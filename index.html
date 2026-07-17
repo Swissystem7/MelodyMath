@@ -100,8 +100,8 @@
 <script>
 (function(){
   var TOPIC='mul', TABLE=3, actx=null, streak=0, stars=0, rhythm=false, tempo=1.1;
-  var TOPICS=[{k:'mul',n:'לוח הכפל',op:'×',lo:2,hi:11,f:function(a,b){return a*b;}},
-              {k:'add',n:'חיבור',op:'+',lo:1,hi:10,f:function(a,b){return a+b;}}];
+  var TOPICS=[{k:'mul',n:'לוח הכפל',op:'×',lo:2,hi:11,f:function(a,b){return a*b;},grade:'כיתה ג׳',strand:'תחום המספר — שליטה בעובדות הכפל והחילוק'},
+              {k:'add',n:'חיבור',op:'+',lo:1,hi:10,f:function(a,b){return a+b;},grade:'כיתות א׳–ב׳',strand:'תחום המספר — חיבור וחיסור בתחום ה-100'}];
   var topics=document.getElementById('topics'), nums=document.getElementById('nums'), melody=document.getElementById('melody');
   var stage=document.getElementById('stage'), quiz=document.getElementById('quiz'), report=document.getElementById('report');
   var qText=document.getElementById('qText'), answers=document.getElementById('answers'), scoreEl=document.getElementById('score'), beatbar=document.getElementById('beatbar');
@@ -173,6 +173,7 @@
       var row=document.createElement('div'); row.className='rrow';
       row.innerHTML='<b>'+tp.n+'</b><span class="bar"><i style="width:'+acc+'%"></i></span><span>'+acc+'%</span> <span class="flag '+flag+'">'+txt+'</span>';
       report.appendChild(row);
+      var cur=document.createElement('div'); cur.className='weak'; cur.innerHTML='📚 '+tp.grade+' · '+tp.strand; report.appendChild(cur);
       var weak=Object.keys(d.facts||{}).filter(function(k){return d.facts[k].w>=2;}).slice(0,6).map(function(k){var a=k.split('x');return a[0]+tp.op+a[1];});
       if(weak.length){ var w=document.createElement('div'); w.className='weak'; w.innerHTML='נקודות לחיזוק ('+tp.n+'): <b>'+weak.join(' · ')+'</b>'; report.appendChild(w); }
     });

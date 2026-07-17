@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · תרגול מתמטיקה מבוסס-קצב לבתי ספר</title>
+<meta name="description" content="תרגול מתמטיקה מבוסס-קצב לחיזוק ריכוז וזיכרון-עבודה — לתלמידי חינוך מיוחד ושילוב. מותאם תוכנית לימודים, עם דוח התקדמות למורה. לבתי ספר וגני חובה בישראל.">
+<style>
+  :root{
+    --ink:#132a26;--muted:#5a726b;--line:#e4ede9;--bg:#ffffff;--soft:#f4f9f6;
+    --green:#0e9f6e;--green-d:#0a7d57;--teal:#0f766e;--sand:#fbf7ee;--warn:#b4791a;
+    --sans:"Assistant","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px;}
+  a{color:var(--green-d);}
+  h1,h2,h3{line-height:1.2;margin:0 0 .4em;text-wrap:balance;font-weight:800;}
+  .eyebrow{font-size:.82rem;font-weight:800;letter-spacing:.04em;color:var(--teal);text-transform:none;margin-bottom:10px;}
+
+  header.nav{border-bottom:1px solid var(--line);position:sticky;top:0;background:#ffffffee;backdrop-filter:blur(8px);z-index:9;}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;}
+  .brand{font-weight:800;font-size:1.15rem;display:flex;align-items:center;gap:8px;}
+  .brand span{font-size:1.35rem;}
+  .nav a.cta{background:var(--green);color:#fff;padding:9px 16px;border-radius:11px;text-decoration:none;font-weight:800;font-size:.92rem;}
+  .nav a.cta:hover{background:var(--green-d);}
+
+  .hero{background:linear-gradient(180deg,var(--soft),#fff);padding:64px 0 52px;}
+  .hero h1{font-size:2.5rem;}
+  .hero p.lead{font-size:1.22rem;color:var(--muted);max-width:44ch;margin:0 0 26px;}
+  .hero .who{display:inline-block;background:#e6f6ef;color:var(--green-d);font-weight:800;font-size:.85rem;padding:6px 13px;border-radius:99px;margin-bottom:18px;}
+  .btns{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:13px 22px;border-radius:13px;font-weight:800;text-decoration:none;font-size:1rem;}
+  .btn.primary{background:var(--green);color:#fff;} .btn.primary:hover{background:var(--green-d);}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);} .btn.ghost:hover{border-color:var(--green);}
+
+  section{padding:52px 0;border-top:1px solid var(--line);}
+  h2{font-size:1.7rem;} .sub{color:var(--muted);max-width:56ch;margin:0 0 30px;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .card{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:22px;}
+  .card .ic{font-size:1.7rem;margin-bottom:10px;}
+  .card h3{font-size:1.12rem;} .card p{margin:0;color:var(--muted);font-size:.96rem;}
+
+  .why{background:var(--sand);}
+  .why .grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:34px;align-items:center;}
+  .stat{font-size:2.1rem;font-weight:800;color:var(--teal);}
+  .evrow{display:flex;gap:11px;padding:11px 0;border-top:1px solid #eee3cf;} .evrow:first-child{border-top:0;}
+  .evrow b{color:var(--ink);}
+
+  .align{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .align .box{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff;}
+  .align .box .g{display:inline-block;background:#eef6f2;color:var(--green-d);font-weight:800;font-size:.8rem;padding:4px 11px;border-radius:99px;margin-bottom:9px;}
+
+  .honest{background:#fff8ec;border:1px solid #f0e2c4;border-radius:16px;padding:20px 22px;margin-top:8px;}
+  .honest b{color:var(--warn);}
+
+  .contact{background:linear-gradient(180deg,#fff,var(--soft));text-align:center;}
+  .contact .btn.primary{font-size:1.05rem;padding:15px 30px;}
+  .contact p{color:var(--muted);max-width:50ch;margin:0 auto 24px;}
+
+  footer{padding:30px 0 46px;color:var(--muted);font-size:.86rem;text-align:center;border-top:1px solid var(--line);}
+  @media (max-width:720px){
+    .hero h1{font-size:2rem;} .grid{grid-template-columns:1fr;} .why .grid2{grid-template-columns:1fr;gap:20px;} .align{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+  <header class="nav"><div class="wrap">
+    <div class="brand"><span>🎵</span>MelodyMath</div>
+    <a class="cta" href="#contact">דברו איתנו</a>
+  </div></header>
+
+  <div class="hero"><div class="wrap">
+    <div class="who">לבתי ספר · גני חובה · מחנכות שילוב</div>
+    <h1>מתמטיקה נכנסת דרך הקצב.</h1>
+    <p class="lead">תרגול מתמטיקה מבוסס-קצב ומוזיקה לחיזוק ריכוז וזיכרון-עבודה — במיוחד לתלמידים שמתקשים בשינון היבש. עם דוח התקדמות למורה, בלי התקנה.</p>
+    <div class="btns">
+      <a class="btn primary" href="./" target="_blank" rel="noopener">▶ נסו את הדמו החי</a>
+      <a class="btn ghost" href="#how">איך זה עובד</a>
+    </div>
+  </div></div>
+
+  <section id="how"><div class="wrap">
+    <div class="eyebrow">הגישה</div>
+    <h2>לא עוד שיר. אימון קוגניטיבי מבוסס-קצב.</h2>
+    <p class="sub">כל תרגיל משלב שמיעה, ראייה ותנועה בזמן — הצירוף שמאמן שליטה עצמית (inhibitory control) לצד עובדות החשבון.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">🥁</div><h3>תרגול בקצב</h3><p>מטרונום מלווה עם טמפו אדפטיבי — מאיץ בהצלחה, מאט בטעות. מאמן קשב מתמשך ושליטה בתגובה.</p></div>
+      <div class="card"><div class="ic">🎯</div><h3>אדפטיבי לתלמיד</h3><p>תרגילים שהתלמיד טעה בהם חוזרים בתדירות גבוהה יותר, עד לשליטה — במקום חזרה אחידה ומתסכלת.</p></div>
+      <div class="card"><div class="ic">📊</div><h3>דוח למורה</h3><p>אחוז שליטה לפי נושא, דגל "שולט / במעקב / צריך עזרה", ונקודות לחיזוק לכל תלמיד — מה ש-YouTube חינמי לא נותן.</p></div>
+    </div>
+  </div></section>
+
+  <section class="why"><div class="wrap">
+    <div class="eyebrow">למה קצב</div>
+    <div class="grid2">
+      <div>
+        <h2>למי שהשינון היבש לא עובד לו.</h2>
+        <p class="sub">התערבויות מבוססות-קצב נחקרו כתמיכה בקשב ובעיבוד מספרי אצל תלמידים עם ADHD ודיסקלקוליה. זו נקודת המוצא של MelodyMath — לא גיימיפיקציה כללית.</p>
+      </div>
+      <div>
+        <div class="evrow"><b>ריכוז:</b> אימון קצבי נקשר במחקר לשיפור שליטה עצמית וקשב.</div>
+        <div class="evrow"><b>רב-חושי:</b> שמיעתי + ויזואלי + תנועתי יחד — עוגנים מרובים לזיכרון.</div>
+        <div class="evrow"><b>נגיש:</b> עברית, בדפדפן, בלי התקנה ובלי תלויות — עובד על כל מחשב בית-ספרי.</div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="curric"><div class="wrap">
+    <div class="eyebrow">מותאם תוכנית לימודים</div>
+    <h2>ממופה לתחומי הליבה — מוכן לשיח מוסדי.</h2>
+    <p class="sub">כל נושא מתויג לתחום ולשכבת הגיל בתוכנית הלימודים במתמטיקה, כדי שהדוח למורה ידבר בשפה של בית הספר.</p>
+    <div class="align">
+      <div class="box"><div class="g">כיתה ג׳</div><h3>לוח הכפל</h3><p>תחום המספר — שליטה בעובדות הכפל והחילוק.</p></div>
+      <div class="box"><div class="g">כיתות א׳–ב׳</div><h3>חיבור</h3><p>תחום המספר — חיבור וחיסור בתחום ה-100.</p></div>
+    </div>
+  </div></section>
+
+  <section id="model"><div class="wrap">
+    <div class="eyebrow">איך זה נמכר</div>
+    <h2>רישיון כיתתי / בית-ספרי.</h2>
+    <p class="sub">הגרסה הפתוחה חינמית לניסיון. לבתי ספר וגנים — רישיון שנתי הכולל את הדוח למורה ומעקב כיתתי, בהתאמה לרכש המוסדי (גפ"ן / קטלוג ספקי תוכן דיגיטלי).</p>
+    <div class="honest">
+      <p style="margin:0"><b>שקיפות פדגוגית:</b> המנגנון של תרגול מבוסס-קצב נשען על מחקר קיים בתחום הקשב. המנגנון הייחודי של "מספר = צליל" נמצא בשלב אימות, ואנחנו מזמינים בתי ספר להצטרף ל<b>פיילוט נמדד</b> — לא מבטיחים תוצאה שלא נמדדה.</p>
+    </div>
+  </div></section>
+
+  <section id="contact" class="contact"><div class="wrap">
+    <div class="eyebrow">בואו נתחיל</div>
+    <h2>מעוניינים בפיילוט בבית הספר?</h2>
+    <p>ספרו לנו על השכבה והצורך (שילוב / חינוך מיוחד / כיתה רגילה), ונבנה יחד פיילוט קצר ומדיד.</p>
+    <div class="btns" style="justify-content:center">
+      <a class="btn primary" href="mailto:aviran2606@gmail.com?subject=פיילוט%20MelodyMath%20לבית%20ספר&body=שם%20בית%20הספר%3A%0Aשכבת%20גיל%3A%0Aהצורך%20(שילוב%2Fחינוך%20מיוחד%2Fרגיל)%3A%0Aאיש%20קשר%20וטלפון%3A">✉ לפנייה לפיילוט</a>
+      <a class="btn ghost" href="./" target="_blank" rel="noopener">▶ לדמו החי</a>
+    </div>
+  </div></section>
+
+  <footer><div class="wrap">MelodyMath · תרגול מתמטיקה מבוסס-קצב · פרויקט של Swissystem7 · <a href="./">דמו</a></div></footer>
+</body>
+</html>
