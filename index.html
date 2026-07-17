@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מלודי־מתמטיקה 🎵 לומדים כפל דרך מוזיקה</title>
+<style>
+  :root{
+    --bg1:#3a1c71;--bg2:#d76d77;--bg3:#ffaf7b;
+    --card:#ffffff;--ink:#2b2140;--muted:#6b5f86;--accent:#7b2ff7;--accent2:#ff7ac6;
+    --good:#22b573;--wrong:#ff5470;--gold:#ffcf3f;
+    --sans:"Varela Round",system-ui,-apple-system,"Segoe UI","Arial Rounded MT Bold",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;font-family:var(--sans);color:var(--ink);
+    background:linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));
+    background-attachment:fixed;display:flex;flex-direction:column;align-items:center;padding:18px;}
+  h1{color:#fff;text-align:center;margin:6px 0 2px;font-size:1.9rem;text-shadow:0 3px 12px rgba(0,0,0,.25);}
+  .sub{color:#ffffffcc;text-align:center;margin:0 0 18px;font-size:.95rem;}
+  .card{background:var(--card);border-radius:26px;box-shadow:0 18px 50px rgba(30,10,60,.35);
+    width:100%;max-width:560px;padding:22px;}
+  .label{font-size:.8rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:10px;letter-spacing:.02em;}
+  .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px;}
+  .np{border:0;border-radius:16px;padding:16px 0;font-size:1.5rem;font-weight:800;font-family:inherit;cursor:pointer;
+    color:#fff;background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 6px 0 #00000018;transition:transform .12s;}
+  .np:hover{transform:translateY(-3px);} .np:active{transform:translateY(2px);}
+  .np.sel{outline:4px solid var(--gold);outline-offset:2px;transform:translateY(-2px) scale(1.04);}
+  .np:focus-visible{outline:4px solid var(--gold);outline-offset:2px;}
+
+  .stage{margin-top:14px;text-align:center;}
+  .row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+  .note{min-width:60px;padding:12px 6px;border-radius:14px;background:#f2ecff;color:var(--accent);
+    font-weight:800;font-size:1.05rem;line-height:1.2;transition:transform .15s,background .15s,color .15s;}
+  .note small{display:block;font-size:.62rem;color:var(--muted);font-weight:700;}
+  .note.on{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;transform:translateY(-8px) scale(1.12);box-shadow:0 8px 18px #7b2ff755;}
+
+  .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+  .btn{border:0;border-radius:16px;padding:13px 22px;font-family:inherit;font-size:1.05rem;font-weight:800;cursor:pointer;
+    color:#fff;box-shadow:0 5px 0 #00000015;transition:transform .12s;}
+  .btn:active{transform:translateY(2px);} .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .play{background:linear-gradient(140deg,#22b573,#12d0a0);} .quiz{background:linear-gradient(140deg,#ff8a3d,#ff5ea0);}
+
+  .q{font-size:2.1rem;font-weight:800;margin:6px 0 14px;}
+  .ans{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .ab{border:0;border-radius:18px;padding:20px 0;font-family:inherit;font-size:1.6rem;font-weight:800;cursor:pointer;
+    background:#f2ecff;color:var(--accent);box-shadow:0 5px 0 #00000012;transition:transform .1s;}
+  .ab:hover{transform:translateY(-2px);} .ab:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .ab.good{background:var(--good);color:#fff;animation:pop .4s;} .ab.bad{background:var(--wrong);color:#fff;animation:shake .4s;}
+  @keyframes pop{50%{transform:scale(1.12);}} @keyframes shake{25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .score{margin-top:16px;font-size:1.3rem;font-weight:800;color:var(--accent);text-align:center;min-height:1.5em;}
+  .stars{font-size:1.5rem;letter-spacing:3px;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  footer{color:#ffffffbb;font-size:.78rem;margin-top:18px;text-align:center;}
+  .hide{display:none;}
+</style>
+</head>
+<body>
+  <h1>🎵 מלודי־מתמטיקה</h1>
+  <p class="sub">לומדים את לוח הכפל דרך מוזיקה — כל מספר הוא צליל</p>
+
+  <div class="card">
+    <div class="label">בחרו לוח כפל</div>
+    <div class="nums" id="nums"></div>
+
+    <div class="stage" id="stage">
+      <div class="row" id="melody"></div>
+      <div class="btns">
+        <button class="btn play" id="playBtn">▶ נגן את השיר</button>
+        <button class="btn quiz" id="quizBtn">🎮 בוא נשחק</button>
+      </div>
+    </div>
+
+    <div class="stage hide" id="quiz">
+      <div class="q" id="qText">—</div>
+      <div class="ans" id="answers"></div>
+      <div class="score" id="score"></div>
+    </div>
+  </div>
+
+  <footer>MelodyMath · לומדים דרך מוזיקה · תוכנית לימודים בעברית · פרויקט פתוח</footer>
+
+<script>
+(function(){
+  var TABLE=3, actx=null, streak=0, stars=0;
+  var nums=document.getElementById('nums'), melody=document.getElementById('melody');
+  var stage=document.getElementById('stage'), quiz=document.getElementById('quiz');
+  var qText=document.getElementById('qText'), answers=document.getElementById('answers'), scoreEl=document.getElementById('score');
+
+  // C major pentatonic-ish scale so every table sounds pleasant
+  var SCALE=[261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.25,783.99,880.00,987.77,1046.5];
+  function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+  function tone(freq,t,dur){
+    var c=ac(), o=c.createOscillator(), g=c.createGain();
+    o.type='triangle'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.28,t+.03);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur);
+  }
+  function chord(freqs,t,dur){ freqs.forEach(function(f){tone(f,t,dur);}); }
+
+  function buildNums(){
+    for(var n=2;n<=11;n++){ (function(n){
+      var b=document.createElement('button'); b.className='np'; b.textContent=n; b.setAttribute('aria-label','לוח הכפל של '+n);
+      b.onclick=function(){ TABLE=n; document.querySelectorAll('.np').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); buildMelody(); showStage(); };
+      nums.appendChild(b);
+    })(n); }
+    nums.children[1].classList.add('sel'); // default 3
+  }
+  function buildMelody(){
+    melody.innerHTML='';
+    for(var i=1;i<=10;i++){ var d=document.createElement('div'); d.className='note';
+      d.innerHTML=(TABLE*i)+'<small>'+TABLE+'×'+i+'</small>'; melody.appendChild(d); }
+  }
+  function playSong(){
+    var c=ac(), t=c.currentTime+0.05, step=0.42, notes=melody.children;
+    for(var i=0;i<10;i++){ (function(i){
+      var f=SCALE[i];
+      tone(f,t+i*step,step*0.95);
+      setTimeout(function(){ notes[i].classList.add('on'); setTimeout(function(){notes[i].classList.remove('on');},step*900);}, i*step*1000+50);
+    })(i); }
+    chord([SCALE[0],SCALE[2],SCALE[4]], t+10*step, 0.9); // finishing chord
+  }
+  function showStage(){ stage.classList.remove('hide'); quiz.classList.add('hide'); }
+
+  // ---- quiz ----
+  function nextQ(){
+    var i=1+Math.floor(Math.random()*10), correct=TABLE*i;
+    qText.textContent=TABLE+' × '+i+' = ?';
+    var opts=[correct]; while(opts.length<4){ var w=correct+([-3,-2,-1,1,2,3,TABLE,-TABLE][Math.floor(Math.random()*8)]); if(w>0 && opts.indexOf(w)<0) opts.push(w); }
+    opts.sort(function(){return Math.random()-.5;});
+    answers.innerHTML='';
+    opts.forEach(function(o){ var b=document.createElement('button'); b.className='ab'; b.textContent=o;
+      b.onclick=function(){ answer(b,o===correct,i); }; answers.appendChild(b); });
+  }
+  function answer(btn,ok,i){
+    if(ok){ btn.classList.add('good'); tone(SCALE[i-1],ac().currentTime,.25); chord([SCALE[i-1],SCALE[i-1]*1.25,SCALE[i-1]*1.5],ac().currentTime+.05,.5);
+      streak++; if(streak%5===0){stars++;} render(); setTimeout(nextQ,650);
+    } else { btn.classList.add('bad'); var c=ac(); tone(160,c.currentTime,.18); tone(120,c.currentTime+.12,.2); streak=0; render();
+      setTimeout(function(){btn.classList.remove('bad');},450); }
+  }
+  function render(){ scoreEl.innerHTML='רצף: '+streak+'  <span class="stars">'+'⭐'.repeat(Math.min(stars,10))+'</span>'; }
+
+  document.getElementById('playBtn').onclick=playSong;
+  document.getElementById('quizBtn').onclick=function(){ ac().resume&&ac().resume(); stage.classList.add('hide'); quiz.classList.remove('hide'); streak=0; render(); nextQ(); };
+
+  buildNums(); buildMelody(); showStage();
+})();
+</script>
+</body>
+</html>
