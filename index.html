@@ -3,147 +3,188 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>מלודי־מתמטיקה 🎵 לומדים כפל דרך מוזיקה</title>
+<title>מלודי־מתמטיקה 🎵 מתמטיקה דרך קצב ומוזיקה</title>
 <style>
   :root{
-    --bg1:#3a1c71;--bg2:#d76d77;--bg3:#ffaf7b;
+    --bg1:#3a1c71;--bg2:#5b3aa8;--bg3:#ff8fb1;
     --card:#ffffff;--ink:#2b2140;--muted:#6b5f86;--accent:#7b2ff7;--accent2:#ff7ac6;
-    --good:#22b573;--wrong:#ff5470;--gold:#ffcf3f;
+    --good:#22b573;--wrong:#ff5470;--gold:#ffcf3f;--beat:#31d0c6;
     --sans:"Varela Round",system-ui,-apple-system,"Segoe UI","Arial Rounded MT Bold",sans-serif;
   }
   *{box-sizing:border-box;}
   body{margin:0;min-height:100vh;font-family:var(--sans);color:var(--ink);
-    background:linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));
-    background-attachment:fixed;display:flex;flex-direction:column;align-items:center;padding:18px;}
-  h1{color:#fff;text-align:center;margin:6px 0 2px;font-size:1.9rem;text-shadow:0 3px 12px rgba(0,0,0,.25);}
-  .sub{color:#ffffffcc;text-align:center;margin:0 0 18px;font-size:.95rem;}
-  .card{background:var(--card);border-radius:26px;box-shadow:0 18px 50px rgba(30,10,60,.35);
-    width:100%;max-width:560px;padding:22px;}
-  .label{font-size:.8rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:10px;letter-spacing:.02em;}
-  .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px;}
-  .np{border:0;border-radius:16px;padding:16px 0;font-size:1.5rem;font-weight:800;font-family:inherit;cursor:pointer;
-    color:#fff;background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 6px 0 #00000018;transition:transform .12s;}
+    background:linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));background-attachment:fixed;
+    display:flex;flex-direction:column;align-items:center;padding:16px;}
+  h1{color:#fff;text-align:center;margin:4px 0 2px;font-size:1.75rem;text-shadow:0 3px 12px rgba(0,0,0,.25);}
+  .sub{color:#ffffffcc;text-align:center;margin:0 0 14px;font-size:.9rem;}
+  .card{background:var(--card);border-radius:24px;box-shadow:0 18px 50px rgba(30,10,60,.35);width:100%;max-width:560px;padding:20px;}
+  .label{font-size:.78rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:9px;}
+  .seg{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
+  .seg button{border:0;border-radius:13px;padding:9px 15px;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;background:#f2ecff;color:var(--accent);}
+  .seg button.sel{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;}
+  .seg button:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:6px;}
+  .np{border:0;border-radius:15px;padding:14px 0;font-size:1.35rem;font-weight:800;font-family:inherit;cursor:pointer;color:#fff;
+    background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 6px 0 #00000018;transition:transform .12s;position:relative;}
   .np:hover{transform:translateY(-3px);} .np:active{transform:translateY(2px);}
   .np.sel{outline:4px solid var(--gold);outline-offset:2px;transform:translateY(-2px) scale(1.04);}
   .np:focus-visible{outline:4px solid var(--gold);outline-offset:2px;}
+  .np .mn{position:absolute;top:3px;left:5px;font-size:.55rem;opacity:.85;}
 
-  .stage{margin-top:14px;text-align:center;}
-  .row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
-  .note{min-width:60px;padding:12px 6px;border-radius:14px;background:#f2ecff;color:var(--accent);
-    font-weight:800;font-size:1.05rem;line-height:1.2;transition:transform .15s,background .15s,color .15s;}
-  .note small{display:block;font-size:.62rem;color:var(--muted);font-weight:700;}
+  .btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+  .btn{border:0;border-radius:15px;padding:12px 18px;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;color:#fff;box-shadow:0 5px 0 #00000015;transition:transform .12s;}
+  .btn:active{transform:translateY(2px);} .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .play{background:linear-gradient(140deg,#22b573,#12d0a0);} .quiz{background:linear-gradient(140deg,#ff8a3d,#ff5ea0);} .rep{background:linear-gradient(140deg,#4f7cff,#7b2ff7);}
+  .row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0 4px;}
+  .note{min-width:54px;padding:10px 5px;border-radius:12px;background:#f2ecff;color:var(--accent);font-weight:800;font-size:1rem;line-height:1.15;transition:transform .15s,background .15s,color .15s;}
+  .note small{display:block;font-size:.58rem;color:var(--muted);font-weight:700;}
   .note.on{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;transform:translateY(-8px) scale(1.12);box-shadow:0 8px 18px #7b2ff755;}
 
-  .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
-  .btn{border:0;border-radius:16px;padding:13px 22px;font-family:inherit;font-size:1.05rem;font-weight:800;cursor:pointer;
-    color:#fff;box-shadow:0 5px 0 #00000015;transition:transform .12s;}
-  .btn:active{transform:translateY(2px);} .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
-  .play{background:linear-gradient(140deg,#22b573,#12d0a0);} .quiz{background:linear-gradient(140deg,#ff8a3d,#ff5ea0);}
-
-  .q{font-size:2.1rem;font-weight:800;margin:6px 0 14px;}
-  .ans{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-  .ab{border:0;border-radius:18px;padding:20px 0;font-family:inherit;font-size:1.6rem;font-weight:800;cursor:pointer;
-    background:#f2ecff;color:var(--accent);box-shadow:0 5px 0 #00000012;transition:transform .1s;}
+  .q{font-size:2rem;font-weight:800;margin:4px 0 6px;text-align:center;}
+  .beatbar{height:10px;border-radius:99px;background:#eee9f7;margin:6px auto 12px;max-width:280px;overflow:hidden;}
+  .beatbar > i{display:block;height:100%;width:26%;border-radius:99px;background:linear-gradient(90deg,var(--beat),var(--accent));transform:translateX(120%);}
+  .beatbar.run > i{animation:sweep var(--bt,1.1s) linear infinite;}
+  @keyframes sweep{from{transform:translateX(120%);}to{transform:translateX(-420%);}}
+  .ans{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;}
+  .ab{border:0;border-radius:17px;padding:18px 0;font-family:inherit;font-size:1.5rem;font-weight:800;cursor:pointer;background:#f2ecff;color:var(--accent);box-shadow:0 5px 0 #00000012;transition:transform .1s;}
   .ab:hover{transform:translateY(-2px);} .ab:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
   .ab.good{background:var(--good);color:#fff;animation:pop .4s;} .ab.bad{background:var(--wrong);color:#fff;animation:shake .4s;}
   @keyframes pop{50%{transform:scale(1.12);}} @keyframes shake{25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
-  .score{margin-top:16px;font-size:1.3rem;font-weight:800;color:var(--accent);text-align:center;min-height:1.5em;}
-  .stars{font-size:1.5rem;letter-spacing:3px;}
+  .score{margin-top:14px;font-size:1.15rem;font-weight:800;color:var(--accent);text-align:center;min-height:1.4em;}
+  .stars{font-size:1.3rem;letter-spacing:2px;}
+
+  .report{background:#faf7ff;border:1px solid #ece4ff;border-radius:16px;padding:16px;margin-top:12px;}
+  .report h3{margin:0 0 10px;font-size:1rem;color:var(--ink);}
+  .rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #efe8ff;font-size:.9rem;}
+  .rrow:first-of-type{border-top:0;} .rrow b{font-family:var(--sans);}
+  .bar{flex:1;height:8px;border-radius:99px;background:#ece4ff;margin:0 10px;overflow:hidden;} .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--good),#12d0a0);}
+  .flag{display:inline-block;font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:99px;}
+  .flag.ok{background:#e3f8ec;color:var(--good);} .flag.watch{background:#fff0e0;color:#d6821a;} .flag.help{background:#ffe6ea;color:var(--wrong);}
+  .weak{margin-top:10px;font-size:.85rem;color:var(--muted);} .weak b{color:var(--wrong);}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
-  footer{color:#ffffffbb;font-size:.78rem;margin-top:18px;text-align:center;}
+  footer{color:#ffffffbb;font-size:.76rem;margin-top:16px;text-align:center;max-width:560px;}
   .hide{display:none;}
 </style>
 </head>
 <body>
   <h1>🎵 מלודי־מתמטיקה</h1>
-  <p class="sub">לומדים את לוח הכפל דרך מוזיקה — כל מספר הוא צליל</p>
+  <p class="sub">מתמטיקה דרך קצב ומוזיקה · לומדים בזמן, זוכרים לאורך זמן</p>
 
   <div class="card">
-    <div class="label">בחרו לוח כפל</div>
+    <div class="label">בחרו תרגול</div>
+    <div class="seg" id="topics"></div>
     <div class="nums" id="nums"></div>
 
-    <div class="stage" id="stage">
+    <div id="stage">
       <div class="row" id="melody"></div>
       <div class="btns">
         <button class="btn play" id="playBtn">▶ נגן את השיר</button>
-        <button class="btn quiz" id="quizBtn">🎮 בוא נשחק</button>
+        <button class="btn quiz" id="quizBtn">🎮 תרגול חופשי</button>
+        <button class="btn rep" id="rhyBtn">🥁 תרגול בקצב</button>
       </div>
     </div>
 
-    <div class="stage hide" id="quiz">
+    <div id="quiz" class="hide">
       <div class="q" id="qText">—</div>
+      <div class="beatbar" id="beatbar"><i></i></div>
       <div class="ans" id="answers"></div>
       <div class="score" id="score"></div>
+      <div class="btns"><button class="btn rep" id="repBtn">📊 דוח למורה / הורה</button></div>
     </div>
+
+    <div class="report hide" id="report"></div>
   </div>
 
-  <footer>MelodyMath · לומדים דרך מוזיקה · תוכנית לימודים בעברית · פרויקט פתוח</footer>
+  <footer>MelodyMath · תרגול מבוסס-קצב לחיזוק ריכוז וזיכרון-עבודה · מותאם תוכנית לימודים · פרויקט פתוח</footer>
 
 <script>
 (function(){
-  var TABLE=3, actx=null, streak=0, stars=0;
-  var nums=document.getElementById('nums'), melody=document.getElementById('melody');
-  var stage=document.getElementById('stage'), quiz=document.getElementById('quiz');
-  var qText=document.getElementById('qText'), answers=document.getElementById('answers'), scoreEl=document.getElementById('score');
+  var TOPIC='mul', TABLE=3, actx=null, streak=0, stars=0, rhythm=false, tempo=1.1;
+  var TOPICS=[{k:'mul',n:'לוח הכפל',op:'×',lo:2,hi:11,f:function(a,b){return a*b;}},
+              {k:'add',n:'חיבור',op:'+',lo:1,hi:10,f:function(a,b){return a+b;}}];
+  var topics=document.getElementById('topics'), nums=document.getElementById('nums'), melody=document.getElementById('melody');
+  var stage=document.getElementById('stage'), quiz=document.getElementById('quiz'), report=document.getElementById('report');
+  var qText=document.getElementById('qText'), answers=document.getElementById('answers'), scoreEl=document.getElementById('score'), beatbar=document.getElementById('beatbar');
+  var SCALE=[261.63,293.66,329.63,392,440,523.25,587.33,659.25,783.99,880,987.77,1046.5];
+  var curQ=null;
 
-  // C major pentatonic-ish scale so every table sounds pleasant
-  var SCALE=[261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.25,783.99,880.00,987.77,1046.5];
+  // ---- persistence (refinement #1/#4: progress + teacher report, no backend) ----
+  function loadP(){ try{return JSON.parse(localStorage.getItem('mm_progress')||'{}');}catch{return {};} }
+  function saveP(p){ try{localStorage.setItem('mm_progress',JSON.stringify(p));}catch{} }
+  function rec(topic,factKey,ok){
+    var p=loadP(); p[topic]=p[topic]||{seen:0,ok:0,facts:{}};
+    p[topic].seen++; if(ok)p[topic].ok++;
+    var f=p[topic].facts[factKey]||{s:0,w:0}; f.s++; if(!ok)f.w++; p[topic].facts[factKey]=f;
+    saveP(p);
+  }
+
   function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); return actx; }
-  function tone(freq,t,dur){
-    var c=ac(), o=c.createOscillator(), g=c.createGain();
-    o.type='triangle'; o.frequency.value=freq;
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.28,t+.03);
-    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur);
-  }
-  function chord(freqs,t,dur){ freqs.forEach(function(f){tone(f,t,dur);}); }
+  function tone(freq,t,dur,type){ var c=ac(),o=c.createOscillator(),g=c.createGain(); o.type=type||'triangle'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.26,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur); }
+  function chord(fs,t,dur){ fs.forEach(function(f){tone(f,t,dur);}); }
+  function click(t){ tone(1200,t,.05,'square'); }
 
-  function buildNums(){
-    for(var n=2;n<=11;n++){ (function(n){
-      var b=document.createElement('button'); b.className='np'; b.textContent=n; b.setAttribute('aria-label','לוח הכפל של '+n);
-      b.onclick=function(){ TABLE=n; document.querySelectorAll('.np').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); buildMelody(); showStage(); };
-      nums.appendChild(b);
-    })(n); }
-    nums.children[1].classList.add('sel'); // default 3
+  function topicObj(){ return TOPICS.filter(function(x){return x.k===TOPIC;})[0]; }
+  function buildTopics(){ TOPICS.forEach(function(tp){ var b=document.createElement('button'); b.textContent=tp.n; if(tp.k===TOPIC)b.classList.add('sel');
+    b.onclick=function(){ TOPIC=tp.k; document.querySelectorAll('#topics button').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); buildNums(); backToStage(); };
+    topics.appendChild(b); }); }
+  function buildNums(){ nums.innerHTML=''; var tp=topicObj();
+    for(var n=tp.lo;n<=tp.hi;n++){ (function(n){ var b=document.createElement('button'); b.className='np'; b.textContent=n;
+      var p=loadP()[TOPIC]; if(p){ /* mastery tick */ }
+      b.onclick=function(){ TABLE=n; document.querySelectorAll('.np').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); buildMelody(); };
+      nums.appendChild(b); })(n); }
+    var first=nums.children[Math.min(1,nums.children.length-1)]; if(first){first.classList.add('sel'); TABLE=+first.textContent;} buildMelody();
   }
-  function buildMelody(){
-    melody.innerHTML='';
+  function buildMelody(){ melody.innerHTML=''; var tp=topicObj();
     for(var i=1;i<=10;i++){ var d=document.createElement('div'); d.className='note';
-      d.innerHTML=(TABLE*i)+'<small>'+TABLE+'×'+i+'</small>'; melody.appendChild(d); }
-  }
-  function playSong(){
-    var c=ac(), t=c.currentTime+0.05, step=0.42, notes=melody.children;
-    for(var i=0;i<10;i++){ (function(i){
-      var f=SCALE[i];
-      tone(f,t+i*step,step*0.95);
-      setTimeout(function(){ notes[i].classList.add('on'); setTimeout(function(){notes[i].classList.remove('on');},step*900);}, i*step*1000+50);
-    })(i); }
-    chord([SCALE[0],SCALE[2],SCALE[4]], t+10*step, 0.9); // finishing chord
-  }
-  function showStage(){ stage.classList.remove('hide'); quiz.classList.add('hide'); }
+      d.innerHTML=tp.f(TABLE,i)+'<small>'+TABLE+tp.op+i+'</small>'; melody.appendChild(d); } }
+  function playSong(){ var c=ac(),t=c.currentTime+.05,step=.4,notes=melody.children;
+    for(var i=0;i<10;i++){ (function(i){ tone(SCALE[i],t+i*step,step*.95);
+      setTimeout(function(){notes[i].classList.add('on');setTimeout(function(){notes[i].classList.remove('on');},step*900);},i*step*1000+40); })(i); }
+    chord([SCALE[0],SCALE[2],SCALE[4]],t+10*step,.9); }
+  function backToStage(){ stage.classList.remove('hide'); quiz.classList.add('hide'); report.classList.add('hide'); beatbar.classList.remove('run'); }
 
-  // ---- quiz ----
-  function nextQ(){
-    var i=1+Math.floor(Math.random()*10), correct=TABLE*i;
-    qText.textContent=TABLE+' × '+i+' = ?';
-    var opts=[correct]; while(opts.length<4){ var w=correct+([-3,-2,-1,1,2,3,TABLE,-TABLE][Math.floor(Math.random()*8)]); if(w>0 && opts.indexOf(w)<0) opts.push(w); }
-    opts.sort(function(){return Math.random()-.5;});
-    answers.innerHTML='';
-    opts.forEach(function(o){ var b=document.createElement('button'); b.className='ab'; b.textContent=o;
-      b.onclick=function(){ answer(b,o===correct,i); }; answers.appendChild(b); });
+  // adaptive: bias toward weak facts (refinement #2 spaced-repetition-lite)
+  function pickFact(){ var tp=topicObj(), p=loadP()[TOPIC], i;
+    if(p&&p.facts&&Math.random()<.55){ var weak=Object.keys(p.facts).filter(function(k){var f=p.facts[k];return f.w>0 && k.indexOf(TABLE+'x')===0;});
+      if(weak.length){ i=+weak[Math.floor(Math.random()*weak.length)].split('x')[1]; } }
+    if(!i) i=1+Math.floor(Math.random()*10); return i; }
+  function nextQ(){ var tp=topicObj(), i=pickFact(), correct=tp.f(TABLE,i), key=TABLE+'x'+i;
+    curQ={i:i,correct:correct,key:key};
+    qText.textContent=TABLE+' '+tp.op+' '+i+' = ?';
+    var opts=[correct]; while(opts.length<4){ var w=correct+([-3,-2,-1,1,2,3,TABLE,-TABLE][Math.floor(Math.random()*8)]); if(w>0&&opts.indexOf(w)<0)opts.push(w); }
+    opts.sort(function(){return Math.random()-.5;}); answers.innerHTML='';
+    opts.forEach(function(o){ var b=document.createElement('button'); b.className='ab'; b.textContent=o; b.onclick=function(){answer(b,o===correct);}; answers.appendChild(b); });
+    if(rhythm){ beatbar.style.setProperty('--bt',tempo+'s'); beatbar.classList.add('run');
+      var c=ac(); for(var k=0;k<3;k++) click(c.currentTime+k*tempo*0.5); } // metronome cue
   }
-  function answer(btn,ok,i){
-    if(ok){ btn.classList.add('good'); tone(SCALE[i-1],ac().currentTime,.25); chord([SCALE[i-1],SCALE[i-1]*1.25,SCALE[i-1]*1.5],ac().currentTime+.05,.5);
-      streak++; if(streak%5===0){stars++;} render(); setTimeout(nextQ,650);
-    } else { btn.classList.add('bad'); var c=ac(); tone(160,c.currentTime,.18); tone(120,c.currentTime+.12,.2); streak=0; render();
-      setTimeout(function(){btn.classList.remove('bad');},450); }
+  function answer(btn,ok){ rec(TOPIC,curQ.key,ok);
+    if(ok){ btn.classList.add('good'); var f=SCALE[curQ.i-1]; tone(f,ac().currentTime,.22); chord([f,f*1.25,f*1.5],ac().currentTime+.05,.5);
+      streak++; if(streak%5===0)stars++; if(rhythm&&tempo>0.62)tempo-=0.04; render(); setTimeout(nextQ,rhythm?Math.max(500,tempo*700):600);
+    } else { btn.classList.add('bad'); var c=ac(); tone(160,c.currentTime,.18); tone(120,c.currentTime+.12,.2); streak=0; if(rhythm)tempo=Math.min(1.3,tempo+0.06); render(); setTimeout(function(){btn.classList.remove('bad');},450); } }
+  function render(){ scoreEl.innerHTML='רצף: '+streak+'  <span class="stars">'+'⭐'.repeat(Math.min(stars,10))+'</span>'+(rhythm?'  🥁 '+tempo.toFixed(2)+'ש\'':''); }
+  function startQuiz(r){ ac().resume&&ac().resume(); rhythm=r; tempo=1.1; stage.classList.add('hide'); report.classList.add('hide'); quiz.classList.remove('hide'); streak=0; render(); nextQ(); if(!r)beatbar.classList.remove('run'); }
+
+  // ---- teacher/parent report (refinement #4) ----
+  function showReport(){ var p=loadP(); report.innerHTML='<h3>📊 דוח התקדמות</h3>'; var any=false;
+    TOPICS.forEach(function(tp){ var d=p[tp.k]; if(!d||!d.seen)return; any=true;
+      var acc=Math.round(d.ok/d.seen*100), flag=acc>=85?'ok':acc>=65?'watch':'help', txt=acc>=85?'שולט':acc>=65?'במעקב':'צריך עזרה';
+      var row=document.createElement('div'); row.className='rrow';
+      row.innerHTML='<b>'+tp.n+'</b><span class="bar"><i style="width:'+acc+'%"></i></span><span>'+acc+'%</span> <span class="flag '+flag+'">'+txt+'</span>';
+      report.appendChild(row);
+      var weak=Object.keys(d.facts||{}).filter(function(k){return d.facts[k].w>=2;}).slice(0,6).map(function(k){var a=k.split('x');return a[0]+tp.op+a[1];});
+      if(weak.length){ var w=document.createElement('div'); w.className='weak'; w.innerHTML='נקודות לחיזוק ('+tp.n+'): <b>'+weak.join(' · ')+'</b>'; report.appendChild(w); }
+    });
+    if(!any) report.innerHTML+='<div class="weak">עדיין אין נתונים — התחילו תרגול והדוח יתמלא.</div>';
+    report.classList.remove('hide');
   }
-  function render(){ scoreEl.innerHTML='רצף: '+streak+'  <span class="stars">'+'⭐'.repeat(Math.min(stars,10))+'</span>'; }
 
   document.getElementById('playBtn').onclick=playSong;
-  document.getElementById('quizBtn').onclick=function(){ ac().resume&&ac().resume(); stage.classList.add('hide'); quiz.classList.remove('hide'); streak=0; render(); nextQ(); };
-
-  buildNums(); buildMelody(); showStage();
+  document.getElementById('quizBtn').onclick=function(){startQuiz(false);};
+  document.getElementById('rhyBtn').onclick=function(){startQuiz(true);};
+  document.getElementById('repBtn').onclick=showReport;
+  buildTopics(); buildNums();
 })();
 </script>
 </body>
