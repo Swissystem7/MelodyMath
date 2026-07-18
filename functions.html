@@ -48,7 +48,8 @@
 <body>
 <header>
   <h1>שומעים פונקציה</h1>
-  <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.</div>
+  <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.
+  · <a href="807.html">🎓 תרגול בגרות 807: גדילה ודעיכה »</a> · <a href="index.html">דף הבית</a></div>
 </header>
 
 <main>
@@ -124,7 +125,7 @@ const FUNCS = {
 const ORDER=["linear","quadratic","sqrt","abs","reciprocal","exp","sine"];
 
 /* ---- audio ---- */
-let AC=null, osc=null, gain=null, sweeping=false, realTone=false, sweepRAF=null;
+let AC=null, osc=null, gain=null, sweeping=false, realTone=false, sweepRAF=null, stopT=null, sweepTok=0;
 function audio(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); return AC; }
 const FMIN=130.81, FMAX=1046.5; // C3..C6
 // map a value within [lo,hi] to log-spaced frequency
@@ -133,7 +134,7 @@ function toFreq(v,lo,hi){
   let t=(v-lo)/(hi-lo); t=Math.max(0,Math.min(1,t));
   return FMIN*Math.pow(FMAX/FMIN, t);
 }
-function startOsc(){ const ac=audio(); stopOsc(); osc=ac.createOscillator(); gain=ac.createGain();
+function startOsc(){ const ac=audio(); clearTimeout(stopT); stopOsc(); osc=ac.createOscillator(); gain=ac.createGain();
   osc.type="sine"; gain.gain.value=0; osc.connect(gain).connect(ac.destination); osc.start(); }
 function stopOsc(){ if(osc){try{osc.stop()}catch(e){}; osc.disconnect(); osc=null;} if(gain){gain.disconnect();gain=null;} }
 function click(){ // short percussive earcon for axis crossing (a root)
@@ -216,11 +217,11 @@ function draw(markX){
 function playSweep(dur=3000, onDone){
   if(sweeping) { stopSweep(); return; }
   audio(); startOsc(); sweeping=true; $("play").textContent="⏹ עצור";
-  const ac=AC, t0=ac.currentTime;
-  let lastSign=null, lastFinite=false;
+  const ac=AC, t0=ac.currentTime, tok=++sweepTok;
+  let lastSign=null, lastFinite=false, lastY=null;
   const p=params();
   const step=(now)=>{
-    if(!sweeping) return;
+    if(!sweeping||tok!==sweepTok) return;
     const elapsed=(ac.currentTime-t0)*1000; let t=elapsed/dur;
     if(t>=1){ finishSweep(); if(onDone)onDone(); return; }
     const x=XMIN+(XMAX-XMIN)*t;
@@ -229,12 +230,14 @@ function playSweep(dur=3000, onDone){
       const f=toFreq(y,yLo,yHi);
       osc.frequency.setTargetAtTime(f,ac.currentTime,.01);
       gain.gain.setTargetAtTime(.18,ac.currentTime,.01);
+      // discontinuity (asymptote jump): reset sign tracking, no root click
+      if(lastY!==null && Math.abs(y-lastY)>Math.abs(yHi-yLo)*0.9){ lastSign=null; lastFinite=false; }
       // root earcon on sign change
       const s=Math.sign(y);
       if(lastFinite && lastSign!==null && s!==0 && s!==lastSign) click();
-      if(s!==0) lastSign=s; lastFinite=true;
+      if(s!==0) lastSign=s; lastFinite=true; lastY=y;
     } else {
-      gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFinite=false; lastSign=null; // silence = undefined
+      gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFinite=false; lastSign=null; lastY=null; // silence = undefined
     }
     draw(x);
     sweepRAF=requestAnimationFrame(step);
@@ -242,12 +245,13 @@ function playSweep(dur=3000, onDone){
   sweepRAF=requestAnimationFrame(step);
 }
 function finishSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF);
-  if(gain){gain.gain.setTargetAtTime(0,AC.currentTime,.02);} setTimeout(stopOsc,120);
+  if(gain){gain.gain.setTargetAtTime(0,AC.currentTime,.02);} stopT=setTimeout(stopOsc,120);
   $("play").textContent="▶︎ נגן סריקה"; draw(); }
 function stopSweep(){ finishSweep(); }
 let qsT=null;
 function quickSweep(){ // short 0.8s sweep on slider drag (skip if playing/game)
-  if(sweeping) return; clearTimeout(qsT);
+  if(sweeping) return; audio(); // create/resume the context inside the user gesture
+  clearTimeout(qsT);
   qsT=setTimeout(()=>{ if(realTone){ playRealTone(); return;} playSweep(800); },140);
 }
 
@@ -268,12 +272,14 @@ $("fn").addEventListener("change",e=>{ cur=e.target.value; realTone=false; $("re
   buildSliders(); refreshHeader(); draw(); });
 $("play").addEventListener("click",()=>playSweep(3000));
 $("realTone").addEventListener("click",()=>{ realTone=!realTone; $("realTone").setAttribute("aria-pressed",String(realTone));
-  if(realTone) playRealTone(); });
+  if(realTone) playRealTone();
+  else { clearTimeout(playRealTone._t); if(gain)gain.gain.setTargetAtTime(0,AC.currentTime,.02); stopT=setTimeout(stopOsc,80); $("live").textContent=""; } });
 document.addEventListener("keydown",e=>{ if(e.code==="Space" && e.target.tagName!=="BUTTON" && e.target.tagName!=="SELECT"){ e.preventDefault(); playSweep(3000);} });
 
 /* ---- game ---- */
 const LS="hear-fn-game";
-let gstate=JSON.parse(localStorage.getItem(LS)||'{"best":0}');
+let gstate={best:0};
+try{ const s=JSON.parse(localStorage.getItem(LS)||'{"best":0}'); if(s && isFinite(s.best) && s.best>=0) gstate=s; }catch(e){}
 let gScore=0, gStreak=0, gAnswer=null, gChoices=[], gParams=null, gLocked=false;
 $("best").textContent=gstate.best||0;
 function randP(P){ const o={}; for(const k in P){ const s=P[k]; let v; do{ v=+(s.min+Math.random()*(s.max-s.min)).toFixed(2);}while(Math.abs(v)<.3&&(k==="a")); o[k]=v; } return o; }
@@ -289,24 +295,27 @@ function newRiddle(){
   $("gReplay").disabled=false;
 }
 function gameSweep(){
-  audio(); startOsc(); const ac=AC,t0=ac.currentTime,dur=2600;
-  let lastSign=null,lastFin=false;
+  // re-entry guard: cancel any active sweep loop before starting a new one
+  if(sweeping){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); }
+  audio(); startOsc(); const ac=AC,t0=ac.currentTime,dur=2600,tok=++sweepTok;
+  let lastSign=null,lastFin=false,lastY=null;
   const P=FUNCS[gAnswer]; sweeping=true;
-  const step=()=>{ if(!sweeping)return; const el=(ac.currentTime-t0)*1000; if(el>=dur){ finishGameSweep(); return; }
+  const step=()=>{ if(!sweeping||tok!==sweepTok)return; const el=(ac.currentTime-t0)*1000; if(el>=dur){ finishGameSweep(); return; }
     const x=XMIN+(XMAX-XMIN)*el/dur; const y=P.f(x,gParams);
     // fit range quickly using generic bounds
     if(isFinite(y)){ const f=toFreq(y,-20,20); osc.frequency.setTargetAtTime(f,ac.currentTime,.01); gain.gain.setTargetAtTime(.18,ac.currentTime,.01);
-      const s=Math.sign(y); if(lastFin&&lastSign!==null&&s!==0&&s!==lastSign)click(); if(s!==0)lastSign=s; lastFin=true;
-    } else { gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFin=false; lastSign=null; }
+      if(lastY!==null && Math.abs(y-lastY)>36){ lastSign=null; lastFin=false; } // asymptote jump: no root click
+      const s=Math.sign(y); if(lastFin&&lastSign!==null&&s!==0&&s!==lastSign)click(); if(s!==0)lastSign=s; lastFin=true; lastY=y;
+    } else { gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFin=false; lastSign=null; lastY=null; }
     sweepRAF=requestAnimationFrame(step); };
   sweepRAF=requestAnimationFrame(step);
 }
-function finishGameSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); if(gain)gain.gain.setTargetAtTime(0,AC.currentTime,.02); setTimeout(stopOsc,120); }
+function finishGameSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); if(gain)gain.gain.setTargetAtTime(0,AC.currentTime,.02); stopT=setTimeout(stopOsc,120); }
 function guess(k,btn){
   if(gLocked) return; gLocked=true;
   const right=k===gAnswer;
   document.querySelectorAll("#gOpts button").forEach(b=>{ if(b.dataset.k===gAnswer)b.classList.add("correct"); else if(b===btn)b.classList.add("wrong"); });
-  if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;localStorage.setItem(LS,JSON.stringify(gstate));$("best").textContent=gstate.best;}
+  if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;try{localStorage.setItem(LS,JSON.stringify(gstate));}catch(e){}$("best").textContent=gstate.best;}
     $("gFb").textContent="✓ נכון! זו "+FUNCS[gAnswer].name; $("gFb").className="fb ok";
   } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+")"; $("gFb").className="fb no"; }
   $("score").textContent=gScore; $("streak").textContent=gStreak;

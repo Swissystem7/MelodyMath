@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>שומעים פונקציה — גדילה ודעיכה (807)</title>
+<style>
+  :root{
+    --indigo:#4f46e5; --indigo-dark:#4338ca; --indigo-light:#eef2ff;
+    --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --ok:#16a34a; --ok-bg:#f0fdf4; --bad:#dc2626; --bad-bg:#fef2f2;
+    --card:#ffffff; --bg:#f8fafc;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans Hebrew",sans-serif;
+    line-height:1.6; padding:16px;
+  }
+  .wrap{max-width:640px; margin:0 auto;}
+  header{text-align:center; padding:18px 0 8px;}
+  h1{font-size:1.6rem; margin:0 0 6px; color:var(--indigo-dark);}
+  .pilot{display:inline-block; background:var(--indigo-light); color:var(--indigo-dark);
+    font-size:.82rem; font-weight:600; padding:4px 12px; border-radius:999px;}
+  .sub{color:var(--muted); font-size:.95rem; margin-top:8px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:20px; margin:16px 0; box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
+  .tab{flex:1 1 auto; min-width:90px; padding:12px 8px; border-radius:14px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); font-size:.95rem; font-weight:600; cursor:pointer; text-align:center;}
+  .tab.on{background:var(--indigo); color:#fff; border-color:var(--indigo);}
+  .prompt{font-size:1.12rem; margin:4px 0 14px;}
+  .givens{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .chip{background:var(--indigo-light); color:var(--indigo-dark); border-radius:12px;
+    padding:8px 14px; font-weight:700; font-size:1rem;}
+  .chip small{font-weight:500; color:var(--muted); display:block; font-size:.72rem;}
+  .audio-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:6px 0 16px;}
+  .btn{border:none; border-radius:14px; padding:14px 18px; font-size:1rem; font-weight:700;
+    cursor:pointer; min-height:50px;}
+  .btn-primary{background:var(--indigo); color:#fff;}
+  .btn-primary:active{background:var(--indigo-dark);}
+  .btn-audio{background:#fff; color:var(--indigo-dark); border:1.5px solid var(--indigo);}
+  .btn-ghost{background:#fff; color:var(--muted); border:1px solid var(--line);}
+  .toggle{display:flex; align-items:center; gap:8px; font-size:.9rem; color:var(--muted); cursor:pointer;}
+  .toggle input{width:20px; height:20px; accent-color:var(--indigo);}
+  .modelabel{font-size:.82rem; color:var(--muted); margin:-6px 0 14px;}
+  .modelabel b{color:var(--indigo-dark);}
+  .answer{display:flex; gap:10px; align-items:stretch;}
+  input[type=text]{flex:1; padding:14px; font-size:1.2rem; border:1.5px solid var(--line);
+    border-radius:14px; text-align:center; font-family:inherit;}
+  input[type=text]:focus{outline:none; border-color:var(--indigo);}
+  .feedback{margin-top:16px; padding:14px 16px; border-radius:14px; font-size:1rem; display:none;}
+  .feedback.ok{display:block; background:var(--ok-bg); border:1px solid #bbf7d0; color:#166534;}
+  .feedback.bad{display:block; background:var(--bad-bg); border:1px solid #fecaca; color:#991b1b;}
+  .sol{margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); font-size:.98rem; color:var(--ink);}
+  .sol code{background:#f1f5f9; padding:2px 7px; border-radius:6px; font-size:.95rem; direction:ltr; display:inline-block;}
+  .sol .formula{background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 12px; margin-top:10px; direction:ltr; text-align:left;}
+  .scorebar{display:flex; justify-content:space-around; text-align:center; margin-top:4px;}
+  .scorebar div{flex:1;}
+  .scorebar .n{font-size:1.5rem; font-weight:800; color:var(--indigo-dark);}
+  .scorebar .l{font-size:.78rem; color:var(--muted);}
+  footer{text-align:center; color:var(--muted); font-size:.9rem; padding:20px 0 8px;}
+  footer a{color:var(--indigo); text-decoration:none; font-weight:600; margin:0 6px;}
+  .hint{font-size:.85rem; color:var(--muted); margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎧 שומעים פונקציה</h1>
+    <span class="pilot">גרסת פיילוט חינמית · גדילה ודעיכה · שאלון 807 (35582)</span>
+    <div class="sub">תרגול <b>M(t) = M₀ · qᵗ</b> — ושומעים איך הלוג מיישר את האקספוננט</div>
+  </header>
+
+  <div class="card">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-type="mix" aria-pressed="true">ערבב</button>
+      <button class="tab" data-type="value" aria-pressed="false">חשב ערך</button>
+      <button class="tab" data-type="q" aria-pressed="false">מצא את q</button>
+      <button class="tab" data-type="t" aria-pressed="false">מצא את t</button>
+    </div>
+  </div>
+
+  <div class="card" id="probCard">
+    <div class="prompt" id="prompt"></div>
+    <div class="givens" id="givens"></div>
+
+    <div class="audio-row">
+      <button class="btn btn-audio" id="playBtn">🎧 שמע את הגדילה</button>
+      <label class="toggle"><input type="checkbox" id="linMode"> מצב Hz לינארי</label>
+    </div>
+    <div class="modelabel" id="modeLabel"></div>
+
+    <div class="answer">
+      <input type="text" id="ans" inputmode="decimal" autocomplete="off" placeholder="התשובה…" aria-label="התשובה">
+      <button class="btn btn-primary" id="checkBtn">בדוק</button>
+    </div>
+    <div class="hint" id="hint"></div>
+
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+    <div style="margin-top:14px; display:flex; gap:10px;">
+      <button class="btn btn-ghost" id="nextBtn" style="flex:1;">שאלה הבאה ←</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="scorebar">
+      <div><div class="n" id="sScore">0</div><div class="l">נכונות</div></div>
+      <div><div class="n" id="sStreak">0</div><div class="l">רצף נוכחי</div></div>
+      <div><div class="n" id="sBest">0</div><div class="l">רצף שיא</div></div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="functions.html">→ עוד פונקציות</a> ·
+    <a href="index.html">דף הבית</a>
+    <div style="margin-top:8px; font-size:.8rem;">שומעים פונקציה · MelodyMath</div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+// ---------- state ----------
+const KEY='sf-807';
+let store={score:0,streak:0,best:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)); if(s)store=Object.assign(store,s);}catch(e){}
+let mode='mix';        // selected tab
+let prob=null;         // current problem
+let answered=false;
+
+const M0S=[]; for(let m=100;m<=1000;m+=50)M0S.push(m);
+const GROW=[1.05,1.1,1.2,1.25,1.5,2];
+const DECAY=[0.9,0.8,0.5];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const round=(x,d)=>{const p=Math.pow(10,d);return Math.round(x*p)/p;};
+const fmt=x=>{ // trim trailing zeros
+  let s=(Math.round(x*100)/100).toString();
+  return s;
+};
+
+// ---------- problem generation ----------
+function contextFor(q,kind){
+  // kind: 'value'|'q'|'t' ; returns {noun,unit,verb}
+  const growCtx=[
+    {noun:'סכום שמושקע בבנק',unit:'₪',word:'ריבית'},
+    {noun:'אוכלוסיית יישוב',unit:'נפש',word:'אוכלוסייה'},
+  ];
+  const decayCtx=[
+    {noun:'כמות חומר רדיואקטיבי',unit:'גרם',word:'דעיכה'},
+    {noun:'ערך רכב',unit:'אלף ₪',word:'ערך רכב'},
+  ];
+  return q>1 ? rnd(growCtx) : rnd(decayCtx);
+}
+
+function gen(){
+  let type = mode==='mix' ? rnd(['value','q','t']) : mode;
+  const q = rnd(Math.random()<0.6?GROW:DECAY);
+  const t = 2+Math.floor(Math.random()*7); // 2..8
+  const M0 = rnd(M0S);
+  const Mexact = M0*Math.pow(q,t);
+  const Mshown = round(Mexact,2);
+  const ctx = contextFor(q,type);
+  const dir = q>1 ? 'גדל' : 'דועך';
+  const factorWord = q>1 ? `פי ${fmt(q)}` : `פי ${fmt(q)} (דעיכה)`;
+  let p={type,M0,q,t,Mshown,ctx};
+
+  if(type==='value'){
+    p.expected = round(Mexact,2);
+    p.tol=0.05; p.dec=2;
+    p.prompt = `${ctx.noun} הוא ${fmt(M0)} ${ctx.unit} ו${dir} ${factorWord} בכל תקופה. מהו הערך אחרי ${t} תקופות?`;
+    p.givens = [['M₀',fmt(M0)],['q',fmt(q)],['t',t]];
+    p.hint='חשב M(t)=M₀·qᵗ · עיגול ל-2 ספרות אחרי הנקודה';
+  } else if(type==='q'){
+    p.expected = round(Math.pow(Mshown/M0,1/t),2);
+    p.tol=0.01; p.dec=2;
+    p.prompt = `${ctx.noun} היה ${fmt(M0)} ${ctx.unit}, ואחרי ${t} תקופות הוא ${fmt(Mshown)} ${ctx.unit}. מהו גורם השינוי q לכל תקופה?`;
+    p.givens = [['M₀',fmt(M0)],['M(t)',fmt(Mshown)],['t',t]];
+    p.hint='q = (M(t)/M₀) בחזקת 1/t · עיגול ל-2 ספרות';
+  } else { // t
+    p.expected = round(Math.log(Mshown/M0)/Math.log(q),1);
+    p.tol=0.2; p.dec=1;
+    p.prompt = `${ctx.noun} היה ${fmt(M0)} ${ctx.unit} ו${dir} ${factorWord} בכל תקופה. אחרי כמה תקופות יגיע ל-${fmt(Mshown)} ${ctx.unit}?`;
+    p.givens = [['M₀',fmt(M0)],['q',fmt(q)],['M יעד',fmt(Mshown)]];
+    p.hint='בודד את t עם לוגריתם';
+  }
+  return p;
+}
+
+// ---------- render ----------
+function render(){
+  document.getElementById('prompt').textContent = prob.prompt;
+  const g=document.getElementById('givens'); g.innerHTML='';
+  prob.givens.forEach(([l,v])=>{
+    const el=document.createElement('div'); el.className='chip';
+    el.innerHTML=`<small>${l}</small>${v}`; g.appendChild(el);
+  });
+  document.getElementById('hint').textContent=prob.hint;
+  document.getElementById('playBtn').textContent = prob.q>1 ? '🎧 שמע את הגדילה' : '🎧 שמע את הדעיכה';
+  document.getElementById('ans').value='';
+  document.getElementById('ans').disabled=false;
+  const fb=document.getElementById('feedback'); fb.className='feedback'; fb.innerHTML='';
+  answered=false;
+  updateModeLabel();
+}
+
+function updateModeLabel(){
+  const lin=document.getElementById('linMode').checked;
+  const grow = prob && prob.q>1;
+  document.getElementById('modeLabel').innerHTML = lin
+    ? `<b>מצב Hz לינארי:</b> התדר עולה כמו הערך עצמו → ${grow?'"התפוצצות" מואצת כלפי מעלה':'צניחה מהירה בהתחלה'} — האקספוננט נשמע.`
+    : `<b>מצב לוג (סמיטונים):</b> קצב עלייה/ירידה קבוע → גליסנדו ${grow?'עולה':'יורד'} אחיד — הלוג מיישר את האקספוננט.`;
+}
+
+// ---------- check ----------
+function check(){
+  if(answered) return;
+  const rawIn=document.getElementById('ans').value.trim();
+  // comma = thousands separator when a dot is present, decimal point otherwise
+  const raw = rawIn.includes('.') ? rawIn.replace(/,/g,'') : rawIn.replace(',', '.');
+  if(raw===''){ flash('הקלד תשובה מספרית לפני הבדיקה.'); return; }
+  const val=Number(raw);
+  if(!isFinite(val)){ flash('הקלט אינו מספר תקין — נסה שוב.'); return; }
+
+  answered=true;
+  document.getElementById('ans').disabled=true;
+  // enforce the declared precision: round the student's input to dec digits,
+  // accept only exact match at that precision (+ float dust epsilon)
+  const ok = Math.abs(round(val,prob.dec)-prob.expected) <= 0.5*Math.pow(10,-prob.dec)*1e-3 + 1e-9;
+
+  if(ok){ store.score++; store.streak++; if(store.streak>store.best)store.best=store.streak; }
+  else { store.streak=0; }
+  save(); paintScore();
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback '+(ok?'ok':'bad');
+  fb.innerHTML = (ok?'✅ נכון! ':`❌ לא מדויק. התשובה: <b>${fmt(prob.expected)}</b> `)
+    + solution();
+}
+
+function flash(msg){
+  const fb=document.getElementById('feedback');
+  fb.className='feedback bad'; fb.textContent=msg;
+}
+
+function solution(){
+  const {type,M0,q,t,Mshown,expected}=prob;
+  if(type==='value'){
+    return `<div class="sol">פתרון: <code>M(${t}) = ${fmt(M0)} · ${fmt(q)}^${t} = ${fmt(expected)}</code></div>`;
+  }
+  if(type==='q'){
+    return `<div class="sol">פתרון: <code>q = (${fmt(Mshown)} / ${fmt(M0)})^(1/${t}) = ${fmt(expected)}</code></div>`;
+  }
+  // t — the didactic log formula
+  return `<div class="sol">מבודדים את t בעזרת לוגריתם:
+    <div class="formula">t = log(M / M₀) / log(q)<br>
+    t = log(${fmt(Mshown)} / ${fmt(M0)}) / log(${fmt(q)}) = <b>${fmt(expected)}</b></div>
+    זה בדיוק מה שהאוזן שומעת: בסקאלה לוגריתמית האקספוננט הופך לקו ישר.</div>`;
+}
+
+// ---------- score ----------
+function paintScore(){
+  document.getElementById('sScore').textContent=store.score;
+  document.getElementById('sStreak').textContent=store.streak;
+  document.getElementById('sBest').textContent=store.best;
+}
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){} }
+
+// ---------- audio ----------
+let actx=null, curOsc=null;
+function playSweep(){
+  if(!prob) return;
+  // re-entry guard: stop the previous sweep before starting a new one
+  if(curOsc){ try{curOsc.stop();}catch(e){} curOsc=null; }
+  const {M0,q,t}=prob;
+  const linear=document.getElementById('linMode').checked;
+  try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); }
+  catch(e){ return; }
+  if(actx.state==='suspended') actx.resume();
+
+  const dur=2.6, steps=64;
+  const C3=130.81, C6=1046.5;
+  const now=actx.currentTime;
+
+  // sampled values along the exponential
+  const vals=[];
+  for(let i=0;i<=steps;i++){ const ti=t*i/steps; vals.push(M0*Math.pow(q,ti)); }
+  let vmin=Math.min.apply(null,vals), vmax=Math.max.apply(null,vals);
+  const span=(vmax-vmin)||1;
+  const lmin=Math.log(vmin), lspan=(Math.log(vmax)-Math.log(vmin))||1;
+  const ratio=C6/C3;
+
+  const osc=actx.createOscillator();
+  const g=actx.createGain();
+  osc.type='sine'; osc.connect(g); g.connect(actx.destination);
+
+  function freqAt(i){
+    let f;
+    if(linear){
+      // frequency proportional to the value itself → exponential in real Hz
+      f = C3 + (vals[i]-vmin)/span*(C6-C3);
+    }else{
+      // log-to-semitone: frac linear in log(value) → constant semitone rate
+      const frac=(Math.log(vals[i])-lmin)/lspan;
+      f = C3*Math.pow(ratio,frac);
+    }
+    return Math.max(C3,Math.min(C6,f));
+  }
+
+  osc.frequency.setValueAtTime(freqAt(0),now);
+  for(let i=1;i<=steps;i++){
+    osc.frequency.linearRampToValueAtTime(freqAt(i), now+dur*i/steps);
+  }
+  g.gain.setValueAtTime(0.0001,now);
+  g.gain.exponentialRampToValueAtTime(0.22, now+0.04);
+  g.gain.setValueAtTime(0.22, now+dur-0.12);
+  g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
+  osc.start(now); osc.stop(now+dur+0.05);
+  curOsc=osc; osc.onended=function(){ if(curOsc===osc) curOsc=null; };
+}
+
+// ---------- wiring ----------
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab'); if(!b)return;
+  document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');});
+  b.classList.add('on'); b.setAttribute('aria-pressed','true'); mode=b.dataset.type;
+  prob=gen(); render();
+});
+document.getElementById('checkBtn').addEventListener('click',check);
+document.getElementById('ans').addEventListener('keydown',e=>{ if(e.key==='Enter')check(); });
+document.getElementById('nextBtn').addEventListener('click',()=>{ prob=gen(); render(); });
+document.getElementById('playBtn').addEventListener('click',playSweep);
+document.getElementById('linMode').addEventListener('change',updateModeLabel);
+
+// ---------- boot ----------
+paintScore();
+prob=gen();
+render();
+
+// ---------- self-check (runs once, silent unless it fails) ----------
+(function selfTest(){
+  // M(t)=M0*q^t consistency across the three solvers
+  const M0=200,q=1.2,t=5;
+  const M=M0*Math.pow(q,t);
+  const gotQ=Math.pow(M/M0,1/t);
+  const gotT=Math.log(M/M0)/Math.log(q);
+  console.assert(Math.abs(gotQ-q)<1e-9,'q solver');
+  console.assert(Math.abs(gotT-t)<1e-9,'t solver');
+})();
+</script>
+</body>
+</html>
