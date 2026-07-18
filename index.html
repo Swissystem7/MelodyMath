@@ -101,6 +101,8 @@
 <script>
 (function(){
   var TOPIC='mul', TABLE=3, actx=null, streak=0, stars=0, rhythm=false, tempo=1.1;
+  // adaptive tempo — mirrors tested lib/tempo.js (multiplicative, clamped)
+  function nextTempo(current, wasCorrect){ var n=wasCorrect?current*0.96:current*1.12; if(n<0.55)n=0.55; if(n>2.0)n=2.0; return Math.round(n*1000)/1000; }
   var TOPICS=[{k:'mul',n:'לוח הכפל',op:'×',lo:2,hi:11,f:function(a,b){return a*b;},grade:'כיתה ג׳',strand:'תחום המספר — שליטה בעובדות הכפל והחילוק'},
               {k:'add',n:'חיבור',op:'+',lo:1,hi:10,f:function(a,b){return a+b;},grade:'כיתות א׳–ב׳',strand:'תחום המספר — חיבור וחיסור בתחום ה-100'}];
   var topics=document.getElementById('topics'), nums=document.getElementById('nums'), melody=document.getElementById('melody');
@@ -162,8 +164,8 @@
   }
   function answer(btn,ok){ rec(TOPIC,curQ.key,ok);
     if(ok){ btn.classList.add('good'); var f=SCALE[curQ.i-1]; tone(f,ac().currentTime,.22); chord([f,f*1.25,f*1.5],ac().currentTime+.05,.5);
-      streak++; if(streak%5===0)stars++; if(rhythm&&tempo>0.62)tempo-=0.04; render(); setTimeout(nextQ,rhythm?Math.max(500,tempo*700):600);
-    } else { btn.classList.add('bad'); var c=ac(); tone(160,c.currentTime,.18); tone(120,c.currentTime+.12,.2); streak=0; if(rhythm)tempo=Math.min(1.3,tempo+0.06); render(); setTimeout(function(){btn.classList.remove('bad');},450); } }
+      streak++; if(streak%5===0)stars++; if(rhythm)tempo=nextTempo(tempo,true); render(); setTimeout(nextQ,rhythm?Math.max(500,tempo*700):600);
+    } else { btn.classList.add('bad'); var c=ac(); tone(160,c.currentTime,.18); tone(120,c.currentTime+.12,.2); streak=0; if(rhythm)tempo=nextTempo(tempo,false); render(); setTimeout(function(){btn.classList.remove('bad');},450); } }
   function render(){ scoreEl.innerHTML='רצף: '+streak+'  <span class="stars">'+'⭐'.repeat(Math.min(stars,10))+'</span>'+(rhythm?'  🥁 '+tempo.toFixed(2)+'ש\'':''); }
   function startQuiz(r){ ac().resume&&ac().resume(); rhythm=r; tempo=1.1; stage.classList.add('hide'); report.classList.add('hide'); quiz.classList.remove('hide'); streak=0; render(); nextQ(); if(!r)beatbar.classList.remove('run'); }
 
