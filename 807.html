@@ -123,7 +123,10 @@
 // ---------- state ----------
 const KEY='sf-807';
 let store={score:0,streak:0,best:0};
-try{const s=JSON.parse(localStorage.getItem(KEY)); if(s)store=Object.assign(store,s);}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(KEY));
+  const ok=v=>Number.isInteger(v)&&v>=0;
+  if(s&&ok(s.score)&&ok(s.streak)&&ok(s.best)) store={score:s.score,streak:s.streak,best:s.best};
+}catch(e){}
 let mode='mix';        // selected tab
 let prob=null;         // current problem
 let answered=false;
@@ -166,19 +169,19 @@ function gen(){
 
   if(type==='value'){
     p.expected = round(Mexact,2);
-    p.tol=0.05; p.dec=2;
+    p.dec=2;
     p.prompt = `${ctx.noun} הוא ${fmt(M0)} ${ctx.unit} ו${dir} ${factorWord} בכל תקופה. מהו הערך אחרי ${t} תקופות?`;
     p.givens = [['M₀',fmt(M0)],['q',fmt(q)],['t',t]];
     p.hint='חשב M(t)=M₀·qᵗ · עיגול ל-2 ספרות אחרי הנקודה';
   } else if(type==='q'){
     p.expected = round(Math.pow(Mshown/M0,1/t),2);
-    p.tol=0.01; p.dec=2;
+    p.dec=2;
     p.prompt = `${ctx.noun} היה ${fmt(M0)} ${ctx.unit}, ואחרי ${t} תקופות הוא ${fmt(Mshown)} ${ctx.unit}. מהו גורם השינוי q לכל תקופה?`;
     p.givens = [['M₀',fmt(M0)],['M(t)',fmt(Mshown)],['t',t]];
     p.hint='q = (M(t)/M₀) בחזקת 1/t · עיגול ל-2 ספרות';
   } else { // t
     p.expected = round(Math.log(Mshown/M0)/Math.log(q),1);
-    p.tol=0.2; p.dec=1;
+    p.dec=1;
     p.prompt = `${ctx.noun} היה ${fmt(M0)} ${ctx.unit} ו${dir} ${factorWord} בכל תקופה. אחרי כמה תקופות יגיע ל-${fmt(Mshown)} ${ctx.unit}?`;
     p.givens = [['M₀',fmt(M0)],['q',fmt(q)],['M יעד',fmt(Mshown)]];
     p.hint='בודד את t עם לוגריתם';
@@ -215,8 +218,7 @@ function updateModeLabel(){
 function check(){
   if(answered) return;
   const rawIn=document.getElementById('ans').value.trim();
-  // comma = thousands separator when a dot is present, decimal point otherwise
-  const raw = rawIn.includes('.') ? rawIn.replace(/,/g,'') : rawIn.replace(',', '.');
+  const raw = rawIn.replace(/,/g,''); // comma = thousands separator (IL/US locale); dot = decimal
   if(raw===''){ flash('הקלד תשובה מספרית לפני הבדיקה.'); return; }
   const val=Number(raw);
   if(!isFinite(val)){ flash('הקלט אינו מספר תקין — נסה שוב.'); return; }
