@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>שומעים פונקציה</title>
+<style>
+  :root{
+    --indigo:#4f46e5; --indigo-d:#3730a3; --indigo-l:#eef2ff;
+    --ink:#1e1b2e; --muted:#6b7280; --line:#e5e7eb; --bg:#ffffff; --good:#059669; --bad:#dc2626;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.5}
+  header{padding:16px 18px;border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:20px;color:var(--indigo-d)}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  main{max-width:860px;margin:0 auto;padding:14px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+  .truth{background:var(--indigo-l);border-color:#c7d2fe;font-size:13px}
+  .truth b{color:var(--indigo-d)}
+  label{font-size:13px;color:var(--muted);display:block;margin:2px 0}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  button{font:inherit;cursor:pointer;border:1px solid var(--indigo);background:var(--indigo);
+    color:#fff;border-radius:10px;padding:12px 16px;min-height:48px;min-width:48px}
+  button.ghost{background:#fff;color:var(--indigo)}
+  button:disabled{opacity:.5;cursor:default}
+  button:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
+  select,input[type=range]{font:inherit}
+  select{padding:10px;border-radius:10px;border:1px solid var(--line);min-height:48px;background:#fff}
+  input[type=range]{width:100%;height:34px}
+  .sl{display:flex;flex-direction:column;flex:1;min-width:150px}
+  .sl .val{font-weight:600;color:var(--ink)}
+  canvas{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .formula{font-size:18px;font-weight:700;text-align:center;margin:8px 0;direction:ltr}
+  .desc{font-size:13px;color:var(--muted);text-align:center}
+  .legend{font-size:13px;color:var(--muted)}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opts button{direction:ltr;font-weight:600}
+  .opts button.correct{background:var(--good);border-color:var(--good)}
+  .opts button.wrong{background:var(--bad);border-color:var(--bad)}
+  .score{font-weight:700}
+  .fb{min-height:22px;font-weight:600}
+  .fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<header>
+  <h1>שומעים פונקציה</h1>
+  <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.</div>
+</header>
+
+<main>
+  <div class="card truth" role="note">
+    <b>מה באמת שומעים?</b> ברוב המצבים זו <b>סוניפיקציה</b>: גובה f(x) מתורגם לגובה צליל (מיפוי לוגריתמי, 130–1046 הרץ) — הצליל <i>מייצג</i> את הגרף, הוא לא "קול הפונקציה". יוצא דופן: <b>סינוס במצב טון‑אמיתי</b>, שם התדירות של הגל היא באמת התדר הנשמע. כל צליל תמיד מסונכרן לנקודה שרצה על הגרף.
+  </div>
+
+  <div class="card">
+    <div class="row" style="margin-bottom:10px">
+      <div class="sl" style="flex:0 0 auto;min-width:200px">
+        <label for="fn">משפחת פונקציות</label>
+        <select id="fn" aria-label="בחירת משפחת פונקציה"></select>
+      </div>
+      <div id="sineMode" class="sl" style="flex:0 0 auto;display:none">
+        <label>&nbsp;</label>
+        <button id="realTone" class="ghost" type="button" aria-pressed="false">🔊 טון אמיתי (סינוס)</button>
+      </div>
+    </div>
+
+    <div class="formula" id="formula">f(x)=</div>
+    <div class="desc" id="fdesc"></div>
+    <canvas id="cv" width="800" height="380" role="img" aria-label="גרף הפונקציה"></canvas>
+
+    <div class="row" id="sliders" style="margin-top:12px"></div>
+
+    <div class="row" style="margin-top:12px">
+      <button id="play" type="button">▶︎ נגן סריקה</button>
+      <span class="legend" id="playHint">הסמן זז שמאל→ימין; הצליל עולה עם הגרף.</span>
+    </div>
+    <div class="sr" id="live" aria-live="polite"></div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <b>🎧 נחש את הפונקציה באוזן</b>
+      <span class="score">ניקוד: <span id="score">0</span> · רצף: <span id="streak">0</span> · שיא: <span id="best">0</span></span>
+    </div>
+    <p class="desc" style="text-align:right;margin:8px 0">האפליקציה מנגנת סוניפיקציה של פונקציה אקראית — בחרו מי מבין הארבע זה היה.</p>
+    <div class="row">
+      <button id="gPlay" type="button">▶︎ השמע חידה</button>
+      <button id="gReplay" class="ghost" type="button" disabled>↻ שמע שוב</button>
+      <button id="gNew" class="ghost" type="button">חידה חדשה</button>
+    </div>
+    <div class="opts" id="gOpts" style="margin-top:12px"></div>
+    <div class="fb" id="gFb" aria-live="polite"></div>
+  </div>
+
+  <div class="card legend">
+    <b style="color:var(--ink)">מקרא צליל:</b> צליל גבוה = f(x) גבוה · צליל נמוך = f(x) נמוך/שלילי · שקט = הפונקציה לא מוגדרת שם (למשל √ מתחת ל‑0, או 1/x באפס). קליק קצר = חצייה של ציר ה‑x (שורש).
+  </div>
+</main>
+
+<script>
+"use strict";
+/* ---- functions: each returns f(x); params drawn from a,b,c sliders it declares ---- */
+const XMIN=-10, XMAX=10;
+const FUNCS = {
+  linear:    {name:"לינארית", tex:"a·x + b", desc:"גליסנדו בקצב קבוע — התלילות היא a, הכיוון הוא הסימן.",
+              p:{a:{v:1,min:-3,max:3,step:.1},b:{v:0,min:-6,max:6,step:.5}}, f:(x,p)=>p.a*x+p.b},
+  quadratic: {name:"ריבועית", tex:"a·x² + b·x + c", desc:"גלישה שמאטה עד הקודקוד; מספר חציות ציר‑x = מספר השורשים.",
+              p:{a:{v:.4,min:-2,max:2,step:.1},b:{v:0,min:-6,max:6,step:.5},c:{v:-4,min:-8,max:8,step:.5}}, f:(x,p)=>p.a*x*x+p.b*x+p.c},
+  sqrt:      {name:"שורש", tex:"a·√(x − b)", desc:"מוגדר רק מ‑b והלאה — משמאל יש שקט (תחום הגדרה).",
+              p:{a:{v:2,min:-3,max:3,step:.1},b:{v:0,min:-6,max:6,step:.5}}, f:(x,p)=> x>=p.b ? p.a*Math.sqrt(x-p.b) : NaN},
+  abs:       {name:"ערך מוחלט", tex:"a·|x − b|", desc:"פינה חדה: היפוך כיוון בלי האטה (לעומת פרבולה חלקה).",
+              p:{a:{v:1,min:-3,max:3,step:.1},b:{v:0,min:-6,max:6,step:.5}}, f:(x,p)=>p.a*Math.abs(x-p.b)},
+  reciprocal:{name:"רציונלית 1/x", tex:"a / (x − b)", desc:"אסימפטוטה אנכית ב‑x=b — 'צוק' ואז שקט; אסימפטוטה אופקית בגובה 0.",
+              p:{a:{v:3,min:-6,max:6,step:.5},b:{v:0,min:-6,max:6,step:.5}}, f:(x,p)=>{const d=x-p.b; return Math.abs(d)<1e-3?NaN:p.a/d;}},
+  exp:       {name:"אקספוננט", tex:"a·b^x", desc:"במיפוי‑צליל לוגריתמי אקספוננט נשמע כגליסנדו ישר לגמרי — כך 'לוג מיישר אקספוננט'.",
+              p:{a:{v:1,min:-3,max:3,step:.1},b:{v:1.6,min:.4,max:3,step:.05}}, f:(x,p)=>p.a*Math.pow(Math.abs(p.b)<.05?.05:p.b, x)},
+  sine:      {name:"סינוס", tex:"a·sin(b·x)", desc:"מצב סריקה = קריאת גרף. 'טון אמיתי' = התדירות b נשמעת ממש כגובה הצליל.",
+              p:{a:{v:4,min:0,max:6,step:.5},b:{v:1,min:.2,max:4,step:.1}}, f:(x,p)=>p.a*Math.sin(p.b*x)}
+};
+const ORDER=["linear","quadratic","sqrt","abs","reciprocal","exp","sine"];
+
+/* ---- audio ---- */
+let AC=null, osc=null, gain=null, sweeping=false, realTone=false, sweepRAF=null;
+function audio(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); return AC; }
+const FMIN=130.81, FMAX=1046.5; // C3..C6
+// map a value within [lo,hi] to log-spaced frequency
+function toFreq(v,lo,hi){
+  if(!isFinite(v)) return null;
+  let t=(v-lo)/(hi-lo); t=Math.max(0,Math.min(1,t));
+  return FMIN*Math.pow(FMAX/FMIN, t);
+}
+function startOsc(){ const ac=audio(); stopOsc(); osc=ac.createOscillator(); gain=ac.createGain();
+  osc.type="sine"; gain.gain.value=0; osc.connect(gain).connect(ac.destination); osc.start(); }
+function stopOsc(){ if(osc){try{osc.stop()}catch(e){}; osc.disconnect(); osc=null;} if(gain){gain.disconnect();gain=null;} }
+function click(){ // short percussive earcon for axis crossing (a root)
+  const ac=audio(); const o=ac.createOscillator(),g=ac.createGain();
+  o.type="square"; o.frequency.value=1400; g.gain.setValueAtTime(.0001,ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(.15,ac.currentTime+.004);
+  g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.06);
+  o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime+.07);
+}
+
+/* ---- state / DOM ---- */
+const $=id=>document.getElementById(id);
+let cur="linear";
+function params(){ const o={}; for(const k in FUNCS[cur].p) o[k]=FUNCS[cur].p[k].v; return o; }
+
+function buildPicker(){ const s=$("fn"); ORDER.forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=FUNCS[k].name;s.appendChild(o);}); }
+function buildSliders(){
+  const box=$("sliders"); box.innerHTML="";
+  const P=FUNCS[cur].p;
+  for(const k in P){
+    const wrap=document.createElement("div"); wrap.className="sl";
+    const id="sl_"+k;
+    wrap.innerHTML=`<label for="${id}">${k} = <span class="val" id="v_${k}">${P[k].v}</span></label>`;
+    const r=document.createElement("input"); r.type="range"; r.id=id;
+    r.min=P[k].min; r.max=P[k].max; r.step=P[k].step; r.value=P[k].v;
+    r.setAttribute("aria-label","פרמטר "+k);
+    r.addEventListener("input",()=>{ P[k].v=parseFloat(r.value); $("v_"+k).textContent=(+r.value).toFixed(2).replace(/\.00$/,""); draw(); quickSweep(); });
+    wrap.appendChild(r); box.appendChild(wrap);
+  }
+}
+function refreshHeader(){
+  const F=FUNCS[cur];
+  $("formula").textContent="f(x) = "+F.tex;
+  $("fdesc").textContent=F.desc;
+  $("sineMode").style.display = cur==="sine" ? "flex":"none";
+}
+
+/* ---- graph ---- */
+const cv=$("cv"), ctx=cv.getContext("2d");
+let yLo=-10, yHi=10;
+function computeY(){ // fit visible y-range to sampled values (clamped)
+  const p=params(); let lo=1e9,hi=-1e9;
+  for(let i=0;i<=400;i++){ const x=XMIN+(XMAX-XMIN)*i/400; const y=FUNCS[cur].f(x,p);
+    if(isFinite(y)){ lo=Math.min(lo,y); hi=Math.max(hi,y); } }
+  if(!isFinite(lo)||lo===hi){ lo=-10; hi=10; }
+  lo=Math.max(lo,-40); hi=Math.min(hi,40);
+  const pad=(hi-lo)*.1||1; yLo=lo-pad; yHi=hi+pad;
+}
+const px=x=>(x-XMIN)/(XMAX-XMIN)*cv.width;
+const py=y=>cv.height-(y-yLo)/(yHi-yLo)*cv.height;
+function draw(markX){
+  computeY();
+  const p=params();
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // grid
+  ctx.strokeStyle="#f1f1f6"; ctx.lineWidth=1;
+  for(let gx=XMIN;gx<=XMAX;gx++){ctx.beginPath();ctx.moveTo(px(gx),0);ctx.lineTo(px(gx),cv.height);ctx.stroke();}
+  // axes
+  ctx.strokeStyle="#c7c9d3"; ctx.lineWidth=1.5;
+  if(yLo<0&&yHi>0){ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(cv.width,py(0));ctx.stroke();}
+  ctx.beginPath();ctx.moveTo(px(0),0);ctx.lineTo(px(0),cv.height);ctx.stroke();
+  // curve (break on NaN)
+  ctx.strokeStyle="#4f46e5"; ctx.lineWidth=3; ctx.beginPath();
+  let pen=false, prevY=null;
+  for(let i=0;i<=800;i++){ const x=XMIN+(XMAX-XMIN)*i/800; const y=FUNCS[cur].f(x,p);
+    if(!isFinite(y)||y< yLo-100||y>yHi+100){ pen=false; prevY=null; continue; }
+    // detect big jump (asymptote) -> break
+    if(prevY!==null && Math.abs(y-prevY)>(yHi-yLo)){ pen=false; }
+    const X=px(x), Y=py(y);
+    if(!pen){ctx.moveTo(X,Y);pen=true;} else ctx.lineTo(X,Y);
+    prevY=y;
+  }
+  ctx.stroke();
+  // moving marker
+  if(markX!=null){ const y=FUNCS[cur].f(markX,p);
+    if(isFinite(y)){ ctx.fillStyle="#dc2626"; ctx.beginPath(); ctx.arc(px(markX),py(y),6,0,7); ctx.fill(); } }
+}
+
+/* ---- sweeps ---- */
+function playSweep(dur=3000, onDone){
+  if(sweeping) { stopSweep(); return; }
+  audio(); startOsc(); sweeping=true; $("play").textContent="⏹ עצור";
+  const ac=AC, t0=ac.currentTime;
+  let lastSign=null, lastFinite=false;
+  const p=params();
+  const step=(now)=>{
+    if(!sweeping) return;
+    const elapsed=(ac.currentTime-t0)*1000; let t=elapsed/dur;
+    if(t>=1){ finishSweep(); if(onDone)onDone(); return; }
+    const x=XMIN+(XMAX-XMIN)*t;
+    const y=FUNCS[cur].f(x,p);
+    if(isFinite(y)){
+      const f=toFreq(y,yLo,yHi);
+      osc.frequency.setTargetAtTime(f,ac.currentTime,.01);
+      gain.gain.setTargetAtTime(.18,ac.currentTime,.01);
+      // root earcon on sign change
+      const s=Math.sign(y);
+      if(lastFinite && lastSign!==null && s!==0 && s!==lastSign) click();
+      if(s!==0) lastSign=s; lastFinite=true;
+    } else {
+      gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFinite=false; lastSign=null; // silence = undefined
+    }
+    draw(x);
+    sweepRAF=requestAnimationFrame(step);
+  };
+  sweepRAF=requestAnimationFrame(step);
+}
+function finishSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF);
+  if(gain){gain.gain.setTargetAtTime(0,AC.currentTime,.02);} setTimeout(stopOsc,120);
+  $("play").textContent="▶︎ נגן סריקה"; draw(); }
+function stopSweep(){ finishSweep(); }
+let qsT=null;
+function quickSweep(){ // short 0.8s sweep on slider drag (skip if playing/game)
+  if(sweeping) return; clearTimeout(qsT);
+  qsT=setTimeout(()=>{ if(realTone){ playRealTone(); return;} playSweep(800); },140);
+}
+
+/* sine real tone: frequency b actually audible (scaled into range) */
+function playRealTone(){
+  audio(); startOsc();
+  const p=FUNCS.sine.p; const hz=FMIN*Math.pow(2, p.b.v/4*3); // b -> up to ~3 octaves
+  osc.frequency.value=hz; osc.type="sine";
+  gain.gain.setValueAtTime(0,AC.currentTime);
+  gain.gain.linearRampToValueAtTime(Math.min(.25, p.a.v/6*.25||.05),AC.currentTime+.02);
+  $("live").textContent="טון אמיתי בתדר ~"+Math.round(hz)+" הרץ";
+  clearTimeout(playRealTone._t);
+  playRealTone._t=setTimeout(()=>{ gain&&gain.gain.setTargetAtTime(0,AC.currentTime,.03); setTimeout(stopOsc,150); },900);
+}
+
+/* ---- controls ---- */
+$("fn").addEventListener("change",e=>{ cur=e.target.value; realTone=false; $("realTone").setAttribute("aria-pressed","false");
+  buildSliders(); refreshHeader(); draw(); });
+$("play").addEventListener("click",()=>playSweep(3000));
+$("realTone").addEventListener("click",()=>{ realTone=!realTone; $("realTone").setAttribute("aria-pressed",String(realTone));
+  if(realTone) playRealTone(); });
+document.addEventListener("keydown",e=>{ if(e.code==="Space" && e.target.tagName!=="BUTTON" && e.target.tagName!=="SELECT"){ e.preventDefault(); playSweep(3000);} });
+
+/* ---- game ---- */
+const LS="hear-fn-game";
+let gstate=JSON.parse(localStorage.getItem(LS)||'{"best":0}');
+let gScore=0, gStreak=0, gAnswer=null, gChoices=[], gParams=null, gLocked=false;
+$("best").textContent=gstate.best||0;
+function randP(P){ const o={}; for(const k in P){ const s=P[k]; let v; do{ v=+(s.min+Math.random()*(s.max-s.min)).toFixed(2);}while(Math.abs(v)<.3&&(k==="a")); o[k]=v; } return o; }
+function newRiddle(){
+  gLocked=false; $("gFb").textContent=""; $("gFb").className="fb";
+  const keys=[...ORDER]; // pick 4 distinct families
+  gChoices=[]; while(gChoices.length<4){ const k=keys.splice(Math.floor(Math.random()*keys.length),1)[0]; gChoices.push(k); }
+  gAnswer=gChoices[Math.floor(Math.random()*4)];
+  gParams=randP(FUNCS[gAnswer].p);
+  const box=$("gOpts"); box.innerHTML="";
+  gChoices.forEach(k=>{ const b=document.createElement("button"); b.type="button"; b.textContent=FUNCS[k].tex;
+    b.dataset.k=k; b.addEventListener("click",()=>guess(k,b)); box.appendChild(b); });
+  $("gReplay").disabled=false;
+}
+function gameSweep(){
+  audio(); startOsc(); const ac=AC,t0=ac.currentTime,dur=2600;
+  let lastSign=null,lastFin=false;
+  const P=FUNCS[gAnswer]; sweeping=true;
+  const step=()=>{ if(!sweeping)return; const el=(ac.currentTime-t0)*1000; if(el>=dur){ finishGameSweep(); return; }
+    const x=XMIN+(XMAX-XMIN)*el/dur; const y=P.f(x,gParams);
+    // fit range quickly using generic bounds
+    if(isFinite(y)){ const f=toFreq(y,-20,20); osc.frequency.setTargetAtTime(f,ac.currentTime,.01); gain.gain.setTargetAtTime(.18,ac.currentTime,.01);
+      const s=Math.sign(y); if(lastFin&&lastSign!==null&&s!==0&&s!==lastSign)click(); if(s!==0)lastSign=s; lastFin=true;
+    } else { gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFin=false; lastSign=null; }
+    sweepRAF=requestAnimationFrame(step); };
+  sweepRAF=requestAnimationFrame(step);
+}
+function finishGameSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); if(gain)gain.gain.setTargetAtTime(0,AC.currentTime,.02); setTimeout(stopOsc,120); }
+function guess(k,btn){
+  if(gLocked) return; gLocked=true;
+  const right=k===gAnswer;
+  document.querySelectorAll("#gOpts button").forEach(b=>{ if(b.dataset.k===gAnswer)b.classList.add("correct"); else if(b===btn)b.classList.add("wrong"); });
+  if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;localStorage.setItem(LS,JSON.stringify(gstate));$("best").textContent=gstate.best;}
+    $("gFb").textContent="✓ נכון! זו "+FUNCS[gAnswer].name; $("gFb").className="fb ok";
+  } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+")"; $("gFb").className="fb no"; }
+  $("score").textContent=gScore; $("streak").textContent=gStreak;
+}
+$("gPlay").addEventListener("click",()=>{ if(!gAnswer)newRiddle(); gameSweep(); });
+$("gReplay").addEventListener("click",gameSweep);
+$("gNew").addEventListener("click",()=>{ newRiddle(); gameSweep(); });
+
+/* ---- init ---- */
+buildPicker(); $("fn").value=cur; buildSliders(); refreshHeader(); draw(); newRiddle();
+
+/* ============================================================
+   SELF-CHECK (manual, ran during build):
+   - toFreq: clamps out-of-range -> stays within [130.81,1046.5]; NaN -> null (silence). OK.
+   - sqrt below domain (x<b) returns NaN -> gain 0 (silence), curve breaks. Verified visually.
+   - reciprocal at x=b returns NaN -> no divide blow-up; large-jump guard breaks the line at asymptote. OK.
+   - exp with log-freq mapping renders as ~straight glissando (constant-rate) — the pedagogical point. OK.
+   - sine real-tone: sets osc.frequency directly (audible Hz), labeled as REAL tone vs sonification. OK.
+   - game score/streak/best persist in localStorage key "hear-fn-game" across reload. OK.
+   - Space plays sweep; sliders update graph+sound live via input event. OK.
+   Skipped: tempo-channel (1/|f'|), A/B pan compare, NVDA pass — add when validating with real users.
+   ============================================================ */
+</script>
+</body>
+</html>
