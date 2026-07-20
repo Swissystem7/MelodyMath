@@ -1,0 +1,202 @@
+{
+  "lib/analyzeClassPerformance.js": {
+    "mtime": 1784573208.6590493,
+    "ast_hash": "338ca7a1ef1e58ed9c7e164285595510",
+    "semantic_hash": "338ca7a1ef1e58ed9c7e164285595510"
+  },
+  "lib/analyzeStudentPerformance.js": {
+    "mtime": 1784443564.4815376,
+    "ast_hash": "01d18bc2011bc0106537750f06eeadbc",
+    "semantic_hash": "01d18bc2011bc0106537750f06eeadbc"
+  },
+  "lib/anonymizeStudentId.js": {
+    "mtime": 1784457977.1146846,
+    "ast_hash": "e30ead7f6dac918282a647f499375148",
+    "semantic_hash": "e30ead7f6dac918282a647f499375148"
+  },
+  "lib/calculateAdaptiveDifficulty.js": {
+    "mtime": 1784573172.60402,
+    "ast_hash": "f78b0bd32c8d7afeff4891e4d9071401",
+    "semantic_hash": "f78b0bd32c8d7afeff4891e4d9071401"
+  },
+  "lib/computeNextReview.js": {
+    "mtime": 1784419642.7222059,
+    "ast_hash": "7886f01635494fe7819740bfc79548b1",
+    "semantic_hash": "7886f01635494fe7819740bfc79548b1"
+  },
+  "lib/computeStreakBonus.js": {
+    "mtime": 1784573173.29154,
+    "ast_hash": "abbbf146abc27c955d8a0f5723ab1859",
+    "semantic_hash": "abbbf146abc27c955d8a0f5723ab1859"
+  },
+  "lib/createClassAssignment.js": {
+    "mtime": 1784443565.255485,
+    "ast_hash": "2b2408c9f297af4e05c9051f1bb210c9",
+    "semantic_hash": "2b2408c9f297af4e05c9051f1bb210c9"
+  },
+  "lib/genGrowthProblem.js": {
+    "mtime": 1784407703.2168431,
+    "ast_hash": "96965a7f5a5e57d75a80b932c4a2d358",
+    "semantic_hash": "96965a7f5a5e57d75a80b932c4a2d358"
+  },
+  "lib/generateAdaptiveLesson.js": {
+    "mtime": 1784573201.5711794,
+    "ast_hash": "5a07a17e2496c52f25d4d48f6a7840d2",
+    "semantic_hash": "5a07a17e2496c52f25d4d48f6a7840d2"
+  },
+  "lib/generateExerciseFromMelody.js": {
+    "mtime": 1784573180.8536644,
+    "ast_hash": "eb01bceac5822c9053d7f2730bcac6ed",
+    "semantic_hash": "eb01bceac5822c9053d7f2730bcac6ed"
+  },
+  "lib/generateFirstWeekPlan.js": {
+    "mtime": 1784443575.5970542,
+    "ast_hash": "b70f796fa639e28c15dd3ac8019bdafa",
+    "semantic_hash": "b70f796fa639e28c15dd3ac8019bdafa"
+  },
+  "lib/generateLessonPlan.js": {
+    "mtime": 1784443563.2675948,
+    "ast_hash": "52112512d428252499a5a8377ccbc4b4",
+    "semantic_hash": "52112512d428252499a5a8377ccbc4b4"
+  },
+  "lib/generateProgressSnapshot.js": {
+    "mtime": 1784573215.3772554,
+    "ast_hash": "1342297cfa55d2c7f1aa3fbfc7b029e8",
+    "semantic_hash": "1342297cfa55d2c7f1aa3fbfc7b029e8"
+  },
+  "lib/generateQuickJoinLink.js": {
+    "mtime": 1784443577.0046039,
+    "ast_hash": "88137d8b0fc26e0d2ed05f9fe0427522",
+    "semantic_hash": "88137d8b0fc26e0d2ed05f9fe0427522"
+  },
+  "lib/generateRhythmExercise.js": {
+    "mtime": 1784573233.8400545,
+    "ast_hash": "c30054244c93fa41457a1e03917bf50c",
+    "semantic_hash": "c30054244c93fa41457a1e03917bf50c"
+  },
+  "lib/generateSSOToken.js": {
+    "mtime": 1784573209.3621824,
+    "ast_hash": "ef9db448c04c9a50cc426e506b2aac7d",
+    "semantic_hash": "ef9db448c04c9a50cc426e506b2aac7d"
+  },
+  "lib/getAdaptiveHint.js": {
+    "mtime": 1784573181.4942906,
+    "ast_hash": "e929a1e4e7134a9b1fe077c17bc1343b",
+    "semantic_hash": "e929a1e4e7134a9b1fe077c17bc1343b"
+  },
+  "lib/getNextDifficulty.js": {
+    "mtime": 1784419643.1324399,
+    "ast_hash": "e91e2a78dd6ade701bd9100d436bfba4",
+    "semantic_hash": "e91e2a78dd6ade701bd9100d436bfba4"
+  },
+  "lib/getNextReviewDate.js": {
+    "mtime": 1784573172.0176544,
+    "ast_hash": "6c132fd8d1265986f4c41ec9ed867358",
+    "semantic_hash": "6c132fd8d1265986f4c41ec9ed867358"
+  },
+  "lib/nearMiss.js": {
+    "mtime": 1784407704.1142368,
+    "ast_hash": "a7a2f00f94927692435e4a6a7cd63aa9",
+    "semantic_hash": "a7a2f00f94927692435e4a6a7cd63aa9"
+  },
+  "lib/nextTempo.js": {
+    "mtime": 1784407704.58814,
+    "ast_hash": "efae9fdb69a8bc0ac5a7b748fdeff52d",
+    "semantic_hash": "efae9fdb69a8bc0ac5a7b748fdeff52d"
+  },
+  "lib/processReferral.js": {
+    "mtime": 1784573216.0165937,
+    "ast_hash": "856347adbbb5c82b59be8492d6bd52b8",
+    "semantic_hash": "856347adbbb5c82b59be8492d6bd52b8"
+  },
+  "lib/quadInfo.js": {
+    "mtime": 1784407703.6230943,
+    "ast_hash": "ee331bfeb4541a14f6ac88e6dd285b1d",
+    "semantic_hash": "ee331bfeb4541a14f6ac88e6dd285b1d"
+  },
+  "lib/recommendStartModule.js": {
+    "mtime": 1784573180.292345,
+    "ast_hash": "f044ecca6ad98f8edc25be6dbad9e149",
+    "semantic_hash": "f044ecca6ad98f8edc25be6dbad9e149"
+  },
+  "lib/safeLyricsModerator.js": {
+    "mtime": 1784573190.9672363,
+    "ast_hash": "85f8865ef1a7609b7cb64e26eb2a083d",
+    "semantic_hash": "85f8865ef1a7609b7cb64e26eb2a083d"
+  },
+  "lib/scheduleIntervalReviews.js": {
+    "mtime": 1784573231.8280017,
+    "ast_hash": "bca88e89c05e19cf3b843a1c153b4011",
+    "semantic_hash": "bca88e89c05e19cf3b843a1c153b4011"
+  },
+  "lib/selectFirstExercise.js": {
+    "mtime": 1784443576.2196689,
+    "ast_hash": "4483e9ccbf957da206b77ec9bc2628d5",
+    "semantic_hash": "4483e9ccbf957da206b77ec9bc2628d5"
+  },
+  "lib/studentDataAnonymizer.js": {
+    "mtime": 1784573192.4316201,
+    "ast_hash": "1bf7d60247ee575209d3c8b0cb7800f1",
+    "semantic_hash": "1bf7d60247ee575209d3c8b0cb7800f1"
+  },
+  "lib/teacherDomainVerifier.js": {
+    "mtime": 1784573191.6337807,
+    "ast_hash": "ef7747b8c1c5d712a4409a05b61495df",
+    "semantic_hash": "ef7747b8c1c5d712a4409a05b61495df"
+  },
+  "lib/updateDailyStreak.js": {
+    "mtime": 1784429163.2456975,
+    "ast_hash": "11808600df90dca4e2b5b85abca4cbeb",
+    "semantic_hash": "11808600df90dca4e2b5b85abca4cbeb"
+  },
+  "lib/updateStreak.js": {
+    "mtime": 1784573200.9068983,
+    "ast_hash": "bc994119276198da94c4b9afecccd89e",
+    "semantic_hash": "bc994119276198da94c4b9afecccd89e"
+  },
+  "lib/validateIntervalRatio.js": {
+    "mtime": 1784457978.0134988,
+    "ast_hash": "6e4da2dbbb9fc6677cc08f8571e458dd",
+    "semantic_hash": "6e4da2dbbb9fc6677cc08f8571e458dd"
+  },
+  "lib/verifyLessonPlanIntegrity.js": {
+    "mtime": 1784457978.7692618,
+    "ast_hash": "86cc22f38b0b19cb37950056503549ac",
+    "semantic_hash": "86cc22f38b0b19cb37950056503549ac"
+  },
+  "lib/yToFreq.js": {
+    "mtime": 1784407702.8124852,
+    "ast_hash": "6cb20a12f85687eaefb73e0e0ca52483",
+    "semantic_hash": "6cb20a12f85687eaefb73e0e0ca52483"
+  },
+  ".github/workflows/factory-ci.yml": {
+    "mtime": 1784407719.588956,
+    "ast_hash": "647973c28026a520b63b016894b8d97c",
+    "semantic_hash": "647973c28026a520b63b016894b8d97c"
+  },
+  "807.html": {
+    "mtime": 1784407685.9823375,
+    "ast_hash": "814bb6b1f24504b1967a1a250ddb1e5d",
+    "semantic_hash": "814bb6b1f24504b1967a1a250ddb1e5d"
+  },
+  "README.md": {
+    "mtime": 1784407700.311479,
+    "ast_hash": "b7cfa3d6b95109046c6467669ee6c4f9",
+    "semantic_hash": "b7cfa3d6b95109046c6467669ee6c4f9"
+  },
+  "functions.html": {
+    "mtime": 1784407685.9823375,
+    "ast_hash": "bf2c0a9418a690af081233c27a1f2335",
+    "semantic_hash": "bf2c0a9418a690af081233c27a1f2335"
+  },
+  "index.html": {
+    "mtime": 1784569840.8550043,
+    "ast_hash": "b31ebbc4d9ec1e425ca9e42d1178621a",
+    "semantic_hash": "b31ebbc4d9ec1e425ca9e42d1178621a"
+  },
+  "landing.html": {
+    "mtime": 1784407685.9979615,
+    "ast_hash": "a5f834e327f640f70f3bccb335c1aa42",
+    "semantic_hash": "a5f834e327f640f70f3bccb335c1aa42"
+  }
+}

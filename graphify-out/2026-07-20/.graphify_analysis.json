@@ -1,0 +1,319 @@
+{
+  "communities": {
+    "0": [
+      "807",
+      "adaptive_tempo",
+      "b2b_model",
+      "exponential_growth_decay",
+      "function_families",
+      "functions",
+      "index",
+      "landing",
+      "lesson_generator",
+      "logarithmic_mapping",
+      "readme",
+      "real_tone_sine",
+      "rhythmic_training",
+      "sonification",
+      "spaced_repetition"
+    ],
+    "1": [
+      "lib_processreferral",
+      "lib_processreferral_addtoinventory",
+      "lib_processreferral_getreferralbycode",
+      "lib_processreferral_getuserbyid",
+      "lib_processreferral_markuserasreferred",
+      "lib_processreferral_processreferral",
+      "lib_processreferral_referralusers"
+    ],
+    "2": [
+      "lib_generateprogresssnapshot",
+      "lib_generateprogresssnapshot_generateprogresssnapshot",
+      "lib_generateprogresssnapshot_progresssnapshots"
+    ],
+    "3": [
+      "lib_safelyricsmoderator",
+      "lib_safelyricsmoderator_levenshtein",
+      "lib_safelyricsmoderator_safelyricsmoderator"
+    ],
+    "4": [
+      "lib_studentdataanonymizer",
+      "lib_studentdataanonymizer_crypto",
+      "lib_studentdataanonymizer_studentdataanonymizer"
+    ],
+    "5": [
+      "lib_updatestreak",
+      "lib_updatestreak_streakstore",
+      "lib_updatestreak_updatestreak"
+    ],
+    "6": [
+      "lib_analyzeclassperformance",
+      "lib_analyzeclassperformance_analyzeclassperformance"
+    ],
+    "7": [
+      "lib_analyzestudentperformance",
+      "lib_analyzestudentperformance_analyzestudentperformance"
+    ],
+    "8": [
+      "lib_anonymizestudentid",
+      "lib_anonymizestudentid_anonymizestudentid"
+    ],
+    "9": [
+      "lib_calculateadaptivedifficulty",
+      "lib_calculateadaptivedifficulty_calculateadaptivedifficulty"
+    ],
+    "10": [
+      "lib_computenextreview",
+      "lib_computenextreview_computenextreview"
+    ],
+    "11": [
+      "lib_computestreakbonus",
+      "lib_computestreakbonus_computestreakbonus"
+    ],
+    "12": [
+      "lib_createclassassignment",
+      "lib_createclassassignment_createclassassignment"
+    ],
+    "13": [
+      "lib_generateadaptivelesson",
+      "lib_generateadaptivelesson_generateadaptivelesson"
+    ],
+    "14": [
+      "lib_generateexercisefrommelody",
+      "lib_generateexercisefrommelody_generateexercisefrommelody"
+    ],
+    "15": [
+      "lib_generatefirstweekplan",
+      "lib_generatefirstweekplan_generatefirstweekplan"
+    ],
+    "16": [
+      "lib_generatelessonplan",
+      "lib_generatelessonplan_generatelessonplan"
+    ],
+    "17": [
+      "lib_generatequickjoinlink",
+      "lib_generatequickjoinlink_generatequickjoinlink"
+    ],
+    "18": [
+      "lib_generaterhythmexercise",
+      "lib_generaterhythmexercise_generaterhythmexercise"
+    ],
+    "19": [
+      "lib_generatessotoken",
+      "lib_generatessotoken_generatessotoken"
+    ],
+    "20": [
+      "lib_gengrowthproblem",
+      "lib_gengrowthproblem_gengrowthproblem"
+    ],
+    "21": [
+      "lib_getadaptivehint",
+      "lib_getadaptivehint_getadaptivehint"
+    ],
+    "22": [
+      "lib_getnextdifficulty",
+      "lib_getnextdifficulty_getnextdifficulty"
+    ],
+    "23": [
+      "lib_getnextreviewdate",
+      "lib_getnextreviewdate_getnextreviewdate"
+    ],
+    "24": [
+      "lib_nearmiss",
+      "lib_nearmiss_nearmiss"
+    ],
+    "25": [
+      "lib_quadinfo",
+      "lib_quadinfo_quadinfo"
+    ],
+    "26": [
+      "lib_recommendstartmodule",
+      "lib_recommendstartmodule_recommendstartmodule"
+    ],
+    "27": [
+      "lib_scheduleintervalreviews",
+      "lib_scheduleintervalreviews_scheduleintervalreviews"
+    ],
+    "28": [
+      "lib_selectfirstexercise",
+      "lib_selectfirstexercise_selectfirstexercise"
+    ],
+    "29": [
+      "lib_teacherdomainverifier",
+      "lib_teacherdomainverifier_teacherdomainverifier"
+    ],
+    "30": [
+      "lib_updatedailystreak",
+      "lib_updatedailystreak_updatedailystreak"
+    ],
+    "31": [
+      "lib_validateintervalratio",
+      "lib_validateintervalratio_validateintervalratio"
+    ],
+    "32": [
+      "lib_verifylessonplanintegrity",
+      "lib_verifylessonplanintegrity_verifylessonplanintegrity"
+    ],
+    "33": [
+      "lib_ytofreq",
+      "lib_ytofreq_ytofreq"
+    ],
+    "34": [
+      "github_workflows_factory_ci"
+    ],
+    "35": [
+      "lib_nexttempo"
+    ]
+  },
+  "cohesion": {
+    "0": 0.19047619047619047,
+    "1": 0.5238095238095238,
+    "2": 0.6666666666666666,
+    "3": 1.0,
+    "4": 0.6666666666666666,
+    "5": 0.6666666666666666,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0
+  },
+  "gods": [
+    {
+      "id": "functions",
+      "label": "Functions Page",
+      "degree": 8
+    },
+    {
+      "id": "807",
+      "label": "807 Practice Page",
+      "degree": 6
+    },
+    {
+      "id": "index",
+      "label": "Index Home",
+      "degree": 6
+    },
+    {
+      "id": "lib_processreferral_processreferral",
+      "label": "processReferral()",
+      "degree": 5
+    },
+    {
+      "id": "readme",
+      "label": "README",
+      "degree": 4
+    },
+    {
+      "id": "landing",
+      "label": "Landing Page",
+      "degree": 4
+    },
+    {
+      "id": "lib_processreferral_getuserbyid",
+      "label": "getUserById()",
+      "degree": 3
+    },
+    {
+      "id": "lib_processreferral_markuserasreferred",
+      "label": "markUserAsReferred()",
+      "degree": 3
+    },
+    {
+      "id": "lib_processreferral_getreferralbycode",
+      "label": "getReferralByCode()",
+      "degree": 2
+    },
+    {
+      "id": "lib_processreferral_addtoinventory",
+      "label": "addToInventory()",
+      "degree": 2
+    }
+  ],
+  "surprises": [
+    {
+      "source": "README",
+      "target": "807 Practice Page",
+      "source_files": [
+        "README.md",
+        "807.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "README",
+      "target": "Functions Page",
+      "source_files": [
+        "README.md",
+        "functions.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "807 Practice Page",
+      "target": "Functions Page",
+      "source_files": [
+        "807.html",
+        "functions.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Functions Page",
+      "target": "Index Home",
+      "source_files": [
+        "functions.html",
+        "index.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Landing Page",
+      "target": "Functions Page",
+      "source_files": [
+        "landing.html",
+        "functions.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    }
+  ],
+  "tokens": {
+    "input": 21539,
+    "output": 8095
+  }
+}
