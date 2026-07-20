@@ -1,196 +1,175 @@
-<!doctype html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>מלודי־מתמטיקה 🎵 מתמטיקה דרך קצב ומוזיקה</title>
-<style>
-  :root{
-    --bg1:#3a1c71;--bg2:#5b3aa8;--bg3:#ff8fb1;
-    --card:#ffffff;--ink:#2b2140;--muted:#6b5f86;--accent:#7b2ff7;--accent2:#ff7ac6;
-    --good:#22b573;--wrong:#ff5470;--gold:#ffcf3f;--beat:#31d0c6;
-    --sans:"Varela Round",system-ui,-apple-system,"Segoe UI","Arial Rounded MT Bold",sans-serif;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;min-height:100vh;font-family:var(--sans);color:var(--ink);
-    background:linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3));background-attachment:fixed;
-    display:flex;flex-direction:column;align-items:center;padding:16px;}
-  h1{color:#fff;text-align:center;margin:4px 0 2px;font-size:1.75rem;text-shadow:0 3px 12px rgba(0,0,0,.25);}
-  .sub{color:#ffffffcc;text-align:center;margin:0 0 14px;font-size:.9rem;}
-  .card{background:var(--card);border-radius:24px;box-shadow:0 18px 50px rgba(30,10,60,.35);width:100%;max-width:560px;padding:20px;}
-  .label{font-size:.78rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:9px;}
-  .seg{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
-  .seg button{border:0;border-radius:13px;padding:9px 15px;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;background:#f2ecff;color:var(--accent);}
-  .seg button.sel{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;}
-  .seg button:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
-  .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:6px;}
-  .np{border:0;border-radius:15px;padding:14px 0;font-size:1.35rem;font-weight:800;font-family:inherit;cursor:pointer;color:#fff;
-    background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 6px 0 #00000018;transition:transform .12s;position:relative;}
-  .np:hover{transform:translateY(-3px);} .np:active{transform:translateY(2px);}
-  .np.sel{outline:4px solid var(--gold);outline-offset:2px;transform:translateY(-2px) scale(1.04);}
-  .np:focus-visible{outline:4px solid var(--gold);outline-offset:2px;}
-  .np .mn{position:absolute;top:3px;left:5px;font-size:.55rem;opacity:.85;}
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MelodyMath | שיעור מוזיקלי</title><style>
+:root{--ink:#20173d;--purple:#6c4ce8;--pink:#ff6cab;--yellow:#ffd661;--bg:#f7f4ff;--line:#ddd4f2}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 12%,#ffe6f1,transparent 29%),radial-gradient(circle at 90% 0,#e4dcff,transparent 32%),var(--bg);font-family:Arial,sans-serif;color:var(--ink);min-height:100vh}.wrap{max-width:980px;margin:auto;padding:42px 20px}header small{color:var(--purple);font-weight:900}h1{font-size:clamp(2.4rem,7vw,4.6rem);margin:8px 0}.layout{display:grid;grid-template-columns:300px 1fr;gap:18px}.card{background:#ffffffd9;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 18px 45px #483d7620}label{display:block;font-size:.82rem;color:#70668d;margin:13px 0 6px}select,input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:white;font:inherit}button{width:100%;border:0;border-radius:11px;background:var(--purple);color:white;padding:13px;margin-top:18px;font-weight:bold;cursor:pointer}.exercise{padding:15px;border-radius:14px;background:white;border:1px solid var(--line);margin:10px 0}.exercise b{color:var(--purple)}.answer{background:#fff6d5;padding:7px 9px;border-radius:8px;margin-top:9px;font-size:.84rem}.stats{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#efeafe;padding:8px 10px;border-radius:99px;font-size:.8rem}.error{color:#a22}@media(max-width:680px){.layout{grid-template-columns:1fr}}
+</style></head><body><main class="wrap"><header><small>MELODYMATH / LESSON LAB</small><h1>כשהמספרים מתחילים לנגן.</h1><p>מחולל שיעור שמחבר תיאוריה מוזיקלית, שברים, יחסים ומשוואות.</p></header><section class="layout"><form class="card" id="form"><h2>בנו שיעור</h2><label>סולם מוזיקלי</label><select id="key"><option>C major</option><option>A minor</option><option>G major</option><option>D minor</option></select><label>נושא מתמטי</label><select id="topic"><option value="rhythm-fractions">שברים וקצב</option><option value="interval-ratios">יחסי מרווחים</option><option value="melody-equations">משוואות מלודיות</option><option value="tempo-progressions">סדרות טמפו</option></select><label>רמת קושי</label><input id="difficulty" type="range" min="1" max="5" value="3"><label>מספר תרגילים</label><input id="count" type="number" min="1" max="6" value="3"><button>צור שיעור</button></form><div class="card" id="result"></div></section></main><script>
+const __modules={"lib/generateLessonPlan.js":function(require,module,exports){
+function generateLessonPlan(musicKey, mathTopic, difficulty, numExercises) {
+  const validKeys = [
+    'C major', 'C# major', 'Db major', 'D major', 'Eb major', 'E major', 'F major',
+    'F# major', 'Gb major', 'G major', 'Ab major', 'A major', 'Bb major', 'B major',
+    'C minor', 'C# minor', 'D minor', 'Eb minor', 'E minor', 'F minor', 'F# minor',
+    'G minor', 'G# minor', 'A minor', 'Bb minor', 'B minor'
+  ];
+  const validTopics = ['interval-ratios', 'rhythm-fractions', 'melody-equations', 'tempo-progressions'];
+  if (!validKeys.includes(musicKey)) throw new Error('Invalid music key');
+  if (!validTopics.includes(mathTopic)) throw new Error('Unsupported math topic');
+  if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 5) throw new Error('Difficulty must be 1-5');
+  if (!Number.isInteger(numExercises) || numExercises <= 0) throw new Error('numExercises must be positive');
 
-  .btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
-  .btn{border:0;border-radius:15px;padding:12px 18px;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;color:#fff;box-shadow:0 5px 0 #00000015;transition:transform .12s;}
-  .btn:active{transform:translateY(2px);} .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
-  .play{background:linear-gradient(140deg,#22b573,#12d0a0);} .quiz{background:linear-gradient(140deg,#ff8a3d,#ff5ea0);} .rep{background:linear-gradient(140deg,#4f7cff,#7b2ff7);}
-  .row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0 4px;}
-  .note{min-width:54px;padding:10px 5px;border-radius:12px;background:#f2ecff;color:var(--accent);font-weight:800;font-size:1rem;line-height:1.15;transition:transform .15s,background .15s,color .15s;}
-  .note small{display:block;font-size:.58rem;color:var(--muted);font-weight:700;}
-  .note.on{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;transform:translateY(-8px) scale(1.12);box-shadow:0 8px 18px #7b2ff755;}
-
-  .q{font-size:2rem;font-weight:800;margin:4px 0 6px;text-align:center;}
-  .beatbar{height:10px;border-radius:99px;background:#eee9f7;margin:6px auto 12px;max-width:280px;overflow:hidden;}
-  .beatbar > i{display:block;height:100%;width:26%;border-radius:99px;background:linear-gradient(90deg,var(--beat),var(--accent));transform:translateX(120%);}
-  .beatbar.run > i{animation:sweep var(--bt,1.1s) linear infinite;}
-  @keyframes sweep{from{transform:translateX(120%);}to{transform:translateX(-420%);}}
-  .ans{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;}
-  .ab{border:0;border-radius:17px;padding:18px 0;font-family:inherit;font-size:1.5rem;font-weight:800;cursor:pointer;background:#f2ecff;color:var(--accent);box-shadow:0 5px 0 #00000012;transition:transform .1s;}
-  .ab:hover{transform:translateY(-2px);} .ab:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
-  .ab.good{background:var(--good);color:#fff;animation:pop .4s;} .ab.bad{background:var(--wrong);color:#fff;animation:shake .4s;}
-  @keyframes pop{50%{transform:scale(1.12);}} @keyframes shake{25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
-  .score{margin-top:14px;font-size:1.15rem;font-weight:800;color:var(--accent);text-align:center;min-height:1.4em;}
-  .stars{font-size:1.3rem;letter-spacing:2px;}
-
-  .report{background:#faf7ff;border:1px solid #ece4ff;border-radius:16px;padding:16px;margin-top:12px;}
-  .report h3{margin:0 0 10px;font-size:1rem;color:var(--ink);}
-  .rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #efe8ff;font-size:.9rem;}
-  .rrow:first-of-type{border-top:0;} .rrow b{font-family:var(--sans);}
-  .bar{flex:1;height:8px;border-radius:99px;background:#ece4ff;margin:0 10px;overflow:hidden;} .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--good),#12d0a0);}
-  .flag{display:inline-block;font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:99px;}
-  .flag.ok{background:#e3f8ec;color:var(--good);} .flag.watch{background:#fff0e0;color:#d6821a;} .flag.help{background:#ffe6ea;color:var(--wrong);}
-  .weak{margin-top:10px;font-size:.85rem;color:var(--muted);} .weak b{color:var(--wrong);}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
-  footer{color:#ffffffbb;font-size:.76rem;margin-top:16px;text-align:center;max-width:560px;}
-  .hide{display:none;}
-</style>
-</head>
-<body>
-  <h1>🎵 מלודי־מתמטיקה</h1>
-  <p class="sub">מתמטיקה דרך קצב ומוזיקה · לומדים בזמן, זוכרים לאורך זמן</p>
-
-  <div class="card">
-    <div class="label">בחרו תרגול</div>
-    <div class="seg" id="topics"></div>
-    <div class="nums" id="nums"></div>
-
-    <div id="stage">
-      <div class="row" id="melody"></div>
-      <div class="btns">
-        <button class="btn play" id="playBtn">▶ נגן את השיר</button>
-        <button class="btn quiz" id="quizBtn">🎮 תרגול חופשי</button>
-        <button class="btn rep" id="rhyBtn">🥁 תרגול בקצב</button>
-      </div>
-    </div>
-
-    <div id="quiz" class="hide">
-      <div class="q" id="qText">—</div>
-      <div class="beatbar" id="beatbar"><i></i></div>
-      <div class="ans" id="answers"></div>
-      <div class="score" id="score"></div>
-      <div class="btns"><button class="btn rep" id="repBtn">📊 דוח למורה / הורה</button></div>
-    </div>
-
-    <div class="report hide" id="report"></div>
-  </div>
-
-  <footer>MelodyMath · תרגול מבוסס-קצב לחיזוק ריכוז וזיכרון-עבודה · מותאם תוכנית לימודים · פרויקט פתוח<br>
-  🆕 <a href="functions.html" style="color:#ffcf3f;font-weight:800">שומעים פונקציה — לחטיבה ותיכון: לשמוע גרפים של פונקציות 🎧</a>
-  · <a href="807.html" style="color:#ffcf3f;font-weight:800">בגרות 807: גדילה ודעיכה 🎓</a></footer>
-
-<script>
-(function(){
-  var TOPIC='mul', TABLE=3, actx=null, streak=0, stars=0, rhythm=false, tempo=1.1;
-  // adaptive tempo — mirrors tested lib/tempo.js (multiplicative, clamped)
-  function nextTempo(current, wasCorrect){ var n=wasCorrect?current*0.96:current*1.12; if(n<0.55)n=0.55; if(n>2.0)n=2.0; return Math.round(n*1000)/1000; }
-  var TOPICS=[{k:'mul',n:'לוח הכפל',op:'×',lo:2,hi:11,f:function(a,b){return a*b;},grade:'כיתה ג׳',strand:'תחום המספר — שליטה בעובדות הכפל והחילוק'},
-              {k:'add',n:'חיבור',op:'+',lo:1,hi:10,f:function(a,b){return a+b;},grade:'כיתות א׳–ב׳',strand:'תחום המספר — חיבור וחיסור בתחום ה-100'}];
-  var topics=document.getElementById('topics'), nums=document.getElementById('nums'), melody=document.getElementById('melody');
-  var stage=document.getElementById('stage'), quiz=document.getElementById('quiz'), report=document.getElementById('report');
-  var qText=document.getElementById('qText'), answers=document.getElementById('answers'), scoreEl=document.getElementById('score'), beatbar=document.getElementById('beatbar');
-  var SCALE=[261.63,293.66,329.63,392,440,523.25,587.33,659.25,783.99,880,987.77,1046.5];
-  var curQ=null;
-
-  // ---- persistence (refinement #1/#4: progress + teacher report, no backend) ----
-  function loadP(){ try{return JSON.parse(localStorage.getItem('mm_progress')||'{}');}catch{return {};} }
-  function saveP(p){ try{localStorage.setItem('mm_progress',JSON.stringify(p));}catch{} }
-  function rec(topic,factKey,ok){
-    var p=loadP(); p[topic]=p[topic]||{seen:0,ok:0,facts:{}};
-    p[topic].seen++; if(ok)p[topic].ok++;
-    var f=p[topic].facts[factKey]||{s:0,w:0}; f.s++; if(!ok)f.w++; p[topic].facts[factKey]=f;
-    saveP(p);
+  const intervalRatios = {
+    'minor second': 16/15, 'major second': 9/8, 'minor third': 6/5, 'major third': 5/4,
+    'perfect fourth': 4/3, 'tritone': 45/32, 'perfect fifth': 3/2, 'minor sixth': 8/5,
+    'major sixth': 5/3, 'minor seventh': 9/5, 'major seventh': 15/8, 'octave': 2/1
+  };
+  const intervalNames = Object.keys(intervalRatios);
+  const noteNames = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+  const keyToRoot = ({Db:'C#',Gb:'F#','G#':'Ab'}[musicKey.split(' ')[0]] || musicKey.split(' ')[0]);
+  const rootIndex = noteNames.indexOf(keyToRoot);
+  const scaleNotes = [];
+  const intervals = [0, 2, 4, 5, 7, 9, 11];
+  for (let i = 0; i < 7; i++) {
+    scaleNotes.push(noteNames[(rootIndex + intervals[i]) % 12]);
   }
 
-  function ac(){ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); return actx; }
-  function tone(freq,t,dur,type){ var c=ac(),o=c.createOscillator(),g=c.createGain(); o.type=type||'triangle'; o.frequency.value=freq;
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.26,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur); }
-  function chord(fs,t,dur){ fs.forEach(function(f){tone(f,t,dur);}); }
-  function click(t){ tone(1200,t,.05,'square'); }
+  const templates = {
+    'interval-ratios': {
+      generate: () => {
+        const i1 = intervalNames[Math.floor(Math.random() * intervalNames.length)];
+        let i2 = intervalNames[Math.floor(Math.random() * intervalNames.length)];
+        while (i2 === i1) i2 = intervalNames[Math.floor(Math.random() * intervalNames.length)];
+        const ratio1 = intervalRatios[i1];
+        const ratio2 = intervalRatios[i2];
+        const result = ratio1 > ratio2 ? ratio1 / ratio2 : ratio2 / ratio1;
+        const rootNote = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+        return {
+          type: 'interval-ratios',
+          description: `Find the ratio between the intervals of a ${i1} and a ${i2}`,
+          parameters: { rootNote, interval1: i1, interval2: i2, expectedRatio: Math.round(result * 100) / 100 }
+        };
+      }
+    },
+    'rhythm-fractions': {
+      generate: () => {
+        const noteValues = ['whole', 'half', 'quarter', 'eighth', 'sixteenth'];
+        const fractions = [1, 1/2, 1/4, 1/8, 1/16];
+        const idx1 = Math.floor(Math.random() * noteValues.length);
+        let idx2 = Math.floor(Math.random() * noteValues.length);
+        while (idx2 === idx1) idx2 = Math.floor(Math.random() * noteValues.length);
+        const sum = fractions[idx1] + fractions[idx2];
+        const bpm = 60 + difficulty * 20;
+        return {
+          type: 'rhythm-fractions',
+          description: `Add the durations of a ${noteValues[idx1]} note and a ${noteValues[idx2]} note in 4/4 time`,
+          parameters: { note1: noteValues[idx1], note2: noteValues[idx2], expectedSum: sum, bpm }
+        };
+      }
+    },
+    'melody-equations': {
+      generate: () => {
+        const startNote = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+        const startIdx = noteNames.indexOf(startNote);
+        const step = Math.floor(Math.random() * 5) + 1;
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const endIdx = (startIdx + step * direction + 12) % 12;
+        const endNote = noteNames[endIdx];
+        return {
+          type: 'melody-equations',
+          description: `If the melody starts on ${startNote} and moves ${direction > 0 ? 'up' : 'down'} by ${step} semitones, what is the resulting note?`,
+          parameters: { startNote, step, direction: direction > 0 ? 'up' : 'down', expectedNote: endNote }
+        };
+      }
+    },
+    'tempo-progressions': {
+      generate: () => {
+        const startBpm = 60 + Math.floor(Math.random() * 60);
+        const multiplier = [1.5, 2, 0.75, 0.5][Math.floor(Math.random() * 4)];
+        const newBpm = Math.round(startBpm * multiplier);
+        return {
+          type: 'tempo-progressions',
+          description: `If the tempo changes from ${startBpm} BPM by a factor of ${multiplier}, what is the new tempo?`,
+          parameters: { startBpm, multiplier, expectedBpm: newBpm }
+        };
+      }
+    }
+  };
 
-  function topicObj(){ return TOPICS.filter(function(x){return x.k===TOPIC;})[0]; }
-  function buildTopics(){ TOPICS.forEach(function(tp){ var b=document.createElement('button'); b.textContent=tp.n; if(tp.k===TOPIC)b.classList.add('sel');
-    b.onclick=function(){ TOPIC=tp.k; document.querySelectorAll('#topics button').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); buildNums(); backToStage(); };
-    topics.appendChild(b); }); }
-  function buildNums(){ nums.innerHTML=''; var tp=topicObj();
-    for(var n=tp.lo;n<=tp.hi;n++){ (function(n){ var b=document.createElement('button'); b.className='np'; b.textContent=n;
-      var p=loadP()[TOPIC]; if(p){ /* mastery tick */ }
-      b.onclick=function(){ TABLE=n; document.querySelectorAll('.np').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel'); buildMelody(); };
-      nums.appendChild(b); })(n); }
-    var first=nums.children[Math.min(1,nums.children.length-1)]; if(first){first.classList.add('sel'); TABLE=+first.textContent;} buildMelody();
+  const usedParams = new Set();
+  const exercises = [];
+  let attempts = 0;
+  while (exercises.length < numExercises && attempts < numExercises * 10) {
+    attempts++;
+    const exercise = templates[mathTopic].generate();
+    const paramKey = JSON.stringify(exercise.parameters);
+    if (!usedParams.has(paramKey)) {
+      usedParams.add(paramKey);
+      exercises.push(exercise);
+    }
   }
-  function buildMelody(){ melody.innerHTML=''; var tp=topicObj();
-    for(var i=1;i<=10;i++){ var d=document.createElement('div'); d.className='note';
-      d.innerHTML=tp.f(TABLE,i)+'<small>'+TABLE+tp.op+i+'</small>'; melody.appendChild(d); } }
-  function playSong(){ var c=ac(),t=c.currentTime+.05,step=.4,notes=melody.children;
-    for(var i=0;i<10;i++){ (function(i){ tone(SCALE[i],t+i*step,step*.95);
-      setTimeout(function(){notes[i].classList.add('on');setTimeout(function(){notes[i].classList.remove('on');},step*900);},i*step*1000+40); })(i); }
-    chord([SCALE[0],SCALE[2],SCALE[4]],t+10*step,.9); }
-  function backToStage(){ stage.classList.remove('hide'); quiz.classList.add('hide'); report.classList.add('hide'); beatbar.classList.remove('run'); }
-
-  // adaptive: bias toward weak facts (refinement #2 spaced-repetition-lite)
-  function pickFact(){ var tp=topicObj(), p=loadP()[TOPIC], i;
-    if(p&&p.facts&&Math.random()<.55){ var weak=Object.keys(p.facts).filter(function(k){var f=p.facts[k];return f.w>0 && k.indexOf(TABLE+'x')===0;});
-      if(weak.length){ i=+weak[Math.floor(Math.random()*weak.length)].split('x')[1]; } }
-    if(!i) i=1+Math.floor(Math.random()*10); return i; }
-  function nextQ(){ var tp=topicObj(), i=pickFact(), correct=tp.f(TABLE,i), key=TABLE+'x'+i;
-    curQ={i:i,correct:correct,key:key};
-    qText.textContent=TABLE+' '+tp.op+' '+i+' = ?';
-    var opts=[correct]; while(opts.length<4){ var w=correct+([-3,-2,-1,1,2,3,TABLE,-TABLE][Math.floor(Math.random()*8)]); if(w>0&&opts.indexOf(w)<0)opts.push(w); }
-    opts.sort(function(){return Math.random()-.5;}); answers.innerHTML='';
-    opts.forEach(function(o){ var b=document.createElement('button'); b.className='ab'; b.textContent=o; b.onclick=function(){answer(b,o===correct);}; answers.appendChild(b); });
-    if(rhythm){ beatbar.style.setProperty('--bt',tempo+'s'); beatbar.classList.add('run');
-      var c=ac(); for(var k=0;k<3;k++) click(c.currentTime+k*tempo*0.5); } // metronome cue
+  if (exercises.length < numExercises) {
+    throw new Error('Could not generate enough unique exercises');
   }
-  function answer(btn,ok){ rec(TOPIC,curQ.key,ok);
-    if(ok){ btn.classList.add('good'); var f=SCALE[curQ.i-1]; tone(f,ac().currentTime,.22); chord([f,f*1.25,f*1.5],ac().currentTime+.05,.5);
-      streak++; if(streak%5===0)stars++; if(rhythm)tempo=nextTempo(tempo,true); render(); setTimeout(nextQ,rhythm?Math.max(500,tempo*700):600);
-    } else { btn.classList.add('bad'); var c=ac(); tone(160,c.currentTime,.18); tone(120,c.currentTime+.12,.2); streak=0; if(rhythm)tempo=nextTempo(tempo,false); render(); setTimeout(function(){btn.classList.remove('bad');},450); } }
-  function render(){ scoreEl.innerHTML='רצף: '+streak+'  <span class="stars">'+'⭐'.repeat(Math.min(stars,10))+'</span>'+(rhythm?'  🥁 '+tempo.toFixed(2)+'ש\'':''); }
-  function startQuiz(r){ ac().resume&&ac().resume(); rhythm=r; tempo=1.1; stage.classList.add('hide'); report.classList.add('hide'); quiz.classList.remove('hide'); streak=0; render(); nextQ(); if(!r)beatbar.classList.remove('run'); }
+  return exercises;
+}
 
-  // ---- teacher/parent report (refinement #4) ----
-  function showReport(){ var p=loadP(); report.innerHTML='<h3>📊 דוח התקדמות</h3>'; var any=false;
-    TOPICS.forEach(function(tp){ var d=p[tp.k]; if(!d||!d.seen)return; any=true;
-      var acc=Math.round(d.ok/d.seen*100), flag=acc>=85?'ok':acc>=65?'watch':'help', txt=acc>=85?'שולט':acc>=65?'במעקב':'צריך עזרה';
-      var row=document.createElement('div'); row.className='rrow';
-      row.innerHTML='<b>'+tp.n+'</b><span class="bar"><i style="width:'+acc+'%"></i></span><span>'+acc+'%</span> <span class="flag '+flag+'">'+txt+'</span>';
-      report.appendChild(row);
-      var cur=document.createElement('div'); cur.className='weak'; cur.innerHTML='📚 '+tp.grade+' · '+tp.strand; report.appendChild(cur);
-      var weak=Object.keys(d.facts||{}).filter(function(k){return d.facts[k].w>=2;}).slice(0,6).map(function(k){var a=k.split('x');return a[0]+tp.op+a[1];});
-      if(weak.length){ var w=document.createElement('div'); w.className='weak'; w.innerHTML='נקודות לחיזוק ('+tp.n+'): <b>'+weak.join(' · ')+'</b>'; report.appendChild(w); }
-    });
-    if(!any) report.innerHTML+='<div class="weak">עדיין אין נתונים — התחילו תרגול והדוח יתמלא.</div>';
-    report.classList.remove('hide');
+module.exports = { generateLessonPlan };
+
+},
+"lib/computeNextReview.js":function(require,module,exports){
+function computeNextReview({lastReviewDate, performanceRating, currentIntervalDays}) {
+  if (!Number.isInteger(performanceRating) || performanceRating < 1 || performanceRating > 5) {
+    throw new Error("performanceRating must be between 1 and 5");
   }
+  if (currentIntervalDays <= 0) {
+    currentIntervalDays = 1;
+  }
+  let factor;
+  if (performanceRating === 1) {
+    factor = 1;
+  } else if (performanceRating === 2) {
+    factor = 1.5;
+  } else if (performanceRating === 3) {
+    factor = 2;
+  } else if (performanceRating === 4) {
+    factor = 2.5;
+  } else {
+    factor = 3;
+  }
+  let nextIntervalDays;
+  if (lastReviewDate === null) {
+    nextIntervalDays = 1;
+  } else {
+    nextIntervalDays = currentIntervalDays * factor;
+    if (performanceRating === 1) {
+      nextIntervalDays = 1;
+    }
+  }
+  if (nextIntervalDays > 365) {
+    nextIntervalDays = 365;
+  }
+  let nextReviewDate;
+  if (lastReviewDate === null) {
+    const now = new Date();
+    const future = new Date(now.getTime() + nextIntervalDays * 86400000);
+    nextReviewDate = future.toISOString();
+  } else {
+    const last = new Date(lastReviewDate);
+    const future = new Date(last.getTime() + nextIntervalDays * 86400000);
+    if (Number.isNaN(future.getTime())) throw new Error('Invalid lastReviewDate');
+    nextReviewDate = future.toISOString();
+  }
+  return { nextIntervalDays, nextReviewDate };
+}
+module.exports = { computeNextReview };
 
-  document.getElementById('playBtn').onclick=playSong;
-  document.getElementById('quizBtn').onclick=function(){startQuiz(false);};
-  document.getElementById('rhyBtn').onclick=function(){startQuiz(true);};
-  document.getElementById('repBtn').onclick=showReport;
-  buildTopics(); buildNums();
-})();
-</script>
-</body>
-</html>
+},
+"lib/nextTempo.js":function(require,module,exports){
+module.exports = {
+  nextTempo: function(current, wasCorrect) {
+    let next = wasCorrect ? current * 0.96 : current * 1.12;
+    if (next < 0.55) next = 0.55;
+    if (next > 2.0) next = 2.0;
+    return Math.round(next * 1000) / 1000;
+  }
+};
+}};const __cache={};function __require(id,from){if(id.startsWith('.')){id=(from.slice(0,from.lastIndexOf('/')+1)+id).split('/').reduce((a,p)=>p==='..'?(a.pop(),a):p==='.'?a:(a.push(p),a),[]).join('/')}if(!id.endsWith('.js'))id+='.js';if(__cache[id])return __cache[id].exports;const fn=__modules[id];if(!fn)throw new Error('Module not bundled: '+id);const module={exports:{}};__cache[id]=module;const localRequire=req=>__require(req,id);localRequire.main=null;fn(localRequire,module,module.exports);return module.exports}
+const Melody={...__require('lib/generateLessonPlan.js'),...__require('lib/computeNextReview.js'),...__require('lib/nextTempo.js')};const $=x=>document.getElementById(x),esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));function answer(p){const key=Object.keys(p).find(k=>/^expected/.test(k));return key?`${key.replace('expected','')}: ${p[key]}`:'גלו באמצעות הנגינה'}function run(e){if(e)e.preventDefault();try{const exercises=Melody.generateLessonPlan($('key').value,$('topic').value,Number($('difficulty').value),Number($('count').value)),review=Melody.computeNextReview({lastReviewDate:new Date().toISOString(),performanceRating:4,currentIntervalDays:2}),tempo=Melody.nextTempo(1,true);$('result').innerHTML=`<div class="stats"><span class="pill">${$('key').value}</span><span class="pill">קושי ${$('difficulty').value}/5</span><span class="pill">קצב הבא ×${tempo}</span><span class="pill">חזרה בעוד ${review.nextIntervalDays} ימים</span></div><h2>התרגילים שלך</h2>${exercises.map((x,i)=>`<article class="exercise"><b>תרגיל ${i+1}</b><p dir="ltr">${esc(x.description)}</p><div class="answer" dir="ltr">${esc(answer(x.parameters))}</div></article>`).join('')}`}catch(err){$('result').innerHTML=`<p class="error">${esc(err.message)}</p>`}}$('form').addEventListener('submit',run);run();
+</script></body></html>
