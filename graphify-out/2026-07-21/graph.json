@@ -43,10 +43,10 @@
       "source_file": "lib/analyzeClassPerformance.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_analyzeclassperformance",
       "community": 6,
-      "community_name": "analyzeClassPerformance.js",
-      "norm_label": "analyzeclassperformance.js"
+      "norm_label": "analyzeclassperformance.js",
+      "id": "lib_analyzeclassperformance",
+      "community_name": "analyzeClassPerformance.js"
     },
     {
       "label": "analyzeClassPerformance()",
@@ -54,10 +54,10 @@
       "source_file": "lib/analyzeClassPerformance.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_analyzeclassperformance_analyzeclassperformance",
       "community": 6,
-      "community_name": "analyzeClassPerformance.js",
-      "norm_label": "analyzeclassperformance()"
+      "norm_label": "analyzeclassperformance()",
+      "id": "lib_analyzeclassperformance_analyzeclassperformance",
+      "community_name": "analyzeClassPerformance.js"
     },
     {
       "label": "analyzeStudentPerformance.js",
@@ -65,10 +65,10 @@
       "source_file": "lib/analyzeStudentPerformance.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_analyzestudentperformance",
       "community": 7,
-      "community_name": "analyzeStudentPerformance.js",
-      "norm_label": "analyzestudentperformance.js"
+      "norm_label": "analyzestudentperformance.js",
+      "id": "lib_analyzestudentperformance",
+      "community_name": "analyzeStudentPerformance.js"
     },
     {
       "label": "analyzeStudentPerformance()",
@@ -76,10 +76,10 @@
       "source_file": "lib/analyzeStudentPerformance.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_analyzestudentperformance_analyzestudentperformance",
       "community": 7,
-      "community_name": "analyzeStudentPerformance.js",
-      "norm_label": "analyzestudentperformance()"
+      "norm_label": "analyzestudentperformance()",
+      "id": "lib_analyzestudentperformance_analyzestudentperformance",
+      "community_name": "analyzeStudentPerformance.js"
     },
     {
       "label": "anonymizeStudentId.js",
@@ -87,10 +87,10 @@
       "source_file": "lib/anonymizeStudentId.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_anonymizestudentid",
       "community": 8,
-      "community_name": "anonymizeStudentId.js",
-      "norm_label": "anonymizestudentid.js"
+      "norm_label": "anonymizestudentid.js",
+      "id": "lib_anonymizestudentid",
+      "community_name": "anonymizeStudentId.js"
     },
     {
       "label": "anonymizeStudentId()",
@@ -98,32 +98,10 @@
       "source_file": "lib/anonymizeStudentId.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_anonymizestudentid_anonymizestudentid",
       "community": 8,
-      "community_name": "anonymizeStudentId.js",
-      "norm_label": "anonymizestudentid()"
-    },
-    {
-      "label": "assessMusicMathLevel.js",
-      "file_type": "code",
-      "source_file": "lib/assessMusicMathLevel.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_assessmusicmathlevel",
-      "community": 37,
-      "community_name": "assessMusicMathLevel.js",
-      "norm_label": "assessmusicmathlevel.js"
-    },
-    {
-      "label": "assessMusicMathLevel()",
-      "file_type": "code",
-      "source_file": "lib/assessMusicMathLevel.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_assessmusicmathlevel_assessmusicmathlevel",
-      "community": 37,
-      "community_name": "assessMusicMathLevel.js",
-      "norm_label": "assessmusicmathlevel()"
+      "norm_label": "anonymizestudentid()",
+      "id": "lib_anonymizestudentid_anonymizestudentid",
+      "community_name": "anonymizeStudentId.js"
     },
     {
       "label": "calculateAdaptiveDifficulty.js",
@@ -131,10 +109,10 @@
       "source_file": "lib/calculateAdaptiveDifficulty.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_calculateadaptivedifficulty",
       "community": 9,
-      "community_name": "calculateAdaptiveDifficulty.js",
-      "norm_label": "calculateadaptivedifficulty.js"
+      "norm_label": "calculateadaptivedifficulty.js",
+      "id": "lib_calculateadaptivedifficulty",
+      "community_name": "calculateAdaptiveDifficulty.js"
     },
     {
       "label": "calculateAdaptiveDifficulty()",
@@ -142,10 +120,10 @@
       "source_file": "lib/calculateAdaptiveDifficulty.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_calculateadaptivedifficulty_calculateadaptivedifficulty",
       "community": 9,
-      "community_name": "calculateAdaptiveDifficulty.js",
-      "norm_label": "calculateadaptivedifficulty()"
+      "norm_label": "calculateadaptivedifficulty()",
+      "id": "lib_calculateadaptivedifficulty_calculateadaptivedifficulty",
+      "community_name": "calculateAdaptiveDifficulty.js"
     },
     {
       "label": "computeNextReview.js",
@@ -153,10 +131,10 @@
       "source_file": "lib/computeNextReview.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_computenextreview",
       "community": 10,
-      "community_name": "computeNextReview.js",
-      "norm_label": "computenextreview.js"
+      "norm_label": "computenextreview.js",
+      "id": "lib_computenextreview",
+      "community_name": "computeNextReview.js"
     },
     {
       "label": "computeNextReview()",
@@ -164,10 +142,10 @@
       "source_file": "lib/computeNextReview.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_computenextreview_computenextreview",
       "community": 10,
-      "community_name": "computeNextReview.js",
-      "norm_label": "computenextreview()"
+      "norm_label": "computenextreview()",
+      "id": "lib_computenextreview_computenextreview",
+      "community_name": "computeNextReview.js"
     },
     {
       "label": "computeStreakBonus.js",
@@ -175,10 +153,10 @@
       "source_file": "lib/computeStreakBonus.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_computestreakbonus",
       "community": 11,
-      "community_name": "computeStreakBonus.js",
-      "norm_label": "computestreakbonus.js"
+      "norm_label": "computestreakbonus.js",
+      "id": "lib_computestreakbonus",
+      "community_name": "computeStreakBonus.js"
     },
     {
       "label": "computeStreakBonus()",
@@ -186,10 +164,10 @@
       "source_file": "lib/computeStreakBonus.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_computestreakbonus_computestreakbonus",
       "community": 11,
-      "community_name": "computeStreakBonus.js",
-      "norm_label": "computestreakbonus()"
+      "norm_label": "computestreakbonus()",
+      "id": "lib_computestreakbonus_computestreakbonus",
+      "community_name": "computeStreakBonus.js"
     },
     {
       "label": "createClassAssignment.js",
@@ -197,10 +175,10 @@
       "source_file": "lib/createClassAssignment.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_createclassassignment",
       "community": 12,
-      "community_name": "createClassAssignment.js",
-      "norm_label": "createclassassignment.js"
+      "norm_label": "createclassassignment.js",
+      "id": "lib_createclassassignment",
+      "community_name": "createClassAssignment.js"
     },
     {
       "label": "createClassAssignment()",
@@ -208,10 +186,10 @@
       "source_file": "lib/createClassAssignment.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_createclassassignment_createclassassignment",
       "community": 12,
-      "community_name": "createClassAssignment.js",
-      "norm_label": "createclassassignment()"
+      "norm_label": "createclassassignment()",
+      "id": "lib_createclassassignment_createclassassignment",
+      "community_name": "createClassAssignment.js"
     },
     {
       "label": "genGrowthProblem.js",
@@ -219,10 +197,10 @@
       "source_file": "lib/genGrowthProblem.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_gengrowthproblem",
       "community": 20,
-      "community_name": "genGrowthProblem.js",
-      "norm_label": "gengrowthproblem.js"
+      "norm_label": "gengrowthproblem.js",
+      "id": "lib_gengrowthproblem",
+      "community_name": "genGrowthProblem.js"
     },
     {
       "label": "genGrowthProblem()",
@@ -230,10 +208,10 @@
       "source_file": "lib/genGrowthProblem.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_gengrowthproblem_gengrowthproblem",
       "community": 20,
-      "community_name": "genGrowthProblem.js",
-      "norm_label": "gengrowthproblem()"
+      "norm_label": "gengrowthproblem()",
+      "id": "lib_gengrowthproblem_gengrowthproblem",
+      "community_name": "genGrowthProblem.js"
     },
     {
       "label": "generateAdaptiveLesson.js",
@@ -241,10 +219,10 @@
       "source_file": "lib/generateAdaptiveLesson.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generateadaptivelesson",
       "community": 13,
-      "community_name": "generateAdaptiveLesson.js",
-      "norm_label": "generateadaptivelesson.js"
+      "norm_label": "generateadaptivelesson.js",
+      "id": "lib_generateadaptivelesson",
+      "community_name": "generateAdaptiveLesson.js"
     },
     {
       "label": "generateAdaptiveLesson()",
@@ -252,32 +230,10 @@
       "source_file": "lib/generateAdaptiveLesson.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generateadaptivelesson_generateadaptivelesson",
       "community": 13,
-      "community_name": "generateAdaptiveLesson.js",
-      "norm_label": "generateadaptivelesson()"
-    },
-    {
-      "label": "generateClassConfig.js",
-      "file_type": "code",
-      "source_file": "lib/generateClassConfig.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclassconfig",
-      "community": 38,
-      "community_name": "generateClassConfig.js",
-      "norm_label": "generateclassconfig.js"
-    },
-    {
-      "label": "generateClassConfig()",
-      "file_type": "code",
-      "source_file": "lib/generateClassConfig.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclassconfig_generateclassconfig",
-      "community": 38,
-      "community_name": "generateClassConfig.js",
-      "norm_label": "generateclassconfig()"
+      "norm_label": "generateadaptivelesson()",
+      "id": "lib_generateadaptivelesson_generateadaptivelesson",
+      "community_name": "generateAdaptiveLesson.js"
     },
     {
       "label": "generateExerciseFromMelody.js",
@@ -285,10 +241,10 @@
       "source_file": "lib/generateExerciseFromMelody.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generateexercisefrommelody",
       "community": 14,
-      "community_name": "generateExerciseFromMelody.js",
-      "norm_label": "generateexercisefrommelody.js"
+      "norm_label": "generateexercisefrommelody.js",
+      "id": "lib_generateexercisefrommelody",
+      "community_name": "generateExerciseFromMelody.js"
     },
     {
       "label": "generateExerciseFromMelody()",
@@ -296,32 +252,10 @@
       "source_file": "lib/generateExerciseFromMelody.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generateexercisefrommelody_generateexercisefrommelody",
       "community": 14,
-      "community_name": "generateExerciseFromMelody.js",
-      "norm_label": "generateexercisefrommelody()"
-    },
-    {
-      "label": "generateFirstExercise.js",
-      "file_type": "code",
-      "source_file": "lib/generateFirstExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatefirstexercise",
-      "community": 39,
-      "community_name": "generateFirstExercise.js",
-      "norm_label": "generatefirstexercise.js"
-    },
-    {
-      "label": "generateFirstExercise()",
-      "file_type": "code",
-      "source_file": "lib/generateFirstExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatefirstexercise_generatefirstexercise",
-      "community": 39,
-      "community_name": "generateFirstExercise.js",
-      "norm_label": "generatefirstexercise()"
+      "norm_label": "generateexercisefrommelody()",
+      "id": "lib_generateexercisefrommelody_generateexercisefrommelody",
+      "community_name": "generateExerciseFromMelody.js"
     },
     {
       "label": "generateFirstWeekPlan.js",
@@ -329,10 +263,10 @@
       "source_file": "lib/generateFirstWeekPlan.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatefirstweekplan",
       "community": 15,
-      "community_name": "generateFirstWeekPlan.js",
-      "norm_label": "generatefirstweekplan.js"
+      "norm_label": "generatefirstweekplan.js",
+      "id": "lib_generatefirstweekplan",
+      "community_name": "generateFirstWeekPlan.js"
     },
     {
       "label": "generateFirstWeekPlan()",
@@ -340,10 +274,10 @@
       "source_file": "lib/generateFirstWeekPlan.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatefirstweekplan_generatefirstweekplan",
       "community": 15,
-      "community_name": "generateFirstWeekPlan.js",
-      "norm_label": "generatefirstweekplan()"
+      "norm_label": "generatefirstweekplan()",
+      "id": "lib_generatefirstweekplan_generatefirstweekplan",
+      "community_name": "generateFirstWeekPlan.js"
     },
     {
       "label": "generateLessonPlan.js",
@@ -351,10 +285,10 @@
       "source_file": "lib/generateLessonPlan.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatelessonplan",
       "community": 16,
-      "community_name": "generateLessonPlan.js",
-      "norm_label": "generatelessonplan.js"
+      "norm_label": "generatelessonplan.js",
+      "id": "lib_generatelessonplan",
+      "community_name": "generateLessonPlan.js"
     },
     {
       "label": "generateLessonPlan()",
@@ -362,10 +296,10 @@
       "source_file": "lib/generateLessonPlan.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatelessonplan_generatelessonplan",
       "community": 16,
-      "community_name": "generateLessonPlan.js",
-      "norm_label": "generatelessonplan()"
+      "norm_label": "generatelessonplan()",
+      "id": "lib_generatelessonplan_generatelessonplan",
+      "community_name": "generateLessonPlan.js"
     },
     {
       "label": "generateProgressSnapshot.js",
@@ -373,10 +307,10 @@
       "source_file": "lib/generateProgressSnapshot.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generateprogresssnapshot",
       "community": 2,
-      "community_name": "generateProgressSnapshot.js",
-      "norm_label": "generateprogresssnapshot.js"
+      "norm_label": "generateprogresssnapshot.js",
+      "id": "lib_generateprogresssnapshot",
+      "community_name": "generateProgressSnapshot.js"
     },
     {
       "label": "progressSnapshots",
@@ -384,10 +318,10 @@
       "source_file": "lib/generateProgressSnapshot.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generateprogresssnapshot_progresssnapshots",
       "community": 2,
-      "community_name": "generateProgressSnapshot.js",
-      "norm_label": "progresssnapshots"
+      "norm_label": "progresssnapshots",
+      "id": "lib_generateprogresssnapshot_progresssnapshots",
+      "community_name": "generateProgressSnapshot.js"
     },
     {
       "label": "generateProgressSnapshot()",
@@ -395,10 +329,10 @@
       "source_file": "lib/generateProgressSnapshot.js",
       "source_location": "L4",
       "_origin": "ast",
-      "id": "lib_generateprogresssnapshot_generateprogresssnapshot",
       "community": 2,
-      "community_name": "generateProgressSnapshot.js",
-      "norm_label": "generateprogresssnapshot()"
+      "norm_label": "generateprogresssnapshot()",
+      "id": "lib_generateprogresssnapshot_generateprogresssnapshot",
+      "community_name": "generateProgressSnapshot.js"
     },
     {
       "label": "generateQuickJoinLink.js",
@@ -406,10 +340,10 @@
       "source_file": "lib/generateQuickJoinLink.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatequickjoinlink",
       "community": 17,
-      "community_name": "generateQuickJoinLink.js",
-      "norm_label": "generatequickjoinlink.js"
+      "norm_label": "generatequickjoinlink.js",
+      "id": "lib_generatequickjoinlink",
+      "community_name": "generateQuickJoinLink.js"
     },
     {
       "label": "generateQuickJoinLink()",
@@ -417,10 +351,10 @@
       "source_file": "lib/generateQuickJoinLink.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatequickjoinlink_generatequickjoinlink",
       "community": 17,
-      "community_name": "generateQuickJoinLink.js",
-      "norm_label": "generatequickjoinlink()"
+      "norm_label": "generatequickjoinlink()",
+      "id": "lib_generatequickjoinlink_generatequickjoinlink",
+      "community_name": "generateQuickJoinLink.js"
     },
     {
       "label": "generateRhythmExercise.js",
@@ -428,10 +362,10 @@
       "source_file": "lib/generateRhythmExercise.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generaterhythmexercise",
       "community": 18,
-      "community_name": "generateRhythmExercise.js",
-      "norm_label": "generaterhythmexercise.js"
+      "norm_label": "generaterhythmexercise.js",
+      "id": "lib_generaterhythmexercise",
+      "community_name": "generateRhythmExercise.js"
     },
     {
       "label": "generateRhythmExercise()",
@@ -439,10 +373,10 @@
       "source_file": "lib/generateRhythmExercise.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generaterhythmexercise_generaterhythmexercise",
       "community": 18,
-      "community_name": "generateRhythmExercise.js",
-      "norm_label": "generaterhythmexercise()"
+      "norm_label": "generaterhythmexercise()",
+      "id": "lib_generaterhythmexercise_generaterhythmexercise",
+      "community_name": "generateRhythmExercise.js"
     },
     {
       "label": "generateSSOToken.js",
@@ -450,10 +384,10 @@
       "source_file": "lib/generateSSOToken.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatessotoken",
       "community": 19,
-      "community_name": "generateSSOToken.js",
-      "norm_label": "generatessotoken.js"
+      "norm_label": "generatessotoken.js",
+      "id": "lib_generatessotoken",
+      "community_name": "generateSSOToken.js"
     },
     {
       "label": "generateSSOToken()",
@@ -461,10 +395,10 @@
       "source_file": "lib/generateSSOToken.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_generatessotoken_generatessotoken",
       "community": 19,
-      "community_name": "generateSSOToken.js",
-      "norm_label": "generatessotoken()"
+      "norm_label": "generatessotoken()",
+      "id": "lib_generatessotoken_generatessotoken",
+      "community_name": "generateSSOToken.js"
     },
     {
       "label": "getAdaptiveHint.js",
@@ -472,10 +406,10 @@
       "source_file": "lib/getAdaptiveHint.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_getadaptivehint",
       "community": 21,
-      "community_name": "getAdaptiveHint.js",
-      "norm_label": "getadaptivehint.js"
+      "norm_label": "getadaptivehint.js",
+      "id": "lib_getadaptivehint",
+      "community_name": "getAdaptiveHint.js"
     },
     {
       "label": "getAdaptiveHint()",
@@ -483,10 +417,10 @@
       "source_file": "lib/getAdaptiveHint.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_getadaptivehint_getadaptivehint",
       "community": 21,
-      "community_name": "getAdaptiveHint.js",
-      "norm_label": "getadaptivehint()"
+      "norm_label": "getadaptivehint()",
+      "id": "lib_getadaptivehint_getadaptivehint",
+      "community_name": "getAdaptiveHint.js"
     },
     {
       "label": "getNextDifficulty.js",
@@ -494,10 +428,10 @@
       "source_file": "lib/getNextDifficulty.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_getnextdifficulty",
       "community": 22,
-      "community_name": "getNextDifficulty.js",
-      "norm_label": "getnextdifficulty.js"
+      "norm_label": "getnextdifficulty.js",
+      "id": "lib_getnextdifficulty",
+      "community_name": "getNextDifficulty.js"
     },
     {
       "label": "getNextDifficulty()",
@@ -505,10 +439,10 @@
       "source_file": "lib/getNextDifficulty.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_getnextdifficulty_getnextdifficulty",
       "community": 22,
-      "community_name": "getNextDifficulty.js",
-      "norm_label": "getnextdifficulty()"
+      "norm_label": "getnextdifficulty()",
+      "id": "lib_getnextdifficulty_getnextdifficulty",
+      "community_name": "getNextDifficulty.js"
     },
     {
       "label": "getNextReviewDate.js",
@@ -516,10 +450,10 @@
       "source_file": "lib/getNextReviewDate.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_getnextreviewdate",
       "community": 23,
-      "community_name": "getNextReviewDate.js",
-      "norm_label": "getnextreviewdate.js"
+      "norm_label": "getnextreviewdate.js",
+      "id": "lib_getnextreviewdate",
+      "community_name": "getNextReviewDate.js"
     },
     {
       "label": "getNextReviewDate()",
@@ -527,10 +461,10 @@
       "source_file": "lib/getNextReviewDate.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_getnextreviewdate_getnextreviewdate",
       "community": 23,
-      "community_name": "getNextReviewDate.js",
-      "norm_label": "getnextreviewdate()"
+      "norm_label": "getnextreviewdate()",
+      "id": "lib_getnextreviewdate_getnextreviewdate",
+      "community_name": "getNextReviewDate.js"
     },
     {
       "label": "nearMiss.js",
@@ -538,10 +472,10 @@
       "source_file": "lib/nearMiss.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_nearmiss",
       "community": 24,
-      "community_name": "nearMiss.js",
-      "norm_label": "nearmiss.js"
+      "norm_label": "nearmiss.js",
+      "id": "lib_nearmiss",
+      "community_name": "nearMiss.js"
     },
     {
       "label": "nearMiss()",
@@ -549,10 +483,10 @@
       "source_file": "lib/nearMiss.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_nearmiss_nearmiss",
       "community": 24,
-      "community_name": "nearMiss.js",
-      "norm_label": "nearmiss()"
+      "norm_label": "nearmiss()",
+      "id": "lib_nearmiss_nearmiss",
+      "community_name": "nearMiss.js"
     },
     {
       "label": "nextTempo.js",
@@ -560,10 +494,10 @@
       "source_file": "lib/nextTempo.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_nexttempo",
       "community": 35,
-      "community_name": "nextTempo.js",
-      "norm_label": "nexttempo.js"
+      "norm_label": "nexttempo.js",
+      "id": "lib_nexttempo",
+      "community_name": "nextTempo.js"
     },
     {
       "label": "processReferral.js",
@@ -571,10 +505,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_processreferral",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "processreferral.js"
+      "norm_label": "processreferral.js",
+      "id": "lib_processreferral",
+      "community_name": "processReferral.js"
     },
     {
       "label": "referralUsers",
@@ -582,10 +516,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_processreferral_referralusers",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "referralusers"
+      "norm_label": "referralusers",
+      "id": "lib_processreferral_referralusers",
+      "community_name": "processReferral.js"
     },
     {
       "label": "processReferral()",
@@ -593,10 +527,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L6",
       "_origin": "ast",
-      "id": "lib_processreferral_processreferral",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "processreferral()"
+      "norm_label": "processreferral()",
+      "id": "lib_processreferral_processreferral",
+      "community_name": "processReferral.js"
     },
     {
       "label": "getReferralByCode()",
@@ -604,10 +538,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L32",
       "_origin": "ast",
-      "id": "lib_processreferral_getreferralbycode",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "getreferralbycode()"
+      "norm_label": "getreferralbycode()",
+      "id": "lib_processreferral_getreferralbycode",
+      "community_name": "processReferral.js"
     },
     {
       "label": "getUserById()",
@@ -615,10 +549,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L40",
       "_origin": "ast",
-      "id": "lib_processreferral_getuserbyid",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "getuserbyid()"
+      "norm_label": "getuserbyid()",
+      "id": "lib_processreferral_getuserbyid",
+      "community_name": "processReferral.js"
     },
     {
       "label": "markUserAsReferred()",
@@ -626,10 +560,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L44",
       "_origin": "ast",
-      "id": "lib_processreferral_markuserasreferred",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "markuserasreferred()"
+      "norm_label": "markuserasreferred()",
+      "id": "lib_processreferral_markuserasreferred",
+      "community_name": "processReferral.js"
     },
     {
       "label": "addToInventory()",
@@ -637,10 +571,10 @@
       "source_file": "lib/processReferral.js",
       "source_location": "L51",
       "_origin": "ast",
-      "id": "lib_processreferral_addtoinventory",
       "community": 1,
-      "community_name": "processReferral.js",
-      "norm_label": "addtoinventory()"
+      "norm_label": "addtoinventory()",
+      "id": "lib_processreferral_addtoinventory",
+      "community_name": "processReferral.js"
     },
     {
       "label": "quadInfo.js",
@@ -648,10 +582,10 @@
       "source_file": "lib/quadInfo.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_quadinfo",
       "community": 25,
-      "community_name": "quadInfo.js",
-      "norm_label": "quadinfo.js"
+      "norm_label": "quadinfo.js",
+      "id": "lib_quadinfo",
+      "community_name": "quadInfo.js"
     },
     {
       "label": "quadInfo()",
@@ -659,10 +593,10 @@
       "source_file": "lib/quadInfo.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_quadinfo_quadinfo",
       "community": 25,
-      "community_name": "quadInfo.js",
-      "norm_label": "quadinfo()"
+      "norm_label": "quadinfo()",
+      "id": "lib_quadinfo_quadinfo",
+      "community_name": "quadInfo.js"
     },
     {
       "label": "recommendStartModule.js",
@@ -670,10 +604,10 @@
       "source_file": "lib/recommendStartModule.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_recommendstartmodule",
       "community": 26,
-      "community_name": "recommendStartModule.js",
-      "norm_label": "recommendstartmodule.js"
+      "norm_label": "recommendstartmodule.js",
+      "id": "lib_recommendstartmodule",
+      "community_name": "recommendStartModule.js"
     },
     {
       "label": "recommendStartModule()",
@@ -681,10 +615,10 @@
       "source_file": "lib/recommendStartModule.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_recommendstartmodule_recommendstartmodule",
       "community": 26,
-      "community_name": "recommendStartModule.js",
-      "norm_label": "recommendstartmodule()"
+      "norm_label": "recommendstartmodule()",
+      "id": "lib_recommendstartmodule_recommendstartmodule",
+      "community_name": "recommendStartModule.js"
     },
     {
       "label": "safeLyricsModerator.js",
@@ -692,10 +626,10 @@
       "source_file": "lib/safeLyricsModerator.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_safelyricsmoderator",
       "community": 3,
-      "community_name": "safeLyricsModerator.js",
-      "norm_label": "safelyricsmoderator.js"
+      "norm_label": "safelyricsmoderator.js",
+      "id": "lib_safelyricsmoderator",
+      "community_name": "safeLyricsModerator.js"
     },
     {
       "label": "levenshtein()",
@@ -703,10 +637,10 @@
       "source_file": "lib/safeLyricsModerator.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_safelyricsmoderator_levenshtein",
       "community": 3,
-      "community_name": "safeLyricsModerator.js",
-      "norm_label": "levenshtein()"
+      "norm_label": "levenshtein()",
+      "id": "lib_safelyricsmoderator_levenshtein",
+      "community_name": "safeLyricsModerator.js"
     },
     {
       "label": "safeLyricsModerator()",
@@ -714,10 +648,10 @@
       "source_file": "lib/safeLyricsModerator.js",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "lib_safelyricsmoderator_safelyricsmoderator",
       "community": 3,
-      "community_name": "safeLyricsModerator.js",
-      "norm_label": "safelyricsmoderator()"
+      "norm_label": "safelyricsmoderator()",
+      "id": "lib_safelyricsmoderator_safelyricsmoderator",
+      "community_name": "safeLyricsModerator.js"
     },
     {
       "label": "scheduleIntervalReviews.js",
@@ -725,10 +659,10 @@
       "source_file": "lib/scheduleIntervalReviews.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_scheduleintervalreviews",
       "community": 27,
-      "community_name": "scheduleIntervalReviews.js",
-      "norm_label": "scheduleintervalreviews.js"
+      "norm_label": "scheduleintervalreviews.js",
+      "id": "lib_scheduleintervalreviews",
+      "community_name": "scheduleIntervalReviews.js"
     },
     {
       "label": "scheduleIntervalReviews()",
@@ -736,10 +670,10 @@
       "source_file": "lib/scheduleIntervalReviews.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_scheduleintervalreviews_scheduleintervalreviews",
       "community": 27,
-      "community_name": "scheduleIntervalReviews.js",
-      "norm_label": "scheduleintervalreviews()"
+      "norm_label": "scheduleintervalreviews()",
+      "id": "lib_scheduleintervalreviews_scheduleintervalreviews",
+      "community_name": "scheduleIntervalReviews.js"
     },
     {
       "label": "selectFirstExercise.js",
@@ -747,10 +681,10 @@
       "source_file": "lib/selectFirstExercise.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_selectfirstexercise",
       "community": 28,
-      "community_name": "selectFirstExercise.js",
-      "norm_label": "selectfirstexercise.js"
+      "norm_label": "selectfirstexercise.js",
+      "id": "lib_selectfirstexercise",
+      "community_name": "selectFirstExercise.js"
     },
     {
       "label": "selectFirstExercise()",
@@ -758,10 +692,10 @@
       "source_file": "lib/selectFirstExercise.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_selectfirstexercise_selectfirstexercise",
       "community": 28,
-      "community_name": "selectFirstExercise.js",
-      "norm_label": "selectfirstexercise()"
+      "norm_label": "selectfirstexercise()",
+      "id": "lib_selectfirstexercise_selectfirstexercise",
+      "community_name": "selectFirstExercise.js"
     },
     {
       "label": "studentDataAnonymizer.js",
@@ -769,10 +703,10 @@
       "source_file": "lib/studentDataAnonymizer.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_studentdataanonymizer",
       "community": 4,
-      "community_name": "studentDataAnonymizer.js",
-      "norm_label": "studentdataanonymizer.js"
+      "norm_label": "studentdataanonymizer.js",
+      "id": "lib_studentdataanonymizer",
+      "community_name": "studentDataAnonymizer.js"
     },
     {
       "label": "crypto",
@@ -780,10 +714,10 @@
       "source_file": "lib/studentDataAnonymizer.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_studentdataanonymizer_crypto",
       "community": 4,
-      "community_name": "studentDataAnonymizer.js",
-      "norm_label": "crypto"
+      "norm_label": "crypto",
+      "id": "lib_studentdataanonymizer_crypto",
+      "community_name": "studentDataAnonymizer.js"
     },
     {
       "label": "studentDataAnonymizer()",
@@ -791,10 +725,10 @@
       "source_file": "lib/studentDataAnonymizer.js",
       "source_location": "L2",
       "_origin": "ast",
-      "id": "lib_studentdataanonymizer_studentdataanonymizer",
       "community": 4,
-      "community_name": "studentDataAnonymizer.js",
-      "norm_label": "studentdataanonymizer()"
+      "norm_label": "studentdataanonymizer()",
+      "id": "lib_studentdataanonymizer_studentdataanonymizer",
+      "community_name": "studentDataAnonymizer.js"
     },
     {
       "label": "teacherDomainVerifier.js",
@@ -802,10 +736,10 @@
       "source_file": "lib/teacherDomainVerifier.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_teacherdomainverifier",
       "community": 29,
-      "community_name": "teacherDomainVerifier.js",
-      "norm_label": "teacherdomainverifier.js"
+      "norm_label": "teacherdomainverifier.js",
+      "id": "lib_teacherdomainverifier",
+      "community_name": "teacherDomainVerifier.js"
     },
     {
       "label": "teacherDomainVerifier()",
@@ -813,10 +747,10 @@
       "source_file": "lib/teacherDomainVerifier.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_teacherdomainverifier_teacherdomainverifier",
       "community": 29,
-      "community_name": "teacherDomainVerifier.js",
-      "norm_label": "teacherdomainverifier()"
+      "norm_label": "teacherdomainverifier()",
+      "id": "lib_teacherdomainverifier_teacherdomainverifier",
+      "community_name": "teacherDomainVerifier.js"
     },
     {
       "label": "updateDailyStreak.js",
@@ -824,10 +758,10 @@
       "source_file": "lib/updateDailyStreak.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_updatedailystreak",
       "community": 30,
-      "community_name": "updateDailyStreak.js",
-      "norm_label": "updatedailystreak.js"
+      "norm_label": "updatedailystreak.js",
+      "id": "lib_updatedailystreak",
+      "community_name": "updateDailyStreak.js"
     },
     {
       "label": "updateDailyStreak()",
@@ -835,10 +769,10 @@
       "source_file": "lib/updateDailyStreak.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_updatedailystreak_updatedailystreak",
       "community": 30,
-      "community_name": "updateDailyStreak.js",
-      "norm_label": "updatedailystreak()"
+      "norm_label": "updatedailystreak()",
+      "id": "lib_updatedailystreak_updatedailystreak",
+      "community_name": "updateDailyStreak.js"
     },
     {
       "label": "updateStreak.js",
@@ -846,10 +780,10 @@
       "source_file": "lib/updateStreak.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_updatestreak",
       "community": 5,
-      "community_name": "updateStreak.js",
-      "norm_label": "updatestreak.js"
+      "norm_label": "updatestreak.js",
+      "id": "lib_updatestreak",
+      "community_name": "updateStreak.js"
     },
     {
       "label": "streakStore",
@@ -857,10 +791,10 @@
       "source_file": "lib/updateStreak.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_updatestreak_streakstore",
       "community": 5,
-      "community_name": "updateStreak.js",
-      "norm_label": "streakstore"
+      "norm_label": "streakstore",
+      "id": "lib_updatestreak_streakstore",
+      "community_name": "updateStreak.js"
     },
     {
       "label": "updateStreak()",
@@ -868,10 +802,10 @@
       "source_file": "lib/updateStreak.js",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "lib_updatestreak_updatestreak",
       "community": 5,
-      "community_name": "updateStreak.js",
-      "norm_label": "updatestreak()"
+      "norm_label": "updatestreak()",
+      "id": "lib_updatestreak_updatestreak",
+      "community_name": "updateStreak.js"
     },
     {
       "label": "validateIntervalRatio.js",
@@ -879,10 +813,10 @@
       "source_file": "lib/validateIntervalRatio.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_validateintervalratio",
       "community": 31,
-      "community_name": "validateIntervalRatio.js",
-      "norm_label": "validateintervalratio.js"
+      "norm_label": "validateintervalratio.js",
+      "id": "lib_validateintervalratio",
+      "community_name": "validateIntervalRatio.js"
     },
     {
       "label": "validateIntervalRatio()",
@@ -890,10 +824,10 @@
       "source_file": "lib/validateIntervalRatio.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_validateintervalratio_validateintervalratio",
       "community": 31,
-      "community_name": "validateIntervalRatio.js",
-      "norm_label": "validateintervalratio()"
+      "norm_label": "validateintervalratio()",
+      "id": "lib_validateintervalratio_validateintervalratio",
+      "community_name": "validateIntervalRatio.js"
     },
     {
       "label": "verifyLessonPlanIntegrity.js",
@@ -901,10 +835,10 @@
       "source_file": "lib/verifyLessonPlanIntegrity.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_verifylessonplanintegrity",
       "community": 32,
-      "community_name": "verifyLessonPlanIntegrity.js",
-      "norm_label": "verifylessonplanintegrity.js"
+      "norm_label": "verifylessonplanintegrity.js",
+      "id": "lib_verifylessonplanintegrity",
+      "community_name": "verifyLessonPlanIntegrity.js"
     },
     {
       "label": "verifyLessonPlanIntegrity()",
@@ -912,10 +846,10 @@
       "source_file": "lib/verifyLessonPlanIntegrity.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_verifylessonplanintegrity_verifylessonplanintegrity",
       "community": 32,
-      "community_name": "verifyLessonPlanIntegrity.js",
-      "norm_label": "verifylessonplanintegrity()"
+      "norm_label": "verifylessonplanintegrity()",
+      "id": "lib_verifylessonplanintegrity_verifylessonplanintegrity",
+      "community_name": "verifyLessonPlanIntegrity.js"
     },
     {
       "label": "yToFreq.js",
@@ -923,10 +857,10 @@
       "source_file": "lib/yToFreq.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_ytofreq",
       "community": 33,
-      "community_name": "yToFreq.js",
-      "norm_label": "ytofreq.js"
+      "norm_label": "ytofreq.js",
+      "id": "lib_ytofreq",
+      "community_name": "yToFreq.js"
     },
     {
       "label": "yToFreq()",
@@ -934,98 +868,10 @@
       "source_file": "lib/yToFreq.js",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_ytofreq_ytofreq",
       "community": 33,
-      "community_name": "yToFreq.js",
-      "norm_label": "ytofreq()"
-    },
-    {
-      "label": "VALIDATION.md",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "validation",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "validation.md"
-    },
-    {
-      "label": "MelodyMath \u2014 Market Validation (auto, DeepSeek 2026-07-20)",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "validation_melodymath_market_validation_auto_deepseek_2026_07_20",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "melodymath \u2014 market validation (auto, deepseek 2026-07-20)"
-    },
-    {
-      "label": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "melodymath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)"
-    },
-    {
-      "label": "1. ICP \u05de\u05d3\u05d5\u05d9\u05e7 (\u05d9\u05e9\u05e8\u05d0\u05dc)",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L5",
-      "_origin": "ast",
-      "id": "validation_1_icp_\u05de\u05d3\u05d5\u05d9\u05e7_\u05d9\u05e9\u05e8\u05d0\u05dc",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "1. icp \u05de\u05d3\u05d5\u05d9\u05e7 (\u05d9\u05e9\u05e8\u05d0\u05dc)"
-    },
-    {
-      "label": "2. \u05de\u05d7\u05d9\u05e8 + \u05de\u05d5\u05d3\u05dc",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L9",
-      "_origin": "ast",
-      "id": "validation_2_\u05de\u05d7\u05d9\u05e8_\u05de\u05d5\u05d3\u05dc",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "2. \u05de\u05d7\u05d9\u05e8 + \u05de\u05d5\u05d3\u05dc"
-    },
-    {
-      "label": "3. \u05d6\u05d5\u05d5\u05d9\u05ea \u05de\u05d5\u05dc \u05d4\u05de\u05ea\u05d7\u05e8\u05d4 \u05d4\u05de\u05e8\u05db\u05d6\u05d9",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L16",
-      "_origin": "ast",
-      "id": "validation_3_\u05d6\u05d5\u05d5\u05d9\u05ea_\u05de\u05d5\u05dc_\u05d4\u05de\u05ea\u05d7\u05e8\u05d4_\u05d4\u05de\u05e8\u05db\u05d6\u05d9",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "3. \u05d6\u05d5\u05d5\u05d9\u05ea \u05de\u05d5\u05dc \u05d4\u05de\u05ea\u05d7\u05e8\u05d4 \u05d4\u05de\u05e8\u05db\u05d6\u05d9"
-    },
-    {
-      "label": "4. \u05ea\u05d5\u05db\u05e0\u05d9\u05ea 100 \u05d4\u05de\u05e9\u05ea\u05de\u05e9\u05d9\u05dd \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05dd (\u05ea\u05e7\u05e6\u05d9\u05d1 0)",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L21",
-      "_origin": "ast",
-      "id": "validation_4_\u05ea\u05d5\u05db\u05e0\u05d9\u05ea_100_\u05d4\u05de\u05e9\u05ea\u05de\u05e9\u05d9\u05dd_\u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05dd_\u05ea\u05e7\u05e6\u05d9\u05d1_0",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "4. \u05ea\u05d5\u05db\u05e0\u05d9\u05ea 100 \u05d4\u05de\u05e9\u05ea\u05de\u05e9\u05d9\u05dd \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05dd (\u05ea\u05e7\u05e6\u05d9\u05d1 0)"
-    },
-    {
-      "label": "5. \u05e7\u05e8\u05d9\u05d8\u05e8\u05d9\u05d5\u05df \u05d4\u05de\u05e9\u05da/\u05e4\u05d9\u05d1\u05d5\u05d8/\u05d4\u05e8\u05d9\u05d2\u05d4 (30 \u05d9\u05d5\u05dd)",
-      "file_type": "document",
-      "source_file": "VALIDATION.md",
-      "source_location": "L27",
-      "_origin": "ast",
-      "id": "validation_5_\u05e7\u05e8\u05d9\u05d8\u05e8\u05d9\u05d5\u05df_\u05d4\u05de\u05e9\u05da_\u05e4\u05d9\u05d1\u05d5\u05d8_\u05d4\u05e8\u05d9\u05d2\u05d4_30_\u05d9\u05d5\u05dd",
-      "community": 36,
-      "community_name": "MelodyMath \u2014 \u05d3\u05e3 \u05d0\u05d9\u05de\u05d5\u05ea \u05e9\u05d5\u05e7 (\u05d2\u05e8\u05e1\u05d4 \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea)",
-      "norm_label": "5. \u05e7\u05e8\u05d9\u05d8\u05e8\u05d9\u05d5\u05df \u05d4\u05de\u05e9\u05da/\u05e4\u05d9\u05d1\u05d5\u05d8/\u05d4\u05e8\u05d9\u05d2\u05d4 (30 \u05d9\u05d5\u05dd)"
+      "norm_label": "ytofreq()",
+      "id": "lib_ytofreq_ytofreq",
+      "community_name": "yToFreq.js"
     },
     {
       "label": "README",
@@ -1038,8 +884,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "readme",
-      "community_name": "Functions Page",
-      "id": "readme"
+      "id": "readme",
+      "community_name": "Functions Page"
     },
     {
       "label": "Functions Page",
@@ -1052,8 +898,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "functions page",
-      "community_name": "Functions Page",
-      "id": "functions"
+      "id": "functions",
+      "community_name": "Functions Page"
     },
     {
       "label": "807 Practice Page",
@@ -1067,8 +913,8 @@
       "verification": "unverified",
       "community": 0,
       "norm_label": "807 practice page",
-      "community_name": "Functions Page",
-      "id": "807"
+      "id": "807",
+      "community_name": "Functions Page"
     },
     {
       "label": "Index Home",
@@ -1081,8 +927,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "index home",
-      "community_name": "Functions Page",
-      "id": "index"
+      "id": "index",
+      "community_name": "Functions Page"
     },
     {
       "label": "Landing Page",
@@ -1096,8 +942,8 @@
       "verification": "unverified",
       "community": 0,
       "norm_label": "landing page",
-      "community_name": "Functions Page",
-      "id": "landing"
+      "id": "landing",
+      "community_name": "Functions Page"
     },
     {
       "label": "Factory CI",
@@ -1110,8 +956,8 @@
       "contributor": null,
       "community": 34,
       "norm_label": "factory ci",
-      "community_name": "Factory CI",
-      "id": "github_workflows_factory_ci"
+      "id": "github_workflows_factory_ci",
+      "community_name": "Factory CI"
     },
     {
       "label": "Rhythmic Training Intervention",
@@ -1124,8 +970,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "rhythmic training intervention",
-      "community_name": "Functions Page",
-      "id": "rhythmic_training"
+      "id": "rhythmic_training",
+      "community_name": "Functions Page"
     },
     {
       "label": "Sonification",
@@ -1138,8 +984,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "sonification",
-      "community_name": "Functions Page",
-      "id": "sonification"
+      "id": "sonification",
+      "community_name": "Functions Page"
     },
     {
       "label": "Exponential Growth/Decay",
@@ -1152,8 +998,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "exponential growth/decay",
-      "community_name": "Functions Page",
-      "id": "exponential_growth_decay"
+      "id": "exponential_growth_decay",
+      "community_name": "Functions Page"
     },
     {
       "label": "Logarithmic Mapping",
@@ -1166,8 +1012,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "logarithmic mapping",
-      "community_name": "Functions Page",
-      "id": "logarithmic_mapping"
+      "id": "logarithmic_mapping",
+      "community_name": "Functions Page"
     },
     {
       "label": "Adaptive Tempo",
@@ -1180,8 +1026,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "adaptive tempo",
-      "community_name": "Functions Page",
-      "id": "adaptive_tempo"
+      "id": "adaptive_tempo",
+      "community_name": "Functions Page"
     },
     {
       "label": "Spaced Repetition",
@@ -1194,8 +1040,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "spaced repetition",
-      "community_name": "Functions Page",
-      "id": "spaced_repetition"
+      "id": "spaced_repetition",
+      "community_name": "Functions Page"
     },
     {
       "label": "B2B Licensing Model",
@@ -1208,8 +1054,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "b2b licensing model",
-      "community_name": "Functions Page",
-      "id": "b2b_model"
+      "id": "b2b_model",
+      "community_name": "Functions Page"
     },
     {
       "label": "Lesson Generator",
@@ -1222,8 +1068,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "lesson generator",
-      "community_name": "Functions Page",
-      "id": "lesson_generator"
+      "id": "lesson_generator",
+      "community_name": "Functions Page"
     },
     {
       "label": "Seven Function Families",
@@ -1236,8 +1082,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "seven function families",
-      "community_name": "Functions Page",
-      "id": "function_families"
+      "id": "function_families",
+      "community_name": "Functions Page"
     },
     {
       "label": "Real Tone Sine",
@@ -1250,8 +1096,8 @@
       "contributor": null,
       "community": 0,
       "norm_label": "real tone sine",
-      "community_name": "Functions Page",
-      "id": "real_tone_sine"
+      "id": "real_tone_sine",
+      "community_name": "Functions Page"
     }
   ],
   "links": [
@@ -1263,9 +1109,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_analyzeclassperformance",
-      "target": "lib_analyzeclassperformance_analyzeclassperformance",
-      "confidence_score": 0.5
+      "target": "lib_analyzeclassperformance_analyzeclassperformance"
     },
     {
       "relation": "indirect_call",
@@ -1275,9 +1121,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_analyzestudentperformance",
-      "target": "lib_analyzestudentperformance_analyzestudentperformance",
-      "confidence_score": 0.5
+      "target": "lib_analyzestudentperformance_analyzestudentperformance"
     },
     {
       "relation": "indirect_call",
@@ -1287,21 +1133,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_anonymizestudentid",
-      "target": "lib_anonymizestudentid_anonymizestudentid",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/assessMusicMathLevel.js",
-      "source_location": "L31",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_assessmusicmathlevel",
-      "target": "lib_assessmusicmathlevel_assessmusicmathlevel",
-      "confidence_score": 0.5
+      "target": "lib_anonymizestudentid_anonymizestudentid"
     },
     {
       "relation": "indirect_call",
@@ -1311,9 +1145,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_calculateadaptivedifficulty",
-      "target": "lib_calculateadaptivedifficulty_calculateadaptivedifficulty",
-      "confidence_score": 0.5
+      "target": "lib_calculateadaptivedifficulty_calculateadaptivedifficulty"
     },
     {
       "relation": "indirect_call",
@@ -1323,9 +1157,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_computenextreview",
-      "target": "lib_computenextreview_computenextreview",
-      "confidence_score": 0.5
+      "target": "lib_computenextreview_computenextreview"
     },
     {
       "relation": "indirect_call",
@@ -1335,9 +1169,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_computestreakbonus",
-      "target": "lib_computestreakbonus_computestreakbonus",
-      "confidence_score": 0.5
+      "target": "lib_computestreakbonus_computestreakbonus"
     },
     {
       "relation": "indirect_call",
@@ -1347,9 +1181,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_createclassassignment",
-      "target": "lib_createclassassignment_createclassassignment",
-      "confidence_score": 0.5
+      "target": "lib_createclassassignment_createclassassignment"
     },
     {
       "relation": "indirect_call",
@@ -1359,9 +1193,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_gengrowthproblem",
-      "target": "lib_gengrowthproblem_gengrowthproblem",
-      "confidence_score": 0.5
+      "target": "lib_gengrowthproblem_gengrowthproblem"
     },
     {
       "relation": "indirect_call",
@@ -1371,21 +1205,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generateadaptivelesson",
-      "target": "lib_generateadaptivelesson_generateadaptivelesson",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateClassConfig.js",
-      "source_location": "L39",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generateclassconfig",
-      "target": "lib_generateclassconfig_generateclassconfig",
-      "confidence_score": 0.5
+      "target": "lib_generateadaptivelesson_generateadaptivelesson"
     },
     {
       "relation": "indirect_call",
@@ -1395,21 +1217,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generateexercisefrommelody",
-      "target": "lib_generateexercisefrommelody_generateexercisefrommelody",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateFirstExercise.js",
-      "source_location": "L38",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatefirstexercise",
-      "target": "lib_generatefirstexercise_generatefirstexercise",
-      "confidence_score": 0.5
+      "target": "lib_generateexercisefrommelody_generateexercisefrommelody"
     },
     {
       "relation": "indirect_call",
@@ -1419,9 +1229,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generatefirstweekplan",
-      "target": "lib_generatefirstweekplan_generatefirstweekplan",
-      "confidence_score": 0.5
+      "target": "lib_generatefirstweekplan_generatefirstweekplan"
     },
     {
       "relation": "indirect_call",
@@ -1431,9 +1241,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generatelessonplan",
-      "target": "lib_generatelessonplan_generatelessonplan",
-      "confidence_score": 0.5
+      "target": "lib_generatelessonplan_generatelessonplan"
     },
     {
       "relation": "indirect_call",
@@ -1443,9 +1253,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generateprogresssnapshot",
-      "target": "lib_generateprogresssnapshot_generateprogresssnapshot",
-      "confidence_score": 0.5
+      "target": "lib_generateprogresssnapshot_generateprogresssnapshot"
     },
     {
       "relation": "contains",
@@ -1454,9 +1264,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_generateprogresssnapshot",
-      "target": "lib_generateprogresssnapshot_progresssnapshots",
-      "confidence_score": 1.0
+      "target": "lib_generateprogresssnapshot_progresssnapshots"
     },
     {
       "relation": "indirect_call",
@@ -1466,9 +1276,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generatequickjoinlink",
-      "target": "lib_generatequickjoinlink_generatequickjoinlink",
-      "confidence_score": 0.5
+      "target": "lib_generatequickjoinlink_generatequickjoinlink"
     },
     {
       "relation": "indirect_call",
@@ -1478,9 +1288,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generaterhythmexercise",
-      "target": "lib_generaterhythmexercise_generaterhythmexercise",
-      "confidence_score": 0.5
+      "target": "lib_generaterhythmexercise_generaterhythmexercise"
     },
     {
       "relation": "indirect_call",
@@ -1490,9 +1300,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_generatessotoken",
-      "target": "lib_generatessotoken_generatessotoken",
-      "confidence_score": 0.5
+      "target": "lib_generatessotoken_generatessotoken"
     },
     {
       "relation": "indirect_call",
@@ -1502,9 +1312,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_getadaptivehint",
-      "target": "lib_getadaptivehint_getadaptivehint",
-      "confidence_score": 0.5
+      "target": "lib_getadaptivehint_getadaptivehint"
     },
     {
       "relation": "indirect_call",
@@ -1514,9 +1324,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_getnextdifficulty",
-      "target": "lib_getnextdifficulty_getnextdifficulty",
-      "confidence_score": 0.5
+      "target": "lib_getnextdifficulty_getnextdifficulty"
     },
     {
       "relation": "indirect_call",
@@ -1526,9 +1336,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_getnextreviewdate",
-      "target": "lib_getnextreviewdate_getnextreviewdate",
-      "confidence_score": 0.5
+      "target": "lib_getnextreviewdate_getnextreviewdate"
     },
     {
       "relation": "indirect_call",
@@ -1538,9 +1348,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_nearmiss",
-      "target": "lib_nearmiss_nearmiss",
-      "confidence_score": 0.5
+      "target": "lib_nearmiss_nearmiss"
     },
     {
       "relation": "contains",
@@ -1549,9 +1359,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral",
-      "target": "lib_processreferral_addtoinventory",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_addtoinventory"
     },
     {
       "relation": "contains",
@@ -1560,9 +1370,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral",
-      "target": "lib_processreferral_getreferralbycode",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_getreferralbycode"
     },
     {
       "relation": "contains",
@@ -1571,9 +1381,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral",
-      "target": "lib_processreferral_getuserbyid",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_getuserbyid"
     },
     {
       "relation": "contains",
@@ -1582,9 +1392,9 @@
       "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral",
-      "target": "lib_processreferral_markuserasreferred",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_markuserasreferred"
     },
     {
       "relation": "indirect_call",
@@ -1594,9 +1404,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_processreferral",
-      "target": "lib_processreferral_processreferral",
-      "confidence_score": 0.5
+      "target": "lib_processreferral_processreferral"
     },
     {
       "relation": "contains",
@@ -1605,9 +1415,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral",
-      "target": "lib_processreferral_referralusers",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_referralusers"
     },
     {
       "relation": "calls",
@@ -1617,9 +1427,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral_processreferral",
-      "target": "lib_processreferral_addtoinventory",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_addtoinventory"
     },
     {
       "relation": "calls",
@@ -1629,9 +1439,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral_processreferral",
-      "target": "lib_processreferral_getreferralbycode",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_getreferralbycode"
     },
     {
       "relation": "calls",
@@ -1641,9 +1451,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral_processreferral",
-      "target": "lib_processreferral_getuserbyid",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_getuserbyid"
     },
     {
       "relation": "calls",
@@ -1653,9 +1463,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral_processreferral",
-      "target": "lib_processreferral_markuserasreferred",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_markuserasreferred"
     },
     {
       "relation": "calls",
@@ -1665,9 +1475,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_processreferral_markuserasreferred",
-      "target": "lib_processreferral_getuserbyid",
-      "confidence_score": 1.0
+      "target": "lib_processreferral_getuserbyid"
     },
     {
       "relation": "indirect_call",
@@ -1677,9 +1487,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_quadinfo",
-      "target": "lib_quadinfo_quadinfo",
-      "confidence_score": 0.5
+      "target": "lib_quadinfo_quadinfo"
     },
     {
       "relation": "indirect_call",
@@ -1689,9 +1499,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_recommendstartmodule",
-      "target": "lib_recommendstartmodule_recommendstartmodule",
-      "confidence_score": 0.5
+      "target": "lib_recommendstartmodule_recommendstartmodule"
     },
     {
       "relation": "contains",
@@ -1700,9 +1510,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_safelyricsmoderator",
-      "target": "lib_safelyricsmoderator_levenshtein",
-      "confidence_score": 1.0
+      "target": "lib_safelyricsmoderator_levenshtein"
     },
     {
       "relation": "indirect_call",
@@ -1712,9 +1522,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_safelyricsmoderator",
-      "target": "lib_safelyricsmoderator_safelyricsmoderator",
-      "confidence_score": 0.5
+      "target": "lib_safelyricsmoderator_safelyricsmoderator"
     },
     {
       "relation": "calls",
@@ -1724,9 +1534,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_safelyricsmoderator_safelyricsmoderator",
-      "target": "lib_safelyricsmoderator_levenshtein",
-      "confidence_score": 1.0
+      "target": "lib_safelyricsmoderator_levenshtein"
     },
     {
       "relation": "indirect_call",
@@ -1736,9 +1546,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_scheduleintervalreviews",
-      "target": "lib_scheduleintervalreviews_scheduleintervalreviews",
-      "confidence_score": 0.5
+      "target": "lib_scheduleintervalreviews_scheduleintervalreviews"
     },
     {
       "relation": "indirect_call",
@@ -1748,9 +1558,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_selectfirstexercise",
-      "target": "lib_selectfirstexercise_selectfirstexercise",
-      "confidence_score": 0.5
+      "target": "lib_selectfirstexercise_selectfirstexercise"
     },
     {
       "relation": "contains",
@@ -1759,9 +1569,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_studentdataanonymizer",
-      "target": "lib_studentdataanonymizer_crypto",
-      "confidence_score": 1.0
+      "target": "lib_studentdataanonymizer_crypto"
     },
     {
       "relation": "indirect_call",
@@ -1771,9 +1581,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_studentdataanonymizer",
-      "target": "lib_studentdataanonymizer_studentdataanonymizer",
-      "confidence_score": 0.5
+      "target": "lib_studentdataanonymizer_studentdataanonymizer"
     },
     {
       "relation": "indirect_call",
@@ -1783,9 +1593,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_teacherdomainverifier",
-      "target": "lib_teacherdomainverifier_teacherdomainverifier",
-      "confidence_score": 0.5
+      "target": "lib_teacherdomainverifier_teacherdomainverifier"
     },
     {
       "relation": "indirect_call",
@@ -1795,9 +1605,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_updatedailystreak",
-      "target": "lib_updatedailystreak_updatedailystreak",
-      "confidence_score": 0.5
+      "target": "lib_updatedailystreak_updatedailystreak"
     },
     {
       "relation": "contains",
@@ -1806,9 +1616,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "lib_updatestreak",
-      "target": "lib_updatestreak_streakstore",
-      "confidence_score": 1.0
+      "target": "lib_updatestreak_streakstore"
     },
     {
       "relation": "indirect_call",
@@ -1818,9 +1628,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_updatestreak",
-      "target": "lib_updatestreak_updatestreak",
-      "confidence_score": 0.5
+      "target": "lib_updatestreak_updatestreak"
     },
     {
       "relation": "indirect_call",
@@ -1830,9 +1640,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_validateintervalratio",
-      "target": "lib_validateintervalratio_validateintervalratio",
-      "confidence_score": 0.5
+      "target": "lib_validateintervalratio_validateintervalratio"
     },
     {
       "relation": "indirect_call",
@@ -1842,9 +1652,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_verifylessonplanintegrity",
-      "target": "lib_verifylessonplanintegrity_verifylessonplanintegrity",
-      "confidence_score": 0.5
+      "target": "lib_verifylessonplanintegrity_verifylessonplanintegrity"
     },
     {
       "relation": "indirect_call",
@@ -1854,86 +1664,9 @@
       "weight": 1.0,
       "_origin": "ast",
       "context": "collection",
+      "confidence_score": 0.5,
       "source": "lib_ytofreq",
-      "target": "lib_ytofreq_ytofreq",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation",
-      "target": "validation_melodymath_market_validation_auto_deepseek_2026_07_20",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation",
-      "target": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "target": "validation_1_icp_\u05de\u05d3\u05d5\u05d9\u05e7_\u05d9\u05e9\u05e8\u05d0\u05dc",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "target": "validation_2_\u05de\u05d7\u05d9\u05e8_\u05de\u05d5\u05d3\u05dc",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L16",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "target": "validation_3_\u05d6\u05d5\u05d5\u05d9\u05ea_\u05de\u05d5\u05dc_\u05d4\u05de\u05ea\u05d7\u05e8\u05d4_\u05d4\u05de\u05e8\u05db\u05d6\u05d9",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "target": "validation_4_\u05ea\u05d5\u05db\u05e0\u05d9\u05ea_100_\u05d4\u05de\u05e9\u05ea\u05de\u05e9\u05d9\u05dd_\u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05dd_\u05ea\u05e7\u05e6\u05d9\u05d1_0",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "VALIDATION.md",
-      "source_location": "L27",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "validation_melodymath_\u05d3\u05e3_\u05d0\u05d9\u05de\u05d5\u05ea_\u05e9\u05d5\u05e7_\u05d2\u05e8\u05e1\u05d4_\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05ea",
-      "target": "validation_5_\u05e7\u05e8\u05d9\u05d8\u05e8\u05d9\u05d5\u05df_\u05d4\u05de\u05e9\u05da_\u05e4\u05d9\u05d1\u05d5\u05d8_\u05d4\u05e8\u05d9\u05d2\u05d4_30_\u05d9\u05d5\u05dd",
-      "confidence_score": 1.0
+      "target": "lib_ytofreq_ytofreq"
     },
     {
       "relation": "references",
@@ -2169,5 +1902,5 @@
       "source_file": "README.md"
     }
   ],
-  "built_at_commit": "969f01d932cfc1bd67063593201df755db46221d"
+  "built_at_commit": "87e0fc90a93c24579922098173ff9f3c36a72025"
 }

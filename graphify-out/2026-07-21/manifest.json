@@ -198,25 +198,5 @@
     "mtime": 1784407685.9979615,
     "ast_hash": "a5f834e327f640f70f3bccb335c1aa42",
     "semantic_hash": "a5f834e327f640f70f3bccb335c1aa42"
-  },
-  "lib/assessMusicMathLevel.js": {
-    "mtime": 1784587567.8716142,
-    "ast_hash": "7ee7df8f78c45fa205c3525a04bd8cc3",
-    "semantic_hash": ""
-  },
-  "lib/generateClassConfig.js": {
-    "mtime": 1784587569.0736146,
-    "ast_hash": "4c783a0550b010967ccb5f9f4d7dbf35",
-    "semantic_hash": ""
-  },
-  "lib/generateFirstExercise.js": {
-    "mtime": 1784587569.6534555,
-    "ast_hash": "cb8145ebed456a6ba617e29b8c45fb43",
-    "semantic_hash": ""
-  },
-  "VALIDATION.md": {
-    "mtime": 1784581439.504157,
-    "ast_hash": "1e032fb42e521b16e3a6c1d28504297a",
-    "semantic_hash": ""
   }
 }
