@@ -1,175 +1,31 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MelodyMath | שיעור מוזיקלי</title><style>
-:root{--ink:#20173d;--purple:#6c4ce8;--pink:#ff6cab;--yellow:#ffd661;--bg:#f7f4ff;--line:#ddd4f2}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 12%,#ffe6f1,transparent 29%),radial-gradient(circle at 90% 0,#e4dcff,transparent 32%),var(--bg);font-family:Arial,sans-serif;color:var(--ink);min-height:100vh}.wrap{max-width:980px;margin:auto;padding:42px 20px}header small{color:var(--purple);font-weight:900}h1{font-size:clamp(2.4rem,7vw,4.6rem);margin:8px 0}.layout{display:grid;grid-template-columns:300px 1fr;gap:18px}.card{background:#ffffffd9;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 18px 45px #483d7620}label{display:block;font-size:.82rem;color:#70668d;margin:13px 0 6px}select,input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:white;font:inherit}button{width:100%;border:0;border-radius:11px;background:var(--purple);color:white;padding:13px;margin-top:18px;font-weight:bold;cursor:pointer}.exercise{padding:15px;border-radius:14px;background:white;border:1px solid var(--line);margin:10px 0}.exercise b{color:var(--purple)}.answer{background:#fff6d5;padding:7px 9px;border-radius:8px;margin-top:9px;font-size:.84rem}.stats{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#efeafe;padding:8px 10px;border-radius:99px;font-size:.8rem}.error{color:#a22}@media(max-width:680px){.layout{grid-template-columns:1fr}}
-</style></head><body><main class="wrap"><header><small>MELODYMATH / LESSON LAB</small><h1>כשהמספרים מתחילים לנגן.</h1><p>מחולל שיעור שמחבר תיאוריה מוזיקלית, שברים, יחסים ומשוואות.</p></header><section class="layout"><form class="card" id="form"><h2>בנו שיעור</h2><label>סולם מוזיקלי</label><select id="key"><option>C major</option><option>A minor</option><option>G major</option><option>D minor</option></select><label>נושא מתמטי</label><select id="topic"><option value="rhythm-fractions">שברים וקצב</option><option value="interval-ratios">יחסי מרווחים</option><option value="melody-equations">משוואות מלודיות</option><option value="tempo-progressions">סדרות טמפו</option></select><label>רמת קושי</label><input id="difficulty" type="range" min="1" max="5" value="3"><label>מספר תרגילים</label><input id="count" type="number" min="1" max="6" value="3"><button>צור שיעור</button></form><div class="card" id="result"></div></section></main><script>
-const __modules={"lib/generateLessonPlan.js":function(require,module,exports){
-function generateLessonPlan(musicKey, mathTopic, difficulty, numExercises) {
-  const validKeys = [
-    'C major', 'C# major', 'Db major', 'D major', 'Eb major', 'E major', 'F major',
-    'F# major', 'Gb major', 'G major', 'Ab major', 'A major', 'Bb major', 'B major',
-    'C minor', 'C# minor', 'D minor', 'Eb minor', 'E minor', 'F minor', 'F# minor',
-    'G minor', 'G# minor', 'A minor', 'Bb minor', 'B minor'
-  ];
-  const validTopics = ['interval-ratios', 'rhythm-fractions', 'melody-equations', 'tempo-progressions'];
-  if (!validKeys.includes(musicKey)) throw new Error('Invalid music key');
-  if (!validTopics.includes(mathTopic)) throw new Error('Unsupported math topic');
-  if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 5) throw new Error('Difficulty must be 1-5');
-  if (!Number.isInteger(numExercises) || numExercises <= 0) throw new Error('numExercises must be positive');
-
-  const intervalRatios = {
-    'minor second': 16/15, 'major second': 9/8, 'minor third': 6/5, 'major third': 5/4,
-    'perfect fourth': 4/3, 'tritone': 45/32, 'perfect fifth': 3/2, 'minor sixth': 8/5,
-    'major sixth': 5/3, 'minor seventh': 9/5, 'major seventh': 15/8, 'octave': 2/1
-  };
-  const intervalNames = Object.keys(intervalRatios);
-  const noteNames = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
-  const keyToRoot = ({Db:'C#',Gb:'F#','G#':'Ab'}[musicKey.split(' ')[0]] || musicKey.split(' ')[0]);
-  const rootIndex = noteNames.indexOf(keyToRoot);
-  const scaleNotes = [];
-  const intervals = [0, 2, 4, 5, 7, 9, 11];
-  for (let i = 0; i < 7; i++) {
-    scaleNotes.push(noteNames[(rootIndex + intervals[i]) % 12]);
-  }
-
-  const templates = {
-    'interval-ratios': {
-      generate: () => {
-        const i1 = intervalNames[Math.floor(Math.random() * intervalNames.length)];
-        let i2 = intervalNames[Math.floor(Math.random() * intervalNames.length)];
-        while (i2 === i1) i2 = intervalNames[Math.floor(Math.random() * intervalNames.length)];
-        const ratio1 = intervalRatios[i1];
-        const ratio2 = intervalRatios[i2];
-        const result = ratio1 > ratio2 ? ratio1 / ratio2 : ratio2 / ratio1;
-        const rootNote = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
-        return {
-          type: 'interval-ratios',
-          description: `Find the ratio between the intervals of a ${i1} and a ${i2}`,
-          parameters: { rootNote, interval1: i1, interval2: i2, expectedRatio: Math.round(result * 100) / 100 }
-        };
-      }
-    },
-    'rhythm-fractions': {
-      generate: () => {
-        const noteValues = ['whole', 'half', 'quarter', 'eighth', 'sixteenth'];
-        const fractions = [1, 1/2, 1/4, 1/8, 1/16];
-        const idx1 = Math.floor(Math.random() * noteValues.length);
-        let idx2 = Math.floor(Math.random() * noteValues.length);
-        while (idx2 === idx1) idx2 = Math.floor(Math.random() * noteValues.length);
-        const sum = fractions[idx1] + fractions[idx2];
-        const bpm = 60 + difficulty * 20;
-        return {
-          type: 'rhythm-fractions',
-          description: `Add the durations of a ${noteValues[idx1]} note and a ${noteValues[idx2]} note in 4/4 time`,
-          parameters: { note1: noteValues[idx1], note2: noteValues[idx2], expectedSum: sum, bpm }
-        };
-      }
-    },
-    'melody-equations': {
-      generate: () => {
-        const startNote = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
-        const startIdx = noteNames.indexOf(startNote);
-        const step = Math.floor(Math.random() * 5) + 1;
-        const direction = Math.random() > 0.5 ? 1 : -1;
-        const endIdx = (startIdx + step * direction + 12) % 12;
-        const endNote = noteNames[endIdx];
-        return {
-          type: 'melody-equations',
-          description: `If the melody starts on ${startNote} and moves ${direction > 0 ? 'up' : 'down'} by ${step} semitones, what is the resulting note?`,
-          parameters: { startNote, step, direction: direction > 0 ? 'up' : 'down', expectedNote: endNote }
-        };
-      }
-    },
-    'tempo-progressions': {
-      generate: () => {
-        const startBpm = 60 + Math.floor(Math.random() * 60);
-        const multiplier = [1.5, 2, 0.75, 0.5][Math.floor(Math.random() * 4)];
-        const newBpm = Math.round(startBpm * multiplier);
-        return {
-          type: 'tempo-progressions',
-          description: `If the tempo changes from ${startBpm} BPM by a factor of ${multiplier}, what is the new tempo?`,
-          parameters: { startBpm, multiplier, expectedBpm: newBpm }
-        };
-      }
-    }
-  };
-
-  const usedParams = new Set();
-  const exercises = [];
-  let attempts = 0;
-  while (exercises.length < numExercises && attempts < numExercises * 10) {
-    attempts++;
-    const exercise = templates[mathTopic].generate();
-    const paramKey = JSON.stringify(exercise.parameters);
-    if (!usedParams.has(paramKey)) {
-      usedParams.add(paramKey);
-      exercises.push(exercise);
-    }
-  }
-  if (exercises.length < numExercises) {
-    throw new Error('Could not generate enough unique exercises');
-  }
-  return exercises;
-}
-
-module.exports = { generateLessonPlan };
-
-},
-"lib/computeNextReview.js":function(require,module,exports){
-function computeNextReview({lastReviewDate, performanceRating, currentIntervalDays}) {
-  if (!Number.isInteger(performanceRating) || performanceRating < 1 || performanceRating > 5) {
-    throw new Error("performanceRating must be between 1 and 5");
-  }
-  if (currentIntervalDays <= 0) {
-    currentIntervalDays = 1;
-  }
-  let factor;
-  if (performanceRating === 1) {
-    factor = 1;
-  } else if (performanceRating === 2) {
-    factor = 1.5;
-  } else if (performanceRating === 3) {
-    factor = 2;
-  } else if (performanceRating === 4) {
-    factor = 2.5;
-  } else {
-    factor = 3;
-  }
-  let nextIntervalDays;
-  if (lastReviewDate === null) {
-    nextIntervalDays = 1;
-  } else {
-    nextIntervalDays = currentIntervalDays * factor;
-    if (performanceRating === 1) {
-      nextIntervalDays = 1;
-    }
-  }
-  if (nextIntervalDays > 365) {
-    nextIntervalDays = 365;
-  }
-  let nextReviewDate;
-  if (lastReviewDate === null) {
-    const now = new Date();
-    const future = new Date(now.getTime() + nextIntervalDays * 86400000);
-    nextReviewDate = future.toISOString();
-  } else {
-    const last = new Date(lastReviewDate);
-    const future = new Date(last.getTime() + nextIntervalDays * 86400000);
-    if (Number.isNaN(future.getTime())) throw new Error('Invalid lastReviewDate');
-    nextReviewDate = future.toISOString();
-  }
-  return { nextIntervalDays, nextReviewDate };
-}
-module.exports = { computeNextReview };
-
-},
-"lib/nextTempo.js":function(require,module,exports){
-module.exports = {
-  nextTempo: function(current, wasCorrect) {
-    let next = wasCorrect ? current * 0.96 : current * 1.12;
-    if (next < 0.55) next = 0.55;
-    if (next > 2.0) next = 2.0;
-    return Math.round(next * 1000) / 1000;
-  }
-};
-}};const __cache={};function __require(id,from){if(id.startsWith('.')){id=(from.slice(0,from.lastIndexOf('/')+1)+id).split('/').reduce((a,p)=>p==='..'?(a.pop(),a):p==='.'?a:(a.push(p),a),[]).join('/')}if(!id.endsWith('.js'))id+='.js';if(__cache[id])return __cache[id].exports;const fn=__modules[id];if(!fn)throw new Error('Module not bundled: '+id);const module={exports:{}};__cache[id]=module;const localRequire=req=>__require(req,id);localRequire.main=null;fn(localRequire,module,module.exports);return module.exports}
-const Melody={...__require('lib/generateLessonPlan.js'),...__require('lib/computeNextReview.js'),...__require('lib/nextTempo.js')};const $=x=>document.getElementById(x),esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));function answer(p){const key=Object.keys(p).find(k=>/^expected/.test(k));return key?`${key.replace('expected','')}: ${p[key]}`:'גלו באמצעות הנגינה'}function run(e){if(e)e.preventDefault();try{const exercises=Melody.generateLessonPlan($('key').value,$('topic').value,Number($('difficulty').value),Number($('count').value)),review=Melody.computeNextReview({lastReviewDate:new Date().toISOString(),performanceRating:4,currentIntervalDays:2}),tempo=Melody.nextTempo(1,true);$('result').innerHTML=`<div class="stats"><span class="pill">${$('key').value}</span><span class="pill">קושי ${$('difficulty').value}/5</span><span class="pill">קצב הבא ×${tempo}</span><span class="pill">חזרה בעוד ${review.nextIntervalDays} ימים</span></div><h2>התרגילים שלך</h2>${exercises.map((x,i)=>`<article class="exercise"><b>תרגיל ${i+1}</b><p dir="ltr">${esc(x.description)}</p><div class="answer" dir="ltr">${esc(answer(x.parameters))}</div></article>`).join('')}`}catch(err){$('result').innerHTML=`<p class="error">${esc(err.message)}</p>`}}$('form').addEventListener('submit',run);run();
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath | מתמטיקה שמנגנת</title><style>
+:root{--ink:#21183b;--muted:#706887;--purple:#6946e8;--pink:#f2529a;--yellow:#ffd85d;--bg:#f7f4ff;--card:#fff;--line:#ded6f0;--good:#167957;--bad:#b23a52}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 5%,#ffe1ef,transparent 27%),radial-gradient(circle at 90% 0,#dfd6ff,transparent 31%),var(--bg);color:var(--ink);font-family:Arial,sans-serif;min-height:100vh}.wrap{max-width:940px;margin:auto;padding:28px 18px 60px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}.brand{font-size:1.15rem;font-weight:900;color:var(--purple)}h1{font-size:clamp(2.2rem,7vw,4.5rem);margin:8px 0;line-height:1}p{line-height:1.55}.tabs{display:flex;gap:8px}.tab,.secondary{width:auto;background:#fff;color:var(--purple);border:1px solid var(--line);margin:0}.tab.active{background:var(--purple);color:#fff}.panel{display:none}.panel.active{display:block}.card{background:#fffffff0;border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,34px);box-shadow:0 20px 50px #4638701a}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0}.level{border:2px solid transparent;background:#f0ebff;color:var(--ink);padding:22px 12px;border-radius:16px;cursor:pointer}.level strong{display:block;font-size:1.2rem}.level.selected{border-color:var(--purple);background:#e6deff}.primary,button{border:0;border-radius:12px;background:var(--purple);color:#fff;padding:13px 18px;font:inherit;font-weight:800;cursor:pointer}.primary{width:100%}.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9rem}.progress{height:8px;background:#ece7f5;border-radius:99px;margin:12px 0 26px;overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--purple));transition:width .25s}.tag{display:inline-block;background:#eee9ff;color:var(--purple);padding:6px 10px;border-radius:99px;font-size:.78rem;font-weight:bold}.prompt{font-size:clamp(1.35rem,4vw,2rem);margin:18px 0 24px}.answer-row{display:flex;gap:10px}input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:13px;background:white;font:inherit;color:var(--ink)}.answer-row button{white-space:nowrap}.feedback{margin-top:18px;padding:16px;border-radius:14px}.feedback.good{background:#e5f6ef;color:var(--good)}.feedback.bad{background:#ffe8ed;color:var(--bad)}.hint{margin-top:7px;color:var(--ink)}.session{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.stat{flex:1;min-width:120px;background:#f4f0fc;border-radius:14px;padding:16px;text-align:center}.stat strong{font-size:1.7rem;display:block}.playgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.tool{background:#faf8ff;border:1px solid var(--line);border-radius:17px;padding:18px}.tool h3{margin-top:0}.result{margin-top:14px;padding:14px;background:#fff5ce;border-radius:12px;font-weight:bold}.rhythm{font-size:1.4rem;direction:ltr;text-align:center}@media(max-width:680px){header{display:block}.tabs{margin-top:15px}.levels,.playgrid{grid-template-columns:1fr}.answer-row{display:block}.answer-row button{width:100%;margin-top:9px}}
+</style></head><body><main class="wrap"><header><div><div class="brand">♫ MELODYMATH</div><h1>מתמטיקה שמנגנת.</h1><p>תרגול קצר שמחבר שברים, יחסים ופונקציות לקצב ולמלודיה.</p></div><nav class="tabs"><button class="tab active" data-tab="practice">תרגול</button><button class="tab" data-tab="playground">מעבדה</button></nav></header>
+<section id="practice" class="panel active"><div id="start" class="card"><span class="tag">35 תרגילים מדורגים</span><h2>מאיפה מתחילים?</h2><p>בחרו רמה. אחרי שתי תשובות נכונות ברצף המערכת תעלה קושי; אחרי שתי טעויות היא תחזור צעד.</p><div class="levels"><button class="level selected" data-level="1"><strong>בסיס</strong>קצב ושברים</button><button class="level" data-level="2"><strong>מתקדמים</strong>יחסים וחזקות</button><button class="level" data-level="3"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button id="begin" class="primary">מתחילים לנגן</button></div>
+<div id="quiz" class="card hidden"><div class="topline"><span id="counter"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div class="answer-row"><input id="answer" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)"><button id="check">בדיקה</button></div><div id="feedback" class="feedback hidden"></div><button id="next" class="primary hidden">לתרגיל הבא</button><button id="finish" class="secondary hidden">סיום וסיכום</button></div>
+<div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button id="again" class="primary">אימון חדש</button></div></section>
+<section id="playground" class="panel"><div class="card"><span class="tag">הפונקציות האמיתיות מהספרייה</span><h2>מעבדת צליל וקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label>מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50"><div id="freq" class="result"></div></div><div class="tool"><h3>מחולל מקצב</h3><label>קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label>דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
+<script>
+const exercises=[
+[1,1,'שברים','קצב','רבע מנוקד שווה לכמה שמיניות?',3,'רבע רגיל = 2 שמיניות, והנקודה מוסיפה חצי מערך התו'],[2,1,'שברים','קצב','כמה רבעים יש בתיבה בזמן 4/4?',4,'המספר העליון מציין כמה רבעים בתיבה'],[3,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של סול במרווח קווינטה?','3:2','קווינטה נקייה היא יחס 3:2'],[4,1,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 3/4?',6,'כל רבע שווה 2 שמיניות'],[5,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של פה במרווח קוורטה?','4:3','קוורטה נקייה היא יחס 4:3'],[6,1,'שברים','קצב','כמה רבעים שווה חצי מנוקד?',3,'חצי רגיל = 2 רבעים, והנקודה מוסיפה רבע נוסף'],[7,1,'חזקות','טמפו','אם מהירות הקצב מוכפלת פי 2 בכל דקה, כמה פעמים תגדל המהירות אחרי 3 דקות?',8,'2 בחזקת 3'],[8,1,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 2/4?',8,'כל רבע שווה 4 שש־עשריות'],[9,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של דו באוקטבה?','2:1','אוקטבה היא הכפלת התדר פי 2'],[10,1,'שברים','קצב','משך תיבה במשקל 6/8 שווה לכמה רבעים?',3,'שש שמיניות שוות במשך לשלושה רבעים; בפועל מרגישים שתי פעימות של רבע מנוקד'],[11,1,'חזקות','טמפו','קצב מתחיל ב־60 BPM ומוכפל כל 2 דקות. מה הקצב אחרי 4 דקות?',240,'60 × 2² = 240'],[12,1,'שברים','קצב','כמה חצאים יש בתיבה בזמן 4/4?',2,'כל חצי שווה 2 רבעים'],
+[13,2,'שברים','קצב','כמה רבעים שווה שלם מנוקד?',6,'שלם רגיל = 4 רבעים, והנקודה מוסיפה 2'],[14,2,'יחסים','מרווחים','מה יחס התדרים בטרצה גדולה?','5:4','טרצה גדולה בכיוון עולה היא יחס 5:4'],[15,2,'חזקות','טמפו','קצב מתחיל ב־40 BPM ומשולש כל דקה. מה הקצב אחרי 3 דקות?',1080,'40 × 3³'],[16,2,'שברים','קצב','כמה שמיניות שווה חצי מנוקד?',6,'4 שמיניות ועוד 2'],[17,2,'יחסים','מרווחים','מה יחס התדרים בסקסטה גדולה?','5:3','סקסטה גדולה היא יחס 5:3'],[18,2,'פונקציות','מלודיה','תו עולה ב־2 חצאי טונים בכל צעד. מה השינוי אחרי 5 צעדים?',10,'2 × 5'],[19,2,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 3/4?',12,'כל רבע שווה 4 שש־עשריות'],[20,2,'חזקות','טמפו','קצב מתחיל ב־50 BPM ומוכפל כל 3 דקות. מה הקצב אחרי 6 דקות?',200,'50 × 2²'],[21,2,'יחסים','מרווחים','מה יחס התדרים בספטימה גדולה?','15:8','ספטימה גדולה היא יחס 15:8'],[22,2,'פונקציות','מלודיה','תו יורד ב־3 חצאי טונים בכל צעד. מה השינוי אחרי 4 צעדים?',-12,'-3 × 4'],[23,2,'שברים','קצב','כמה רבעים שווה שמינית מנוקדת?',.75,'0.5 רבע ועוד 0.25'],[24,2,'חזקות','טמפו','קצב מתחיל ב־30 BPM ומוכפל כל דקה. מה הקצב אחרי 5 דקות?',960,'30 × 2⁵'],
+[25,3,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 12/8?',12,'המספר העליון מציין שמיניות'],[26,3,'יחסים','מרווחים','מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?','75:64','בכוונון טבעי 5-limit היחס הוא 75:64'],[27,3,'פונקציות','מלודיה','תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה: 4−2=2; כפול 3'],[28,3,'חזקות','טמפו','קצב מתחיל ב־20 BPM ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?',540,'20 × 3³'],[29,3,'שברים','קצב','כמה רבעים שווה שלם עם שתי נקודות הארכה?',7,'4 + 2 + 1 = 7'],[30,3,'יחסים','מרווחים','מה יחס התדרים בטריטון בכיוון עולה?','45:32','בכוונון טבעי היחס הוא 45:32'],[31,3,'פונקציות','מלודיה','תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?',35,'5 × 7'],[32,3,'חזקות','טמפו','קצב מתחיל ב־10 BPM ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?',80,'10 × 2³'],[33,3,'שברים','קצב','כמה שמיניות שווה רבע עם שתי נקודות הארכה?',3.5,'2 + 1 + 0.5 = 3.5'],[34,3,'יחסים','מרווחים','מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?','64:45','בכוונון טבעי היחס הוא 64:45'],[35,3,'פונקציות','מלודיה','תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?',-12,'בכל חזרה: ‎-6+3=-3; כפול 4']
+].map(([id,level,mathTopic,musicConcept,prompt,answer,hint])=>({id,level,mathTopic,musicConcept,prompt,answer,hint}));
+let chosenLevel=1,history=[],current=null,answered=false,seed=Date.now()&0x7fffffff;
+const $=id=>document.getElementById(id); const show=(id,on)=>$(id).classList.toggle('hidden',!on);
+function rng(n){let s=n|0;return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
+function nextExercise(){const seen=new Set(history.map(h=>h.id));let level=current?current.level:chosenLevel;const last=history.slice(-2);if(last.length===2&&last.every(x=>x.correct))level=Math.min(3,level+1);else if(last.length===2&&last.every(x=>!x.correct))level=Math.max(1,level-1);let pool=exercises.filter(x=>x.level===level&&!seen.has(x.id));if(!pool.length)pool=exercises.filter(x=>!seen.has(x.id));if(!pool.length)pool=exercises;const random=rng(seed+history.length*97);return pool[Math.floor(random()*pool.length)]}
+function renderExercise(){current=nextExercise();answered=false;$('counter').textContent=`תרגיל ${history.length+1} מתוך 10`;$('score').textContent=`${history.filter(x=>x.correct).length} נכונות`;$('bar').style.width=`${history.length*10}%`;$('meta').textContent=`רמה ${current.level} · ${current.musicConcept} × ${current.mathTopic}`;$('prompt').textContent=current.prompt;$('answer').value='';$('answer').disabled=false;$('check').disabled=false;show('feedback',false);show('next',false);show('finish',history.length>0);setTimeout(()=>$('answer').focus(),0)}
+function normalize(v){return String(v).trim().replace(/\s/g,'').replace(/,/g,'.')}
+function check(){if(answered||!normalize($('answer').value))return;answered=true;const correct=normalize($('answer').value)===normalize(current.answer);history.push({id:current.id,correct});$('feedback').className=`feedback ${correct?'good':'bad'}`;$('feedback').innerHTML=`<strong>${correct?'בדיוק! 🎵':'עוד רגע זה יושב.'}</strong><div class="hint">${current.hint}. התשובה: <b>${current.answer}</b></div>`;show('feedback',true);$('answer').disabled=true;$('check').disabled=true;$('bar').style.width=`${history.length*10}%`;show('next',history.length<10);show('finish',true);if(history.length===10)setTimeout(finish,650)}
+function finish(){show('quiz',false);show('summary',true);const good=history.filter(x=>x.correct).length;const level=Math.max(...history.map(x=>exercises.find(e=>e.id===x.id).level));$('stats').innerHTML=`<div class="stat"><strong>${good}/${history.length}</strong>נכונות</div><div class="stat"><strong>${Math.round(good/history.length*100)||0}%</strong>דיוק</div><div class="stat"><strong>${level}</strong>רמה מרבית</div>`;$('summaryText').textContent=good/history.length>=.8?'שליטה מצוינת. בפעם הבאה אפשר להתחיל ברמה גבוהה יותר.':'כל טעות כיוונה את התרגיל הבא — עוד סבב קצר יחזק את החיבורים.'}
+document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dataset.level;document.querySelectorAll('.level').forEach(x=>x.classList.toggle('selected',x===b))});
+$('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter')check()};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true)};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
+function yToFreq(y,yMin,yMax){if(typeof y!=='number'||!isFinite(y))return null;if(yMin===yMax)return 440*Math.pow(2,(66-69)/12);const t=(Math.min(Math.max(y,yMin),yMax)-yMin)/(yMax-yMin);return 440*Math.pow(2,(48+t*36-69)/12)}
+function renderFreq(){const y=+$('y').value;$('yLabel').textContent=y;$('freq').textContent=`${yToFreq(y,0,100).toFixed(2)} Hz`}$('y').oninput=renderFreq;renderFreq();
+function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}const names={'.5':'1/2','.375':'3/8','.25':'1/4','.1875':'3/16','.125':'1/8','.0625':'1/16'};return{fractionPattern:pattern.map(n=>names[String(n)]||(Math.abs(n-1/3)<.01?'1/3':Math.abs(n-2/3)<.01?'2/3':n.toFixed(3))).join(' + '),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
+$('makeRhythm').onclick=()=>{const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`};$('makeRhythm').click();
 </script></body></html>
