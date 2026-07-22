@@ -38,20 +38,5 @@
   "36": "MelodyMath — דף אימות שוק (גרסה ראשונית)",
   "37": "assessMusicMathLevel.js",
   "38": "generateClassConfig.js",
-  "39": "generateFirstExercise.js",
-  "40": "syncProgress.js",
-  "41": "exerciseSets.js",
-  "42": "calculateStreakRewards.js",
-  "43": "generateClassInviteToken.js",
-  "44": "generateDailyChallenge.js",
-  "45": "generateAnonymizedReport.js",
-  "46": "generateAssignment.js",
-  "47": "generateClassReport.js",
-  "48": "generateLearningPath.js",
-  "49": "getDueReviews.js",
-  "50": "getNextExercise.js",
-  "51": "moderateMathLyrics.js",
-  "52": "moderateUserContent.js",
-  "53": "quickStartDemo.js",
-  "54": "verifyTempoSequence.js"
+  "39": "generateFirstExercise.js"
 }

@@ -148,39 +148,6 @@
       "norm_label": "calculateadaptivedifficulty()"
     },
     {
-      "label": "calculateStreakRewards.js",
-      "file_type": "code",
-      "source_file": "lib/calculateStreakRewards.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_calculatestreakrewards",
-      "community": 42,
-      "community_name": "calculateStreakRewards.js",
-      "norm_label": "calculatestreakrewards.js"
-    },
-    {
-      "label": "calculateStreakRewards()",
-      "file_type": "code",
-      "source_file": "lib/calculateStreakRewards.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_calculatestreakrewards_calculatestreakrewards",
-      "community": 42,
-      "community_name": "calculateStreakRewards.js",
-      "norm_label": "calculatestreakrewards()"
-    },
-    {
-      "label": "getPracticeHistory()",
-      "file_type": "code",
-      "source_file": "lib/calculateStreakRewards.js",
-      "source_location": "L33",
-      "_origin": "ast",
-      "id": "lib_calculatestreakrewards_getpracticehistory",
-      "community": 42,
-      "community_name": "calculateStreakRewards.js",
-      "norm_label": "getpracticehistory()"
-    },
-    {
       "label": "computeNextReview.js",
       "file_type": "code",
       "source_file": "lib/computeNextReview.js",
@@ -247,50 +214,6 @@
       "norm_label": "createclassassignment()"
     },
     {
-      "label": "exerciseSets.js",
-      "file_type": "code",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_exercisesets",
-      "community": 41,
-      "community_name": "exerciseSets.js",
-      "norm_label": "exercisesets.js"
-    },
-    {
-      "label": "exerciseSets()",
-      "file_type": "code",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_exercisesets_exercisesets",
-      "community": 41,
-      "community_name": "exerciseSets.js",
-      "norm_label": "exercisesets()"
-    },
-    {
-      "label": "seededRandom()",
-      "file_type": "code",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L39",
-      "_origin": "ast",
-      "id": "lib_exercisesets_seededrandom",
-      "community": 41,
-      "community_name": "exerciseSets.js",
-      "norm_label": "seededrandom()"
-    },
-    {
-      "label": "nextExercise()",
-      "file_type": "code",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L47",
-      "_origin": "ast",
-      "id": "lib_exercisesets_nextexercise",
-      "community": 41,
-      "community_name": "exerciseSets.js",
-      "norm_label": "nextexercise()"
-    },
-    {
       "label": "genGrowthProblem.js",
       "file_type": "code",
       "source_file": "lib/genGrowthProblem.js",
@@ -335,50 +258,6 @@
       "norm_label": "generateadaptivelesson()"
     },
     {
-      "label": "generateAnonymizedReport.js",
-      "file_type": "code",
-      "source_file": "lib/generateAnonymizedReport.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateanonymizedreport",
-      "community": 45,
-      "community_name": "generateAnonymizedReport.js",
-      "norm_label": "generateanonymizedreport.js"
-    },
-    {
-      "label": "generateAnonymizedReport()",
-      "file_type": "code",
-      "source_file": "lib/generateAnonymizedReport.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateanonymizedreport_generateanonymizedreport",
-      "community": 45,
-      "community_name": "generateAnonymizedReport.js",
-      "norm_label": "generateanonymizedreport()"
-    },
-    {
-      "label": "generateAssignment.js",
-      "file_type": "code",
-      "source_file": "lib/generateAssignment.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateassignment",
-      "community": 46,
-      "community_name": "generateAssignment.js",
-      "norm_label": "generateassignment.js"
-    },
-    {
-      "label": "generateAssignment()",
-      "file_type": "code",
-      "source_file": "lib/generateAssignment.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateassignment_generateassignment",
-      "community": 46,
-      "community_name": "generateAssignment.js",
-      "norm_label": "generateassignment()"
-    },
-    {
       "label": "generateClassConfig.js",
       "file_type": "code",
       "source_file": "lib/generateClassConfig.js",
@@ -399,94 +278,6 @@
       "community": 38,
       "community_name": "generateClassConfig.js",
       "norm_label": "generateclassconfig()"
-    },
-    {
-      "label": "generateClassInviteToken.js",
-      "file_type": "code",
-      "source_file": "lib/generateClassInviteToken.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclassinvitetoken",
-      "community": 43,
-      "community_name": "generateClassInviteToken.js",
-      "norm_label": "generateclassinvitetoken.js"
-    },
-    {
-      "label": "crypto",
-      "file_type": "code",
-      "source_file": "lib/generateClassInviteToken.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclassinvitetoken_crypto",
-      "community": 43,
-      "community_name": "generateClassInviteToken.js",
-      "norm_label": "crypto"
-    },
-    {
-      "label": "generateClassInviteToken()",
-      "file_type": "code",
-      "source_file": "lib/generateClassInviteToken.js",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "lib_generateclassinvitetoken_generateclassinvitetoken",
-      "community": 43,
-      "community_name": "generateClassInviteToken.js",
-      "norm_label": "generateclassinvitetoken()"
-    },
-    {
-      "label": "generateClassReport.js",
-      "file_type": "code",
-      "source_file": "lib/generateClassReport.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclassreport",
-      "community": 47,
-      "community_name": "generateClassReport.js",
-      "norm_label": "generateclassreport.js"
-    },
-    {
-      "label": "generateClassReport()",
-      "file_type": "code",
-      "source_file": "lib/generateClassReport.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclassreport_generateclassreport",
-      "community": 47,
-      "community_name": "generateClassReport.js",
-      "norm_label": "generateclassreport()"
-    },
-    {
-      "label": "generateDailyChallenge.js",
-      "file_type": "code",
-      "source_file": "lib/generateDailyChallenge.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatedailychallenge",
-      "community": 44,
-      "community_name": "generateDailyChallenge.js",
-      "norm_label": "generatedailychallenge.js"
-    },
-    {
-      "label": "{ createHash }",
-      "file_type": "code",
-      "source_file": "lib/generateDailyChallenge.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatedailychallenge_createhash",
-      "community": 44,
-      "community_name": "generateDailyChallenge.js",
-      "norm_label": "{ createhash }"
-    },
-    {
-      "label": "generateDailyChallenge()",
-      "file_type": "code",
-      "source_file": "lib/generateDailyChallenge.js",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "lib_generatedailychallenge_generatedailychallenge",
-      "community": 44,
-      "community_name": "generateDailyChallenge.js",
-      "norm_label": "generatedailychallenge()"
     },
     {
       "label": "generateExerciseFromMelody.js",
@@ -553,28 +344,6 @@
       "community": 15,
       "community_name": "generateFirstWeekPlan.js",
       "norm_label": "generatefirstweekplan()"
-    },
-    {
-      "label": "generateLearningPath.js",
-      "file_type": "code",
-      "source_file": "lib/generateLearningPath.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatelearningpath",
-      "community": 48,
-      "community_name": "generateLearningPath.js",
-      "norm_label": "generatelearningpath.js"
-    },
-    {
-      "label": "generateLearningPath()",
-      "file_type": "code",
-      "source_file": "lib/generateLearningPath.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatelearningpath_generatelearningpath",
-      "community": 48,
-      "community_name": "generateLearningPath.js",
-      "norm_label": "generatelearningpath()"
     },
     {
       "label": "generateLessonPlan.js",
@@ -720,28 +489,6 @@
       "norm_label": "getadaptivehint()"
     },
     {
-      "label": "getDueReviews.js",
-      "file_type": "code",
-      "source_file": "lib/getDueReviews.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_getduereviews",
-      "community": 49,
-      "community_name": "getDueReviews.js",
-      "norm_label": "getduereviews.js"
-    },
-    {
-      "label": "getDueReviews()",
-      "file_type": "code",
-      "source_file": "lib/getDueReviews.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_getduereviews_getduereviews",
-      "community": 49,
-      "community_name": "getDueReviews.js",
-      "norm_label": "getduereviews()"
-    },
-    {
       "label": "getNextDifficulty.js",
       "file_type": "code",
       "source_file": "lib/getNextDifficulty.js",
@@ -764,28 +511,6 @@
       "norm_label": "getnextdifficulty()"
     },
     {
-      "label": "getNextExercise.js",
-      "file_type": "code",
-      "source_file": "lib/getNextExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_getnextexercise",
-      "community": 50,
-      "community_name": "getNextExercise.js",
-      "norm_label": "getnextexercise.js"
-    },
-    {
-      "label": "getNextExercise()",
-      "file_type": "code",
-      "source_file": "lib/getNextExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_getnextexercise_getnextexercise",
-      "community": 50,
-      "community_name": "getNextExercise.js",
-      "norm_label": "getnextexercise()"
-    },
-    {
       "label": "getNextReviewDate.js",
       "file_type": "code",
       "source_file": "lib/getNextReviewDate.js",
@@ -806,50 +531,6 @@
       "community": 23,
       "community_name": "getNextReviewDate.js",
       "norm_label": "getnextreviewdate()"
-    },
-    {
-      "label": "moderateMathLyrics.js",
-      "file_type": "code",
-      "source_file": "lib/moderateMathLyrics.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_moderatemathlyrics",
-      "community": 51,
-      "community_name": "moderateMathLyrics.js",
-      "norm_label": "moderatemathlyrics.js"
-    },
-    {
-      "label": "moderateMathLyrics()",
-      "file_type": "code",
-      "source_file": "lib/moderateMathLyrics.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_moderatemathlyrics_moderatemathlyrics",
-      "community": 51,
-      "community_name": "moderateMathLyrics.js",
-      "norm_label": "moderatemathlyrics()"
-    },
-    {
-      "label": "moderateUserContent.js",
-      "file_type": "code",
-      "source_file": "lib/moderateUserContent.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_moderateusercontent",
-      "community": 52,
-      "community_name": "moderateUserContent.js",
-      "norm_label": "moderateusercontent.js"
-    },
-    {
-      "label": "moderateUserContent()",
-      "file_type": "code",
-      "source_file": "lib/moderateUserContent.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_moderateusercontent_moderateusercontent",
-      "community": 52,
-      "community_name": "moderateUserContent.js",
-      "norm_label": "moderateusercontent()"
     },
     {
       "label": "nearMiss.js",
@@ -984,28 +665,6 @@
       "norm_label": "quadinfo()"
     },
     {
-      "label": "quickStartDemo.js",
-      "file_type": "code",
-      "source_file": "lib/quickStartDemo.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_quickstartdemo",
-      "community": 53,
-      "community_name": "quickStartDemo.js",
-      "norm_label": "quickstartdemo.js"
-    },
-    {
-      "label": "quickStartDemo()",
-      "file_type": "code",
-      "source_file": "lib/quickStartDemo.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_quickstartdemo_quickstartdemo",
-      "community": 53,
-      "community_name": "quickStartDemo.js",
-      "norm_label": "quickstartdemo()"
-    },
-    {
       "label": "recommendStartModule.js",
       "file_type": "code",
       "source_file": "lib/recommendStartModule.js",
@@ -1138,61 +797,6 @@
       "norm_label": "studentdataanonymizer()"
     },
     {
-      "label": "syncProgress.js",
-      "file_type": "code",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_syncprogress",
-      "community": 40,
-      "community_name": "syncProgress.js",
-      "norm_label": "syncprogress.js"
-    },
-    {
-      "label": "syncProgress()",
-      "file_type": "code",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_syncprogress_syncprogress",
-      "community": 40,
-      "community_name": "syncProgress.js",
-      "norm_label": "syncprogress()"
-    },
-    {
-      "label": "validateModules()",
-      "file_type": "code",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L49",
-      "_origin": "ast",
-      "id": "lib_syncprogress_validatemodules",
-      "community": 40,
-      "community_name": "syncProgress.js",
-      "norm_label": "validatemodules()"
-    },
-    {
-      "label": "validateScores()",
-      "file_type": "code",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L54",
-      "_origin": "ast",
-      "id": "lib_syncprogress_validatescores",
-      "community": 40,
-      "community_name": "syncProgress.js",
-      "norm_label": "validatescores()"
-    },
-    {
-      "label": "validateDate()",
-      "file_type": "code",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L59",
-      "_origin": "ast",
-      "id": "lib_syncprogress_validatedate",
-      "community": 40,
-      "community_name": "syncProgress.js",
-      "norm_label": "validatedate()"
-    },
-    {
       "label": "teacherDomainVerifier.js",
       "file_type": "code",
       "source_file": "lib/teacherDomainVerifier.js",
@@ -1312,28 +916,6 @@
       "community": 32,
       "community_name": "verifyLessonPlanIntegrity.js",
       "norm_label": "verifylessonplanintegrity()"
-    },
-    {
-      "label": "verifyTempoSequence.js",
-      "file_type": "code",
-      "source_file": "lib/verifyTempoSequence.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_verifytemposequence",
-      "community": 54,
-      "community_name": "verifyTempoSequence.js",
-      "norm_label": "verifytemposequence.js"
-    },
-    {
-      "label": "verifyTempoSequence()",
-      "file_type": "code",
-      "source_file": "lib/verifyTempoSequence.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_verifytemposequence_verifytemposequence",
-      "community": 54,
-      "community_name": "verifyTempoSequence.js",
-      "norm_label": "verifytemposequence()"
     },
     {
       "label": "yToFreq.js",
@@ -1736,41 +1318,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/calculateStreakRewards.js",
-      "source_location": "L38",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_calculatestreakrewards",
-      "target": "lib_calculatestreakrewards_calculatestreakrewards",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/calculateStreakRewards.js",
-      "source_location": "L33",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_calculatestreakrewards",
-      "target": "lib_calculatestreakrewards_getpracticehistory",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/calculateStreakRewards.js",
-      "source_location": "L13",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_calculatestreakrewards_calculatestreakrewards",
-      "target": "lib_calculatestreakrewards_getpracticehistory",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/computeNextReview.js",
       "source_location": "L45",
       "weight": 1.0,
@@ -1807,65 +1354,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L82",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_exercisesets",
-      "target": "lib_exercisesets_exercisesets",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L82",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_exercisesets",
-      "target": "lib_exercisesets_nextexercise",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L39",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_exercisesets",
-      "target": "lib_exercisesets_seededrandom",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L55",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_exercisesets_nextexercise",
-      "target": "lib_exercisesets_exercisesets",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/exerciseSets.js",
-      "source_location": "L54",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_exercisesets_nextexercise",
-      "target": "lib_exercisesets_seededrandom",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/genGrowthProblem.js",
       "source_location": "L14",
       "weight": 1.0,
@@ -1890,30 +1378,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/generateAnonymizedReport.js",
-      "source_location": "L45",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generateanonymizedreport",
-      "target": "lib_generateanonymizedreport_generateanonymizedreport",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateAssignment.js",
-      "source_location": "L29",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generateassignment",
-      "target": "lib_generateassignment_generateassignment",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/generateClassConfig.js",
       "source_location": "L39",
       "weight": 1.0,
@@ -1921,64 +1385,6 @@
       "context": "collection",
       "source": "lib_generateclassconfig",
       "target": "lib_generateclassconfig_generateclassconfig",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/generateClassInviteToken.js",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_generateclassinvitetoken",
-      "target": "lib_generateclassinvitetoken_crypto",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateClassInviteToken.js",
-      "source_location": "L28",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generateclassinvitetoken",
-      "target": "lib_generateclassinvitetoken_generateclassinvitetoken",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateClassReport.js",
-      "source_location": "L135",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generateclassreport",
-      "target": "lib_generateclassreport_generateclassreport",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/generateDailyChallenge.js",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_generatedailychallenge",
-      "target": "lib_generatedailychallenge_createhash",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateDailyChallenge.js",
-      "source_location": "L52",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatedailychallenge",
-      "target": "lib_generatedailychallenge_generatedailychallenge",
       "confidence_score": 0.5
     },
     {
@@ -2015,18 +1421,6 @@
       "context": "collection",
       "source": "lib_generatefirstweekplan",
       "target": "lib_generatefirstweekplan_generatefirstweekplan",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateLearningPath.js",
-      "source_location": "L41",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatelearningpath",
-      "target": "lib_generatelearningpath_generatelearningpath",
       "confidence_score": 0.5
     },
     {
@@ -2115,18 +1509,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/getDueReviews.js",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_getduereviews",
-      "target": "lib_getduereviews_getduereviews",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/getNextDifficulty.js",
       "source_location": "L19",
       "weight": 1.0,
@@ -2139,18 +1521,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/getNextExercise.js",
-      "source_location": "L55",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_getnextexercise",
-      "target": "lib_getnextexercise_getnextexercise",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/getNextReviewDate.js",
       "source_location": "L22",
       "weight": 1.0,
@@ -2158,30 +1528,6 @@
       "context": "collection",
       "source": "lib_getnextreviewdate",
       "target": "lib_getnextreviewdate_getnextreviewdate",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/moderateMathLyrics.js",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_moderatemathlyrics",
-      "target": "lib_moderatemathlyrics_moderatemathlyrics",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/moderateUserContent.js",
-      "source_location": "L37",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_moderateusercontent",
-      "target": "lib_moderateusercontent_moderateusercontent",
       "confidence_score": 0.5
     },
     {
@@ -2338,18 +1684,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/quickStartDemo.js",
-      "source_location": "L43",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_quickstartdemo",
-      "target": "lib_quickstartdemo_quickstartdemo",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/recommendStartModule.js",
       "source_location": "L36",
       "weight": 1.0,
@@ -2444,87 +1778,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L64",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_syncprogress",
-      "target": "lib_syncprogress_syncprogress",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L59",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_syncprogress",
-      "target": "lib_syncprogress_validatedate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L49",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_syncprogress",
-      "target": "lib_syncprogress_validatemodules",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L54",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_syncprogress",
-      "target": "lib_syncprogress_validatescores",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L13",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_syncprogress_syncprogress",
-      "target": "lib_syncprogress_validatedate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L11",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_syncprogress_syncprogress",
-      "target": "lib_syncprogress_validatemodules",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/syncProgress.js",
-      "source_location": "L12",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_syncprogress_syncprogress",
-      "target": "lib_syncprogress_validatescores",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/teacherDomainVerifier.js",
       "source_location": "L21",
       "weight": 1.0,
@@ -2591,18 +1844,6 @@
       "context": "collection",
       "source": "lib_verifylessonplanintegrity",
       "target": "lib_verifylessonplanintegrity_verifylessonplanintegrity",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/verifyTempoSequence.js",
-      "source_location": "L57",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_verifytemposequence",
-      "target": "lib_verifytemposequence_verifytemposequence",
       "confidence_score": 0.5
     },
     {
@@ -2928,5 +2169,5 @@
       "source_file": "README.md"
     }
   ],
-  "built_at_commit": "91672a4e9c8c8d5740fe8ab6f4ac48518e4674db"
+  "built_at_commit": "969f01d932cfc1bd67063593201df755db46221d"
 }

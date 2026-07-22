@@ -190,9 +190,9 @@
     "semantic_hash": "bf2c0a9418a690af081233c27a1f2335"
   },
   "index.html": {
-    "mtime": 1784678502.9658923,
-    "ast_hash": "a037c9e9e63510ea21450fb1dad7b4d3",
-    "semantic_hash": ""
+    "mtime": 1784569840.8550043,
+    "ast_hash": "b31ebbc4d9ec1e425ca9e42d1178621a",
+    "semantic_hash": "b31ebbc4d9ec1e425ca9e42d1178621a"
   },
   "landing.html": {
     "mtime": 1784407685.9979615,
@@ -217,81 +217,6 @@
   "VALIDATION.md": {
     "mtime": 1784581439.504157,
     "ast_hash": "1e032fb42e521b16e3a6c1d28504297a",
-    "semantic_hash": ""
-  },
-  "lib/calculateStreakRewards.js": {
-    "mtime": 1784659568.7590866,
-    "ast_hash": "d2b97228e0128633a5c8a479c555bb61",
-    "semantic_hash": ""
-  },
-  "lib/exerciseSets.js": {
-    "mtime": 1784678390.4904797,
-    "ast_hash": "c6d0664f426b110148543e6d39737e22",
-    "semantic_hash": ""
-  },
-  "lib/generateAnonymizedReport.js": {
-    "mtime": 1784645165.8681269,
-    "ast_hash": "60cf96220c5a5049b32d9479c3dc9169",
-    "semantic_hash": ""
-  },
-  "lib/generateAssignment.js": {
-    "mtime": 1784630774.3427944,
-    "ast_hash": "67fe20daa6bd1318926bda7fc7cfb555",
-    "semantic_hash": ""
-  },
-  "lib/generateClassInviteToken.js": {
-    "mtime": 1784601972.3311484,
-    "ast_hash": "f8ad84a8bc6d6dcfe6e5174c04bad523",
-    "semantic_hash": ""
-  },
-  "lib/generateClassReport.js": {
-    "mtime": 1784659567.6340826,
-    "ast_hash": "e0eaff3a3358f4f95a14070d0eea7932",
-    "semantic_hash": ""
-  },
-  "lib/generateDailyChallenge.js": {
-    "mtime": 1784616380.1594925,
-    "ast_hash": "f00ab51d2bd17c229417f1538c05b8bd",
-    "semantic_hash": ""
-  },
-  "lib/generateLearningPath.js": {
-    "mtime": 1784630772.9260404,
-    "ast_hash": "e8636f8a5ee6a60ac6d2eff6babd1b10",
-    "semantic_hash": ""
-  },
-  "lib/getDueReviews.js": {
-    "mtime": 1784616380.812934,
-    "ast_hash": "3a6ac55e5a655a9ff9f6bc39942368a9",
-    "semantic_hash": ""
-  },
-  "lib/getNextExercise.js": {
-    "mtime": 1784616379.2960436,
-    "ast_hash": "d4a65f35733fddb36594df51d6644550",
-    "semantic_hash": ""
-  },
-  "lib/moderateMathLyrics.js": {
-    "mtime": 1784645164.555997,
-    "ast_hash": "3ff2c237262c0986db37bc33037ceed5",
-    "semantic_hash": ""
-  },
-  "lib/moderateUserContent.js": {
-    "mtime": 1784601971.4697232,
-    "ast_hash": "1816268a2f508640d2f04b7e525b1cad",
-    "semantic_hash": ""
-  },
-  "lib/quickStartDemo.js": {
-    "mtime": 1784630773.795923,
-    "ast_hash": "fb1999b676e547d4498527c843f753df",
-    "semantic_hash": ""
-  },
-  "lib/syncProgress.js": {
-    "mtime": 1784673963.4593983,
-    "ast_hash": "0cf9b6e8e9f8d01ef612a4f44a75a1c1",
-    "semantic_hash": ""
-  },
-  "lib/verifyTempoSequence.js": {
-    "mtime": 1784645165.3019898,
-    "ast_hash": "b5e983342c9023f2b63f379dbb94df42",
     "semantic_hash": ""
   }
 }
