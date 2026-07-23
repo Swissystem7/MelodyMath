@@ -1,16 +1,16 @@
-# Graph Report - MelodyMath  (2026-07-23)
+# Graph Report - MelodyMath  (2026-07-22)
 
 ## Corpus Check
-- 65 files · ~22,526 words
+- 54 files · ~17,251 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 182 nodes · 141 edges · 66 communities (54 shown, 12 thin omitted)
-- Extraction: 45% EXTRACTED · 55% INFERRED · 0% AMBIGUOUS · INFERRED: 77 edges (avg confidence: 0.55)
+- 144 nodes · 107 edges · 55 communities (47 shown, 8 thin omitted)
+- Extraction: 43% EXTRACTED · 57% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.56)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `10ab6493`
+- Built from commit: `91672a4e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -28,11 +28,6 @@
 - calculateStreakRewards.js
 - generateClassInviteToken.js
 - generateDailyChallenge.js
-- remediationTrack.js
-- generateReferralCode.js
-- recordReferral.js
-- generateClassChallenges.js
-- selectNextExercise.js
 
 ## God Nodes (most connected - your core abstractions)
 1. `Functions Page` - 8 edges
@@ -40,11 +35,11 @@
 3. `807 Practice Page` - 6 edges
 4. `Index Home` - 6 edges
 5. `processReferral()` - 5 edges
-6. `skillHe()` - 4 edges
-7. `remediationPlan()` - 4 edges
-8. `syncProgress()` - 4 edges
-9. `README` - 4 edges
-10. `Landing Page` - 4 edges
+6. `syncProgress()` - 4 edges
+7. `README` - 4 edges
+8. `Landing Page` - 4 edges
+9. `nextExercise()` - 3 edges
+10. `getUserById()` - 3 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `README` --references--> `807 Practice Page`  [EXTRACTED]
@@ -65,7 +60,7 @@
 - **Sonification Pipeline** — functions, 807, sonification, logarithmic_mapping, function_families [INFERRED 0.80]
 - **Adaptive Pedagogy** — index, readme, rhythmic_training, adaptive_tempo, spaced_repetition, lesson_generator [INFERRED 0.85]
 
-## Communities (66 total, 12 thin omitted)
+## Communities (55 total, 8 thin omitted)
 
 ### Community 0 - "Functions Page"
 Cohesion: 0.19
@@ -87,14 +82,10 @@ Nodes (4): syncProgress(), validateDate(), validateModules(), validateScores()
 Cohesion: 0.83
 Nodes (3): exerciseSets(), nextExercise(), seededRandom()
 
-### Community 55 - "remediationTrack.js"
-Cohesion: 0.39
-Nodes (8): BANK, demo(), diagnoseGaps(), remediationPlan(), seededRandom(), SKILL_ORDER, skillHe(), SKILLS
-
 ## Knowledge Gaps
-- **20 isolated node(s):** `{ randomUUID }`, `crypto`, `{ createHash }`, `progressSnapshots`, `referralCodes` (+15 more)
+- **13 isolated node(s):** `crypto`, `{ createHash }`, `progressSnapshots`, `referralUsers`, `crypto` (+8 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -105,5 +96,5 @@ _Questions this graph is uniquely positioned to answer:_
   _`807 Practice Page` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 3 inferred relationships involving `Index Home` (e.g. with `Adaptive Tempo` and `Lesson Generator`) actually correct?**
   _`Index Home` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `{ randomUUID }`, `crypto`, `{ createHash }` to the rest of the system?**
-  _20 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `crypto`, `{ createHash }`, `progressSnapshots` to the rest of the system?**
+  _13 weakly-connected nodes found - possible documentation gaps or missing edges._

@@ -190,8 +190,8 @@
     "semantic_hash": "bf2c0a9418a690af081233c27a1f2335"
   },
   "index.html": {
-    "mtime": 1784746471.376788,
-    "ast_hash": "e3d53a751f53467d608ae4ee8aa555a6",
+    "mtime": 1784678502.9658923,
+    "ast_hash": "a037c9e9e63510ea21450fb1dad7b4d3",
     "semantic_hash": ""
   },
   "landing.html": {
@@ -292,61 +292,6 @@
   "lib/verifyTempoSequence.js": {
     "mtime": 1784645165.3019898,
     "ast_hash": "b5e983342c9023f2b63f379dbb94df42",
-    "semantic_hash": ""
-  },
-  "lib/assessOnboardingLevel.js": {
-    "mtime": 1784760374.1076121,
-    "ast_hash": "7535134e5028ce1f542a861bcd6c3d4b",
-    "semantic_hash": ""
-  },
-  "lib/buildChallengeLink.js": {
-    "mtime": 1784731565.863159,
-    "ast_hash": "de8e852169cd8f2e924c7531db8dc3bc",
-    "semantic_hash": ""
-  },
-  "lib/createOnboardingSandbox.js": {
-    "mtime": 1784760375.5873332,
-    "ast_hash": "558eca8900acc5e7b3fc647b18a8224d",
-    "semantic_hash": ""
-  },
-  "lib/equationToMelody.js": {
-    "mtime": 1784746471.868929,
-    "ast_hash": "6328d30501a8f4c147053b2cf5431548",
-    "semantic_hash": ""
-  },
-  "lib/generateClassChallenges.js": {
-    "mtime": 1784746471.710065,
-    "ast_hash": "4e25cb9637f3cf81b1059ac1c918f210",
-    "semantic_hash": ""
-  },
-  "lib/generateDifferentiatedPlan.js": {
-    "mtime": 1784731581.2281883,
-    "ast_hash": "385b06ce2ac7a6d9ea2fe8d5d2027d0f",
-    "semantic_hash": ""
-  },
-  "lib/generateQuickStartExercise.js": {
-    "mtime": 1784760374.9174068,
-    "ast_hash": "064a252b9e5f1748960c1f79292a72b2",
-    "semantic_hash": ""
-  },
-  "lib/generateReferralCode.js": {
-    "mtime": 1784731564.3228736,
-    "ast_hash": "b1d395221d5b533d4a29b976067af7a8",
-    "semantic_hash": ""
-  },
-  "lib/recordReferral.js": {
-    "mtime": 1784731566.6287708,
-    "ast_hash": "cf16f15052f90785b870cd3042f51f10",
-    "semantic_hash": ""
-  },
-  "lib/remediationTrack.js": {
-    "mtime": 1784746471.37779,
-    "ast_hash": "8392c42272bc6b4612f14b7e9e8bcc8b",
-    "semantic_hash": ""
-  },
-  "lib/selectNextExercise.js": {
-    "mtime": 1784746471.5102642,
-    "ast_hash": "bf4be906c31bc0225c84de6455e954ac",
     "semantic_hash": ""
   }
 }

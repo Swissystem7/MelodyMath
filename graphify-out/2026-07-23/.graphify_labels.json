@@ -53,16 +53,5 @@
   "51": "moderateMathLyrics.js",
   "52": "moderateUserContent.js",
   "53": "quickStartDemo.js",
-  "54": "verifyTempoSequence.js",
-  "55": "remediationTrack.js",
-  "56": "generateReferralCode.js",
-  "57": "recordReferral.js",
-  "58": "buildChallengeLink.js",
-  "59": "generateClassChallenges.js",
-  "60": "selectNextExercise.js",
-  "61": "assessOnboardingLevel.js",
-  "62": "createOnboardingSandbox.js",
-  "63": "equationToMelody.js",
-  "64": "generateDifferentiatedPlan.js",
-  "65": "generateQuickStartExercise.js"
+  "54": "verifyTempoSequence.js"
 }

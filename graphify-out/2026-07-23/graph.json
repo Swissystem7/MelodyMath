@@ -126,61 +126,6 @@
       "norm_label": "assessmusicmathlevel()"
     },
     {
-      "label": "assessOnboardingLevel.js",
-      "file_type": "code",
-      "source_file": "lib/assessOnboardingLevel.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_assessonboardinglevel",
-      "community": 61,
-      "community_name": "assessOnboardingLevel.js",
-      "norm_label": "assessonboardinglevel.js"
-    },
-    {
-      "label": "assessOnboardingLevel()",
-      "file_type": "code",
-      "source_file": "lib/assessOnboardingLevel.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_assessonboardinglevel_assessonboardinglevel",
-      "community": 61,
-      "community_name": "assessOnboardingLevel.js",
-      "norm_label": "assessonboardinglevel()"
-    },
-    {
-      "label": "buildChallengeLink.js",
-      "file_type": "code",
-      "source_file": "lib/buildChallengeLink.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_buildchallengelink",
-      "community": 58,
-      "community_name": "buildChallengeLink.js",
-      "norm_label": "buildchallengelink.js"
-    },
-    {
-      "label": "buildChallengeLink()",
-      "file_type": "code",
-      "source_file": "lib/buildChallengeLink.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_buildchallengelink_buildchallengelink",
-      "community": 58,
-      "community_name": "buildChallengeLink.js",
-      "norm_label": "buildchallengelink()"
-    },
-    {
-      "label": "parseChallengeLink()",
-      "file_type": "code",
-      "source_file": "lib/buildChallengeLink.js",
-      "source_location": "L11",
-      "_origin": "ast",
-      "id": "lib_buildchallengelink_parsechallengelink",
-      "community": 58,
-      "community_name": "buildChallengeLink.js",
-      "norm_label": "parsechallengelink()"
-    },
-    {
       "label": "calculateAdaptiveDifficulty.js",
       "file_type": "code",
       "source_file": "lib/calculateAdaptiveDifficulty.js",
@@ -300,50 +245,6 @@
       "community": 12,
       "community_name": "createClassAssignment.js",
       "norm_label": "createclassassignment()"
-    },
-    {
-      "label": "createOnboardingSandbox.js",
-      "file_type": "code",
-      "source_file": "lib/createOnboardingSandbox.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_createonboardingsandbox",
-      "community": 62,
-      "community_name": "createOnboardingSandbox.js",
-      "norm_label": "createonboardingsandbox.js"
-    },
-    {
-      "label": "createOnboardingSandbox()",
-      "file_type": "code",
-      "source_file": "lib/createOnboardingSandbox.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_createonboardingsandbox_createonboardingsandbox",
-      "community": 62,
-      "community_name": "createOnboardingSandbox.js",
-      "norm_label": "createonboardingsandbox()"
-    },
-    {
-      "label": "equationToMelody.js",
-      "file_type": "code",
-      "source_file": "lib/equationToMelody.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_equationtomelody",
-      "community": 63,
-      "community_name": "equationToMelody.js",
-      "norm_label": "equationtomelody.js"
-    },
-    {
-      "label": "equationToMelody()",
-      "file_type": "code",
-      "source_file": "lib/equationToMelody.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_equationtomelody_equationtomelody",
-      "community": 63,
-      "community_name": "equationToMelody.js",
-      "norm_label": "equationtomelody()"
     },
     {
       "label": "exerciseSets.js",
@@ -478,39 +379,6 @@
       "norm_label": "generateassignment()"
     },
     {
-      "label": "generateClassChallenges.js",
-      "file_type": "code",
-      "source_file": "lib/generateClassChallenges.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclasschallenges",
-      "community": 59,
-      "community_name": "generateClassChallenges.js",
-      "norm_label": "generateclasschallenges.js"
-    },
-    {
-      "label": "{ randomUUID }",
-      "file_type": "code",
-      "source_file": "lib/generateClassChallenges.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generateclasschallenges_randomuuid",
-      "community": 59,
-      "community_name": "generateClassChallenges.js",
-      "norm_label": "{ randomuuid }"
-    },
-    {
-      "label": "generateClassChallenges()",
-      "file_type": "code",
-      "source_file": "lib/generateClassChallenges.js",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "lib_generateclasschallenges_generateclasschallenges",
-      "community": 59,
-      "community_name": "generateClassChallenges.js",
-      "norm_label": "generateclasschallenges()"
-    },
-    {
       "label": "generateClassConfig.js",
       "file_type": "code",
       "source_file": "lib/generateClassConfig.js",
@@ -619,28 +487,6 @@
       "community": 44,
       "community_name": "generateDailyChallenge.js",
       "norm_label": "generatedailychallenge()"
-    },
-    {
-      "label": "generateDifferentiatedPlan.js",
-      "file_type": "code",
-      "source_file": "lib/generateDifferentiatedPlan.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatedifferentiatedplan",
-      "community": 64,
-      "community_name": "generateDifferentiatedPlan.js",
-      "norm_label": "generatedifferentiatedplan.js"
-    },
-    {
-      "label": "generateDifferentiatedPlan()",
-      "file_type": "code",
-      "source_file": "lib/generateDifferentiatedPlan.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatedifferentiatedplan_generatedifferentiatedplan",
-      "community": 64,
-      "community_name": "generateDifferentiatedPlan.js",
-      "norm_label": "generatedifferentiatedplan()"
     },
     {
       "label": "generateExerciseFromMelody.js",
@@ -806,83 +652,6 @@
       "community": 17,
       "community_name": "generateQuickJoinLink.js",
       "norm_label": "generatequickjoinlink()"
-    },
-    {
-      "label": "generateQuickStartExercise.js",
-      "file_type": "code",
-      "source_file": "lib/generateQuickStartExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatequickstartexercise",
-      "community": 65,
-      "community_name": "generateQuickStartExercise.js",
-      "norm_label": "generatequickstartexercise.js"
-    },
-    {
-      "label": "generateQuickStartExercise()",
-      "file_type": "code",
-      "source_file": "lib/generateQuickStartExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatequickstartexercise_generatequickstartexercise",
-      "community": 65,
-      "community_name": "generateQuickStartExercise.js",
-      "norm_label": "generatequickstartexercise()"
-    },
-    {
-      "label": "generateReferralCode.js",
-      "file_type": "code",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatereferralcode",
-      "community": 56,
-      "community_name": "generateReferralCode.js",
-      "norm_label": "generatereferralcode.js"
-    },
-    {
-      "label": "referralCodes",
-      "file_type": "code",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_generatereferralcode_referralcodes",
-      "community": 56,
-      "community_name": "generateReferralCode.js",
-      "norm_label": "referralcodes"
-    },
-    {
-      "label": "userCodes",
-      "file_type": "code",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L2",
-      "_origin": "ast",
-      "id": "lib_generatereferralcode_usercodes",
-      "community": 56,
-      "community_name": "generateReferralCode.js",
-      "norm_label": "usercodes"
-    },
-    {
-      "label": "generateReferralCode()",
-      "file_type": "code",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L4",
-      "_origin": "ast",
-      "id": "lib_generatereferralcode_generatereferralcode",
-      "community": 56,
-      "community_name": "generateReferralCode.js",
-      "norm_label": "generatereferralcode()"
-    },
-    {
-      "label": "validateReferralCode()",
-      "file_type": "code",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L30",
-      "_origin": "ast",
-      "id": "lib_generatereferralcode_validatereferralcode",
-      "community": 56,
-      "community_name": "generateReferralCode.js",
-      "norm_label": "validatereferralcode()"
     },
     {
       "label": "generateRhythmExercise.js",
@@ -1259,160 +1028,6 @@
       "norm_label": "recommendstartmodule()"
     },
     {
-      "label": "recordReferral.js",
-      "file_type": "code",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_recordreferral",
-      "community": 57,
-      "community_name": "recordReferral.js",
-      "norm_label": "recordreferral.js"
-    },
-    {
-      "label": "referrals",
-      "file_type": "code",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_recordreferral_referrals",
-      "community": 57,
-      "community_name": "recordReferral.js",
-      "norm_label": "referrals"
-    },
-    {
-      "label": "points",
-      "file_type": "code",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L2",
-      "_origin": "ast",
-      "id": "lib_recordreferral_points",
-      "community": 57,
-      "community_name": "recordReferral.js",
-      "norm_label": "points"
-    },
-    {
-      "label": "recordReferral()",
-      "file_type": "code",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L4",
-      "_origin": "ast",
-      "id": "lib_recordreferral_recordreferral",
-      "community": 57,
-      "community_name": "recordReferral.js",
-      "norm_label": "recordreferral()"
-    },
-    {
-      "label": "getLeaderboard()",
-      "file_type": "code",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L22",
-      "_origin": "ast",
-      "id": "lib_recordreferral_getleaderboard",
-      "community": 57,
-      "community_name": "recordReferral.js",
-      "norm_label": "getleaderboard()"
-    },
-    {
-      "label": "remediationTrack.js",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_remediationtrack",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "remediationtrack.js"
-    },
-    {
-      "label": "SKILLS",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L9",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_skills",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "skills"
-    },
-    {
-      "label": "SKILL_ORDER",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L16",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_skill_order",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "skill_order"
-    },
-    {
-      "label": "skillHe()",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L17",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_skillhe",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "skillhe()"
-    },
-    {
-      "label": "BANK",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L21",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_bank",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "bank"
-    },
-    {
-      "label": "seededRandom()",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L55",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_seededrandom",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "seededrandom()"
-    },
-    {
-      "label": "diagnoseGaps()",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L63",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_diagnosegaps",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "diagnosegaps()"
-    },
-    {
-      "label": "remediationPlan()",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L95",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_remediationplan",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "remediationplan()"
-    },
-    {
-      "label": "demo()",
-      "file_type": "code",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L121",
-      "_origin": "ast",
-      "id": "lib_remediationtrack_demo",
-      "community": 55,
-      "community_name": "remediationTrack.js",
-      "norm_label": "demo()"
-    },
-    {
       "label": "safeLyricsModerator.js",
       "file_type": "code",
       "source_file": "lib/safeLyricsModerator.js",
@@ -1488,39 +1103,6 @@
       "community": 28,
       "community_name": "selectFirstExercise.js",
       "norm_label": "selectfirstexercise()"
-    },
-    {
-      "label": "selectNextExercise.js",
-      "file_type": "code",
-      "source_file": "lib/selectNextExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_selectnextexercise",
-      "community": 60,
-      "community_name": "selectNextExercise.js",
-      "norm_label": "selectnextexercise.js"
-    },
-    {
-      "label": "selectNextExercise()",
-      "file_type": "code",
-      "source_file": "lib/selectNextExercise.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "lib_selectnextexercise_selectnextexercise",
-      "community": 60,
-      "community_name": "selectNextExercise.js",
-      "norm_label": "selectnextexercise()"
-    },
-    {
-      "label": "parametersFor()",
-      "file_type": "code",
-      "source_file": "lib/selectNextExercise.js",
-      "source_location": "L38",
-      "_origin": "ast",
-      "id": "lib_selectnextexercise_parametersfor",
-      "community": 60,
-      "community_name": "selectNextExercise.js",
-      "norm_label": "parametersfor()"
     },
     {
       "label": "studentDataAnonymizer.js",
@@ -2142,42 +1724,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/assessOnboardingLevel.js",
-      "source_location": "L93",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_assessonboardinglevel",
-      "target": "lib_assessonboardinglevel_assessonboardinglevel",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/buildChallengeLink.js",
-      "source_location": "L30",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_buildchallengelink",
-      "target": "lib_buildchallengelink_buildchallengelink",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/buildChallengeLink.js",
-      "source_location": "L30",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_buildchallengelink",
-      "target": "lib_buildchallengelink_parsechallengelink",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/calculateAdaptiveDifficulty.js",
       "source_location": "L28",
       "weight": 1.0,
@@ -2256,30 +1802,6 @@
       "context": "collection",
       "source": "lib_createclassassignment",
       "target": "lib_createclassassignment_createclassassignment",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/createOnboardingSandbox.js",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_createonboardingsandbox",
-      "target": "lib_createonboardingsandbox_createonboardingsandbox",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/equationToMelody.js",
-      "source_location": "L93",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_equationtomelody",
-      "target": "lib_equationtomelody_equationtomelody",
       "confidence_score": 0.5
     },
     {
@@ -2392,29 +1914,6 @@
     {
       "relation": "indirect_call",
       "confidence": "INFERRED",
-      "source_file": "lib/generateClassChallenges.js",
-      "source_location": "L62",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generateclasschallenges",
-      "target": "lib_generateclasschallenges_generateclasschallenges",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/generateClassChallenges.js",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_generateclasschallenges",
-      "target": "lib_generateclasschallenges_randomuuid",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
       "source_file": "lib/generateClassConfig.js",
       "source_location": "L39",
       "weight": 1.0,
@@ -2480,18 +1979,6 @@
       "context": "collection",
       "source": "lib_generatedailychallenge",
       "target": "lib_generatedailychallenge_generatedailychallenge",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateDifferentiatedPlan.js",
-      "source_location": "L67",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatedifferentiatedplan",
-      "target": "lib_generatedifferentiatedplan_generatedifferentiatedplan",
       "confidence_score": 0.5
     },
     {
@@ -2587,64 +2074,6 @@
       "context": "collection",
       "source": "lib_generatequickjoinlink",
       "target": "lib_generatequickjoinlink_generatequickjoinlink",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateQuickStartExercise.js",
-      "source_location": "L135",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatequickstartexercise",
-      "target": "lib_generatequickstartexercise_generatequickstartexercise",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L41",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatereferralcode",
-      "target": "lib_generatereferralcode_generatereferralcode",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_generatereferralcode",
-      "target": "lib_generatereferralcode_referralcodes",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_generatereferralcode",
-      "target": "lib_generatereferralcode_usercodes",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/generateReferralCode.js",
-      "source_location": "L41",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_generatereferralcode",
-      "target": "lib_generatereferralcode_validatereferralcode",
       "confidence_score": 0.5
     },
     {
@@ -2931,215 +2360,6 @@
       "confidence_score": 0.5
     },
     {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_recordreferral",
-      "target": "lib_recordreferral_getleaderboard",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_recordreferral",
-      "target": "lib_recordreferral_points",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_recordreferral",
-      "target": "lib_recordreferral_recordreferral",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/recordReferral.js",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_recordreferral",
-      "target": "lib_recordreferral_referrals",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_bank",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L121",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_demo",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L151",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_diagnosegaps",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L151",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_remediationplan",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L55",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_seededrandom",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L16",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_skill_order",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L151",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_skillhe",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack",
-      "target": "lib_remediationtrack_skills",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L17",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack_skillhe",
-      "target": "lib_remediationtrack_skills"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L76",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack_diagnosegaps",
-      "target": "lib_remediationtrack_skillhe",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L113",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack_remediationplan",
-      "target": "lib_remediationtrack_skillhe",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L104",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack_remediationplan",
-      "target": "lib_remediationtrack_seededrandom",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L124",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack_demo",
-      "target": "lib_remediationtrack_diagnosegaps",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/remediationTrack.js",
-      "source_location": "L135",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_remediationtrack_demo",
-      "target": "lib_remediationtrack_remediationplan",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "lib/safeLyricsModerator.js",
@@ -3197,41 +2417,6 @@
       "source": "lib_selectfirstexercise",
       "target": "lib_selectfirstexercise_selectfirstexercise",
       "confidence_score": 0.5
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/selectNextExercise.js",
-      "source_location": "L38",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_selectnextexercise",
-      "target": "lib_selectnextexercise_parametersfor",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
-      "source_file": "lib/selectNextExercise.js",
-      "source_location": "L61",
-      "weight": 1.0,
-      "_origin": "ast",
-      "context": "collection",
-      "source": "lib_selectnextexercise",
-      "target": "lib_selectnextexercise_selectnextexercise",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/selectNextExercise.js",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "lib_selectnextexercise_selectnextexercise",
-      "target": "lib_selectnextexercise_parametersfor",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3743,5 +2928,5 @@
       "source_file": "README.md"
     }
   ],
-  "built_at_commit": "10ab64936e7f19367f6c509408b47af44fb44d96"
+  "built_at_commit": "91672a4e9c8c8d5740fe8ab6f4ac48518e4674db"
 }
