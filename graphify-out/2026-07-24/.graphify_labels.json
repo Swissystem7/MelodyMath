@@ -64,14 +64,5 @@
   "62": "createOnboardingSandbox.js",
   "63": "equationToMelody.js",
   "64": "generateDifferentiatedPlan.js",
-  "65": "generateQuickStartExercise.js",
-  "66": "sanitizeLessonContent.js",
-  "67": "anonymizeStudentData.js",
-  "68": "checkContentSafety.js",
-  "69": "detectRhythmCheat.js",
-  "70": "generateLessonPlanTemplate.js",
-  "71": "generateOnboardingChallenge.js",
-  "72": "generateProgressReport.js",
-  "73": "getConceptPreviewData.js",
-  "74": "verifySubmission.js"
+  "65": "generateQuickStartExercise.js"
 }

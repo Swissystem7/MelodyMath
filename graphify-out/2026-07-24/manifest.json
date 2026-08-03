@@ -348,50 +348,5 @@
     "mtime": 1784746471.5102642,
     "ast_hash": "bf4be906c31bc0225c84de6455e954ac",
     "semantic_hash": ""
-  },
-  "lib/anonymizeStudentData.js": {
-    "mtime": 1784774790.9526823,
-    "ast_hash": "ceb6257c90984649c5e83bd7c317df4b",
-    "semantic_hash": ""
-  },
-  "lib/checkContentSafety.js": {
-    "mtime": 1784817985.3647978,
-    "ast_hash": "d37c17fe3ee52de31ae3402015d4bcf1",
-    "semantic_hash": ""
-  },
-  "lib/detectRhythmCheat.js": {
-    "mtime": 1784817987.4000878,
-    "ast_hash": "fa111c86b7e524602ec281212861bee5",
-    "semantic_hash": ""
-  },
-  "lib/generateLessonPlanTemplate.js": {
-    "mtime": 1784803568.9423895,
-    "ast_hash": "efc560a7f9bf9e1c21c6c2ffed8b488d",
-    "semantic_hash": ""
-  },
-  "lib/generateOnboardingChallenge.js": {
-    "mtime": 1784803568.2774868,
-    "ast_hash": "ac74d85da873f667afc8fd2f51a4e7d7",
-    "semantic_hash": ""
-  },
-  "lib/generateProgressReport.js": {
-    "mtime": 1784796363.9482367,
-    "ast_hash": "56fd0e75df4c6304c4de1594282de45b",
-    "semantic_hash": ""
-  },
-  "lib/getConceptPreviewData.js": {
-    "mtime": 1784803569.478782,
-    "ast_hash": "1f08a39d6e8d759de04baec6845bfa84",
-    "semantic_hash": ""
-  },
-  "lib/sanitizeLessonContent.js": {
-    "mtime": 1784774789.360562,
-    "ast_hash": "3c490e2c5c606ae38e40a9cc9e5cd9c4",
-    "semantic_hash": ""
-  },
-  "lib/verifySubmission.js": {
-    "mtime": 1784774791.4400043,
-    "ast_hash": "e60e914d57a8e7a6d3be1b118c1c8695",
-    "semantic_hash": ""
   }
 }
