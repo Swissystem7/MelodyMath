@@ -1,3 +1,13 @@
+## What is MelodyMath?
+MelodyMath is a browser-based app that combines music theory with mathematics for learners. It helps students and music enthusiasts understand musical patterns through interactive math exercises.
+
+## Who is it for?
+- Students learning music theory
+- Teachers looking for interactive tools
+- Anyone curious about the math behind music
+
+---
+
 # 🎵 MelodyMath — תרגול מתמטיקה מבוסס-קצב
 
 > **[לפתיחת הדמו החי](https://swissystem7.github.io/MelodyMath/)**
