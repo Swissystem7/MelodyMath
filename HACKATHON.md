@@ -1,3 +1,5 @@
+> **Note**: Submitted to MusicTech Hackathon, Afeka/Ono, June 2026. Kept for historical reference.
+
 # MelodyMath — חבילת הצגה להאקתון
 
 ## הבעיה במשפט אחד

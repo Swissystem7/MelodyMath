@@ -1,3 +1,9 @@
+**What**: MelodyMath — rhythm-based math practice for special education, with function graph sonification
+
+**For whom**: special ed teachers, students with learning differences, parents
+
+**How**: open the [browser demo](https://swissystem7.github.io/MelodyMath/) — no install needed
+
 # 🎵 MelodyMath — תרגול מתמטיקה מבוסס-קצב
 
 > **[לפתיחת הדמו החי](https://swissystem7.github.io/MelodyMath/)**
