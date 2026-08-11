@@ -61,4 +61,26 @@ $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCh
 $('rmPractice').onclick=()=>{rpStep=0;rpItem=0;show('rmReport',false);show('rmPlan',true);rpRender()};
 $('rmRestart').onclick=()=>{show('rmReport',false);show('rmStart',true)};
 $('rmPlanCheck').onclick=rpCheck;$('rmPlanAnswer').onkeydown=e=>{if(e.key==='Enter')rpCheck()};$('rmPlanNext').onclick=rpAdvance;
+
+const RM_PARENT_KEY='rmParentPro';function rmIsPro(){return localStorage.getItem(RM_PARENT_KEY)==='1'}function rmSetPro(v){localStorage.setItem(RM_PARENT_KEY,v?'1':'0');rmRenderProBadge()}function rmRenderProBadge(){const b=document.getElementById('rmProBadge');if(!b)return;b.textContent=rmIsPro()?'⭐ מנוי פרו פעיל':'גרסה חינמית · שדרגו לפרו';b.className='tag '+(rmIsPro()?'pro-active':'pro-inactive')}
+const RM_STREAK_KEY='rmStreakData';function rmToday(){return new Date().toISOString().slice(0,10)}function rmLoadStreak(){try{return JSON.parse(localStorage.getItem(RM_STREAK_KEY))||{last:null,count:0,best:0}}catch(e){return{last:null,count:0,best:0}}}function rmSaveStreakVisit(){const s=rmLoadStreak();const today=rmToday();if(s.last===today)return s;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);s.count=s.last===y?s.count+1:1;s.last=today;s.best=Math.max(s.best||0,s.count);localStorage.setItem(RM_STREAK_KEY,JSON.stringify(s));return s}function rmRenderStreak(){const el=document.getElementById('rmStreakBadge');if(!el)return;const s=rmSaveStreakVisit();el.textContent=`🔥 רצף ${s.count} ${s.count===1?'יום':'ימים'} · שיא ${s.best}`}
+function rmExportProgressPdfText(){const rows=(rmAns||[]).map((x,i)=>`${i+1}. ${rmHe(x.skill)} — ${x.correct?'נכון':'שגוי'}`).join('\n');const w=window.open('','_blank');if(!w)return;w.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>דוח התקדמות MelodyMath</title></head><body><h2>דוח התקדמות — MelodyMath</h2><p>תאריך: ${new Date().toLocaleDateString('he-IL')}</p><pre style="font-size:16px">${rows||'אין נתונים עדיין'}</pre></body></html>`);w.document.close();w.print()}
+
+document.addEventListener('DOMContentLoaded',function(){
+try{
+var styleTag=document.createElement('style');
+styleTag.textContent='.pro-badge-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}.tag.pro-active{background:var(--yellow);color:#000;font-weight:bold}.tag.pro-inactive{background:var(--muted);color:#fff}.mm-btn{cursor:pointer;border:none;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:600}.mm-btn.upgrade{background:var(--purple);color:#fff}.mm-btn.export{background:var(--pink);color:#fff}';
+document.head.appendChild(styleTag);
+var header=document.querySelector('header');
+if(header){
+var row=document.createElement('div');
+row.className='pro-badge-row';
+row.innerHTML='<span id="rmProBadge" class="tag"></span><span id="rmStreakBadge" class="tag"></span><button id="rmUpgradeBtn" class="mm-btn upgrade">שדרוג לפרו ⭐</button><button id="rmExportBtn" class="mm-btn export">ייצוא דוח התקדמות 📄</button>';
+header.appendChild(row);
+}
+rmRenderProBadge();rmRenderStreak();
+var exportBtn=document.getElementById('rmExportBtn');if(exportBtn)exportBtn.onclick=rmExportProgressPdfText;
+var upgradeBtn=document.getElementById('rmUpgradeBtn');if(upgradeBtn)upgradeBtn.onclick=function(){if(confirm('להפעיל מצב פרו לצורך הדגמה? (סימולציה מקומית, ללא תשלום אמיתי)')){rmSetPro(true);alert('מצב פרו הופעל! כל הפיצ׳רים המתקדמים פתוחים כעת.')}};
+}catch(e){console.error('MelodyMath pro-features init error',e)}
+});
 </script></body></html>
