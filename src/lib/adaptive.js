@@ -64,11 +64,27 @@
     return false;
   }
 
+  function parseSimpleFraction(raw) {
+    const s = String(raw == null ? '' : raw).trim().replace(/\s/g, '');
+    if (s === '½') return { n: 1, d: 2 };
+    if (s === '¼') return { n: 1, d: 4 };
+    if (s === '⅛') return { n: 1, d: 8 };
+    const m = /^(-?\d+)\/(-?\d+)$/.exec(s);
+    if (!m) return null;
+    const n = Number(m[1]);
+    const d = Number(m[2]);
+    if (!Number.isFinite(n) || !Number.isFinite(d) || d === 0) return null;
+    return { n: n, d: d };
+  }
+
   function isCorrect(given, expected) {
     const g = normalizeAnswer(given);
     if (g === '') return false;
     const e = normalizeAnswer(expected);
     if (g === e) return true;
+    const gf = parseSimpleFraction(given);
+    const ef = parseSimpleFraction(expected);
+    if (gf && ef && gf.n * ef.d === ef.n * gf.d) return true;
     // Numeric compare: 3.5 == 3.50, .75 == 0.75, 1,25 == 1.25 (comma already
     // folded by normalizeAnswer). Ratios like 3:2 stay on the string path.
     const gn = Number(g);
@@ -103,7 +119,7 @@
 
   return {
     nextLevel, normalizeAnswer, isCorrect, eligibleExercises,
-    parseStudentNumber, countDecimals, closeEnough,
+    parseStudentNumber, countDecimals, closeEnough, parseSimpleFraction,
     MIN_LEVEL, MAX_LEVEL,
   };
 });
