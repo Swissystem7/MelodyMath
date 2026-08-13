@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · כיסוי תכנית הלימודים א׳–ד׳</title>
+<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך לכיתות א׳–ד׳ — ומה לא. בלי טענת יעילות.">
+<style>
+  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:940px;margin:auto;padding:24px 16px 60px}
+  h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:8px 0}
+  .lead{color:var(--muted);max-width:58ch}
+  .sum{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:8rem}
+  .stat strong{display:block;font-size:1.4rem}
+  .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0}
+  .note{color:var(--muted);font-size:.9rem}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
+</style>
+</head>
+<body>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
+<main class="wrap" id="main" tabindex="-1">
+  <p class="mm-product-banner"><b>תרגול יסודי</b> — מוצר נפרד מסוניפיקציית הגרפים. הדף הזה מציג כיסוי מול התוכנית החדשה לכיתות א׳–ג׳ והתוכנית שפורסמה לכיתה ד׳. זה לא אישור משרד ואין טענת יעילות.</p>
+  <h1>כיסוי תוכנית הלימודים — במפורש</h1>
+  <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
+  <div class="sum" id="sum"></div>
+  <div id="tables"></div>
+  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. אין כאן גאומטריה, מדידה או חקר נתונים — אלה פערים, לא «בקרוב» ממותג.</p>
+</main>
+<script src="src/lib/curriculum.js"></script>
+<script src="src/lib/banks.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
+<script>
+(function () {
+  const grades = grades();
+  const sum = document.getElementById('sum');
+  const tables = document.getElementById('tables');
+  sum.innerHTML = grades.map(function (g) {
+    const s = summaryForGrade(g);
+    return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
+      + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
+  }).join('');
+  tables.innerHTML = grades.map(function (g) {
+    const rows = coverageMatrix().filter(function (r) { return r.grade === g; });
+    const body = rows.map(function (r) {
+      return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
+        + '<td class="st-' + r.status + '">' + r.statusHe + '</td>'
+        + '<td>' + r.note + '</td></tr>';
+    }).join('');
+    const bank = (typeof coverageByGrade === 'function' ? coverageByGrade()[g] : {}) || {};
+    const bankNote = Object.keys(bank).map(function (sk) {
+      return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
+    }).join(' · ');
+    return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
+      + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
+      + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
+      + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
+      + '<tbody>' + body + '</tbody></table></section>';
+  }).join('');
+})();
+</script>
+</body>
+</html>
