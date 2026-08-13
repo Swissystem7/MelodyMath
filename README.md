@@ -8,7 +8,7 @@
 
 דמו דפדפן בעברית (RTL), בלי התקנה ובלי שרת. הריפו מכיל **שני רכיבים נפרדים** — לא חבילה אחת לחינוך מיוחד.
 
-> **[דמו חי](https://swissystem7.github.io/MelodyMath/)** · [שומעים פונקציה](https://swissystem7.github.io/MelodyMath/functions.html) · [גדילה ודעיכה · 807](https://swissystem7.github.io/MelodyMath/807.html) · [דף נחיתה](https://swissystem7.github.io/MelodyMath/landing.html)
+> **[דמו חי](https://swissystem7.github.io/MelodyMath/)** · [שומעים פונקציה](https://swissystem7.github.io/MelodyMath/functions.html) · [גדילה ודעיכה · 807](https://swissystem7.github.io/MelodyMath/807.html) · [דף נחיתה](https://swissystem7.github.io/MelodyMath/landing.html) · [הזמן ניסוי כיתתי](https://swissystem7.github.io/MelodyMath/offer.html)
 
 `README.md` הזה הוא מקור האמת. מסמכי האקתון, אימות ישן והערות רכש ישנות יושבים ב־[docs/archive/](docs/archive/INDEX.md).
 
@@ -54,7 +54,7 @@
 
 2. **הראיות על «קצב → מתמטיקה» דלילות ומעורבות — אסור לצטט אותן כהוכחה שהדמו עובד.** מטא־אנליזה של [Sala & Gobet, 2020](https://pubmed.ncbi.nlm.nih.gov/32728850/) מצאה אפקט אפס לאימון מוזיקה על קוגניציה כששולטים באיכות המחקר. [Ahokas et al. על קצב וקריאה](https://link.springer.com/article/10.1007/s10643-024-01654-4) לא מצאו הבדל מובהק באוריינות מול ביקורת; [הסקירה השיטתית שלהם (2025)](https://doi.org/10.1177/20592043241305922) מצאה תוצאה מובהקת ב־5 מתוך 10 מחקרים בלבד, ומציעה (לא מוכיחה) מינון של 90–120 דקות לפחות פעמיים בשבוע — בעיקר תנועה פנים־אל־פנים, לא מטרונום על תרגילי כפל. **לא נמצא RCT** על אפליקציית מתמטיקה מבוססת-מטרונום אצל ADHD/דיסקלקוליה.
 
-3. **אין קונה משלם היום.** נתיב האימות היחיד שצוין: **מחנכת שילוב אחת**, קבוצה קטנה, **4 שבועות, חינם, בלי טענת יעילות**. אם אין כיתה — נשארים PARK. אין ממציאים פיבוט לקראת דדליין מימון.
+3. **אין קונה משלם היום.** מחקר רכש מ־13.8.2026 — [MONETIZATION.md](MONETIZATION.md) — לא מצא נתיב תשלום: מפתח יחיד בלי עוסק לא נכנס לגפ״ן, מכרז המאגר האחרון נסגר ב־3.2.2026, מכרז התוכן הדיגיטלי נסגר ב־9.6.2025, וסל שילוב מממן שעות תמיכה ולא תוכנה. נתיב האימות היחיד: **מחנכת שילוב אחת**, קבוצה קטנה, **4 שבועות, חינם, בלי טענת יעילות**. [דף הניסוי](https://swissystem7.github.io/MelodyMath/offer.html) מייצר מכתב למנהל/ת ודף להדפסה. אם אין כיתה — נשארים PARK.
 
 ## הפעלה מקומית
 פותחים את `index.html` בדפדפן. זהו. כל הדפים טוענים את אותה ליבה (`src/lib/core.js` + `sonify.js` / `adaptive.js` / `teacherStore.js` / `banks.js` / `worksheets.js` / `metro.js` / `access.js` / `graphListen.js` / `listenLessons.js` / `onboard.js`) — מנוע אודיו אחד, בודק תשובות אחד, אחסון מקומי אחד, בנק תרגילים אחד למסך ולדף, הגדרות נגישות אחת, מנתח גרף אחד, שיעורי האזנה, והדרכה למורה. בלי CDN ובלי bundler.

@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.join(__dirname, '..');
-const pages = ['index.html', 'functions.html', '807.html', 'landing.html'];
+const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html'];
 
 function html(name) {
   return fs.readFileSync(path.join(root, name), 'utf8');
@@ -104,4 +104,15 @@ test('home and landing do not sell mastery or treatment', () => {
   assert.doesNotMatch(landing, /אימון קצבי נקשר במחקר לשיפור/);
   assert.match(landing, /PARK/);
   assert.match(landing, /לא טיפול/);
+  assert.match(landing, /offer\.html/);
+  assert.match(landing, /אין מוצר בתשלום/);
+});
+
+test('the offer form labels its fields and announces status', () => {
+  const offerPage = html('offer.html');
+  assert.match(offerPage, /<label>שם המורה/);
+  assert.match(offerPage, /<label>שם בית הספר/);
+  assert.match(offerPage, /id="formStatus"[^>]*aria-live/);
+  assert.match(offerPage, /id="letterPreview"[^>]*aria-live/);
+  assert.match(offerPage, /id="main"/);
 });

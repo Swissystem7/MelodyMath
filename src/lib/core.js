@@ -87,6 +87,7 @@
       ['functions.html', 'שומעים פונקציה'],
       ['807.html', 'גדילה ודעיכה'],
       ['landing.html', 'אודות'],
+      ['offer.html', 'ניסוי כיתתי'],
     ];
     const nav = document.createElement('nav');
     nav.id = 'mm-site-nav';
