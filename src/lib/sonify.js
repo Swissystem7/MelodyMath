@@ -16,6 +16,8 @@
   const MIDI_HIGH = 84;  // C6
   const MIDI_A4 = 69;
   const FREQ_A4 = 440;
+  const FMIN = 130.81;   // C3 Hz — one ear-range for every page
+  const FMAX = 1046.5;   // C6 Hz
 
   function midiToFreq(midi) {
     return FREQ_A4 * Math.pow(2, (midi - MIDI_A4) / 12);
@@ -100,9 +102,125 @@
     scheduled.length = 0;
   }
 
+  let voiceOsc = null;
+  let voiceGain = null;
+  let sweepOsc = null;
+
+  function startVoice() {
+    const ac = getAudioContext();
+    if (!ac) return null;
+    stopVoice();
+    voiceOsc = ac.createOscillator();
+    voiceGain = ac.createGain();
+    voiceOsc.type = 'sine';
+    voiceGain.gain.value = 0;
+    voiceOsc.connect(voiceGain).connect(ac.destination);
+    voiceOsc.start();
+    return ac;
+  }
+
+  function setVoice(freq, gainVal) {
+    const ac = getAudioContext();
+    if (!ac || !voiceOsc || !voiceGain) return;
+    if (freq != null && isFinite(freq) && freq > 0) {
+      voiceOsc.frequency.setTargetAtTime(freq, ac.currentTime, 0.01);
+    }
+    if (gainVal != null && isFinite(gainVal)) {
+      voiceGain.gain.setTargetAtTime(Math.max(0, gainVal), ac.currentTime, 0.01);
+    }
+  }
+
+  function stopVoice() {
+    if (voiceOsc) {
+      try { voiceOsc.stop(); } catch (e) { /* already stopped */ }
+      try { voiceOsc.disconnect(); } catch (e) { /* already gone */ }
+      voiceOsc = null;
+    }
+    if (voiceGain) {
+      try { voiceGain.disconnect(); } catch (e) { /* already gone */ }
+      voiceGain = null;
+    }
+  }
+
+  function playClick(hz) {
+    const ac = getAudioContext();
+    if (!ac) return;
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'square';
+    o.frequency.value = hz > 0 ? hz : 1100;
+    g.gain.setValueAtTime(0.0001, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.18, ac.currentTime + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.055);
+    o.connect(g).connect(ac.destination);
+    o.start();
+    o.stop(ac.currentTime + 0.07);
+    scheduled.push(o);
+  }
+
+  function toFreq(v, lo, hi) {
+    if (typeof v !== 'number' || !isFinite(v)) return null;
+    if (lo === hi) return midiToFreq(66);
+    let t = (v - lo) / (hi - lo);
+    t = Math.max(0, Math.min(1, t));
+    return FMIN * Math.pow(FMAX / FMIN, t);
+  }
+
+  function playValueSweep(vals, opts) {
+    const ac = getAudioContext();
+    if (!ac || !Array.isArray(vals) || !vals.length) return null;
+    stopValueSweep();
+    const linear = !!(opts && opts.linear);
+    const dur = opts && opts.duration > 0 ? opts.duration : 2.6;
+    const now = ac.currentTime;
+    const steps = vals.length - 1;
+    const vmin = Math.min.apply(null, vals);
+    const vmax = Math.max.apply(null, vals);
+    const span = (vmax - vmin) || 1;
+    const lmin = Math.log(Math.max(Math.abs(vmin) < 1e-9 ? 1e-9 : vmin, 1e-9));
+    const lspan = (Math.log(Math.max(Math.abs(vmax) < 1e-9 ? 1e-9 : vmax, 1e-9)) - lmin) || 1;
+    const ratio = FMAX / FMIN;
+    function freqAt(i) {
+      const v = vals[i];
+      let f;
+      if (linear) f = FMIN + (v - vmin) / span * (FMAX - FMIN);
+      else {
+        const frac = (Math.log(Math.max(v, 1e-9)) - lmin) / lspan;
+        f = FMIN * Math.pow(ratio, frac);
+      }
+      return Math.max(FMIN, Math.min(FMAX, f));
+    }
+    const osc = ac.createOscillator();
+    const g = ac.createGain();
+    osc.type = 'sine';
+    osc.connect(g).connect(ac.destination);
+    osc.frequency.setValueAtTime(freqAt(0), now);
+    for (let i = 1; i <= steps; i++) {
+      osc.frequency.linearRampToValueAtTime(freqAt(i), now + dur * i / steps);
+    }
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.22, now + 0.04);
+    g.gain.setValueAtTime(0.22, now + Math.max(0.05, dur - 0.12));
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    osc.start(now);
+    osc.stop(now + dur + 0.05);
+    sweepOsc = osc;
+    osc.onended = function () { if (sweepOsc === osc) sweepOsc = null; };
+    return osc;
+  }
+
+  function stopValueSweep() {
+    if (sweepOsc) {
+      try { sweepOsc.stop(); } catch (e) { /* already stopped */ }
+      sweepOsc = null;
+    }
+  }
+
   function stopAllAudio() {
     stopScheduled();
     stopHeldTone();
+    stopVoice();
+    stopValueSweep();
   }
 
   // Play (or retune) a held sine at freq Hz. Stops shortly after the last call,
@@ -162,8 +280,10 @@
   }
 
   return {
-    yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH,
+    yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
-    getAudioContext, playFreq, playRhythmClicks, stopAllAudio,
+    getAudioContext, playFreq, playRhythmClicks, playClick,
+    startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
+    stopAllAudio,
   };
 });

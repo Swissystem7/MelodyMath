@@ -49,7 +49,7 @@
 <header>
   <h1>שומעים פונקציה</h1>
   <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.
-  · <a href="807.html">🎓 תרגול בגרות 807: גדילה ודעיכה »</a> · <a href="index.html">דף הבית</a></div>
+  מקשים: רווח = נגן/עצור, Tab לסליידרים.</div>
 </header>
 
 <main>
@@ -109,6 +109,10 @@
   </div>
 </main>
 
+<script src="src/lib/sonify.js"></script>
+<script src="src/lib/adaptive.js"></script>
+<script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/core.js"></script>
 <script>
 "use strict";
 /* ---- functions: each returns f(x); params drawn from a,b,c sliders it declares ---- */
@@ -131,26 +135,12 @@ const FUNCS = {
 };
 const ORDER=["linear","quadratic","sqrt","abs","reciprocal","exp","sine"];
 
-/* ---- audio ---- */
-let AC=null, osc=null, gain=null, sweeping=false, realTone=false, sweepRAF=null, stopT=null, sweepTok=0;
-function audio(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); return AC; }
-const FMIN=130.81, FMAX=1046.5; // C3..C6
-// map a value within [lo,hi] to log-spaced frequency
-function toFreq(v,lo,hi){
-  if(!isFinite(v)) return null;
-  let t=(v-lo)/(hi-lo); t=Math.max(0,Math.min(1,t));
-  return FMIN*Math.pow(FMAX/FMIN, t);
-}
-function startOsc(){ const ac=audio(); clearTimeout(stopT); stopOsc(); osc=ac.createOscillator(); gain=ac.createGain();
-  osc.type="sine"; gain.gain.value=0; osc.connect(gain).connect(ac.destination); osc.start(); }
-function stopOsc(){ if(osc){try{osc.stop()}catch(e){}; osc.disconnect(); osc=null;} if(gain){gain.disconnect();gain=null;} }
-function click(){ // short percussive earcon for axis crossing (a root)
-  const ac=audio(); const o=ac.createOscillator(),g=ac.createGain();
-  o.type="square"; o.frequency.value=1400; g.gain.setValueAtTime(.0001,ac.currentTime);
-  g.gain.exponentialRampToValueAtTime(.15,ac.currentTime+.004);
-  g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.06);
-  o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime+.07);
-}
+/* ---- audio: one engine from src/lib/sonify.js (C3–C6, one AudioContext) ---- */
+let sweeping=false, realTone=false, sweepRAF=null, stopT=null, sweepTok=0;
+function audio(){ return getAudioContext(); }
+function startOsc(){ clearTimeout(stopT); startVoice(); }
+function stopOsc(){ stopVoice(); }
+function click(){ playClick(1400); }
 
 /* ---- state / DOM ---- */
 const $=id=>document.getElementById(id);
@@ -223,8 +213,9 @@ function draw(markX){
 /* ---- sweeps ---- */
 function playSweep(dur=3000, onDone){
   if(sweeping) { stopSweep(); return; }
-  audio(); startOsc(); sweeping=true; $("play").textContent="⏹ עצור";
-  const ac=AC, t0=ac.currentTime, tok=++sweepTok;
+  const ac=audio(); if(!ac) return;
+  startOsc(); sweeping=true; $("play").textContent="⏹ עצור";
+  const t0=ac.currentTime, tok=++sweepTok;
   let lastSign=null, lastFinite=false, lastY=null;
   const p=params();
   const step=(now)=>{
@@ -235,8 +226,7 @@ function playSweep(dur=3000, onDone){
     const y=FUNCS[cur].f(x,p);
     if(isFinite(y)){
       const f=toFreq(y,yLo,yHi);
-      osc.frequency.setTargetAtTime(f,ac.currentTime,.01);
-      gain.gain.setTargetAtTime(.18,ac.currentTime,.01);
+      setVoice(f,.18);
       // discontinuity (asymptote jump): reset sign tracking, no root click
       if(lastY!==null && Math.abs(y-lastY)>Math.abs(yHi-yLo)*0.9){ lastSign=null; lastFinite=false; }
       // root earcon on sign change
@@ -244,7 +234,7 @@ function playSweep(dur=3000, onDone){
       if(lastFinite && lastSign!==null && s!==0 && s!==lastSign) click();
       if(s!==0) lastSign=s; lastFinite=true; lastY=y;
     } else {
-      gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFinite=false; lastSign=null; lastY=null; // silence = undefined
+      setVoice(null,0); lastFinite=false; lastSign=null; lastY=null; // silence = undefined
     }
     draw(x);
     sweepRAF=requestAnimationFrame(step);
@@ -252,7 +242,7 @@ function playSweep(dur=3000, onDone){
   sweepRAF=requestAnimationFrame(step);
 }
 function finishSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF);
-  if(gain){gain.gain.setTargetAtTime(0,AC.currentTime,.02);} stopT=setTimeout(stopOsc,120);
+  setVoice(null,0); stopT=setTimeout(stopOsc,120);
   $("play").textContent="▶︎ נגן סריקה"; draw(); }
 function stopSweep(){ finishSweep(); }
 let qsT=null;
@@ -264,14 +254,13 @@ function quickSweep(){ // short 0.8s sweep on slider drag (skip if playing/game)
 
 /* sine real tone: frequency b actually audible (scaled into range) */
 function playRealTone(){
-  audio(); startOsc();
-  const p=FUNCS.sine.p; const hz=FMIN*Math.pow(2, p.b.v/4*3); // b -> up to ~3 octaves
-  osc.frequency.value=hz; osc.type="sine";
-  gain.gain.setValueAtTime(0,AC.currentTime);
-  gain.gain.linearRampToValueAtTime(Math.min(.25, p.a.v/6*.25||.05),AC.currentTime+.02);
+  const ac=audio(); if(!ac) return;
+  startOsc();
+  const p=FUNCS.sine.p; const hz=FMIN*Math.pow(2, p.b.v/4*3);
+  setVoice(hz, Math.min(.25, p.a.v/6*.25||.05));
   $("live").textContent="טון אמיתי בתדר ~"+Math.round(hz)+" הרץ";
   clearTimeout(playRealTone._t);
-  playRealTone._t=setTimeout(()=>{ gain&&gain.gain.setTargetAtTime(0,AC.currentTime,.03); setTimeout(stopOsc,150); },900);
+  playRealTone._t=setTimeout(()=>{ setVoice(null,0); setTimeout(stopOsc,150); },900);
 }
 
 /* ---- controls ---- */
@@ -285,13 +274,13 @@ $("fn").addEventListener("change",e=>{
 $("play").addEventListener("click",()=>playSweep(3000));
 $("realTone").addEventListener("click",()=>{ realTone=!realTone; $("realTone").setAttribute("aria-pressed",String(realTone));
   if(realTone) playRealTone();
-  else { clearTimeout(playRealTone._t); if(gain)gain.gain.setTargetAtTime(0,AC.currentTime,.02); stopT=setTimeout(stopOsc,80); $("live").textContent=""; } });
+  else { clearTimeout(playRealTone._t); setVoice(null,0); stopT=setTimeout(stopOsc,80); $("live").textContent=""; } });
 document.addEventListener("keydown",e=>{ if(e.code==="Space" && e.target.tagName!=="BUTTON" && e.target.tagName!=="SELECT"){ e.preventDefault(); playSweep(3000);} });
 
 /* ---- game ---- */
 const LS="hear-fn-game";
 let gstate={best:0};
-try{ const s=JSON.parse(localStorage.getItem(LS)||'{"best":0}'); if(s && isFinite(s.best) && s.best>=0) gstate=s; }catch(e){}
+try{ const s=loadJson(LS,{best:0}); if(s && isFinite(s.best) && s.best>=0) gstate=s; }catch(e){}
 let gScore=0, gStreak=0, gAnswer=null, gChoices=[], gParams=null, gLocked=false;
 $("best").textContent=gstate.best||0;
 function randP(P){ const o={}; for(const k in P){ const s=P[k]; let v; do{ v=+(s.min+Math.random()*(s.max-s.min)).toFixed(2);}while(Math.abs(v)<.3&&(k==="a")); o[k]=v; } return o; }
@@ -307,27 +296,26 @@ function newRiddle(){
   $("gReplay").disabled=false;
 }
 function gameSweep(){
-  // re-entry guard: cancel any active sweep loop before starting a new one
   if(sweeping){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); }
-  audio(); startOsc(); const ac=AC,t0=ac.currentTime,dur=2600,tok=++sweepTok;
+  const ac=audio(); if(!ac) return;
+  startOsc(); const t0=ac.currentTime,dur=2600,tok=++sweepTok;
   let lastSign=null,lastFin=false,lastY=null;
   const P=FUNCS[gAnswer]; sweeping=true;
   const step=()=>{ if(!sweeping||tok!==sweepTok)return; const el=(ac.currentTime-t0)*1000; if(el>=dur){ finishGameSweep(); return; }
     const x=XMIN+(XMAX-XMIN)*el/dur; const y=P.f(x,gParams);
-    // fit range quickly using generic bounds
-    if(isFinite(y)){ const f=toFreq(y,-20,20); osc.frequency.setTargetAtTime(f,ac.currentTime,.01); gain.gain.setTargetAtTime(.18,ac.currentTime,.01);
-      if(lastY!==null && Math.abs(y-lastY)>36){ lastSign=null; lastFin=false; } // asymptote jump: no root click
+    if(isFinite(y)){ const f=toFreq(y,-20,20); setVoice(f,.18);
+      if(lastY!==null && Math.abs(y-lastY)>36){ lastSign=null; lastFin=false; }
       const s=Math.sign(y); if(lastFin&&lastSign!==null&&s!==0&&s!==lastSign)click(); if(s!==0)lastSign=s; lastFin=true; lastY=y;
-    } else { gain.gain.setTargetAtTime(0,ac.currentTime,.01); lastFin=false; lastSign=null; lastY=null; }
+    } else { setVoice(null,0); lastFin=false; lastSign=null; lastY=null; }
     sweepRAF=requestAnimationFrame(step); };
   sweepRAF=requestAnimationFrame(step);
 }
-function finishGameSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); if(gain)gain.gain.setTargetAtTime(0,AC.currentTime,.02); stopT=setTimeout(stopOsc,120); }
+function finishGameSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); setVoice(null,0); stopT=setTimeout(stopOsc,120); }
 function guess(k,btn){
   if(gLocked) return; gLocked=true;
   const right=k===gAnswer;
   document.querySelectorAll("#gOpts button").forEach(b=>{ if(b.dataset.k===gAnswer)b.classList.add("correct"); else if(b===btn)b.classList.add("wrong"); });
-  if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;try{localStorage.setItem(LS,JSON.stringify(gstate));}catch(e){}$("best").textContent=gstate.best;}
+  if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;saveJson(LS,gstate);$("best").textContent=gstate.best;}
     $("gFb").textContent="✓ נכון! זו "+FUNCS[gAnswer].name; $("gFb").className="fb ok";
   } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+")"; $("gFb").className="fb no"; }
   $("score").textContent=gScore; $("streak").textContent=gStreak;

@@ -82,6 +82,14 @@ test('export then import merges sessions and rejects garbage', () => {
   assert.equal(store.importRoster('שילוב', '{"students":null}', dest).ok, false);
 });
 
+test('loadJson/saveJson namespace keys and survive garbage', () => {
+  const ls = memory();
+  assert.equal(store.saveJson('sf-807', { score: 3 }, ls), true);
+  assert.equal(store.loadJson('sf-807', null, ls).score, 3);
+  ls.setItem('mm:v1:bad', '{');
+  assert.equal(store.loadJson('bad', 7, ls), 7);
+});
+
 test('an empty name is refused and a missing student yields a blank report', () => {
   const ls = memory();
   assert.equal(store.upsertStudent('כ', '   ', ls), null);

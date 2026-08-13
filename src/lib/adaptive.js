@@ -30,6 +30,40 @@
     return String(value).trim().replace(/\s/g, '').replace(/,/g, '.');
   }
 
+  function parseStudentNumber(rawIn) {
+    let s = String(rawIn == null ? '' : rawIn).trim().replace(/\s/g, '');
+    if (s === '') return NaN;
+    const lastComma = s.lastIndexOf(',');
+    const lastDot = s.lastIndexOf('.');
+    if (lastComma !== -1 && lastDot !== -1) {
+      s = lastComma > lastDot ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+    } else if (lastComma !== -1) {
+      s = s.replace(',', '.');
+    }
+    return Number(s);
+  }
+
+  function countDecimals(rawIn) {
+    const s = String(rawIn == null ? '' : rawIn).trim().replace(/\s/g, '');
+    const sep = Math.max(s.lastIndexOf('.'), s.lastIndexOf(','));
+    if (sep === -1) return 0;
+    return s.slice(sep + 1).replace(/\D/g, '').length;
+  }
+
+  function closeEnough(val, expected, dec, rawIn) {
+    const eps = 1e-9;
+    const digits = typeof dec === 'number' ? dec : 2;
+    const unit = Math.pow(10, -digits);
+    if (Math.abs(val - expected) <= 0.5 * unit + eps) return true;
+    const p = Math.pow(10, digits);
+    if (Math.abs(Math.round(val * p) / p - expected) <= eps) return true;
+    if (countDecimals(rawIn) <= 1) {
+      if (Math.abs(Math.round(val * 10) / 10 - Math.round(expected * 10) / 10) <= eps) return true;
+      if (Math.abs(val - expected) <= 0.05 + eps) return true;
+    }
+    return false;
+  }
+
   function isCorrect(given, expected) {
     const g = normalizeAnswer(given);
     if (g === '') return false;
@@ -67,5 +101,9 @@
     return pool;
   }
 
-  return { nextLevel, normalizeAnswer, isCorrect, eligibleExercises, MIN_LEVEL, MAX_LEVEL };
+  return {
+    nextLevel, normalizeAnswer, isCorrect, eligibleExercises,
+    parseStudentNumber, countDecimals, closeEnough,
+    MIN_LEVEL, MAX_LEVEL,
+  };
 });

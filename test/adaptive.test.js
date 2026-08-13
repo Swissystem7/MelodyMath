@@ -44,6 +44,15 @@ test('spacing and a decimal comma do not fail a correct answer', () => {
   assert.ok(isCorrect('3.5', 3.5));
 });
 
+test('807-style 1-decimal answers pass against a 2-decimal key', () => {
+  const { parseStudentNumber, closeEnough } = require('../src/lib/adaptive');
+  assert.equal(parseStudentNumber('1,25'), 1.25);
+  assert.equal(parseStudentNumber('.75'), 0.75);
+  assert.ok(closeEnough(497.7, 497.66, 2, '497.7'));
+  assert.ok(closeEnough(3.5, 3.5, 2, '3.50'));
+  assert.ok(!closeEnough(4, 3, 2, '4'));
+});
+
 test('numeric answers match across trailing zeros, a leading-dot, and a comma', () => {
   assert.ok(isCorrect('3.50', 3.5));
   assert.ok(isCorrect('3.5', '3.50'));

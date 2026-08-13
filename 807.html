@@ -112,18 +112,20 @@
   </div>
 
   <footer>
-    <a href="functions.html">→ עוד פונקציות</a> ·
-    <a href="index.html">דף הבית</a>
     <div style="margin-top:8px; font-size:.8rem;">שומעים פונקציה · MelodyMath</div>
   </footer>
 </div>
 
+<script src="src/lib/sonify.js"></script>
+<script src="src/lib/adaptive.js"></script>
+<script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/core.js"></script>
 <script>
 "use strict";
 // ---------- state ----------
 const KEY='sf-807';
 let store={score:0,streak:0,best:0};
-try{const s=JSON.parse(localStorage.getItem(KEY));
+try{const s=loadJson(KEY,null);
   const ok=v=>Number.isInteger(v)&&v>=0;
   if(s&&ok(s.score)&&ok(s.streak)&&ok(s.best)) store={score:s.score,streak:s.streak,best:s.best};
 }catch(e){}
@@ -214,36 +216,7 @@ function updateModeLabel(){
     : `<b>מצב לוג (סמיטונים):</b> קצב עלייה/ירידה קבוע → גליסנדו ${grow?'עולה':'יורד'} אחיד — הלוג מיישר את האקספוננט.`;
 }
 
-// comma as decimal (1,25) — Hebrew keyboards — and as thousands if both separators appear
-function parseStudentNumber(rawIn){
-  let s=String(rawIn).trim().replace(/\s/g,'');
-  if(s==='') return NaN;
-  const lastComma=s.lastIndexOf(','), lastDot=s.lastIndexOf('.');
-  if(lastComma!==-1 && lastDot!==-1){
-    s = lastComma>lastDot ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,'');
-  } else if(lastComma!==-1){
-    s=s.replace(',','.');
-  }
-  return Number(s);
-}
-function countDecimals(rawIn){
-  const s=String(rawIn).trim().replace(/\s/g,'');
-  const sep=Math.max(s.lastIndexOf('.'), s.lastIndexOf(','));
-  if(sep===-1) return 0;
-  return s.slice(sep+1).replace(/\D/g,'').length;
-}
-// declared precision, plus 1-decimal reasonableness: 497.7 passes vs 497.66
-function closeEnough(val, expected, dec, rawIn){
-  const eps=1e-9;
-  const unit=Math.pow(10, -dec);
-  if(Math.abs(val-expected) <= 0.5*unit + eps) return true;
-  if(Math.abs(round(val,dec)-expected) <= eps) return true;
-  if(countDecimals(rawIn) <= 1){
-    if(Math.abs(round(val,1)-round(expected,1)) <= eps) return true;
-    if(Math.abs(val-expected) <= 0.05 + eps) return true;
-  }
-  return false;
-}
+// parseStudentNumber / closeEnough מגיעים מ-src/lib/adaptive.js
 
 // ---------- check ----------
 function check(){
@@ -293,64 +266,18 @@ function paintScore(){
   document.getElementById('sStreak').textContent=store.streak;
   document.getElementById('sBest').textContent=store.best;
 }
-function save(){ try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){} }
+function save(){ saveJson(KEY,store); }
 
-// ---------- audio ----------
-let actx=null, curOsc=null;
+// ---------- audio: shared playValueSweep (one AudioContext, C3–C6) ----------
 function playSweep(){
   if(!prob) return;
-  // re-entry guard: stop the previous sweep before starting a new one
-  if(curOsc){ try{curOsc.stop();}catch(e){} curOsc=null; }
   const {M0,q,t}=prob;
   const linear=document.getElementById('linMode').checked;
-  try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); }
-  catch(e){ return; }
-  if(actx.state==='suspended') actx.resume();
-
-  const dur=2.6, steps=64;
-  const C3=130.81, C6=1046.5;
-  const now=actx.currentTime;
-
-  // sampled values along the exponential
-  const vals=[];
-  for(let i=0;i<=steps;i++){ const ti=t*i/steps; vals.push(M0*Math.pow(q,ti)); }
-  let vmin=Math.min.apply(null,vals), vmax=Math.max.apply(null,vals);
-  const span=(vmax-vmin)||1;
-  const lmin=Math.log(vmin), lspan=(Math.log(vmax)-Math.log(vmin))||1;
-  const ratio=C6/C3;
-
-  const osc=actx.createOscillator();
-  const g=actx.createGain();
-  osc.type='sine'; osc.connect(g); g.connect(actx.destination);
-
-  function freqAt(i){
-    let f;
-    if(linear){
-      // frequency proportional to the value itself → exponential in real Hz
-      f = C3 + (vals[i]-vmin)/span*(C6-C3);
-    }else{
-      // log-to-semitone: frac linear in log(value) → constant semitone rate
-      const frac=(Math.log(vals[i])-lmin)/lspan;
-      f = C3*Math.pow(ratio,frac);
-    }
-    return Math.max(C3,Math.min(C6,f));
-  }
-
-  osc.frequency.setValueAtTime(freqAt(0),now);
-  for(let i=1;i<=steps;i++){
-    osc.frequency.linearRampToValueAtTime(freqAt(i), now+dur*i/steps);
-  }
-  g.gain.setValueAtTime(0.0001,now);
-  g.gain.exponentialRampToValueAtTime(0.22, now+0.04);
-  g.gain.setValueAtTime(0.22, now+dur-0.12);
-  g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
-  osc.start(now); osc.stop(now+dur+0.05);
-  curOsc=osc; osc.onended=function(){ if(curOsc===osc) curOsc=null; };
+  const steps=64, vals=[];
+  for(let i=0;i<=steps;i++){ vals.push(M0*Math.pow(q,t*i/steps)); }
+  playValueSweep(vals,{linear:linear,duration:2.6});
 }
-
-function stopCurOsc(){
-  if(curOsc){ try{curOsc.stop();}catch(e){} curOsc=null; }
-}
+function stopCurOsc(){ stopValueSweep(); }
 
 // ---------- wiring ----------
 document.getElementById('tabs').addEventListener('click',e=>{
