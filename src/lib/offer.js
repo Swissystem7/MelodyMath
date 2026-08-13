@@ -145,10 +145,13 @@
       '',
       'הקישור: ' + DEMO_URL,
       'דף קצר להדפסה: ' + OFFER_URL,
+      r.replyEmail ? 'לחזרה: ' + r.replyEmail : '',
       '',
       'תודה,',
       teacher,
-    ].join('\n');
+    ].filter(function (line, i, arr) {
+      return line !== '' || (arr[i - 1] !== '' && i !== 0);
+    }).join('\n');
   }
 
   function buildPrincipalEmail(raw) {
@@ -166,15 +169,17 @@
       to: to,
       subject: subject,
       body: body,
-      mailto: buildMailto(to || PROJECT_MAIL, subject, body),
+      mailto: buildMailto(to || PROJECT_MAIL, subject, body, r.replyEmail),
     };
   }
 
-  function buildMailto(to, subject, body) {
+  function buildMailto(to, subject, body, cc) {
     const addr = cleanLine(to, 80) || PROJECT_MAIL;
+    const copy = cleanLine(cc, 80);
     return 'mailto:' + encodeURIComponent(addr)
       + '?subject=' + encodeURIComponent(subject)
-      + '&body=' + encodeURIComponent(body);
+      + '&body=' + encodeURIComponent(body)
+      + (copy ? '&cc=' + encodeURIComponent(copy) : '');
   }
 
   return {
