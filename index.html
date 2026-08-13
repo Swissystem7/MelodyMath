@@ -13,19 +13,19 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
 @media print{
   body{background:#fff;color:#000}
-  header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode{display:none!important}
+  header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
   .panel{display:none!important}
   #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
-  #worksheetCard,#classBoardCard,#parentCard{display:none!important}
+  #worksheetCard,#classBoardCard,#parentCard,#certCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
-  body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard{display:none!important}
+  body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
-  body.print-sheet #trialKit,body.print-sheet #reportCard,body.print-sheet #classBoardCard,body.print-sheet #parentCard{display:none!important}
+  body.print-sheet #trialKit,body.print-sheet #reportCard,body.print-sheet #classBoardCard,body.print-sheet #parentCard,body.print-sheet #certCard{display:none!important}
   body.print-class #classBoardCard{display:block!important}
-  body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard{display:none!important}
+  body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard,body.print-class #certCard{display:none!important}
   body.print-parent #parentCard,body.print-parent #parentLetter{display:block!important}
-  body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard{display:none!important}
+  body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard,body.print-parent #certCard{display:none!important}
   .card{box-shadow:none;border:0;padding:0}
   .print-only{display:block}
   .report-table th,.report-table td{border-bottom:1px solid #999}
@@ -35,7 +35,26 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   .progress span{transition:none!important}
 }
 :focus-visible{outline:3px solid var(--purple);outline-offset:2px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--purple);outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-</style></head><body><main class="wrap" id="main"><header><div><div class="brand">♫ MELODYMATH</div><h1>תרגול מתמטיקה בעברית — בטאבלט או על דף.</h1><p>אבחון קצר, תרגול אישי, מצב כיתה בלחיצה, ודוח מקומי למורה. מקצב אופציונלי — לא טיפול ואין טענת יעילות. מנייה, חיבור, חיסור, כפל ושברים בסיסיים.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול"><button class="tab active" role="tab" aria-selected="true" data-tab="remediation">השלמת פערים</button><button class="tab" role="tab" aria-selected="false" data-tab="practice">תרגול קצב</button><button class="tab" role="tab" aria-selected="false" data-tab="playground">מעבדה</button><button class="tab" role="tab" aria-selected="false" data-tab="classMode">מצב כיתה</button><button class="tab" role="tab" aria-selected="false" data-tab="teacherReport">דוח מורה</button></nav></header>
+.first-run{background:#fff;border:2px solid var(--purple);border-radius:18px;padding:18px 20px;margin:0 0 16px}
+.first-run h2{margin:6px 0 10px;font-size:1.35rem}
+.onboard-steps{margin:8px 0 0;padding-right:20px}
+.onboard-steps li{margin:8px 0}
+.onboard-steps li[aria-current="step"]{font-weight:800}
+.onboard-now{background:#f4f0fc;border-radius:12px;padding:12px 14px}
+.onboard-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.onboard-actions .primary{width:auto}
+.beat-window{height:10px;background:#ece7f5;border-radius:99px;overflow:hidden;margin:10px 0}
+.beat-window span{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--pink),var(--purple));transform-origin:right center}
+.cert{border:4px double var(--purple);border-radius:18px;padding:28px 24px;text-align:center;max-width:40rem;margin:12px auto}
+.cert h2{font-size:1.7rem;margin:8px 0}
+.cert-count{font-size:1.25rem}
+.cert-who{color:var(--muted);font-weight:700}
+@media print{
+  body.print-cert #certCard,body.print-cert #certSheet{display:block!important}
+  body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard{display:none!important}
+  .first-run,#firstRun{display:none!important}
+}
+</style></head><body><main class="wrap" id="main"><header><div><div class="brand">♫ MELODYMATH</div><h1>תרגול מתמטיקה בעברית — בטאבלט או על דף.</h1><p>אבחון קצר על מנייה, חיבור/חיסור עד 20, לוח הכפל ושברים פשוטים; תרגול מדורג; מצב כיתה; וחלון תשובה לפי הפעימה אם המורה רוצה. מקצב אופציונלי — לא טיפול ואין טענת יעילות.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול"><button class="tab active" role="tab" aria-selected="true" data-tab="remediation">השלמת פערים</button><button class="tab" role="tab" aria-selected="false" data-tab="practice">תרגול קצב</button><button class="tab" role="tab" aria-selected="false" data-tab="playground">מעבדה</button><button class="tab" role="tab" aria-selected="false" data-tab="classMode">מצב כיתה</button><button class="tab" role="tab" aria-selected="false" data-tab="beatMode">על הפעימה</button><button class="tab" role="tab" aria-selected="false" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div class="who-bar" id="whoBar">
   <label>קוד כיתה <input id="classCode" maxlength="24" autocomplete="off" placeholder="למשל שילוב-ג"></label>
   <label>שם או קוד תלמיד/ה <input id="studentName" maxlength="24" autocomplete="off" placeholder="למשל נועה / נ-14"></label>
@@ -53,6 +72,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
   <span class="note">נקישה לקצב התרגול במכשיר. המורה שולטת ב־BPM. לא טיפול ואין טענת יעילות.</span>
 </div>
+<div id="firstRun" class="first-run no-print hidden" role="region" aria-label="הדרכה למורה בפעם הראשונה"></div>
 <nav class="more-nav" aria-label="מעבר לתרגולים נוספים">
   <a class="navcard" href="functions.html"><strong>שומעים פונקציה</strong><span>גרפים שנשמעים: שיפוע כגובה צליל, שורשים כנקישות.</span></a>
   <a class="navcard" href="807.html"><strong>גדילה ודעיכה · 807</strong><span>תרגול M(t)=M₀·qᵗ לבגרות, עם סריקת צליל של האקספוננט.</span></a>
@@ -86,12 +106,44 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <p id="classDoneNote">המספרים האלה הם ספירה של התשובות במפגש — לא ציון ולא הוכחה שהתרגול עוזר.</p>
   <button type="button" id="classAgain" class="primary">מפגש נוסף</button>
 </div></section>
+<section id="beatMode" class="panel"><div class="card" id="beatGate">
+  <span class="tag">חלון תשובה לפי הפעימה · לא טיפול</span>
+  <h2>תרגול על הפעימה</h2>
+  <p>השאלה נפתחת עם הפעימה. יש שתי פעימות לענות — ארבע אם בסרגל הנגישות מסומנת «המתנה ארוכה». רצף של 3 נכונות מעלה BPM רק אם סימנתם «האצה» בסרגל המקצב. זה כלי פסינג שהמורה מפעילה, לא טיפול ואין טענת יעילות.</p>
+  <div class="sheet-actions">
+    <label>חבילה
+      <select id="beatPack" aria-label="חבילת תרגול על הפעימה">
+        <option value="class">א׳–ב׳ · מנייה · חיבור · חיסור</option>
+        <option value="all">כל המיומנויות א׳–ד׳</option>
+        <option value="multiplication">לוח הכפל</option>
+        <option value="basic_fractions">שברים בסיסיים</option>
+      </select>
+    </label>
+  </div>
+  <button type="button" id="beatStart" class="primary">התחלת תרגול על הפעימה</button>
+</div>
+<div class="card hidden" id="beatPlay">
+  <div class="topline"><span id="beatMeta" class="tag"></span><span id="beatWho" class="tag"></span></div>
+  <div class="beat-window" aria-hidden="true"><span id="beatBar"></span></div>
+  <p id="beatClock" class="class-timer" aria-live="polite">—</p>
+  <h2 class="prompt" id="beatPrompt"></h2>
+  <div class="choices" id="beatChoices"></div>
+  <div id="beatFeedback" class="feedback hidden" role="status" aria-live="polite"></div>
+  <button type="button" id="beatStop" class="secondary no-print">סיום התרגול</button>
+</div>
+<div class="card hidden" id="beatDone">
+  <span class="tag">התרגול על הפעימה נגמר</span>
+  <h2>רישום הסבב</h2>
+  <div id="beatDoneStats" class="session"></div>
+  <p id="beatDoneNote">המספרים האלה הם ספירה — כולל חלון שנסגר בלי תשובה. לא ציון ולא הוכחה שהקצב עוזר.</p>
+  <button type="button" id="beatAgain" class="primary">סבב נוסף</button>
+</div></section>
 <section id="teacherReport" class="panel"><div class="card" id="trialKit">
   <span class="tag">ערכת פיילוט · 4 שבועות · חינם</span>
   <h2>דף הפעלה למורה</h2>
   <p>מיועד למחנכת שילוב אחת עם קבוצה קטנה. אין כאן תוכנית משרד, אין רישום במאגר, ואין טענה שהקצב משפר מתמטיקה.</p>
   <ol class="err-list" id="trialSteps">
-    <li><b>לפני שבוע 1.</b> בחרו קוד כיתה קבוע (למשל «שילוב-ג»). לכל ילד — שם או קוד. שמרו במכשיר. ייצאו גיבוי JSON לתיקייה שלכם.</li>
+    <li><b>לפני שבוע 1.</b> אם זו הפעם הראשונה במכשיר — חמשת הצעדים למעלה. בחרו קוד כיתה קבוע (למשל «שילוב-ג»). לכל ילד — שם או קוד. שמרו במכשיר. ייצאו גיבוי JSON לתיקייה שלכם.</li>
     <li><b>שבוע 1.</b> מצב כיתה: מפגש אחד של 8 דקות לכל ילד, לחיצה בלי הקלדה. בסרגל הנגישות — אות גדולה והקראה למי שצריך. החלפה בין ילדים — לחיצה על השם. הדפיסו דוח אחרי המפגש הראשון — זה קו הבסיס, לא ציון.</li>
     <li><b>שבועות 2–3.</b> אותו מפגש, בלי לשנות כללים. מי שבלי טאבלט מקבל דף עבודה מאותם תרגילים (למטה). אחרי כל שיעור: ייצוא גיבוי + מבט בלוח הכיתה. טאבלט בית ספר נמחק לעיתים קרובות — ולכן גם פתיחה חד־פעמית מהקישור שומרת את הדף במכשיר.</li>
     <li><b>שבוע 4.</b> הדפיסו דוח ומכתב להורה לכל ילד. שאלה אחת לעצמכם: האם ראיתם משהו שדף עבודה לא נותן? אם לא — הפיילוט ענה, והכלי נשאר דמו.</li>
@@ -151,6 +203,16 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   </div>
   <div id="parentLetter" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="certCard">
+  <span class="tag">תעודת תרגול · לא הצטיינות</span>
+  <h2>תעודה לילד/ה</h2>
+  <p>עמוד אחד להדפסה: שם, תאריך, וכמה תרגילים נרשמו במכשיר. בלי «שולט» ובלי כוכבי הצטיינות — רק ספירה.</p>
+  <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+    <button type="button" id="certMake" class="secondary">הצגת התעודה</button>
+    <button type="button" id="certPrint">הדפסת התעודה</button>
+  </div>
+  <div id="certSheet" class="hidden" aria-live="polite"></div>
+</div>
 <div class="card" id="reportCard">
   <span class="tag">רישום מקומי · לא ציון ואין טענת שליטה</span>
   <h2>דוח מורה</h2>
@@ -182,6 +244,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/graphListen.js"></script>
+<script src="src/lib/listenLessons.js"></script>
+<script src="src/lib/onboard.js"></script>
 <script src="src/lib/core.js"></script>
 <script>
 const exercises=[
@@ -215,10 +279,12 @@ function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').textC
 function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=isCorrect($('rmAnswer').value,q.answer);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${q.hint}. התשובה: <b>${q.answer}</b></div>`;show('rmFeedback',true);$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים'}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
-function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר הזה היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:RM_BANK[k].slice(0,5).map(([prompt,answer,hint,hear])=>({prompt,answer,hint,hear}))}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='בעשר השאלות האלה כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
-function rpRender(){const st=rmPlan[rpStep],it=st.items[rpItem];rpAnswered=false;$('rmPlanSkill').textContent=st.he;$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${rpItem+1}/${st.items.length}`;$('rmPlanPrompt').textContent=it.prompt;$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
-function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const it=rmPlan[rpStep].items[rpItem];const correct=isCorrect($('rmPlanAnswer').value,it.answer);noteMetro(correct);logTeacherItem({kind:'plan',skill:rmPlan[rpStep].he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${it.hint}. התשובה: <b>${it.answer}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=rpItem>=rmPlan[rpStep].items.length-1;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
-function rpAdvance(){const st=rmPlan[rpStep];if(rpItem<st.items.length-1){rpItem++;rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true}}
+function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר הזה היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:rowsOf(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='בעשר השאלות האלה כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
+const PLAN_PER_SKILL=6;
+function rpPick(){const st=rmPlan[rpStep];const pool=eligibleExercises(st.items,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
+function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;$('rmPlanPrompt').textContent=it.prompt;$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
+function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=isCorrect($('rmPlanAnswer').value,it.answer);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${it.hint}. התשובה: <b>${it.answer}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
+function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true}}
 $('rmBegin').onclick=()=>{rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
 $('rmPractice').onclick=()=>{rpStep=0;rpItem=0;show('rmReport',false);show('rmPlan',true);rpRender()};
@@ -226,7 +292,7 @@ $('rmRestart').onclick=()=>{show('rmReport',false);show('rmStart',true)};
 $('rmPlanCheck').onclick=rpCheck;$('rmPlanAnswer').onkeydown=e=>{if(e.key==='Enter')rpCheck()};$('rmPlanNext').onclick=rpAdvance;
 
 // ---- דוח מורה: זהות מקומית + רישום מפגשים (teacherStore) ----
-const KIND_HE={diag:'אבחון',plan:'תרגול פערים',practice:'תרגול קצב',class:'מצב כיתה'};
+const KIND_HE={diag:'אבחון',plan:'תרגול פערים',practice:'תרגול קצב',class:'מצב כיתה',beat:'על הפעימה'};
 let who={classCode:'',name:''},openSess=null;
 function currentWho(){return who.name?who:null}
 function applyWhoToForm(){if($('classCode'))$('classCode').value=who.classCode||'';if($('studentName'))$('studentName').value=who.name||'';if($('whoStatus'))$('whoStatus').textContent=who.name?`נשמר: ${who.name} · כיתה ${who.classCode||'ברירת מחדל'}`:'';renderRosterChips()}
@@ -245,7 +311,7 @@ if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
 function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
 if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));if(!res.ok){$('rosterMsg').textContent=res.error==='not-json'?'הקובץ אינו JSON תקין.':'מבנה הקובץ לא מתאים.';return}$('rosterMsg').textContent=`יובא: ${res.added} תלמידים חדשים, ${res.merged} מפגשים שמוזגו.`;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
@@ -257,14 +323,14 @@ if($('parentMake'))$('parentMake').onclick=renderParentLetter;
 if($('parentPrint'))$('parentPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class');document.body.classList.add('print-parent');renderParentLetter();window.print()};
 
 const CLASS_MS=8*60*1000;
-const CLASS_BANK=['counting','addition','subtraction'].flatMap(k=>RM_BANK[k].map(([prompt,answer,hint,hear])=>({skill:rmHe(k),prompt,answer,hint,hear})));
+const CLASS_BANK=classItems();
 const preferLessMotion=()=>typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 let classTimerId=null,classEndsAt=0,classCurrent=null,classAnswered=false,classSeed=1;
 function renderClassKids(){const box=$('classKids');if(!box)return;const names=who.classCode||who.name?listStudents(who.classCode):[];box.innerHTML=names.length?names.map(n=>`<button type="button" data-kid="${escapeHtml(n)}" aria-pressed="${n===who.name?'true':'false'}">${escapeHtml(n)}</button>`).join(''):'<span class="note">עדיין אין תלמידים בקוד הכיתה הזה במכשיר.</span>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>switchToKid(b.dataset.kid))}
 function classTick(){const left=Math.max(0,classEndsAt-Date.now());const m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$('classTimer').textContent=`${m}:${String(s).padStart(2,'0')}`;if(left<=0)endClassSession('time')}
 function showClassCard(id){['classGate','classPlay','classDone'].forEach(x=>show(x,x===id))}
 function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const q=CLASS_BANK[Math.floor(random()*CLASS_BANK.length)];classCurrent=q;$('classPrompt').textContent=q.prompt;$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=String(v);b.onclick=()=>pickClass(v,b);box.appendChild(b)});maybeHear(q);maybeSpeak(q.prompt)}
-function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);noteMetro(correct);logTeacherItem({kind:'class',skill:classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${classCurrent.hint}`;show('classFeedback',true);const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
+function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);noteMetro(correct);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${classCurrent.hint}`;show('classFeedback',true);const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
 function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';return}endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
 function endClassSession(){classEndsAt=0;if(classTimerId){clearInterval(classTimerId);classTimerId=null}document.body.classList.remove('class-live');const student=who.name?getStudent(who.classCode,who.name):null;const last=student&&student.sessions&&student.sessions.filter(s=>s.kind==='class').slice(-1)[0];endTeacherSession();const n=last?(last.items||[]).length:0;const ok=last?(last.items||[]).filter(it=>it.correct).length:0;$('classDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות במפגש</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק במפגש</div>`;showClassCard('classDone')}
 if($('classStart'))$('classStart').onclick=startClassSession;
@@ -288,11 +354,17 @@ function quietEndClass(){
   document.body.classList.remove('class-live');
   endTeacherSession();
 }
+function quietEndBeat(){
+  stopBeatTimer();
+  if($('beatPlay') && !$('beatPlay').classList.contains('hidden')) endTeacherSession();
+}
 function switchToKid(name){
   const label=normalizeCode(name);
   if(!label) return;
   const wasLive=classEndsAt>Date.now();
+  const beatLive=$('beatPlay') && !$('beatPlay').classList.contains('hidden');
   if(wasLive) quietEndClass();
+  else if(beatLive) quietEndBeat();
   else if(openSess) endTeacherSession();
   $('studentName').value=label;
   if(!$('classCode').value && who.classCode) $('classCode').value=who.classCode;
@@ -347,6 +419,131 @@ document.addEventListener('visibilitychange',function(){ if(document.hidden) sto
 paintMetro();
 renderRosterChips();
 renderClassBoard();
+
+function renderFirstRun(){
+  const box=$('firstRun'); if(!box || typeof shouldShowOnboard!=='function') return;
+  if(!shouldShowOnboard()){ box.classList.add('hidden'); box.innerHTML=''; return; }
+  const state=loadOnboard();
+  box.innerHTML=renderOnboardHtml(state);
+  box.classList.remove('hidden');
+  const next=$('onboardNext'), skip=$('onboardSkip');
+  if(skip) skip.onclick=function(){ dismissOnboard(); renderFirstRun(); };
+  if(next) next.onclick=function(){
+    const steps=onboardSteps();
+    const cur=loadOnboard();
+    if(cur.step>=steps.length-1){ dismissOnboard(); renderFirstRun(); return; }
+    setOnboardStep(cur.step+1);
+    renderFirstRun();
+  };
+}
+renderFirstRun();
+
+function renderCertificate(){
+  const box=$('certSheet'); if(!box) return;
+  if(!who.name){ box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>'; box.classList.remove('hidden'); return; }
+  const student=getStudent(who.classCode,who.name);
+  const when=(function(){ try{ return new Date().toLocaleDateString('he-IL'); }catch(e){ return ''; } })();
+  const cert=buildCertificate(student,{ classCode:who.classCode, when:when });
+  box.innerHTML=renderCertificateHtml(cert);
+  box.classList.remove('hidden');
+}
+if($('certMake'))$('certMake').onclick=renderCertificate;
+if($('certPrint'))$('certPrint').onclick=function(){
+  renderCertificate();
+  document.body.classList.remove('print-kit','print-sheet','print-class','print-parent');
+  document.body.classList.add('print-cert');
+  window.print();
+};
+
+function beatPool(){
+  const pack=$('beatPack')?$('beatPack').value:'class';
+  if(pack==='all') return practiceItems();
+  if(pack==='multiplication' || pack==='basic_fractions') return rowsOf(pack);
+  return classItems();
+}
+function showBeatCard(id){ ['beatGate','beatPlay','beatDone'].forEach(x=>show(x,x===id)); }
+let beatTimerId=null, beatOpenedAt=0, beatCurrent=null, beatAnswered=false, beatSeed=1, beatHist=[], beatLevel=1, beatLastId=null;
+function stopBeatTimer(){ if(beatTimerId){ clearInterval(beatTimerId); beatTimerId=null; } }
+function beatBeats(){ return typeof beatsForPrefs==='function'?beatsForPrefs(prefsNow()):2; }
+function paintBeatWindow(){
+  const bpm=metroBpmNow();
+  const beats=beatBeats();
+  const left=typeof windowRemaining==='function'?windowRemaining(beatOpenedAt, Date.now(), bpm, beats):0;
+  const ratio=typeof windowRatio==='function'?windowRatio(beatOpenedAt, Date.now(), bpm, beats):0;
+  if($('beatBar')) $('beatBar').style.width=Math.round(ratio*100)+'%';
+  if($('beatClock')) $('beatClock').textContent=left>0?Math.ceil(left/1000)+' שנ׳':'נסגר';
+  if(left<=0 && !beatAnswered) beatLate();
+}
+function nextBeatQuestion(){
+  beatAnswered=false;
+  const pool=eligibleExercises(beatPool(), beatHist, beatLastId, beatLevel);
+  const random=rng(beatSeed++);
+  const q=pool[Math.floor(random()*pool.length)];
+  beatCurrent=q;
+  $('beatPrompt').textContent=q.prompt;
+  $('beatWho').textContent=who.name||'';
+  $('beatMeta').textContent=(q.he||q.skill||'')+(q.level?' · '+levelHe(q.level):'')+' · '+metroBpmNow()+' BPM';
+  show('beatFeedback',false);
+  const opts=makeChoices(q.answer, random);
+  const box=$('beatChoices'); box.innerHTML='';
+  opts.forEach(v=>{ const b=document.createElement('button'); b.type='button'; b.className='choice'; b.textContent=String(v); b.onclick=()=>pickBeat(v,b); box.appendChild(b); });
+  maybeHear(q); maybeSpeak(q.prompt);
+  beatOpenedAt=Date.now();
+  stopBeatTimer();
+  paintBeatWindow();
+  beatTimerId=setInterval(paintBeatWindow, preferLessMotion()?200:50);
+}
+function finishBeatPick(value, correct, late){
+  if(!beatCurrent || beatAnswered) return;
+  beatAnswered=true;
+  stopBeatTimer();
+  beatHist.push({id:beatCurrent.id,correct:correct});
+  beatLastId=beatCurrent.id;
+  beatLevel=nextLevel(beatCurrent.level||beatLevel, beatHist.slice(-2));
+  const paced=typeof applyStreak==='function'?applyStreak(metroBpmNow(), metroStreak, correct && !late, !!( $('metroAccel') && $('metroAccel').checked )):null;
+  if(paced){
+    metroStreak=paced.streak;
+    if($('metroBpm')) $('metroBpm').value=paced.bpm;
+    if(metroOn) startMetro();
+  } else noteMetro(correct && !late);
+  logTeacherItem({kind:'beat',skill:beatCurrent.he||beatCurrent.skill,prompt:beatCurrent.prompt,answer:beatCurrent.answer,given:late?'מאוחר':value,correct:correct});
+  [...$('beatChoices').children].forEach(b=>{ b.disabled=true; if(isCorrect(b.textContent,beatCurrent.answer)) b.classList.add('picked-good'); });
+  $('beatFeedback').className='feedback '+(correct?'good':'bad');
+  $('beatFeedback').innerHTML=late
+    ? '<strong>החלון נסגר.</strong> לא נורא — זו פעימה, לא ציון. התשובה: <b>'+beatCurrent.answer+'</b>'
+    : '<strong>'+(correct?'נכון.':'זו לא התשובה.')+'</strong> '+beatCurrent.hint;
+  show('beatFeedback',true);
+  const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);
+  setTimeout(function(){ if($('beatPlay') && !$('beatPlay').classList.contains('hidden')) nextBeatQuestion(); }, wait);
+}
+function pickBeat(value, btn){
+  if(beatAnswered||!beatCurrent) return;
+  const onTime=typeof isWindowOpen==='function'?isWindowOpen(beatOpenedAt, Date.now(), metroBpmNow(), beatBeats()):true;
+  if(!onTime){ beatLate(); return; }
+  const correct=isCorrect(value, beatCurrent.answer);
+  if(!correct) btn.classList.add('picked-bad');
+  finishBeatPick(value, correct, false);
+}
+function beatLate(){ finishBeatPick('מאוחר', false, true); }
+function startBeatSession(){
+  beatHist=[]; beatLevel=1; beatLastId=null; beatSeed=Date.now()&0x7fffffff; metroStreak=0;
+  endTeacherSession();
+  if(who.name) ensureTeacherSession('beat');
+  if(!prefsNow().quiet && !metroOn) startMetro();
+  showBeatCard('beatPlay');
+  nextBeatQuestion();
+}
+function endBeatSession(){
+  stopBeatTimer();
+  endTeacherSession();
+  const n=beatHist.length;
+  const ok=beatHist.filter(x=>x.correct).length;
+  $('beatDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות בזמן</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק בסבב</div><div class="stat"><strong>${metroBpmNow()}</strong>BPM בסיום</div>`;
+  showBeatCard('beatDone');
+}
+if($('beatStart'))$('beatStart').onclick=startBeatSession;
+if($('beatStop'))$('beatStop').onclick=endBeatSession;
+if($('beatAgain'))$('beatAgain').onclick=function(){ showBeatCard('beatGate'); };
 
 const RM_PARENT_KEY='rmParentPro';function rmIsPro(){return localStorage.getItem(RM_PARENT_KEY)==='1'}function rmSetPro(v){localStorage.setItem(RM_PARENT_KEY,v?'1':'0');rmRenderProBadge()}function rmRenderProBadge(){const b=document.getElementById('rmProBadge');if(!b)return;b.textContent=rmIsPro()?'תג דמו פעיל · אין מנוי':'דמו מקומי · אין מנוי';b.className='tag '+(rmIsPro()?'pro-active':'pro-inactive')}
 const RM_STREAK_KEY='rmStreakData';function rmToday(){return new Date().toISOString().slice(0,10)}function rmLoadStreak(){try{return JSON.parse(localStorage.getItem(RM_STREAK_KEY))||{last:null,count:0,best:0}}catch(e){return{last:null,count:0,best:0}}}function rmSaveStreakVisit(){const s=rmLoadStreak();const today=rmToday();if(s.last===today)return s;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);s.count=s.last===y?s.count+1:1;s.last=today;s.best=Math.max(s.best||0,s.count);localStorage.setItem(RM_STREAK_KEY,JSON.stringify(s));return s}function rmRenderStreak(){const el=document.getElementById('rmStreakBadge');if(!el)return;const s=rmSaveStreakVisit();el.textContent=`🔥 רצף ${s.count} ${s.count===1?'יום':'ימים'} · שיא ${s.best}`}

@@ -70,6 +70,15 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
 .sheet-hint{color:#555;font-size:.9rem}
 @media (max-width:680px){.sheet-grid{grid-template-columns:1fr}}
 
+.first-run{background:#fff;border:2px solid #6946e8;border-radius:18px;padding:18px 20px;margin:0 0 16px}
+.onboard-steps{margin:8px 0 0;padding-inline-start:20px}
+.onboard-steps li[aria-current="step"]{font-weight:800}
+.onboard-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.beat-window{height:10px;background:#ece7f5;border-radius:99px;overflow:hidden;margin:10px 0}
+.beat-window span{display:block;height:100%;background:#f2529a}
+.cert{border:4px double #6946e8;border-radius:18px;padding:28px 24px;text-align:center;max-width:40rem;margin:12px auto}
+.cert h2{font-size:1.7rem;margin:8px 0}
+
 @media print{
   #mm-site-nav,#mm-access,.mm-no-print,header,nav.tabs,.tabs,.more-nav,.who-bar,.metro-bar,.pwa-banner,.roster-chips,.no-print{display:none!important}
   body{background:#fff!important;color:#000!important}
@@ -77,16 +86,21 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
   .print-only{display:block!important}
   #trialKit{display:none!important}
   body.print-kit #trialKit{display:block!important}
-  body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard{display:none!important}
+  body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
   #worksheetCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
-  body.print-sheet #trialKit,body.print-sheet #reportCard,body.print-sheet #classBoardCard,body.print-sheet #parentCard{display:none!important}
+  body.print-sheet #trialKit,body.print-sheet #reportCard,body.print-sheet #classBoardCard,body.print-sheet #parentCard,body.print-sheet #certCard{display:none!important}
   #classBoardCard,#parentCard{display:none!important}
   body.print-class #classBoardCard{display:block!important}
-  body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard{display:none!important}
+  body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard,body.print-class #certCard{display:none!important}
   body.print-parent #parentCard,body.print-parent #parentLetter{display:block!important}
-  body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard{display:none!important}
+  body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard,body.print-parent #certCard{display:none!important}
+  body.print-cert #certCard,body.print-cert #certSheet{display:block!important}
+  body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard{display:none!important}
+  #certCard{display:none!important}
+  body.print-cert #certCard{display:block!important}
   #teacherReport.panel{display:block!important}
+  #firstRun,.first-run{display:none!important}
   .sheet-item{border-color:#999}
 }
 @media (prefers-reduced-motion:reduce){

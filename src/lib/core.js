@@ -18,7 +18,9 @@
         require('./worksheets'),
         require('./metro'),
         require('./access'),
-        require('./graphListen')
+        require('./graphListen'),
+        require('./listenLessons'),
+        require('./onboard')
       );
     }
     return root;

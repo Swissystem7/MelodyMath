@@ -15,5 +15,9 @@ test('the teacher tab has a class board and a parent letter, not a paywall', () 
   assert.match(indexHtml, /id="classBoard"/);
   assert.match(indexHtml, /id="parentLetter"/);
   assert.match(indexHtml, /מכתב קצר הביתה/);
+  assert.match(indexHtml, /id="firstRun"/);
+  assert.match(indexHtml, /id="beatMode"/);
+  assert.match(indexHtml, /id="certCard"/);
+  assert.match(indexHtml, /לא הצטיינות/);
   assert.doesNotMatch(indexHtml, /checkout|stripe|תשלום עכשיו/i);
 });
