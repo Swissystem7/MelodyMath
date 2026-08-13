@@ -41,12 +41,17 @@ test('shared chrome respects reduced motion', () => {
   assert.match(html('index.html'), /prefers-reduced-motion/);
 });
 
-test('pages expose a main landmark and the chrome skip-link target', () => {
+test('pages expose a main landmark, a static skip link, and a focusable target', () => {
   const core = fs.readFileSync(path.join(root, 'src/lib/core.js'), 'utf8');
   assert.match(core, /mm-skip/);
   assert.match(core, /#main/);
   for (const page of pages) {
-    assert.match(html(page), /id="main"/, page);
+    const h = html(page);
+    assert.match(h, /<main[\s>]/, page);
+    assert.match(h, /id="main"/, page);
+    assert.match(h, /tabindex="-1"/, page);
+    assert.match(h, /class="mm-skip"/, page);
+    assert.match(h, /href="#main"/, page);
   }
 });
 
@@ -106,6 +111,15 @@ test('home and landing do not sell mastery or treatment', () => {
   assert.match(landing, /לא טיפול/);
   assert.match(landing, /offer\.html/);
   assert.match(landing, /אין מוצר בתשלום/);
+});
+
+test('home tablist wires aria-controls and tabpanels', () => {
+  const index = html('index.html');
+  assert.match(index, /aria-controls="remediation"/);
+  assert.match(index, /aria-controls="teacherReport"/);
+  assert.match(index, /role="tabpanel"[^>]*aria-labelledby="tab-remediation"|aria-labelledby="tab-remediation"[^>]*role="tabpanel"/);
+  assert.match(index, /src\/lib\/tabs\.js/);
+  assert.match(index, /<caption class="sr-only">/);
 });
 
 test('the offer form labels its fields and announces status', () => {

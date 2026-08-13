@@ -5,10 +5,8 @@ const path = require('node:path');
 
 const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
-test('the leftover pro-upgrade demo is still labelled as a demo if present', () => {
-  if (!indexHtml.includes('rmUpgradeBtn')) return;
-  assert.match(indexHtml, /דמו/);
-  assert.match(indexHtml, /ללא חיוב|אין מנוי|הדגמה בלבד/);
+test('home has no fake pro upgrade, streak badge, or leftover paywall chrome', () => {
+  assert.doesNotMatch(indexHtml, /rmUpgradeBtn|שדרוג לפרו|rmProBadge|rmParentPro|rmStreakBadge/);
 });
 
 test('the teacher tab has a class board and a parent letter, not a paywall', () => {
