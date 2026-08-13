@@ -275,7 +275,12 @@ function playRealTone(){
 }
 
 /* ---- controls ---- */
-$("fn").addEventListener("change",e=>{ cur=e.target.value; realTone=false; $("realTone").setAttribute("aria-pressed","false");
+$("fn").addEventListener("change",e=>{
+  stopSweep();
+  clearTimeout(playRealTone._t);
+  realTone=false; $("realTone").setAttribute("aria-pressed","false");
+  $("live").textContent="";
+  cur=e.target.value;
   buildSliders(); refreshHeader(); draw(); });
 $("play").addEventListener("click",()=>playSweep(3000));
 $("realTone").addEventListener("click",()=>{ realTone=!realTone; $("realTone").setAttribute("aria-pressed",String(realTone));

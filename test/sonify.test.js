@@ -44,3 +44,23 @@ test('the three-octave span is exactly two doublings of frequency', () => {
   const high = yToFreq(100, 0, 100);
   assert.ok(Math.abs(high / low - 8) < 1e-9, 'C3 to C6 should be a factor of 8');
 });
+
+test('rhythm fractions print as 1/4+1/2+1/8, not raw decimals', () => {
+  const { fractionName, formatRhythmPattern } = require('../src/lib/sonify');
+  assert.equal(fractionName(0.25), '1/4');
+  assert.equal(fractionName(0.5), '1/2');
+  assert.equal(fractionName(0.125), '1/8');
+  assert.equal(fractionName(1 / 3), '1/3');
+  assert.equal(formatRhythmPattern([0.25, 0.5, 0.125]), '1/4+1/2+1/8');
+  // the old String(n) lookup used keys '.25' / '.5' and never matched
+  assert.notEqual(String(0.25), '.25');
+  assert.equal(formatRhythmPattern([.25, .5, .125, .375]), '1/4+1/2+1/8+3/8');
+});
+
+test('audio helpers are inert in Node — no AudioContext, no throw', () => {
+  const { getAudioContext, playFreq, playRhythmClicks, stopAllAudio } = require('../src/lib/sonify');
+  assert.equal(getAudioContext(), null);
+  assert.doesNotThrow(() => playFreq(440));
+  assert.doesNotThrow(() => playRhythmClicks([0.25, 0.5, 0.125], 80));
+  assert.doesNotThrow(() => stopAllAudio());
+});

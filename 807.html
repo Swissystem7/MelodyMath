@@ -214,20 +214,48 @@ function updateModeLabel(){
     : `<b>מצב לוג (סמיטונים):</b> קצב עלייה/ירידה קבוע → גליסנדו ${grow?'עולה':'יורד'} אחיד — הלוג מיישר את האקספוננט.`;
 }
 
+// comma as decimal (1,25) — Hebrew keyboards — and as thousands if both separators appear
+function parseStudentNumber(rawIn){
+  let s=String(rawIn).trim().replace(/\s/g,'');
+  if(s==='') return NaN;
+  const lastComma=s.lastIndexOf(','), lastDot=s.lastIndexOf('.');
+  if(lastComma!==-1 && lastDot!==-1){
+    s = lastComma>lastDot ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,'');
+  } else if(lastComma!==-1){
+    s=s.replace(',','.');
+  }
+  return Number(s);
+}
+function countDecimals(rawIn){
+  const s=String(rawIn).trim().replace(/\s/g,'');
+  const sep=Math.max(s.lastIndexOf('.'), s.lastIndexOf(','));
+  if(sep===-1) return 0;
+  return s.slice(sep+1).replace(/\D/g,'').length;
+}
+// declared precision, plus 1-decimal reasonableness: 497.7 passes vs 497.66
+function closeEnough(val, expected, dec, rawIn){
+  const eps=1e-9;
+  const unit=Math.pow(10, -dec);
+  if(Math.abs(val-expected) <= 0.5*unit + eps) return true;
+  if(Math.abs(round(val,dec)-expected) <= eps) return true;
+  if(countDecimals(rawIn) <= 1){
+    if(Math.abs(round(val,1)-round(expected,1)) <= eps) return true;
+    if(Math.abs(val-expected) <= 0.05 + eps) return true;
+  }
+  return false;
+}
+
 // ---------- check ----------
 function check(){
   if(answered) return;
   const rawIn=document.getElementById('ans').value.trim();
-  const raw = rawIn.replace(/,/g,''); // comma = thousands separator (IL/US locale); dot = decimal
-  if(raw===''){ flash('הקלד תשובה מספרית לפני הבדיקה.'); return; }
-  const val=Number(raw);
+  if(rawIn===''){ flash('הקלד תשובה מספרית לפני הבדיקה.'); return; }
+  const val=parseStudentNumber(rawIn);
   if(!isFinite(val)){ flash('הקלט אינו מספר תקין — נסה שוב.'); return; }
 
   answered=true;
   document.getElementById('ans').disabled=true;
-  // enforce the declared precision: round the student's input to dec digits,
-  // accept only exact match at that precision (+ float dust epsilon)
-  const ok = Math.abs(round(val,prob.dec)-prob.expected) <= 0.5*Math.pow(10,-prob.dec)*1e-3 + 1e-9;
+  const ok = closeEnough(val, prob.expected, prob.dec, rawIn);
 
   if(ok){ store.score++; store.streak++; if(store.streak>store.best)store.best=store.streak; }
   else { store.streak=0; }
@@ -320,16 +348,21 @@ function playSweep(){
   curOsc=osc; osc.onended=function(){ if(curOsc===osc) curOsc=null; };
 }
 
+function stopCurOsc(){
+  if(curOsc){ try{curOsc.stop();}catch(e){} curOsc=null; }
+}
+
 // ---------- wiring ----------
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('.tab'); if(!b)return;
   document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');});
   b.classList.add('on'); b.setAttribute('aria-pressed','true'); mode=b.dataset.type;
+  stopCurOsc();
   prob=gen(); render();
 });
 document.getElementById('checkBtn').addEventListener('click',check);
 document.getElementById('ans').addEventListener('keydown',e=>{ if(e.key==='Enter')check(); });
-document.getElementById('nextBtn').addEventListener('click',()=>{ prob=gen(); render(); });
+document.getElementById('nextBtn').addEventListener('click',()=>{ stopCurOsc(); prob=gen(); render(); });
 document.getElementById('playBtn').addEventListener('click',playSweep);
 document.getElementById('linMode').addEventListener('change',updateModeLabel);
 
@@ -347,6 +380,11 @@ render();
   const gotT=Math.log(M/M0)/Math.log(q);
   console.assert(Math.abs(gotQ-q)<1e-9,'q solver');
   console.assert(Math.abs(gotT-t)<1e-9,'t solver');
+  console.assert(parseStudentNumber('1,25')===1.25,'comma decimal');
+  console.assert(parseStudentNumber('.75')===0.75,'leading dot');
+  console.assert(closeEnough(497.7,497.66,2,'497.7'),'1-dec vs 497.66');
+  console.assert(closeEnough(3.5,3.5,2,'3.50'),'trailing zero');
+  console.assert(!closeEnough(4,3,2,'4'),'wrong stays wrong');
 })();
 </script>
 </body>
