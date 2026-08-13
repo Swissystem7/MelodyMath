@@ -158,6 +158,30 @@
     scheduled.push(o);
   }
 
+  function formatSweepCoord(n) {
+    if (typeof n !== 'number' || !isFinite(n)) return null;
+    const rounded = Math.round(n * 10) / 10;
+    return Object.is(rounded, -0) ? 0 : rounded;
+  }
+
+  // Hebrew screen-reader line for one sample on a graph sweep.
+  function sweepNarration(x, y, flags) {
+    const f = flags || {};
+    const bits = [];
+    const xs = formatSweepCoord(x);
+    if (xs != null) bits.push('איקס ' + xs);
+    if (!isFinite(y)) bits.push('לא מוגדר');
+    else bits.push('וואי ' + formatSweepCoord(y));
+    if (f.root) bits.push('שורש');
+    if (f.undefined) bits.push('מחוץ לתחום');
+    if (f.asymptote) bits.push('אסימפטוטה');
+    return bits.join(', ');
+  }
+
+  function preferLessMotion() {
+    return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   function toFreq(v, lo, hi) {
     if (typeof v !== 'number' || !isFinite(v)) return null;
     if (lo === hi) return midiToFreq(66);
@@ -284,6 +308,6 @@
     fractionName, formatRhythmPattern,
     getAudioContext, playFreq, playRhythmClicks, playClick,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
-    stopAllAudio,
+    stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };
 });

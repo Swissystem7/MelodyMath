@@ -62,10 +62,12 @@
   footer{text-align:center; color:var(--muted); font-size:.9rem; padding:20px 0 8px;}
   footer a{color:var(--indigo); text-decoration:none; font-weight:600; margin:0 6px;}
   .hint{font-size:.85rem; color:var(--muted); margin-top:10px;}
+  .btn:focus-visible,.tab:focus-visible,input:focus-visible{outline:3px solid var(--indigo);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="main">
   <header>
     <h1>🎧 שומעים פונקציה</h1>
     <span class="pilot">גרסת פיילוט חינמית · גדילה ודעיכה · שאלון 807 (35582)</span>
@@ -73,11 +75,11 @@
   </header>
 
   <div class="card">
-    <div class="tabs" id="tabs">
-      <button class="tab on" data-type="mix" aria-pressed="true">ערבב</button>
-      <button class="tab" data-type="value" aria-pressed="false">חשב ערך</button>
-      <button class="tab" data-type="q" aria-pressed="false">מצא את q</button>
-      <button class="tab" data-type="t" aria-pressed="false">מצא את t</button>
+    <div class="tabs" id="tabs" role="tablist" aria-label="סוג השאלה">
+      <button class="tab on" role="tab" data-type="mix" aria-selected="true" aria-pressed="true">ערבב</button>
+      <button class="tab" role="tab" data-type="value" aria-selected="false" aria-pressed="false">חשב ערך</button>
+      <button class="tab" role="tab" data-type="q" aria-selected="false" aria-pressed="false">מצא את q</button>
+      <button class="tab" role="tab" data-type="t" aria-selected="false" aria-pressed="false">מצא את t</button>
     </div>
   </div>
 
@@ -282,8 +284,8 @@ function stopCurOsc(){ stopValueSweep(); }
 // ---------- wiring ----------
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('.tab'); if(!b)return;
-  document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');});
-  b.classList.add('on'); b.setAttribute('aria-pressed','true'); mode=b.dataset.type;
+  document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');x.setAttribute('aria-selected','false');});
+  b.classList.add('on'); b.setAttribute('aria-pressed','true'); b.setAttribute('aria-selected','true'); mode=b.dataset.type;
   stopCurOsc();
   prob=gen(); render();
 });

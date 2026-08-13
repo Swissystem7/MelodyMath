@@ -1,9 +1,9 @@
 // MelodyMath shared kernel — one <script src> for every page.
 //
 // Classic script (not type=module) so a teacher can open index.html from disk.
-// GitHub Pages serves this fine. In the browser this file document.write-s the
-// three focused modules, then installs the Hebrew site nav + print CSS.
-// Node tests keep requiring adaptive.js / sonify.js / teacherStore.js directly.
+// GitHub Pages serves this fine. In the browser this file installs the Hebrew
+// site nav, print CSS, and the offline service worker.
+// Node tests keep requiring the focused modules directly.
 (function (root) {
   const IN_NODE = typeof module === 'object' && module.exports && typeof document === 'undefined';
 
@@ -13,10 +13,54 @@
         {},
         require('./sonify'),
         require('./adaptive'),
-        require('./teacherStore')
+        require('./teacherStore'),
+        require('./banks'),
+        require('./worksheets'),
+        require('./metro')
       );
     }
     return root;
+  }
+
+  function siteRoot() {
+    const script = document.currentScript || document.querySelector('script[src*="core.js"]');
+    if (script && script.src) return script.src.replace(/src\/lib\/[^/?#]+(?:[?#].*)?$/, '');
+    return '';
+  }
+
+  function ensureHeadLink(rel, href, extra) {
+    if (document.querySelector('link[rel="' + rel + '"]' + (extra && extra.attr ? '[' + extra.attr + ']' : ''))) return;
+    const link = document.createElement('link');
+    link.rel = rel;
+    link.href = href;
+    if (extra && extra.attr) link.setAttribute(extra.attr, extra.val || '1');
+    document.head.appendChild(link);
+  }
+
+  function installPwaHooks() {
+    if (typeof document === 'undefined') return;
+    const rootHref = siteRoot();
+    ensureHeadLink('manifest', rootHref + 'manifest.webmanifest');
+    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+      const ic = document.createElement('link');
+      ic.rel = 'apple-touch-icon';
+      ic.href = rootHref + 'icons/icon-192.png';
+      document.head.appendChild(ic);
+    }
+    if (!document.querySelector('meta[name="theme-color"]')) {
+      const t = document.createElement('meta');
+      t.name = 'theme-color';
+      t.content = '#6946e8';
+      document.head.appendChild(t);
+    }
+    if (typeof navigator === 'undefined' || !navigator.serviceWorker) return;
+    navigator.serviceWorker.register(rootHref + 'sw.js').then(function () {
+      const el = document.getElementById('pwaStatus');
+      if (el) el.textContent = 'נשמר בטאבלט · עובד גם בלי רשת אחרי הביקור הראשון';
+    }).catch(function () {
+      const el = document.getElementById('pwaStatus');
+      if (el) el.textContent = 'שמירה ללא-רשת דורשת פתיחה מ־https (לא מקובץ מקומי)';
+    });
   }
 
   function installSharedChrome() {
@@ -30,6 +74,7 @@
       link.setAttribute('data-mm-print', '1');
       document.head.appendChild(link);
     }
+    installPwaHooks();
     if (document.getElementById('mm-site-nav')) return;
     const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     const links = [
@@ -48,6 +93,13 @@
       return '<a href="' + file + '"' + (current ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }).join(' · ');
     document.body.insertBefore(nav, document.body.firstChild);
+    if (!document.querySelector('.mm-skip')) {
+      const skip = document.createElement('a');
+      skip.className = 'mm-skip';
+      skip.href = '#main';
+      skip.textContent = 'דלגו לתוכן';
+      document.body.insertBefore(skip, nav);
+    }
   }
 
   function api() {

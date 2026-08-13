@@ -4,19 +4,36 @@
   padding:8px 14px;font:600 14px/1.4 Arial,sans-serif;
   background:#21183b;color:#fff;
 }
-#mm-site-nav a{color:#ffd85d;text-decoration:none}
+#mm-site-nav a{color:#ffe27a;text-decoration:none}
+#mm-site-nav a:focus-visible{outline:3px solid #ffe27a;outline-offset:3px}
 #mm-site-nav a[aria-current="page"]{color:#fff;text-decoration:underline}
+.mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+.mm-skip:focus{transform:none}
 #mm-site-nav .mm-brand{font-weight:900;margin-inline-end:8px;color:#fff}
 
+.sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.sheet-item{border:1px solid #cfc6e6;border-radius:12px;padding:12px 14px;break-inside:avoid}
+.sheet-item .n{font-weight:900;margin-inline-end:6px}
+.sheet-item .prompt{font-size:1.05rem;margin:8px 0}
+.sheet-blank{margin-top:18px;color:#555;border-bottom:1px solid #999;padding-bottom:4px}
+.sheet-note,.sheet-kicker{margin:0 0 8px}
+.sheet-key{margin-top:28px;page-break-before:always}
+.sheet-hint{color:#555;font-size:.9rem}
+@media (max-width:680px){.sheet-grid{grid-template-columns:1fr}}
+
 @media print{
-  #mm-site-nav,.mm-no-print,header,nav.tabs,.tabs,.more-nav,.who-bar{display:none!important}
+  #mm-site-nav,.mm-no-print,header,nav.tabs,.tabs,.more-nav,.who-bar,.metro-bar,.pwa-banner,.roster-chips,.no-print{display:none!important}
   body{background:#fff!important;color:#000!important}
   .card{box-shadow:none!important;border:0!important}
   .print-only{display:block!important}
   #trialKit{display:none!important}
   body.print-kit #trialKit{display:block!important}
   body.print-kit #reportCard{display:none!important}
+  #worksheetCard{display:none!important}
+  body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
+  body.print-sheet #trialKit,body.print-sheet #reportCard{display:none!important}
   #teacherReport.panel{display:block!important}
+  .sheet-item{border-color:#999}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
