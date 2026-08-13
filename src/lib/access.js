@@ -152,6 +152,8 @@
     if (!d || !d.querySelector) return '';
     const selectors = [
       '#classPlay:not(.hidden) #classPrompt',
+      '#beatPlay:not(.hidden) #beatPrompt',
+      '#lessonPlay:not(.hidden) #lessonPrompt',
       '#rmPlan:not(.hidden) #rmPlanPrompt',
       '#rmQuiz:not(.hidden) #rmPrompt',
       '#quiz:not(.hidden) #prompt',

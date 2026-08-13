@@ -32,14 +32,71 @@
     return bpm;
   }
 
+  // Answer window follows the beat. Default: two beats to tap.
+  // Wait-preference (accessibility) doubles that. Not a treatment.
+  const BEATS_DEFAULT = 2;
+  const BEATS_WAIT = 4;
+  const BEATS_MIN = 1;
+  const BEATS_MAX = 8;
+
+  function clampBeats(n) {
+    const v = Math.round(Number(n));
+    if (!Number.isFinite(v)) return BEATS_DEFAULT;
+    return Math.min(BEATS_MAX, Math.max(BEATS_MIN, v));
+  }
+
+  function beatsForPrefs(prefs) {
+    const p = prefs && typeof prefs === 'object' ? prefs : {};
+    if (p.wait) return BEATS_WAIT;
+    return clampBeats(p.beats != null ? p.beats : BEATS_DEFAULT);
+  }
+
+  function windowMs(bpm, beats) {
+    return msPerBeat(bpm) * clampBeats(beats);
+  }
+
+  function windowRemaining(openedAt, now, bpm, beats) {
+    const open = Number(openedAt);
+    const t = Number(now);
+    if (!Number.isFinite(open) || !Number.isFinite(t)) return 0;
+    return Math.max(0, windowMs(bpm, beats) - (t - open));
+  }
+
+  function isWindowOpen(openedAt, now, bpm, beats) {
+    return windowRemaining(openedAt, now, bpm, beats) > 0;
+  }
+
+  function windowRatio(openedAt, now, bpm, beats) {
+    const total = windowMs(bpm, beats);
+    if (total <= 0) return 0;
+    return Math.max(0, Math.min(1, windowRemaining(openedAt, now, bpm, beats) / total));
+  }
+
+  function applyStreak(bpm, streak, correct, accelerate) {
+    const nextStreak = correct ? Math.max(0, Math.round(Number(streak) || 0)) + 1 : 0;
+    return {
+      streak: nextStreak,
+      bpm: nextBpm(bpm, nextStreak, !!accelerate),
+    };
+  }
+
   return {
     BPM_MIN: BPM_MIN,
     BPM_MAX: BPM_MAX,
     BPM_DEFAULT: BPM_DEFAULT,
     STREAK_EVERY: STREAK_EVERY,
     STREAK_STEP: STREAK_STEP,
+    BEATS_DEFAULT: BEATS_DEFAULT,
+    BEATS_WAIT: BEATS_WAIT,
     clampBpm: clampBpm,
     msPerBeat: msPerBeat,
     nextBpm: nextBpm,
+    clampBeats: clampBeats,
+    beatsForPrefs: beatsForPrefs,
+    windowMs: windowMs,
+    windowRemaining: windowRemaining,
+    isWindowOpen: isWindowOpen,
+    windowRatio: windowRatio,
+    applyStreak: applyStreak,
   };
 });

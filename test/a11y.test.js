@@ -59,6 +59,10 @@ test('one-tablet switcher and worksheet controls are labelled', () => {
   assert.match(index, /id="classBoard"/);
   assert.match(index, /id="parentLetter"/);
   assert.match(index, /id="teacherNote"/);
+  assert.match(index, /id="firstRun"/);
+  assert.match(index, /id="beatPrompt"/);
+  assert.match(index, /id="beatFeedback"[^>]*aria-live/);
+  assert.match(index, /id="certSheet"/);
 });
 
 test('shared chrome installs a labelled access toolbar', () => {
@@ -76,6 +80,8 @@ test('the sonification page exposes landmarks, describe, and A/B compare', () =>
   assert.match(fn, /id="descBtn"/);
   assert.match(fn, /id="markList"/);
   assert.match(fn, /id="gCompare"/);
+  assert.match(fn, /id="lessonPlay"/);
+  assert.match(fn, /id="lessonPrompt"/);
   assert.match(fn, /describeGraphHe|announceDescription/);
   assert.match(fn, /ArrowRight|keydown/);
 });

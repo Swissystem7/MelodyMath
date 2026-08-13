@@ -104,6 +104,26 @@
     </div>
   </div>
 
+  <div class="card" id="lessonPlay">
+    <div class="row" style="justify-content:space-between">
+      <b>שיעור האזנה מודרך</b>
+      <span class="score">שיעור <span id="lessonN">1</span> / <span id="lessonTotal">1</span></span>
+    </div>
+    <p class="desc" style="text-align:right;margin:8px 0">משימות האזנה לדגימה שעל המסך: לזהות שורש / אסימפטוטה / שקט, או להשוות שני גרפים באוזן. זה תרגול האזנה — לא מבחן שמיעה ולא הוכחה ששומעים לומדים אלגברה.</p>
+    <div class="formula" id="lessonTitle"></div>
+    <p id="lessonPrompt" class="desc" style="text-align:right"></p>
+    <div class="row" id="lessonPlayRow">
+      <button id="lessonPlayA" type="button">▶︎ השמע א׳</button>
+      <button id="lessonPlayB" class="ghost" type="button" hidden>▶︎ השמע ב׳</button>
+    </div>
+    <div class="opts" id="lessonOpts" style="margin-top:12px"></div>
+    <div class="fb" id="lessonFb" aria-live="polite"></div>
+    <p class="legend" id="lessonTeach"></p>
+    <div class="row">
+      <button id="lessonNext" class="ghost" type="button">לשיעור הבא</button>
+    </div>
+  </div>
+
   <div class="card">
     <div class="row" style="justify-content:space-between">
       <b>🎧 נחש את הפונקציה באוזן</b>
@@ -130,6 +150,7 @@
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/graphListen.js"></script>
+<script src="src/lib/listenLessons.js"></script>
 <script src="src/lib/core.js"></script>
 <script>
 "use strict";
@@ -454,6 +475,72 @@ $("gPlay").addEventListener("click",()=>{ if(!gAnswer)newRiddle(); gameSweep(); 
 $("gReplay").addEventListener("click",gameSweep);
 $("gNew").addEventListener("click",()=>{ newRiddle(); gameSweep(); });
 if($("gCompare")) $("gCompare").addEventListener("click", compareGuess);
+
+/* ---- guided listen lessons ---- */
+let lesson=typeof LISTEN_LESSONS!=="undefined" && LISTEN_LESSONS.length ? LISTEN_LESSONS[0] : null;
+let lessonLocked=false;
+function renderLesson(){
+  if(!lesson) return;
+  lessonLocked=false;
+  const n=typeof lessonIndex==="function"?lessonIndex(lesson.id)+1:1;
+  if($("lessonN")) $("lessonN").textContent=n;
+  if($("lessonTotal")) $("lessonTotal").textContent=LISTEN_LESSONS.length;
+  if($("lessonTitle")) $("lessonTitle").textContent=lesson.titleHe||"";
+  if($("lessonPrompt")) $("lessonPrompt").textContent=lesson.promptHe||"";
+  if($("lessonTeach")) $("lessonTeach").textContent="";
+  if($("lessonFb")){ $("lessonFb").textContent=""; $("lessonFb").className="fb"; }
+  const needB=lesson.kind==="compare";
+  if($("lessonPlayB")){ $("lessonPlayB").hidden=!needB; }
+  if($("lessonPlayA")) $("lessonPlayA").textContent=needB?"▶︎ השמע א׳":"▶︎ השמע את הסריקה";
+  const box=$("lessonOpts"); if(!box) return;
+  box.innerHTML="";
+  (lesson.choices||[]).forEach(function(ch){
+    const b=document.createElement("button");
+    b.type="button"; b.textContent=ch.labelHe; b.dataset.id=ch.id;
+    b.addEventListener("click", function(){ pickLesson(ch.id, b); });
+    box.appendChild(b);
+  });
+  const live=$("live"); if(live && typeof describeLessonHe==="function") live.textContent=describeLessonHe(lesson);
+}
+function playLessonSpec(spec, dur, onDone){
+  if(!spec || !FUNCS[spec.family]) return;
+  playFamily(spec.family, spec.p, dur||2200, onDone);
+}
+function playLessonSide(side){
+  if(!lesson) return;
+  if(lesson.kind==="compare"){
+    const spec=side==="B"?lesson.b:lesson.a;
+    const live=$("live"); if(live) live.textContent=side==="B"?"משמיעים ב׳.":"משמיעים א׳.";
+    playLessonSpec(spec, 2000);
+    return;
+  }
+  playLessonSpec({ family:lesson.family, p:lesson.p }, 2400);
+}
+function pickLesson(id, btn){
+  if(!lesson || lessonLocked) return;
+  lessonLocked=true;
+  const right=typeof checkListenAnswer==="function"?checkListenAnswer(lesson, id):id===lesson.answer;
+  document.querySelectorAll("#lessonOpts button").forEach(function(b){
+    if(b.dataset.id===lesson.answer) b.classList.add("correct");
+    else if(b===btn && !right) b.classList.add("wrong");
+  });
+  $("lessonFb").className="fb "+(right?"ok":"no");
+  $("lessonFb").textContent=right?"נכון — לפי הדגימה הזו.":"לא זו הבחירה. "+(lesson.teachHe||"");
+  if($("lessonTeach")) $("lessonTeach").textContent=lesson.teachHe||"";
+  const live=$("live"); if(live) live.textContent=$("lessonFb").textContent+" "+(lesson.teachHe||"");
+  if(typeof speakHebrew==="function") speakHebrew($("lessonFb").textContent);
+}
+if($("lessonPlayA")) $("lessonPlayA").addEventListener("click", function(){ playLessonSide("A"); });
+if($("lessonPlayB")) $("lessonPlayB").addEventListener("click", function(){ playLessonSide("B"); });
+if($("lessonNext")) $("lessonNext").addEventListener("click", function(){
+  if(typeof nextLesson==="function" && lesson) lesson=nextLesson(lesson.id);
+  else if(LISTEN_LESSONS && LISTEN_LESSONS.length){
+    const i=LISTEN_LESSONS.findIndex(function(L){ return lesson && L.id===lesson.id; });
+    lesson=LISTEN_LESSONS[(i+1)%LISTEN_LESSONS.length];
+  }
+  renderLesson();
+});
+if(lesson) renderLesson();
 
 /* ---- init ---- */
 buildPicker(); $("fn").value=cur; buildSliders(); refreshHeader(); draw(); rebuildListen(); newRiddle();
