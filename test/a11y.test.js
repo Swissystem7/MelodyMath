@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.join(__dirname, '..');
-const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html'];
+const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html', 'curriculum.html'];
 
 function html(name) {
   return fs.readFileSync(path.join(root, name), 'utf8');

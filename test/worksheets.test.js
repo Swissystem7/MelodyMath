@@ -3,19 +3,21 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const sheets = require('../src/lib/worksheets');
 
-test('the diagnostic pack is still ten items — first two of each skill', () => {
-  const d = banks.diagnosticItems();
-  assert.equal(d.length, 10);
+test('the diagnostic pack is first two items of each skill in the chosen grade', () => {
+  const d = banks.diagnosticItems('א');
+  assert.equal(d.length, banks.skillsForGrade('א').length * 2);
   assert.equal(d[0].skill, 'counting');
   assert.equal(d[2].skill, 'addition');
   assert.equal(d.filter((x) => x.skill === 'counting').length, 2);
+  assert.ok(d.every((x) => x.grade === 'א'));
 });
 
-test('class pack is counting + addition + subtraction only', () => {
+test('class pack is grade-א counting, addition, subtraction and the number line', () => {
   const c = banks.classItems();
   assert.ok(c.length >= 12);
   c.forEach((it) => {
-    assert.ok(['counting', 'addition', 'subtraction'].includes(it.skill));
+    assert.equal(it.grade, 'א');
+    assert.ok(['counting', 'addition', 'subtraction', 'number_line'].includes(it.skill));
   });
 });
 
