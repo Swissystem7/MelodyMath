@@ -69,13 +69,13 @@ function rmExportProgressPdfText(){const rows=(rmAns||[]).map((x,i)=>`${i+1}. ${
 document.addEventListener('DOMContentLoaded',function(){
 try{
 var styleTag=document.createElement('style');
-styleTag.textContent='.pro-badge-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}.tag.pro-active{background:var(--yellow);color:#000;font-weight:bold}.tag.pro-inactive{background:var(--muted);color:#fff}.mm-btn{cursor:pointer;border:none;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:600}.mm-btn.upgrade{background:var(--purple);color:#fff}.mm-btn.export{background:var(--pink);color:#fff}';
+styleTag.textContent='.pro-badge-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}.tag.pro-active{background:var(--yellow);color:#000;font-weight:bold}.tag.pro-inactive{background:var(--muted);color:#fff}.tag.pro-demo-note{background:#f4f0fc;color:var(--muted)}.mm-btn{cursor:pointer;border:none;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:600}.mm-btn.upgrade{background:var(--purple);color:#fff}.mm-btn.export{background:var(--pink);color:#fff}';
 document.head.appendChild(styleTag);
 var header=document.querySelector('header');
 if(header){
 var row=document.createElement('div');
 row.className='pro-badge-row';
-row.innerHTML='<span id="rmProBadge" class="tag"></span><span id="rmStreakBadge" class="tag"></span><button id="rmUpgradeBtn" class="mm-btn upgrade">שדרוג לפרו ⭐</button><button id="rmExportBtn" class="mm-btn export">ייצוא דוח התקדמות 📄</button>';
+row.innerHTML='<span id="rmProBadge" class="tag"></span><span id="rmStreakBadge" class="tag"></span><button id="rmUpgradeBtn" class="mm-btn upgrade">שדרוג לפרו ⭐ · דמו</button><span id="rmUpgradeNote" class="tag pro-demo-note">הדגמה בלבד · ללא חיוב</span><button id="rmExportBtn" class="mm-btn export">ייצוא דוח התקדמות 📄</button>';
 header.appendChild(row);
 }
 rmRenderProBadge();rmRenderStreak();
