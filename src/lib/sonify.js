@@ -142,20 +142,44 @@
     }
   }
 
+  function scheduleClick(ac, t, hz, type, peak, dur) {
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(hz > 0 ? hz : 1100, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak || 0.18, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.055));
+    o.connect(g).connect(ac.destination);
+    o.start(t);
+    o.stop(t + (dur || 0.055) + 0.02);
+    scheduled.push(o);
+    return o;
+  }
+
   function playClick(hz) {
     const ac = getAudioContext();
     if (!ac) return;
-    const o = ac.createOscillator();
-    const g = ac.createGain();
-    o.type = 'square';
-    o.frequency.value = hz > 0 ? hz : 1100;
-    g.gain.setValueAtTime(0.0001, ac.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.18, ac.currentTime + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.055);
-    o.connect(g).connect(ac.destination);
-    o.start();
-    o.stop(ac.currentTime + 0.07);
-    scheduled.push(o);
+    scheduleClick(ac, ac.currentTime, hz > 0 ? hz : 1100, 'square', 0.18, 0.055);
+  }
+
+  // Soft drum taps for "how many beats?" — distinct from the metronome click.
+  // groups = [3, 2] plays three taps, a pause, then two. Caps at 12 per group.
+  function playCountClicks(groups, bpm) {
+    const ac = getAudioContext();
+    if (!ac || !Array.isArray(groups) || !groups.length) return;
+    stopScheduled();
+    const tempo = typeof bpm === 'number' && bpm > 0 ? bpm : 76;
+    const beat = 60 / tempo;
+    let t = ac.currentTime + 0.06;
+    groups.forEach(function (n, gi) {
+      const count = Math.max(0, Math.min(12, Math.round(Number(n) || 0)));
+      for (let i = 0; i < count; i++) {
+        scheduleClick(ac, t, 196, 'sine', 0.22, 0.09);
+        t += beat;
+      }
+      if (gi < groups.length - 1) t += beat * 1.4;
+    });
   }
 
   function formatSweepCoord(n) {
@@ -306,7 +330,7 @@
   return {
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
-    getAudioContext, playFreq, playRhythmClicks, playClick,
+    getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };
