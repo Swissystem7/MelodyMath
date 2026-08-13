@@ -40,3 +40,20 @@ test('shared chrome respects reduced motion', () => {
   assert.match(css, /prefers-reduced-motion/);
   assert.match(html('index.html'), /prefers-reduced-motion/);
 });
+
+test('pages expose a main landmark and the chrome skip-link target', () => {
+  const core = fs.readFileSync(path.join(root, 'src/lib/core.js'), 'utf8');
+  assert.match(core, /mm-skip/);
+  assert.match(core, /#main/);
+  for (const page of pages) {
+    assert.match(html(page), /id="main"/, page);
+  }
+});
+
+test('one-tablet switcher and worksheet controls are labelled', () => {
+  const index = html('index.html');
+  assert.match(index, /id="rosterChips"/);
+  assert.match(index, /id="worksheetSheet"/);
+  assert.match(index, /id="metroToggle"/);
+  assert.match(index, /id="pwaStatus"/);
+});
