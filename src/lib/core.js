@@ -16,7 +16,9 @@
         require('./teacherStore'),
         require('./banks'),
         require('./worksheets'),
-        require('./metro')
+        require('./metro'),
+        require('./access'),
+        require('./graphListen')
       );
     }
     return root;
@@ -75,6 +77,7 @@
       document.head.appendChild(link);
     }
     installPwaHooks();
+    installAccessBar();
     if (document.getElementById('mm-site-nav')) return;
     const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     const links = [
@@ -102,9 +105,63 @@
     }
   }
 
+  function installAccessBar() {
+    if (typeof document === 'undefined') return;
+    if (typeof loadAccess !== 'function') return;
+    const prefs = loadAccess();
+    applyAccessToDocument(prefs, document);
+    if (document.getElementById('mm-access')) return;
+    const bar = document.createElement('div');
+    bar.id = 'mm-access';
+    bar.setAttribute('role', 'toolbar');
+    bar.setAttribute('aria-label', 'הגדרות נגישות');
+    const toggles = [
+      ['contrast', 'ניגודיות'],
+      ['large', 'אות גדולה'],
+      ['speak', 'הקראה'],
+      ['wait', 'המתנה ארוכה'],
+      ['quiet', 'שקט'],
+    ];
+    let html = '<span class="mm-access-label">נגישות</span>';
+    toggles.forEach(function (pair) {
+      const on = !!prefs[pair[0]];
+      html += '<button type="button" data-acc="' + pair[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + pair[1] + '</button>';
+    });
+    html += '<button type="button" id="mm-speak-now">השמע תרגיל</button>';
+    html += '<button type="button" id="mm-hear" hidden disabled>השמע פעימות</button>';
+    bar.innerHTML = html;
+    const nav = document.getElementById('mm-site-nav');
+    if (nav && nav.parentNode) nav.parentNode.insertBefore(bar, nav.nextSibling);
+    else document.body.insertBefore(bar, document.body.firstChild);
+    bar.addEventListener('click', function (e) {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.id === 'mm-speak-now') {
+        const text = currentPromptText(document);
+        if (text) speakHebrew(text);
+        return;
+      }
+      if (btn.id === 'mm-hear') {
+        const groups = getActiveHear();
+        if (groups && typeof playCountClicks === 'function') playCountClicks(groups, 76);
+        return;
+      }
+      const key = btn.getAttribute('data-acc');
+      if (!key) return;
+      const next = toggleAccess(key);
+      applyAccessToDocument(next, document);
+      btn.setAttribute('aria-pressed', next[key] ? 'true' : 'false');
+      if (key === 'speak' && next.speak) {
+        const t = currentPromptText(document);
+        if (t) speakHebrew(t);
+      }
+      if (key === 'speak' && !next.speak && typeof cancelSpeech === 'function') cancelSpeech();
+    });
+  }
+
   function api() {
     const parts = pick();
-    return Object.assign({}, parts, { installSharedChrome: installSharedChrome });
+    return Object.assign({}, parts, { installSharedChrome: installSharedChrome, installAccessBar: installAccessBar });
   }
 
   const exported = IN_NODE ? api() : { installSharedChrome: installSharedChrome };

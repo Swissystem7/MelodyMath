@@ -89,9 +89,15 @@
 
     <div class="audio-row">
       <button class="btn btn-audio" id="playBtn">🎧 שמע את הגדילה</button>
+      <button class="btn btn-ghost" id="descBtn" type="button">תאר את המודל</button>
+      <button class="btn btn-ghost" id="cmpBtn" type="button">השווה לוג מול לינארי</button>
       <label class="toggle"><input type="checkbox" id="linMode"> מצב Hz לינארי</label>
     </div>
     <div class="modelabel" id="modeLabel"></div>
+    <label class="hint" for="tScrub">נקודה על ציר הזמן — שומעים את M באותו t
+      <input id="tScrub" type="range" min="0" max="100" value="0" aria-valuemin="0" aria-valuemax="100" aria-label="מיקום t בסריקה">
+    </label>
+    <div class="hint" id="tScrubVal" aria-live="polite"></div>
 
     <div class="answer">
       <input type="text" id="ans" inputmode="decimal" autocomplete="off" placeholder="התשובה…" aria-label="התשובה">
@@ -121,6 +127,8 @@
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/graphListen.js"></script>
 <script src="src/lib/core.js"></script>
 <script>
 "use strict";
@@ -208,6 +216,11 @@ function render(){
   const fb=document.getElementById('feedback'); fb.className='feedback'; fb.innerHTML='';
   answered=false;
   updateModeLabel();
+  const scrub=document.getElementById('tScrub');
+  if(scrub){ scrub.value='0'; }
+  const tv=document.getElementById('tScrubVal');
+  if(tv) tv.textContent='';
+  if(typeof speakIfEnabled==='function') speakIfEnabled(prob.prompt);
 }
 
 function updateModeLabel(){
@@ -275,11 +288,39 @@ function playSweep(){
   if(!prob) return;
   const {M0,q,t}=prob;
   const linear=document.getElementById('linMode').checked;
-  const steps=64, vals=[];
-  for(let i=0;i<=steps;i++){ vals.push(M0*Math.pow(q,t*i/steps)); }
+  const vals=expSeries(M0,q,t,64);
   playValueSweep(vals,{linear:linear,duration:2.6});
 }
 function stopCurOsc(){ stopValueSweep(); }
+function announceModel(){
+  if(!prob) return;
+  const text=describeExpHe({M0:prob.M0,q:prob.q,t:prob.t,M:prob.Mshown});
+  const el=document.getElementById('tScrubVal');
+  if(el) el.textContent=text;
+  if(typeof speakHebrew==='function') speakHebrew(text);
+}
+function compareModes(){
+  if(!prob) return;
+  const vals=expSeries(prob.M0,prob.q,prob.t,64);
+  document.getElementById('modeLabel').innerHTML='<b>קודם לוג</b> (גליסנדו אחיד) · אחר כך <b>לינארי</b> (האקספוננט נשמע). ייצוג, לא קול הפונקציה.';
+  playValueSweep(vals,{linear:false,duration:2.2});
+  setTimeout(function(){ playValueSweep(vals,{linear:true,duration:2.2}); }, 2600);
+}
+function scrubT(){
+  if(!prob) return;
+  const slider=document.getElementById('tScrub');
+  const frac=(Number(slider.value)||0)/100;
+  const ti=prob.t*frac;
+  const M=expValue(prob.M0,prob.q,ti);
+  const line='t = '+ (Math.round(ti*10)/10) +' · M ≈ '+(M==null?'—':Math.round(M*100)/100);
+  document.getElementById('tScrubVal').textContent=line;
+  if(M!=null && typeof playFreq==='function'){
+    const lo=Math.min(prob.M0, prob.Mshown);
+    const hi=Math.max(prob.M0, prob.Mshown);
+    const f=toFreq(M, lo, hi || lo+1);
+    if(f) playFreq(f, 260);
+  }
+}
 
 // ---------- wiring ----------
 document.getElementById('tabs').addEventListener('click',e=>{
@@ -294,6 +335,9 @@ document.getElementById('ans').addEventListener('keydown',e=>{ if(e.key==='Enter
 document.getElementById('nextBtn').addEventListener('click',()=>{ stopCurOsc(); prob=gen(); render(); });
 document.getElementById('playBtn').addEventListener('click',playSweep);
 document.getElementById('linMode').addEventListener('change',updateModeLabel);
+document.getElementById('descBtn').addEventListener('click',announceModel);
+document.getElementById('cmpBtn').addEventListener('click',compareModes);
+document.getElementById('tScrub').addEventListener('input',scrubT);
 
 // ---------- boot ----------
 paintScore();

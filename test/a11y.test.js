@@ -56,4 +56,46 @@ test('one-tablet switcher and worksheet controls are labelled', () => {
   assert.match(index, /id="worksheetSheet"/);
   assert.match(index, /id="metroToggle"/);
   assert.match(index, /id="pwaStatus"/);
+  assert.match(index, /id="classBoard"/);
+  assert.match(index, /id="parentLetter"/);
+  assert.match(index, /id="teacherNote"/);
+});
+
+test('shared chrome installs a labelled access toolbar', () => {
+  const core = fs.readFileSync(path.join(root, 'src/lib/core.js'), 'utf8');
+  assert.match(core, /id = 'mm-access'/);
+  assert.match(core, /הגדרות נגישות/);
+  assert.match(core, /mm-hear/);
+  const css = fs.readFileSync(path.join(root, 'src/lib/print.css'), 'utf8');
+  assert.match(css, /mm-contrast/);
+  assert.match(css, /mm-large/);
+});
+
+test('the sonification page exposes landmarks, describe, and A/B compare', () => {
+  const fn = html('functions.html');
+  assert.match(fn, /id="descBtn"/);
+  assert.match(fn, /id="markList"/);
+  assert.match(fn, /id="gCompare"/);
+  assert.match(fn, /describeGraphHe|announceDescription/);
+  assert.match(fn, /ArrowRight|keydown/);
+});
+
+test('807 can describe the model and compare log vs linear', () => {
+  const exam = html('807.html');
+  assert.match(exam, /id="descBtn"/);
+  assert.match(exam, /id="cmpBtn"/);
+  assert.match(exam, /id="tScrub"/);
+  assert.match(exam, /describeExpHe/);
+});
+
+test('home and landing do not sell mastery or treatment', () => {
+  const index = html('index.html');
+  assert.doesNotMatch(index, /סוגרים פערים במתמטיקה/);
+  assert.doesNotMatch(index, /שליטה מצוינת/);
+  assert.doesNotMatch(index, /הילד שולט בכל המיומנויות/);
+  const landing = html('landing.html');
+  assert.doesNotMatch(landing, /רישיון כיתתי \/ בית-ספרי/);
+  assert.doesNotMatch(landing, /אימון קצבי נקשר במחקר לשיפור/);
+  assert.match(landing, /PARK/);
+  assert.match(landing, /לא טיפול/);
 });

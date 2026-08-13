@@ -47,3 +47,17 @@ test('answer key is a second page the teacher can omit', () => {
 test('HTML escaping keeps a prompt with < from becoming markup', () => {
   assert.equal(sheets.escapeHtml('3 < 4'), '3 &lt; 4');
 });
+
+test('count-the-beats items carry a hear cue that matches the countable answer', () => {
+  const drums = banks.rowsOf('counting').find((x) => x.answer === 5 && x.hear);
+  assert.deepEqual(drums.hear, [5]);
+  const plus = banks.rowsOf('addition').find((x) => x.prompt.indexOf('3 פעימות') !== -1);
+  assert.deepEqual(plus.hear, [3, 2]);
+  assert.equal(plus.answer, 5);
+  banks.practiceItems().forEach((it) => {
+    if (!it.hear) return;
+    it.hear.forEach((n) => {
+      assert.ok(n >= 1 && n <= 12);
+    });
+  });
+});

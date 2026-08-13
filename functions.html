@@ -43,6 +43,12 @@
   .fb{min-height:22px;font-weight:600}
   .fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .listen-dock{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .listen-dock button{min-height:48px}
+  .mark-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .mark-list button{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:10px;padding:8px 12px;min-height:44px;font:inherit;font-weight:700;cursor:pointer}
+  .mark-list button[aria-current="true"]{background:#3730a3;color:#fff}
+  canvas:focus-visible{outline:3px solid #4f46e5;outline-offset:3px}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -71,7 +77,7 @@
 
     <div class="formula" id="formula">f(x)=</div>
     <div class="desc" id="fdesc"></div>
-    <canvas id="cv" width="800" height="380" role="img" aria-label="גרף הפונקציה"></canvas>
+    <canvas id="cv" width="800" height="380" role="img" aria-label="גרף הפונקציה" tabindex="0"></canvas>
 
     <div class="row" id="sliders" style="margin-top:12px"></div>
 
@@ -79,6 +85,15 @@
       <button id="play" type="button" aria-pressed="false">▶︎ נגן סריקה</button>
       <span class="legend" id="playHint">הסמן זז שמאל→ימין; הצליל עולה עם הגרף.</span>
     </div>
+    <div class="listen-dock" id="listenDock">
+      <button id="descBtn" type="button">תאר את הגרף</button>
+      <button id="stepPrev" type="button">נקודה קודמת</button>
+      <button id="stepNext" type="button">נקודה הבאה</button>
+      <button id="markNext" type="button">נקודת עניין הבאה</button>
+      <span class="legend" id="listenWhere" aria-live="polite"></span>
+    </div>
+    <div class="mark-list" id="markList" role="list" aria-label="נקודות עניין בגרף"></div>
+    <p class="legend" id="keyHelp">מקלדת על הגרף: חצים לנקודה, Home/End לקצוות, L לנקודת עניין, D לתיאור, רווח לסריקה. זה תיאור של הדגימה — לא קול הפונקציה.</p>
     <div class="sr" id="live" aria-live="polite" aria-atomic="true"></div>
     <div class="legend" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px 16px;border-top:1px solid #e2e8f0;padding-top:10px" aria-label="מילון הצלילים">
       <b style="flex-basis:100%;color:#4338ca">מילון הצלילים:</b>
@@ -98,6 +113,7 @@
     <div class="row">
       <button id="gPlay" type="button">▶︎ השמע חידה</button>
       <button id="gReplay" class="ghost" type="button" disabled>↻ שמע שוב</button>
+      <button id="gCompare" class="ghost" type="button" disabled>השוו ניחוש מול תשובה</button>
       <button id="gNew" class="ghost" type="button">חידה חדשה</button>
     </div>
     <div class="opts" id="gOpts" style="margin-top:12px"></div>
@@ -112,6 +128,8 @@
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/graphListen.js"></script>
 <script src="src/lib/core.js"></script>
 <script>
 "use strict";
@@ -158,7 +176,7 @@ function buildSliders(){
     const r=document.createElement("input"); r.type="range"; r.id=id;
     r.min=P[k].min; r.max=P[k].max; r.step=P[k].step; r.value=P[k].v;
     r.setAttribute("aria-label","פרמטר "+k);
-    r.addEventListener("input",()=>{ P[k].v=parseFloat(r.value); $("v_"+k).textContent=(+r.value).toFixed(2).replace(/\.00$/,""); draw(); quickSweep(); });
+    r.addEventListener("input",()=>{ P[k].v=parseFloat(r.value); $("v_"+k).textContent=(+r.value).toFixed(2).replace(/\.00$/,""); draw(); rebuildListen(); quickSweep(); });
     wrap.appendChild(r); box.appendChild(wrap);
   }
 }
@@ -282,22 +300,99 @@ $("fn").addEventListener("change",e=>{
   realTone=false; $("realTone").setAttribute("aria-pressed","false");
   $("live").textContent="";
   cur=e.target.value;
-  buildSliders(); refreshHeader(); draw(); });
+  buildSliders(); refreshHeader(); draw(); rebuildListen(); });
 $("play").addEventListener("click",()=>playSweep(3000));
 $("realTone").addEventListener("click",()=>{ realTone=!realTone; $("realTone").setAttribute("aria-pressed",String(realTone));
   if(realTone) playRealTone();
   else { clearTimeout(playRealTone._t); setVoice(null,0); stopT=setTimeout(stopOsc,80); $("live").textContent=""; } });
 document.addEventListener("keydown",e=>{ if(e.code==="Space" && e.target.tagName!=="BUTTON" && e.target.tagName!=="SELECT"){ e.preventDefault(); playSweep(3000);} });
 
+/* ---- landmarks / keyboard scrub (graphListen.js) ---- */
+let listenSamples=[], listenSummary=null, listenMarks=[], listenI=0, listenMarkI=0;
+function currentFnAt(x){ return FUNCS[cur].f(x, params()); }
+function rebuildListen(){
+  listenSamples=sampleCurve(currentFnAt, XMIN, XMAX, 240);
+  listenSummary=summarizeCurve(listenSamples);
+  listenMarks=landmarksOf(listenSummary);
+  listenI=indexNearX(listenSamples, 0);
+  listenMarkI=0;
+  const box=$("markList"); if(!box) return;
+  box.innerHTML="";
+  listenMarks.forEach(function(m,i){
+    const b=document.createElement("button");
+    b.type="button"; b.setAttribute("role","listitem");
+    b.textContent=describeLandmarkHe(m);
+    b.addEventListener("click",function(){ goLandmark(i); });
+    box.appendChild(b);
+  });
+  paintListenWhere();
+}
+function paintListenWhere(){
+  const pt=listenSamples[listenI];
+  const line=pt?sweepNarration(pt.x, pt.y, !isFinite(pt.y)?{undefined:true}:{}):"";
+  if($("listenWhere")) $("listenWhere").textContent=line;
+  const buttons=[...document.querySelectorAll("#markList button")];
+  buttons.forEach(function(b,i){ b.setAttribute("aria-current", i===listenMarkI?"true":"false"); });
+}
+function toneAt(i){
+  const pt=listenSamples[i]; if(!pt) return;
+  listenI=i;
+  if(isFinite(pt.y)){
+    const f=toFreq(pt.y, yLo, yHi);
+    if(f) playFreq(f, 280);
+  }
+  announceSweep(pt.x, pt.y, !isFinite(pt.y)?{undefined:true}:{});
+  draw(pt.x);
+  paintListenWhere();
+}
+function stepListen(dir){
+  listenI=stepIndex(listenI, dir, listenSamples.length);
+  toneAt(listenI);
+}
+function goLandmark(i){
+  if(!listenMarks.length) return;
+  listenMarkI=Math.max(0, Math.min(listenMarks.length-1, i));
+  const mark=listenMarks[listenMarkI];
+  listenI=indexNearX(listenSamples, mark.x);
+  toneAt(listenI);
+  const live=$("live"); if(live) live.textContent=describeLandmarkHe(mark);
+}
+function nextMark(dir){
+  if(!listenMarks.length) return;
+  const x=listenSamples[listenI]?listenSamples[listenI].x:0;
+  listenMarkI=nextLandmarkIndex(listenMarks, x, dir);
+  goLandmark(listenMarkI);
+}
+function announceDescription(){
+  rebuildListen();
+  const text=describeGraphHe(listenSummary);
+  const live=$("live"); if(live) live.textContent=text;
+  if($("listenWhere")) $("listenWhere").textContent=text;
+  if(typeof speakHebrew==="function") speakHebrew(text);
+}
+$("descBtn").addEventListener("click", announceDescription);
+$("stepPrev").addEventListener("click", function(){ stepListen(-1); });
+$("stepNext").addEventListener("click", function(){ stepListen(1); });
+$("markNext").addEventListener("click", function(){ nextMark(1); });
+$("cv").addEventListener("keydown", function(e){
+  if(e.key==="ArrowRight"){ e.preventDefault(); stepListen(1); }
+  else if(e.key==="ArrowLeft"){ e.preventDefault(); stepListen(-1); }
+  else if(e.key==="Home"){ e.preventDefault(); toneAt(0); }
+  else if(e.key==="End"){ e.preventDefault(); toneAt(listenSamples.length-1); }
+  else if(e.key==="l"||e.key==="L"||e.key==="ך"){ e.preventDefault(); nextMark(e.shiftKey?-1:1); }
+  else if(e.key==="d"||e.key==="D"||e.key==="ג"){ e.preventDefault(); announceDescription(); }
+});
+
 /* ---- game ---- */
 const LS="hear-fn-game";
 let gstate={best:0};
 try{ const s=loadJson(LS,{best:0}); if(s && isFinite(s.best) && s.best>=0) gstate=s; }catch(e){}
-let gScore=0, gStreak=0, gAnswer=null, gChoices=[], gParams=null, gLocked=false;
+let gScore=0, gStreak=0, gAnswer=null, gChoices=[], gParams=null, gLocked=false, gPicked=null;
 $("best").textContent=gstate.best||0;
 function randP(P){ const o={}; for(const k in P){ const s=P[k]; let v; do{ v=+(s.min+Math.random()*(s.max-s.min)).toFixed(2);}while(Math.abs(v)<.3&&(k==="a")); o[k]=v; } return o; }
 function newRiddle(){
-  gLocked=false; $("gFb").textContent=""; $("gFb").className="fb";
+  gLocked=false; gPicked=null; $("gFb").textContent=""; $("gFb").className="fb";
+  if($("gCompare")) $("gCompare").disabled=true;
   const keys=[...ORDER]; // pick 4 distinct families
   gChoices=[]; while(gChoices.length<4){ const k=keys.splice(Math.floor(Math.random()*keys.length),1)[0]; gChoices.push(k); }
   gAnswer=gChoices[Math.floor(Math.random()*4)];
@@ -323,21 +418,45 @@ function gameSweep(){
   sweepRAF=requestAnimationFrame(step);
 }
 function finishGameSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF); setVoice(null,0); stopT=setTimeout(stopOsc,120); }
+function playFamily(key, p, dur, onDone){
+  const ac=audio(); if(!ac) return;
+  startOsc(); const t0=ac.currentTime, tok=++sweepTok;
+  let lastSign=null,lastFin=false,lastY=null;
+  const P=FUNCS[key]; sweeping=true;
+  const step=()=>{ if(!sweeping||tok!==sweepTok)return; const el=(ac.currentTime-t0)*1000; if(el>=dur){ finishGameSweep(); if(onDone)onDone(); return; }
+    const x=XMIN+(XMAX-XMIN)*el/dur; const y=P.f(x,p);
+    if(isFinite(y)){ const f=toFreq(y,-20,20); setVoice(f,.18);
+      if(lastY!==null && Math.abs(y-lastY)>36){ lastSign=null; lastFin=false; }
+      const s=Math.sign(y); if(lastFin&&lastSign!==null&&s!==0&&s!==lastSign)click(); if(s!==0)lastSign=s; lastFin=true; lastY=y;
+    } else { setVoice(null,0); lastFin=false; lastSign=null; lastY=null; }
+    sweepRAF=requestAnimationFrame(step); };
+  sweepRAF=requestAnimationFrame(step);
+}
+function compareGuess(){
+  if(!gAnswer||!gPicked) return;
+  const live=$("live");
+  if(live) live.textContent="קודם: מה שניחשתם ("+FUNCS[gPicked].name+"). אחר כך: התשובה ("+FUNCS[gAnswer].name+").";
+  playFamily(gPicked, randP(FUNCS[gPicked].p), 1800, function(){
+    setTimeout(function(){ playFamily(gAnswer, gParams, 1800); }, 400);
+  });
+}
 function guess(k,btn){
-  if(gLocked) return; gLocked=true;
+  if(gLocked) return; gLocked=true; gPicked=k;
   const right=k===gAnswer;
   document.querySelectorAll("#gOpts button").forEach(b=>{ if(b.dataset.k===gAnswer)b.classList.add("correct"); else if(b===btn)b.classList.add("wrong"); });
   if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;saveJson(LS,gstate);$("best").textContent=gstate.best;}
-    $("gFb").textContent="✓ נכון! זו "+FUNCS[gAnswer].name; $("gFb").className="fb ok";
-  } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+")"; $("gFb").className="fb no"; }
+    $("gFb").textContent="✓ נכון! זו "+FUNCS[gAnswer].name+". "+FUNCS[gAnswer].desc; $("gFb").className="fb ok";
+  } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+"). לחצו «השוו» כדי לשמוע את הניחוש ואז את התשובה."; $("gFb").className="fb no"; }
   $("score").textContent=gScore; $("streak").textContent=gStreak;
+  if($("gCompare")) $("gCompare").disabled=false;
 }
 $("gPlay").addEventListener("click",()=>{ if(!gAnswer)newRiddle(); gameSweep(); });
 $("gReplay").addEventListener("click",gameSweep);
 $("gNew").addEventListener("click",()=>{ newRiddle(); gameSweep(); });
+if($("gCompare")) $("gCompare").addEventListener("click", compareGuess);
 
 /* ---- init ---- */
-buildPicker(); $("fn").value=cur; buildSliders(); refreshHeader(); draw(); newRiddle();
+buildPicker(); $("fn").value=cur; buildSliders(); refreshHeader(); draw(); rebuildListen(); newRiddle();
 
 /* ============================================================
    SELF-CHECK (manual, ran during build):

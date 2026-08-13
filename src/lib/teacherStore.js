@@ -194,6 +194,110 @@
     };
   }
 
+  function addNote(classCode, name, text, storage) {
+    const label = normalizeCode(name);
+    const body = String(text == null ? '' : text).replace(/\s+/g, ' ').trim().slice(0, 280);
+    if (!label || !body) return null;
+    const roster = loadRoster(classCode, storage);
+    const student = roster.students[label];
+    if (!student) return null;
+    if (!Array.isArray(student.notes)) student.notes = [];
+    const note = { at: Date.now(), text: body };
+    student.notes.push(note);
+    saveRoster(classCode, roster, storage);
+    return note;
+  }
+
+  function listNotes(student) {
+    if (!student || !Array.isArray(student.notes)) return [];
+    return student.notes.slice();
+  }
+
+  function itemsSince(student, sinceTs) {
+    const all = allItems(student);
+    const since = Number(sinceTs);
+    if (!Number.isFinite(since)) return all;
+    return all.filter(function (it) { return Number(it.at) >= since; });
+  }
+
+  function buildClassOverview(classCode, storage) {
+    const roster = loadRoster(classCode, storage);
+    const names = Object.keys(roster.students).sort(function (a, b) {
+      return a.localeCompare(b, 'he');
+    });
+    return names.map(function (name) {
+      const student = roster.students[name];
+      const report = buildReport(student);
+      const sessions = student.sessions || [];
+      const last = sessions.length ? sessions[sessions.length - 1] : null;
+      return {
+        name: name,
+        total: report.total,
+        correct: report.correct,
+        accuracy: report.total ? report.correct / report.total : 0,
+        repeating: report.repeatingErrors.length,
+        sessions: sessions.length,
+        lastAt: last ? last.started : null,
+        lastKind: last ? last.kind : '',
+        notes: listNotes(student).length,
+      };
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  function buildParentNote(student, extras) {
+    const o = extras || {};
+    const since = o.since;
+    const items = itemsSince(student, since);
+    const report = buildReport(student ? { name: student.name, sessions: [{ items: items }] } : null);
+    // Rebuild per-skill from the (possibly sliced) items while keeping name/errors.
+    const name = student && student.name ? student.name : '';
+    const classCode = o.classCode || '';
+    const observation = String(o.observation || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+    const lastNotes = listNotes(student);
+    const lastNote = lastNotes.length ? lastNotes[lastNotes.length - 1].text : '';
+    return {
+      title: 'מכתב קצר להורה — MelodyMath',
+      name: name,
+      classCode: classCode,
+      total: report.total,
+      correct: report.correct,
+      perSkill: report.perSkill,
+      repeatingErrors: report.repeatingErrors,
+      observation: observation || lastNote,
+      disclaimer: 'המספרים הם ספירה של תשובות במכשיר הזה — לא ציון, לא אבחון, ולא הוכחה שהתרגול עוזר. MelodyMath הוא דף דפדפן בלי שרת. אין כאן טיפול ואין טענת יעילות.',
+    };
+  }
+
+  function renderParentNoteHtml(note) {
+    const n = note || buildParentNote(null, {});
+    const who = [n.name, n.classCode].filter(Boolean).join(' · ');
+    const skills = (n.perSkill || []).map(function (s) {
+      return '<li>' + escapeHtml(s.skill) + ': ' + s.correct + ' מתוך ' + s.total + '</li>';
+    }).join('');
+    const errs = (n.repeatingErrors || []).map(function (e) {
+      return '<li>' + escapeHtml(e.prompt) + ' — ' + e.count + ' פעמים</li>';
+    }).join('');
+    return '<article class="parent-note">'
+      + '<p class="sheet-kicker">' + escapeHtml(n.title) + (who ? ' — ' + escapeHtml(who) : '') + '</p>'
+      + '<p>שלום,</p>'
+      + '<p>במכשיר בבית הספר נרשם תרגול קצר'
+      + (n.name ? ' של <b>' + escapeHtml(n.name) + '</b>' : '')
+      + '. זה דף סיכום להורה, לא מבחן.</p>'
+      + '<p><b>במכשיר:</b> ' + n.correct + ' נכונות מתוך ' + n.total + '.</p>'
+      + (skills ? '<p><b>לפי מיומנות</b></p><ul class="err-list">' + skills + '</ul>' : '')
+      + '<p><b>תרגילים שחזרו כשגיאה</b></p>'
+      + (errs ? '<ul class="err-list">' + errs + '</ul>' : '<p>אין תרגיל שנפסל פעמיים או יותר במדגם הזה.</p>')
+      + (n.observation ? '<p><b>הערת המורה:</b> ' + escapeHtml(n.observation) + '</p>' : '')
+      + '<p class="sheet-note">' + escapeHtml(n.disclaimer) + '</p>'
+      + '</article>';
+  }
+
   function exportRoster(classCode, storage) {
     const roster = loadRoster(classCode, storage);
     return JSON.stringify({
@@ -321,6 +425,8 @@
     normalizeCode, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     startSession, addItem, endSession, buildReport, allItems,
+    addNote, listNotes, itemsSince, buildClassOverview,
+    buildParentNote, renderParentNoteHtml, escapeHtml,
     loadWho, saveWho, makeChoices, exportRoster, importRoster,
     loadJson, saveJson, jsonKey,
   };

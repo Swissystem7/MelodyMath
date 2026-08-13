@@ -66,11 +66,12 @@ test('toFreq shares the C3–C6 range with yToFreq at the endpoints', () => {
 });
 
 test('audio helpers are inert in Node — no AudioContext, no throw', () => {
-  const { getAudioContext, playFreq, playRhythmClicks, playClick, playValueSweep, stopAllAudio } = require('../src/lib/sonify');
+  const { getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks, playValueSweep, stopAllAudio } = require('../src/lib/sonify');
   assert.equal(getAudioContext(), null);
   assert.doesNotThrow(() => playFreq(440));
   assert.doesNotThrow(() => playRhythmClicks([0.25, 0.5, 0.125], 80));
   assert.doesNotThrow(() => playClick(1400));
+  assert.doesNotThrow(() => playCountClicks([3, 2], 76));
   assert.doesNotThrow(() => playValueSweep([1, 2, 4], { linear: false }));
   assert.doesNotThrow(() => stopAllAudio());
 });
