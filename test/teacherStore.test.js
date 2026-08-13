@@ -97,3 +97,43 @@ test('an empty name is refused and a missing student yields a blank report', () 
   assert.equal(report.total, 0);
   assert.deepEqual(report.repeatingErrors, []);
 });
+
+test('class overview lists every child on this tablet with last session and repeating errors', () => {
+  const ls = memory();
+  const a = store.startSession('שילוב', 'נועה', 'class', ls);
+  store.addItem('שילוב', 'נועה', a.id, { skill: 'חיבור', prompt: '2+2', correct: true }, ls);
+  store.endSession('שילוב', 'נועה', a.id, ls);
+  const b = store.startSession('שילוב', 'יוסי', 'diag', ls);
+  store.addItem('שילוב', 'יוסי', b.id, { skill: 'חיסור', prompt: '7-3', correct: false }, ls);
+  store.addItem('שילוב', 'יוסי', b.id, { skill: 'חיסור', prompt: '7-3', correct: false }, ls);
+  const board = store.buildClassOverview('שילוב', ls);
+  assert.equal(board.length, 2);
+  assert.equal(board[0].name, 'יוסי');
+  assert.equal(board[1].name, 'נועה');
+  const yossi = board.find((r) => r.name === 'יוסי');
+  assert.equal(yossi.repeating, 1);
+  assert.equal(yossi.total, 2);
+  assert.equal(yossi.lastKind, 'diag');
+});
+
+test('a teacher note is trimmed and the parent letter refuses mastery language', () => {
+  const ls = memory();
+  store.upsertStudent('שילוב', 'תמר', ls);
+  const note = store.addNote('שילוב', 'תמר', '  היום ספרה על האצבעות  ', ls);
+  assert.equal(note.text, 'היום ספרה על האצבעות');
+  assert.equal(store.addNote('שילוב', 'תמר', '   ', ls), null);
+  const sess = store.startSession('שילוב', 'תמר', 'class', ls);
+  store.addItem('שילוב', 'תמר', sess.id, { skill: 'מנייה', prompt: '5 תופים', correct: true }, ls);
+  store.addItem('שילוב', 'תמר', sess.id, { skill: 'חיבור', prompt: '3+2', correct: false }, ls);
+  const letter = store.buildParentNote(store.getStudent('שילוב', 'תמר', ls), { classCode: 'שילוב' });
+  assert.equal(letter.total, 2);
+  assert.equal(letter.correct, 1);
+  assert.match(letter.disclaimer, /לא ציון/);
+  assert.match(letter.disclaimer, /אין טענת יעילות/);
+  assert.doesNotMatch(letter.disclaimer, /שולט|מחקרים מוכיחים|זה טיפול/);
+  const html = store.renderParentNoteHtml(letter);
+  assert.match(html, /תמר/);
+  assert.match(html, /היום ספרה על האצבעות/);
+  assert.equal(html.includes('<script'), false);
+  assert.equal(store.escapeHtml('3 < 4'), '3 &lt; 4');
+});
