@@ -8,4 +8,4 @@
 | [VALIDATION.md](VALIDATION.md) | אימות הגשה, 3.8.2026 | עדיין שימושי כהערת יושרה (אין משתמשים, אין פיילוט), אבל לא תיאור המוצר החי |
 | [RESEARCH-procurement-2026-08.md](RESEARCH-procurement-2026-08.md) | הערות רכש/שוק מוקדמות | הוחלף ב־[RESEARCH.md](../../RESEARCH.md) מ־13.8.2026 (פסק דין PARK) |
 
-מחקר השוק העדכני: [`RESEARCH.md`](../../RESEARCH.md).
+מחקר השוק העדכני: [`RESEARCH.md`](../../RESEARCH.md). מחקר הרכש (גפ״ן / תוכן דיגיטלי / סל שילוב): [`MONETIZATION.md`](../../MONETIZATION.md).
