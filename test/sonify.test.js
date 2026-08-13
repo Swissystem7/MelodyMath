@@ -44,3 +44,11 @@ test('the three-octave span is exactly two doublings of frequency', () => {
   const high = yToFreq(100, 0, 100);
   assert.ok(Math.abs(high / low - 8) < 1e-9, 'C3 to C6 should be a factor of 8');
 });
+
+test('audio helpers are inert in Node — no AudioContext, no throw', () => {
+  const { getAudioContext, playFreq, playRhythmClicks, stopAllAudio } = require('../src/lib/sonify');
+  assert.equal(getAudioContext(), null);
+  assert.doesNotThrow(() => playFreq(440));
+  assert.doesNotThrow(() => playRhythmClicks([0.25, 0.5, 0.125], 80));
+  assert.doesNotThrow(() => stopAllAudio());
+});
