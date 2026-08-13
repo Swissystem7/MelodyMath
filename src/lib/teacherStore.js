@@ -278,6 +278,33 @@
     return opts;
   }
 
+  function jsonKey(key) {
+    return 'mm:v1:' + String(key || '');
+  }
+
+  function loadJson(key, fallback, storage) {
+    const ls = storage || defaultStorage();
+    if (!ls) return fallback;
+    try {
+      const raw = ls.getItem(jsonKey(key)) || ls.getItem(String(key));
+      if (raw == null) return fallback;
+      return JSON.parse(raw);
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function saveJson(key, value, storage) {
+    const ls = storage || defaultStorage();
+    if (!ls) return false;
+    try {
+      ls.setItem(jsonKey(key), JSON.stringify(value));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function saveWho(who, storage) {
     const ls = storage || defaultStorage();
     if (!ls) return;
@@ -295,5 +322,6 @@
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     startSession, addItem, endSession, buildReport, allItems,
     loadWho, saveWho, makeChoices, exportRoster, importRoster,
+    loadJson, saveJson, jsonKey,
   };
 });

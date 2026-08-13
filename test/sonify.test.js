@@ -57,10 +57,20 @@ test('rhythm fractions print as 1/4+1/2+1/8, not raw decimals', () => {
   assert.equal(formatRhythmPattern([.25, .5, .125, .375]), '1/4+1/2+1/8+3/8');
 });
 
+test('toFreq shares the C3–C6 range with yToFreq at the endpoints', () => {
+  const { toFreq, yToFreq, FMIN, FMAX } = require('../src/lib/sonify');
+  assert.ok(Math.abs(toFreq(0, 0, 1) - FMIN) < 1e-6);
+  assert.ok(Math.abs(toFreq(1, 0, 1) - FMAX) < 1e-6);
+  assert.equal(toFreq(NaN, 0, 1), null);
+  assert.ok(yToFreq(0, 0, 100) > 0);
+});
+
 test('audio helpers are inert in Node — no AudioContext, no throw', () => {
-  const { getAudioContext, playFreq, playRhythmClicks, stopAllAudio } = require('../src/lib/sonify');
+  const { getAudioContext, playFreq, playRhythmClicks, playClick, playValueSweep, stopAllAudio } = require('../src/lib/sonify');
   assert.equal(getAudioContext(), null);
   assert.doesNotThrow(() => playFreq(440));
   assert.doesNotThrow(() => playRhythmClicks([0.25, 0.5, 0.125], 80));
+  assert.doesNotThrow(() => playClick(1400));
+  assert.doesNotThrow(() => playValueSweep([1, 2, 4], { linear: false }));
   assert.doesNotThrow(() => stopAllAudio());
 });

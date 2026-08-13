@@ -1,0 +1,23 @@
+/* Shared print + chrome. One file so every page hides the same chrome. */
+#mm-site-nav{
+  display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;
+  padding:8px 14px;font:600 14px/1.4 Arial,sans-serif;
+  background:#21183b;color:#fff;
+}
+#mm-site-nav a{color:#ffd85d;text-decoration:none}
+#mm-site-nav a[aria-current="page"]{color:#fff;text-decoration:underline}
+#mm-site-nav .mm-brand{font-weight:900;margin-inline-end:8px;color:#fff}
+
+@media print{
+  #mm-site-nav,.mm-no-print,header,nav.tabs,.tabs,.more-nav,.who-bar{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .card{box-shadow:none!important;border:0!important}
+  .print-only{display:block!important}
+  #trialKit{display:none!important}
+  body.print-kit #trialKit{display:block!important}
+  body.print-kit #reportCard{display:none!important}
+  #teacherReport.panel{display:block!important}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}

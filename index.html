@@ -108,6 +108,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/core.js"></script>
 <script>
 const exercises=[
 [1,1,'שברים','קצב','רבע מנוקד שווה לכמה שמיניות?',3,'רבע רגיל = 2 שמיניות, והנקודה מוסיפה חצי מערך התו'],[2,1,'שברים','קצב','כמה רבעים יש בתיבה בזמן 4/4?',4,'המספר העליון מציין כמה רבעים בתיבה'],[3,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של סול במרווח קווינטה?','3:2','קווינטה נקייה היא יחס 3:2'],[4,1,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 3/4?',6,'כל רבע שווה 2 שמיניות'],[5,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של פה במרווח קוורטה?','4:3','קוורטה נקייה היא יחס 4:3'],[6,1,'שברים','קצב','כמה רבעים שווה חצי מנוקד?',3,'חצי רגיל = 2 רבעים, והנקודה מוסיפה רבע נוסף'],[7,1,'חזקות','טמפו','אם מהירות הקצב מוכפלת פי 2 בכל דקה, כמה פעמים תגדל המהירות אחרי 3 דקות?',8,'2 בחזקת 3'],[8,1,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 2/4?',8,'כל רבע שווה 4 שש־עשריות'],[9,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של דו באוקטבה?','2:1','אוקטבה היא הכפלת התדר פי 2'],[10,1,'שברים','קצב','משך תיבה במשקל 6/8 שווה לכמה רבעים?',3,'שש שמיניות שוות במשך לשלושה רבעים; בפועל מרגישים שתי פעימות של רבע מנוקד'],[11,1,'חזקות','טמפו','קצב מתחיל ב־60 BPM ומוכפל כל 2 דקות. מה הקצב אחרי 4 דקות?',240,'60 × 2² = 240'],[12,1,'שברים','קצב','כמה חצאים יש בתיבה בזמן 4/4?',2,'כל חצי שווה 2 רבעים'],
@@ -170,7 +171,8 @@ function renderTeacherReport(){const empty=$('reportEmpty'),body=$('reportBody')
 who=loadWho();applyWhoToForm();
 if($('whoSave'))$('whoSave').onclick=saveWhoFromForm;
 if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
-if($('reportPrint'))$('reportPrint').onclick=()=>{document.body.classList.remove('print-kit');renderTeacherReport();window.print()};
+function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
+if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
 window.addEventListener('afterprint',()=>document.body.classList.remove('print-kit'));
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
@@ -211,7 +213,7 @@ row.innerHTML='<span id="rmProBadge" class="tag"></span><span id="rmStreakBadge"
 header.appendChild(row);
 }
 rmRenderProBadge();rmRenderStreak();
-var exportBtn=document.getElementById('rmExportBtn');if(exportBtn)exportBtn.onclick=rmExportProgressPdfText;
+var exportBtn=document.getElementById('rmExportBtn');if(exportBtn)exportBtn.onclick=function(){document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab==='teacherReport')});document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active',p.id==='teacherReport')});printTeacherReport()};
 var upgradeBtn=document.getElementById('rmUpgradeBtn');if(upgradeBtn)upgradeBtn.onclick=function(){if(confirm('זה רק תג מקומי להדגמה. אין מנוי, אין תשלום, ואין פיצ׳רים נוספים. להציג את התג?')){rmSetPro(true);alert('תג דמו בלבד. שום דבר מעבר למה שכבר פתוח בדף לא השתנה.')}};
 }catch(e){console.error('MelodyMath pro-features init error',e)}
 });
