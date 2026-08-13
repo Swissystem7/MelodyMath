@@ -137,3 +137,26 @@ test('a teacher note is trimmed and the parent letter refuses mastery language',
   assert.equal(html.includes('<script'), false);
   assert.equal(store.escapeHtml('3 < 4'), '3 &lt; 4');
 });
+
+test('a child certificate counts practice and refuses mastery language', () => {
+  const ls = memory();
+  const sess = store.startSession('שילוב', 'נועה', 'class', ls);
+  store.addItem('שילוב', 'נועה', sess.id, { skill: 'מנייה', prompt: '5', correct: true }, ls);
+  store.addItem('שילוב', 'נועה', sess.id, { skill: 'חיבור', prompt: '2+2', correct: false }, ls);
+  const cert = store.buildCertificate(store.getStudent('שילוב', 'נועה', ls), {
+    classCode: 'שילוב',
+    when: '13.8.2026',
+  });
+  assert.equal(cert.total, 2);
+  assert.equal(cert.correct, 1);
+  assert.match(cert.line, /נועה/);
+  assert.match(cert.line, /תרגל/);
+  assert.match(cert.disclaimer, /לא ציון/);
+  assert.match(cert.disclaimer, /לא הצטיינות/);
+  assert.doesNotMatch(cert.disclaimer, /שולט|מצטיין|טיפול/);
+  const html = store.renderCertificateHtml(cert);
+  assert.match(html, /נועה/);
+  assert.match(html, /13\.8\.2026/);
+  assert.match(html, /מנייה/);
+  assert.equal(html.includes('<script'), false);
+});

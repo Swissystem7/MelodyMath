@@ -274,6 +274,41 @@
     };
   }
 
+  function buildCertificate(student, extras) {
+    const o = extras || {};
+    const report = buildReport(student);
+    const name = student && student.name ? student.name : '';
+    const when = o.when || '';
+    return {
+      title: 'תעודת תרגול — MelodyMath',
+      name: name,
+      classCode: o.classCode || '',
+      when: when,
+      total: report.total,
+      correct: report.correct,
+      perSkill: report.perSkill,
+      line: (name ? name + ' תרגל/ה' : 'תרגול') + ' במכשיר הזה.',
+      disclaimer: 'זו ספירה של תרגילים במכשיר — לא ציון, לא הצטיינות, לא אבחון, ולא הוכחה שהתרגול עוזר. MelodyMath הוא דף דפדפן בלי שרת.',
+    };
+  }
+
+  function renderCertificateHtml(cert) {
+    const c = cert || buildCertificate(null, {});
+    const who = [c.name, c.classCode].filter(Boolean).join(' · ');
+    const skills = (c.perSkill || []).map(function (s) {
+      return '<li>' + escapeHtml(s.skill) + ': ' + s.correct + ' מתוך ' + s.total + '</li>';
+    }).join('');
+    return '<article class="cert">'
+      + '<p class="sheet-kicker">' + escapeHtml(c.title) + '</p>'
+      + '<h2>' + escapeHtml(c.line) + '</h2>'
+      + (who ? '<p class="cert-who">' + escapeHtml(who) + '</p>' : '')
+      + (c.when ? '<p>' + escapeHtml(c.when) + '</p>' : '')
+      + '<p class="cert-count"><b>' + c.correct + '</b> נכונות מתוך <b>' + c.total + '</b> במכשיר הזה.</p>'
+      + (skills ? '<ul class="err-list">' + skills + '</ul>' : '<p>עדיין אין פירוט מיומנות.</p>')
+      + '<p class="sheet-note">' + escapeHtml(c.disclaimer) + '</p>'
+      + '</article>';
+  }
+
   function renderParentNoteHtml(note) {
     const n = note || buildParentNote(null, {});
     const who = [n.name, n.classCode].filter(Boolean).join(' · ');
@@ -426,7 +461,7 @@
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     startSession, addItem, endSession, buildReport, allItems,
     addNote, listNotes, itemsSince, buildClassOverview,
-    buildParentNote, renderParentNoteHtml, escapeHtml,
+    buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
     loadWho, saveWho, makeChoices, exportRoster, importRoster,
     loadJson, saveJson, jsonKey,
   };
