@@ -56,6 +56,16 @@ test('repeating errors are prompts missed at least twice; streak counts a tail o
   assert.equal(report.streak.best, 2);
 });
 
+test('makeChoices always includes the key and four distinct non-negative options', () => {
+  let i = 0;
+  const rng = () => { i += 1; return (i % 10) / 10; };
+  const opts = store.makeChoices(5, rng);
+  assert.equal(opts.length, 4);
+  assert.ok(opts.includes(5));
+  assert.equal(new Set(opts).size, 4);
+  opts.forEach((n) => assert.ok(n >= 0));
+});
+
 test('an empty name is refused and a missing student yields a blank report', () => {
   const ls = memory();
   assert.equal(store.upsertStudent('כ', '   ', ls), null);

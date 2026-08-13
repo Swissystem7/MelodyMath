@@ -206,6 +206,31 @@
     }
   }
 
+  // Four tap-targets for grades א–ב. Nearby integers, never the key twice.
+  function makeChoices(answer, rng) {
+    const roll = typeof rng === 'function' ? rng : Math.random;
+    const n = Number(answer);
+    if (!Number.isFinite(n)) return [String(answer)];
+    const opts = [n];
+    const around = [n - 1, n + 1, n - 2, n + 2, n + 3, n - 3, n + 4, Math.max(0, n - 4), n === 0 ? 1 : 0];
+    around.forEach(function (c) {
+      if (opts.length >= 4) return;
+      if (Number.isFinite(c) && c >= 0 && opts.indexOf(c) === -1) opts.push(c);
+    });
+    let guard = 0;
+    while (opts.length < 4 && guard++ < 30) {
+      const c = Math.max(0, n + Math.floor(roll() * 9) - 4);
+      if (opts.indexOf(c) === -1) opts.push(c);
+    }
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(roll() * (i + 1));
+      const tmp = opts[i];
+      opts[i] = opts[j];
+      opts[j] = tmp;
+    }
+    return opts;
+  }
+
   function saveWho(who, storage) {
     const ls = storage || defaultStorage();
     if (!ls) return;
@@ -222,6 +247,6 @@
     normalizeCode, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     startSession, addItem, endSession, buildReport, allItems,
-    loadWho, saveWho,
+    loadWho, saveWho, makeChoices,
   };
 });
