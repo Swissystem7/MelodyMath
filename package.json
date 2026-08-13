@@ -1,0 +1,8 @@
+{
+  "name": "melodymath",
+  "private": true,
+  "description": "Hebrew math practice and graph sonification — no install, no backend",
+  "scripts": {
+    "test": "node --test"
+  }
+}

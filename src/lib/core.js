@@ -48,6 +48,13 @@
       return '<a href="' + file + '"' + (current ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }).join(' · ');
     document.body.insertBefore(nav, document.body.firstChild);
+    if (!document.querySelector('.mm-skip')) {
+      const skip = document.createElement('a');
+      skip.className = 'mm-skip';
+      skip.href = '#main';
+      skip.textContent = 'דלגו לתוכן';
+      document.body.insertBefore(skip, nav);
+    }
   }
 
   function api() {

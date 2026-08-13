@@ -4,8 +4,11 @@
   padding:8px 14px;font:600 14px/1.4 Arial,sans-serif;
   background:#21183b;color:#fff;
 }
-#mm-site-nav a{color:#ffd85d;text-decoration:none}
+#mm-site-nav a{color:#ffe27a;text-decoration:none}
+#mm-site-nav a:focus-visible{outline:3px solid #ffe27a;outline-offset:3px}
 #mm-site-nav a[aria-current="page"]{color:#fff;text-decoration:underline}
+.mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+.mm-skip:focus{transform:none}
 #mm-site-nav .mm-brand{font-weight:900;margin-inline-end:8px;color:#fff}
 
 @media print{

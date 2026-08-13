@@ -43,16 +43,16 @@
   .fb{min-height:22px;font-weight:600}
   .fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <h1>שומעים פונקציה</h1>
-  <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.
-  מקשים: רווח = נגן/עצור, Tab לסליידרים.</div>
+  <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.</div>
 </header>
 
-<main>
+<main id="main">
   <div class="card truth" role="note">
     <b>מה באמת שומעים?</b> ברוב המצבים זו <b>סוניפיקציה</b>: גובה f(x) מתורגם לגובה צליל (מיפוי לוגריתמי, 130–1046 הרץ) — הצליל <i>מייצג</i> את הגרף, הוא לא "קול הפונקציה". יוצא דופן: <b>סינוס במצב טון‑אמיתי</b>, שם התדירות של הגל היא באמת התדר הנשמע. כל צליל תמיד מסונכרן לנקודה שרצה על הגרף.
   </div>
@@ -76,10 +76,10 @@
     <div class="row" id="sliders" style="margin-top:12px"></div>
 
     <div class="row" style="margin-top:12px">
-      <button id="play" type="button">▶︎ נגן סריקה</button>
+      <button id="play" type="button" aria-pressed="false">▶︎ נגן סריקה</button>
       <span class="legend" id="playHint">הסמן זז שמאל→ימין; הצליל עולה עם הגרף.</span>
     </div>
-    <div class="sr" id="live" aria-live="polite"></div>
+    <div class="sr" id="live" aria-live="polite" aria-atomic="true"></div>
     <div class="legend" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px 16px;border-top:1px solid #e2e8f0;padding-top:10px" aria-label="מילון הצלילים">
       <b style="flex-basis:100%;color:#4338ca">מילון הצלילים:</b>
       <span>🔔 נקישה = <b>שורש</b> (חציית ציר x)</span>
@@ -211,39 +211,51 @@ function draw(markX){
 }
 
 /* ---- sweeps ---- */
+function announceSweep(x,y,flags){
+  const line=sweepNarration(x,y,flags);
+  const live=$("live");
+  if(live) live.textContent=line;
+  $("cv").setAttribute("aria-label", line || "גרף הפונקציה");
+}
 function playSweep(dur=3000, onDone){
   if(sweeping) { stopSweep(); return; }
   const ac=audio(); if(!ac) return;
-  startOsc(); sweeping=true; $("play").textContent="⏹ עצור";
+  const quiet=preferLessMotion();
+  startOsc(); sweeping=true; $("play").textContent="⏹ עצור"; $("play").setAttribute("aria-pressed","true");
   const t0=ac.currentTime, tok=++sweepTok;
-  let lastSign=null, lastFinite=false, lastY=null;
+  let lastSign=null, lastFinite=false, lastY=null, lastSaid=-1, lastUndef=false;
   const p=params();
+  announceSweep(XMIN, FUNCS[cur].f(XMIN,p), {});
   const step=(now)=>{
     if(!sweeping||tok!==sweepTok) return;
     const elapsed=(ac.currentTime-t0)*1000; let t=elapsed/dur;
     if(t>=1){ finishSweep(); if(onDone)onDone(); return; }
     const x=XMIN+(XMAX-XMIN)*t;
     const y=FUNCS[cur].f(x,p);
+    let flags={};
     if(isFinite(y)){
       const f=toFreq(y,yLo,yHi);
       setVoice(f,.18);
-      // discontinuity (asymptote jump): reset sign tracking, no root click
-      if(lastY!==null && Math.abs(y-lastY)>Math.abs(yHi-yLo)*0.9){ lastSign=null; lastFinite=false; }
-      // root earcon on sign change
+      if(lastY!==null && Math.abs(y-lastY)>Math.abs(yHi-yLo)*0.9){ lastSign=null; lastFinite=false; flags.asymptote=true; }
       const s=Math.sign(y);
-      if(lastFinite && lastSign!==null && s!==0 && s!==lastSign) click();
-      if(s!==0) lastSign=s; lastFinite=true; lastY=y;
+      if(lastFinite && lastSign!==null && s!==0 && s!==lastSign){ click(); flags.root=true; }
+      if(s!==0) lastSign=s; lastFinite=true; lastY=y; lastUndef=false;
     } else {
-      setVoice(null,0); lastFinite=false; lastSign=null; lastY=null; // silence = undefined
+      setVoice(null,0); lastFinite=false; lastSign=null; lastY=null;
+      flags.undefined=true;
+      if(!lastUndef){ announceSweep(x,y,flags); lastUndef=true; lastSaid=elapsed; }
     }
-    draw(x);
+    if(flags.root || flags.asymptote || elapsed-lastSaid>800){ announceSweep(x,y,flags); lastSaid=elapsed; }
+    if(!quiet) draw(x);
     sweepRAF=requestAnimationFrame(step);
   };
   sweepRAF=requestAnimationFrame(step);
 }
 function finishSweep(){ sweeping=false; if(sweepRAF)cancelAnimationFrame(sweepRAF);
   setVoice(null,0); stopT=setTimeout(stopOsc,120);
-  $("play").textContent="▶︎ נגן סריקה"; draw(); }
+  $("play").textContent="▶︎ נגן סריקה"; $("play").setAttribute("aria-pressed","false");
+  const live=$("live"); if(live && !live.textContent) live.textContent="הסריקה הסתיימה.";
+  draw(); }
 function stopSweep(){ finishSweep(); }
 let qsT=null;
 function quickSweep(){ // short 0.8s sweep on slider drag (skip if playing/game)
