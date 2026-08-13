@@ -194,6 +194,53 @@
     };
   }
 
+  function exportRoster(classCode, storage) {
+    const roster = loadRoster(classCode, storage);
+    return JSON.stringify({
+      v: 1,
+      exported: Date.now(),
+      note: 'MelodyMath local roster. Not a cloud backup and not an official school record.',
+      classCode: roster.classCode,
+      students: roster.students,
+    });
+  }
+
+  function importRoster(classCode, raw, storage) {
+    let data;
+    try {
+      data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch (e) {
+      return { ok: false, error: 'not-json' };
+    }
+    if (!data || typeof data !== 'object' || typeof data.students !== 'object' || !data.students) {
+      return { ok: false, error: 'shape' };
+    }
+    const roster = loadRoster(classCode, storage);
+    let added = 0;
+    let merged = 0;
+    Object.keys(data.students).forEach(function (name) {
+      const incoming = data.students[name];
+      if (!incoming || typeof incoming !== 'object') return;
+      const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
+      if (!roster.students[name]) {
+        roster.students[name] = { name: name, created: incoming.created || Date.now(), sessions: sessions };
+        added += 1;
+        return;
+      }
+      const have = {};
+      roster.students[name].sessions.forEach(function (s) { if (s && s.id) have[s.id] = true; });
+      sessions.forEach(function (s) {
+        if (s && s.id && !have[s.id]) {
+          roster.students[name].sessions.push(s);
+          have[s.id] = true;
+          merged += 1;
+        }
+      });
+    });
+    saveRoster(classCode, roster, storage);
+    return { ok: true, added: added, merged: merged };
+  }
+
   function loadWho(storage) {
     const ls = storage || defaultStorage();
     if (!ls) return { classCode: '', name: '' };
@@ -247,6 +294,6 @@
     normalizeCode, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     startSession, addItem, endSession, buildReport, allItems,
-    loadWho, saveWho, makeChoices,
+    loadWho, saveWho, makeChoices, exportRoster, importRoster,
   };
 });

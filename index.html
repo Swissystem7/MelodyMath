@@ -12,6 +12,9 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   header,.tabs,.more-nav,.who-bar,.no-print,nav,#remediation,#practice,#playground,#classMode{display:none!important}
   .panel{display:none!important}
   #teacherReport.panel{display:block!important}
+  #trialKit{display:none!important}
+  body.print-kit #trialKit{display:block!important}
+  body.print-kit #reportCard{display:none!important}
   .card{box-shadow:none;border:0;padding:0}
   .print-only{display:block}
   .report-table th,.report-table td{border-bottom:1px solid #999}
@@ -61,7 +64,25 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <p id="classDoneNote">המספרים האלה הם ספירה של התשובות במפגש — לא ציון ולא הוכחה שהתרגול עוזר.</p>
   <button type="button" id="classAgain" class="primary">מפגש נוסף</button>
 </div></section>
-<section id="teacherReport" class="panel"><div class="card" id="reportCard">
+<section id="teacherReport" class="panel"><div class="card" id="trialKit">
+  <span class="tag">ערכת פיילוט · 4 שבועות · חינם</span>
+  <h2>דף הפעלה למורה</h2>
+  <p>מיועד למחנכת שילוב אחת עם קבוצה קטנה. אין כאן תוכנית משרד, אין רישום במאגר, ואין טענה שהקצב משפר מתמטיקה.</p>
+  <ol class="err-list" id="trialSteps">
+    <li><b>לפני שבוע 1.</b> בחרו קוד כיתה קבוע (למשל «שילוב-ג»). לכל ילד — שם או קוד. שמרו במכשיר. ייצאו גיבוי JSON לתיקייה שלכם.</li>
+    <li><b>שבוע 1.</b> מצב כיתה: מפגש אחד של 8 דקות לכל ילד, לחיצה בלי הקלדה. הדפיסו דוח אחרי המפגש הראשון — זה קו הבסיס, לא ציון.</li>
+    <li><b>שבועות 2–3.</b> אותו מפגש, בלי לשנות כללים. אחרי כל שיעור: ייצוא גיבוי. טאבלט בית ספר נמחק לעיתים קרובות.</li>
+    <li><b>שבוע 4.</b> הדפיסו דוח לכל ילד. שאלה אחת לעצמכם: האם ראיתם משהו שדף עבודה לא נותן? אם לא — הפיילוט ענה, והכלי נשאר דמו.</li>
+  </ol>
+  <p><b>מה לא אומרים להורים:</b> «שולט», «טיפול», «מחקרים מוכיחים», «סוגר פערים». אומרים: תרגול קצר במכשיר, הרישום מקומי, בלי שרת.</p>
+  <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+    <button type="button" id="kitPrint" class="secondary">הדפסת דף ההפעלה</button>
+    <button type="button" id="rosterExport" class="secondary">ייצוא גיבוי JSON</button>
+    <label class="secondary" style="display:inline-block;padding:13px 18px;cursor:pointer">ייבוא גיבוי<input type="file" id="rosterImport" accept="application/json,.json" hidden></label>
+    <span id="rosterMsg" class="who-status"></span>
+  </div>
+</div>
+<div class="card" id="reportCard">
   <span class="tag">רישום מקומי · לא ציון ואין טענת שליטה</span>
   <h2>דוח מורה</h2>
   <p>מה שנרשם במכשיר הזה לתלמיד/ה שנבחרו למעלה: דיוק לפי מיומנות, רצפים, תרגילים שחזרו כשגיאה, ויומן מפגשים. להדפסה — כפתור ההדפסה (CSS להדפסה מסתיר את שאר הדף).</p>
@@ -149,7 +170,12 @@ function renderTeacherReport(){const empty=$('reportEmpty'),body=$('reportBody')
 who=loadWho();applyWhoToForm();
 if($('whoSave'))$('whoSave').onclick=saveWhoFromForm;
 if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
-if($('reportPrint'))$('reportPrint').onclick=()=>{renderTeacherReport();window.print()};
+if($('reportPrint'))$('reportPrint').onclick=()=>{document.body.classList.remove('print-kit');renderTeacherReport();window.print()};
+if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-kit'));
+function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
+if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
+if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));if(!res.ok){$('rosterMsg').textContent=res.error==='not-json'?'הקובץ אינו JSON תקין.':'מבנה הקובץ לא מתאים.';return}$('rosterMsg').textContent=`יובא: ${res.added} תלמידים חדשים, ${res.merged} מפגשים שמוזגו.`;renderClassKids();renderTeacherReport()};reader.readAsText(f)};
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='teacherReport')renderTeacherReport();if(b.dataset.tab==='classMode')renderClassKids();document.body.classList.toggle('class-live',b.dataset.tab==='classMode'&&classEndsAt>Date.now())}));
 
 const CLASS_MS=8*60*1000;

@@ -66,6 +66,22 @@ test('makeChoices always includes the key and four distinct non-negative options
   opts.forEach((n) => assert.ok(n >= 0));
 });
 
+test('export then import merges sessions and rejects garbage', () => {
+  const src = memory();
+  const dest = memory();
+  const a = store.startSession('שילוב', 'דני', 'class', src);
+  store.addItem('שילוב', 'דני', a.id, { skill: 'מנייה', prompt: '3', correct: true }, src);
+  const json = store.exportRoster('שילוב', src);
+  const first = store.importRoster('שילוב', json, dest);
+  assert.equal(first.ok, true);
+  assert.equal(first.added, 1);
+  const again = store.importRoster('שילוב', json, dest);
+  assert.equal(again.ok, true);
+  assert.equal(store.getStudent('שילוב', 'דני', dest).sessions.length, 1);
+  assert.equal(store.importRoster('שילוב', '{nope', dest).ok, false);
+  assert.equal(store.importRoster('שילוב', '{"students":null}', dest).ok, false);
+});
+
 test('an empty name is refused and a missing student yields a blank report', () => {
   const ls = memory();
   assert.equal(store.upsertStudent('כ', '   ', ls), null);
