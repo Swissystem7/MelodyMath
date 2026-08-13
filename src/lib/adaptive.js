@@ -8,6 +8,9 @@
 //   isCorrect   answers are compared after normalisation, so "3 : 2", "3:2"
 //               and " 3:2 " all count, and a decimal comma is accepted the way
 //               a Hebrew-keyboard child actually types it.
+//   eligibleExercises
+//               only mastered (correct) ids drop out. Misses stay in the pool
+//               and are preferred on the next turn so errors return sooner.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -44,5 +47,25 @@
     return false;
   }
 
-  return { nextLevel, normalizeAnswer, isCorrect, MIN_LEVEL, MAX_LEVEL };
+  function eligibleExercises(items, history, lastId, chosenLevel) {
+    const list = Array.isArray(items) ? items : [];
+    const log = Array.isArray(history) ? history : [];
+    const mastered = new Set(log.filter((h) => h.correct).map((h) => h.id));
+    const missed = log.filter((h) => !h.correct && !mastered.has(h.id)).map((h) => h.id);
+    const last = list.find((x) => x.id === lastId);
+    const level = nextLevel(last ? last.level : chosenLevel, log.slice(-2));
+    const atLevel = (pred) => list.filter((x) => x.level === level && pred(x));
+    // Prefer a miss that is not the item just shown — one intervening question,
+    // then the error returns. Immediate repeat only if nothing else is left.
+    const retry = atLevel((x) => missed.includes(x.id) && x.id !== lastId);
+    if (retry.length) return retry;
+    let pool = atLevel((x) => !mastered.has(x.id) && x.id !== lastId);
+    if (!pool.length) pool = atLevel((x) => !mastered.has(x.id));
+    if (!pool.length) pool = list.filter((x) => !mastered.has(x.id) && x.id !== lastId);
+    if (!pool.length) pool = list.filter((x) => !mastered.has(x.id));
+    if (!pool.length) pool = list;
+    return pool;
+  }
+
+  return { nextLevel, normalizeAnswer, isCorrect, eligibleExercises, MIN_LEVEL, MAX_LEVEL };
 });

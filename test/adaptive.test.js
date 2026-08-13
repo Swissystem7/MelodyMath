@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { nextLevel, isCorrect, normalizeAnswer, MIN_LEVEL, MAX_LEVEL } = require('../src/lib/adaptive');
+const { nextLevel, isCorrect, normalizeAnswer, eligibleExercises, MIN_LEVEL, MAX_LEVEL } = require('../src/lib/adaptive');
 
 const right = { correct: true };
 const wrong = { correct: false };
@@ -70,4 +70,23 @@ test('a wrong answer stays wrong', () => {
 test('normalisation is idempotent', () => {
   const once = normalizeAnswer(' 3 , 5 ');
   assert.equal(normalizeAnswer(once), once);
+});
+
+const bank = [{ id: 1, level: 1 }, { id: 2, level: 1 }, { id: 3, level: 1 }, { id: 4, level: 2 }];
+
+test('a wrong answer stays eligible so it can return sooner', () => {
+  // lastId is a different item — the miss must be preferred, not treated as "seen"
+  const pool = eligibleExercises(bank, [{ id: 1, correct: false }], 2, 1);
+  assert.deepEqual(pool.map((x) => x.id), [1]);
+});
+
+test('a correct answer is not asked again while others remain', () => {
+  const pool = eligibleExercises(bank, [{ id: 1, correct: true }], 1, 1);
+  assert.deepEqual(pool.map((x) => x.id).sort(), [2, 3]);
+});
+
+test('a recently missed item is preferred on the following turn', () => {
+  const history = [{ id: 1, correct: false }, { id: 2, correct: true }];
+  const pool = eligibleExercises(bank, history, 2, 1);
+  assert.deepEqual(pool.map((x) => x.id), [1]);
 });
