@@ -21,7 +21,11 @@
         require('./graphListen'),
         require('./listenLessons'),
         require('./onboard'),
-        require('./tabs')
+        require('./tabs'),
+        require('./mastery'),
+        require('./numberLine'),
+        require('./bar44'),
+        require('./curriculum')
       );
     }
     return root;
@@ -85,22 +89,27 @@
     if (typeof refreshSpeakNow === 'function') refreshSpeakNow(document);
     if (document.getElementById('mm-site-nav')) return;
     const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    const links = [
-      ['index.html', 'דף הבית'],
-      ['functions.html', 'שומעים פונקציה'],
-      ['807.html', 'גדילה ודעיכה'],
-      ['landing.html', 'אודות'],
-      ['offer.html', 'ניסוי כיתתי'],
-    ];
-    const nav = document.createElement('nav');
-    nav.id = 'mm-site-nav';
-    nav.setAttribute('aria-label', 'MelodyMath');
-    nav.innerHTML = '<span class="mm-brand">♫ MelodyMath</span>' + links.map(function (pair) {
-      const file = pair[0];
-      const label = pair[1];
+    const sonify = here === 'functions.html' || here === '807.html';
+    const hub = here === 'landing.html' || here === 'offer.html';
+    document.body.setAttribute('data-product', sonify ? 'sonify' : hub ? 'hub' : 'elementary');
+    function link(file, label) {
       const current = here === file || (here === '' && file === 'index.html');
       return '<a href="' + file + '"' + (current ? ' aria-current="page"' : '') + '>' + label + '</a>';
-    }).join(' · ');
+    }
+    const nav = document.createElement('nav');
+    nav.id = 'mm-site-nav';
+    nav.setAttribute('aria-label', 'MelodyMath — שני מוצרים');
+    nav.innerHTML = '<span class="mm-brand">♫ MelodyMath</span>'
+      + '<span class="mm-prod' + (sonify ? '' : ' on') + '"><span class="mm-prod-label">תרגול יסודי</span>'
+      + link('index.html', 'תרגול א׳–ד׳') + ' · '
+      + link('curriculum.html', 'כיסוי תוכנית') + '</span>'
+      + '<span class="mm-prod-split" aria-hidden="true">|</span>'
+      + '<span class="mm-prod' + (sonify ? ' on' : '') + '"><span class="mm-prod-label">סוניפיקציה · חט״ב/תיכון</span>'
+      + link('functions.html', 'שומעים פונקציה') + ' · '
+      + link('807.html', 'גדילה ודעיכה') + '</span>'
+      + '<span class="mm-prod-meta">'
+      + link('landing.html', 'אודות') + ' · '
+      + link('offer.html', 'ניסוי כיתתי') + '</span>';
     const existingSkip = document.querySelector('.mm-skip');
     if (existingSkip && existingSkip.parentNode === document.body) {
       document.body.insertBefore(nav, existingSkip.nextSibling);

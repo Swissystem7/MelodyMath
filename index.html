@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath | מתמטיקה שמנגנת</title>
-<meta name="description" content="תרגול מתמטיקה בעברית בטאבלט או על דף. בלי חשבון, בלי שרת, בלי טענת יעילות.">
+<title>MelodyMath | תרגול יסודי א׳–ד׳</title>
+<meta name="description" content="תרגול מתמטיקה בעברית לפי כיתה, מתויג לתוכנית הלימודים. בלי חשבון, בלי שרת, בלי טענת יעילות.">
 <style>
 :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--pink:#f2529a;--yellow:#ffd85d;--bg:#f7f4ff;--card:#fff;--line:#ded6f0;--good:#167957;--bad:#b23a52}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 5%,#ffe1ef,transparent 27%),radial-gradient(circle at 90% 0,#dfd6ff,transparent 31%),var(--bg);color:var(--ink);font-family:Arial,sans-serif;min-height:100vh}.wrap{max-width:940px;margin:auto;padding:28px 18px 60px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}.brand{font-size:1.15rem;font-weight:900;color:var(--purple)}h1{font-size:clamp(2.2rem,7vw,4.5rem);margin:8px 0;line-height:1}p{line-height:1.55}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab,.secondary{width:auto;background:#fff;color:var(--purple);border:1px solid var(--line);margin:0;min-height:44px}.tab.active{background:var(--purple);color:#fff}.panel{display:none}.panel.active{display:block}.card{background:#fffffff0;border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,34px);box-shadow:0 20px 50px #4638701a}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0}.level{border:2px solid transparent;background:#f0ebff;color:var(--ink);padding:22px 12px;border-radius:16px;cursor:pointer}.level strong{display:block;font-size:1.2rem}.level.selected{border-color:var(--purple);background:#e6deff}.primary,button{border:0;border-radius:12px;background:var(--purple);color:#fff;padding:13px 18px;font:inherit;font-weight:800;cursor:pointer}.primary{width:100%}.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9rem}.progress{height:8px;background:#ece7f5;border-radius:99px;margin:12px 0 26px;overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--purple));transition:width .25s}.tag{display:inline-block;background:#eee9ff;color:var(--purple);padding:6px 10px;border-radius:99px;font-size:.78rem;font-weight:bold}.prompt{font-size:clamp(1.35rem,4vw,2rem);margin:18px 0 24px}.answer-row{display:flex;gap:10px}input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:13px;background:white;font:inherit;color:var(--ink)}.answer-row button{white-space:nowrap}.feedback{margin-top:18px;padding:16px;border-radius:14px}.feedback.good{background:#e5f6ef;color:var(--good)}.feedback.bad{background:#ffe8ed;color:var(--bad)}.hint{margin-top:7px;color:var(--ink)}.session{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.stat{flex:1;min-width:120px;background:#f4f0fc;border-radius:14px;padding:16px;text-align:center}.stat strong{font-size:1.7rem;display:block}.playgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.tool{background:#faf8ff;border:1px solid var(--line);border-radius:17px;padding:18px}.tool h3{margin-top:0}.result{margin-top:14px;padding:14px;background:#fff5ce;border-radius:12px;font-weight:bold}.rhythm{font-size:1.4rem;direction:ltr;text-align:center}.more-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 22px}.navcard{display:block;background:#fffffff0;border:1px solid var(--line);border-radius:16px;padding:16px 18px;text-decoration:none;color:var(--ink);box-shadow:0 10px 28px #46387014}.navcard:hover,.navcard:focus-visible{border-color:var(--purple);outline:none}.navcard strong{display:block;color:var(--purple);font-size:1.05rem;margin-bottom:4px}.navcard span{color:var(--muted);font-size:.92rem;line-height:1.45}@media(max-width:680px){header{display:block}.tabs{margin-top:15px}.levels,.playgrid,.more-nav{grid-template-columns:1fr}.answer-row{display:block}.answer-row button{width:100%;margin-top:9px}}
 .who-bar{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}.who-bar label{flex:1;min-width:140px;font-size:.82rem;color:var(--muted);font-weight:700}.who-bar .note{flex-basis:100%;margin:0;font-size:.8rem;color:var(--muted)}.who-bar button{width:auto}.who-status{font-size:.85rem;color:var(--good);font-weight:700}
@@ -58,7 +58,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 }
 </style></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
-<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH</div><h1>תרגול מתמטיקה בעברית — בטאבלט או על דף.</h1><p>אבחון קצר על מנייה, חיבור/חיסור עד 20, לוח הכפל ושברים פשוטים; תרגול מדורג; מצב כיתה; וחלון תשובה לפי הפעימה אם המורה רוצה. מקצב אופציונלי — לא טיפול ואין טענת יעילות.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">השלמת פערים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">תרגול קצב</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div class="who-bar" id="whoBar">
   <label>קוד כיתה <input id="classCode" maxlength="24" autocomplete="off" placeholder="למשל שילוב-ג"></label>
   <label>שם או קוד תלמיד/ה <input id="studentName" maxlength="24" autocomplete="off" placeholder="למשל נועה / נ-14"></label>
@@ -78,28 +78,36 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
   <span class="note">נקישה לקצב התרגול במכשיר. המורה שולטת ב־BPM. לא טיפול ואין טענת יעילות.</span>
 </details>
-<nav class="more-nav" aria-label="מעבר לתרגולים נוספים">
-  <a class="navcard" href="functions.html"><strong>שומעים פונקציה</strong><span>גרפים שנשמעים: שיפוע כגובה צליל, שורשים כנקישות.</span></a>
-  <a class="navcard" href="807.html"><strong>גדילה ודעיכה · 807</strong><span>תרגול M(t)=M₀·qᵗ לבגרות, עם סריקת צליל של האקספוננט.</span></a>
+<p class="mm-product-banner"><b>מוצר 1 · תרגול יסודי.</b> כיתה נבחרת למטה. <a href="curriculum.html">כיסוי מול התוכנית — כולל מה שאין</a>. סוניפיקציה לחטיבה/תיכון היא <a href="landing.html">מוצר נפרד</a>.</p>
+<div class="who-bar" id="gradeBar">
+  <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
+  <div class="grade-pick" id="gradePick" role="group" aria-label="בחירת כיתה"></div>
+  <p class="note" id="gradeNote">כיתה א׳: מנייה עד 100, חיבור/חיסור, ישר מספרים.</p>
+</div>
+<nav class="more-nav" aria-label="דפים במוצר היסודי">
+  <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית הלימודים</strong><span>לפי כיתה ותחום: מה מכוסה, מה חלקי, ומה אין. הפערים גלויים.</span></a>
+  <a class="navcard" href="landing.html"><strong>מוצר אחר · סוניפיקציה</strong><span>גרפים לחטיבה ולתיכון. לא חלק מבנק א׳–ד׳.</span></a>
 </nav>
-<section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag">אבחון קצר · כיתות א׳–ד׳</span><h2>איפה נמצאים הפערים?</h2><p>עשר שאלות קצרות במנייה, חיבור, חיסור, כפל ושברים בסיסיים. בסוף — סיכום לפי מיומנות במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button></div>
-<div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><h2 id="rmPrompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button></div>
+<section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">שתי שאלות מכל מיומנות בבנק של הכיתה. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.</div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button></div>
+<div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag"></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button></div>
 <div id="rmReport" class="card hidden"><span class="tag">דוח פערים להורה</span><h2>מה מצאנו</h2><div id="rmStats" class="session"></div><p id="rmSummary"></p><button type="button" id="rmPractice" class="primary hidden">מתחילים תרגול אישי</button><button type="button" id="rmRestart" class="secondary hidden">אבחון חדש</button></div>
-<div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><h2 id="rmPlanPrompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button></div></section>
-<section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">35 תרגילים מדורגים</span><h2>מאיפה מתחילים?</h2><p>בחרו רמה. אחרי שתי תשובות נכונות ברצף המערכת תעלה קושי; אחרי שתי טעויות היא תחזור צעד.</p><div class="levels"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
+<div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag"></p><h2 id="rmPlanPrompt" class="prompt"></h2><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button></div></section>
+<section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">לא תכנית א׳–ד׳ · מרווחים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחס מרווחים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
 <div id="quiz" class="card hidden"><div class="topline"><span id="counter"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button></div>
 <div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button type="button" id="again" class="primary">אימון חדש</button></div></section>
 <section id="classMode" class="panel" role="tabpanel" aria-labelledby="tab-classMode" hidden><div class="card" id="classGate">
-  <span class="tag">מפגש תרגול · 8 דקות · כיתות א׳–ב׳</span>
+  <span class="tag">מפגש תרגול · 8 דקות · בנק א׳</span>
   <h2>מצב כיתה</h2>
-  <p>תרגול קצר בלחיצה — בלי הקלדה. השמירה לפי <b>קוד כיתה + שם</b> בסרגל למעלה, במכשיר הזה בלבד. זה מפגש תרגול, לא אבחון ואין כאן טענת יעילות.</p>
+  <p>תרגול קצר בלחיצה מבנק כיתה א׳ (מנייה, חיבור, חיסור, ישר מספרים). השמירה לפי <b>קוד כיתה + שם</b> בסרגל למעלה, במכשיר הזה בלבד. זה מפגש תרגול, לא אבחון ואין כאן טענת יעילות.</p>
   <p class="note">בחרו תלמיד/ה קיים/ת או כתבו שם חדש בסרגל ולחצו «שמירה במכשיר».</p>
   <div class="class-kids" id="classKids"></div>
   <button type="button" id="classStart" class="primary">התחלת מפגש 8 דקות</button>
 </div>
 <div class="card hidden" id="classPlay">
   <div class="topline"><span class="class-timer" id="classTimer" role="timer" aria-live="polite">8:00</span><span id="classWho" class="tag"></span></div>
+  <p id="classItemTag" class="item-tag"></p>
   <h2 class="prompt" id="classPrompt"></h2>
+  <div id="classWidget" class="hidden"></div>
   <div class="choices" id="classChoices"></div>
   <div id="classFeedback" class="feedback hidden" role="status" aria-live="polite"></div>
   <button type="button" id="classStop" class="secondary no-print">סיום המפגש עכשיו</button>
@@ -118,10 +126,11 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <div class="sheet-actions">
     <label>חבילה
       <select id="beatPack" aria-label="חבילת תרגול על הפעימה">
-        <option value="class">א׳–ב׳ · מנייה · חיבור · חיסור</option>
-        <option value="all">כל המיומנויות א׳–ד׳</option>
-        <option value="multiplication">לוח הכפל</option>
-        <option value="basic_fractions">שברים בסיסיים</option>
+        <option value="class">בנק א׳ · מנייה · חיבור · חיסור · ישר</option>
+        <option value="grade">הכיתה שנבחרה למעלה</option>
+        <option value="multiplication">כפל (עם שער 2/4/5/10)</option>
+        <option value="division">חילוק לחלקים ולהכלה</option>
+        <option value="basic_fractions">שברים מול תיבה 4/4</option>
       </select>
     </label>
   </div>
@@ -131,7 +140,9 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <div class="topline"><span id="beatMeta" class="tag"></span><span id="beatWho" class="tag"></span></div>
   <div class="beat-window" aria-hidden="true"><span id="beatBar"></span></div>
   <p id="beatClock" class="class-timer" aria-live="polite">—</p>
+  <p id="beatItemTag" class="item-tag"></p>
   <h2 class="prompt" id="beatPrompt"></h2>
+  <div id="beatWidget" class="hidden"></div>
   <div class="choices" id="beatChoices"></div>
   <div id="beatFeedback" class="feedback hidden" role="status" aria-live="polite"></div>
   <button type="button" id="beatStop" class="secondary no-print">סיום התרגול</button>
@@ -168,9 +179,10 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <div class="sheet-actions no-print">
     <label>חבילה
       <select id="sheetPack" aria-label="חבילת תרגילים">
-        <option value="class">מצב כיתה (מנייה · חיבור · חיסור)</option>
-        <option value="diag">אבחון (10 שאלות)</option>
-        <option value="practice">תרגול אישי (כל המיומנויות)</option>
+        <option value="class">מצב כיתה (בנק א׳)</option>
+        <option value="diag">אבחון לפי הכיתה שנבחרה</option>
+        <option value="practice">תרגול אישי לפי הכיתה</option>
+        <option value="grade">כל הבנק של הכיתה</option>
       </select>
     </label>
     <label>כמה תרגילים
@@ -245,6 +257,9 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/banks.js"></script>
+<script src="src/lib/mastery.js"></script>
+<script src="src/lib/numberLine.js"></script>
+<script src="src/lib/bar44.js"></script>
 <script src="src/lib/worksheets.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
@@ -273,24 +288,68 @@ document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activat
 function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);$('freq').textContent=`${hz.toFixed(2)} Hz`;if(play)playFreq(hz)}$('y').oninput=()=>renderFreq(true);renderFreq(false);
 function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
 function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`;if(play)playRhythmClicks(x.pattern,x.bpm)}$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
-// ---- מסלול השלמת פערים (כיתות א׳–ד׳; מוזיקה = שכבת פרס) ----
+// ---- תרגול לפי כיתה (בנק מתויג; מקצב = פסינג, לא מוצר) ----
 const rmHe=skillHe;
-const RM_DIAG=diagnosticItems();
-let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rpStep=0,rpItem=0,rpAnswered=false;
+const GRADE_NOTE={
+  'א':'כיתה א׳: מנייה עד 100, חיבור/חיסור (פירוקי 10, = משמאל, עשרות), ישר מספרים.',
+  'ב':'כיתה ב׳: עשרות; כפל 2/4/5/10; חילוק לחלקים ולהכלה. 3/6/7/8/9 חסומים.',
+  'ג':'כיתה ג׳: לוח 3/6/7/8/9 וחילוק — רק אחרי שליטה ב־2/4/5/10.',
+  'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».'
+};
+let selectedGrade='א';
+try{const g=localStorage.getItem('mm-grade'); if(g&&GRADE_SKILLS[g]) selectedGrade=g;}catch(e){}
+function saveGrade(g){selectedGrade=g; try{localStorage.setItem('mm-grade',g);}catch(e){} paintGrade();}
+function paintGrade(){
+  const box=$('gradePick'); if(!box) return;
+  box.innerHTML=GRADES.map(g=>{
+    const on=g===selectedGrade;
+    return '<button type="button" data-grade="'+g+'" aria-pressed="'+(on?'true':'false')+'">'+g+'׳</button>';
+  }).join('');
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>saveGrade(b.dataset.grade));
+  if($('gradeNote')) $('gradeNote').textContent=GRADE_NOTE[selectedGrade]||'';
+  if($('rmGradeTag')) $('rmGradeTag').textContent='אבחון קצר · כיתה '+selectedGrade+'׳';
+  if($('gateNote')) $('gateNote').classList.toggle('hidden', selectedGrade!=='ג' && selectedGrade!=='ב');
+}
+function itemTagText(it){
+  if(!it) return '';
+  return 'כיתה '+it.grade+'׳ · '+(it.strand||'')+' · '+(it.standard||'');
+}
+function renderWidget(hostId, item, inputId){
+  const host=$(hostId); if(!host) return;
+  host.innerHTML=''; host.classList.add('hidden');
+  if(!item) return;
+  const fill=function(val){ const inp=inputId&&$(inputId); if(inp){ inp.value=val; } };
+  if(item.widget==='numberLine' && item.line && typeof bindNumberLine==='function'){
+    host.classList.remove('hidden');
+    bindNumberLine(host, item.line, fill);
+  } else if(item.widget==='bar44' && typeof bindBar44==='function'){
+    host.classList.remove('hidden');
+    bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
+  }
+}
+function currentDiag(){ return diagnosticItems(selectedGrade); }
+function poolForSkill(skill){
+  let rows=rowsOf(skill, selectedGrade);
+  if((skill==='multiplication'||skill==='division') && selectedGrade==='ג' && typeof withCoreIfNeeded==='function'){
+    rows=withCoreIfNeeded(rows, typeof coreFactItems==='function'?coreFactItems():[]);
+  }
+  return rows;
+}
+let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
 function prefsNow(){return typeof loadAccess==='function'?loadAccess():{}}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null);if(!groups)return;if(prefsNow().quiet)return;if(typeof playCountClicks==='function')playCountClicks(groups,76)}
-function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').textContent=`שאלה ${rmIdx+1}/${RM_DIAG.length}`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;$('rmPrompt').textContent=q.prompt;$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
+function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').textContent=`שאלה ${rmIdx+1}/${RM_DIAG.length}`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;if($('rmItemTag'))$('rmItemTag').textContent=itemTagText(q);$('rmPrompt').textContent=q.prompt;renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
 function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=isCorrect($('rmAnswer').value,q.answer);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${q.hint}. התשובה: <b>${q.answer}</b></div>`;show('rmFeedback',true);$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים'}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
-function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר הזה היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:rowsOf(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='בעשר השאלות האלה כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
+function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
 const PLAN_PER_SKILL=6;
-function rpPick(){const st=rmPlan[rpStep];const pool=eligibleExercises(st.items,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
-function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;$('rmPlanPrompt').textContent=it.prompt;$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
+function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items;const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
+function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))$('rmPlanTag').textContent=itemTagText(it);$('rmPlanPrompt').textContent=it.prompt;renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
 function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=isCorrect($('rmPlanAnswer').value,it.answer);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${it.hint}. התשובה: <b>${it.answer}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
 function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true}}
-$('rmBegin').onclick=()=>{rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmQuiz',true);rmRender()};
+$('rmBegin').onclick=()=>{RM_DIAG=currentDiag();rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
 $('rmPractice').onclick=()=>{rpStep=0;rpItem=0;show('rmReport',false);show('rmPlan',true);rpRender()};
 $('rmRestart').onclick=()=>{show('rmReport',false);show('rmStart',true)};
@@ -335,7 +394,7 @@ document.querySelectorAll('.tabs [role="tab"]').forEach(function(b){b.addEventLi
 function renderClassKids(){const box=$('classKids');if(!box)return;const names=who.classCode||who.name?listStudents(who.classCode):[];box.innerHTML=names.length?names.map(n=>`<button type="button" data-kid="${escapeHtml(n)}" aria-pressed="${n===who.name?'true':'false'}">${escapeHtml(n)}</button>`).join(''):'<span class="note">עדיין אין תלמידים בקוד הכיתה הזה במכשיר.</span>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>switchToKid(b.dataset.kid))}
 function classTick(){const left=Math.max(0,classEndsAt-Date.now());const m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$('classTimer').textContent=`${m}:${String(s).padStart(2,'0')}`;if(left<=0)endClassSession('time')}
 function showClassCard(id){['classGate','classPlay','classDone'].forEach(x=>show(x,x===id))}
-function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const q=CLASS_BANK[Math.floor(random()*CLASS_BANK.length)];classCurrent=q;$('classPrompt').textContent=q.prompt;$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=String(v);b.onclick=()=>pickClass(v,b);box.appendChild(b)});maybeHear(q);maybeSpeak(q.prompt)}
+function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const q=CLASS_BANK[Math.floor(random()*CLASS_BANK.length)];classCurrent=q;if($('classItemTag'))$('classItemTag').textContent=itemTagText(q);$('classPrompt').textContent=q.prompt;renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=String(v);b.onclick=()=>pickClass(v,b);box.appendChild(b)});maybeHear(q);maybeSpeak(q.prompt)}
 function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);noteMetro(correct);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${classCurrent.hint}`;show('classFeedback',true);const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
 function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';return}endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
 function endClassSession(){classEndsAt=0;if(classTimerId){clearInterval(classTimerId);classTimerId=null}document.body.classList.remove('class-live');const student=who.name?getStudent(who.classCode,who.name):null;const last=student&&student.sessions&&student.sessions.filter(s=>s.kind==='class').slice(-1)[0];endTeacherSession();const n=last?(last.items||[]).length:0;const ok=last?(last.items||[]).filter(it=>it.correct).length:0;$('classDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות במפגש</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק במפגש</div>`;showClassCard('classDone')}
@@ -382,6 +441,7 @@ function renderSheet(){
   const box=$('worksheetSheet'); if(!box) return;
   const sheet=buildWorksheet({
     pack:($('sheetPack')&&$('sheetPack').value)||'class',
+    grade:selectedGrade,
     count:$('sheetCount')?+$('sheetCount').value:8,
     seed:(Date.now()&0xffff)+(($('sheetCount')&&+$('sheetCount').value)||8),
     withAnswers:!!($('sheetKey')&&$('sheetKey').checked),
@@ -442,6 +502,7 @@ function renderFirstRun(){
     renderFirstRun();
   };
 }
+paintGrade();
 renderFirstRun();
 
 function renderCertificate(){
@@ -463,9 +524,12 @@ if($('certPrint'))$('certPrint').onclick=function(){
 
 function beatPool(){
   const pack=$('beatPack')?$('beatPack').value:'class';
-  if(pack==='all') return practiceItems();
-  if(pack==='multiplication' || pack==='basic_fractions') return rowsOf(pack);
-  return classItems();
+  let pool;
+  if(pack==='grade') pool=itemsForGrade(selectedGrade);
+  else if(pack==='multiplication' || pack==='division' || pack==='basic_fractions') pool=rowsOf(pack);
+  else pool=classItems();
+  if(typeof gateItems==='function') pool=gateItems(pool, beatHist, typeof allItems==='function'?allItems():pool);
+  return pool;
 }
 function showBeatCard(id){ ['beatGate','beatPlay','beatDone'].forEach(x=>show(x,x===id)); }
 let beatTimerId=null, beatOpenedAt=0, beatCurrent=null, beatAnswered=false, beatSeed=1, beatHist=[], beatLevel=1, beatLastId=null;
@@ -486,7 +550,9 @@ function nextBeatQuestion(){
   const random=rng(beatSeed++);
   const q=pool[Math.floor(random()*pool.length)];
   beatCurrent=q;
+  if($('beatItemTag'))$('beatItemTag').textContent=itemTagText(q);
   $('beatPrompt').textContent=q.prompt;
+  renderWidget('beatWidget',q,null);
   $('beatWho').textContent=who.name||'';
   $('beatMeta').textContent=(q.he||q.skill||'')+(q.level?' · '+levelHe(q.level):'')+' · '+metroBpmNow()+' BPM';
   show('beatFeedback',false);

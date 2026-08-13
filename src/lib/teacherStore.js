@@ -392,9 +392,25 @@
     }
   }
 
-  // Four tap-targets for grades א–ב. Nearby integers, never the key twice.
+  // Four tap-targets. Nearby integers, or unit-fraction distractors.
   function makeChoices(answer, rng) {
     const roll = typeof rng === 'function' ? rng : Math.random;
+    const raw = String(answer == null ? '' : answer).trim();
+    if (/^\d+\/\d+$/.test(raw) || raw === '½' || raw === '¼' || raw === '⅛') {
+      const pool = ['1/2', '1/4', '1/8', '1', '3/4', '0'];
+      const opts = [raw === '½' ? '1/2' : raw === '¼' ? '1/4' : raw === '⅛' ? '1/8' : raw];
+      pool.forEach(function (c) {
+        if (opts.length >= 4) return;
+        if (opts.indexOf(c) === -1) opts.push(c);
+      });
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(roll() * (i + 1));
+        const tmp = opts[i];
+        opts[i] = opts[j];
+        opts[j] = tmp;
+      }
+      return opts;
+    }
     const n = Number(answer);
     if (!Number.isFinite(n)) return [String(answer)];
     const opts = [n];

@@ -38,12 +38,14 @@ test('RESEARCH.md points at archived validation docs, not missing root files', (
 });
 
 test('live pages and the offer letter refuse efficacy and treatment claims', () => {
-  const pages = ['index.html', 'landing.html', 'offer.html', 'README.md'];
+  const pages = ['index.html', 'landing.html', 'offer.html', 'README.md', 'curriculum.html'];
   for (const page of pages) {
     const text = read(page);
     assert.doesNotMatch(text, /סוגרים פערים במתמטיקה/);
     assert.doesNotMatch(text, /הילד שולט בכל המיומנויות/);
     assert.doesNotMatch(text, /מחקרים מוכיחים שהקצב/);
+    assert.doesNotMatch(text, /ADHD|דיסקלקול|dyscalcul/i);
+    assert.doesNotMatch(text, /15–20%|15-20%/);
   }
   const letter = require('../src/lib/offer').principalLetterBody({
     teacher: 'נועה',
@@ -59,6 +61,10 @@ test('pages only load scripts that exist, and home does not load graph lessons',
   assert.doesNotMatch(index, /src="src\/lib\/graphListen\.js"/);
   assert.doesNotMatch(index, /src="src\/lib\/listenLessons\.js"/);
   assert.match(index, /src="src\/lib\/tabs\.js"/);
+  assert.match(index, /src="src\/lib\/mastery\.js"/);
+  assert.match(index, /src="src\/lib\/numberLine\.js"/);
+  assert.ok(require('node:fs').existsSync(require('node:path').join(root, 'src/lib/mastery.js')));
+  assert.ok(require('node:fs').existsSync(require('node:path').join(root, 'curriculum.html')));
   const landing = read('landing.html');
   assert.doesNotMatch(landing, /src="src\/lib\/sonify\.js"/);
   assert.doesNotMatch(landing, /src="src\/lib\/adaptive\.js"/);

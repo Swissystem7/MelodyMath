@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · דמו עברי בלי התקנה</title>
-<meta name="description" content="שני דמואים בדפדפן: תרגול יסודי בעברית וסוניפיקציה של גרפים. בלי חשבון, בלי שרת, בלי טענת יעילות.">
+<title>MelodyMath · שני מוצרים נפרדים</title>
+<meta name="description" content="שני מוצרים נפרדים בדפדפן: תרגול יסודי בעברית לפי תכנית הלימודים, וסוניפיקציה של גרפים לחטיבה ולתיכון. בלי טענת יעילות.">
 <style>
   :root{
     --ink:#132a26;--muted:#5a726b;--line:#e4ede9;--bg:#ffffff;--soft:#f4f9f6;
@@ -48,6 +48,7 @@
   .evrow{display:flex;gap:11px;padding:11px 0;border-top:1px solid #eee3cf;} .evrow:first-child{border-top:0;}
   .evrow b{color:var(--ink);}
 
+  .two-products{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
   .align{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .align .box{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff;}
   .align .box .g{display:inline-block;background:#eef6f2;color:var(--green-d);font-weight:800;font-size:.8rem;padding:4px 11px;border-radius:99px;margin-bottom:9px;}
@@ -61,7 +62,7 @@
 
   footer{padding:30px 0 46px;color:var(--muted);font-size:.86rem;text-align:center;border-top:1px solid var(--line);}
   @media (max-width:720px){
-    .hero h1{font-size:2rem;} .grid{grid-template-columns:1fr;} .why .grid2{grid-template-columns:1fr;gap:20px;} .align{grid-template-columns:1fr;}
+    .hero h1{font-size:2rem;} .grid{grid-template-columns:1fr;} .why .grid2{grid-template-columns:1fr;gap:20px;} .align,.two-products{grid-template-columns:1fr;}
   }
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#132a26;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
@@ -78,24 +79,23 @@
   </div></header>
 
   <main id="main" tabindex="-1"><div class="hero"><div class="wrap">
-    <div class="who">דמו דפדפן · בלי חשבון · בלי שרת</div>
-    <h1>תרגול מתמטיקה בעברית, וגרף שאפשר לשמוע.</h1>
-    <p class="lead">שני דמואים נפרדים בכתובת אחת: תרגול יסודי למחנכת שילוב על טאבלט אחד, וסוניפיקציה עברית של גרפים. מקצב הוא כלי פסינג אופציונלי — לא טיפול, ואין כאן טענת יעילות.</p>
+    <div class="who">שני מוצרים · בלי חשבון · בלי שרת</div>
+    <h1>שני מוצרים נפרדים. לא חבילה אחת.</h1>
+    <p class="lead">תרגול יסודי לפי כיתה מול תכנית הלימודים, וסוניפיקציית גרפים לחטיבה ולתיכון. מקצב הוא כלי פסינג אופציונלי. אין טענת יעילות.</p>
     <div class="btns">
-      <a class="btn primary" href="./">▶ לדמו החי</a>
-      <a class="btn ghost" href="functions.html">שומעים פונקציה</a>
-      <a class="btn ghost" href="offer.html">הזמן ניסוי כיתתי</a>
+      <a class="btn primary" href="./">תרגול יסודי א׳–ד׳</a>
+      <a class="btn ghost" href="functions.html">סוניפיקציה · חט״ב/תיכון</a>
+      <a class="btn ghost" href="curriculum.html">כיסוי תוכנית</a>
     </div>
   </div></div>
 
   <section id="how"><div class="wrap">
-    <div class="eyebrow">הגישה</div>
-    <h2>מה רץ בדפדפן — לא קטלוג מוסדי.</h2>
+    <div class="eyebrow">שני מוצרים</div>
+    <h2>לא מתיימרים להיות אותו דבר.</h2>
     <p class="sub">הכול מקומי בטאבלט. אחרי ביקור אחד בכתובת החי אפשר גם בלי רשת. אין חשבון ואין סנכרון בין מכשירים.</p>
-    <div class="grid">
-      <div class="card"><div class="ic">🥁</div><h3>תרגול יסודי + מצב כיתה</h3><p>בנק א׳–ד׳ מדורג (מנייה, חיבור/חיסור עד 20, לוח כפל, שברים). אבחון, תרגול על מה שפספסנו, מפגש 8 דקות, וחלון תשובה לפי הפעימה אם המורה רוצה. לא טיפול.</p></div>
-      <div class="card"><div class="ic">📋</div><h3>לוח כיתה ומכתב להורה</h3><p>רישום מקומי לפי שם: דיוק לפי מיומנות, שגיאות שחזרו, הערת מורה, מכתב הדפסה, ותעודת תרגול בלי מילות שליטה. הדרכה קצרה בפעם הראשונה במכשיר.</p></div>
-      <div class="card"><div class="ic">🎧</div><h3>שומעים פונקציה</h3><p>סריקת גרף כגובה צליל, שיעורי האזנה (שורש / אסימפטוטה / השוואת א׳/ב׳), נקודות עניין במקלדת, ומשחק ניחוש. לחטיבה ולתיכון — קהל אחר.</p></div>
+    <div class="two-products">
+      <div class="card"><div class="ic">📒</div><h3>מוצר 1 · תרגול יסודי</h3><p>בנק נפרד לכל כיתה, כל פריט מתויג לכיתה / תחום / סעיף. מנייה עד 100, חיבור/חיסור, כפל 2/4/5/10 עם שער, חילוק, שברים מול תיבה 4/4, וישר מספרים. <a href="./">לתרגול</a> · <a href="curriculum.html">לכיסוי</a></p></div>
+      <div class="card"><div class="ic">🎧</div><h3>מוצר 2 · סוניפיקציה</h3><p>סריקת גרף כגובה צליל לחטיבה, תיכון ושאלון 807. זה לא חלק מבנק א׳–ד׳ ואין לו מקום בתוכנית היסודית. <a href="functions.html">לגרפים</a> · <a href="807.html">ל־807</a></p></div>
     </div>
   </div></section>
 
@@ -103,12 +103,12 @@
     <div class="eyebrow">מה מותר לומר</div>
     <div class="grid2">
       <div>
-        <h2>הראיות על «קצב → מתמטיקה» דלילות.</h2>
-        <p class="sub">אין כאן ציטוט מחקר כהוכחה שהדמו עובד. אימון מוזיקה כללי לא הוכיח טרנספר למתמטיקה כששולטים באיכות המחקר. אין RCT על מטרונום מעל תרגילי כפל אצל ADHD או דיסקלקוליה.</p>
+        <h2>אין כאן הוכחה שהקצב משפר חשבון.</h2>
+        <p class="sub">אין ציטוט מחקר כהוכחה שהדמו עובד. אימון מוזיקה כללי לא הוכיח טרנספר למתמטיקה כששולטים באיכות המחקר. המקצב כאן הוא פסינג אופציונלי.</p>
       </div>
       <div>
         <div class="evrow"><b>מה כן:</b> עברית, RTL, בלי התקנה, נגישות על הטאבלט (ניגודיות, אות גדולה, הקראה, שקט).</div>
-        <div class="evrow"><b>מה לא:</b> טענת מחקר שלא נבדקה, «סוגר פערים», «טיפול», דשבורד ענן, רישום במאגר.</div>
+        <div class="evrow"><b>מה לא:</b> טענת מחקר שלא נבדקה, «סוגר פערים», טיפול, דשבורד ענן, רישום במאגר. המקצב לא טיפול.</div>
         <div class="evrow"><b>למי זה מיועד עכשיו:</b> מחנכת שילוב אחת, קבוצה קטנה, 4 שבועות חינם — לבדוק אם הכלי שימושי לה.</div>
       </div>
     </div>
@@ -116,13 +116,13 @@
 
   <section id="curric"><div class="wrap">
     <div class="eyebrow">מה בדמו</div>
-    <h2>מה רץ בדמו — לא קטלוג מוסדי.</h2>
-    <p class="sub">הדמו מכסה את מה שכבר רץ בדפדפן: השלמת פערים לכיתות א׳–ד׳, וסוניפיקציה של פונקציות לחטיבה, תיכון ובגרות 807.</p>
+    <h2>מה רץ בדפדפן — לא קטלוג מוסדי.</h2>
+    <p class="sub">התרגול היסודי ממופה לתוכנית. הפערים (גאומטריה, מדידה, נתונים, דו־ספרתי במאונך) גלויים ב־<a href="curriculum.html">דף הכיסוי</a>.</p>
     <div class="align">
-      <div class="box"><div class="g">כיתות א׳–ד׳</div><h3>השלמת פערים</h3><p>מנייה עד 20, חיבור/חיסור עד 20, לוח הכפל ושברים פשוטים — כל מיומנות בשלוש רמות. אבחון קצר ותרגול אישי על הפערים.</p></div>
-      <div class="box"><div class="g">כיתות א׳–ד׳ ומעלה</div><h3>תרגול קצב</h3><p>שברים, יחסים, טמפו ופונקציות בסיסיות — 35 תרגילים מדורגים עם חזרה על טעויות.</p></div>
-      <div class="box"><div class="g">חטיבה ותיכון · ז׳–י״ב</div><h3>🎧 שומעים פונקציה</h3><p>גרפים של פונקציות באוזניים: שיפוע כגובה צליל, שורשים כנקישות, סינוס כטון אמיתי — כולל משחק "נחש את הפונקציה". <a href="functions.html">לניסיון »</a></p></div>
-      <div class="box"><div class="g">בגרות 5 יח׳ · שאלון 807</div><h3>🎓 גדילה ודעיכה</h3><p>תרגול M(t)=M₀·qᵗ עם פתרון מלא — ושומעים איך הלוג מיישר את האקספוננט. הנושא שמזכה ב-40% מהשאלון. <a href="807.html">לתרגול »</a></p></div>
+      <div class="box"><div class="g">כיתה א׳</div><h3>מנייה · חיבור/חיסור · ישר</h3><p>ספירה עד 100, אחורה, דילוגי 2 מ־50 ודילוגי 5, קיבוץ ל־10, פירוקי 10, = משמאל, שלושה מחוברים, עשרות שלמות, וישר מספרים.</p></div>
+      <div class="box"><div class="g">כיתות ב׳–ג׳</div><h3>כפל עם שער · חילוק</h3><p>ב׳: 2/4/5/10 וחילוק לחלקים ולהכלה. 3/6/7/8/9 נפתחים רק אחרי שליטה בליבה — זה מה שהתוכנית דורשת.</p></div>
+      <div class="box"><div class="g">כיתה ד׳</div><h3>שבר מול תיבה 4/4</h3><p>רק 1/2, 1/4, 1/8 כחלק משלם מול תיבה מוזיקלית. תשובה כמו «חצי מ־8 = 4» אינה שבר ואינה בבנק.</p></div>
+      <div class="box"><div class="g">מוצר נפרד · ז׳–י״ב</div><h3>🎧 סוניפיקציה</h3><p>גרפים שנשמעים, ו־807 לגדילה ודעיכה. לא חלק מהתרגול היסודי. <a href="functions.html">לגרפים »</a></p></div>
     </div>
   </div></section>
 
@@ -146,7 +146,7 @@
   </div></section>
   </main>
 
-  <footer><div class="wrap">MelodyMath · שני דמואים בעברית · פרויקט של Swissystem7 · <a href="./">דמו</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="functions.html">שומעים פונקציה</a></div></footer>
+  <footer><div class="wrap">MelodyMath · שני מוצרים בעברית · Swissystem7 · <a href="./">תרגול יסודי</a> · <a href="curriculum.html">כיסוי</a> · <a href="functions.html">סוניפיקציה</a></div></footer>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
 </body>

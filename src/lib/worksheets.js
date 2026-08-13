@@ -48,14 +48,16 @@
 
   function poolFor(opts) {
     const pack = (opts && opts.pack) || 'class';
-    if (pack === 'diag') return BANKS.diagnosticItems();
-    if (pack === 'practice') return BANKS.practiceItems(opts.skills);
+    const grade = opts && opts.grade;
+    if (pack === 'diag') return BANKS.diagnosticItems(grade);
+    if (pack === 'practice') return BANKS.practiceItems(opts.skills, grade);
+    if (pack === 'grade' && grade) return BANKS.itemsForGrade(grade);
     return BANKS.classItems();
   }
 
   function buildWorksheet(opts) {
     const o = opts || {};
-    const count = o.pack === 'diag' ? 10 : clampCount(o.count);
+    const count = o.pack === 'diag' ? Math.max(4, poolFor(o).length) : clampCount(o.count);
     const seed = (Number(o.seed) || 1) >>> 0;
     const rand = mulberry32(seed || 1);
     const pool = poolFor(o);
@@ -74,7 +76,13 @@
     const shuffled = shuffle(pool, rand);
     const items = [];
     for (let i = 0; i < count; i++) items.push(shuffled[i % shuffled.length]);
-    const packHe = o.pack === 'diag' ? 'אבחון (10)' : o.pack === 'practice' ? 'תרגול אישי' : 'מצב כיתה (א׳–ב׳)';
+    const packHe = o.pack === 'diag'
+      ? ('אבחון כיתה ' + (o.grade || 'א') + '׳')
+      : o.pack === 'practice'
+        ? 'תרגול אישי'
+        : o.pack === 'grade'
+          ? ('בנק כיתה ' + (o.grade || '') + '׳')
+          : 'מצב כיתה (א׳ · מנייה · חיבור · חיסור · ישר)';
     return {
       title: 'MelodyMath — דף עבודה',
       note: 'אותם תרגילים כמו במסך (' + packHe + '). זה דף עבודה, לא מבחן ולא הוכחת יעילות.',
