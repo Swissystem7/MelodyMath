@@ -44,6 +44,15 @@ test('spacing and a decimal comma do not fail a correct answer', () => {
   assert.ok(isCorrect('3.5', 3.5));
 });
 
+test('numeric answers match across trailing zeros, a leading-dot, and a comma', () => {
+  assert.ok(isCorrect('3.50', 3.5));
+  assert.ok(isCorrect('3.5', '3.50'));
+  assert.ok(isCorrect('.75', 0.75));
+  assert.ok(isCorrect('1,25', 1.25));
+  assert.ok(isCorrect('3,50', 3.5));
+  assert.ok(!isCorrect('3.51', 3.5));
+});
+
 test('a negative answer is compared as written', () => {
   assert.ok(isCorrect('-12', -12));
   assert.ok(!isCorrect('12', -12));

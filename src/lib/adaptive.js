@@ -30,7 +30,18 @@
   function isCorrect(given, expected) {
     const g = normalizeAnswer(given);
     if (g === '') return false;
-    return g === normalizeAnswer(expected);
+    const e = normalizeAnswer(expected);
+    if (g === e) return true;
+    // Numeric compare: 3.5 == 3.50, .75 == 0.75, 1,25 == 1.25 (comma already
+    // folded by normalizeAnswer). Ratios like 3:2 stay on the string path.
+    const gn = Number(g);
+    const en = Number(e);
+    if (Number.isFinite(gn) && Number.isFinite(en)) {
+      if (gn === en) return true;
+      const tol = Math.max(1e-9, Math.abs(en) * 1e-9);
+      return Math.abs(gn - en) <= tol;
+    }
+    return false;
   }
 
   return { nextLevel, normalizeAnswer, isCorrect, MIN_LEVEL, MAX_LEVEL };
