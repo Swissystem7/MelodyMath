@@ -20,7 +20,8 @@
         require('./access'),
         require('./graphListen'),
         require('./listenLessons'),
-        require('./onboard')
+        require('./onboard'),
+        require('./tabs')
       );
     }
     return root;
@@ -80,6 +81,8 @@
     }
     installPwaHooks();
     installAccessBar();
+    if (typeof bindAllTablists === 'function') bindAllTablists(document);
+    if (typeof refreshSpeakNow === 'function') refreshSpeakNow(document);
     if (document.getElementById('mm-site-nav')) return;
     const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     const links = [
@@ -98,7 +101,12 @@
       const current = here === file || (here === '' && file === 'index.html');
       return '<a href="' + file + '"' + (current ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }).join(' · ');
-    document.body.insertBefore(nav, document.body.firstChild);
+    const existingSkip = document.querySelector('.mm-skip');
+    if (existingSkip && existingSkip.parentNode === document.body) {
+      document.body.insertBefore(nav, existingSkip.nextSibling);
+    } else {
+      document.body.insertBefore(nav, document.body.firstChild);
+    }
     if (!document.querySelector('.mm-skip')) {
       const skip = document.createElement('a');
       skip.className = 'mm-skip';
@@ -106,6 +114,8 @@
       skip.textContent = 'דלגו לתוכן';
       document.body.insertBefore(skip, nav);
     }
+    const main = document.getElementById('main');
+    if (main && !main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
   }
 
   function installAccessBar() {

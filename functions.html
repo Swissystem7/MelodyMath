@@ -49,16 +49,20 @@
   .mark-list button{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:10px;padding:8px 12px;min-height:44px;font:inherit;font-weight:700;cursor:pointer}
   .mark-list button[aria-current="true"]{background:#3730a3;color:#fff}
   canvas:focus-visible{outline:3px solid #4f46e5;outline-offset:3px}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#1e1b2e;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
+<main id="main" tabindex="-1">
 <header>
   <h1>שומעים פונקציה</h1>
   <div class="sub">בונים אינטואיציה: ככל ש‑f(x) גבוה יותר — הצליל גבוה יותר. מקשים: רווח = נגן/עצור, Tab לסליידרים.</div>
 </header>
 
-<main id="main">
   <div class="card truth" role="note">
     <b>מה באמת שומעים?</b> ברוב המצבים זו <b>סוניפיקציה</b>: גובה f(x) מתורגם לגובה צליל (מיפוי לוגריתמי, 130–1046 הרץ) — הצליל <i>מייצג</i> את הגרף, הוא לא "קול הפונקציה". יוצא דופן: <b>סינוס במצב טון‑אמיתי</b>, שם התדירות של הגל היא באמת התדר הנשמע. כל צליל תמיד מסונכרן לנקודה שרצה על הגרף.
   </div>
@@ -146,7 +150,6 @@
 </main>
 
 <script src="src/lib/sonify.js"></script>
-<script src="src/lib/adaptive.js"></script>
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/graphListen.js"></script>
@@ -326,7 +329,14 @@ $("play").addEventListener("click",()=>playSweep(3000));
 $("realTone").addEventListener("click",()=>{ realTone=!realTone; $("realTone").setAttribute("aria-pressed",String(realTone));
   if(realTone) playRealTone();
   else { clearTimeout(playRealTone._t); setVoice(null,0); stopT=setTimeout(stopOsc,80); $("live").textContent=""; } });
-document.addEventListener("keydown",e=>{ if(e.code==="Space" && e.target.tagName!=="BUTTON" && e.target.tagName!=="SELECT"){ e.preventDefault(); playSweep(3000);} });
+document.addEventListener("keydown",e=>{
+  const t=e.target;
+  if(e.code!=="Space") return;
+  if(/^(BUTTON|SELECT|A|INPUT|TEXTAREA)$/.test(t.tagName)) return;
+  if(t.classList&&t.classList.contains("mm-skip")) return;
+  if(t.closest&&t.closest("#mm-access,#mm-site-nav")) return;
+  e.preventDefault(); playSweep(3000);
+});
 
 /* ---- landmarks / keyboard scrub (graphListen.js) ---- */
 let listenSamples=[], listenSummary=null, listenMarks=[], listenI=0, listenMarkI=0;
