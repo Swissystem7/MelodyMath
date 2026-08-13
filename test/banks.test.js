@@ -26,7 +26,13 @@ test('banks are split per grade — not one א–ד dump', () => {
       assert.ok(banks.rowsOf(sk, g).length >= 4, g + ' ' + sk);
     });
   });
-  assert.deepEqual(banks.skillsForGrade('א'), ['counting', 'addition', 'subtraction', 'number_line']);
+  // Wave 2 added the strands the Ministry curriculum requires for כיתה א׳ and
+  // that the app previously had nothing of: word problems, measurement,
+  // geometry and data. The old four are still there and still first.
+  assert.deepEqual(banks.skillsForGrade('א'), [
+    'counting', 'addition', 'subtraction', 'number_line',
+    'word_problems', 'measurement', 'geometry', 'data',
+  ]);
   assert.ok(banks.skillsForGrade('ב').includes('division'));
   assert.ok(!banks.skillsForGrade('א').includes('multiplication'));
   assert.ok(!banks.skillsForGrade('ב').includes('basic_fractions'));
