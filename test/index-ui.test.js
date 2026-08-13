@@ -5,10 +5,15 @@ const path = require('node:path');
 
 const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
-test('the pro upgrade button is clearly marked as a demo', () => {
-  assert.match(indexHtml, /<button id="rmUpgradeBtn" class="mm-btn upgrade">שדרוג לפרו ⭐ · דמו<\/button>/);
+test('the leftover pro-upgrade demo is still labelled as a demo if present', () => {
+  if (!indexHtml.includes('rmUpgradeBtn')) return;
+  assert.match(indexHtml, /דמו/);
+  assert.match(indexHtml, /ללא חיוב|אין מנוי|הדגמה בלבד/);
 });
 
-test('the pro upgrade area includes a no-charge notice in Hebrew', () => {
-  assert.match(indexHtml, /<span id="rmUpgradeNote" class="tag pro-demo-note">הדגמה בלבד · ללא חיוב<\/span>/);
+test('the teacher tab has a class board and a parent letter, not a paywall', () => {
+  assert.match(indexHtml, /id="classBoard"/);
+  assert.match(indexHtml, /id="parentLetter"/);
+  assert.match(indexHtml, /מכתב קצר הביתה/);
+  assert.doesNotMatch(indexHtml, /checkout|stripe|תשלום עכשיו/i);
 });

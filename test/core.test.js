@@ -10,5 +10,9 @@ test('core.js is the Node facade for audio, answers, and storage', () => {
   assert.equal(typeof core.loadJson, 'function');
   assert.equal(typeof core.buildReport, 'function');
   assert.equal(typeof core.installSharedChrome, 'function');
+  assert.equal(typeof core.loadAccess, 'function');
+  assert.equal(typeof core.describeGraphHe, 'function');
+  assert.equal(typeof core.buildParentNote, 'function');
+  assert.equal(typeof core.playCountClicks, 'function');
   assert.ok(core.isCorrect('1,25', 1.25));
 });
