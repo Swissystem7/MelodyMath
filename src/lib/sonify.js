@@ -21,6 +21,31 @@
     return FREQ_A4 * Math.pow(2, (midi - MIDI_A4) / 12);
   }
 
+  // Map a note length (fraction of a whole note) to a printed name.
+  // Must compare numerically: String(0.25) is "0.25", never ".25".
+  const NOTE_NAMES = [
+    [1, '1'],
+    [2 / 3, '2/3'],
+    [1 / 2, '1/2'],
+    [3 / 8, '3/8'],
+    [1 / 3, '1/3'],
+    [1 / 4, '1/4'],
+    [3 / 16, '3/16'],
+    [1 / 8, '1/8'],
+    [1 / 16, '1/16'],
+  ];
+
+  function fractionName(n) {
+    if (typeof n !== 'number' || !isFinite(n)) return String(n);
+    const hit = NOTE_NAMES.find(([v]) => Math.abs(n - v) < 1e-9);
+    return hit ? hit[1] : n.toFixed(3);
+  }
+
+  function formatRhythmPattern(pattern) {
+    if (!Array.isArray(pattern)) return '';
+    return pattern.map(fractionName).join('+');
+  }
+
   function yToFreq(y, yMin, yMax) {
     if (typeof y !== 'number' || !isFinite(y)) return null;
     // A flat function has no range to map onto; answer with the middle pitch
@@ -138,6 +163,7 @@
 
   return {
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH,
+    fractionName, formatRhythmPattern,
     getAudioContext, playFreq, playRhythmClicks, stopAllAudio,
   };
 });
