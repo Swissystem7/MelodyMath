@@ -147,6 +147,18 @@
     return activeHear ? activeHear.slice() : null;
   }
 
+  function refreshSpeakNow(doc) {
+    const d = doc || (typeof document !== 'undefined' ? document : null);
+    if (!d || !d.getElementById) return '';
+    const b = d.getElementById('mm-speak-now');
+    const t = currentPromptText(d);
+    if (b) {
+      b.hidden = !t;
+      b.disabled = !t;
+    }
+    return t;
+  }
+
   function currentPromptText(doc) {
     const d = doc || (typeof document !== 'undefined' ? document : null);
     if (!d || !d.querySelector) return '';
@@ -187,5 +199,6 @@
     setActiveHear: setActiveHear,
     getActiveHear: getActiveHear,
     currentPromptText: currentPromptText,
+    refreshSpeakNow: refreshSpeakNow,
   };
 });

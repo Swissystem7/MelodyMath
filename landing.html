@@ -63,27 +63,27 @@
   @media (max-width:720px){
     .hero h1{font-size:2rem;} .grid{grid-template-columns:1fr;} .why .grid2{grid-template-columns:1fr;gap:20px;} .align{grid-template-columns:1fr;}
   }
-  a:focus-visible,.btn:focus-visible,.nav a.cta:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#132a26;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
+  a:focus-visible,.btn:focus-visible,.nav a.cta:focus-visible,.mm-skip:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<script src="src/lib/sonify.js"></script>
-<script src="src/lib/adaptive.js"></script>
-<script src="src/lib/teacherStore.js"></script>
-<script src="src/lib/access.js"></script>
-<script src="src/lib/core.js"></script>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
   <header class="nav"><div class="wrap">
     <div class="brand"><span>🎵</span>MelodyMath</div>
     <a class="cta" href="./">לדמו</a>
   </div></header>
 
-  <div class="hero" id="main"><div class="wrap">
+  <main id="main" tabindex="-1"><div class="hero"><div class="wrap">
     <div class="who">דמו דפדפן · בלי חשבון · בלי שרת</div>
     <h1>תרגול מתמטיקה בעברית, וגרף שאפשר לשמוע.</h1>
     <p class="lead">שני דמואים נפרדים בכתובת אחת: תרגול יסודי למחנכת שילוב על טאבלט אחד, וסוניפיקציה עברית של גרפים. מקצב הוא כלי פסינג אופציונלי — לא טיפול, ואין כאן טענת יעילות.</p>
     <div class="btns">
-      <a class="btn primary" href="./" target="_blank" rel="noopener">▶ נסו את הדמו החי</a>
+      <a class="btn primary" href="./">▶ לדמו החי</a>
+      <a class="btn ghost" href="functions.html">שומעים פונקציה</a>
       <a class="btn ghost" href="offer.html">הזמן ניסוי כיתתי</a>
     </div>
   </div></div>
@@ -115,7 +115,7 @@
   </div></section>
 
   <section id="curric"><div class="wrap">
-    <div class="eyebrow">מותאם תוכנית לימודים</div>
+    <div class="eyebrow">מה בדמו</div>
     <h2>מה רץ בדמו — לא קטלוג מוסדי.</h2>
     <p class="sub">הדמו מכסה את מה שכבר רץ בדפדפן: השלמת פערים לכיתות א׳–ד׳, וסוניפיקציה של פונקציות לחטיבה, תיכון ובגרות 807.</p>
     <div class="align">
@@ -141,10 +141,13 @@
     <p>אם יש כיתה ל־4 שבועות של שימוש חופשי בכתובת — בלי חשבונית ובלי טענת יעילות — זה נתיב האימות היחיד.</p>
     <div class="btns" style="justify-content:center">
       <a class="btn primary" href="offer.html">הזמן ניסוי כיתתי</a>
-      <a class="btn ghost" href="./" target="_blank" rel="noopener">▶ לדמו החי</a>
+      <a class="btn ghost" href="./">▶ לדמו החי</a>
     </div>
   </div></section>
+  </main>
 
   <footer><div class="wrap">MelodyMath · שני דמואים בעברית · פרויקט של Swissystem7 · <a href="./">דמו</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="functions.html">שומעים פונקציה</a></div></footer>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
 </body>
 </html>

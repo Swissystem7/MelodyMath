@@ -19,7 +19,7 @@
 #mm-access .mm-access-label{font-weight:900;margin-inline-end:4px}
 #mm-access button{
   background:#fff;color:#21183b;border:1px solid #ded6f0;border-radius:10px;
-  padding:8px 12px;min-height:44px;font:inherit;font-weight:700;cursor:pointer
+  padding:8px 12px;min-height:44px;min-width:44px;font:inherit;font-weight:700;cursor:pointer
 }
 #mm-access button[aria-pressed="true"]{background:#21183b;color:#fff}
 #mm-access button:focus-visible{outline:3px solid #6946e8;outline-offset:2px}
@@ -43,11 +43,24 @@ body.mm-contrast .feedback.good{background:#fff!important;color:#000!important;b
 body.mm-contrast .feedback.bad{background:#000!important;color:#fff!important}
 body.mm-contrast #mm-access{background:#fff;border-bottom:3px solid #000}
 body.mm-contrast #mm-site-nav{background:#000;color:#fff}
+body.mm-contrast .first-run,body.mm-contrast .cert,body.mm-contrast .btn,
+body.mm-contrast .btn-primary,body.mm-contrast .btn-audio,body.mm-contrast .btn-ghost,
+body.mm-contrast .chip,body.mm-contrast header,body.mm-contrast .hero,
+body.mm-contrast .onepager,body.mm-contrast .honest{
+  background:#fff!important;color:#000!important;border-color:#000!important;box-shadow:none!important
+}
+body.mm-contrast .btn-primary,body.mm-contrast .btn.primary,body.mm-contrast .tab.on{
+  background:#000!important;color:#fff!important
+}
 
 body.mm-large{font-size:1.22em}
 body.mm-large .prompt{font-size:clamp(2rem,7vw,3.6rem)!important}
 body.mm-large .choice{min-height:88px;font-size:2.2rem!important}
+body.mm-large button,body.mm-large input,body.mm-large select,.tab,button.tab,.choice{
+  min-height:44px
+}
 body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
+.tab,button.tab{min-height:44px}
 
 .class-board{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}
 .class-board th,.class-board td{border-bottom:1px solid #ded6f0;padding:8px 6px;text-align:right}

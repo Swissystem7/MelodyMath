@@ -23,6 +23,7 @@ test('the service worker precaches files that exist on disk', () => {
   const listed = [...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]).filter(Boolean);
   assert.ok(listed.includes('index.html'));
   assert.ok(listed.includes('src/lib/banks.js'));
+  assert.ok(listed.includes('src/lib/tabs.js'));
   listed.forEach((rel) => {
     if (rel === '' || rel === './') return;
     assert.ok(fs.existsSync(path.join(root, rel)), rel);

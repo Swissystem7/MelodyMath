@@ -53,6 +53,17 @@ test('hear groups are capped and rejected when they are not countable beats', ()
   assert.equal(access.setActiveHear([]), null);
 });
 
+test('refreshSpeakNow hides the speak button when there is no prompt', () => {
+  const btn = { hidden: false, disabled: false };
+  const doc = {
+    getElementById: (id) => (id === 'mm-speak-now' ? btn : null),
+    querySelector: () => null,
+  };
+  assert.equal(access.refreshSpeakNow(doc), '');
+  assert.equal(btn.hidden, true);
+  assert.equal(btn.disabled, true);
+});
+
 test('currentPromptText reads the visible class-mode prompt first', () => {
   const nodes = {
     '#classPlay:not(.hidden) #classPrompt': { textContent: '  כמה תופים?  ' },

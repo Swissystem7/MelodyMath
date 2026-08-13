@@ -1,7 +1,8 @@
 # MelodyMath — מחקר שוק + פסק דין
 
 **תאריך הבדיקה:** 13 באוגוסט 2026  
-**מה נבדק בפועל:** דמו חי ב-[swissystem7.github.io/MelodyMath](https://swissystem7.github.io/MelodyMath) ודף הסוניפיקציה [functions.html](https://swissystem7.github.io/MelodyMath/functions.html); ריפו [github.com/Swissystem7/MelodyMath](https://github.com/Swissystem7/MelodyMath) (נוצר 17.7.2026, עודכן 11.8.2026, 0 כוכבים, 0 forks); `README.md`, `VALIDATION.md` (3.8.2026), `HACKATHON.md`, `RESEARCH.md` בריפו; דפי מחיר רשמיים; דפי משרד החינוך על גפ״ן ותוכן דיגיטלי; מאמרים peer-reviewed.  
+**עדכון ערב 13.8.2026:** אחרי המחקר נוסף בדמו מצב כיתה מקומי, לוח כיתה בטאבלט, דפי עבודה, PWA, ודף ניסוי (`offer.html`). **פסק הדין PARK לא השתנה.** אין כיתה בענן ואין סנכרון. `VALIDATION.md` ו־`HACKATHON.md` יושבים ב־[docs/archive/](docs/archive/INDEX.md).  
+**מה נבדק בפועל:** דמו חי ב-[swissystem7.github.io/MelodyMath](https://swissystem7.github.io/MelodyMath) ודף הסוניפיקציה [functions.html](https://swissystem7.github.io/MelodyMath/functions.html); ריפו [github.com/Swissystem7/MelodyMath](https://github.com/Swissystem7/MelodyMath) (נוצר 17.7.2026; המחקר עצמו ראה עדכון אחרון ב־11.8.2026); `README.md`, [VALIDATION.md בארכיון](docs/archive/VALIDATION.md) (3.8.2026), [HACKATHON.md בארכיון](docs/archive/HACKATHON.md), `RESEARCH.md` בריפו; דפי מחיר רשמיים; דפי משרד החינוך על גפ״ן ותוכן דיגיטלי; מאמרים peer-reviewed.  
 **כלים:** חיפוש אינטרנט + Jina Reader + GitHub CLI + חיפוש סמנטי ב-X. Reddit CLI ו-Exa לא היו זמינים.  
 **כלל:** אין עובדות מומצאות. איפה שאין מקור — כתוב במפורש **לא נמצא מקור**.  
 **דדליין שהוצהר בבקשה:** הגשת מימון ב־22 באוגוסט 2026. **לא נמצא קול קורא רשמי שנסגר בדיוק ב־22.8.2026.** החלון הרשמי הקרוב ביותר שאומת: מסלול תנופה של רשות החדשנות — בקשות עד **18.8.2026 בשעה 12:00**, והחלון הבא עד **7.9.2026 בשעה 12:00** ([דף תנופה הרשמי](https://innovationisrael.org.il/programs/%D7%9E%D7%A1%D7%9C%D7%95%D7%9C-%D7%AA%D7%A0%D7%95%D7%A4%D7%94-%D7%A7%D7%A8%D7%9F-%D7%94%D7%94%D7%96%D7%A0%D7%A7/)).
@@ -12,13 +13,13 @@
 
 הדמו החי הוא אפליקציית דפדפן עברית, בלי התקנה ובלי הרשמה. הוא מורכב **משני מוצרים שונים**:
 
-1. **תרגול יסודי בכיתות א׳–ד׳** — אבחון 10 שאלות במנייה, חיבור, חיסור, כפל ושברים בסיסיים; 35 תרגילים מדורגים; מטרונום ומשוב מוזיקלי; קושי אדפטיבי (שתי תשובות נכונות ברצף מעלות רמה, שתי שגויות מורידות). נתונים ב־`localStorage` בלבד.
+1. **תרגול יסודי בכיתות א׳–ד׳** — אבחון 10 שאלות במנייה, חיבור, חיסור, כפל ושברים בסיסיים; 35 תרגילים מדורגים; מקצב אופציונלי; קושי אדפטיבי (שתי תשובות נכונות ברצף מעלות רמה, שתי שגויות מורידות). בערב 13.8 נוסף גם מצב כיתה מקומי (8 דקות בלחיצה), לוח כיתה בטאבלט, דפי עבודה, ו־PWA. נתונים ב־`localStorage` בלבד — אותו קוד כיתה בטאבלט אחר **לא** מסנכרן.
 2. **מעבדת סוניפיקציה של גרפי פונקציות** (`functions.html`) — מיפוי לוגריתמי של \(f(x)\) לגובה צליל (130–1,046 הרץ), נקישה לשורש, בריחת-צליל לאסימפטוטה, ומשחק "נחש את הפונקציה באוזן". הדף עצמו מבהיר שברוב המצבים זה ייצוג, לא "קול הפונקציה".
 
-אין backend, אין חשבון משתמש, אין כיתה, אין תשלום, אין ניהול מורה מרחוק. הריפו מגדיר את עצמו כתרגול מבוסס-קצב לחינוך מיוחד + סוניפיקציה ([README](https://github.com/Swissystem7/MelodyMath/blob/master/README.md)).
+אין backend, אין חשבון משתמש, אין כיתה בענן, אין תשלום, אין ניהול מורה מרחוק. הריפו מגדיר את עצמו כשני דמואים נפרדים — לא חבילה אחת לחינוך מיוחד ([README](https://github.com/Swissystem7/MelodyMath/blob/master/README.md)).
 
-`VALIDATION.md` (3.8.2026) כותב במפורש: **אין ולו משתמש אחד**; קריטריון 30 משתמשים פעילים ב־30 יום מעולם לא הורץ; אין נתוני פיילוט.  
-`HACKATHON.md` מציין שהוגש להאקתון MusicTech באפקה/Ono ביוני 2026, ומציע מחיר 49 ₪/שנה למורה ו־299 ₪/שנה לבית ספר — **זה רעיון מחיר, לא מכירה מתועדת**. אותו מסמך מודה שמדד "15–20% שיפור" בדמו הוא **נתון מדמה**.
+[`VALIDATION.md` בארכיון](docs/archive/VALIDATION.md) (3.8.2026) כותב במפורש: **אין ולו משתמש אחד**; קריטריון 30 משתמשים פעילים ב־30 יום מעולם לא הורץ; אין נתוני פיילוט.  
+[`HACKATHON.md` בארכיון](docs/archive/HACKATHON.md) מציין שהוגש להאקתון MusicTech באפקה/Ono ביוני 2026, ומציע מחיר 49 ₪/שנה למורה ו־299 ₪/שנה לבית ספר — **זה רעיון מחיר, לא מכירה מתועדת**. אותו מסמך מודה שמדד "15–20% שיפור" בדמו הוא **נתון מדמה**.
 
 ב־X לא נמצאה שיחה ציבורית על MelodyMath עצמו (חיפוש סמנטי, 13.8.2026).
 
@@ -68,7 +69,7 @@
 
 ### מה 49 ₪ / 299 ₪ אומרים מול השוק
 
-הרעיון ב־`HACKATHON.md` (49 ₪ למורה, 299 ₪ לבית ספר) זול מ־TTRS לבית ספר (~US$260) וזול בהרבה מ־Calcularis להורה ($240/שנה). זה לא יתרון: בלי דשבורד כיתה, בלי חשבון, בלי ראיות ובלי רישום במאגר — **אין למי לגבות את הסכום**. מול אופק/Desmos המחיר הרלוונטי הוא אפס.
+הרעיון ב־[`HACKATHON.md`](docs/archive/HACKATHON.md) (49 ₪ למורה, 299 ₪ לבית ספר) זול מ־TTRS לבית ספר (~US$260) וזול בהרבה מ־Calcularis להורה ($240/שנה). זה לא יתרון: בלי דשבורד כיתה בענן, בלי חשבון, בלי ראיות ובלי רישום במאגר — **אין למי לגבות את הסכום**. מול אופק/Desmos המחיר הרלוונטי הוא אפס.
 
 ---
 
@@ -80,7 +81,7 @@
 
 - שוק קיים בחו״ל: הורים משלמים £7.20 ל־TTRS, $240 ל־Calcularis, $300 ל־Make Music Count.
 - בישראל: **לא נמצא מקור** לסקר תשלום הורים על אפליקציית דיסקלקוליה/קצב-מתמטיקה עברית.
-- `VALIDATION.md` של הפרויקט עצמו פוסל את המסלול הזה: "ההורה לא מזהה את הצורך, ואין ערוץ הפצה."
+- [`VALIDATION.md`](docs/archive/VALIDATION.md) של הפרויקט עצמו פוסל את המסלול הזה: "ההורה לא מזהה את הצורך, ואין ערוץ הפצה."
 - בלי חנות אפליקציות, בלי מנוי, בלי שימור בין מכשירים — אין מוצר B2C, רק דף ציבורי.
 
 **מסקנה:** הורה אינו קונה ריאלי למוצר כפי שהוא היום.
@@ -226,7 +227,7 @@ MelodyMath הוא תרגול דפדפן קצר. **הוא לא מספק 90–120 
 
 ### ג. מה המוצר עצמו מדד
 
-כלום. אין פיילוט, אין baseline, אין קבוצת ביקורת, אין אפילו 30 משתמשים (`VALIDATION.md`). מדד ה־15–20% ב־`HACKATHON.md` מסומן שם כנתון מדמה.
+כלום. אין פיילוט, אין baseline, אין קבוצת ביקורת, אין אפילו 30 משתמשים ([`VALIDATION.md`](docs/archive/VALIDATION.md)). מדד ה־15–20% ב־[`HACKATHON.md`](docs/archive/HACKATHON.md) מסומן שם כנתון מדמה.
 
 ---
 
@@ -254,7 +255,7 @@ MelodyMath הוא תרגול דפדפן קצר. **הוא לא מספק 90–120 
 - אין דשבורד כיתה — המורה לא רואה את התלמידים שלה.
 - Calcularis ו־Dynamo כבר מוכרים "דיסקלקוליה" עם ניירות מחקר. Desmos כבר נותן סוניפיקציה בחינם.
 
-אם אף מחנכת לא מוכנה לתת כיתה לחודש **בלי לשלם** — אין מה למכור אחר כך. `VALIDATION.md` כבר ניסח את זה נכון ב־3.8.2026. מאז לא נוספו משתמשים ציבוריים שאפשר לאמת.
+אם אף מחנכת לא מוכנה לתת כיתה לחודש **בלי לשלם** — אין מה למכור אחר כך. [`VALIDATION.md`](docs/archive/VALIDATION.md) כבר ניסח את זה נכון ב־3.8.2026. מאז לא נוספו משתמשים ציבוריים שאפשר לאמת.
 
 ### למה זו הנחת המוות ולא "עוד סיכון"
 
@@ -301,13 +302,13 @@ MelodyMath הוא תרגול דפדפן קצר. **הוא לא מספק 90–120 
 
 ### מה כן נכון במוצר
 
-הדמו רץ, עברית, בלי התקנה, ויש יושרה פנימית ב־`VALIDATION.md` וב־README לגבי מצב הראיות. זה יותר מרוב דמואים. זה לא שוק, לא רכש, ולא בקשת מימון.
+הדמו רץ, עברית, בלי התקנה, ויש יושרה פנימית ב־[`VALIDATION.md`](docs/archive/VALIDATION.md) וב־README לגבי מצב הראיות. זה יותר מרוב דמואים. זה לא שוק, לא רכש, ולא בקשת מימון.
 
 ---
 
 ## נספח: מקורות מרכזיים לפי סעיף
 
-**המוצר:** [דמו](https://swissystem7.github.io/MelodyMath) · [functions.html](https://swissystem7.github.io/MelodyMath/functions.html) · [README](https://github.com/Swissystem7/MelodyMath/blob/master/README.md) · [VALIDATION.md](https://github.com/Swissystem7/MelodyMath/blob/master/VALIDATION.md) · [HACKATHON.md](https://github.com/Swissystem7/MelodyMath/blob/master/HACKATHON.md)
+**המוצר:** [דמו](https://swissystem7.github.io/MelodyMath) · [functions.html](https://swissystem7.github.io/MelodyMath/functions.html) · [README](https://github.com/Swissystem7/MelodyMath/blob/master/README.md) · [VALIDATION.md בארכיון](https://github.com/Swissystem7/MelodyMath/blob/master/docs/archive/VALIDATION.md) · [HACKATHON.md בארכיון](https://github.com/Swissystem7/MelodyMath/blob/master/docs/archive/HACKATHON.md)
 
 **מתחרים:** [TTRS families](https://ttrockstars.com/families/) · [TTRS schools](https://ttrockstars.com/schools/) · [Muzology FAQ](https://www.muzology.com/faq) · [Make Music Count](https://makemusiccount.com/pages/home-schoolers) · [Desmos Audio Trace](https://help.desmos.com/hc/en-us/articles/37064105800333-Audio-Trace) · [SAS Accelerator](https://support.sas.com/software/products/graphics-accelerator/) · [Highcharts Sonification Studio](https://sonification.highcharts.com/) · [Calcularis parents](https://constructor.tech/products/learning/calcularis/parents) · [Dynamo](https://dynamomaths.co.uk/) · [אופק מטח](https://myofek.cet.ac.il/)
 

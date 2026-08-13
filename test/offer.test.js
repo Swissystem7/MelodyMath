@@ -33,6 +33,12 @@ test('a complete request builds a principal email with no efficacy claim', () =>
   assert.match(mail.mailto, /^mailto:/);
 });
 
+test('a reply email is named in the letter and copied on the mailto', () => {
+  const mail = offer.buildPrincipalEmail(Object.assign({}, sample, { replyEmail: 'teacher@example.school.il' }));
+  assert.match(mail.body, /לחזרה: teacher@example\.school\.il/);
+  assert.match(mail.mailto, /cc=teacher%40example\.school\.il/);
+});
+
 test('missing teacher school or grade blocks the email', () => {
   const mail = offer.buildPrincipalEmail({ teacher: 'נועה' });
   assert.equal(mail.ok, false);
