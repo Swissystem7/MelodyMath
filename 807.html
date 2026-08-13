@@ -348,16 +348,21 @@ function playSweep(){
   curOsc=osc; osc.onended=function(){ if(curOsc===osc) curOsc=null; };
 }
 
+function stopCurOsc(){
+  if(curOsc){ try{curOsc.stop();}catch(e){} curOsc=null; }
+}
+
 // ---------- wiring ----------
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('.tab'); if(!b)return;
   document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');});
   b.classList.add('on'); b.setAttribute('aria-pressed','true'); mode=b.dataset.type;
+  stopCurOsc();
   prob=gen(); render();
 });
 document.getElementById('checkBtn').addEventListener('click',check);
 document.getElementById('ans').addEventListener('keydown',e=>{ if(e.key==='Enter')check(); });
-document.getElementById('nextBtn').addEventListener('click',()=>{ prob=gen(); render(); });
+document.getElementById('nextBtn').addEventListener('click',()=>{ stopCurOsc(); prob=gen(); render(); });
 document.getElementById('playBtn').addEventListener('click',playSweep);
 document.getElementById('linMode').addEventListener('change',updateModeLabel);
 
