@@ -47,3 +47,29 @@ test('isTabKey only accepts the four APG keys', () => {
   assert.equal(tabs.isTabKey(' '), false);
   assert.equal(tabs.isTabKey('Enter'), false);
 });
+
+test('syncRovingTabindex handles no tabs', () => {
+  const nodes = [];
+  tabs.syncRovingTabindex(nodes);
+  nodes.forEach(node => assert.equal(node.tabIndex, -1));
+});
+
+test('syncRovingTabindex handles first tab selected', () => {
+  const nodes = [
+    { getAttribute: () => 'true', tabIndex: 0, setAttribute() {} },
+    { getAttribute: () => 'false', tabIndex: 0, setAttribute() {} },
+  ];
+  tabs.syncRovingTabindex(nodes);
+  assert.equal(nodes[0].tabIndex, 0);
+  assert.equal(nodes[1].tabIndex, -1);
+});
+
+test('syncRovingTabindex handles last tab selected', () => {
+  const nodes = [
+    { getAttribute: () => 'false', tabIndex: 0, setAttribute() {} },
+    { getAttribute: () => 'true', tabIndex: 0, setAttribute() {} },
+  ];
+  tabs.syncRovingTabindex(nodes);
+  assert.equal(nodes[0].tabIndex, -1);
+  assert.equal(nodes[1].tabIndex, 0);
+});
