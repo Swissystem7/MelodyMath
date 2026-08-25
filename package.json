@@ -3,6 +3,7 @@
   "private": true,
   "description": "Hebrew math practice and graph sonification — no install, no backend",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "build": "node scripts/build-site.js"
   }
 }
