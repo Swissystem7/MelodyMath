@@ -10,6 +10,14 @@
 
 > **[תרגול יסודי](https://swissystem7.github.io/MelodyMath/)** · [כיסוי תוכנית](https://swissystem7.github.io/MelodyMath/curriculum.html) · [שומעים פונקציה](https://swissystem7.github.io/MelodyMath/functions.html) · [גדילה ודעיכה · 807](https://swissystem7.github.io/MelodyMath/807.html) · [דף נחיתה](https://swissystem7.github.io/MelodyMath/landing.html) · [הזמן ניסוי כיתתי](https://swissystem7.github.io/MelodyMath/offer.html)
 
+## מעבדת בלש AI · Base44 2026
+
+**Separate track (HOLD / split) — לא מסלול משהח.** Base44 AI lab is not part of elementary MoE submission.
+
+`ai-lab.html` היא חוויה דטרמיניסטית בת ארבע משימות לילדים ולנוער: בדיקת תשובת AI, שיפור prompt, שמירה על פרטיות ודרישת מקור. אין צ'אט חי, אין איסוף מידע אישי ואין טענה שהשלמת המשחק מוכיחה שליטה. הפרויקט מקושר ליישום Base44 בשם `melodymath-ai-lab` ונבנה ל־`dist/` באמצעות `npm run build`.
+
+See [docs/BASE44_BOUNDARY.md](docs/BASE44_BOUNDARY.md) and [docs/MOE_HOLD.md](docs/MOE_HOLD.md).
+
 `README.md` הזה הוא מקור האמת. מסמכי האקתון, אימות ישן והערות רכש ישנות יושבים ב־[docs/archive/](docs/archive/INDEX.md).
 
 ## שני המוצרים
