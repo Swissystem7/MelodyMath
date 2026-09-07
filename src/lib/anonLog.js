@@ -108,6 +108,23 @@
     return [];
   }
 
+  /** UI-safe helper: maps attempt payloads to anon record() without PII fields. */
+  function logAttempt(item, storage) {
+    const src = item && typeof item === 'object' ? item : {};
+    const exerciseId = String(
+      src.exerciseId || src.id || src.skill || src.kind || 'unknown'
+    ).slice(0, 64);
+    const correct = !!src.correct;
+    let durationMs = Number(src.durationMs);
+    if (!Number.isFinite(durationMs) || durationMs < 0) durationMs = 0;
+    // Never forward name/classCode/email/prompt/given/answer/notes
+    return record({
+      exerciseId: exerciseId,
+      correct: correct,
+      durationMs: durationMs,
+    }, storage);
+  }
+
   return {
     STORE_KEY: STORE_KEY,
     BANNED_KEYS: BANNED_KEYS,
@@ -118,5 +135,6 @@
     summarize: summarize,
     exportEvents: exportEvents,
     clear: clear,
+    logAttempt: logAttempt,
   };
 });

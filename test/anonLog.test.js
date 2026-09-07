@@ -65,3 +65,46 @@ test('stripPii drops name-like keys but keeps exerciseId', () => {
   assert.equal(cleaned.name, undefined);
   assert.equal(cleaned.fullName, undefined);
 });
+
+test('logAttempt strips prompt/given/answer/name and never writes them', () => {
+  const store = memoryStore();
+  const ev = anon.logAttempt({
+    id: 'ex-9',
+    correct: true,
+    durationMs: 400,
+    prompt: 'כמה זה 2+2?',
+    given: '5',
+    answer: '4',
+    name: 'דני',
+    classCode: 'ג3',
+    email: 'a@b.c',
+    notes: 'secret',
+  }, store);
+  assert.equal(ev.exerciseId, 'ex-9');
+  assert.equal(ev.correct, true);
+  assert.equal(ev.durationMs, 400);
+  const dumped = JSON.stringify(ev);
+  assert.equal(dumped.includes('כמה'), false);
+  assert.equal(dumped.includes('דני'), false);
+  assert.equal(dumped.includes('a@b.c'), false);
+  assert.equal(dumped.includes('secret'), false);
+  assert.equal(dumped.includes('ג3'), false);
+  const rows = anon.exportEvents(store);
+  assert.equal(rows.length, 1);
+  assert.deepEqual(Object.keys(rows[0]).sort(), ['correct', 'durationMs', 'exerciseId', 'ts']);
+  assert.equal(JSON.stringify(rows[0]).includes('prompt'), false);
+  assert.equal(JSON.stringify(rows[0]).includes('given'), false);
+  assert.equal(JSON.stringify(rows[0]).includes('answer'), false);
+  assert.equal(JSON.stringify(rows[0]).includes('name'), false);
+});
+
+test('logAttempt falls back exerciseId from skill/kind and clamps duration', () => {
+  const store = memoryStore();
+  const ev = anon.logAttempt({ skill: 'add', kind: 'practice', correct: 1, durationMs: -3 }, store);
+  assert.equal(ev.exerciseId, 'add');
+  assert.equal(ev.correct, true);
+  assert.equal(ev.durationMs, 0);
+  const ev2 = anon.logAttempt({ kind: 'beat', correct: false }, store);
+  assert.equal(ev2.exerciseId, 'beat');
+  assert.equal(ev2.correct, false);
+});
