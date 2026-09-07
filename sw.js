@@ -15,6 +15,7 @@ const ASSETS = [
   './src/lib/sonify.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
+  './src/lib/anonLog.js',
   './src/lib/banks.js',
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
