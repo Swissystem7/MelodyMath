@@ -19,3 +19,10 @@ test('an unrecognised op falls back to addition', () => {
   const V = vert.normalizeVertical({ a: 1, b: 2 });
   assert.equal(V.op, '+');
 });
+
+test('bindVertical returns normalized vertical data object', () => {
+  const root = { innerHTML: '' };
+  const verticalData = { a: 47, b: 25, op: '+' };
+  const result = vert.bindVertical(root, verticalData);
+  assert.deepEqual(result, { kind: 'vertical', data: { a: 47, b: 25, op: '+' }, normalized: true });
+});
