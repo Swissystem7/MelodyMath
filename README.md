@@ -10,6 +10,10 @@
 
 > **[תרגול יסודי](https://swissystem7.github.io/MelodyMath/)** · [כיסוי תוכנית](https://swissystem7.github.io/MelodyMath/curriculum.html) · [שומעים פונקציה](https://swissystem7.github.io/MelodyMath/functions.html) · [גדילה ודעיכה · 807](https://swissystem7.github.io/MelodyMath/807.html) · [דף נחיתה](https://swissystem7.github.io/MelodyMath/landing.html) · [הזמן ניסוי כיתתי](https://swissystem7.github.io/MelodyMath/offer.html)
 
+## מעבדת בלש AI · Base44 2026
+
+`ai-lab.html` היא פעילות דטרמיניסטית בת 20–25 דקות לגילאי 10–14, הכוללת שמונה חקירות ומשימת סיום: בדיקת תשובת AI, שיפור prompt, שמירה על פרטיות, בדיקת מקור ותמונה וזיהוי מתי צריך לערב אדם. אין צ'אט חי, אין איסוף מידע אישי ואין טענה שהשלמת המשחק מוכיחה שליטה. הפרויקט מקושר ליישום Base44 בשם `melodymath-ai-lab` ונבנה ל־`dist/` באמצעות `npm run build`.
+
 `README.md` הזה הוא מקור האמת. מסמכי האקתון, אימות ישן והערות רכש ישנות יושבים ב־[docs/archive/](docs/archive/INDEX.md).
 
 ## שני המוצרים

@@ -32,3 +32,8 @@ test('none of the widgets emit a script tag', () => {
   assert.doesNotMatch(b, /<script/);
   assert.doesNotMatch(c, /<script/);
 });
+
+test('a data table includes data-type attribute for accessibility and testability', () => {
+  const html = data.renderTableHtml({ headers: ['Name', 'Age'], rows: [['John', '25']] });
+  assert.strictEqual(html, '<table class="data-table" data-type="table"><caption class="sr-only">טבלת נתונים</caption><thead><tr><th scope="col">Name</th><th scope="col">Age</th></tr></thead><tbody><tr><td>John</td><td>25</td></tr></tbody></table>');
+});
