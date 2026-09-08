@@ -9,7 +9,8 @@ Against HTML + test/a11y.test.js.
 5. offer.html — labelled fields
 6. curriculum.html — landmarks
 7. Access toolbar (core.js) — contrast/large/hear
-8. print.css — prefers-reduced-motion9. Keyboard on graphs — arrows + describe
+8. print.css — prefers-reduced-motion
+9. Keyboard on graphs — arrows + describe
 10. Teacher report panel — local-only roster
 
 PASS: checklist + npm test green.
