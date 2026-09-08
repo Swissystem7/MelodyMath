@@ -27,7 +27,7 @@
     const width = Math.max(String(V.a).length, String(V.b).length + 1);
     const opWord = V.op === '+' ? 'ועוד' : 'פחות';
     return '<div class="vert" dir="ltr" role="img" aria-label="חישוב מאונך: '
-      + V.a + ' ' + opWord + ' ' + V.b + '">'
+      + V.a + ' ' + opWord + ' ' + V.b + '" data-op="' + V.op + '">'
       + '<div class="vert-row vert-a">' + padDigits(V.a, width) + '</div>'
       + '<div class="vert-row vert-b"><span class="vert-op" aria-hidden="true">' + V.op + '</span>'
       + padDigits(V.b, width - 1) + '</div>'
