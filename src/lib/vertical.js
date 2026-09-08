@@ -12,6 +12,9 @@
     let b = Math.round(Number(src.b));
     if (!Number.isFinite(a)) a = 0;
     if (!Number.isFinite(b)) b = 0;
+    // Clamp values to range 0-99
+    a = Math.max(0, Math.min(99, a));
+    b = Math.max(0, Math.min(99, b));
     const op = src.op === '-' ? '-' : '+';
     return { a: a, b: b, op: op };
   }
