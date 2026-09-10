@@ -498,3 +498,186 @@ test('a whole session folds to one state', () => {
   assert.deepEqual(g.reduceAudioEvents(null, null), IDLE);
   assert.deepEqual(g.reduceAudioEvents(null, []), IDLE);
 });
+
+// ---------------------------------------------------------------------------
+// R2-B — describeFunctionShape: one short Hebrew sentence above the list.
+//
+// Fixed sampled arrays and fixed landmark lists in, exact strings out. Every
+// sentence below was written out by hand from the rules in the header of
+// src/lib/graphListen.js, and the classification of each array was worked out
+// on paper first (rising / falling / constant / turning / broken).
+// ---------------------------------------------------------------------------
+
+const TAIL = ' ' + g.SAMPLE_ONLY_HE;
+const shapePts = (ys) => ys.map((y, i) => ({ i: i, x: i, y: y }));
+
+test('a rising line that crosses at 2 is exactly the sentence the research asked for', () => {
+  const up = shapePts([-2, -1, 0, 1, 2]);
+  assert.equal(g.describeFunctionShape(up, [{ kind: 'root', x: 2, y: 0 }]),
+    'פונקציה עולה, חותכת את ציר איקס בנקודה 2.' + TAIL);
+
+  const down = shapePts([2, 1, 0, -1, -2]);
+  assert.equal(g.describeFunctionShape(down, [{ kind: 'root', x: 2, y: 0 }]),
+    'פונקציה יורדת, חותכת את ציר איקס בנקודה 2.' + TAIL);
+
+  // the same rising line with no crossing inside the window
+  assert.equal(g.describeFunctionShape(shapePts([1, 2, 3]), []),
+    'פונקציה עולה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('a constant sampling is constant, and a constant zero is on the axis', () => {
+  assert.equal(g.describeFunctionShape(shapePts([3, 3, 3, 3]), []),
+    'פונקציה קבועה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  // y = 0 is ON the axis at every sample: "crosses at" and "does not cross"
+  // are both false, so it gets its own sentence and no crossing clause
+  assert.equal(g.describeFunctionShape(shapePts([0, 0, 0]), []),
+    'פונקציה קבועה על ציר איקס.' + TAIL);
+  assert.equal(g.describeFunctionShape(shapePts([-7, -7]), []),
+    'פונקציה קבועה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('one turning point in the landmark list names the shape', () => {
+  assert.equal(g.describeFunctionShape(shapePts([0, 1, 2, 1, 0]), [{ kind: 'max', x: 2, y: 2 }]),
+    'פונקציה עולה ואז יורדת, ' + g.NO_CROSSING_HE + '.' + TAIL);
+
+  const valley = shapePts([2, 0, -1, 0, 2]);
+  const valleyMarks = [
+    { kind: 'root', x: 1, y: 0 },
+    { kind: 'min', x: 2, y: -1 },
+    { kind: 'root', x: 3, y: 0 },
+  ];
+  assert.equal(g.describeFunctionShape(valley, valleyMarks),
+    'פונקציה יורדת ואז עולה, חותכת את ציר איקס בנקודות 1, 3.' + TAIL);
+});
+
+test('monotonicity is read from every consecutive pair, not from three samples', () => {
+  // trendOf looks at the first, middle and last sample only. [0,3,1,4,2,5]
+  // rises overall, so it answers 'up' — and the sampling turns four times.
+  const zigzag = shapePts([0, 3, 1, 4, 2, 5]);
+  assert.equal(g.summarizeCurve(zigzag).trend, 'up');
+  assert.equal(g.monotonicityOf(zigzag), 'mixed');
+  const zigzagMarks = [
+    { kind: 'root', x: 0, y: 0 },
+    { kind: 'max', x: 1, y: 3 },
+    { kind: 'min', x: 2, y: 1 },
+    { kind: 'max', x: 3, y: 4 },
+    { kind: 'min', x: 4, y: 2 },
+  ];
+  assert.equal(g.describeFunctionShape(zigzag, zigzagMarks),
+    'פונקציה עולה ויורדת לסירוגין עם 4 נקודות מפנה, חותכת את ציר איקס בנקודה 0.' + TAIL);
+
+  // one sample out of five going the wrong way is enough to withdraw the
+  // claim, and with nothing in the landmark list to point at it says only
+  // that much. Strictness is the point: see the header.
+  const wobble = shapePts([0, 1, 0.9, 2, 3]);
+  assert.equal(g.summarizeCurve(wobble).trend, 'up');
+  assert.equal(g.describeFunctionShape(wobble, []),
+    'פונקציה לא מונוטונית, ' + g.NO_CROSSING_HE + '.' + TAIL);
+
+  // and the mirror: a whole period of sin is 'flat' to trendOf, because
+  // first, middle and last are all zero
+  assert.equal(g.summarizeCurve(cleanSine).trend, 'flat');
+  assert.equal(g.monotonicityOf(cleanSine), 'mixed');
+  assert.match(g.describeFunctionShape(cleanSine, g.findLandmarks(cleanSine)), /לסירוגין/);
+});
+
+test('a broken sampling refuses the monotonicity claim in both vocabularies', () => {
+  const broken = [
+    { i: 0, x: 0, y: 1 }, { i: 1, x: 1, y: 2 }, { i: 2, x: 2, y: NaN },
+    { i: 3, x: 3, y: -2 }, { i: 4, x: 4, y: -1 },
+  ];
+  // findLandmarks says 'gap'; the older landmarksOf says 'undefined'
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'gap', x: 2, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'undefined', x: 2, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'jump', x: 2.5, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'asymptote', x: 2.5, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  // a break plus a crossing still reports the crossing
+  assert.equal(g.describeFunctionShape(broken,
+    [{ kind: 'gap', x: 2, y: NaN }, { kind: 'root', x: 3.5, y: 0 }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, חותכת את ציר איקס בנקודה 3.5.' + TAIL);
+});
+
+test('fewer than two defined samples says so instead of guessing', () => {
+  const short = 'אין מספיק דגימות כדי לתאר את הצורה.' + TAIL;
+  assert.equal(g.describeFunctionShape([], []), short);
+  assert.equal(g.describeFunctionShape(null, null), short);
+  assert.equal(g.describeFunctionShape(shapePts([7]), []), short);
+  assert.equal(g.describeFunctionShape([{ i: 0, x: 0, y: NaN }, { i: 1, x: 1, y: NaN }], []), short);
+  // one defined sample among undefined ones is still one sample
+  assert.equal(g.describeFunctionShape([{ i: 0, x: 0, y: NaN }, { i: 1, x: 1, y: 5 }], []), short);
+});
+
+test('crossings are printed in x order, one decimal, without rounding duplicates', () => {
+  const line = shapePts([-2, -1, 0, 1, 2]);
+  // out of order in, in order out
+  assert.equal(g.describeFunctionShape(line,
+    [{ kind: 'root', x: 5, y: 0 }, { kind: 'root', x: -1, y: 0 }]),
+    'פונקציה עולה, חותכת את ציר איקס בנקודות -1, 5.' + TAIL);
+  // 3.13 and 3.14 both read 3.1 at one decimal: one crossing is printed, once
+  assert.equal(g.describeFunctionShape(line,
+    [{ kind: 'root', x: 3.13, y: 0 }, { kind: 'root', x: 3.14, y: 0 }]),
+    'פונקציה עולה, חותכת את ציר איקס בנקודה 3.1.' + TAIL);
+  // landmarks that are neither crossings nor turning points are ignored
+  assert.equal(g.describeFunctionShape(line,
+    [{ kind: 'start', x: 0, y: -2 }, { kind: 'end', x: 4, y: 2 },
+      { kind: 'y-intercept', x: 0, y: -2 }]),
+    'פונקציה עולה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('the sentence composes with the real detectors', () => {
+  // a whole period of sin: two turning points, three crossings at 0 / 3.1 / 6.3
+  assert.equal(g.describeFunctionShape(cleanSine, g.findLandmarks(cleanSine)),
+    'פונקציה עולה ויורדת לסירוגין עם 2 נקודות מפנה, '
+    + 'חותכת את ציר איקס בנקודות 0, 3.1, 6.3.' + TAIL);
+  // the same sampling plus the fixed jitter says the same thing
+  assert.equal(g.describeFunctionShape(noisySine, g.findLandmarks(noisySine)),
+    g.describeFunctionShape(cleanSine, g.findLandmarks(cleanSine)));
+
+  const quadPts = g.sampleCurve((x) => x * x - 4, -4, 4, 200);
+  assert.equal(g.describeFunctionShape(quadPts, g.findLandmarks(quadPts)),
+    'פונקציה יורדת ואז עולה, חותכת את ציר איקס בנקודות -2, 2.' + TAIL);
+
+  const invPts = g.sampleCurve((x) => (Math.abs(x) < 0.05 ? NaN : 1 / x), -4, 4, 160);
+  assert.equal(g.describeFunctionShape(invPts, g.findLandmarks(invPts)),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+
+  const flatPts = g.sampleCurve(() => 3, -5, 5, 40);
+  assert.equal(g.describeFunctionShape(flatPts, g.findLandmarks(flatPts)),
+    'פונקציה קבועה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('the shape sentence summarises and does not repeat the landmark list', () => {
+  const marks = g.findLandmarks(cleanSine);
+  const shape = g.describeFunctionShape(cleanSine, marks);
+  const list = g.describeLandmarksHe(marks, cleanSine);
+
+  // the list walks the landmarks with coordinates; the summary does neither
+  assert.match(list, /משמאל לימין/);
+  assert.doesNotMatch(shape, /משמאל לימין/);
+  assert.doesNotMatch(shape, /וואי/);
+  assert.doesNotMatch(shape, /שיא|שפל/);
+  assert.notEqual(shape, list);
+
+  // and the standing disclaimer is carried exactly once, at the end
+  assert.equal(shape.split(g.SAMPLE_ONLY_HE).length - 1, 1);
+  assert.ok(shape.endsWith(g.SAMPLE_ONLY_HE));
+  assert.ok(list.endsWith(g.SAMPLE_ONLY_HE));
+});
+
+test('monotonicityOf reads the sampling and skips the undefined parts', () => {
+  assert.equal(g.monotonicityOf(shapePts([1, 2, 3])), 'up');
+  assert.equal(g.monotonicityOf(shapePts([3, 2, 1])), 'down');
+  assert.equal(g.monotonicityOf(shapePts([2, 2, 2])), 'constant');
+  assert.equal(g.monotonicityOf(shapePts([1, 2, 1])), 'mixed');
+  // a plateau inside a rise is still a rise
+  assert.equal(g.monotonicityOf(shapePts([1, 2, 2, 3])), 'up');
+  // a hole is not a change of direction: 1 .. NaN .. 3 is still rising
+  assert.equal(g.monotonicityOf([{ x: 0, y: 1 }, { x: 1, y: NaN }, { x: 2, y: 3 }]), 'up');
+  assert.equal(g.monotonicityOf(shapePts([5])), 'unknown');
+  assert.equal(g.monotonicityOf([]), 'unknown');
+  assert.equal(g.monotonicityOf(null), 'unknown');
+});

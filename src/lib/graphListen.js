@@ -635,6 +635,129 @@
   }
 
   // ------------------------------------------------------------------
+  // describeFunctionShape - the one short sentence, above the landmark list.
+  //
+  // WHAT IS NEW HERE AND WHAT IS NOT. This module already had two Hebrew
+  // descriptions and this is deliberately not a third implementation:
+  //   describeGraphHe(summary)      trend + roots + every extremum, from
+  //                                 summarizeCurve. Its `trend` comes from
+  //                                 trendOf, which looks at the FIRST, MIDDLE
+  //                                 and LAST sample only.
+  //   describeLandmarksHe(marks)    every landmark in x order with its
+  //                                 coordinates. The full list, not a summary.
+  // describeFunctionShape re-detects nothing: roots and turning points are
+  // read out of the `landmarks` the caller already has from findLandmarks (or
+  // from landmarksOf - both vocabularies are accepted). The ONE thing it
+  // computes that nothing else in the module does is monotonicity, and that is
+  // exactly why it exists:
+  //
+  //   trendOf is a three-sample heuristic and it is not monotonicity.
+  //   [0, 3, 1, 4, 2, 5] rises overall, so trendOf answers 'up', while the
+  //   sampling turns four times. A whole period of sin answers 'flat' for the
+  //   same reason - first, middle and last are all 0. Neither answer is wrong
+  //   for what trendOf is for, and neither may be read as "the function is
+  //   increasing". monotonicityOf reads every consecutive pair, so 'עולה' is
+  //   said only when the sampling never once goes down.
+  //
+  // That strictness is the point and it has a cost: one noisy sample out of
+  // four hundred is enough to make a rising curve "not monotone". A caller who
+  // knows its own noise floor should read the turning points out of
+  // findLandmarks (which IS noise tolerant) rather than ask for a monotonicity
+  // claim the samples do not support.
+  //
+  // Every sentence in this module ends with the same disclaimer, and this one
+  // does too - it is a description of the sampling, not of the function.
+  // ------------------------------------------------------------------
+  const SHAPE_HE = {
+    up: 'פונקציה עולה',
+    down: 'פונקציה יורדת',
+    constant: 'פונקציה קבועה',
+    zeroLine: 'פונקציה קבועה על ציר איקס',
+    upThenDown: 'פונקציה עולה ואז יורדת',
+    downThenUp: 'פונקציה יורדת ואז עולה',
+    notMonotone: 'פונקציה לא מונוטונית',
+    broken: 'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה',
+    short: 'אין מספיק דגימות כדי לתאר את הצורה',
+  };
+
+  const NO_CROSSING_HE = 'בלי חיתוך עם ציר איקס בדגימה הזו';
+  const TURN_KINDS = ['max', 'min'];
+  const BREAK_KINDS = ['gap', 'jump', 'undefined', 'asymptote'];
+
+  // 'up' / 'down' / 'constant' / 'mixed', or 'unknown' when there are fewer
+  // than two defined samples to compare. Undefined samples are skipped, not
+  // treated as a change of direction.
+  function monotonicityOf(samples) {
+    const finite = finiteOf(Array.isArray(samples) ? samples : []);
+    if (finite.length < 2) return 'unknown';
+    let up = false;
+    let down = false;
+    for (let i = 1; i < finite.length; i++) {
+      if (finite[i].y > finite[i - 1].y) up = true;
+      else if (finite[i].y < finite[i - 1].y) down = true;
+    }
+    if (up && down) return 'mixed';
+    if (up) return 'up';
+    if (down) return 'down';
+    return 'constant';
+  }
+
+  function landmarksOfKinds(marks, kinds) {
+    return (Array.isArray(marks) ? marks : []).filter(function (m) {
+      return m && kinds.indexOf(m.kind) !== -1;
+    });
+  }
+
+  // Roots in x order, one decimal each, with the duplicates that rounding
+  // creates folded away: two crossings that both read 3.1 are printed once.
+  function crossingClauseHe(marks) {
+    const xs = [];
+    landmarksOfKinds(marks, ['root']).slice().sort(function (a, b) {
+      return a.x - b.x;
+    }).forEach(function (m) {
+      const v = fmt(m.x);
+      if (v == null) return;
+      if (!xs.length || xs[xs.length - 1] !== v) xs.push(v);
+    });
+    if (!xs.length) return NO_CROSSING_HE;
+    if (xs.length === 1) return 'חותכת את ציר איקס בנקודה ' + xs[0];
+    return 'חותכת את ציר איקס בנקודות ' + xs.join(', ');
+  }
+
+  function shapeClauseHe(samples, marks) {
+    if (landmarksOfKinds(marks, BREAK_KINDS).length) return SHAPE_HE.broken;
+    const mono = monotonicityOf(samples);
+    if (mono === 'up') return SHAPE_HE.up;
+    if (mono === 'down') return SHAPE_HE.down;
+    if (mono === 'constant') return SHAPE_HE.constant;
+    const turns = landmarksOfKinds(marks, TURN_KINDS);
+    if (turns.length === 1) {
+      return turns[0].kind === 'max' ? SHAPE_HE.upThenDown : SHAPE_HE.downThenUp;
+    }
+    if (turns.length > 1) {
+      return 'פונקציה עולה ויורדת לסירוגין עם ' + turns.length + ' נקודות מפנה';
+    }
+    return SHAPE_HE.notMonotone;
+  }
+
+  function describeFunctionShape(sampledPoints, landmarks) {
+    const mono = monotonicityOf(sampledPoints);
+    if (mono === 'unknown') return SHAPE_HE.short + '. ' + SAMPLE_ONLY_HE;
+    // A constant zero is on the axis at every sample. Neither "crosses at" nor
+    // "does not cross" would be true, so it gets its own sentence and no
+    // crossing clause at all.
+    if (mono === 'constant') {
+      const flat = finiteOf(sampledPoints);
+      if (flat.every(function (s) { return s.y === 0; })) {
+        return SHAPE_HE.zeroLine + '. ' + SAMPLE_ONLY_HE;
+      }
+    }
+    return shapeClauseHe(sampledPoints, landmarks)
+      + ', ' + crossingClauseHe(landmarks)
+      + '. ' + SAMPLE_ONLY_HE;
+  }
+
+  // ------------------------------------------------------------------
   // Audio control, as a pure state machine.
   //
   // WCAG 2.x 1.4.2 (Audio Control) and EN 301 549 clause 9.1.4.2 require that
@@ -775,6 +898,11 @@
     NO_LANDMARKS_HE: NO_LANDMARKS_HE,
     LANDMARK_EPSILON: LANDMARK_EPSILON,
     KIND_HE: KIND_HE,
+    monotonicityOf: monotonicityOf,
+    describeFunctionShape: describeFunctionShape,
+    SHAPE_HE: SHAPE_HE,
+    NO_CROSSING_HE: NO_CROSSING_HE,
+    SAMPLE_ONLY_HE: SAMPLE_ONLY_HE,
     AUDIO_STATUSES: AUDIO_STATUSES,
     AUDIO_DEFAULT_VOLUME: AUDIO_DEFAULT_VOLUME,
     initialAudioState: initialAudioState,
