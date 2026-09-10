@@ -358,6 +358,13 @@
   //     an exact zero).
   //   So sin(x) sampled on [0, 2*pi] gives 2 extrema (pi/2 and 3*pi/2) and 3
   //   roots (0, pi and 2*pi) — both endpoint zeros are counted.
+  //   * A turning point needs a retrace on BOTH sides. One that sits within
+  //     delta of the window edge on its near side is not reported at all,
+  //     and one whose retrace is only just over delta flickers under noise of
+  //     the same size (a maximum 0.47 before the end of a sine window, with a
+  //     retrace of 0.108 against a threshold of 0.100, disappears in 2 of
+  //     2400 noisy trials measured 2026-09-10). Inherent to any minimum-
+  //     prominence detector; not a defect this module can remove.
   //
   // A constant sampling has zero range, so there is no scale to measure
   // prominence against and nothing to point at: findLandmarks returns []. A
@@ -505,19 +512,34 @@
   }
 
   // (y - threshold)-weighted centroid of the plateau around a confirmed
-  // extremum, searched only inside the swing that confirmed it.
-  function centroidOf(list, kind, idx, extremeY, delta, from, to) {
+  // extremum. The plateau is walked OUTWARD from the extreme sample in both
+  // directions while the curve stays within delta of it. It is deliberately
+  // not clipped to the swing that confirmed the extremum: that swing starts
+  // where the curve first moved delta away from the previous extreme, which
+  // can sit inside the plateau when the previous extreme was close (the first
+  // swing after the window edge, typically). Integrating only from there cut
+  // the plateau on one side and pulled the centroid inward by up to a whole
+  // one-decimal bucket — measured 2026-09-10: a minimum at x = 0.472 was read
+  // as 0.566. The walk stops on its own at the window edges.
+  function centroidOf(list, kind, idx, extremeY, delta) {
     const sign = kind === 'max' ? 1 : -1;
     const cut = extremeY - sign * delta;
+    const weight = function (i) {
+      const s = list[i];
+      if (!s || !isFinite(s.y)) return 0;
+      return sign * (s.y - cut);
+    };
     let wsum = 0;
     let xsum = 0;
-    for (let i = from; i <= to && i < list.length; i++) {
-      const s = list[i];
-      if (!s || !isFinite(s.y)) continue;
-      const w = sign * (s.y - cut);
+    let lo = idx;
+    let hi = idx;
+    while (lo - 1 >= 0 && weight(lo - 1) > 0) lo--;
+    while (hi + 1 < list.length && weight(hi + 1) > 0) hi++;
+    for (let i = lo; i <= hi; i++) {
+      const w = weight(i);
       if (w <= 0) continue;
       wsum += w;
-      xsum += w * s.x;
+      xsum += w * list[i].x;
     }
     const x = wsum > 0 ? xsum / wsum : list[idx].x;
     return { kind: kind, x: x, y: extremeY };
@@ -531,7 +553,6 @@
     let mnI = -1;
     let mxI = -1;
     let lookForMax = null;
-    let segStart = 0;
     for (let i = 0; i < n; i++) {
       const s = list[i];
       if (!s || !isFinite(s.y)) continue;
@@ -541,16 +562,16 @@
         // The first swing only fixes which way the curve is going. Whatever
         // extreme it passed sits against the edge of the window, and an edge
         // is not a turning point.
-        if (s.y < mx - delta) { lookForMax = false; mn = s.y; mnI = i; segStart = i; }
-        else if (s.y > mn + delta) { lookForMax = true; mx = s.y; mxI = i; segStart = i; }
+        if (s.y < mx - delta) { lookForMax = false; mn = s.y; mnI = i; }
+        else if (s.y > mn + delta) { lookForMax = true; mx = s.y; mxI = i; }
         continue;
       }
       if (lookForMax === true && s.y < mx - delta) {
-        out.push(centroidOf(list, 'max', mxI, mx, delta, segStart, i));
-        mn = s.y; mnI = i; segStart = i; lookForMax = false;
+        out.push(centroidOf(list, 'max', mxI, mx, delta));
+        mn = s.y; mnI = i; lookForMax = false;
       } else if (lookForMax === false && s.y > mn + delta) {
-        out.push(centroidOf(list, 'min', mnI, mn, delta, segStart, i));
-        mx = s.y; mxI = i; segStart = i; lookForMax = true;
+        out.push(centroidOf(list, 'min', mnI, mn, delta));
+        mx = s.y; mxI = i; lookForMax = true;
       }
     }
     return out;

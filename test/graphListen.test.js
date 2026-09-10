@@ -291,3 +291,45 @@ test('findLandmarks leaves the literal detectors alone', () => {
   assert.equal(sum.trend, 'flat');
   assert.equal(g.summarizeCurve(g.sampleCurve(Math.sin, 0, Math.PI, 100)).trend, 'up-then-down');
 });
+
+// The two numerical helpers below were found unprotected on 2026-09-10: deleting either left the suite green
+// while measurements showed both matter (11x and 2.3x error reductions). These tests fail without them.
+
+test('a root is placed by the least-squares line through the band, not by the one bracketing pair', () => {
+  // y = x - 3 sampled at 0.125 + k/4. The two samples bracketing the zero are pushed down by 0.05 and the two
+  // beyond them pushed up by 0.05: the bracketing pair alone says t = 0.175/(0.175+0.075) = 0.7, i.e. 3.05,
+  // while the fit through the four samples inside the band is exactly y = x - 3 again, i.e. 3.0.
+  const pts = [];
+  for (let k = 0; k < 24; k++) { const x = 0.125 + k * 0.25; pts.push({ i: k, x: x, y: x - 3 }); }
+  const bump = { 2.625: 0.05, 2.875: -0.05, 3.125: -0.05, 3.375: 0.05 };
+  pts.forEach((s) => { if (bump[s.x] !== undefined) s.y += bump[s.x]; });
+  const roots = g.findLandmarks(pts, { epsilon: 0.1 }).filter((m) => m.kind === 'root');
+  assert.equal(roots.length, 1);
+  assert.ok(Math.abs(roots[0].x - 3) < 1e-9, 'the fitted root is 3, the bracketing pair alone says 3.05; got ' + roots[0].x);
+});
+
+test('a flat-topped peak is placed at the centre of its plateau, not at the first sample that touches the top', () => {
+  const ys = [0, 0.2, 0.5, 0.9, 1, 1, 1, 0.9, 0.5, 0.2, 0];
+  const pts = ys.map((y, i) => ({ i: i, x: i, y: y }));
+  const maxes = g.findLandmarks(pts).filter((m) => m.kind === 'max');
+  assert.equal(maxes.length, 1);
+  assert.ok(Math.abs(maxes[0].x - 5) < 1e-9, 'the argmax would say 4; the plateau centre is 5; got ' + maxes[0].x);
+  assert.equal(maxes[0].y, 1);
+});
+
+test('an extremum close to the window edge is placed where it is, not pulled inward', () => {
+  // sin(x + 4.24) on [0, 2pi]: the minimum sits at 3pi/2 - 4.24 = 0.4724, fifteen samples from the left edge.
+  // Until 2026-09-10 the centroid was clipped to the swing that confirmed the extremum, and reported 0.566 -
+  // a whole one-decimal bucket off, and worse than the raw argmax it was meant to improve on.
+  const step = TWO_PI / 200;
+  const shifted = g.sampleCurve((x) => Math.sin(x + 4.24), 0, TWO_PI, 200);
+  const marks = g.findLandmarks(shifted);
+  const min = marks.filter((m) => m.kind === 'min')[0];
+  assert.ok(min, 'the minimum is reported');
+  const truthMin = 3 * Math.PI / 2 - 4.24;
+  assert.ok(Math.abs(min.x - truthMin) < step / 2, 'min read at ' + min.x + ', truth ' + truthMin);
+  const max = marks.filter((m) => m.kind === 'max')[0];
+  const truthMax = Math.PI / 2 - 4.24 + TWO_PI;
+  assert.ok(Math.abs(max.x - truthMax) < step / 2, 'max read at ' + max.x + ', truth ' + truthMax);
+  assert.equal(g.fmt(min.x), 0.5);
+});

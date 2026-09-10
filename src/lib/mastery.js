@@ -147,6 +147,11 @@
   function priorOf(state, p) {
     if (state == null) return p.pInit;
     if (typeof state === 'number') return clamp01(state, p.pInit);
+    if (typeof state === 'string') {
+      // a value that round-tripped through localStorage comes back as text;
+      // read it rather than silently restarting the learner at pInit
+      return state.trim() === '' ? p.pInit : clamp01(state, p.pInit);
+    }
     if (typeof state === 'object') {
       const v = state.pKnown != null ? state.pKnown : state.p;
       return clamp01(v, p.pInit);

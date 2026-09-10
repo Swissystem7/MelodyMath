@@ -174,3 +174,13 @@ test('BKT: the difficulty bands are < 0.4 easier, 0.4..0.85 same, > 0.85 harder'
   assert.equal(mastery.masteryBand(mastery.masteryFromHistory([true, true, true])), 'harder');
   assert.equal(mastery.masteryBand(mastery.masteryFromHistory([false, false])), 'easier');
 });
+
+test('a P(known) that came back from storage as text is read, not silently replaced by pInit', () => {
+  const m = require('../src/lib/mastery.js');
+  assert.equal(m.bktUpdate('0.9', true), m.bktUpdate(0.9, true));
+  assert.equal(m.bktUpdate({ pKnown: '0.9' }, false), m.bktUpdate(0.9, false));
+  assert.notEqual(m.bktUpdate('0.9', true), m.bktUpdate(null, true), 'the text value must not collapse to pInit');
+  // rubbish text still falls back to pInit, and an empty string is "no observations yet"
+  assert.equal(m.bktUpdate('nonsense', true), m.bktUpdate(null, true));
+  assert.equal(m.bktUpdate('   ', true), m.bktUpdate(null, true));
+});
