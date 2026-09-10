@@ -326,6 +326,293 @@
       + ' אחיד — ייצוג, לא «קול הפונקציה».';
   }
 
+  // ------------------------------------------------------------------
+  // Noise-tolerant landmark detection.
+  //
+  // findRoots/findExtrema above are literal readings of the sampling: every
+  // sign change is a root, every three-sample dip is an extremum. On a curve
+  // with even a little noise that produces dozens of "extrema" that are not
+  // features of the curve at all. findLandmarks is the robust reading of the
+  // SAME sampling, and it changes nothing about the functions above.
+  //
+  //   prominence   an extremum is reported only once the curve has retraced by
+  //                more than `epsilon` of the sampled y-range away from it —
+  //                textbook peak detection with a minimum-prominence delta.
+  //                Its x is then the weighted centroid of the plateau around
+  //                it rather than the raw argmax: on a flat-topped peak the
+  //                argmax jumps several samples under tiny noise (near a peak
+  //                the curve is quadratic, so a few samples out the drop is
+  //                smaller than the noise), while the centroid does not move.
+  //   merging      crossings closer together than one sample step are one
+  //                crossing. Noise around a zero can produce a cluster of sign
+  //                changes inside a single step; the curve crossed once.
+  //
+  // ENDPOINT POLICY — deliberate, and the sine test depends on it:
+  //   * The first and last samples are never extrema. A turning point has to
+  //     be confirmed by a retrace and outside the window there is nothing to
+  //     retrace into. (findExtrema already skips them, for the same reason.)
+  //   * The first and last samples DO count as roots when |y| is within the
+  //     same epsilon-of-range tolerance AND within a sample or two of the axis
+  //     at the local slope, because a sign change cannot be observed past the
+  //     edge of the window. Interior roots still need a real sign change (or
+  //     an exact zero).
+  //   So sin(x) sampled on [0, 2*pi] gives 2 extrema (pi/2 and 3*pi/2) and 3
+  //   roots (0, pi and 2*pi) — both endpoint zeros are counted.
+  //
+  // A constant sampling has zero range, so there is no scale to measure
+  // prominence against and nothing to point at: findLandmarks returns []. A
+  // caller who knows its own noise floor can widen that with `flatTol`.
+  // ------------------------------------------------------------------
+  const LANDMARK_EPSILON = 0.05;
+
+  function landmarkOptions(opts) {
+    const o = opts || {};
+    const eps = Number(o.epsilon);
+    const flat = Number(o.flatTol);
+    return {
+      epsilon: (isFinite(eps) && eps > 0) ? eps : LANDMARK_EPSILON,
+      flatTol: (isFinite(flat) && flat >= 0) ? flat : 0,
+    };
+  }
+
+  function sampleStep(list) {
+    let step = Infinity;
+    for (let i = 1; i < list.length; i++) {
+      const d = Math.abs(list[i].x - list[i - 1].x);
+      if (d > 0 && d < step) step = d;
+    }
+    return isFinite(step) ? step : 0;
+  }
+
+  // A single sign change localises a zero only to about (noise / slope): with
+  // amplitude-1 noise of 0.01 on a curve crossing at slope 1, the interpolated
+  // x is off by ~0.01, which is enough to move a root that sits near a
+  // rounding boundary into the next bucket when it is read out to one decimal.
+  // When several samples sit inside the same epsilon-of-range band around the
+  // axis, a least-squares line through all of them averages that noise down
+  // instead of trusting the one bracketing pair.
+  function refineCrossing(list, i, delta, fallback) {
+    let lo = i;
+    let hi = i + 1;
+    const near = function (k) {
+      const s = list[k];
+      return s && isFinite(s.y) && Math.abs(s.y) <= delta;
+    };
+    while (lo - 1 >= 0 && near(lo - 1)) lo--;
+    while (hi + 1 < list.length && near(hi + 1)) hi++;
+    let n = 0;
+    let sx = 0;
+    let sy = 0;
+    let sxx = 0;
+    let sxy = 0;
+    for (let k = lo; k <= hi; k++) {
+      if (!near(k)) continue;
+      const s = list[k];
+      n++;
+      sx += s.x;
+      sy += s.y;
+      sxx += s.x * s.x;
+      sxy += s.x * s.y;
+    }
+    if (n < 3) return fallback;
+    const den = n * sxx - sx * sx;
+    if (!(Math.abs(den) > 0)) return fallback;
+    const slope = (n * sxy - sx * sy) / den;
+    if (!(Math.abs(slope) > 0)) return fallback;
+    const intercept = (sy - slope * sx) / n;
+    const x = -intercept / slope;
+    // A fit that wanders outside the band it was fitted on is not a better
+    // answer than the bracketing pair.
+    if (!isFinite(x) || Math.abs(x - fallback) > Math.abs(list[hi].x - list[lo].x)) {
+      return fallback;
+    }
+    return x;
+  }
+
+  // How much y moves per sample near an end of the window, averaged over a few
+  // samples so noise does not dominate the estimate.
+  function edgeSlope(list, i, inward) {
+    const span = 5;
+    const a = list[i];
+    let far = null;
+    let used = 0;
+    for (let k = 1; k <= span; k++) {
+      const s = list[i + inward * k];
+      if (!s || !isFinite(s.y)) break;
+      far = s;
+      used = k;
+    }
+    if (!far || !used) return 0;
+    return Math.abs(far.y - a.y) / used;
+  }
+
+  // An end sample counts as a crossing only if it is BOTH inside the noise
+  // tolerance AND within about a sample or two of the axis at the local slope.
+  // The tolerance alone is scaled to the whole sampled range, which on a curve
+  // with an asymptote is enormous: 1/x on [-4, 4] spans 20, so a fifth of a
+  // unit would look like "on the axis" at x = -4 where y is -0.25 and the
+  // curve is nowhere near crossing. The slope test rejects that.
+  function edgeIsCrossing(list, i, inward, delta) {
+    const y = Math.abs(list[i].y);
+    if (y > delta) return false;
+    const per = edgeSlope(list, i, inward);
+    if (!(per > 0)) return y === 0;
+    return y <= Math.min(delta, per * 2);
+  }
+
+  function robustRoots(list, delta, step) {
+    const n = list.length;
+    const raw = [];
+    for (let i = 0; i < n; i++) {
+      const a = list[i];
+      if (!a || !isFinite(a.y)) continue;
+      if (i === 0 || i === n - 1) {
+        // Edge: no sign change is observable past it, so a sample sitting on
+        // the axis within tolerance is the crossing.
+        if (edgeIsCrossing(list, i, i === 0 ? 1 : -1, delta)) {
+          raw.push({ x: a.x, edge: true });
+        }
+        continue;
+      }
+      if (a.y === 0) { raw.push({ x: a.x, edge: false }); continue; }
+      const b = list[i + 1];
+      if (!b || !isFinite(b.y)) continue;
+      if (a.y * b.y < 0) {
+        const t = a.y / (a.y - b.y);
+        const bracket = a.x + t * (b.x - a.x);
+        raw.push({ x: refineCrossing(list, i, delta, bracket), edge: false });
+      }
+    }
+    raw.sort(function (p, q) { return p.x - q.x; });
+    const out = [];
+    let cluster = [];
+    function flush() {
+      if (!cluster.length) return;
+      // An edge crossing sits on a real sample position; prefer it to the
+      // interpolated noise around it. Otherwise average the cluster.
+      let anchor = null;
+      cluster.forEach(function (c) { if (!anchor && c.edge) anchor = c; });
+      const x = anchor ? anchor.x : cluster.reduce(function (s, c) { return s + c.x; }, 0) / cluster.length;
+      out.push({ kind: 'root', x: x, y: 0 });
+      cluster = [];
+    }
+    raw.forEach(function (r) {
+      if (cluster.length && Math.abs(r.x - cluster[cluster.length - 1].x) >= step) flush();
+      cluster.push(r);
+    });
+    flush();
+    return out;
+  }
+
+  // (y - threshold)-weighted centroid of the plateau around a confirmed
+  // extremum, searched only inside the swing that confirmed it.
+  function centroidOf(list, kind, idx, extremeY, delta, from, to) {
+    const sign = kind === 'max' ? 1 : -1;
+    const cut = extremeY - sign * delta;
+    let wsum = 0;
+    let xsum = 0;
+    for (let i = from; i <= to && i < list.length; i++) {
+      const s = list[i];
+      if (!s || !isFinite(s.y)) continue;
+      const w = sign * (s.y - cut);
+      if (w <= 0) continue;
+      wsum += w;
+      xsum += w * s.x;
+    }
+    const x = wsum > 0 ? xsum / wsum : list[idx].x;
+    return { kind: kind, x: x, y: extremeY };
+  }
+
+  function robustExtrema(list, delta) {
+    const n = list.length;
+    const out = [];
+    let mn = Infinity;
+    let mx = -Infinity;
+    let mnI = -1;
+    let mxI = -1;
+    let lookForMax = null;
+    let segStart = 0;
+    for (let i = 0; i < n; i++) {
+      const s = list[i];
+      if (!s || !isFinite(s.y)) continue;
+      if (s.y > mx) { mx = s.y; mxI = i; }
+      if (s.y < mn) { mn = s.y; mnI = i; }
+      if (lookForMax === null) {
+        // The first swing only fixes which way the curve is going. Whatever
+        // extreme it passed sits against the edge of the window, and an edge
+        // is not a turning point.
+        if (s.y < mx - delta) { lookForMax = false; mn = s.y; mnI = i; segStart = i; }
+        else if (s.y > mn + delta) { lookForMax = true; mx = s.y; mxI = i; segStart = i; }
+        continue;
+      }
+      if (lookForMax === true && s.y < mx - delta) {
+        out.push(centroidOf(list, 'max', mxI, mx, delta, segStart, i));
+        mn = s.y; mnI = i; segStart = i; lookForMax = false;
+      } else if (lookForMax === false && s.y > mn + delta) {
+        out.push(centroidOf(list, 'min', mnI, mn, delta, segStart, i));
+        mx = s.y; mxI = i; segStart = i; lookForMax = true;
+      }
+    }
+    return out;
+  }
+
+  function findLandmarks(samples, opts) {
+    const list = Array.isArray(samples) ? samples : [];
+    const o = landmarkOptions(opts);
+    const finite = finiteOf(list);
+    if (!finite.length) return [];
+    const ys = finite.map(function (s) { return s.y; });
+    const span = Math.max.apply(null, ys) - Math.min.apply(null, ys);
+    if (!(span > o.flatTol)) return [];
+    const delta = o.epsilon * span;
+    const step = sampleStep(list);
+    const marks = robustRoots(list, delta, step).concat(robustExtrema(list, delta));
+    findUndefinedSpans(list).forEach(function (u) {
+      marks.push({ kind: 'gap', x: u.from, y: NaN, to: u.to });
+    });
+    findAsymptotes(list).forEach(function (a) {
+      marks.push({ kind: 'jump', x: a.x, y: NaN });
+    });
+    marks.sort(function (a, b) { return a.x - b.x; });
+    return marks;
+  }
+
+  const LANDMARK_HE = {
+    root: 'חיתוך עם ציר איקס',
+    max: 'שיא',
+    min: 'שפל',
+    gap: 'קטע מחוץ לתחום',
+    jump: 'קפיצה חדה',
+  };
+
+  const NO_LANDMARKS_HE = 'לא נמצאו נקודות ציון בדגימה הזו.';
+  const FLAT_HE = 'הגרף שטוח: הגובה קבוע לאורך כל הקטע, ואין נקודות ציון.';
+  const SAMPLE_ONLY_HE = 'זה תיאור של הדגימה על המסך, לא הוכחה ולא «קול הפונקציה».';
+
+  // Landmarks in x order, one decimal each. `samples` is optional and only
+  // used to tell "flat" apart from "no landmarks here": y = x + 1 on [0, 2]
+  // has no landmarks either, and calling that curve flat would be a lie.
+  function describeLandmarksHe(marks, samples) {
+    const list = (Array.isArray(marks) ? marks : []).slice().sort(function (a, b) {
+      return a.x - b.x;
+    });
+    if (!list.length) {
+      const finite = finiteOf(Array.isArray(samples) ? samples : []);
+      const ys = finite.map(function (s) { return s.y; });
+      const flat = ys.length > 0 && Math.max.apply(null, ys) === Math.min.apply(null, ys);
+      return (flat ? FLAT_HE : NO_LANDMARKS_HE) + ' ' + SAMPLE_ONLY_HE;
+    }
+    const parts = list.map(function (m) {
+      const name = LANDMARK_HE[m.kind] || m.kind;
+      const xs = fmt(m.x);
+      const ys = fmt(m.y);
+      let s = name + ' באיקס ' + (xs == null ? '?' : xs);
+      if (ys != null && m.kind !== 'root') s += ', וואי ' + ys;
+      return s;
+    });
+    return 'משמאל לימין: ' + parts.join('; ') + '. ' + SAMPLE_ONLY_HE;
+  }
+
   return {
     fmt: fmt,
     sampleCurve: sampleCurve,
@@ -344,6 +631,12 @@
     expValue: expValue,
     expSeries: expSeries,
     describeExpHe: describeExpHe,
+    findLandmarks: findLandmarks,
+    describeLandmarksHe: describeLandmarksHe,
+    LANDMARK_HE: LANDMARK_HE,
+    FLAT_HE: FLAT_HE,
+    NO_LANDMARKS_HE: NO_LANDMARKS_HE,
+    LANDMARK_EPSILON: LANDMARK_EPSILON,
     KIND_HE: KIND_HE,
   };
 });
