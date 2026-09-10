@@ -99,3 +99,99 @@ test('a recently missed item is preferred on the following turn', () => {
   const pool = eligibleExercises(bank, history, 2, 1);
   assert.deepEqual(pool.map((x) => x.id), [1]);
 });
+
+// ---------------------------------------------------------------------------
+// M1 — pacing the level from P(known) instead of a two-answer streak.
+//
+// `pace: 'bkt'` is opt-in. See the header of src/lib/adaptive.js: the backlog
+// asked for BKT to replace the streak rule AND for the existing tests to keep
+// passing, and those two cannot both hold — two correct answers give
+// P(known) = 0.843952, inside the 0.4..0.85 HOLD band, while
+// test/banks.test.js:153 pins level 2 after exactly those two answers.
+// ---------------------------------------------------------------------------
+
+const adaptive = require('../src/lib/adaptive');
+const bkt = require('../src/lib/mastery');
+
+const recs = (flags) => flags.map((c, i) => ({ id: i + 1, correct: c }));
+const BKT = { pace: 'bkt' };
+
+test('paceLevel defaults to the streak rule, so nothing existing changes', () => {
+  assert.equal(adaptive.paceLevel(1, [right, right]), 2);
+  assert.equal(adaptive.paceLevel(2, [wrong, wrong]), 1);
+  assert.equal(adaptive.paceLevel(2, [right, wrong]), 2);
+  assert.equal(adaptive.paceLevel(2, []), 2);
+  // an unspecified pace, and an unknown one, both stay on the streak rule
+  assert.equal(adaptive.paceLevel(1, [right, right], {}), 2);
+  assert.equal(adaptive.paceLevel(1, [right, right], { pace: 'whatever' }), 2);
+});
+
+test('BKT pacing holds at two correct answers and only moves up on the third', () => {
+  // P = 0.843952 -> inside 0.4..0.85 -> hold. This is the one place BKT and
+  // the streak rule visibly disagree, and it is why the default is unchanged.
+  assert.equal(bkt.masteryFromHistory(recs([true, true])).toFixed(6), '0.843952');
+  assert.equal(adaptive.paceLevel(1, recs([true, true]), BKT), 1);
+
+  // P = 0.958476 -> above 0.85 -> harder
+  assert.equal(bkt.masteryFromHistory(recs([true, true, true])).toFixed(6), '0.958476');
+  assert.equal(adaptive.paceLevel(1, recs([true, true, true]), BKT), 2);
+});
+
+test('BKT pacing drops the level while P(known) is under 0.4', () => {
+  assert.equal(bkt.masteryFromHistory(recs([false, false])).toFixed(6), '0.173761');
+  assert.equal(adaptive.paceLevel(2, recs([false, false]), BKT), 1);
+  assert.equal(adaptive.paceLevel(3, recs([false]), BKT), 2);
+  // and it never leaves 1..3
+  assert.equal(adaptive.paceLevel(MIN_LEVEL, recs([false, false, false]), BKT), MIN_LEVEL);
+  assert.equal(adaptive.paceLevel(MAX_LEVEL, recs([true, true, true, true]), BKT), MAX_LEVEL);
+});
+
+test('BKT pacing reads the whole history, so one slip does not undo five successes', () => {
+  const fiveThenSlip = recs([true, true, true, true, true, false]);
+  // the streak rule only ever sees the last two answers -> mixed pair -> hold
+  assert.equal(adaptive.paceLevel(2, fiveThenSlip), 2);
+  // BKT still has five correct answers on the books: P = 0.984910 -> harder
+  assert.equal(bkt.masteryFromHistory(fiveThenSlip).toFixed(6), '0.984910');
+  assert.equal(adaptive.paceLevel(2, fiveThenSlip, BKT), 3);
+
+  // and the mirror case: four misses then one lucky-looking hit is not mastery
+  const fourThenHit = recs([false, false, false, false, true]);
+  assert.equal(bkt.masteryFromHistory(fourThenHit).toFixed(6), '0.515277');
+  assert.equal(adaptive.paceLevel(2, fourThenHit, BKT), 2);
+});
+
+test('BKT pacing accepts per-child parameters', () => {
+  // a faster learner (pLearn 0.3) clears 0.85 on the second correct answer
+  const fast = { pace: 'bkt', params: { pLearn: 0.3 } };
+  assert.equal(bkt.masteryFromHistory(recs([true, true]), fast.params).toFixed(6), '0.902390');
+  assert.equal(adaptive.paceLevel(1, recs([true, true]), fast), 2);
+  assert.equal(adaptive.paceLevel(1, recs([true, true]), BKT), 1);
+});
+
+test('masteryOf exposes P(known) and a non-numeric level is handed straight back', () => {
+  assert.equal(adaptive.masteryOf(recs([true, true, true])).toFixed(6), '0.958476');
+  assert.equal(adaptive.masteryOf([]), bkt.BKT_DEFAULTS.pInit);
+  // same shrug the streak rule gave for a level it cannot reason about
+  assert.equal(adaptive.nextLevelFromMastery(undefined, []), undefined);
+  assert.equal(adaptive.nextLevelFromMastery('x', recs([true, true, true])), 'x');
+});
+
+const pacedBank = [{ id: 1, level: 1 }, { id: 2, level: 1 }, { id: 3, level: 1 }, { id: 4, level: 2 }];
+
+test('eligibleExercises paces from P(known) when asked, and from the streak otherwise', () => {
+  const twoRight = [{ id: 1, correct: true }, { id: 2, correct: true }];
+  // streak (default): two right -> level 2 -> the only level-2 item
+  assert.deepEqual(eligibleExercises(pacedBank, twoRight, 2, 1).map((x) => x.id), [4]);
+  // BKT: P = 0.843952 -> hold at level 1 -> the remaining unmastered level-1 item
+  assert.deepEqual(eligibleExercises(pacedBank, twoRight, 2, 1, BKT).map((x) => x.id), [3]);
+
+  const threeRight = twoRight.concat([{ id: 3, correct: true }]);
+  // by the third correct answer both rules agree on level 2
+  assert.deepEqual(eligibleExercises(pacedBank, threeRight, 3, 1).map((x) => x.id), [4]);
+  assert.deepEqual(eligibleExercises(pacedBank, threeRight, 3, 1, BKT).map((x) => x.id), [4]);
+});
+
+test('BKT pacing still returns a miss to the child before anything new', () => {
+  const history = [{ id: 1, correct: false }, { id: 2, correct: true }];
+  assert.deepEqual(eligibleExercises(pacedBank, history, 2, 1, BKT).map((x) => x.id), [1]);
+});
