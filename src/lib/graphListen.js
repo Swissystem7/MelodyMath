@@ -634,6 +634,122 @@
     return 'משמאל לימין: ' + parts.join('; ') + '. ' + SAMPLE_ONLY_HE;
   }
 
+  // ------------------------------------------------------------------
+  // Audio control, as a pure state machine.
+  //
+  // WCAG 2.x 1.4.2 (Audio Control) and EN 301 549 clause 9.1.4.2 require that
+  // any audio a page starts can be paused or stopped by the user. That is a
+  // requirement about STATE, not about the Web Audio API: whether "stop" is
+  // reachable from every status, whether the volume the child chose survives a
+  // stop, whether a second press of PLAY starts a second voice. Those are the
+  // parts that break, and they are the parts that can be tested without a
+  // sound card. updateAudioState is that state, and nothing in this section
+  // touches AudioContext, an <audio> element, or any timer.
+  //
+  // status   idle -> the page loaded and has never played anything. This is
+  //          deliberately NOT the same value as `stopped`: "no audio started
+  //          on load" is a claim about idle, and folding the two together
+  //          would make that claim untestable.
+  //          playing / paused / stopped are the three the user can reach.
+  // volume   0..1, clamped. It belongs to the child, not to the clip, so it
+  //          survives PLAY, PAUSE and STOP untouched, and 0 is a real volume
+  //          (a muted sweep is still a sweep) rather than a missing value.
+  // position where the sweep got to, in whatever unit the caller counts in
+  //          (sample index or seconds - this module does not care). PAUSE
+  //          keeps it so PLAY resumes; STOP rewinds it to 0.
+  //
+  // The four events are the ones the accessibility clauses name: PLAY, PAUSE,
+  // STOP, SET_VOLUME. Anything else is returned unchanged rather than guessed
+  // at, and the input state is never mutated.
+  //
+  // TWO DECISIONS THAT ARE JUDGEMENT, NOT STANDARD, AND ARE PINNED IN TESTS:
+  //   * A second PLAY while already playing changes nothing at all - not the
+  //     position either. Restarting the sweep under the child would be the
+  //     opposite of the control 1.4.2 asks for, and starting a second voice is
+  //     precisely what it forbids.
+  //   * STOP from idle stays idle. Nothing is making a sound, so there is
+  //     nothing to stop, and answering `stopped` would assert that something
+  //     had played.
+  // ------------------------------------------------------------------
+  const AUDIO_STATUSES = ['idle', 'playing', 'paused', 'stopped'];
+  const AUDIO_DEFAULT_VOLUME = 0.8;
+
+  function clampVolume(v, fallback) {
+    const n = Number(v);
+    if (!isFinite(n)) return fallback;
+    return Math.min(1, Math.max(0, n));
+  }
+
+  // Only a real number counts as a position. Number('') is 0 and Number(null)
+  // is 0, and neither of those is a caller saying "the sweep is at the start".
+  function eventPosition(ev) {
+    if (typeof ev.position !== 'number' || !isFinite(ev.position)) return null;
+    return ev.position < 0 ? 0 : ev.position;
+  }
+
+  function initialAudioState(volume) {
+    return {
+      status: 'idle',
+      volume: clampVolume(volume, AUDIO_DEFAULT_VOLUME),
+      position: 0,
+    };
+  }
+
+  // Whatever came in - a stored object, a half-written one, null - is read
+  // into a full state before anything is decided about it.
+  function normalizeAudioState(state) {
+    const s = (state && typeof state === 'object') ? state : {};
+    const pos = (typeof s.position === 'number' && isFinite(s.position) && s.position > 0)
+      ? s.position
+      : 0;
+    return {
+      status: AUDIO_STATUSES.indexOf(s.status) !== -1 ? s.status : 'idle',
+      volume: clampVolume(s.volume, AUDIO_DEFAULT_VOLUME),
+      position: pos,
+    };
+  }
+
+  function updateAudioState(state, event) {
+    const cur = normalizeAudioState(state);
+    const ev = (event && typeof event === 'object') ? event : { type: event };
+    const at = eventPosition(ev);
+    switch (String(ev.type == null ? '' : ev.type)) {
+      case 'PLAY':
+        if (cur.status === 'playing') return cur;
+        return {
+          status: 'playing',
+          volume: cur.volume,
+          position: at == null ? cur.position : at,
+        };
+      case 'PAUSE':
+        if (cur.status !== 'playing') return cur;
+        return {
+          status: 'paused',
+          volume: cur.volume,
+          position: at == null ? cur.position : at,
+        };
+      case 'STOP':
+        if (cur.status === 'idle') return cur;
+        return { status: 'stopped', volume: cur.volume, position: 0 };
+      case 'SET_VOLUME':
+        return {
+          status: cur.status,
+          volume: clampVolume(ev.volume, cur.volume),
+          position: cur.position,
+        };
+      default:
+        return cur;
+    }
+  }
+
+  // Fold a sequence of events, because that is how the UI actually arrives:
+  // reduceAudioEvents(initialAudioState(), [{type:'PLAY'}, {type:'PAUSE'}]).
+  function reduceAudioEvents(state, events) {
+    const list = Array.isArray(events) ? events : [];
+    return list.reduce(function (s, ev) { return updateAudioState(s, ev); },
+      normalizeAudioState(state));
+  }
+
   return {
     fmt: fmt,
     sampleCurve: sampleCurve,
@@ -659,5 +775,11 @@
     NO_LANDMARKS_HE: NO_LANDMARKS_HE,
     LANDMARK_EPSILON: LANDMARK_EPSILON,
     KIND_HE: KIND_HE,
+    AUDIO_STATUSES: AUDIO_STATUSES,
+    AUDIO_DEFAULT_VOLUME: AUDIO_DEFAULT_VOLUME,
+    initialAudioState: initialAudioState,
+    normalizeAudioState: normalizeAudioState,
+    updateAudioState: updateAudioState,
+    reduceAudioEvents: reduceAudioEvents,
   };
 });

@@ -333,3 +333,168 @@ test('an extremum close to the window edge is placed where it is, not pulled inw
   assert.ok(Math.abs(max.x - truthMax) < step / 2, 'max read at ' + max.x + ', truth ' + truthMax);
   assert.equal(g.fmt(min.x), 0.5);
 });
+
+// ---------------------------------------------------------------------------
+// R2-A — the audio control state machine (WCAG 1.4.2 / EN 301 549 9.1.4.2).
+//
+// Every expected object below was written out by hand from the rules in the
+// header of src/lib/graphListen.js before the reducer existed. No audio API,
+// no timer, no clock.
+// ---------------------------------------------------------------------------
+
+const IDLE = { status: 'idle', volume: 0.8, position: 0 };
+
+test('audio starts idle, and only PLAY can leave idle', () => {
+  assert.deepEqual(g.initialAudioState(), IDLE);
+  assert.equal(g.AUDIO_DEFAULT_VOLUME, 0.8);
+  assert.deepEqual(g.AUDIO_STATUSES, ['idle', 'playing', 'paused', 'stopped']);
+
+  // "no audio on load" as a machine-checkable claim: nothing but PLAY moves it
+  ['PAUSE', 'STOP', 'SET_VOLUME', 'SEEK', '', 'play'].forEach((type) => {
+    assert.equal(g.updateAudioState(IDLE, { type: type }).status, 'idle', type);
+  });
+  assert.equal(g.updateAudioState(IDLE, { type: 'PLAY' }).status, 'playing');
+  assert.equal(g.updateAudioState(IDLE, 'PLAY').status, 'playing');
+  assert.equal(g.updateAudioState(IDLE, null).status, 'idle');
+});
+
+test('the child volume is clamped once, at the door, and 0 is a real volume', () => {
+  assert.equal(g.initialAudioState(0.25).volume, 0.25);
+  assert.equal(g.initialAudioState(0).volume, 0);
+  assert.equal(g.initialAudioState(5).volume, 1);
+  assert.equal(g.initialAudioState(-1).volume, 0);
+  assert.equal(g.initialAudioState('loud').volume, 0.8);
+  assert.equal(g.initialAudioState(undefined).volume, 0.8);
+});
+
+test('PLAY, PAUSE, PLAY, STOP keeps the position across the pause and rewinds on stop', () => {
+  const played = g.updateAudioState(IDLE, { type: 'PLAY' });
+  assert.deepEqual(played, { status: 'playing', volume: 0.8, position: 0 });
+
+  const paused = g.updateAudioState(played, { type: 'PAUSE', position: 12 });
+  assert.deepEqual(paused, { status: 'paused', volume: 0.8, position: 12 });
+
+  const resumed = g.updateAudioState(paused, { type: 'PLAY' });
+  assert.deepEqual(resumed, { status: 'playing', volume: 0.8, position: 12 });
+
+  const stopped = g.updateAudioState(resumed, { type: 'STOP' });
+  assert.deepEqual(stopped, { status: 'stopped', volume: 0.8, position: 0 });
+
+  // and PLAY after a stop starts from the beginning, because STOP rewound it
+  assert.deepEqual(g.updateAudioState(stopped, { type: 'PLAY' }),
+    { status: 'playing', volume: 0.8, position: 0 });
+});
+
+test('a second PLAY while playing changes nothing — not even the position', () => {
+  const playing = g.updateAudioState(IDLE, { type: 'PLAY', position: 4 });
+  assert.deepEqual(playing, { status: 'playing', volume: 0.8, position: 4 });
+  // a second press must not restart the sweep under the child, and must not
+  // start a second voice at a different offset
+  assert.deepEqual(g.updateAudioState(playing, { type: 'PLAY' }), playing);
+  assert.deepEqual(g.updateAudioState(playing, { type: 'PLAY', position: 99 }), playing);
+  assert.deepEqual(g.updateAudioState(g.updateAudioState(playing, { type: 'PLAY' }),
+    { type: 'PLAY' }), playing);
+});
+
+test('STOP from idle stays idle; from anywhere else it stops and rewinds', () => {
+  // nothing is making a sound, so there is nothing to stop — and answering
+  // "stopped" would assert that something had played
+  assert.deepEqual(g.updateAudioState(IDLE, { type: 'STOP' }), IDLE);
+
+  const playing = { status: 'playing', volume: 0.3, position: 9 };
+  const paused = { status: 'paused', volume: 0.3, position: 9 };
+  const stopped = { status: 'stopped', volume: 0.3, position: 0 };
+  assert.deepEqual(g.updateAudioState(playing, { type: 'STOP' }), stopped);
+  assert.deepEqual(g.updateAudioState(paused, { type: 'STOP' }), stopped);
+  assert.deepEqual(g.updateAudioState(stopped, { type: 'STOP' }), stopped);
+});
+
+test('PAUSE only bites while playing', () => {
+  const paused = { status: 'paused', volume: 0.8, position: 5 };
+  assert.deepEqual(g.updateAudioState(paused, { type: 'PAUSE', position: 40 }), paused);
+  const stopped = { status: 'stopped', volume: 0.8, position: 0 };
+  assert.deepEqual(g.updateAudioState(stopped, { type: 'PAUSE', position: 40 }), stopped);
+  assert.deepEqual(g.updateAudioState(IDLE, { type: 'PAUSE', position: 40 }), IDLE);
+  // while playing it records where the sweep got to
+  assert.deepEqual(g.updateAudioState({ status: 'playing', volume: 0.8, position: 1 },
+    { type: 'PAUSE', position: 40 }), { status: 'paused', volume: 0.8, position: 40 });
+  // a position that is not a number is not a position
+  ['3', null, undefined, NaN, {}].forEach((bad) => {
+    assert.deepEqual(g.updateAudioState({ status: 'playing', volume: 0.8, position: 1 },
+      { type: 'PAUSE', position: bad }), { status: 'paused', volume: 0.8, position: 1 },
+      String(bad));
+  });
+  assert.deepEqual(g.updateAudioState({ status: 'playing', volume: 0.8, position: 1 },
+    { type: 'PAUSE', position: -5 }), { status: 'paused', volume: 0.8, position: 0 });
+});
+
+test('SET_VOLUME never changes the status, and the volume survives a stop', () => {
+  const playing = { status: 'playing', volume: 0.8, position: 6 };
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 0.3 }),
+    { status: 'playing', volume: 0.3, position: 6 });
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 0 }),
+    { status: 'playing', volume: 0, position: 6 });
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 1.5 }),
+    { status: 'playing', volume: 1, position: 6 });
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: -0.2 }),
+    { status: 'playing', volume: 0, position: 6 });
+  // an unreadable volume leaves the one the child already chose
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 'loud' }), playing);
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME' }), playing);
+  // it works before anything has played, and it does not start anything
+  assert.deepEqual(g.updateAudioState(IDLE, { type: 'SET_VOLUME', volume: 0.1 }),
+    { status: 'idle', volume: 0.1, position: 0 });
+  // and the stop that follows keeps it
+  assert.equal(g.updateAudioState({ status: 'playing', volume: 0.1, position: 3 },
+    { type: 'STOP' }).volume, 0.1);
+});
+
+test('the reducer is pure: the state that came in is never touched', () => {
+  const before = Object.freeze({ status: 'playing', volume: 0.8, position: 2 });
+  const after = g.updateAudioState(before, { type: 'PAUSE', position: 7 });
+  assert.deepEqual(before, { status: 'playing', volume: 0.8, position: 2 });
+  assert.equal(after.position, 7);
+  // even a no-op hands back a fresh object rather than the caller's
+  const noop = g.updateAudioState(before, { type: 'NOPE' });
+  assert.deepEqual(noop, before);
+  assert.notEqual(noop, before);
+});
+
+test('a half-written or stored state is read into a whole one', () => {
+  assert.deepEqual(g.normalizeAudioState(null), IDLE);
+  assert.deepEqual(g.normalizeAudioState({}), IDLE);
+  assert.deepEqual(g.normalizeAudioState('playing'), IDLE);
+  // a status nobody defined is idle; the volume is still only clamped, never dropped
+  assert.deepEqual(g.normalizeAudioState({ status: 'dancing', volume: 9, position: -4 }),
+    { status: 'idle', volume: 1, position: 0 });
+  assert.deepEqual(g.normalizeAudioState({ status: 'paused', position: '12' }),
+    { status: 'paused', volume: 0.8, position: 0 });
+  assert.deepEqual(g.normalizeAudioState({ status: 'paused', volume: 0, position: 12 }),
+    { status: 'paused', volume: 0, position: 12 });
+});
+
+test('a whole session folds to one state', () => {
+  const session = [
+    { type: 'PLAY' },
+    { type: 'SET_VOLUME', volume: 0.5 },
+    { type: 'PAUSE', position: 7 },
+    { type: 'PLAY' },
+    { type: 'STOP' },
+    { type: 'PLAY' },
+  ];
+  assert.deepEqual(g.reduceAudioEvents(g.initialAudioState(), session),
+    { status: 'playing', volume: 0.5, position: 0 });
+
+  // the same events, one at a time, land in the same place
+  let step = g.initialAudioState();
+  session.forEach((ev) => { step = g.updateAudioState(step, ev); });
+  assert.deepEqual(step, { status: 'playing', volume: 0.5, position: 0 });
+
+  // pressing stop twice at the end is still stopped, at the start, same volume
+  assert.deepEqual(g.reduceAudioEvents(g.initialAudioState(),
+    session.concat([{ type: 'STOP' }, { type: 'STOP' }])),
+    { status: 'stopped', volume: 0.5, position: 0 });
+
+  assert.deepEqual(g.reduceAudioEvents(null, null), IDLE);
+  assert.deepEqual(g.reduceAudioEvents(null, []), IDLE);
+});
