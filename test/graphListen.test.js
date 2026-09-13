@@ -333,3 +333,351 @@ test('an extremum close to the window edge is placed where it is, not pulled inw
   assert.ok(Math.abs(max.x - truthMax) < step / 2, 'max read at ' + max.x + ', truth ' + truthMax);
   assert.equal(g.fmt(min.x), 0.5);
 });
+
+// ---------------------------------------------------------------------------
+// R2-A — the audio control state machine (WCAG 1.4.2 / EN 301 549 9.1.4.2).
+//
+// Every expected object below was written out by hand from the rules in the
+// header of src/lib/graphListen.js before the reducer existed. No audio API,
+// no timer, no clock.
+// ---------------------------------------------------------------------------
+
+const IDLE = { status: 'idle', volume: 0.8, position: 0 };
+
+test('audio starts idle, and only PLAY can leave idle', () => {
+  assert.deepEqual(g.initialAudioState(), IDLE);
+  assert.equal(g.AUDIO_DEFAULT_VOLUME, 0.8);
+  assert.deepEqual(g.AUDIO_STATUSES, ['idle', 'playing', 'paused', 'stopped']);
+
+  // "no audio on load" as a machine-checkable claim: nothing but PLAY moves it
+  ['PAUSE', 'STOP', 'SET_VOLUME', 'SEEK', '', 'play'].forEach((type) => {
+    assert.equal(g.updateAudioState(IDLE, { type: type }).status, 'idle', type);
+  });
+  assert.equal(g.updateAudioState(IDLE, { type: 'PLAY' }).status, 'playing');
+  assert.equal(g.updateAudioState(IDLE, 'PLAY').status, 'playing');
+  assert.equal(g.updateAudioState(IDLE, null).status, 'idle');
+});
+
+test('the child volume is clamped once, at the door, and 0 is a real volume', () => {
+  assert.equal(g.initialAudioState(0.25).volume, 0.25);
+  assert.equal(g.initialAudioState(0).volume, 0);
+  assert.equal(g.initialAudioState(5).volume, 1);
+  assert.equal(g.initialAudioState(-1).volume, 0);
+  assert.equal(g.initialAudioState('loud').volume, 0.8);
+  assert.equal(g.initialAudioState(undefined).volume, 0.8);
+});
+
+test('PLAY, PAUSE, PLAY, STOP keeps the position across the pause and rewinds on stop', () => {
+  const played = g.updateAudioState(IDLE, { type: 'PLAY' });
+  assert.deepEqual(played, { status: 'playing', volume: 0.8, position: 0 });
+
+  const paused = g.updateAudioState(played, { type: 'PAUSE', position: 12 });
+  assert.deepEqual(paused, { status: 'paused', volume: 0.8, position: 12 });
+
+  const resumed = g.updateAudioState(paused, { type: 'PLAY' });
+  assert.deepEqual(resumed, { status: 'playing', volume: 0.8, position: 12 });
+
+  const stopped = g.updateAudioState(resumed, { type: 'STOP' });
+  assert.deepEqual(stopped, { status: 'stopped', volume: 0.8, position: 0 });
+
+  // and PLAY after a stop starts from the beginning, because STOP rewound it
+  assert.deepEqual(g.updateAudioState(stopped, { type: 'PLAY' }),
+    { status: 'playing', volume: 0.8, position: 0 });
+});
+
+test('a second PLAY while playing changes nothing — not even the position', () => {
+  const playing = g.updateAudioState(IDLE, { type: 'PLAY', position: 4 });
+  assert.deepEqual(playing, { status: 'playing', volume: 0.8, position: 4 });
+  // a second press must not restart the sweep under the child, and must not
+  // start a second voice at a different offset
+  assert.deepEqual(g.updateAudioState(playing, { type: 'PLAY' }), playing);
+  assert.deepEqual(g.updateAudioState(playing, { type: 'PLAY', position: 99 }), playing);
+  assert.deepEqual(g.updateAudioState(g.updateAudioState(playing, { type: 'PLAY' }),
+    { type: 'PLAY' }), playing);
+});
+
+test('STOP from idle stays idle; from anywhere else it stops and rewinds', () => {
+  // nothing is making a sound, so there is nothing to stop — and answering
+  // "stopped" would assert that something had played
+  assert.deepEqual(g.updateAudioState(IDLE, { type: 'STOP' }), IDLE);
+
+  const playing = { status: 'playing', volume: 0.3, position: 9 };
+  const paused = { status: 'paused', volume: 0.3, position: 9 };
+  const stopped = { status: 'stopped', volume: 0.3, position: 0 };
+  assert.deepEqual(g.updateAudioState(playing, { type: 'STOP' }), stopped);
+  assert.deepEqual(g.updateAudioState(paused, { type: 'STOP' }), stopped);
+  assert.deepEqual(g.updateAudioState(stopped, { type: 'STOP' }), stopped);
+});
+
+test('PAUSE only bites while playing', () => {
+  const paused = { status: 'paused', volume: 0.8, position: 5 };
+  assert.deepEqual(g.updateAudioState(paused, { type: 'PAUSE', position: 40 }), paused);
+  const stopped = { status: 'stopped', volume: 0.8, position: 0 };
+  assert.deepEqual(g.updateAudioState(stopped, { type: 'PAUSE', position: 40 }), stopped);
+  assert.deepEqual(g.updateAudioState(IDLE, { type: 'PAUSE', position: 40 }), IDLE);
+  // while playing it records where the sweep got to
+  assert.deepEqual(g.updateAudioState({ status: 'playing', volume: 0.8, position: 1 },
+    { type: 'PAUSE', position: 40 }), { status: 'paused', volume: 0.8, position: 40 });
+  // a position that is not a number is not a position
+  ['3', null, undefined, NaN, {}].forEach((bad) => {
+    assert.deepEqual(g.updateAudioState({ status: 'playing', volume: 0.8, position: 1 },
+      { type: 'PAUSE', position: bad }), { status: 'paused', volume: 0.8, position: 1 },
+      String(bad));
+  });
+  assert.deepEqual(g.updateAudioState({ status: 'playing', volume: 0.8, position: 1 },
+    { type: 'PAUSE', position: -5 }), { status: 'paused', volume: 0.8, position: 0 });
+});
+
+test('SET_VOLUME never changes the status, and the volume survives a stop', () => {
+  const playing = { status: 'playing', volume: 0.8, position: 6 };
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 0.3 }),
+    { status: 'playing', volume: 0.3, position: 6 });
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 0 }),
+    { status: 'playing', volume: 0, position: 6 });
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 1.5 }),
+    { status: 'playing', volume: 1, position: 6 });
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: -0.2 }),
+    { status: 'playing', volume: 0, position: 6 });
+  // an unreadable volume leaves the one the child already chose
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME', volume: 'loud' }), playing);
+  assert.deepEqual(g.updateAudioState(playing, { type: 'SET_VOLUME' }), playing);
+  // it works before anything has played, and it does not start anything
+  assert.deepEqual(g.updateAudioState(IDLE, { type: 'SET_VOLUME', volume: 0.1 }),
+    { status: 'idle', volume: 0.1, position: 0 });
+  // and the stop that follows keeps it
+  assert.equal(g.updateAudioState({ status: 'playing', volume: 0.1, position: 3 },
+    { type: 'STOP' }).volume, 0.1);
+});
+
+test('the reducer is pure: the state that came in is never touched', () => {
+  const before = Object.freeze({ status: 'playing', volume: 0.8, position: 2 });
+  const after = g.updateAudioState(before, { type: 'PAUSE', position: 7 });
+  assert.deepEqual(before, { status: 'playing', volume: 0.8, position: 2 });
+  assert.equal(after.position, 7);
+  // even a no-op hands back a fresh object rather than the caller's
+  const noop = g.updateAudioState(before, { type: 'NOPE' });
+  assert.deepEqual(noop, before);
+  assert.notEqual(noop, before);
+});
+
+test('a half-written or stored state is read into a whole one', () => {
+  assert.deepEqual(g.normalizeAudioState(null), IDLE);
+  assert.deepEqual(g.normalizeAudioState({}), IDLE);
+  assert.deepEqual(g.normalizeAudioState('playing'), IDLE);
+  // a status nobody defined is idle; the volume is still only clamped, never dropped
+  assert.deepEqual(g.normalizeAudioState({ status: 'dancing', volume: 9, position: -4 }),
+    { status: 'idle', volume: 1, position: 0 });
+  assert.deepEqual(g.normalizeAudioState({ status: 'paused', position: '12' }),
+    { status: 'paused', volume: 0.8, position: 0 });
+  assert.deepEqual(g.normalizeAudioState({ status: 'paused', volume: 0, position: 12 }),
+    { status: 'paused', volume: 0, position: 12 });
+});
+
+test('a whole session folds to one state', () => {
+  const session = [
+    { type: 'PLAY' },
+    { type: 'SET_VOLUME', volume: 0.5 },
+    { type: 'PAUSE', position: 7 },
+    { type: 'PLAY' },
+    { type: 'STOP' },
+    { type: 'PLAY' },
+  ];
+  assert.deepEqual(g.reduceAudioEvents(g.initialAudioState(), session),
+    { status: 'playing', volume: 0.5, position: 0 });
+
+  // the same events, one at a time, land in the same place
+  let step = g.initialAudioState();
+  session.forEach((ev) => { step = g.updateAudioState(step, ev); });
+  assert.deepEqual(step, { status: 'playing', volume: 0.5, position: 0 });
+
+  // pressing stop twice at the end is still stopped, at the start, same volume
+  assert.deepEqual(g.reduceAudioEvents(g.initialAudioState(),
+    session.concat([{ type: 'STOP' }, { type: 'STOP' }])),
+    { status: 'stopped', volume: 0.5, position: 0 });
+
+  assert.deepEqual(g.reduceAudioEvents(null, null), IDLE);
+  assert.deepEqual(g.reduceAudioEvents(null, []), IDLE);
+});
+
+// ---------------------------------------------------------------------------
+// R2-B — describeFunctionShape: one short Hebrew sentence above the list.
+//
+// Fixed sampled arrays and fixed landmark lists in, exact strings out. Every
+// sentence below was written out by hand from the rules in the header of
+// src/lib/graphListen.js, and the classification of each array was worked out
+// on paper first (rising / falling / constant / turning / broken).
+// ---------------------------------------------------------------------------
+
+const TAIL = ' ' + g.SAMPLE_ONLY_HE;
+const shapePts = (ys) => ys.map((y, i) => ({ i: i, x: i, y: y }));
+
+test('a rising line that crosses at 2 is exactly the sentence the research asked for', () => {
+  const up = shapePts([-2, -1, 0, 1, 2]);
+  assert.equal(g.describeFunctionShape(up, [{ kind: 'root', x: 2, y: 0 }]),
+    'פונקציה עולה, חותכת את ציר איקס בנקודה 2.' + TAIL);
+
+  const down = shapePts([2, 1, 0, -1, -2]);
+  assert.equal(g.describeFunctionShape(down, [{ kind: 'root', x: 2, y: 0 }]),
+    'פונקציה יורדת, חותכת את ציר איקס בנקודה 2.' + TAIL);
+
+  // the same rising line with no crossing inside the window
+  assert.equal(g.describeFunctionShape(shapePts([1, 2, 3]), []),
+    'פונקציה עולה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('a constant sampling is constant, and a constant zero is on the axis', () => {
+  assert.equal(g.describeFunctionShape(shapePts([3, 3, 3, 3]), []),
+    'פונקציה קבועה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  // y = 0 is ON the axis at every sample: "crosses at" and "does not cross"
+  // are both false, so it gets its own sentence and no crossing clause
+  assert.equal(g.describeFunctionShape(shapePts([0, 0, 0]), []),
+    'פונקציה קבועה על ציר איקס.' + TAIL);
+  assert.equal(g.describeFunctionShape(shapePts([-7, -7]), []),
+    'פונקציה קבועה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('one turning point in the landmark list names the shape', () => {
+  assert.equal(g.describeFunctionShape(shapePts([0, 1, 2, 1, 0]), [{ kind: 'max', x: 2, y: 2 }]),
+    'פונקציה עולה ואז יורדת, ' + g.NO_CROSSING_HE + '.' + TAIL);
+
+  const valley = shapePts([2, 0, -1, 0, 2]);
+  const valleyMarks = [
+    { kind: 'root', x: 1, y: 0 },
+    { kind: 'min', x: 2, y: -1 },
+    { kind: 'root', x: 3, y: 0 },
+  ];
+  assert.equal(g.describeFunctionShape(valley, valleyMarks),
+    'פונקציה יורדת ואז עולה, חותכת את ציר איקס בנקודות 1, 3.' + TAIL);
+});
+
+test('monotonicity is read from every consecutive pair, not from three samples', () => {
+  // trendOf looks at the first, middle and last sample only. [0,3,1,4,2,5]
+  // rises overall, so it answers 'up' — and the sampling turns four times.
+  const zigzag = shapePts([0, 3, 1, 4, 2, 5]);
+  assert.equal(g.summarizeCurve(zigzag).trend, 'up');
+  assert.equal(g.monotonicityOf(zigzag), 'mixed');
+  const zigzagMarks = [
+    { kind: 'root', x: 0, y: 0 },
+    { kind: 'max', x: 1, y: 3 },
+    { kind: 'min', x: 2, y: 1 },
+    { kind: 'max', x: 3, y: 4 },
+    { kind: 'min', x: 4, y: 2 },
+  ];
+  assert.equal(g.describeFunctionShape(zigzag, zigzagMarks),
+    'פונקציה עולה ויורדת לסירוגין עם 4 נקודות מפנה, חותכת את ציר איקס בנקודה 0.' + TAIL);
+
+  // one sample out of five going the wrong way is enough to withdraw the
+  // claim, and with nothing in the landmark list to point at it says only
+  // that much. Strictness is the point: see the header.
+  const wobble = shapePts([0, 1, 0.9, 2, 3]);
+  assert.equal(g.summarizeCurve(wobble).trend, 'up');
+  assert.equal(g.describeFunctionShape(wobble, []),
+    'פונקציה לא מונוטונית, ' + g.NO_CROSSING_HE + '.' + TAIL);
+
+  // and the mirror: a whole period of sin is 'flat' to trendOf, because
+  // first, middle and last are all zero
+  assert.equal(g.summarizeCurve(cleanSine).trend, 'flat');
+  assert.equal(g.monotonicityOf(cleanSine), 'mixed');
+  assert.match(g.describeFunctionShape(cleanSine, g.findLandmarks(cleanSine)), /לסירוגין/);
+});
+
+test('a broken sampling refuses the monotonicity claim in both vocabularies', () => {
+  const broken = [
+    { i: 0, x: 0, y: 1 }, { i: 1, x: 1, y: 2 }, { i: 2, x: 2, y: NaN },
+    { i: 3, x: 3, y: -2 }, { i: 4, x: 4, y: -1 },
+  ];
+  // findLandmarks says 'gap'; the older landmarksOf says 'undefined'
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'gap', x: 2, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'undefined', x: 2, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'jump', x: 2.5, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  assert.equal(g.describeFunctionShape(broken, [{ kind: 'asymptote', x: 2.5, y: NaN }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+  // a break plus a crossing still reports the crossing
+  assert.equal(g.describeFunctionShape(broken,
+    [{ kind: 'gap', x: 2, y: NaN }, { kind: 'root', x: 3.5, y: 0 }]),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, חותכת את ציר איקס בנקודה 3.5.' + TAIL);
+});
+
+test('fewer than two defined samples says so instead of guessing', () => {
+  const short = 'אין מספיק דגימות כדי לתאר את הצורה.' + TAIL;
+  assert.equal(g.describeFunctionShape([], []), short);
+  assert.equal(g.describeFunctionShape(null, null), short);
+  assert.equal(g.describeFunctionShape(shapePts([7]), []), short);
+  assert.equal(g.describeFunctionShape([{ i: 0, x: 0, y: NaN }, { i: 1, x: 1, y: NaN }], []), short);
+  // one defined sample among undefined ones is still one sample
+  assert.equal(g.describeFunctionShape([{ i: 0, x: 0, y: NaN }, { i: 1, x: 1, y: 5 }], []), short);
+});
+
+test('crossings are printed in x order, one decimal, without rounding duplicates', () => {
+  const line = shapePts([-2, -1, 0, 1, 2]);
+  // out of order in, in order out
+  assert.equal(g.describeFunctionShape(line,
+    [{ kind: 'root', x: 5, y: 0 }, { kind: 'root', x: -1, y: 0 }]),
+    'פונקציה עולה, חותכת את ציר איקס בנקודות -1, 5.' + TAIL);
+  // 3.13 and 3.14 both read 3.1 at one decimal: one crossing is printed, once
+  assert.equal(g.describeFunctionShape(line,
+    [{ kind: 'root', x: 3.13, y: 0 }, { kind: 'root', x: 3.14, y: 0 }]),
+    'פונקציה עולה, חותכת את ציר איקס בנקודה 3.1.' + TAIL);
+  // landmarks that are neither crossings nor turning points are ignored
+  assert.equal(g.describeFunctionShape(line,
+    [{ kind: 'start', x: 0, y: -2 }, { kind: 'end', x: 4, y: 2 },
+      { kind: 'y-intercept', x: 0, y: -2 }]),
+    'פונקציה עולה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('the sentence composes with the real detectors', () => {
+  // a whole period of sin: two turning points, three crossings at 0 / 3.1 / 6.3
+  assert.equal(g.describeFunctionShape(cleanSine, g.findLandmarks(cleanSine)),
+    'פונקציה עולה ויורדת לסירוגין עם 2 נקודות מפנה, '
+    + 'חותכת את ציר איקס בנקודות 0, 3.1, 6.3.' + TAIL);
+  // the same sampling plus the fixed jitter says the same thing
+  assert.equal(g.describeFunctionShape(noisySine, g.findLandmarks(noisySine)),
+    g.describeFunctionShape(cleanSine, g.findLandmarks(cleanSine)));
+
+  const quadPts = g.sampleCurve((x) => x * x - 4, -4, 4, 200);
+  assert.equal(g.describeFunctionShape(quadPts, g.findLandmarks(quadPts)),
+    'פונקציה יורדת ואז עולה, חותכת את ציר איקס בנקודות -2, 2.' + TAIL);
+
+  const invPts = g.sampleCurve((x) => (Math.abs(x) < 0.05 ? NaN : 1 / x), -4, 4, 160);
+  assert.equal(g.describeFunctionShape(invPts, g.findLandmarks(invPts)),
+    'הדגימה נקטעת ואין כאן טענה על עלייה או ירידה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+
+  const flatPts = g.sampleCurve(() => 3, -5, 5, 40);
+  assert.equal(g.describeFunctionShape(flatPts, g.findLandmarks(flatPts)),
+    'פונקציה קבועה, ' + g.NO_CROSSING_HE + '.' + TAIL);
+});
+
+test('the shape sentence summarises and does not repeat the landmark list', () => {
+  const marks = g.findLandmarks(cleanSine);
+  const shape = g.describeFunctionShape(cleanSine, marks);
+  const list = g.describeLandmarksHe(marks, cleanSine);
+
+  // the list walks the landmarks with coordinates; the summary does neither
+  assert.match(list, /משמאל לימין/);
+  assert.doesNotMatch(shape, /משמאל לימין/);
+  assert.doesNotMatch(shape, /וואי/);
+  assert.doesNotMatch(shape, /שיא|שפל/);
+  assert.notEqual(shape, list);
+
+  // and the standing disclaimer is carried exactly once, at the end
+  assert.equal(shape.split(g.SAMPLE_ONLY_HE).length - 1, 1);
+  assert.ok(shape.endsWith(g.SAMPLE_ONLY_HE));
+  assert.ok(list.endsWith(g.SAMPLE_ONLY_HE));
+});
+
+test('monotonicityOf reads the sampling and skips the undefined parts', () => {
+  assert.equal(g.monotonicityOf(shapePts([1, 2, 3])), 'up');
+  assert.equal(g.monotonicityOf(shapePts([3, 2, 1])), 'down');
+  assert.equal(g.monotonicityOf(shapePts([2, 2, 2])), 'constant');
+  assert.equal(g.monotonicityOf(shapePts([1, 2, 1])), 'mixed');
+  // a plateau inside a rise is still a rise
+  assert.equal(g.monotonicityOf(shapePts([1, 2, 2, 3])), 'up');
+  // a hole is not a change of direction: 1 .. NaN .. 3 is still rising
+  assert.equal(g.monotonicityOf([{ x: 0, y: 1 }, { x: 1, y: NaN }, { x: 2, y: 3 }]), 'up');
+  assert.equal(g.monotonicityOf(shapePts([5])), 'unknown');
+  assert.equal(g.monotonicityOf([]), 'unknown');
+  assert.equal(g.monotonicityOf(null), 'unknown');
+});
