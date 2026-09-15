@@ -49,3 +49,14 @@ test('garbage in storage does not crash the first-run gate', () => {
   ls.setItem(onboard.ONBOARD_KEY, '{"dismissed":1}');
   assert.equal(onboard.shouldShowOnboard(ls), false);
 });
+
+test('escapeHtml preserves single quotes in Hebrew text while escaping them in other contexts', () => {
+  // Test that Hebrew text without external quotes is preserved
+  assert.equal(onboard.escapeHtml('שלום'), 'שלום');
+  
+  // Test that single quotes are still escaped in non-Hebrew context
+  assert.equal(onboard.escapeHtml("It's a test"), 'It&#39;s a test');
+  
+  // Test that Hebrew with internal quotes is preserved
+  assert.equal(onboard.escapeHtml('השם של "שלום"'), 'השם של "שלום"');
+});
