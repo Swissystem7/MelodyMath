@@ -38,7 +38,7 @@
   function bindVertical(root, vert) {
     if (!root) return null;
     root.innerHTML = renderVerticalHtml(vert);
-    return {};
+    return { kind: 'vertical', data: normalizeVertical(vert), normalized: true };
   }
 
   return {
