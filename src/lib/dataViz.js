@@ -75,7 +75,7 @@
     const body = T.rows.map(function (r) {
       return '<tr>' + r.map(function (c) { return '<td>' + escapeHtml(c) + '</td>'; }).join('') + '</tr>';
     }).join('');
-    return '<table class="data-table"><caption class="sr-only">טבלת נתונים</caption>'
+    return '<table class="data-table" data-type="table"><caption class="sr-only">טבלת נתונים</caption>'
       + '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>';
   }
 
