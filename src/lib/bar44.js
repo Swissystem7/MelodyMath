@@ -43,7 +43,7 @@
     if (c === 4) return '1/2';
     if (c === 2) return '1/4';
     if (c === 1) return '1/8';
-    if (c === 6) return '3/4';
+    if (c === 6) return '6/8';
     if (c === 3) return '3/8';
     if (c % 2 === 0) return formatFraction(c / 2, 4);
     return formatFraction(c, 8);
