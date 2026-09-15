@@ -22,3 +22,7 @@ test('core.js is the Node facade for audio, answers, and storage', () => {
   assert.ok(core.isCorrect('1,25', 1.25));
   assert.equal(core.tabIndexAfterKey(0, 3, 'ArrowLeft', true), 1);
 });
+
+test('escapeHtml properly escapes Unicode characters like copyright symbol', () => {
+  assert.equal(core.escapeHtml('© 2026 MelodyMath'), '&copy; 2026 MelodyMath');
+});
