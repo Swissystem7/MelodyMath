@@ -19,3 +19,8 @@ test('an unrecognised op falls back to addition', () => {
   const V = vert.normalizeVertical({ a: 1, b: 2 });
   assert.equal(V.op, '+');
 });
+
+test('vertical normalize clamps negative operands to zero after rounding', () => {
+  const result = vert.normalizeVertical({ a: -3.7, b: 2.3 });
+  assert.deepStrictEqual(result, { a: 0, b: 2, op: '+' });
+});
