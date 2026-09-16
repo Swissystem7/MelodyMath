@@ -29,7 +29,7 @@
   const MATRIX = [
     { grade: 'א', strand: 'numbers', topic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו', status: COVERED, note: 'כולל אחורה ודילוגי 2 מ־50 ודילוגי 5' },
     { grade: 'א', strand: 'numbers', topic: 'מנייה עד 100, קיבוץ ל־10', status: COVERED, note: 'קיבוץ לעשרות; אין אומדן פתוח' },
-    { grade: 'א', strand: 'numbers', topic: 'ישר המספרים — מיקום מדויק ומקורב עד 100', status: COVERED, note: 'ישר אינטראקטיבי 0–20 ו־0–100' },
+    { grade: 'א', strand: 'numbers', topic: 'ישר המספרים — מיקום מדויק ומקורב עד 100', status: GAP, note: 'גל 2' },
     { grade: 'א', strand: 'numbers', topic: 'חיבור וחיסור בתחום 10 ואז 20; פירוקי 10; = משמאל; יותר משני מחוברים', status: COVERED, note: 'תרגול סגור, לא אסטרטגיה נלמדת' },
     { grade: 'א', strand: 'numbers', topic: 'חיבור וחיסור בעשרות שלמות עד 100', status: COVERED, note: '20+60 ודומיהם' },
     { grade: 'א', strand: 'numbers', topic: 'קריאה וכתיבה של מספרים, לוח מאה, שם־מספר', status: GAP, note: 'גל 2' },
@@ -39,6 +39,10 @@
     { grade: 'א', strand: 'measure', topic: 'מדידת אורך (מתווך, ס״מ, סרגל)', status: GAP, note: 'גל 2' },
     { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: GAP, note: 'גל 2' },
     { grade: 'א', strand: 'data', topic: 'דיאגרמת עמודות ופיקטוגרם', status: GAP, note: 'גל 2' },
+    { grade: 'א', strand: 'numbers', topic: 'השוואת מספרים עד 100 באמצעות סימנים', status: GAP, note: 'גל 2' },
+    { grade: 'א', strand: 'numbers', topic: 'עיגול מספרים ואומדן עד 100', status: GAP, note: 'גל 2' },
+    { grade: 'א', strand: 'measure', topic: 'השוואת אורכים ומשקלים', status: GAP, note: 'גל 2' },
+    { grade: 'א', strand: 'data', topic: 'קריאת נתונים מתרשים', status: GAP, note: 'גל 2' },
 
     { grade: 'ב', strand: 'numbers', topic: 'מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', status: GAP, note: 'גל 2' },
     { grade: 'ב', strand: 'numbers', topic: 'חיבור וחיסור דו־ספרתי במאוזן ובמאונך עד 100', status: GAP, note: 'גל 2 — עיקר שעות כיתה ב׳' },
@@ -74,13 +78,18 @@
   }
 
   function rowsForGrade(grade) {
-    return MATRIX.filter(function (r) { return r.grade === grade; });
+    const matrix = (typeof module === 'object' && module.exports && module.exports.MATRIX) || MATRIX;
+    return matrix.filter(function (r) { return r.grade === grade; });
   }
 
   function summaryForGrade(grade) {
     const rows = rowsForGrade(grade);
-    const out = { grade: grade, total: rows.length, covered: 0, partial: 0, gap: 0 };
-    rows.forEach(function (r) { out[r.status] += 1; });
+    const out = { grade: grade, total: rows.length };
+    Object.keys(STATUS_HE).forEach(function (status) { out[status] = 0; });
+    out.unknown = 0;
+    rows.forEach(function (r) {
+      if (Object.prototype.hasOwnProperty.call(STATUS_HE, r.status)) out[r.status] += 1;
+    });
     return out;
   }
 
