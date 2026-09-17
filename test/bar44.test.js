@@ -28,3 +28,8 @@ test('the bar drawing names a 4/4 bar and has eight cells', () => {
   assert.equal((html.match(/bar44-cell/g) || []).length, 8);
   assert.match(html, /מלא: 1\/2/);
 });
+
+test('fractionFromEighths handles out-of-bounds inputs by clamping to valid range', () => {
+  assert.equal(bar.fractionFromEighths(-1), '0');
+  assert.equal(bar.fractionFromEighths(9), '1');
+});

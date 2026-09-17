@@ -37,16 +37,17 @@
 
   function fractionFromEighths(count) {
     const c = Math.round(Number(count));
-    if (!Number.isFinite(c) || c < 0 || c > BAR_EIGHTHS) return null;
-    if (c === 0) return '0';
-    if (c === 8) return '1';
-    if (c === 4) return '1/2';
-    if (c === 2) return '1/4';
-    if (c === 1) return '1/8';
-    if (c === 6) return '3/4';
-    if (c === 3) return '3/8';
-    if (c % 2 === 0) return formatFraction(c / 2, 4);
-    return formatFraction(c, 8);
+    // Clamp the input to the valid range [0, 8]
+    const clamped = Math.min(BAR_EIGHTHS, Math.max(0, c));
+    if (clamped === 0) return '0';
+    if (clamped === 8) return '1';
+    if (clamped === 4) return '1/2';
+    if (clamped === 2) return '1/4';
+    if (clamped === 1) return '1/8';
+    if (clamped === 6) return '3/4';
+    if (clamped === 3) return '3/8';
+    if (clamped % 2 === 0) return formatFraction(clamped / 2, 4);
+    return formatFraction(clamped, 8);
   }
 
   function sameFraction(a, b) {
