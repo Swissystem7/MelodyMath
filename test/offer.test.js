@@ -95,3 +95,20 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /checkout|stripe|paypal|תשלום עכשיו|49 ₪|רישיון כיתתי/i);
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
+
+test('buildPrincipalEmail rejects invalid email formats', () => {
+  const result = offer.buildPrincipalEmail({
+    teacher: 'נועה כהן',
+    school: 'יסודי הגליל',
+    grade: 'שילוב ב׳–ג׳',
+    principalEmail: 'invalid-email'
+  });
+  assert.deepEqual(result, {
+    ok: false,
+    missing: ['principalEmail'],
+    to: '',
+    subject: '',
+    body: '',
+    mailto: ''
+  });
+});

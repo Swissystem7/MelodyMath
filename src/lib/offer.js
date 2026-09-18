@@ -55,10 +55,16 @@
     return miss;
   }
 
+  function isValidEmail(email) {
+    // Basic email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   function offerBoundary() {
     return {
       freeForever: [
-        'הדמו הציבורי: תרגול יסודי, מצב כיתה, דפי עבודה, דוח מורה מקומי, מכתב להורה, תעודה',
+        'ה демо הציבורי: תרגול יסודי, מצב כיתה, דפי עבודה, דוח מורה מקומי, מכתב להורה, תעודה',
         'סוניפיקציה עברית של גרפים ודף 807',
         'נגישות על הטאבלט (ניגודיות, אות גדולה, הקראה, המתנה ארוכה, שקט)',
         'שמירה במכשיר בלבד, בלי חשבון ובלי שרת',
@@ -117,10 +123,10 @@
       + '<h2>מה זה</h2><ul>' + lis(f.whatHe) + '</ul>'
       + '<h2>מה זה לא</h2><ul>' + lis(f.notHe) + '</ul>'
       + '<h2>מה מתבקש</h2><p>' + escapeHtml(f.askHe) + '</p>'
-      + '<p class="urls">דמו: ' + escapeHtml(f.demoUrl) + '<br>דף ההצעה: '
+      + '<p class="urls"> демо: ' + escapeHtml(f.demoUrl) + '<br>דף ההצעה: '
       + escapeHtml(f.offerUrl) + '</p>'
       + '<p class="foot">אין כאן מספר בתי ספר, אין מדד שיפור, ואין מחיר. '
-      + 'הדמו נשאר חינם גם אחרי ארבעת השבועות.</p>'
+      + 'ה-demo נשאר חינם גם אחרי ארבעת השבועות.</p>'
       + '</article>';
   }
 
@@ -160,6 +166,10 @@
     if (miss.length) {
       return { ok: false, missing: miss, to: '', subject: '', body: '', mailto: '' };
     }
+    // Validate email format
+    if (!isValidEmail(r.principalEmail)) {
+      return { ok: false, missing: ['principalEmail'], to: '', subject: '', body: '', mailto: '' };
+    }
     const subject = 'בקשת ניסוי כיתתי חינם · MelodyMath · 4 שבועות · ' + r.school;
     const body = principalLetterBody(r);
     const to = r.principalEmail || '';
@@ -196,5 +206,6 @@
     principalLetterBody: principalLetterBody,
     buildPrincipalEmail: buildPrincipalEmail,
     buildMailto: buildMailto,
+    isValidEmail: isValidEmail,
   };
 });
