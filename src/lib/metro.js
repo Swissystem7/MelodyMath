@@ -63,6 +63,7 @@
   }
 
   function isWindowOpen(openedAt, now, bpm, beats) {
+    if (!Number.isFinite(openedAt) || !Number.isFinite(now)) return false;
     return windowRemaining(openedAt, now, bpm, beats) > 0;
   }
 

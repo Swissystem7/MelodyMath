@@ -44,3 +44,12 @@ test('applyStreak raises BPM on a multiple of three only when acceleration is on
   assert.deepEqual(metro.applyStreak(80, 2, true, false), { streak: 3, bpm: 80 });
   assert.deepEqual(metro.applyStreak(84, 5, false, true), { streak: 0, bpm: 84 });
 });
+
+test('isWindowOpen returns false when openedAt or now are invalid timestamps', () => {
+  assert.equal(metro.isWindowOpen(null, 1000, 80, 2), false);
+  assert.equal(metro.isWindowOpen(1000, null, 80, 2), false);
+  assert.equal(metro.isWindowOpen(undefined, 1000, 80, 2), false);
+  assert.equal(metro.isWindowOpen(1000, undefined, 80, 2), false);
+  assert.equal(metro.isWindowOpen(NaN, 1000, 80, 2), false);
+  assert.equal(metro.isWindowOpen(1000, NaN, 80, 2), false);
+});
