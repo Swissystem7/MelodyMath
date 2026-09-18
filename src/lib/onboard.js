@@ -89,7 +89,13 @@
   }
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    const text = String(s == null ? '' : s);
+    return text.replace(/[&<>"']/g, function (c, index) {
+      const prev = text[index - 1] || '';
+      const next = text[index + 1] || '';
+      if ((c === '"' || c === "'") && (/[\u0590-\u05ff]/.test(prev) || /[\u0590-\u05ff]/.test(next))) {
+        return c;
+      }
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
     });
   }
