@@ -1,0 +1,11 @@
+{
+  "name": "melodymath-ai-lab",
+  "description": "Hebrew AI-literacy game for children: test answers, improve prompts, and explain AI limits.",
+  "visibility": "public",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npx serve .",
+    "outputDirectory": "./dist"
+  }
+}
