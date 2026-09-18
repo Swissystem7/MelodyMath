@@ -30,3 +30,20 @@ test('the coverage page is Hebrew RTL and renders covered vs gap', () => {
   assert.doesNotMatch(page, /ADHD|דיסקלקול|15–20%|15-20%/i);
   assert.doesNotMatch(page, /סוגרים פערים במתמטיקה/);
 });
+
+test('summaryForGrade handles unknown statuses by initializing them to 0', () => {
+  // Mock a row with an unknown status to test the fix
+  const originalMatrix = cur.MATRIX;
+  const mockMatrix = [...originalMatrix, { grade: 'א', strand: 'numbers', topic: 'mock topic', status: 'unknown' }];
+  
+  // Temporarily replace the MATRIX with our mock
+  cur.MATRIX = mockMatrix;
+  
+  try {
+    const result = cur.summaryForGrade('א');
+    assert.deepStrictEqual(result, { grade: 'א', total: 17, covered: 4, partial: 2, gap: 10, unknown: 0 });
+  } finally {
+    // Restore original MATRIX
+    cur.MATRIX = originalMatrix;
+  }
+});
