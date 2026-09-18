@@ -708,13 +708,18 @@
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
+    const strand = String(raw.strand).trim();
+    const standard = String(raw.standard).trim();
     const it = {
       id: raw.grade + '-' + raw.skill + '-' + i,
       skill: raw.skill,
       he: skillHe(raw.skill),
       grade: raw.grade,
-      strand: String(raw.strand).trim(),
-      standard: String(raw.standard).trim(),
+      strand: strand,
+      standard: standard,
+      // aliases — do NOT rename strand/standard across the codebase
+      domain: strand,
+      clause: standard,
       prompt: raw.prompt,
       answer: raw.answer,
       hint: raw.hint || '',
@@ -840,11 +845,70 @@
     });
   });
 
+  // Closed curriculum vocab (Hebrew). Aliases of STRAND/ST values — not a rename.
+  const CLOSED_DOMAINS = Object.freeze(Array.from(new Set(Object.values(STRAND))));
+  const CLOSED_CLAUSES = Object.freeze(Array.from(new Set(Object.values(ST))));
+  const CLOSED_DOMAIN_SET = new Set(CLOSED_DOMAINS);
+  const CLOSED_CLAUSE_SET = new Set(CLOSED_CLAUSES);
+
+  function uncoveredDomains(grade) {
+    const seen = {};
+    SHIPPED.forEach(function (it) {
+      if (it.grade !== grade) return;
+      seen[it.domain || it.strand] = true;
+    });
+    return CLOSED_DOMAINS.filter(function (d) { return !seen[d]; }).sort(function (a, b) {
+      return a.localeCompare(b, 'he');
+    });
+  }
+
+  function tagViolations() {
+    const missingTag = [];
+    const outsideClosed = [];
+    const byGradeClause = {};
+    SHIPPED.forEach(function (it) {
+      const domain = it.domain;
+      const clause = it.clause;
+      if (!it.grade || !domain || !clause) {
+        missingTag.push({ id: it.id, grade: it.grade, domain: domain, clause: clause });
+      }
+      if (domain && !CLOSED_DOMAIN_SET.has(domain)) {
+        outsideClosed.push({ id: it.id, grade: it.grade, domain: domain, clause: clause });
+      } else if (clause && !CLOSED_CLAUSE_SET.has(clause)) {
+        outsideClosed.push({ id: it.id, grade: it.grade, domain: domain, clause: clause });
+      }
+      if (it.grade && clause) {
+        const key = it.grade + '\0' + clause;
+        if (!byGradeClause[key]) byGradeClause[key] = { grade: it.grade, clause: clause, domains: {}, ids: [] };
+        byGradeClause[key].domains[domain] = true;
+        byGradeClause[key].ids.push(it.id);
+      }
+    });
+    const clauseDomainConflicts = [];
+    Object.keys(byGradeClause).forEach(function (key) {
+      const entry = byGradeClause[key];
+      const domains = Object.keys(entry.domains);
+      if (domains.length > 1) {
+        clauseDomainConflicts.push({
+          id: entry.ids[0],
+          grade: entry.grade,
+          domain: domains.join('|'),
+          clause: entry.clause,
+          domains: domains,
+          ids: entry.ids,
+        });
+      }
+    });
+    return { missingTag: missingTag, outsideClosed: outsideClosed, clauseDomainConflicts: clauseDomainConflicts };
+  }
+
   return {
     GRADES: GRADES,
     GRADE_SKILLS: GRADE_SKILLS,
     STRAND: STRAND,
     ST: ST,
+    CLOSED_DOMAINS: CLOSED_DOMAINS,
+    CLOSED_CLAUSES: CLOSED_CLAUSES,
     SKILL_HE: SKILL_HE,
     RM_SKILLS: RM_SKILLS,
     RM_ORDER: RM_ORDER,
@@ -868,5 +932,7 @@
     coreFactItems: coreFactItems,
     coverage: coverage,
     coverageByGrade: coverageByGrade,
+    uncoveredDomains: uncoveredDomains,
+    tagViolations: tagViolations,
   };
 });
