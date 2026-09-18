@@ -57,8 +57,15 @@
 
   function buildWorksheet(opts) {
     const o = opts || {};
-    const count = o.pack === 'diag' ? Math.max(4, poolFor(o).length) : clampCount(o.count);
-    const seed = (Number(o.seed) || 1) >>> 0;
+    const rawSeed = typeof o.seed === 'string' && o.seed.trim() === '' ? NaN : Number(o.seed);
+    const hasSeed = Object.prototype.hasOwnProperty.call(o, 'seed');
+    const invalidSeed = hasSeed && !Number.isFinite(rawSeed);
+    const count = invalidSeed
+      ? 0
+      : o.pack === 'diag' ? Math.max(4, poolFor(o).length) : clampCount(o.count);
+    const seed = (invalidSeed || !Number.isFinite(rawSeed)
+      ? 1
+      : Math.min(4294967295, Math.max(1, rawSeed))) >>> 0;
     const rand = mulberry32(seed || 1);
     const pool = poolFor(o);
     if (!pool.length) {
