@@ -63,3 +63,17 @@ test('count-the-beats items carry a hear cue that matches the countable answer',
     });
   });
 });
+
+test('buildWorksheet with invalid seed string should fallback to default seed 1', () => {
+  const result = sheets.buildWorksheet({ seed: 'abc' });
+  assert.deepEqual(result, {
+    title: 'MelodyMath — דף עבודה',
+    note: 'אותם תרגילים כמו במסך (מצב כיתה (א׳ · מנייה · חיבור · חיסור · ישר)). זה דף עבודה, לא מבחן ולא הוכחת יעילות.',
+    pack: 'class',
+    seed: 1,
+    withAnswers: false,
+    studentName: '',
+    classCode: '',
+    items: [],
+  });
+});
