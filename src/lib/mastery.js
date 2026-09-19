@@ -66,6 +66,10 @@
   function gateItems(items, history, catalog) {
     const list = Array.isArray(items) ? items : [];
     const book = catalog || list;
+    // Handle null or undefined history by treating it as empty array
+    if (history === null || history === undefined) {
+      return list.slice();
+    }
     if (coreTablesMastered(history, book)) return list.slice();
     return list.filter(function (it) { return !isBlockedItem(it); });
   }

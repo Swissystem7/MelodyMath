@@ -49,3 +49,19 @@ test('grade-ג practice can borrow core 2/4/5/10 facts to unlock the gate', () =
   assert.ok(merged.some((it) => it.table === 2 && it.grade === 'ב'));
   assert.ok(merged.some((it) => it.table === 7 && it.grade === 'ג'));
 });
+
+test('gateItems should handle null or undefined history by treating them as empty arrays', () => {
+  const items = [{ id: 1, table: 2 }, { id: 2, table: 7 }, { id: 3, table: 5 }];
+  const resultNull = mastery.gateItems(items, null, items);
+  const resultUndefined = mastery.gateItems(items, undefined, items);
+  
+  assert.ok(Array.isArray(resultNull));
+  assert.ok(Array.isArray(resultUndefined));
+  assert.equal(resultNull.length, items.length);
+  assert.equal(resultUndefined.length, items.length);
+  
+  // When history is null or undefined, gateItems should return all items
+  // (as if no gating was applied)
+  assert.deepEqual(resultNull, items);
+  assert.deepEqual(resultUndefined, items);
+});
