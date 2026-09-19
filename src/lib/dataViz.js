@@ -41,7 +41,11 @@
     const bars = (Array.isArray(src.bars) ? src.bars : []).map(function (b) {
       return { label: String(b.label || ''), value: Math.max(0, Math.round(Number(b.value)) || 0) };
     });
-    const max = Math.max(1, Math.round(Number(src.max)) || Math.max.apply(null, bars.map(function (b) { return b.value; }).concat([1])));
+    const hasMax = Object.prototype.hasOwnProperty.call(src, 'max');
+    const convertedMax = Number(src.max);
+    const max = hasMax
+      ? (Number.isFinite(convertedMax) ? Math.max(1, Math.round(convertedMax)) : 1)
+      : Math.max(1, Math.round(convertedMax) || Math.max.apply(null, bars.map(function (b) { return b.value; }).concat([1])));
     return { bars: bars, max: max };
   }
 
