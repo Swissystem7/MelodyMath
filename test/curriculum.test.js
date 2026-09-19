@@ -30,3 +30,21 @@ test('the coverage page is Hebrew RTL and renders covered vs gap', () => {
   assert.doesNotMatch(page, /ADHD|דיסקלקול|15–20%|15-20%/i);
   assert.doesNotMatch(page, /סוגרים פערים במתמטיקה/);
 });
+
+test('summaryForGrade throws TypeError for invalid grade input', () => {
+  assert.throws(() => {
+    cur.summaryForGrade('ה');
+  }, TypeError);
+
+  assert.throws(() => {
+    cur.summaryForGrade('');
+  }, TypeError);
+
+  assert.throws(() => {
+    cur.summaryForGrade('דד');
+  }, TypeError);
+
+  assert.throws(() => {
+    cur.summaryForGrade(123);
+  }, TypeError);
+});

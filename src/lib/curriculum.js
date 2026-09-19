@@ -78,6 +78,10 @@
   }
 
   function summaryForGrade(grade) {
+    const validGrades = ['א', 'ב', 'ג', 'ד'];
+    if (!validGrades.includes(grade)) {
+      throw new TypeError('Invalid grade: ' + grade);
+    }
     const rows = rowsForGrade(grade);
     const out = { grade: grade, total: rows.length, covered: 0, partial: 0, gap: 0 };
     rows.forEach(function (r) { out[r.status] += 1; });
