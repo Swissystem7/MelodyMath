@@ -43,7 +43,7 @@
 
   function shapeHe(name) {
     const s = shapeOf(name);
-    return s ? s.he : name;
+    return s ? s.he : null;
   }
 
   // A right angle is exactly 90 degrees. Anything else — flat, obtuse,

@@ -26,3 +26,7 @@ test('isRightAngle is true only at exactly 90 degrees', () => {
   assert.equal(geo.isRightAngle(180), false);
   assert.equal(geo.isRightAngle(45), false);
 });
+
+test('shapeHe returns null for non-existent shape names', () => {
+  assert.equal(geo.shapeHe('nonexistent'), null);
+});
