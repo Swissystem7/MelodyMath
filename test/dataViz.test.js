@@ -32,3 +32,8 @@ test('none of the widgets emit a script tag', () => {
   assert.doesNotMatch(b, /<script/);
   assert.doesNotMatch(c, /<script/);
 });
+
+test('normalizeBars should validate and sanitize max property, defaulting to 1 for invalid inputs', () => {
+  const result = data.normalizeBars({ bars: [{ label: 'A', value: 10 }], max: 'invalid' });
+  assert.deepStrictEqual(result, { bars: [{ label: 'A', value: 10 }], max: 1 });
+});
