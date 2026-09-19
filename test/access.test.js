@@ -75,3 +75,13 @@ test('currentPromptText reads the visible class-mode prompt first', () => {
   assert.equal(access.currentPromptText(doc), 'כמה תופים?');
   assert.equal(access.currentPromptText({ querySelector: () => null }), '');
 });
+
+test('normalizePrefs converts string booleans to actual booleans', () => {
+  assert.deepEqual(access.normalizePrefs({ contrast: 'true', large: 'false' }), {
+    contrast: true,
+    large: false,
+    speak: false,
+    quiet: false,
+    wait: false
+  });
+});

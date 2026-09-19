@@ -29,12 +29,21 @@
 
   function normalizePrefs(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
+    function toBool(val) {
+      if (typeof val === 'boolean') return val;
+      if (typeof val === 'number') return !!val;
+      if (typeof val === 'string') {
+        if (val === 'true') return true;
+        if (val === 'false') return false;
+      }
+      return false;
+    }
     return {
-      contrast: !!src.contrast,
-      large: !!src.large,
-      speak: !!src.speak,
-      quiet: !!src.quiet,
-      wait: !!src.wait,
+      contrast: toBool(src.contrast),
+      large: toBool(src.large),
+      speak: toBool(src.speak),
+      quiet: toBool(src.quiet),
+      wait: toBool(src.wait),
     };
   }
 
