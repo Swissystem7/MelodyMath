@@ -19,3 +19,8 @@ test('an unrecognised op falls back to addition', () => {
   const V = vert.normalizeVertical({ a: 1, b: 2 });
   assert.equal(V.op, '+');
 });
+
+test('vertical normalize handles negative inputs by taking absolute value', () => {
+  const result = vert.normalizeVertical({ a: -5, b: 3, op: '+' });
+  assert.deepStrictEqual(result, { a: 5, b: 3, op: '+' });
+});

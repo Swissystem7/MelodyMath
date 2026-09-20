@@ -12,6 +12,8 @@
     let b = Math.round(Number(src.b));
     if (!Number.isFinite(a)) a = 0;
     if (!Number.isFinite(b)) b = 0;
+    a = Math.abs(a);
+    b = Math.abs(b);
     const op = src.op === '-' ? '-' : '+';
     return { a: a, b: b, op: op };
   }
