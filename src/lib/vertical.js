@@ -12,6 +12,9 @@
     let b = Math.round(Number(src.b));
     if (!Number.isFinite(a)) a = 0;
     if (!Number.isFinite(b)) b = 0;
+    // Clamp negative values to zero before rounding
+    if (a < 0) a = 0;
+    if (b < 0) b = 0;
     const op = src.op === '-' ? '-' : '+';
     return { a: a, b: b, op: op };
   }
