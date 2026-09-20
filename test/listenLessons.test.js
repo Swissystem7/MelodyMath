@@ -41,3 +41,7 @@ test('compareHearing names which sample has a root without calling it a proof', 
   assert.match(cmp.cueHe, /רק לב׳ יש שורש/);
   assert.match(cmp.cueHe, /לא הוכחה|לא «קול הפונקציה»/);
 });
+
+test('lessonIndex returns null for non-existent lesson IDs', () => {
+  assert.equal(lessons.lessonIndex('non-existent-id'), null);
+});

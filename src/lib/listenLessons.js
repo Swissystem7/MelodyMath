@@ -132,12 +132,13 @@
   }
 
   function lessonIndex(id) {
-    return LESSONS.findIndex(function (L) { return L.id === id; });
+    const index = LESSONS.findIndex(function (L) { return L.id === id; });
+    return index === -1 ? null : index;
   }
 
   function nextLesson(id) {
     const i = lessonIndex(id);
-    if (i < 0) return LESSONS[0];
+    if (i === null) return LESSONS[0];
     return LESSONS[(i + 1) % LESSONS.length];
   }
 
