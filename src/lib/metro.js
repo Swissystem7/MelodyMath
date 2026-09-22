@@ -73,10 +73,11 @@
   }
 
   function applyStreak(bpm, streak, correct, accelerate) {
-    const nextStreak = correct ? Math.max(0, Math.round(Number(streak) || 0)) + 1 : 0;
+    const isCorrect = !!correct;
+    const nextStreak = isCorrect ? Math.max(0, Math.round(Number(streak) || 0)) + 1 : 0;
     return {
       streak: nextStreak,
-      bpm: nextBpm(bpm, nextStreak, !!accelerate),
+      bpm: nextBpm(bpm, nextStreak, !!accelerate && typeof correct === 'boolean'),
     };
   }
 
