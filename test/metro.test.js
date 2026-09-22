@@ -44,3 +44,7 @@ test('applyStreak raises BPM on a multiple of three only when acceleration is on
   assert.deepEqual(metro.applyStreak(80, 2, true, false), { streak: 3, bpm: 80 });
   assert.deepEqual(metro.applyStreak(84, 5, false, true), { streak: 0, bpm: 84 });
 });
+
+test('applyStreak normalizes non-boolean correct parameter and treats truthy values as correct', () => {
+  assert.deepEqual(metro.applyStreak(80, 2, 'true', true), { streak: 3, bpm: 80 });
+});
