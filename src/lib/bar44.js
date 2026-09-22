@@ -25,6 +25,9 @@
   }
 
   function formatFraction(n, d) {
+    if (typeof n !== 'number' || typeof d !== 'number' || !Number.isFinite(n) || !Number.isFinite(d) || d === 0) {
+      throw new TypeError('Both arguments must be valid numbers');
+    }
     return n + '/' + d;
   }
 

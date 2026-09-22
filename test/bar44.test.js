@@ -28,3 +28,7 @@ test('the bar drawing names a 4/4 bar and has eight cells', () => {
   assert.equal((html.match(/bar44-cell/g) || []).length, 8);
   assert.match(html, /מלא: 1\/2/);
 });
+
+test('formatFraction validates numeric inputs and throws TypeError for non-numeric arguments', () => {
+  assert.throws(() => bar.formatFraction(1, '2'), TypeError);
+});
