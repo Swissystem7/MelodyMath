@@ -30,3 +30,8 @@ test('the coverage page is Hebrew RTL and renders covered vs gap', () => {
   assert.doesNotMatch(page, /ADHD|דיסקלקול|15–20%|15-20%/i);
   assert.doesNotMatch(page, /סוגרים פערים במתמטיקה/);
 });
+
+test('strandHe should return Hebrew translation for numbers when given null', () => {
+  const result = cur.strandHe(null);
+  assert.strictEqual(result, 'מספרים ופעולות');
+});

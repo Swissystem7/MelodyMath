@@ -70,6 +70,7 @@
   }
 
   function strandHe(s) {
+    if (typeof s !== 'string') return STRAND_HE.numbers;
     return STRAND_HE[s] || s;
   }
 
