@@ -52,7 +52,9 @@
   }
 
   function windowMs(bpm, beats) {
-    return msPerBeat(bpm) * clampBeats(beats);
+    const bpmValue = Number(bpm);
+    if (!Number.isFinite(bpmValue)) return 0;
+    return msPerBeat(bpmValue) * clampBeats(beats);
   }
 
   function windowRemaining(openedAt, now, bpm, beats) {
