@@ -27,6 +27,9 @@
 
   function clampGroup(n) {
     const x = Math.round(Number(n));
+    if (Number.isFinite(x) && x < 0) {
+      throw new TypeError('group size must not be negative');
+    }
     if (!Number.isFinite(x) || x < 1) return 1;
     return Math.min(12, x);
   }
