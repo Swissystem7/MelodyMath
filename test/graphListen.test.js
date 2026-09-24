@@ -334,6 +334,71 @@ test('an extremum close to the window edge is placed where it is, not pulled inw
   assert.equal(g.fmt(min.x), 0.5);
 });
 
+const turnsOf = (marks) => marks.filter((m) => m.kind === 'max' || m.kind === 'min');
+
+test('an asymptote is not a turning point: 1/x, 1/(x-1) and 1/x^2 have no extrema', () => {
+  // The samples either side of a pole are the ends of two separate branches, each one monotone, so neither
+  // end is a turning point. Until 2026-09-24 the retrace test ran straight across the pole and reported
+  // min@-0.1 and max@0.1 for 1/x, while the literal findExtrema on the same samples reported nothing.
+  const guarded = {
+    '1/x': g.sampleCurve((x) => (Math.abs(x) < 0.05 ? NaN : 1 / x), -4, 4, 160),
+    '1/(x-1)': g.sampleCurve((x) => (Math.abs(x - 1) < 0.05 ? NaN : 1 / (x - 1)), -4, 4, 160),
+    '1/x^2': g.sampleCurve((x) => (Math.abs(x) < 0.05 ? NaN : 1 / (x * x)), -4, 4, 160),
+  };
+  Object.keys(guarded).forEach((name) => {
+    const marks = g.findLandmarks(guarded[name]);
+    assert.equal(g.findExtrema(guarded[name]).length, 0, name + ': the literal reading has none either');
+    assert.deepEqual(turnsOf(marks), [], name + ': ' + shown(marks));
+    assert.ok(marks.some((m) => m.kind === 'gap'), name + ' still reports its gap');
+  });
+  // 161 samples put no sample on the pole: every sample is finite and the pole is one huge step, which
+  // findLandmarks reports as a jump. The two samples either side of it are not turning points either.
+  const stepped = {
+    '1/x': g.sampleCurve((x) => 1 / x, -4, 4, 161),
+    '1/(x-1)': g.sampleCurve((x) => 1 / (x - 1), -4, 4, 161),
+    '1/x^2': g.sampleCurve((x) => 1 / (x * x), -4, 4, 161),
+  };
+  Object.keys(stepped).forEach((name) => {
+    const marks = g.findLandmarks(stepped[name]);
+    assert.deepEqual(turnsOf(marks), [], name + ' with no sample on the pole: ' + shown(marks));
+    assert.ok(marks.some((m) => m.kind === 'jump'), name + ' still reports its jump');
+  });
+});
+
+test('real turning points beside a gap are kept; the rim of the gap is not one', () => {
+  // x + 1/x: a maximum at x = -1 (y = -2) and a minimum at x = 1 (y = 2), one on each branch of the pole.
+  const hyper = g.sampleCurve((x) => (Math.abs(x) < 0.05 ? NaN : x + 1 / x), -4, 4, 160);
+  const turns = turnsOf(g.findLandmarks(hyper));
+  assert.deepEqual(kinds(turns), ['max', 'min'], shown(turns));
+  assert.ok(turns[0].x < 0 && Math.abs(turns[0].y + 2) < 1e-9, shown(turns));
+  assert.ok(turns[1].x > 0 && Math.abs(turns[1].y - 2) < 1e-9, shown(turns));
+
+  // cos with a hole around 0: the maximum at 0 falls inside the hole, so the highest sample on its rim
+  // (x = -0.5) is not reported as a maximum, while the four turning points at -2pi, -pi, pi and 2pi are.
+  const holed = g.sampleCurve((x) => (Math.abs(x) < 0.5 ? NaN : Math.cos(x)), -7, 7, 280);
+  const cosTurns = turnsOf(g.findLandmarks(holed));
+  assert.deepEqual(kinds(cosTurns), ['max', 'min', 'min', 'max'], shown(cosTurns));
+  [-TWO_PI, -Math.PI, Math.PI, TWO_PI].forEach((truth, i) => {
+    assert.ok(Math.abs(cosTurns[i].x - truth) < 0.05, shown(cosTurns));
+  });
+});
+
+test('the landmark list stays Hebrew for the older landmarksOf kinds and for unknown kinds', () => {
+  // describeFunctionShape accepts both vocabularies, so describeLandmarksHe must not print the English
+  // kind name when it meets one of the older kinds (start, end, asymptote, undefined, y-intercept).
+  const inv = g.sampleCurve((x) => (Math.abs(x) < 0.05 ? NaN : 1 / x), -4, 4, 160);
+  const older = g.describeLandmarksHe(g.landmarksOf(g.summarizeCurve(inv)), inv);
+  assert.doesNotMatch(older, /[A-Za-z]/, older);
+  [g.KIND_HE.start, g.KIND_HE.asymptote, g.KIND_HE.undefined, g.KIND_HE.end].forEach((he) => {
+    assert.ok(older.includes(he), he + ' missing from: ' + older);
+  });
+  const withIntercept = g.describeLandmarksHe([{ kind: 'y-intercept', x: 0, y: 1 }]);
+  assert.ok(withIntercept.includes(g.KIND_HE['y-intercept']), withIntercept);
+  const unknown = g.describeLandmarksHe([{ kind: 'inflection', x: 1, y: 2 }]);
+  assert.doesNotMatch(unknown, /[A-Za-z]/, unknown);
+  assert.match(unknown, /באיקס 1, וואי 2/);
+});
+
 // ---------------------------------------------------------------------------
 // R2-A — the audio control state machine (WCAG 1.4.2 / EN 301 549 9.1.4.2).
 //

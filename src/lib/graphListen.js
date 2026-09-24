@@ -113,11 +113,17 @@
     return spans;
   }
 
-  function findAsymptotes(samples) {
-    const list = Array.isArray(samples) ? samples : [];
+  // How big a step between two finite neighbours has to be before it reads as
+  // a jump rather than a steep stretch of the curve.
+  function jumpThreshold(list) {
     const ys = finiteOf(list).map(function (s) { return s.y; });
     const yRange = ys.length ? Math.max.apply(null, ys) - Math.min.apply(null, ys) : 0;
-    const thresh = Math.max(8, yRange * 0.85);
+    return Math.max(8, yRange * 0.85);
+  }
+
+  function findAsymptotes(samples) {
+    const list = Array.isArray(samples) ? samples : [];
+    const thresh = jumpThreshold(list);
     const marks = [];
     for (let i = 1; i < list.length; i++) {
       const a = list[i - 1];
@@ -365,6 +371,16 @@
   //     retrace of 0.108 against a threshold of 0.100, disappears in 2 of
   //     2400 noisy trials measured 2026-09-10). Inherent to any minimum-
   //     prominence detector; not a defect this module can remove.
+  //   * A gap (undefined samples) or a jump (the same step findAsymptotes
+  //     reports) is an edge too. Extrema are looked for in each unbroken run
+  //     of samples on its own, so the samples on the rim of a gap or a jump
+  //     are never turning points: on 1/x the retrace used to run straight
+  //     across the pole and report min@-0.1 and max@0.1 (measured 2026-09-24),
+  //     although each branch is monotone. Roots are not split this way.
+  //     The cost is the window-edge cost above: a real turning point whose
+  //     retrace toward a gap is under delta is not reported. sin(3x) on
+  //     [-4, 4] with one undefined sample at 0.7 loses its maximum at pi/6,
+  //     three samples before the gap, which retraces 0.068 against 0.1.
   //
   // A constant sampling has zero range, so there is no scale to measure
   // prominence against and nothing to point at: findLandmarks returns []. A
@@ -577,6 +593,25 @@
     return out;
   }
 
+  // The unbroken runs of finite samples, cut at every undefined sample and at
+  // every step findAsymptotes would call a jump.
+  function continuousRuns(list) {
+    const thresh = jumpThreshold(list);
+    const runs = [];
+    let run = [];
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i];
+      const ok = !!s && isFinite(s.y);
+      if (!ok || (run.length && Math.abs(s.y - run[run.length - 1].y) > thresh)) {
+        if (run.length) runs.push(run);
+        run = [];
+      }
+      if (ok) run.push(s);
+    }
+    if (run.length) runs.push(run);
+    return runs;
+  }
+
   function findLandmarks(samples, opts) {
     const list = Array.isArray(samples) ? samples : [];
     const o = landmarkOptions(opts);
@@ -587,7 +622,10 @@
     if (!(span > o.flatTol)) return [];
     const delta = o.epsilon * span;
     const step = sampleStep(list);
-    const marks = robustRoots(list, delta, step).concat(robustExtrema(list, delta));
+    let marks = robustRoots(list, delta, step);
+    continuousRuns(list).forEach(function (run) {
+      marks = marks.concat(robustExtrema(run, delta));
+    });
     findUndefinedSpans(list).forEach(function (u) {
       marks.push({ kind: 'gap', x: u.from, y: NaN, to: u.to });
     });
@@ -624,7 +662,9 @@
       return (flat ? FLAT_HE : NO_LANDMARKS_HE) + ' ' + SAMPLE_ONLY_HE;
     }
     const parts = list.map(function (m) {
-      const name = LANDMARK_HE[m.kind] || m.kind;
+      // The older landmarksOf kinds (start, asymptote, ...) have Hebrew names in
+      // KIND_HE; an English kind name must never reach the Hebrew sentence.
+      const name = LANDMARK_HE[m.kind] || KIND_HE[m.kind] || 'נקודת ציון';
       const xs = fmt(m.x);
       const ys = fmt(m.y);
       let s = name + ' באיקס ' + (xs == null ? '?' : xs);
