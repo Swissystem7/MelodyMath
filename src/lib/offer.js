@@ -125,6 +125,11 @@
   }
 
   function principalLetterBody(raw) {
+    if (raw && typeof raw === 'object'
+      && Object.prototype.hasOwnProperty.call(raw, 'groupSize')
+      && (!Number.isInteger(raw.groupSize) || raw.groupSize < 1)) {
+      throw new Error('groupSize must be a positive integer');
+    }
     const r = normalizeTrialRequest(raw);
     const name = r.principal ? r.principal : 'מנהל/ת בית הספר';
     const teacher = r.teacher || 'מחנכת שילוב';
