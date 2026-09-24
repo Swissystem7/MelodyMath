@@ -36,3 +36,13 @@ test('shared chrome registers the service worker', () => {
   assert.match(core, /sw\.js/);
   assert.match(core, /manifest/);
 });
+
+test('the service-worker cache moved past v6, which holds the curriculum.html that threw on load', () => {
+  // sw.js is cache-first and re-caches only when its own bytes change. v6 precached the page whose
+  // `const grades = grades();` threw a TDZ ReferenceError, so a browser that opened any page since
+  // a677d10 keeps serving that copy until CACHE changes.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const m = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) > 6, 'CACHE is still v' + m[1]);
+});
