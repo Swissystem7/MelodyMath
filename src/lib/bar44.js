@@ -80,7 +80,7 @@
       const beat = Math.floor(i / 2) + 1;
       cells.push(
         '<button type="button" class="bar44-cell' + (on ? ' on' : '') + '"'
-        + (interactive ? '' : ' disabled')
+        + (interactive === true ? '' : ' disabled')
         + ' data-i="' + i + '"'
         + ' aria-pressed="' + (on ? 'true' : 'false') + '"'
         + ' aria-label="שמינית ' + (i + 1) + ' · פעימה ' + beat + '">'
