@@ -35,18 +35,18 @@
     { grade: 'א', strand: 'numbers', topic: 'קריאה וכתיבה של מספרים, לוח מאה, שם־מספר', status: GAP, note: 'גל 2' },
     { grade: 'א', strand: 'numbers', topic: 'סדרות דגמים צורניים + יצירת סדרה', status: PARTIAL, note: 'יש דילוג מספרי; אין דגם צורני' },
     { grade: 'א', strand: 'numbers', topic: 'מצבי חיבור/חיסור מחיי יום־יום (איסוף, הוספה, הפרדה, גריעה)', status: PARTIAL, note: 'חלק מהניסוחים מוזיקליים; אין טיפולוגיה מלאה' },
-    { grade: 'א', strand: 'geometry', topic: 'מיון מצולעים, קודקוד וצלע, פירוק והרכבה', status: GAP, note: 'גל 2' },
-    { grade: 'א', strand: 'measure', topic: 'מדידת אורך (מתווך, ס״מ, סרגל)', status: GAP, note: 'גל 2' },
-    { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: GAP, note: 'גל 2' },
-    { grade: 'א', strand: 'data', topic: 'דיאגרמת עמודות ופיקטוגרם', status: GAP, note: 'גל 2' },
+    { grade: 'א', strand: 'geometry', topic: 'מיון מצולעים, קודקוד וצלע, פירוק והרכבה', status: PARTIAL, note: 'מתויג בבנק (12 פריטים — מיון, קודקוד וצלע, זווית ישרה); אין פירוק והרכבה' },
+    { grade: 'א', strand: 'measure', topic: 'מדידת אורך (מתווך, ס״מ, סרגל)', status: COVERED, note: 'מתויג בבנק (6 פריטים — אורך)' },
+    { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: COVERED, note: 'מתויג בבנק (6 פריטים — שעון)' },
+    { grade: 'א', strand: 'data', topic: 'דיאגרמת עמודות ופיקטוגרם', status: COVERED, note: 'מתויג בבנק (12 פריטים)' },
 
     { grade: 'ב', strand: 'numbers', topic: 'מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', status: GAP, note: 'גל 2' },
     { grade: 'ב', strand: 'numbers', topic: 'חיבור וחיסור דו־ספרתי במאוזן ובמאונך עד 100', status: GAP, note: 'גל 2 — עיקר שעות כיתה ב׳' },
     { grade: 'ב', strand: 'numbers', topic: 'שליטה בכפולות 2, 4, 5, 10', status: COVERED, note: '3, 6, 7, 8, 9 חסומים עד שליטה בליבה' },
     { grade: 'ב', strand: 'numbers', topic: 'חילוק לחלקים ולהכלה על אותם מספרים', status: COVERED, note: 'בלי המונחים הפורמליים לתלמיד' },
-    { grade: 'ב', strand: 'geometry', topic: 'פירוק והרכבה של מצולעים; זווית ישרה', status: GAP, note: 'גל 2' },
-    { grade: 'ב', strand: 'measure', topic: 'ס״מ, היקף, נפח תיבות, חצאי שעות', status: GAP, note: 'גל 2' },
-    { grade: 'ב', strand: 'data', topic: 'טבלה, עמודות, פיקטוגרם', status: GAP, note: 'גל 2' },
+    { grade: 'ב', strand: 'geometry', topic: 'פירוק והרכבה של מצולעים; זווית ישרה', status: PARTIAL, note: 'מתויג בבנק (12 פריטים — זווית ישרה ומיון מצולעים); אין פירוק והרכבה' },
+    { grade: 'ב', strand: 'measure', topic: 'ס״מ, היקף, נפח תיבות, חצאי שעות', status: PARTIAL, note: 'מתויג בבנק (12 פריטים — אורך ושעון; בלי היקף/נפח/חצאי שעות)' },
+    { grade: 'ב', strand: 'data', topic: 'טבלה, עמודות, פיקטוגרם', status: PARTIAL, note: 'מתויג בבנק (12 פריטים — עמודות ופיקטוגרם); אין פריטי טבלה' },
 
     { grade: 'ג', strand: 'numbers', topic: 'מספרים עד 10,000, מבנה עשרוני', status: GAP, note: 'גל 2' },
     { grade: 'ג', strand: 'numbers', topic: 'חיבור/חיסור במאוזן ובמאונך עד רבבה', status: GAP, note: 'גל 2' },
@@ -102,6 +102,15 @@
     return ['א', 'ב', 'ג', 'ד'];
   }
 
+  function uncoveredDomainsHe(grade, uncoveredList) {
+    const list = Array.isArray(uncoveredList) ? uncoveredList : [];
+    if (!list.length) {
+      return 'תחומים לא מכוסים בבנק: אין — כל חמשת התחומים מיוצגים';
+    }
+    return 'תחומים לא מכוסים בבנק: ' + list.join(', ');
+  }
+
+
   return {
     COVERED: COVERED,
     PARTIAL: PARTIAL,
@@ -115,5 +124,6 @@
     summaryForGrade: summaryForGrade,
     coverageMatrix: coverageMatrix,
     grades: grades,
+    uncoveredDomainsHe: uncoveredDomainsHe,
   };
 });
