@@ -29,7 +29,7 @@
   function padDigits(n, width) {
     const s = String(Math.abs(Math.round(Number(n))));
     if (s.length >= width) return s;
-    return new Array(width - s.length + 1).join(' ') + s;
+    return new Array(width - s.length + 1).join('\u00a0') + s;
   }
 
   function renderVerticalHtml(vert) {
