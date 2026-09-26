@@ -22,6 +22,7 @@
   function defaultStorage() {
     try {
       if (typeof localStorage !== 'undefined') return localStorage;
+      return null;
     } catch (e) { /* private mode */ }
     return null;
   }
@@ -412,7 +413,16 @@
       return opts;
     }
     const n = Number(answer);
-    if (!Number.isFinite(n)) return [String(answer)];
+    if (!Number.isFinite(n)) {
+      // Special handling for beat mode
+      if (raw === 'כן') return ['כן', 'לא'];
+      if (raw === 'זוגי') return ['זוגי', 'אי-זוגי'];
+      if (raw === 'משולש') {
+        const shapes = ['משולש', 'ריבוע', 'עיגול', 'חץ'];
+        return shapes;
+      }
+      return [String(answer)];
+    }
     const opts = [n];
     const around = [n - 1, n + 1, n - 2, n + 2, n + 3, n - 3, n + 4, Math.max(0, n - 4), n === 0 ? 1 : 0];
     around.forEach(function (c) {
