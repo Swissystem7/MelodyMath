@@ -95,6 +95,77 @@
     };
   }
 
+  function rulerLength(ruler) {
+    if (typeof ruler === 'number') return ruler;
+    if (!ruler) return 0;
+    if (typeof ruler === 'object') {
+      if (typeof ruler.length === 'number') return ruler.length;
+      if (typeof ruler.count === 'number') return ruler.count;
+      if (typeof ruler.value === 'number') return ruler.value;
+      if (typeof ruler.units === 'number') return ruler.units;
+      if (typeof ruler.len === 'number') return ruler.len;
+      const n = Number(ruler.length || ruler.count || ruler.value || ruler.units || ruler.len);
+      if (Number.isFinite(n)) return n;
+    }
+    const n = Number(ruler);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function renderItemWidget(it) {
+    if (!it) return '';
+    const parts = [];
+    if (it.chart) {
+      const chart = it.chart;
+      const widget = chart.widget || chart.type || (chart.icon ? 'pictogram' : (chart.bars ? 'barchart' : ''));
+      if (widget === 'pictogram') {
+        const rawRows = chart.rows || chart.data || chart.bars || chart.items || [];
+        const rows = Array.isArray(rawRows)
+          ? rawRows
+          : (rawRows && typeof rawRows === 'object'
+            ? Object.keys(rawRows).map(function (k) { return { label: k, count: rawRows[k] }; })
+            : []);
+        const key = Math.max(1, Number(chart.key) || 1);
+        const lines = rows.map(function (r) {
+          const label = Array.isArray(r) ? r[0] : (r.label || r.name || r.text || r.category || '');
+          const countVal = Array.isArray(r) ? r[1] : (r.count != null ? r.count : (r.value != null ? r.value : r.val));
+          const count = Number(countVal) || 0;
+          const icon = (r && r.icon) || chart.icon || '🍎';
+          const copies = Math.max(0, Math.ceil(count / key));
+          const icons = icon.repeat(copies);
+          const sep = label ? (String(label).endsWith(':') ? ' ' : ': ') : '';
+          return '<div class="sheet-widget-row">' + (label ? escapeHtml(label) + sep : '') + icons + '</div>';
+        });
+        if (lines.length) {
+          parts.push('<div class="sheet-widget sheet-pictogram">' + lines.join('') + '</div>');
+        }
+      } else if (widget === 'barchart' || widget === 'bar') {
+        const rawBars = chart.bars || chart.rows || chart.data || chart.items || [];
+        const bars = Array.isArray(rawBars)
+          ? rawBars
+          : (rawBars && typeof rawBars === 'object'
+            ? Object.keys(rawBars).map(function (k) { return { label: k, value: rawBars[k] }; })
+            : []);
+        const lines = bars.map(function (b) {
+          const label = Array.isArray(b) ? b[0] : (b.label || b.name || b.text || b.category || '');
+          const val = Array.isArray(b) ? b[1] : (b.value != null ? b.value : (b.count != null ? b.count : b.val));
+          const valStr = val != null ? escapeHtml(String(val)) : '';
+          const sep = label ? (String(label).endsWith(':') ? ' ' : ': ') : '';
+          return '<div class="sheet-widget-row">' + (label ? escapeHtml(label) + sep : '') + valStr + '</div>';
+        });
+        if (lines.length) {
+          parts.push('<div class="sheet-widget sheet-barchart">' + lines.join('') + '</div>');
+        }
+      }
+    }
+    if (it.ruler) {
+      const len = Math.max(0, Math.round(rulerLength(it.ruler)));
+      if (len > 0) {
+        parts.push('<div class="sheet-widget sheet-ruler"><div class="sheet-widget-row">' + '🟫'.repeat(len) + '</div></div>');
+      }
+    }
+    return parts.join('');
+  }
+
   function renderWorksheetHtml(sheet) {
     const s = sheet || buildWorksheet({});
     const who = [s.studentName, s.classCode].filter(Boolean).join(' · ');
@@ -104,6 +175,7 @@
       return '<div class="sheet-item"><span class="n">' + (i + 1) + '.</span> '
         + '<span class="tag">' + escapeHtml(it.he || it.skill || '') + '</span> '
         + '<p class="prompt">' + escapeHtml(it.prompt) + '</p>'
+        + renderItemWidget(it)
         + '<div class="sheet-blank">תשובה: ________________</div></div>';
     }).join('');
     let html = '<div class="sheet-page">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
