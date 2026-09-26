@@ -95,6 +95,71 @@
     };
   }
 
+  function renderWidgetHtml(it) {
+    if (!it) return '';
+    if (it.chart) {
+      const ch = it.chart;
+      const w = ch.widget || it.widget || ch.type || it.type || (ch.rows ? 'pictogram' : (ch.bars ? 'barchart' : ''));
+      if (w === 'pictogram' || (!w && (ch.icon || it.icon))) {
+        let rawRows = ch.rows || ch.data || ch.items || (Array.isArray(ch) ? ch : null);
+        if (!rawRows && typeof ch === 'object') {
+          rawRows = [];
+          const reserved = { widget: 1, type: 1, icon: 1, key: 1, title: 1, prompt: 1 };
+          for (const k in ch) {
+            if (!reserved[k] && Object.prototype.hasOwnProperty.call(ch, k)) {
+              rawRows.push({ label: k, count: ch[k] });
+            }
+          }
+        }
+        const rows = Array.isArray(rawRows) ? rawRows : Object.keys(rawRows || {}).map(function (k) {
+          const v = rawRows[k];
+          return (v && typeof v === 'object') ? Object.assign({ label: k }, v) : { label: k, count: v };
+        });
+        const icon = ch.icon || it.icon || '🍎';
+        const key = Number(ch.key || it.key) || 1;
+        const lines = rows.map(function (r) {
+          const label = r.label != null ? r.label : (r.name != null ? r.name : '');
+          const count = Number(r.count != null ? r.count : (r.value != null ? r.value : 0)) || 0;
+          const rIcon = r.icon || icon;
+          const copies = Math.ceil(count / key);
+          let icons = '';
+          for (let j = 0; j < copies; j++) icons += rIcon;
+          return '<div class="widget-row">' + escapeHtml(label) + (label && icons ? ' ' : '') + icons + '</div>';
+        }).join('');
+        if (lines) return '<div class="sheet-widget">' + lines + '</div>';
+      } else if (w === 'barchart' || (!w && ch.bars)) {
+        let rawBars = ch.bars || ch.rows || ch.data || ch.items || (Array.isArray(ch) ? ch : null);
+        if (!rawBars && typeof ch === 'object') {
+          rawBars = [];
+          const reserved = { widget: 1, type: 1, icon: 1, key: 1, title: 1, prompt: 1 };
+          for (const k in ch) {
+            if (!reserved[k] && Object.prototype.hasOwnProperty.call(ch, k)) {
+              rawBars.push({ label: k, value: ch[k] });
+            }
+          }
+        }
+        const bars = Array.isArray(rawBars) ? rawBars : Object.keys(rawBars || {}).map(function (k) {
+          const v = rawBars[k];
+          return (v && typeof v === 'object') ? Object.assign({ label: k }, v) : { label: k, value: v };
+        });
+        const lines = bars.map(function (b) {
+          const label = b.label != null ? b.label : (b.name != null ? b.name : '');
+          const val = b.value != null ? b.value : (b.count != null ? b.count : '');
+          return '<div class="widget-row">' + escapeHtml(label) + (label && val !== '' ? ' ' : '') + escapeHtml(val) + '</div>';
+        }).join('');
+        if (lines) return '<div class="sheet-widget">' + lines + '</div>';
+      }
+    } else if (it.ruler != null) {
+      const len = typeof it.ruler === 'number'
+        ? it.ruler
+        : (it.ruler.length != null ? it.ruler.length : (it.ruler.value != null ? it.ruler.value : 0));
+      let blocks = '';
+      for (let j = 0; j < len; j++) blocks += '🟫';
+      if (blocks) return '<div class="sheet-widget">' + blocks + '</div>';
+    }
+    return '';
+  }
+
   function renderWorksheetHtml(sheet) {
     const s = sheet || buildWorksheet({});
     const who = [s.studentName, s.classCode].filter(Boolean).join(' · ');
@@ -104,6 +169,7 @@
       return '<div class="sheet-item"><span class="n">' + (i + 1) + '.</span> '
         + '<span class="tag">' + escapeHtml(it.he || it.skill || '') + '</span> '
         + '<p class="prompt">' + escapeHtml(it.prompt) + '</p>'
+        + renderWidgetHtml(it)
         + '<div class="sheet-blank">תשובה: ________________</div></div>';
     }).join('');
     let html = '<div class="sheet-page">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
