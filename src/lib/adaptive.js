@@ -30,6 +30,10 @@
     return String(value).trim().replace(/\s/g, '').replace(/,/g, '.');
   }
 
+  function normalizeHebrewText(value) {
+    return String(value).trim().replace(/[\s\-־]/g, '');
+  }
+
   function parseStudentNumber(rawIn) {
     let s = String(rawIn == null ? '' : rawIn).trim().replace(/\s/g, '');
     if (s === '') return NaN;
@@ -82,6 +86,11 @@
     if (g === '') return false;
     const e = normalizeAnswer(expected);
     if (g === e) return true;
+    if (
+      /[\u0590-\u05FF]/.test(g) &&
+      /[\u0590-\u05FF]/.test(e) &&
+      normalizeHebrewText(given) === normalizeHebrewText(expected)
+    ) return true;
     const gf = parseSimpleFraction(given);
     const ef = parseSimpleFraction(expected);
     if (gf && ef && gf.n * ef.d === ef.n * gf.d) return true;
