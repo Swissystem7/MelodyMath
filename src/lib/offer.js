@@ -32,18 +32,25 @@
   }
 
   function normalizeTrialRequest(raw) {
+    if (raw && raw._normalized) return raw;
     const src = raw && typeof raw === 'object' ? raw : {};
-    const role = cleanLine(src.role, 40);
-    return {
-      teacher: cleanLine(src.teacher, 60),
+    const role = escapeHtml(cleanLine(src.role, 40));
+    const res = {
+      teacher: escapeHtml(cleanLine(src.teacher, 60)),
       role: role || 'מחנכת שילוב',
-      school: cleanLine(src.school, 80),
-      grade: cleanLine(src.grade, 40),
+      school: escapeHtml(cleanLine(src.school, 80)),
+      grade: escapeHtml(cleanLine(src.grade, 40)),
       groupSize: clampGroup(src.groupSize),
-      principal: cleanLine(src.principal, 60),
-      principalEmail: cleanLine(src.principalEmail, 80),
-      replyEmail: cleanLine(src.replyEmail, 80),
+      principal: escapeHtml(cleanLine(src.principal, 60)),
+      principalEmail: escapeHtml(cleanLine(src.principalEmail, 80)),
+      replyEmail: escapeHtml(cleanLine(src.replyEmail, 80)),
     };
+    Object.defineProperty(res, '_normalized', {
+      value: true,
+      enumerable: false,
+      configurable: true,
+    });
+    return res;
   }
 
   function missingTrialFields(req) {
@@ -100,12 +107,12 @@
     const r = normalizeTrialRequest(raw);
     const f = onePagerFacts();
     const who = r.teacher
-      ? escapeHtml(r.teacher) + (r.role ? ' · ' + escapeHtml(r.role) : '')
+      ? r.teacher + (r.role ? ' · ' + r.role : '')
       : 'מחנכת שילוב';
-    const place = [r.school, r.grade].filter(Boolean).map(escapeHtml).join(' · ')
+    const place = [r.school, r.grade].filter(Boolean).join(' · ')
       || 'בית ספר (ימולא בהדפסה)';
     const group = r.groupSize ? escapeHtml(String(r.groupSize)) + ' ילדים בקבוצה' : 'קבוצה קטנה';
-    const principal = r.principal ? escapeHtml(r.principal) : 'מנהל/ת בית הספר';
+    const principal = r.principal ? r.principal : 'מנהל/ת בית הספר';
     function lis(arr) {
       return arr.map(function (line) { return '<li>' + escapeHtml(line) + '</li>'; }).join('');
     }
