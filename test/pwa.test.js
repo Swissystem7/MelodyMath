@@ -46,3 +46,14 @@ test('the service-worker cache moved past v6, which holds the curriculum.html th
   assert.ok(m, 'CACHE constant not found');
   assert.ok(Number(m[1]) > 6, 'CACHE is still v' + m[1]);
 });
+
+test('every script a page loads is precached, so the page still works offline', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));
+  for (const page of ['index.html', 'curriculum.html', 'offer.html', 'landing.html', 'functions.html', '807.html']) {
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    for (const m of html.matchAll(/<script src="([^"]+)"/g)) {
+      assert.ok(listed.has(m[1]), page + ' loads ' + m[1] + ' but sw.js does not precache it');
+    }
+  }
+});
