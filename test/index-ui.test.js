@@ -31,3 +31,10 @@ test('home is the elementary product: grade picker, coverage link, no mixed soni
   assert.match(indexHtml, /src\/lib\/numberLine\.js/);
   assert.match(indexHtml, /src\/lib\/bar44\.js/);
 });
+
+test('the pilot kit sends the end-of-pilot answer to the project, not only to the teacher herself', () => {
+  const kit = indexHtml.slice(indexHtml.indexOf('id="trialKit"'), indexHtml.indexOf('id="worksheetCard"'));
+  assert.match(kit, /data-mm-contact/);
+  assert.match(kit, /שלחו את התשובה לפרויקט/);
+  assert.match(indexHtml, /<script src="src\/lib\/contact\.js"><\/script>/);
+});
