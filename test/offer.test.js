@@ -95,3 +95,32 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /checkout|stripe|paypal|תשלום עכשיו|49 ₪|רישיון כיתתי/i);
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
+
+test('without a principal address the letter is not silently addressed to the project', () => {
+  const noPrincipal = Object.assign({}, sample, { principalEmail: '' });
+  const mail = offer.buildPrincipalEmail(noPrincipal);
+  assert.equal(mail.ok, true);
+  assert.equal(mail.to, '');
+  assert.match(mail.mailto, /^mailto:\?subject=/);
+  assert.doesNotMatch(mail.mailto, /aviran|gmail/);
+});
+
+test('the project gets a copy only when the teacher ticks the box', () => {
+  const project = require('../src/lib/contact').projectEmail();
+  assert.ok(project, 'CONTACT.email is empty; this test needs the configured address');
+  const enc = encodeURIComponent(project).replace(/[.]/g, '\\.');
+  const off = offer.buildPrincipalEmail(sample);
+  assert.doesNotMatch(off.mailto, new RegExp(enc));
+  const on = offer.buildPrincipalEmail(Object.assign({}, sample, { copyProject: true, replyEmail: 'teacher@example.school.il' }));
+  assert.match(on.mailto, /^mailto:principal%40example\.school\.il\?/);
+  assert.match(on.mailto, new RegExp('cc=teacher%40example\\.school\\.il%2C' + enc));
+  assert.equal(offer.normalizeTrialRequest({ copyProject: 'yes' }).copyProject, true);
+  assert.equal(offer.normalizeTrialRequest({}).copyProject, false);
+});
+
+test('the offer page offers the copy box and says what it does', () => {
+  const page = fs.readFileSync(path.join(__dirname, '..', 'offer.html'), 'utf8');
+  assert.match(page, /id="copyProject"/);
+  assert.match(page, /עותק לפרויקט/);
+  assert.doesNotMatch(page, /תשלח עותק לכתובת הפרויקט/);
+});

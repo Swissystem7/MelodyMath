@@ -49,6 +49,7 @@
       principal: cleanLine(src.principal, 60),
       principalEmail: cleanLine(src.principalEmail, 80),
       replyEmail: cleanLine(src.replyEmail, 80),
+      copyProject: src.copyProject === true || src.copyProject === 'yes' || src.copyProject === 'on',
     };
   }
 
@@ -169,19 +170,23 @@
     const subject = 'בקשת ניסוי כיתתי חינם · MelodyMath · 4 שבועות · ' + r.school;
     const body = principalLetterBody(r);
     const to = r.principalEmail || '';
+    // No principal address = an empty To: the teacher types it in her mail app.
+    // The project is copied only when she ticks «עותק לפרויקט».
+    const cc = [r.replyEmail, r.copyProject ? PROJECT_MAIL : ''].filter(Boolean).join(',');
     return {
       ok: true,
       missing: [],
       to: to,
+      copiesProject: !!(r.copyProject && PROJECT_MAIL),
       subject: subject,
       body: body,
-      mailto: buildMailto(to || PROJECT_MAIL, subject, body, r.replyEmail),
+      mailto: buildMailto(to, subject, body, cc),
     };
   }
 
   function buildMailto(to, subject, body, cc) {
-    const addr = cleanLine(to, 80) || PROJECT_MAIL;
-    const copy = cleanLine(cc, 80);
+    const addr = cleanLine(to, 80);
+    const copy = cleanLine(cc, 170);
     return 'mailto:' + encodeURIComponent(addr)
       + '?subject=' + encodeURIComponent(subject)
       + '&body=' + encodeURIComponent(body)

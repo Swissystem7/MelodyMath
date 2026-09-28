@@ -30,6 +30,8 @@
   .honest{background:#fff8ec;border:1px solid #f0e2c4;border-radius:16px;padding:16px 18px}
   .honest b{color:var(--warn)}
   label{display:block;font-weight:700;font-size:.88rem;margin:12px 0 0}
+  label.check{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:16px}
+  label.check input{width:auto;margin-top:5px}
   input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
@@ -136,6 +138,10 @@
         <input id="replyEmail" name="replyEmail" type="email" maxlength="80" autocomplete="email" dir="ltr">
       </label>
     </div>
+    <label class="check" id="copyProjectRow">
+      <input type="checkbox" id="copyProject" name="copyProject">
+      שלחו עותק לפרויקט (רשות). כך נדע שנפתח ניסוי ונוכל לשאול בסוף את שאלת הסיום. העותק יוצא מהדוא״ל שלכם — אין שרת שאוסף אותו.
+    </label>
     <div class="btns">
       <button type="submit" class="primary" id="makeLetter">הצגת המכתב</button>
       <button type="button" class="ghost" id="openMail" disabled>פתיחת הדוא״ל</button>
@@ -191,6 +197,7 @@
       principal: $('principal').value,
       principalEmail: $('principalEmail').value,
       replyEmail: $('replyEmail').value,
+      copyProject: $('copyProject').checked,
     };
   }
 
@@ -206,9 +213,11 @@
       return mail;
     }
     $('letterPreview').textContent = mail.body;
-    $('letterHint').textContent = mail.to
-      ? 'היעד: ' + mail.to + '. אפשר לפתוח בדוא״ל או להעתיק.'
-      : 'אין דוא״ל למנהל/ת — «פתיחת הדוא״ל» תשלח עותק לכתובת הפרויקט. אפשר גם להעתיק ולשלוח ידנית.';
+    $('letterHint').textContent = (mail.to
+      ? 'היעד: ' + mail.to + '.'
+      : 'אין דוא״ל למנהל/ת — «פתיחת הדוא״ל» פותחת מכתב בלי נמען, ואת הכתובת כותבים בעצמכם.')
+      + (mail.copiesProject ? ' עותק יישלח גם לפרויקט.' : '')
+      + ' אפשר גם להעתיק ולשלוח ידנית.';
     $('openMail').disabled = false;
     $('copyLetter').disabled = false;
     $('openMail').setAttribute('data-href', mail.mailto);
@@ -226,7 +235,12 @@
       : 'מלאו שם, בית ספר ושכבה.';
   });
 
-  ['teacher', 'role', 'school', 'grade', 'groupSize', 'principal', 'principalEmail', 'replyEmail'].forEach(function (id) {
+  if (!PROJECT_MAIL) {
+    $('copyProject').checked = false;
+    $('copyProjectRow').hidden = true;
+  }
+
+  ['teacher', 'role', 'school', 'grade', 'groupSize', 'principal', 'principalEmail', 'replyEmail', 'copyProject'].forEach(function (id) {
     $(id).addEventListener('input', function () { paint(readForm()); });
     $(id).addEventListener('change', function () { paint(readForm()); });
   });
