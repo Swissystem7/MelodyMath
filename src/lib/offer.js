@@ -8,7 +8,13 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const PROJECT_MAIL = 'aviran2606@gmail.com';
+  // The address lives in contact.js (CONTACT.email). '' there = no project address here.
+  const contactApi = (typeof module === 'object' && module.exports && typeof require === 'function')
+    ? require('./contact')
+    : (typeof globalThis !== 'undefined' && typeof globalThis.projectEmail === 'function'
+      ? { projectEmail: globalThis.projectEmail }
+      : { projectEmail: function () { return ''; } });
+  const PROJECT_MAIL = contactApi.projectEmail();
   const DEMO_URL = 'https://swissystem7.github.io/MelodyMath/';
   const OFFER_URL = 'https://swissystem7.github.io/MelodyMath/offer.html';
   const TRIAL_WEEKS = 4;
@@ -43,6 +49,7 @@
       principal: cleanLine(src.principal, 60),
       principalEmail: cleanLine(src.principalEmail, 80),
       replyEmail: cleanLine(src.replyEmail, 80),
+      copyProject: src.copyProject === true || src.copyProject === 'yes' || src.copyProject === 'on',
     };
   }
 
@@ -163,23 +170,33 @@
     const subject = 'בקשת ניסוי כיתתי חינם · MelodyMath · 4 שבועות · ' + r.school;
     const body = principalLetterBody(r);
     const to = r.principalEmail || '';
+    // No principal address = an empty To: the teacher types it in her mail app.
+    // The project is copied only when she ticks «עותק לפרויקט».
+    const cc = [r.replyEmail, r.copyProject ? PROJECT_MAIL : ''].filter(Boolean).join(',');
     return {
       ok: true,
       missing: [],
       to: to,
+      copiesProject: !!(r.copyProject && PROJECT_MAIL),
       subject: subject,
       body: body,
-      mailto: buildMailto(to || PROJECT_MAIL, subject, body, r.replyEmail),
+      mailto: buildMailto(to, subject, body, cc),
     };
   }
 
   function buildMailto(to, subject, body, cc) {
-    const addr = cleanLine(to, 80) || PROJECT_MAIL;
-    const copy = cleanLine(cc, 80);
+    const addr = cleanLine(to, 80);
+    const copy = cleanLine(cc, 170);
     return 'mailto:' + encodeURIComponent(addr)
       + '?subject=' + encodeURIComponent(subject)
       + '&body=' + encodeURIComponent(body)
       + (copy ? '&cc=' + encodeURIComponent(copy) : '');
+  }
+
+  // The mail button navigates only to a mailto: link; any other scheme (javascript:, data:, https:) becomes ''.
+  function safeMailHref(href) {
+    if (typeof href !== 'string') return '';
+    return href.startsWith('mailto:') ? href : '';
   }
 
   return {
@@ -196,5 +213,6 @@
     principalLetterBody: principalLetterBody,
     buildPrincipalEmail: buildPrincipalEmail,
     buildMailto: buildMailto,
+    safeMailHref: safeMailHref,
   };
 });

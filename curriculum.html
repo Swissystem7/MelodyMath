@@ -15,7 +15,7 @@
   .sum{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
   .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:8rem}
   .stat strong{display:block;font-size:1.4rem}
-  .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0}
+  .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0;overflow-x:auto}
   .note{color:var(--muted);font-size:.9rem}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
@@ -39,15 +39,15 @@
 <script src="src/lib/core.js"></script>
 <script>
 (function () {
-  const grades = grades();
+  const gradeList = grades();
   const sum = document.getElementById('sum');
   const tables = document.getElementById('tables');
-  sum.innerHTML = grades.map(function (g) {
+  sum.innerHTML = gradeList.map(function (g) {
     const s = summaryForGrade(g);
     return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
       + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
   }).join('');
-  tables.innerHTML = grades.map(function (g) {
+  tables.innerHTML = gradeList.map(function (g) {
     const rows = coverageMatrix().filter(function (r) { return r.grade === g; });
     const body = rows.map(function (r) {
       return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
