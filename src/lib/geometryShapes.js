@@ -53,6 +53,10 @@
     return Math.round(Number(deg)) === 90;
   }
 
+  function isStraightAngle(deg) {
+    return Math.round(Number(deg)) === 180;
+  }
+
   return {
     SHAPES: SHAPES,
     shapeOf: shapeOf,
@@ -61,5 +65,6 @@
     namesForSides: namesForSides,
     shapeHe: shapeHe,
     isRightAngle: isRightAngle,
+    isStraightAngle: isStraightAngle,
   };
 });
