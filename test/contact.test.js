@@ -56,3 +56,26 @@ test('offer and landing pages mount the contact block and load contact.js', () =
     assert.match(html, /src="src\/lib\/contact\.js"/, page);
   }
 });
+
+// The owner decided on 28.9: the public contact channel for all his apps is his Google Form
+// "משוב על האפליקציות", with the app field pre-filled as MelodyMath (an exact option of the form).
+const OWNER_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdT8YduNx-VWKM3bWGUJdiSj4Sw9D-EA6R6c-oYVYCQmOVXxQ/viewform?usp=pp_url&entry.368039752=MelodyMath';
+
+test('CONTACT.form is the owner\'s Google Form; the pages link to it instead of the public GitHub form', () => {
+  assert.equal(contact.CONTACT.form, OWNER_FORM);
+  assert.equal(contact.contactChannels().formUrl, OWNER_FORM);
+  const html = contact.renderContactHtml(contact.CONTACT);
+  assert.ok(html.includes('href="' + OWNER_FORM.replace(/&/g, '&amp;') + '"'), 'the block links to the form');
+  assert.match(html, /target="_blank" rel="noopener"/);
+  assert.match(html, /טופס Google/);
+  assert.doesNotMatch(html, /issues\/new|בגיטהאב/, 'the GitHub form and its "public" note step aside');
+  assert.match(html, /אל תכתבו שמות של ילדים/, 'the no-personal-details warning stays');
+  // A non-https value is ignored and the GitHub form comes back.
+  const bad = contact.renderContactHtml({ email: '', form: 'javascript:alert(1)' });
+  assert.match(bad, /issues\/new\?template=pilot\.yml/);
+  assert.doesNotMatch(bad, /javascript:/);
+});
+
+test('contact.js changed, so the service worker cache moved to v9', () => {
+  assert.match(read('sw.js'), /const CACHE = 'melodymath-offline-v9';/);
+});

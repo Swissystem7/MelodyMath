@@ -1,9 +1,12 @@
 // MelodyMath — the one place that says how to reach the project.
 //
-// CONTACT.email is the only contact value in the repo. The owner put this
-// address in offer.js on 13.8.2026 (c94fdd8); it moved here unchanged.
-// Set it to '' and every page hides the email link and shows only the
-// Hebrew GitHub issue form. Nothing here invents a phone, a WhatsApp or a name.
+// CONTACT holds the only contact values in the repo.
+//   email: the owner put this address in offer.js on 13.8.2026 (c94fdd8); it
+//          moved here unchanged. '' hides the email link.
+//   form:  the public channel. The owner decided on 28.9 that it is his Google
+//          Form "משוב על האפליקציות", with the app field pre-filled as MelodyMath.
+//          https only; '' (or anything else) brings back the Hebrew GitHub issue form.
+// Nothing here invents a phone, a WhatsApp or a name.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -18,6 +21,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const CONTACT = {
     email: 'aviran2606@gmail.com',
+    form: 'https://docs.google.com/forms/d/e/1FAIpQLSdT8YduNx-VWKM3bWGUJdiSj4Sw9D-EA6R6c-oYVYCQmOVXxQ/viewform?usp=pp_url&entry.368039752=MelodyMath',
   };
   const ISSUE_FORM_URL = 'https://github.com/Swissystem7/MelodyMath/issues/new?template=pilot.yml';
   const EMAIL_RE = /^[^\s@<>"'()]+@[^\s@<>"'()]+\.[a-z]{2,}$/i;
@@ -31,8 +35,10 @@
   function contactChannels(cfg) {
     const c = cfg && typeof cfg === 'object' ? cfg : CONTACT;
     const raw = String(c.email == null ? '' : c.email).trim();
+    const form = String(c.form == null ? '' : c.form).trim();
     return {
       email: EMAIL_RE.test(raw) ? raw : '',
+      formUrl: /^https:\/\/[^\s"'<>]+$/i.test(form) ? form : '',
       issueUrl: ISSUE_FORM_URL,
     };
   }
@@ -48,6 +54,13 @@
     if (ch.email) {
       html += '<a class="btn primary" href="mailto:' + esc(encodeURIComponent(ch.email))
         + '?subject=' + esc(encodeURIComponent(subject)) + '">דוא״ל לפרויקט</a> ';
+    }
+    if (ch.formUrl) {
+      return html + '<a class="btn ghost" href="' + esc(ch.formUrl) + '" target="_blank" rel="noopener">טופס פנייה או משוב (טופס Google)</a>'
+        + '</div>'
+        + '<p class="mm-contact-note">הטופס נפתח בחלון חדש. אל תכתבו שמות של ילדים, טלפון או כתובת.'
+        + (ch.email ? ' אם תרצו תשובה — הדוא״ל.' : '')
+        + '</p>';
     }
     html += '<a class="btn ghost" href="' + esc(ch.issueUrl) + '">טופס פנייה או משוב בגיטהאב</a>'
       + '</div>'
