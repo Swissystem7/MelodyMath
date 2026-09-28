@@ -193,6 +193,12 @@
       + (copy ? '&cc=' + encodeURIComponent(copy) : '');
   }
 
+  // The mail button navigates only to a mailto: link; any other scheme (javascript:, data:, https:) becomes ''.
+  function safeMailHref(href) {
+    if (typeof href !== 'string') return '';
+    return href.startsWith('mailto:') ? href : '';
+  }
+
   return {
     PROJECT_MAIL: PROJECT_MAIL,
     DEMO_URL: DEMO_URL,
@@ -207,5 +213,6 @@
     principalLetterBody: principalLetterBody,
     buildPrincipalEmail: buildPrincipalEmail,
     buildMailto: buildMailto,
+    safeMailHref: safeMailHref,
   };
 });
