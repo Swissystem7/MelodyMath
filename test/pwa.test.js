@@ -57,3 +57,19 @@ test('every script a page loads is precached, so the page still works offline', 
     }
   }
 });
+
+test('the cache name is not v7, which master (PR #34) ships with a different file set', () => {
+  // main never served v7. Master's #34 bumps to v7 with its own curriculum.html and without
+  // contact.js; one name for two different asset sets would pin whichever copy a tablet saw first.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const m = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) >= 8, 'CACHE is v' + m[1]);
+});
+
+test('README says where the one contact value lives and that the lab tab is out', () => {
+  const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+  assert.match(readme, /src\/lib\/contact\.js/);
+  assert.match(readme, /CONTACT\.email/);
+  assert.match(readme, /שעון/);
+});
