@@ -16,3 +16,16 @@ test('the coverage table scrolls inside its card, not the whole page', () => {
   const css = read('curriculum.html');
   assert.match(css, /\.grade-block\{[^}]*overflow-x:auto/);
 });
+
+// Measured again 28.9.2026 at 390px: once the teacher fills name, school and grade,
+// the letter preview (<pre>, white-space:pre-wrap) prints the demo and offer URLs,
+// which do not break, and offer.html widens to 524px.
+test('the principal-letter preview wraps its URLs on a phone', () => {
+  assert.match(read('offer.html'), /#letterPreview\{[^}]*overflow-wrap:anywhere/);
+});
+
+// 807.html measured 392px at a 390px viewport: the answer input keeps its intrinsic
+// min-width inside the flex row, so the row is 355px in a 316px box.
+test('the 807 answer input can shrink inside its flex row', () => {
+  assert.match(read('807.html'), /input\[type=text\]\{flex:1; min-width:0;/);
+});
