@@ -81,6 +81,13 @@
     return { n: n, d: d };
   }
 
+  function isDecimalAnswer(raw) {
+    if (raw == null) return false;
+    const s = String(raw).trim().replace(/\s/g, '');
+    if (!s || s.includes('/')) return false;
+    return /^[+-]?(?:\d*[.,]\d+|\d+[.,]\d*)$/.test(s);
+  }
+
   function isCorrect(given, expected) {
     const g = normalizeAnswer(given);
     if (g === '') return false;
@@ -129,6 +136,7 @@
   return {
     nextLevel, normalizeAnswer, isCorrect, eligibleExercises,
     parseStudentNumber, countDecimals, closeEnough, parseSimpleFraction,
+    isDecimalAnswer,
     MIN_LEVEL, MAX_LEVEL,
   };
 });
