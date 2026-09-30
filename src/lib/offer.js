@@ -14,8 +14,8 @@
   const TRIAL_WEEKS = 4;
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    return String(s == null ? '' : s).replace(/[&<>"'€]/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '€': '&euro;' })[c];
     });
   }
 
@@ -58,7 +58,7 @@
   function offerBoundary() {
     return {
       freeForever: [
-        'הדמו הציבורי: תרגול יסודי, מצב כיתה, דפי עבודה, דוח מורה מקומי, מכתב להורה, תעודה',
+        'ה демо הציבורי: תרגול יסודי, מצב כיתה, דפי עבודה, דוח מורה מקומי, מכתב להורה, תעודה',
         'סוניפיקציה עברית של גרפים ודף 807',
         'נגישות על הטאבלט (ניגודיות, אות גדולה, הקראה, המתנה ארוכה, שקט)',
         'שמירה במכשיר בלבד, בלי חשבון ובלי שרת',
@@ -117,10 +117,10 @@
       + '<h2>מה זה</h2><ul>' + lis(f.whatHe) + '</ul>'
       + '<h2>מה זה לא</h2><ul>' + lis(f.notHe) + '</ul>'
       + '<h2>מה מתבקש</h2><p>' + escapeHtml(f.askHe) + '</p>'
-      + '<p class="urls">דמו: ' + escapeHtml(f.demoUrl) + '<br>דף ההצעה: '
+      + '<p class="urls">-demo: ' + escapeHtml(f.demoUrl) + '<br>דף ההצעה: '
       + escapeHtml(f.offerUrl) + '</p>'
       + '<p class="foot">אין כאן מספר בתי ספר, אין מדד שיפור, ואין מחיר. '
-      + 'הדמו נשאר חינם גם אחרי ארבעת השבועות.</p>'
+      + 'ה демо נשאר חינם גם אחרי ארבעת השבועות.</p>'
       + '</article>';
   }
 
