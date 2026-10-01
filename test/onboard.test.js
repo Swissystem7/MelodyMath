@@ -49,3 +49,7 @@ test('garbage in storage does not crash the first-run gate', () => {
   ls.setItem(onboard.ONBOARD_KEY, '{"dismissed":1}');
   assert.equal(onboard.shouldShowOnboard(ls), false);
 });
+
+test('escapeHtml should escape the Euro sign Unicode character to its HTML entity', () => {
+  assert.equal(onboard.escapeHtml('Price: €100'), 'Price: &euro;100');
+});
