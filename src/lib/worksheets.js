@@ -14,7 +14,7 @@
 
   function clampCount(n) {
     const v = Math.round(Number(n));
-    if (!Number.isFinite(v)) return 8;
+    if (!Number.isFinite(v)) return 4;
     return Math.min(24, Math.max(4, v));
   }
 
