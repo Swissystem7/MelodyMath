@@ -38,7 +38,7 @@
   function fractionFromEighths(count) {
     const c = Math.round(Number(count));
     if (!Number.isFinite(c) || c < 0 || c > BAR_EIGHTHS) return null;
-    if (c === 0) return '0';
+    if (c === 0) return '0/8';
     if (c === 8) return '1';
     if (c === 4) return '1/2';
     if (c === 2) return '1/4';
