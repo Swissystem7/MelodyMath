@@ -63,3 +63,7 @@ test('count-the-beats items carry a hear cue that matches the countable answer',
     });
   });
 });
+
+test('Unicode characters are escaped in HTML', () => {
+  assert.equal(sheets.escapeHtml('© MelodyMath'), '&copy; MelodyMath');
+});
