@@ -95,3 +95,8 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /checkout|stripe|paypal|תשלום עכשיו|49 ₪|רישיון כיתתי/i);
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
+
+test('whitespace-only principalEmail is treated as missing', () => {
+  const result = offer.buildPrincipalEmail({ principalEmail: '   ' });
+  assert.deepEqual(result, { ok: false, missing: ['principalEmail'], to: '', subject: '', body: '', mailto: '' });
+});
