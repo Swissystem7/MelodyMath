@@ -156,6 +156,11 @@
 
   function buildPrincipalEmail(raw) {
     const r = normalizeTrialRequest(raw);
+    const hasPrincipalEmail = raw && typeof raw === 'object'
+      && Object.prototype.hasOwnProperty.call(raw, 'principalEmail');
+    if (hasPrincipalEmail && !r.principalEmail) {
+      return { ok: false, missing: ['principalEmail'], to: '', subject: '', body: '', mailto: '' };
+    }
     const miss = missingTrialFields(r);
     if (miss.length) {
       return { ok: false, missing: miss, to: '', subject: '', body: '', mailto: '' };
