@@ -122,7 +122,8 @@
   }
 
   function sanitizeHear(groups) {
-    if (!Array.isArray(groups) || !groups.length) return null;
+    if (!Array.isArray(groups)) return null;
+    if (!groups.length) return [];
     const out = [];
     for (let i = 0; i < groups.length && out.length < 4; i++) {
       const n = Math.round(Number(groups[i]));
@@ -134,6 +135,7 @@
 
   function setActiveHear(groups) {
     activeHear = sanitizeHear(groups);
+    if (activeHear && !activeHear.length) activeHear = null;
     if (typeof document === 'undefined') return activeHear;
     const b = document.getElementById('mm-hear');
     if (b) {
