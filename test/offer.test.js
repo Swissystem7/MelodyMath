@@ -95,3 +95,9 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /checkout|stripe|paypal|תשלום עכשיו|49 ₪|רישיון כיתתי/i);
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
+
+test('principalLetterBody throws error for negative groupSize', () => {
+  assert.throws(() => {
+    offer.principalLetterBody({ groupSize: -5 });
+  }, new Error('groupSize must be a positive integer'));
+});
