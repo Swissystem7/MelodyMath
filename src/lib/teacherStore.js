@@ -233,10 +233,62 @@
       return {
         name: name,
         total: report.total,
+        totalPractices: report.total,
         correct: report.correct,
         accuracy: report.total ? report.correct / report.total : 0,
+        successRate: report.total ? report.correct / report.total : 0,
+        perSkill: report.perSkill,
+        skills: report.perSkill,
+        repeatingErrors: report.repeatingErrors,
+        errors: report.repeatingErrors,
         repeating: report.repeatingErrors.length,
         sessions: sessions.length,
+        sessionsCount: sessions.length,
+        lastAt: last ? last.started : null,
+        lastKind: last ? last.kind : '',
+        notes: listNotes(student).length,
+      };
+    });
+  }
+
+  function getDashboardData(rawOrCode, storage) {
+    let roster;
+    if (rawOrCode && typeof rawOrCode === 'object' && rawOrCode.students) {
+      roster = rawOrCode;
+    } else if (typeof rawOrCode === 'string' && rawOrCode.trim().startsWith('{')) {
+      try {
+        roster = JSON.parse(rawOrCode);
+      } catch (e) {
+        roster = loadRoster(rawOrCode, storage);
+      }
+    } else if (typeof rawOrCode === 'string' || rawOrCode == null) {
+      roster = loadRoster(rawOrCode, storage);
+    } else {
+      roster = { students: {} };
+    }
+    const studentsMap = (roster && roster.students) || {};
+    const names = Object.keys(studentsMap).sort(function (a, b) {
+      return a.localeCompare(b, 'he');
+    });
+    return names.map(function (name) {
+      const student = studentsMap[name];
+      const report = buildReport(student);
+      const sessions = (student && student.sessions) || [];
+      const last = sessions.length ? sessions[sessions.length - 1] : null;
+      return {
+        name: name,
+        total: report.total,
+        totalPractices: report.total,
+        correct: report.correct,
+        accuracy: report.total ? report.correct / report.total : 0,
+        successRate: report.total ? report.correct / report.total : 0,
+        perSkill: report.perSkill,
+        skills: report.perSkill,
+        repeatingErrors: report.repeatingErrors,
+        errors: report.repeatingErrors,
+        repeating: report.repeatingErrors.length,
+        sessions: sessions.length,
+        sessionsCount: sessions.length,
         lastAt: last ? last.started : null,
         lastKind: last ? last.kind : '',
         notes: listNotes(student).length,
@@ -476,7 +528,7 @@
     normalizeCode, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     startSession, addItem, endSession, buildReport, allItems,
-    addNote, listNotes, itemsSince, buildClassOverview,
+    addNote, listNotes, itemsSince, buildClassOverview, getDashboardData,
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
     loadWho, saveWho, makeChoices, exportRoster, importRoster,
     loadJson, saveJson, jsonKey,
