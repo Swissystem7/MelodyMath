@@ -95,3 +95,7 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /checkout|stripe|paypal|תשלום עכשיו|49 ₪|רישיון כיתתי/i);
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
+
+test('clampGroup throws TypeError for negative input', () => {
+  assert.throws(() => offer.normalizeTrialRequest({ groupSize: -5 }), TypeError);
+});
