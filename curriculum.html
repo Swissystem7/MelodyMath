@@ -31,7 +31,7 @@
   <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
   <div class="sum" id="sum"></div>
   <div id="tables"></div>
-  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. אין כאן גאומטריה, מדידה או חקר נתונים — אלה פערים, לא «בקרוב» ממותג.</p>
+  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. תחומים ללא פריטים בבנק מופיעים במפורש מתחת לכל כיתה.</p>
 </main>
 <script src="src/lib/curriculum.js"></script>
 <script src="src/lib/banks.js"></script>
@@ -58,11 +58,16 @@
     const bankNote = Object.keys(bank).map(function (sk) {
       return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
     }).join(' · ');
+    const uncovered = (typeof uncoveredDomains === 'function' ? uncoveredDomains(g) : []) || [];
+    const uncoveredLine = uncovered.length
+      ? ('תחומים לא מכוסים בבנק: ' + uncovered.join(', '))
+      : 'תחומים לא מכוסים בבנק: אין — כל חמשת התחומים מיוצגים';
     return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
       + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
       + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
       + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
-      + '<tbody>' + body + '</tbody></table></section>';
+      + '<tbody>' + body + '</tbody></table>'
+      + '<p class="note uncovered-domains">' + uncoveredLine + '</p></section>';
   }).join('');
 })();
 </script>
