@@ -8,6 +8,10 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const assignmentApi = (typeof module === 'object' && module.exports)
+    ? require('./assignment')
+    : (typeof globalThis !== 'undefined' ? globalThis : {});
+
   const PREFIX = 'mm-roster-v1:';
   const WHO_KEY = 'mm-who-v1';
 
@@ -70,8 +74,10 @@
     if (!label) return null;
     const roster = loadRoster(classCode, storage);
     if (!roster.students[label]) {
-      roster.students[label] = { name: label, created: Date.now(), sessions: [] };
+      roster.students[label] = { name: label, created: Date.now(), sessions: [], assignments: [] };
       saveRoster(classCode, roster, storage);
+    } else if (!Array.isArray(roster.students[label].assignments)) {
+      roster.students[label].assignments = [];
     }
     return roster.students[label];
   }
@@ -192,6 +198,30 @@
         };
       }),
     };
+  }
+
+  function assignTask(classCode, name, task, storage) {
+    const label = normalizeCode(name);
+    const row = assignmentApi.normalizeAssignment
+      ? assignmentApi.normalizeAssignment(task)
+      : null;
+    if (!label || !row) return null;
+    const roster = loadRoster(classCode, storage);
+    const student = roster.students[label];
+    if (!student) return null;
+    if (!Array.isArray(student.assignments)) student.assignments = [];
+    student.assignments.push(row);
+    saveRoster(classCode, roster, storage);
+    return row;
+  }
+
+  function listAssignments(classCode, name, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (assignmentApi.assignmentsForStudent) {
+      return assignmentApi.assignmentsForStudent(student);
+    }
+    if (!student || !Array.isArray(student.assignments)) return [];
+    return student.assignments.slice();
   }
 
   function addNote(classCode, name, text, storage) {
@@ -414,7 +444,13 @@
       if (!incoming || typeof incoming !== 'object') return;
       const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
       if (!roster.students[name]) {
-        roster.students[name] = { name: name, created: incoming.created || Date.now(), sessions: sessions };
+        const assignments = Array.isArray(incoming.assignments) ? incoming.assignments : [];
+        roster.students[name] = {
+          name: name,
+          created: incoming.created || Date.now(),
+          sessions: sessions,
+          assignments: assignments,
+        };
         added += 1;
         return;
       }
@@ -527,6 +563,7 @@
     PREFIX, WHO_KEY,
     normalizeCode, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
+    assignTask, listAssignments,
     startSession, addItem, endSession, buildReport, allItems,
     addNote, listNotes, itemsSince, buildClassOverview, getDashboardData,
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
