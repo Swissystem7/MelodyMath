@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MelodyMath · מעבדת בלש AI</title>
+  <meta name="description" content="פעילות עברית לגילאי 10–14 שמלמדת לבדוק תשובות AI, לכתוב prompt מדויק ולשמור על פרטיות.">
+  <style>
+    :root{--ink:#21183b;--muted:#5b526f;--purple:#6946e8;--pink:#f2529a;--bg:#f7f4ff;--card:#fff;--line:#ded6f0;--good:#137454;--bad:#a8324b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 12% 8%,#ffe1ef,transparent 30%),radial-gradient(circle at 90% 0,#dfd6ff,transparent 32%),var(--bg);color:var(--ink);font-family:Arial,sans-serif;min-height:100vh}.wrap{max-width:760px;margin:auto;padding:24px 16px 60px}a{color:var(--purple)}header{margin-bottom:18px}.eyebrow{font-weight:900;color:var(--purple)}h1{font-size:clamp(2rem,7vw,3.8rem);line-height:1.05;margin:.35rem 0}.lead{line-height:1.55;color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(20px,5vw,34px);box-shadow:0 18px 50px #4638701c}.progress{height:10px;background:#ece7f5;border-radius:99px;overflow:hidden;margin:12px 0 22px}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--purple))}.tag{display:inline-block;background:#eee9ff;color:var(--purple);padding:6px 10px;border-radius:99px;font-weight:800;font-size:.82rem}.answer{background:#f8f6fc;border-right:5px solid var(--pink);padding:14px;border-radius:12px;line-height:1.5}.choices{display:grid;gap:10px;margin:18px 0}.choices button,.primary{border:2px solid var(--line);border-radius:14px;background:white;color:var(--ink);padding:14px 16px;font:inherit;font-weight:800;cursor:pointer;text-align:right}.choices button:hover,.choices button:focus-visible{border-color:var(--purple);outline:3px solid #d8cffb}.choices button.good{background:#e3f6ee;border-color:var(--good)}.choices button.bad{background:#ffe8ed;border-color:var(--bad)}.primary{background:var(--purple);color:white;border-color:var(--purple);width:100%;text-align:center}.feedback{padding:14px;border-radius:12px;line-height:1.5}.feedback.good{background:#e3f6ee;color:var(--good)}.feedback.bad{background:#ffe8ed;color:var(--bad)}.hidden{display:none!important}.rules{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}.rule{background:#faf8ff;border:1px solid var(--line);border-radius:14px;padding:14px}.note{font-size:.9rem;color:var(--muted)}@media(max-width:600px){.rules{grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <a href="index.html">← חזרה ל‑MelodyMath</a>
+    <p class="eyebrow">MELODYMATH · אתגר Base44 2026</p>
+    <h1>מעבדת בלש AI</h1>
+    <p class="lead">שמונה חקירות קצרות: בודקים תשובות ומקורות, משפרים בקשות, שומרים על פרטיות ומזהים מתי צריך לערב אדם. אין כאן צ׳אט אמיתי ואין איסוף מידע.</p>
+  </header>
+  <section class="card" id="intro">
+    <span class="tag">20–25 דקות · גילאי 10–14</span>
+    <h2>המשימה שלכם</h2>
+    <p>AI יכול לעזור, אבל הוא גם יכול לטעות. בכל שלב קראו את התרחיש, בחרו פעולה והקדישו רגע להסביר לעצמכם למה. מומלץ לעבוד בזוג ולנמק כל בחירה לפני שלוחצים.</p>
+    <div class="rules">
+      <div class="rule"><b>בודקים</b><br><span class="note">חישוב, מקור או אדם מתאים.</span></div>
+      <div class="rule"><b>מדייקים</b><br><span class="note">מטרה, הקשר וגבולות ב‑prompt.</span></div>
+      <div class="rule"><b>שומרים</b><br><span class="note">לא מוסרים פרטים אישיים.</span></div>
+      <div class="rule"><b>מסבירים</b><br><span class="note">לא רק מה בחרנו—גם למה.</span></div>
+    </div>
+    <button class="primary" id="start" type="button">מתחילים לחקור</button>
+  </section>
+  <section class="card hidden" id="game" aria-live="polite">
+    <div><span class="tag" id="skill"></span> <span id="counter"></span></div>
+    <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+    <h2 id="prompt"></h2>
+    <p class="answer" id="answer"></p>
+    <div class="choices" id="choices"></div>
+    <div class="feedback hidden" id="feedback" role="status"></div>
+    <button class="primary hidden" id="next" type="button">למשימה הבאה</button>
+  </section>
+  <section class="card hidden" id="summary" aria-live="polite">
+    <span class="tag">סיכום למידה</span>
+    <h2 id="score"></h2>
+    <p id="summaryText"></p>
+    <p><b>משימת סיום (כ־4 דקות):</b> בחרו תשובת AI שקיבלתם לאחרונה או המציאו דוגמה. הסבירו בעל־פה או על דף: מה הטענה, איזו ראיה חסרה, איזה מידע אסור למסור ומי יכול לעזור לבדוק.</p>
+    <p><b>שאלת יציאה:</b> לפני שסומכים על תשובת AI—איזו בדיקה אחת תעשו?</p>
+    <button class="primary" id="again" type="button">ניסיון נוסף</button>
+  </section>
+</main>
+<script src="src/lib/aiLab.js"></script>
+<script>
+(function(){
+  var lab=window.MelodyMathAILab,index=0,results=[];
+  var intro=document.getElementById('intro'),game=document.getElementById('game'),summary=document.getElementById('summary');
+  function render(){
+    var s=lab.getScenario(index);
+    document.getElementById('skill').textContent=s.skill;
+    document.getElementById('counter').textContent=(index+1)+' מתוך '+lab.scenarios.length;
+    document.getElementById('bar').style.width=((index+1)/lab.scenarios.length*100)+'%';
+    document.getElementById('prompt').textContent=s.prompt;
+    document.getElementById('answer').textContent=s.answer;
+    var box=document.getElementById('choices'); box.textContent='';
+    s.choices.forEach(function(label,i){var b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',function(){choose(i,b);});box.appendChild(b);});
+    document.getElementById('feedback').className='feedback hidden';
+    document.getElementById('next').className='primary hidden';
+  }
+  function choose(choice,button){
+    var result=lab.evaluate(index,choice);results[index]=result.correct;
+    document.querySelectorAll('#choices button').forEach(function(b){b.disabled=true;});
+    button.classList.add(result.correct?'good':'bad');
+    var f=document.getElementById('feedback');f.textContent=(result.correct?'יפה! ':'עוד בדיקה: ')+result.explanation;f.className='feedback '+(result.correct?'good':'bad');
+    document.getElementById('next').className='primary';
+  }
+  function finish(){var s=lab.summarize(results);game.classList.add('hidden');summary.classList.remove('hidden');document.getElementById('score').textContent=s.correct+' מתוך '+s.total;document.getElementById('summaryText').textContent=s.message;}
+  document.getElementById('start').addEventListener('click',function(){intro.classList.add('hidden');game.classList.remove('hidden');render();});
+  document.getElementById('next').addEventListener('click',function(){index+=1;if(index>=lab.scenarios.length)finish();else render();});
+  document.getElementById('again').addEventListener('click',function(){index=0;results=[];summary.classList.add('hidden');game.classList.remove('hidden');render();});
+})();
+</script>
+</body>
+</html>
