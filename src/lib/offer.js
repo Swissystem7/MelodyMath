@@ -185,6 +185,11 @@
       + (copy ? '&cc=' + encodeURIComponent(copy) : '');
   }
 
+  function safeMailHref(href) {
+    if (typeof href !== 'string') return '';
+    return href.startsWith('mailto:') ? href : '';
+  }
+
   return {
     PROJECT_MAIL: PROJECT_MAIL,
     DEMO_URL: DEMO_URL,
@@ -199,5 +204,6 @@
     principalLetterBody: principalLetterBody,
     buildPrincipalEmail: buildPrincipalEmail,
     buildMailto: buildMailto,
+    safeMailHref: safeMailHref,
   };
 });
