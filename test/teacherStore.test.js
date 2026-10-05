@@ -208,3 +208,49 @@ test('a child certificate counts practice and refuses mastery language', () => {
   assert.match(html, /מנייה/);
   assert.equal(html.includes('<script'), false);
 });
+
+test('a student name that is a prototype key never pollutes Object.prototype', () => {
+  const ls = memory();
+  assert.equal(store.upsertStudent('שילוב', '__proto__', ls), null);
+  assert.equal(store.upsertStudent('שילוב', 'constructor', ls), null);
+  assert.equal(store.startSession('שילוב', '__proto__', 'practice', ls), null);
+  assert.equal(store.getStudent('שילוב', 'constructor', ls), null);
+  assert.equal(store.getStudent('שילוב', 'toString', ls), null);
+  assert.equal(store.addNote('שילוב', '__proto__', 'x', ls), null);
+  assert.deepEqual(store.listStudents('שילוב', ls), []);
+  assert.equal(({}).sessions, undefined);
+  assert.equal(({}).assignments, undefined);
+  assert.equal(({}).notes, undefined);
+});
+
+test('importRoster skips prototype-key names and normalizes the rest', () => {
+  const dest = memory();
+  // Written as text on purpose: an object literal with a __proto__ key sets the
+  // prototype instead of an own key, but JSON.parse creates an own key.
+  const raw = '{"v":1,"students":{'
+    + '"__proto__":{"sessions":[{"id":"evil","items":[]}],"notes":[{"at":1,"text":"x"}]},'
+    + '"constructor":{"sessions":[]},'
+    + '"  דני   כהן ":{"sessions":[{"id":"a1","items":[]}]}}}';
+  const res = store.importRoster('שילוב', raw, dest);
+  assert.equal(res.ok, true);
+  assert.equal(res.added, 1);
+  assert.equal(res.skipped, 2);
+  assert.equal(({}).sessions, undefined);
+  assert.equal(({}).notes, undefined);
+  assert.deepEqual(store.listStudents('שילוב', dest), ['דני כהן']);
+  const kid = store.getStudent('שילוב', 'דני כהן', dest);
+  assert.ok(kid);
+  assert.equal(kid.sessions.length, 1);
+  // Re-importing the same file merges into the normalized row instead of adding a twin.
+  const again = store.importRoster('שילוב', raw, dest);
+  assert.equal(again.added, 0);
+  assert.equal(store.getStudent('שילוב', 'דני כהן', dest).sessions.length, 1);
+});
+
+test('loadRoster drops a prototype-key row that an older build may have stored', () => {
+  const ls = memory();
+  ls.setItem(store.storageKey('שילוב'), '{"classCode":"שילוב","students":{"__proto__":{"sessions":[]},"רון":{"name":"רון","sessions":[]}}}');
+  assert.deepEqual(store.listStudents('שילוב', ls), ['רון']);
+  assert.equal(store.getStudent('שילוב', '__proto__', ls), null);
+  assert.equal(({}).sessions, undefined);
+});

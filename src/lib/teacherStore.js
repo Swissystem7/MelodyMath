@@ -19,6 +19,32 @@
     return String(value == null ? '' : value).trim().replace(/\s+/g, ' ').slice(0, 24);
   }
 
+  // Roster keys are student names a teacher typed or that came out of an
+  // imported JSON file. A name that already lives on Object.prototype
+  // ('__proto__', 'constructor', 'toString', ...) makes roster.students[name]
+  // hand back the prototype instead of a student row, and every write after
+  // that lands on every object in the page. Such a name is never a student.
+  function studentLabel(name) {
+    const label = normalizeCode(name);
+    if (!label || label in Object.prototype) return '';
+    return label;
+  }
+
+  function ownStudent(roster, label) {
+    const students = roster && roster.students;
+    if (!students || !label || !Object.prototype.hasOwnProperty.call(students, label)) return null;
+    return students[label] || null;
+  }
+
+  function cleanStudents(map) {
+    const out = {};
+    Object.keys(map).forEach(function (key) {
+      if (key in Object.prototype) return;
+      out[key] = map[key];
+    });
+    return out;
+  }
+
   function storageKey(classCode) {
     return PREFIX + (normalizeCode(classCode) || 'default');
   }
@@ -45,7 +71,7 @@
       if (!data || typeof data !== 'object' || typeof data.students !== 'object' || !data.students) {
         return fallback;
       }
-      return { classCode: normalizeCode(data.classCode) || fallback.classCode, students: data.students };
+      return { classCode: normalizeCode(data.classCode) || fallback.classCode, students: cleanStudents(data.students) };
     } catch (e) {
       return fallback;
     }
@@ -77,10 +103,10 @@
   }
 
   function upsertStudent(classCode, name, storage) {
-    const label = normalizeCode(name);
+    const label = studentLabel(name);
     if (!label) return null;
     const roster = loadRoster(classCode, storage);
-    if (!roster.students[label]) {
+    if (!ownStudent(roster, label)) {
       roster.students[label] = { name: label, created: Date.now(), sessions: [], assignments: [] };
       saveRoster(classCode, roster, storage);
     } else if (!Array.isArray(roster.students[label].assignments)) {
@@ -90,9 +116,7 @@
   }
 
   function getStudent(classCode, name, storage) {
-    const label = normalizeCode(name);
-    if (!label) return null;
-    return loadRoster(classCode, storage).students[label] || null;
+    return ownStudent(loadRoster(classCode, storage), studentLabel(name));
   }
 
   function startSession(classCode, name, kind, storage) {
@@ -110,17 +134,17 @@
     // Fall back to the in-memory row so the practice loop keeps running
     // instead of throwing from inside the answer handler.
     const roster = loadRoster(classCode, storage);
-    const target = ensureSessions(roster.students[student.name] || student);
-    if (!roster.students[student.name]) roster.students[student.name] = target;
+    const target = ensureSessions(ownStudent(roster, student.name) || student);
+    if (!ownStudent(roster, student.name)) roster.students[student.name] = target;
     target.sessions.push(session);
     saveRoster(classCode, roster, storage);
     return session;
   }
 
   function addItem(classCode, name, sessionId, item, storage) {
-    const label = normalizeCode(name);
+    const label = studentLabel(name);
     const roster = loadRoster(classCode, storage);
-    const student = ensureSessions(roster.students[label]);
+    const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
     const session = student.sessions.find(function (s) { return s.id === sessionId; });
     if (!session) return null;
@@ -138,9 +162,9 @@
   }
 
   function endSession(classCode, name, sessionId, storage) {
-    const label = normalizeCode(name);
+    const label = studentLabel(name);
     const roster = loadRoster(classCode, storage);
-    const student = ensureSessions(roster.students[label]);
+    const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
     const session = student.sessions.find(function (s) { return s.id === sessionId; });
     if (!session) return null;
@@ -214,13 +238,13 @@
   }
 
   function assignTask(classCode, name, task, storage) {
-    const label = normalizeCode(name);
+    const label = studentLabel(name);
     const row = assignmentApi.normalizeAssignment
       ? assignmentApi.normalizeAssignment(task)
       : null;
     if (!label || !row) return null;
     const roster = loadRoster(classCode, storage);
-    const student = roster.students[label];
+    const student = ownStudent(roster, label);
     if (!student) return null;
     if (!Array.isArray(student.assignments)) student.assignments = [];
     student.assignments.push(row);
@@ -238,11 +262,11 @@
   }
 
   function addNote(classCode, name, text, storage) {
-    const label = normalizeCode(name);
+    const label = studentLabel(name);
     const body = String(text == null ? '' : text).replace(/\s+/g, ' ').trim().slice(0, 280);
     if (!label || !body) return null;
     const roster = loadRoster(classCode, storage);
-    const student = roster.students[label];
+    const student = ownStudent(roster, label);
     if (!student) return null;
     if (!Array.isArray(student.notes)) student.notes = [];
     const note = { at: Date.now(), text: body };
@@ -483,12 +507,17 @@
     let added = 0;
     let merged = 0;
     let notes = 0;
-    Object.keys(data.students).forEach(function (name) {
-      const incoming = data.students[name];
+    let skipped = 0;
+    Object.keys(data.students).forEach(function (rawName) {
+      const incoming = data.students[rawName];
       if (!incoming || typeof incoming !== 'object') return;
+      // Same rule as upsertStudent: trimmed, 24 chars, never a prototype key.
+      // Otherwise a row lands under a name getStudent can never look up.
+      const name = studentLabel(rawName);
+      if (!name) { skipped += 1; return; }
       const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
       const incomingNotes = cleanNotes(incoming.notes);
-      if (!roster.students[name]) {
+      if (!ownStudent(roster, name)) {
         const assignments = Array.isArray(incoming.assignments) ? incoming.assignments : [];
         roster.students[name] = {
           name: name,
@@ -524,7 +553,7 @@
       });
     });
     saveRoster(classCode, roster, storage);
-    return { ok: true, added: added, merged: merged, notes: notes };
+    return { ok: true, added: added, merged: merged, notes: notes, skipped: skipped };
   }
 
   function loadWho(storage) {
@@ -620,7 +649,7 @@
 
   return {
     PREFIX, WHO_KEY,
-    normalizeCode, storageKey, emptyRoster,
+    normalizeCode, studentLabel, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
     assignTask, listAssignments,
     startSession, addItem, endSession, buildReport, allItems,
