@@ -31,3 +31,15 @@ test('home is the elementary product: grade picker, coverage link, no mixed soni
   assert.match(indexHtml, /src\/lib\/numberLine\.js/);
   assert.match(indexHtml, /src\/lib\/bar44\.js/);
 });
+
+test('teacher report escapes imported item text before injecting it into HTML', () => {
+  // importRoster() stores session items from a pasted JSON file as-is, so
+  // prompt / skill / kind must be escaped at render time, like student names.
+  const report = indexHtml.match(/function renderTeacherReport\(\)[\s\S]*?\n/)[0];
+  assert.match(report, /<td>\$\{escapeHtml\(s\.skill\)\}<\/td>/);
+  assert.match(report, /<li>\$\{escapeHtml\(e\.prompt\)\}/);
+  assert.match(report, /escapeHtml\(e\.skill\)/);
+  assert.match(report, /escapeHtml\(KIND_HE\[s\.kind\]\|\|s\.kind\)/);
+  assert.doesNotMatch(report, /\$\{s\.skill\}|\$\{e\.prompt\}|\|\|s\.kind\}/);
+  assert.match(indexHtml, /escapeHtml\(KIND_HE\[r\.lastKind\]\|\|r\.lastKind\)/);
+});
