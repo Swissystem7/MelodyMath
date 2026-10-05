@@ -69,6 +69,13 @@
     });
   }
 
+  // A hand-edited or partially imported roster may carry a student row with
+  // no `sessions` array. Every writer below pushes into it, so repair it here.
+  function ensureSessions(student) {
+    if (student && !Array.isArray(student.sessions)) student.sessions = [];
+    return student;
+  }
+
   function upsertStudent(classCode, name, storage) {
     const label = normalizeCode(name);
     if (!label) return null;
@@ -79,7 +86,7 @@
     } else if (!Array.isArray(roster.students[label].assignments)) {
       roster.students[label].assignments = [];
     }
-    return roster.students[label];
+    return ensureSessions(roster.students[label]);
   }
 
   function getStudent(classCode, name, storage) {
@@ -98,8 +105,14 @@
       ended: null,
       items: [],
     };
+    // When the tablet cannot persist (storage quota, private mode), the
+    // upsert above was not saved and a fresh load has no such student.
+    // Fall back to the in-memory row so the practice loop keeps running
+    // instead of throwing from inside the answer handler.
     const roster = loadRoster(classCode, storage);
-    roster.students[student.name].sessions.push(session);
+    const target = ensureSessions(roster.students[student.name] || student);
+    if (!roster.students[student.name]) roster.students[student.name] = target;
+    target.sessions.push(session);
     saveRoster(classCode, roster, storage);
     return session;
   }
@@ -107,7 +120,7 @@
   function addItem(classCode, name, sessionId, item, storage) {
     const label = normalizeCode(name);
     const roster = loadRoster(classCode, storage);
-    const student = roster.students[label];
+    const student = ensureSessions(roster.students[label]);
     if (!student) return null;
     const session = student.sessions.find(function (s) { return s.id === sessionId; });
     if (!session) return null;
@@ -127,7 +140,7 @@
   function endSession(classCode, name, sessionId, storage) {
     const label = normalizeCode(name);
     const roster = loadRoster(classCode, storage);
-    const student = roster.students[label];
+    const student = ensureSessions(roster.students[label]);
     if (!student) return null;
     const session = student.sessions.find(function (s) { return s.id === sessionId; });
     if (!session) return null;
@@ -489,6 +502,7 @@
         return;
       }
       const have = {};
+      ensureSessions(roster.students[name]);
       roster.students[name].sessions.forEach(function (s) { if (s && s.id) have[s.id] = true; });
       sessions.forEach(function (s) {
         if (s && s.id && !have[s.id]) {

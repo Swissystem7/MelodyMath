@@ -90,6 +90,54 @@ test('loadJson/saveJson namespace keys and survive garbage', () => {
   assert.equal(store.loadJson('bad', 7, ls), 7);
 });
 
+test('a tablet that cannot persist still runs the session instead of throwing', () => {
+  // Safari private mode / full quota: getItem works, setItem throws.
+  const m = Object.create(null);
+  const readOnly = {
+    getItem: (k) => (k in m ? m[k] : null),
+    setItem: () => { throw new Error('QuotaExceededError'); },
+    removeItem: () => {},
+  };
+  assert.equal(store.saveRoster('שילוב', store.emptyRoster('שילוב'), readOnly), false);
+  let sess;
+  assert.doesNotThrow(() => { sess = store.startSession('שילוב', 'נועה', 'class', readOnly); });
+  assert.ok(sess && sess.id);
+  assert.equal(sess.kind, 'class');
+  // Nothing was written, and the follow-up calls degrade to null, not a crash.
+  assert.deepEqual(store.listStudents('שילוב', readOnly), []);
+  assert.doesNotThrow(() => {
+    store.addItem('שילוב', 'נועה', sess.id, { skill: 'חיבור', prompt: '2+2', correct: true }, readOnly);
+    store.endSession('שילוב', 'נועה', sess.id, readOnly);
+  });
+});
+
+test('a roster row with no sessions array is repaired on first use', () => {
+  const ls = memory();
+  ls.setItem(store.storageKey('שילוב'), JSON.stringify({
+    classCode: 'שילוב',
+    students: { 'תמר': { name: 'תמר', created: 1 } },
+  }));
+  let sess;
+  assert.doesNotThrow(() => { sess = store.startSession('שילוב', 'תמר', 'diag', ls); });
+  store.addItem('שילוב', 'תמר', sess.id, { skill: 'מנייה', prompt: '3', correct: true }, ls);
+  store.endSession('שילוב', 'תמר', sess.id, ls);
+  const student = store.getStudent('שילוב', 'תמר', ls);
+  assert.equal(student.sessions.length, 1);
+  assert.equal(student.sessions[0].items.length, 1);
+  assert.ok(student.sessions[0].ended);
+  // Import into the same repaired row must not throw either.
+  const json = store.exportRoster('שילוב', ls);
+  const dest = memory();
+  dest.setItem(store.storageKey('שילוב'), JSON.stringify({
+    classCode: 'שילוב',
+    students: { 'תמר': { name: 'תמר', created: 1 } },
+  }));
+  const res = store.importRoster('שילוב', json, dest);
+  assert.equal(res.ok, true);
+  assert.equal(res.merged, 1);
+  assert.equal(store.getStudent('שילוב', 'תמר', dest).sessions.length, 1);
+});
+
 test('an empty name is refused and a missing student yields a blank report', () => {
   const ls = memory();
   assert.equal(store.upsertStudent('כ', '   ', ls), null);
