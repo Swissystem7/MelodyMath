@@ -243,6 +243,36 @@
     return student.notes.slice();
   }
 
+  function noteText(note) {
+    const raw = note && typeof note === 'object' ? note.text : null;
+    return String(raw == null ? '' : raw).replace(/\s+/g, ' ').trim().slice(0, 280);
+  }
+
+  // Two tablets never share a clock reading to the millisecond by accident, so
+  // the timestamp plus the text is enough to tell a re-import from a new note.
+  function noteKey(note) {
+    return String(note && note.at != null ? note.at : '') + ' ' + noteText(note);
+  }
+
+  // Notes come off another tablet's JSON file: keep the shape addNote writes,
+  // drop rows with no text, and never carry the same note in twice.
+  function cleanNotes(list) {
+    if (!Array.isArray(list)) return [];
+    const seen = Object.create(null);
+    const out = [];
+    list.forEach(function (n) {
+      const text = noteText(n);
+      if (!text) return;
+      const at = Number(n.at);
+      const row = { at: Number.isFinite(at) ? at : Date.now(), text: text };
+      const key = noteKey(row);
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push(row);
+    });
+    return out;
+  }
+
   function itemsSince(student, sinceTs) {
     const all = allItems(student);
     const since = Number(sinceTs);
@@ -439,10 +469,12 @@
     const roster = loadRoster(classCode, storage);
     let added = 0;
     let merged = 0;
+    let notes = 0;
     Object.keys(data.students).forEach(function (name) {
       const incoming = data.students[name];
       if (!incoming || typeof incoming !== 'object') return;
       const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
+      const incomingNotes = cleanNotes(incoming.notes);
       if (!roster.students[name]) {
         const assignments = Array.isArray(incoming.assignments) ? incoming.assignments : [];
         roster.students[name] = {
@@ -450,8 +482,10 @@
           created: incoming.created || Date.now(),
           sessions: sessions,
           assignments: assignments,
+          notes: incomingNotes,
         };
         added += 1;
+        notes += incomingNotes.length;
         return;
       }
       const have = {};
@@ -463,9 +497,20 @@
           merged += 1;
         }
       });
+      const target = roster.students[name];
+      if (!Array.isArray(target.notes)) target.notes = [];
+      const haveNotes = Object.create(null);
+      target.notes.forEach(function (n) { haveNotes[noteKey(n)] = true; });
+      incomingNotes.forEach(function (n) {
+        const key = noteKey(n);
+        if (haveNotes[key]) return;
+        haveNotes[key] = true;
+        target.notes.push(n);
+        notes += 1;
+      });
     });
     saveRoster(classCode, roster, storage);
-    return { ok: true, added: added, merged: merged };
+    return { ok: true, added: added, merged: merged, notes: notes };
   }
 
   function loadWho(storage) {
