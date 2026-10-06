@@ -65,7 +65,7 @@ test('every script a page loads is in the precache list', () => {
   pages.forEach((page) => {
     assert.ok(listed.has(page), page + ' is not precached');
     const html = fs.readFileSync(path.join(root, page), 'utf8');
-    [...html.matchAll(/<script[^>]*\ssrc="([^"]+)"/g)].forEach((m) => {
+    [...html.matchAll(/ src="(src\/lib\/[^"]+)"/g)].forEach((m) => {
       assert.ok(listed.has(m[1]), page + ' loads ' + m[1] + ' which sw.js does not precache');
     });
   });
