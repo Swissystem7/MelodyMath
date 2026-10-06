@@ -592,6 +592,28 @@
     return { ok: true, added: added, merged: merged, notes: notes, assignments: assignments, skipped: skipped };
   }
 
+  // One Hebrew line for the roster-import message. Every counter importRoster
+  // returns is named, so the teacher sees that notes and tasks came along too
+  // and that rows with an unusable name were dropped instead of vanishing.
+  function summarizeImport(res) {
+    if (!res || !res.ok) {
+      return res && res.error === 'not-json' ? 'הקובץ אינו JSON תקין.' : 'מבנה הקובץ לא מתאים.';
+    }
+    const n = function (v) { return Number.isFinite(v) && v > 0 ? Math.floor(v) : 0; };
+    const added = n(res.added), merged = n(res.merged), notes = n(res.notes);
+    const assignments = n(res.assignments), skipped = n(res.skipped);
+    const parts = [];
+    if (added) parts.push(added + ' תלמידים חדשים');
+    if (merged) parts.push(merged + ' מפגשים שמוזגו');
+    if (notes) parts.push(notes + ' הערות מורה');
+    if (assignments) parts.push(assignments + ' משימות');
+    let text = parts.length
+      ? 'יובא: ' + parts.join(', ') + '.'
+      : 'הקובץ נקרא, אבל לא היה בו דבר חדש למכשיר הזה.';
+    if (skipped) text += ' ' + skipped + ' שורות עם שם לא תקין לא יובאו.';
+    return text;
+  }
+
   function loadWho(storage) {
     const ls = storage || defaultStorage();
     if (!ls) return { classCode: '', name: '' };
@@ -691,7 +713,7 @@
     startSession, addItem, endSession, buildReport, allItems,
     addNote, listNotes, itemsSince, buildClassOverview, getDashboardData,
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
-    loadWho, saveWho, makeChoices, exportRoster, importRoster,
+    loadWho, saveWho, makeChoices, exportRoster, importRoster, summarizeImport,
     loadJson, saveJson, jsonKey,
   };
 });
