@@ -130,3 +130,8 @@ test('the offer form labels its fields and announces status', () => {
   assert.match(offerPage, /id="letterPreview"[^>]*aria-live/);
   assert.match(offerPage, /id="main"/);
 });
+test('playground tab has a rhythm maker with accessible live region', () => {
+  const index = html('index.html');
+  assert.match(index, /id="rhythm"[^>]*aria-live/);
+  assert.match(index, /id="freq"[^>]*aria-live/);
+});
