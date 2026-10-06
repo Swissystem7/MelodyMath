@@ -17,7 +17,10 @@
 
   function buildStudentReport(student) {
     const items = allItems(student);
-    const bySkill = {};
+    // Null-prototype maps: an imported item whose skill or prompt is a
+    // prototype key (constructor, __proto__) must count like any other text
+    // instead of vanishing from the report and writing into Object.prototype.
+    const bySkill = Object.create(null);
     items.forEach(function (it) {
       const k = it.skill || 'אחר';
       const g = bySkill[k] || (bySkill[k] = { skill: k, total: 0, correct: 0 });
@@ -36,7 +39,7 @@
       }
     });
 
-    const missCount = {};
+    const missCount = Object.create(null);
     items.forEach(function (it) {
       if (it.correct) return;
       const key = it.prompt || it.skill || '?';
