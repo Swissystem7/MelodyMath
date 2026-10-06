@@ -36,10 +36,21 @@
     return students[label] || null;
   }
 
+  // A student row is the object upsertStudent writes. A hand-edited or
+  // truncated export, or a build that imported without checking, can leave
+  // roster.students[name] as null, a bare string, a number or an array.
+  // Every reader then does student.sessions / student.assignments on it, so
+  // the class board, the practice loop and the next import all throw for
+  // the whole class. Such a row holds no sessions anyway: drop it.
+  function isStudentRow(row) {
+    return !!row && typeof row === 'object' && !Array.isArray(row);
+  }
+
   function cleanStudents(map) {
     const out = {};
     Object.keys(map).forEach(function (key) {
       if (key in Object.prototype) return;
+      if (!isStudentRow(map[key])) return;
       out[key] = map[key];
     });
     return out;
@@ -536,11 +547,13 @@
     let skipped = 0;
     Object.keys(data.students).forEach(function (rawName) {
       const incoming = data.students[rawName];
-      if (!incoming || typeof incoming !== 'object') return;
-      // Same rule as upsertStudent: trimmed, 24 chars, never a prototype key.
-      // Otherwise a row lands under a name getStudent can never look up.
+      // Same rules as loadRoster and upsertStudent: the row must be an
+      // object and the name trimmed, 24 chars, never a prototype key.
+      // Otherwise a row lands under a name getStudent can never look up, or
+      // holds a value every reader would throw on. Count it so the teacher
+      // sees it was dropped instead of vanishing.
       const name = studentLabel(rawName);
-      if (!name) { skipped += 1; return; }
+      if (!name || !isStudentRow(incoming)) { skipped += 1; return; }
       const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
       const incomingNotes = cleanNotes(incoming.notes);
       const incomingAssignments = cleanAssignments(incoming.assignments);
@@ -613,7 +626,7 @@
     let text = parts.length
       ? 'יובא: ' + parts.join(', ') + '.'
       : 'הקובץ נקרא, אבל לא היה בו דבר חדש למכשיר הזה.';
-    if (skipped) text += ' ' + skipped + ' שורות עם שם לא תקין לא יובאו.';
+    if (skipped) text += ' ' + skipped + ' שורות לא תקינות (שם או מבנה) לא יובאו.';
     return text;
   }
 
