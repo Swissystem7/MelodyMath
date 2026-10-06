@@ -310,6 +310,28 @@
     return out;
   }
 
+  // Assignments come off another tablet's JSON file too. Run each row through
+  // the same normalizer assignTask uses, drop rows with no title, and never
+  // carry the same id in twice. Without the normalizer (browser load order)
+  // keep rows that at least look like assignments.
+  function cleanAssignments(list) {
+    if (!Array.isArray(list)) return [];
+    const seen = Object.create(null);
+    const out = [];
+    list.forEach(function (raw) {
+      if (!raw || typeof raw !== 'object') return;
+      const row = assignmentApi.normalizeAssignment
+        ? assignmentApi.normalizeAssignment(raw)
+        : (raw.id && raw.title ? raw : null);
+      if (!row) return;
+      const key = String(row.id);
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push(row);
+    });
+    return out;
+  }
+
   function itemsSince(student, sinceTs) {
     const all = allItems(student);
     const since = Number(sinceTs);
@@ -507,6 +529,7 @@
     let added = 0;
     let merged = 0;
     let notes = 0;
+    let assignments = 0;
     let skipped = 0;
     Object.keys(data.students).forEach(function (rawName) {
       const incoming = data.students[rawName];
@@ -517,17 +540,18 @@
       if (!name) { skipped += 1; return; }
       const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
       const incomingNotes = cleanNotes(incoming.notes);
+      const incomingAssignments = cleanAssignments(incoming.assignments);
       if (!ownStudent(roster, name)) {
-        const assignments = Array.isArray(incoming.assignments) ? incoming.assignments : [];
         roster.students[name] = {
           name: name,
           created: incoming.created || Date.now(),
           sessions: sessions,
-          assignments: assignments,
+          assignments: incomingAssignments,
           notes: incomingNotes,
         };
         added += 1;
         notes += incomingNotes.length;
+        assignments += incomingAssignments.length;
         return;
       }
       const have = {};
@@ -551,9 +575,21 @@
         target.notes.push(n);
         notes += 1;
       });
+      // Tasks the teacher assigned on the other tablet ride along the same
+      // way: new ids are appended, ids already here are left untouched so a
+      // task completed on this tablet is not reset by a stale export.
+      if (!Array.isArray(target.assignments)) target.assignments = [];
+      const haveAssignments = Object.create(null);
+      target.assignments.forEach(function (a) { if (a && a.id) haveAssignments[String(a.id)] = true; });
+      incomingAssignments.forEach(function (a) {
+        if (haveAssignments[String(a.id)]) return;
+        haveAssignments[String(a.id)] = true;
+        target.assignments.push(a);
+        assignments += 1;
+      });
     });
     saveRoster(classCode, roster, storage);
-    return { ok: true, added: added, merged: merged, notes: notes, skipped: skipped };
+    return { ok: true, added: added, merged: merged, notes: notes, assignments: assignments, skipped: skipped };
   }
 
   function loadWho(storage) {
