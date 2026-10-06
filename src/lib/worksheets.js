@@ -95,6 +95,33 @@
     };
   }
 
+  function printableWidget(it) {
+    if (it && it.chart && it.widget === 'pictogram') {
+      const chart = it.chart;
+      const key = Number(chart.key);
+      const unit = Number.isFinite(key) && key > 0 ? key : 1;
+      const icon = escapeHtml(chart.icon);
+      const rows = (Array.isArray(chart.rows) ? chart.rows : []).map(function (row) {
+        const count = Number(row.count);
+        const copies = Number.isFinite(count) ? Math.max(0, Math.ceil(count / unit)) : 0;
+        return '<div class="sheet-widget-row">' + escapeHtml(row.label) + ' ' + Array(copies + 1).join(icon) + '</div>';
+      }).join('');
+      return rows ? '<div class="sheet-widget sheet-pictogram">' + rows + '</div>' : '';
+    }
+    if (it && it.chart && it.widget === 'barchart') {
+      const bars = (Array.isArray(it.chart.bars) ? it.chart.bars : []).map(function (bar) {
+        return '<div class="sheet-widget-row">' + escapeHtml(bar.label) + ' ' + escapeHtml(bar.value) + '</div>';
+      }).join('');
+      return bars ? '<div class="sheet-widget sheet-barchart">' + bars + '</div>' : '';
+    }
+    if (it && it.ruler) {
+      const length = Number(it.ruler.length);
+      const copies = Number.isFinite(length) ? Math.max(0, Math.ceil(length)) : 0;
+      return '<div class="sheet-widget sheet-ruler">' + Array(copies + 1).join('🟫') + '</div>';
+    }
+    return '';
+  }
+
   function renderWorksheetHtml(sheet) {
     const s = sheet || buildWorksheet({});
     const who = [s.studentName, s.classCode].filter(Boolean).join(' · ');
@@ -104,6 +131,7 @@
       return '<div class="sheet-item"><span class="n">' + (i + 1) + '.</span> '
         + '<span class="tag">' + escapeHtml(it.he || it.skill || '') + '</span> '
         + '<p class="prompt">' + escapeHtml(it.prompt) + '</p>'
+        + printableWidget(it)
         + '<div class="sheet-blank">תשובה: ________________</div></div>';
     }).join('');
     let html = '<div class="sheet-page">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
