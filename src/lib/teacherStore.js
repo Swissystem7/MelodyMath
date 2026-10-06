@@ -342,6 +342,23 @@
     return all.filter(function (it) { return Number(it.at) >= since; });
   }
 
+  // The class board names the most recent session. Sessions are stored in
+  // the order they arrived, and importRoster appends another tablet's rows
+  // after the local ones, so the last array entry may be older than a
+  // session already here. Pick the latest start time instead; rows without
+  // a usable start time fall back to array order.
+  function latestSession(sessions) {
+    let best = null;
+    let bestAt = -Infinity;
+    (Array.isArray(sessions) ? sessions : []).forEach(function (s) {
+      if (!s || typeof s !== 'object') return;
+      const at = Number(s.started);
+      const when = Number.isFinite(at) ? at : -Infinity;
+      if (!best || when >= bestAt) { best = s; bestAt = when; }
+    });
+    return best;
+  }
+
   function buildClassOverview(classCode, storage) {
     const roster = loadRoster(classCode, storage);
     const names = Object.keys(roster.students).sort(function (a, b) {
@@ -351,7 +368,7 @@
       const student = roster.students[name];
       const report = buildReport(student);
       const sessions = student.sessions || [];
-      const last = sessions.length ? sessions[sessions.length - 1] : null;
+      const last = latestSession(sessions);
       return {
         name: name,
         total: report.total,
@@ -396,7 +413,7 @@
       const student = studentsMap[name];
       const report = buildReport(student);
       const sessions = (student && student.sessions) || [];
-      const last = sessions.length ? sessions[sessions.length - 1] : null;
+      const last = latestSession(sessions);
       return {
         name: name,
         total: report.total,
