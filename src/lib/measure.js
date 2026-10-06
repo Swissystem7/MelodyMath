@@ -25,18 +25,23 @@
     let length = Math.round(Number(src.length));
     if (!Number.isFinite(length) || length < 1) length = 1;
     length = Math.min(20, length);
-    return { unit: unit, length: length, label: src.label || (unit === 'cm' ? 'ס״מ' : 'יחידות') };
+    // Imported items (banks.js keeps raw.ruler as-is) may carry a custom
+    // label; keep it a plain non-empty string so the renderer can escape it.
+    const custom = typeof src.label === 'string' || typeof src.label === 'number' ? String(src.label).trim() : '';
+    const label = custom || (unit === 'cm' ? 'ס״מ' : 'יחידות');
+    return { unit: unit, length: length, label: label };
   }
 
   function renderRulerHtml(ruler) {
     const R = normalizeRuler(ruler);
+    const label = escapeHtml(R.label);
     const cells = [];
     for (let i = 0; i < R.length; i++) {
       cells.push('<span class="ruler-cell" aria-hidden="true">' + (R.unit === 'cm' ? '▮' : '🟫') + '</span>');
     }
-    return '<div class="ruler" dir="ltr" role="img" aria-label="עצם שאורכו ' + R.length + ' ' + R.label + '">'
+    return '<div class="ruler" dir="ltr" role="img" aria-label="עצם שאורכו ' + R.length + ' ' + label + '">'
       + '<div class="ruler-track">' + cells.join('') + '</div>'
-      + '<p class="ruler-read">' + R.length + ' ' + R.label + '</p>'
+      + '<p class="ruler-read">' + R.length + ' ' + label + '</p>'
       + '</div>';
   }
 

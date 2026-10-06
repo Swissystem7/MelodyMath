@@ -84,6 +84,7 @@
       document.head.appendChild(link);
     }
     installPwaHooks();
+    hookPracticeFinishSummary();
     installAccessBar();
     if (typeof bindAllTablists === 'function') bindAllTablists(document);
     if (typeof refreshSpeakNow === 'function') refreshSpeakNow(document);
@@ -125,6 +126,77 @@
     }
     const main = document.getElementById('main');
     if (main && !main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+  }
+
+  function countSessionCorrectAnswers(history) {
+    if (!Array.isArray(history)) return 0;
+    return history.filter(function (x) { return x && x.correct; }).length;
+  }
+
+  function renderExerciseCorrectCount(doc, correct) {
+    if (!doc || typeof doc.getElementById !== 'function') return null;
+    var el = doc.getElementById('exerciseCorrectCount');
+    if (!el && typeof doc.createElement === 'function') {
+      el = doc.createElement('p');
+      el.id = 'exerciseCorrectCount';
+      el.className = 'exercise-correct-count';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      var stats = doc.getElementById('stats');
+      if (stats && stats.parentNode) stats.parentNode.insertBefore(el, stats.nextSibling);
+    }
+    if (el) el.textContent = 'היום פתרת נכון ' + correct + ' שאלות';
+    return el;
+  }
+
+  function showExerciseSessionSummary(doc, history, options) {
+    options = options || {};
+    if (!doc || !Array.isArray(history)) return { correct: 0, total: 0 };
+    var correct = countSessionCorrectAnswers(history);
+    var total = history.length;
+    var levelForId = options.levelForId || function () { return 1; };
+    var maxLevel = 1;
+    history.forEach(function (x) {
+      var lv = levelForId(x.id);
+      if (lv > maxLevel) maxLevel = lv;
+    });
+    var statsEl = doc.getElementById(options.statsId || 'stats');
+    if (statsEl) {
+      statsEl.innerHTML = '<div class="stat"><strong>' + correct + '/' + total + '</strong>נכונות</div>'
+        + '<div class="stat"><strong>' + (total ? Math.round(correct / total * 100) : 0) + '%</strong>דיוק בסבב</div>'
+        + '<div class="stat"><strong>' + maxLevel + '</strong>רמה מרבית בסבב</div>';
+    }
+    renderExerciseCorrectCount(doc, correct);
+    var summaryTextEl = doc.getElementById(options.summaryTextId || 'summaryText');
+    if (summaryTextEl) {
+      summaryTextEl.textContent = options.summaryText
+        || 'ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.';
+    }
+    if (options.showPanels) {
+      var quiz = doc.getElementById('quiz');
+      var summary = doc.getElementById('summary');
+      if (quiz && quiz.classList) quiz.classList.toggle('hidden', true);
+      if (summary && summary.classList) summary.classList.toggle('hidden', false);
+    }
+    return { correct: correct, total: total };
+  }
+
+  function hookPracticeFinishSummary() {
+    if (IN_NODE || typeof document === 'undefined') return;
+    var g = typeof globalThis !== 'undefined' ? globalThis : root;
+    if (!g || typeof g.finish !== 'function' || g.finish.__mmExerciseSummary) return;
+    var previous = g.finish;
+    g.finish = function mmFinishWithSummary() {
+      previous.call(this);
+      var summary = document.getElementById('summary');
+      if (!summary || summary.classList.contains('hidden')) return;
+      var stats = document.getElementById('stats');
+      if (!stats) return;
+      var match = String(stats.innerHTML).match(/<strong>(\d+)\/(\d+)<\/strong>/);
+      if (!match) return;
+      renderExerciseCorrectCount(document, parseInt(match[1], 10));
+    };
+    g.finish.__mmExerciseSummary = true;
   }
 
   function installAccessBar() {
@@ -183,7 +255,12 @@
 
   function api() {
     const parts = pick();
-    return Object.assign({}, parts, { installSharedChrome: installSharedChrome, installAccessBar: installAccessBar });
+    return Object.assign({}, parts, {
+      installSharedChrome: installSharedChrome,
+      installAccessBar: installAccessBar,
+      countSessionCorrectAnswers: countSessionCorrectAnswers,
+      showExerciseSessionSummary: showExerciseSessionSummary,
+    });
   }
 
   const exported = IN_NODE ? api() : { installSharedChrome: installSharedChrome };

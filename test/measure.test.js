@@ -14,6 +14,21 @@ test('a non-standard-unit ruler defaults to "יחידות"', () => {
   assert.match(html, /4 יחידות/);
 });
 
+test('a custom ruler label is escaped and never breaks out of the markup', () => {
+  const html = measure.renderRulerHtml({ length: 2, label: '"><script>alert(1)</script>' });
+  assert.doesNotMatch(html, /<script/);
+  assert.match(html, /aria-label="עצם שאורכו 2 &quot;&gt;&lt;script&gt;/);
+  assert.match(html, /<p class="ruler-read">2 &quot;&gt;&lt;script&gt;/);
+  assert.equal((html.match(/<\/div>/g) || []).length, 2);
+});
+
+test('a blank or non-string ruler label falls back to the unit default', () => {
+  assert.equal(measure.normalizeRuler({ unit: 'cm', label: '   ' }).label, 'ס״מ');
+  assert.equal(measure.normalizeRuler({ label: { bad: true } }).label, 'יחידות');
+  assert.equal(measure.normalizeRuler({ label: 'קוביות' }).label, 'קוביות');
+  assert.match(measure.renderRulerHtml({ length: 3, label: 'קוביות' }), /3 קוביות/);
+});
+
 test('ruler length is clamped to a sane range', () => {
   const R = measure.normalizeRuler({ length: 999 });
   assert.ok(R.length <= 20);

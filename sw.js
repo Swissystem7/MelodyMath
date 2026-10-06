@@ -1,7 +1,7 @@
 /* MelodyMath — cache the demo so a school tablet survives wifi drops.
    First visit on https still needs a network. After that the listed files
    come from this cache. Bump CACHE when shipping a new set of assets. */
-const CACHE = 'melodymath-offline-v6';
+const CACHE = 'melodymath-offline-v7';
 const ASSETS = [
   './',
   './index.html',

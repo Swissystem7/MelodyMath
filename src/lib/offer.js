@@ -27,6 +27,9 @@
 
   function clampGroup(n) {
     const x = Math.round(Number(n));
+    if (Number.isFinite(x) && x < 0) {
+      throw new TypeError('group size must not be negative');
+    }
     if (!Number.isFinite(x) || x < 1) return 1;
     return Math.min(12, x);
   }
@@ -187,6 +190,11 @@
       + (copy ? '&cc=' + encodeURIComponent(copy) : '');
   }
 
+  function safeMailHref(href) {
+    if (typeof href !== 'string') return '';
+    return href.startsWith('mailto:') ? href : '';
+  }
+
   return {
     PROJECT_MAIL: PROJECT_MAIL,
     DEMO_URL: DEMO_URL,
@@ -201,5 +209,6 @@
     principalLetterBody: principalLetterBody,
     buildPrincipalEmail: buildPrincipalEmail,
     buildMailto: buildMailto,
+    safeMailHref: safeMailHref,
   };
 });

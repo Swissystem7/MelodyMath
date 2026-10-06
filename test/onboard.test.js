@@ -49,3 +49,15 @@ test('garbage in storage does not crash the first-run gate', () => {
   ls.setItem(onboard.ONBOARD_KEY, '{"dismissed":1}');
   assert.equal(onboard.shouldShowOnboard(ls), false);
 });
+
+test('when localStorage is unavailable, shouldShowOnboard must return false', () => {
+  // Create a storage that throws when accessed, simulating private browsing mode
+  const brokenStorage = {
+    getItem: () => { throw new Error('localStorage not available'); },
+    setItem: () => { throw new Error('localStorage not available'); },
+    removeItem: () => { throw new Error('localStorage not available'); },
+  };
+  
+  // The function should return false even though normalizeState({}) returns { dismissed: false, step: 0 }
+  assert.equal(onboard.shouldShowOnboard(brokenStorage), false);
+});

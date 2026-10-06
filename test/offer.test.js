@@ -96,6 +96,10 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
 
+test('clampGroup throws TypeError for negative input', () => {
+  assert.throws(() => offer.normalizeTrialRequest({ groupSize: -5 }), TypeError);
+});
+
 test('principalLetterBody throws error for negative groupSize', () => {
   assert.throws(() => {
     offer.principalLetterBody({ groupSize: -5 });

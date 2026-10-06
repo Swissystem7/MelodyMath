@@ -90,6 +90,54 @@ test('loadJson/saveJson namespace keys and survive garbage', () => {
   assert.equal(store.loadJson('bad', 7, ls), 7);
 });
 
+test('a tablet that cannot persist still runs the session instead of throwing', () => {
+  // Safari private mode / full quota: getItem works, setItem throws.
+  const m = Object.create(null);
+  const readOnly = {
+    getItem: (k) => (k in m ? m[k] : null),
+    setItem: () => { throw new Error('QuotaExceededError'); },
+    removeItem: () => {},
+  };
+  assert.equal(store.saveRoster('שילוב', store.emptyRoster('שילוב'), readOnly), false);
+  let sess;
+  assert.doesNotThrow(() => { sess = store.startSession('שילוב', 'נועה', 'class', readOnly); });
+  assert.ok(sess && sess.id);
+  assert.equal(sess.kind, 'class');
+  // Nothing was written, and the follow-up calls degrade to null, not a crash.
+  assert.deepEqual(store.listStudents('שילוב', readOnly), []);
+  assert.doesNotThrow(() => {
+    store.addItem('שילוב', 'נועה', sess.id, { skill: 'חיבור', prompt: '2+2', correct: true }, readOnly);
+    store.endSession('שילוב', 'נועה', sess.id, readOnly);
+  });
+});
+
+test('a roster row with no sessions array is repaired on first use', () => {
+  const ls = memory();
+  ls.setItem(store.storageKey('שילוב'), JSON.stringify({
+    classCode: 'שילוב',
+    students: { 'תמר': { name: 'תמר', created: 1 } },
+  }));
+  let sess;
+  assert.doesNotThrow(() => { sess = store.startSession('שילוב', 'תמר', 'diag', ls); });
+  store.addItem('שילוב', 'תמר', sess.id, { skill: 'מנייה', prompt: '3', correct: true }, ls);
+  store.endSession('שילוב', 'תמר', sess.id, ls);
+  const student = store.getStudent('שילוב', 'תמר', ls);
+  assert.equal(student.sessions.length, 1);
+  assert.equal(student.sessions[0].items.length, 1);
+  assert.ok(student.sessions[0].ended);
+  // Import into the same repaired row must not throw either.
+  const json = store.exportRoster('שילוב', ls);
+  const dest = memory();
+  dest.setItem(store.storageKey('שילוב'), JSON.stringify({
+    classCode: 'שילוב',
+    students: { 'תמר': { name: 'תמר', created: 1 } },
+  }));
+  const res = store.importRoster('שילוב', json, dest);
+  assert.equal(res.ok, true);
+  assert.equal(res.merged, 1);
+  assert.equal(store.getStudent('שילוב', 'תמר', dest).sessions.length, 1);
+});
+
 test('an empty name is refused and a missing student yields a blank report', () => {
   const ls = memory();
   assert.equal(store.upsertStudent('כ', '   ', ls), null);
@@ -159,4 +207,50 @@ test('a child certificate counts practice and refuses mastery language', () => {
   assert.match(html, /13\.8\.2026/);
   assert.match(html, /מנייה/);
   assert.equal(html.includes('<script'), false);
+});
+
+test('a student name that is a prototype key never pollutes Object.prototype', () => {
+  const ls = memory();
+  assert.equal(store.upsertStudent('שילוב', '__proto__', ls), null);
+  assert.equal(store.upsertStudent('שילוב', 'constructor', ls), null);
+  assert.equal(store.startSession('שילוב', '__proto__', 'practice', ls), null);
+  assert.equal(store.getStudent('שילוב', 'constructor', ls), null);
+  assert.equal(store.getStudent('שילוב', 'toString', ls), null);
+  assert.equal(store.addNote('שילוב', '__proto__', 'x', ls), null);
+  assert.deepEqual(store.listStudents('שילוב', ls), []);
+  assert.equal(({}).sessions, undefined);
+  assert.equal(({}).assignments, undefined);
+  assert.equal(({}).notes, undefined);
+});
+
+test('importRoster skips prototype-key names and normalizes the rest', () => {
+  const dest = memory();
+  // Written as text on purpose: an object literal with a __proto__ key sets the
+  // prototype instead of an own key, but JSON.parse creates an own key.
+  const raw = '{"v":1,"students":{'
+    + '"__proto__":{"sessions":[{"id":"evil","items":[]}],"notes":[{"at":1,"text":"x"}]},'
+    + '"constructor":{"sessions":[]},'
+    + '"  דני   כהן ":{"sessions":[{"id":"a1","items":[]}]}}}';
+  const res = store.importRoster('שילוב', raw, dest);
+  assert.equal(res.ok, true);
+  assert.equal(res.added, 1);
+  assert.equal(res.skipped, 2);
+  assert.equal(({}).sessions, undefined);
+  assert.equal(({}).notes, undefined);
+  assert.deepEqual(store.listStudents('שילוב', dest), ['דני כהן']);
+  const kid = store.getStudent('שילוב', 'דני כהן', dest);
+  assert.ok(kid);
+  assert.equal(kid.sessions.length, 1);
+  // Re-importing the same file merges into the normalized row instead of adding a twin.
+  const again = store.importRoster('שילוב', raw, dest);
+  assert.equal(again.added, 0);
+  assert.equal(store.getStudent('שילוב', 'דני כהן', dest).sessions.length, 1);
+});
+
+test('loadRoster drops a prototype-key row that an older build may have stored', () => {
+  const ls = memory();
+  ls.setItem(store.storageKey('שילוב'), '{"classCode":"שילוב","students":{"__proto__":{"sessions":[]},"רון":{"name":"רון","sessions":[]}}}');
+  assert.deepEqual(store.listStudents('שילוב', ls), ['רון']);
+  assert.equal(store.getStudent('שילוב', '__proto__', ls), null);
+  assert.equal(({}).sessions, undefined);
 });

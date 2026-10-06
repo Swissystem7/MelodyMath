@@ -759,10 +759,28 @@
     return (GRADE_SKILLS[grade] || []).slice();
   }
 
+  // One base question and one intermediate question per skill: a child who
+  // only stumbles at level 2 must look different in the gap report from a
+  // child who is stuck at level 1.
+  function diagnosticPair(skill, grade) {
+    const rows = rowsOf(skill, grade);
+    const pair = [];
+    const base = rows.find(function (it) { return it.level === 1; });
+    const mid = rows.find(function (it) { return it.level === 2; });
+    if (base) pair.push(base);
+    if (mid) pair.push(mid);
+    // A skill missing one of the two levels still contributes two questions,
+    // so the diagnostic keeps its length.
+    rows.forEach(function (it) {
+      if (pair.length < 2 && pair.indexOf(it) === -1) pair.push(it);
+    });
+    return pair;
+  }
+
   function diagnosticItems(grade) {
     const g = grade && GRADE_SKILLS[grade] ? grade : 'א';
     return skillsForGrade(g).flatMap(function (skill) {
-      return rowsOf(skill, g).slice(0, 2);
+      return diagnosticPair(skill, g);
     });
   }
 
