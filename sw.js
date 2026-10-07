@@ -23,6 +23,7 @@ const ASSETS = [
   './src/lib/numberLine.js',
   './src/lib/bar44.js',
   './src/lib/curriculum.js',
+  './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
   './src/lib/access.js',
