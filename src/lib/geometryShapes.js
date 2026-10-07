@@ -23,8 +23,14 @@
     6: ['hexagon'],
   };
 
+  // Own keys only: a name like 'toString' or 'constructor' must not
+  // resolve to an Object.prototype member.
+  function own(map, key) {
+    return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : null;
+  }
+
   function shapeOf(name) {
-    return SHAPES[name] || null;
+    return own(SHAPES, name);
   }
 
   function sidesOf(name) {
@@ -38,7 +44,7 @@
   }
 
   function namesForSides(n) {
-    return (NAMES_BY_SIDES[n] || []).slice();
+    return (own(NAMES_BY_SIDES, n) || []).slice();
   }
 
   function shapeHe(name) {
