@@ -19,6 +19,9 @@
   };
 
   let activeHear = null;
+  let announcementQueue = [];
+  let isSpeaking = false;
+  let currentUtterance = null;
 
   function defaultStorage() {
     try {
@@ -87,16 +90,114 @@
     return next;
   }
 
+  function normalizePriority(priority) {
+    if (typeof priority === 'number') return priority;
+    if (priority === true) return 1;
+    if (typeof priority === 'string') {
+      const p = priority.toLowerCase().trim();
+      if (p === 'high' || p === 'assertive' || p === 'urgent') return 1;
+    }
+    return 0;
+  }
+
+  function queueAnnouncement(text, priority, opts) {
+    const t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+    if (!t) return false;
+    const prio = normalizePriority(priority);
+    const item = {
+      text: t,
+      priority: prio,
+      opts: opts || {},
+    };
+    announcementQueue.push(item);
+    try {
+      if (typeof speechSynthesis !== 'undefined') {
+        const prefs = loadAccess();
+        if (prefs && prefs.speak) {
+          processSpeechQueue();
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return true;
+  }
+
+  function dequeueAnnouncementItem() {
+    if (!announcementQueue.length) return null;
+    let bestIdx = 0;
+    let bestPriority = announcementQueue[0].priority;
+    for (let i = 1; i < announcementQueue.length; i++) {
+      if (announcementQueue[i].priority > bestPriority) {
+        bestPriority = announcementQueue[i].priority;
+        bestIdx = i;
+      }
+    }
+    const [item] = announcementQueue.splice(bestIdx, 1);
+    return item || null;
+  }
+
+  function dequeueAnnouncement() {
+    const item = dequeueAnnouncementItem();
+    return item ? item.text : null;
+  }
+
+  function clearAnnouncements() {
+    announcementQueue = [];
+  }
+
+  function getAnnouncementQueue() {
+    return announcementQueue.map(function (item) {
+      return { text: item.text, priority: item.priority };
+    });
+  }
+
+  function processSpeechQueue() {
+    if (typeof speechSynthesis === 'undefined') return false;
+    if (isSpeaking) return false;
+    if (!announcementQueue.length) return false;
+
+    const item = dequeueAnnouncementItem();
+    if (!item) return false;
+
+    try {
+      isSpeaking = true;
+      const u = new SpeechSynthesisUtterance(item.text);
+      u.lang = 'he-IL';
+      const opts = item.opts || {};
+      u.rate = opts && typeof opts.rate === 'number' && opts.rate > 0 ? opts.rate : 0.9;
+
+      // speechSynthesis.cancel() fires the cancelled utterance's end/error
+      // event later, asynchronously. By then a new utterance may already be
+      // playing; a stale callback must not free the queue for it.
+      const onDone = function () {
+        if (currentUtterance !== u) return;
+        currentUtterance = null;
+        isSpeaking = false;
+        processSpeechQueue();
+      };
+
+      u.onend = onDone;
+      u.onerror = onDone;
+      currentUtterance = u;
+      speechSynthesis.speak(u);
+      return true;
+    } catch (e) {
+      currentUtterance = null;
+      isSpeaking = false;
+      return false;
+    }
+  }
+
   function speakHebrew(text, opts) {
     if (typeof speechSynthesis === 'undefined') return false;
     const t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
     if (!t) return false;
     try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(t);
-      u.lang = 'he-IL';
-      u.rate = opts && typeof opts.rate === 'number' && opts.rate > 0 ? opts.rate : 0.9;
-      speechSynthesis.speak(u);
+      if (opts && (opts.cancel || opts.interrupt)) {
+        cancelSpeech();
+      }
+      const priority = opts && (opts.priority || opts.urgent || opts.assertive);
+      queueAnnouncement(t, priority, opts);
+      processSpeechQueue();
       return true;
     } catch (e) {
       return false;
@@ -110,6 +211,9 @@
   }
 
   function cancelSpeech() {
+    announcementQueue = [];
+    isSpeaking = false;
+    currentUtterance = null;
     if (typeof speechSynthesis === 'undefined') return;
     try { speechSynthesis.cancel(); } catch (e) { /* closed */ }
   }
@@ -200,5 +304,14 @@
     getActiveHear: getActiveHear,
     currentPromptText: currentPromptText,
     refreshSpeakNow: refreshSpeakNow,
+    queueAnnouncement: queueAnnouncement,
+    enqueueAnnouncement: queueAnnouncement,
+    dequeueAnnouncement: dequeueAnnouncement,
+    nextAnnouncement: dequeueAnnouncement,
+    clearAnnouncements: clearAnnouncements,
+    getAnnouncementQueue: getAnnouncementQueue,
+    queueMessage: queueAnnouncement,
+    dequeueMessage: dequeueAnnouncement,
+    nextMessage: dequeueAnnouncement,
   };
 });

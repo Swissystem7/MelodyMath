@@ -42,6 +42,22 @@
     return i;
   }
 
+  function getNextTabId(tabIds, currentId, key, rtl) {
+    if (!Array.isArray(tabIds) || tabIds.length === 0) return null;
+    const count = tabIds.length;
+    let idx = tabIds.indexOf(currentId);
+    if (idx < 0) {
+      if (key === KEYS.END) return tabIds[count - 1];
+      if (key === KEYS.HOME) return tabIds[0];
+      idx = 0;
+    }
+    const isRtlMode = typeof rtl === 'boolean'
+      ? rtl
+      : (rtl === 'rtl' || Boolean(rtl && rtl.rtl));
+    const nextIdx = tabIndexAfterKey(idx, count, key, isRtlMode);
+    return tabIds[nextIdx];
+  }
+
   function tabsOf(list) {
     if (!list || !list.querySelectorAll) return [];
     return Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
@@ -102,5 +118,9 @@
     syncRovingTabindex: syncRovingTabindex,
     bindTablist: bindTablist,
     bindAllTablists: bindAllTablists,
+    getNextTabId: getNextTabId,
+    nextTabId: getNextTabId,
+    tabIdAfterKey: getNextTabId,
+    navigateTabs: getNextTabId,
   };
 });

@@ -5,6 +5,9 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const MAX_INTERVALS = 100;
+  const LIMIT = 1e6;
+
   function clampInt(n, min, max) {
     const v = Math.round(Number(n));
     if (!Number.isFinite(v)) return min;
@@ -17,8 +20,13 @@
     let max = Math.round(Number(src.max));
     if (!Number.isFinite(min)) min = 0;
     if (!Number.isFinite(max)) max = 20;
+    // Past 2^53 n += step stops moving and ticksOf never ends; keep integers exact.
+    min = clampInt(min, -LIMIT, LIMIT - 10);
+    max = clampInt(max, -LIMIT, LIMIT);
     if (max <= min) max = min + 10;
-    const step = Math.max(1, Math.round(Number(src.step)) || 1);
+    // Imported items (banks.js keeps raw.line as-is) may carry a huge range;
+    // widen the step so the rail never holds more than MAX_INTERVALS ticks.
+    const step = Math.max(1, Math.round(Number(src.step)) || 1, Math.ceil((max - min) / MAX_INTERVALS));
     const start = src.start == null ? null : clampInt(src.start, min, max);
     const mark = src.mark == null ? null : clampInt(src.mark, min, max);
     return { min: min, max: max, step: step, start: start, mark: mark };
