@@ -547,13 +547,14 @@
     let skipped = 0;
     Object.keys(data.students).forEach(function (rawName) {
       const incoming = data.students[rawName];
-      // Same rules as loadRoster and upsertStudent: the row must be an
-      // object and the name trimmed, 24 chars, never a prototype key.
-      // Otherwise a row lands under a name getStudent can never look up, or
-      // holds a value every reader would throw on. Count it so the teacher
-      // sees it was dropped instead of vanishing.
+      // Same rule as loadRoster: a row that is not an object holds a value
+      // every reader would throw on. Count it so the teacher sees it was
+      // dropped instead of vanishing.
+      if (!isStudentRow(incoming)) { skipped += 1; return; }
+      // Same rule as upsertStudent: trimmed, 24 chars, never a prototype key.
+      // Otherwise a row lands under a name getStudent can never look up.
       const name = studentLabel(rawName);
-      if (!name || !isStudentRow(incoming)) { skipped += 1; return; }
+      if (!name) { skipped += 1; return; }
       const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
       const incomingNotes = cleanNotes(incoming.notes);
       const incomingAssignments = cleanAssignments(incoming.assignments);
