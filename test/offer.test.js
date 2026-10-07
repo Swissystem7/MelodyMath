@@ -99,3 +99,9 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
 test('clampGroup throws TypeError for negative input', () => {
   assert.throws(() => offer.normalizeTrialRequest({ groupSize: -5 }), TypeError);
 });
+
+test('principalLetterBody throws error for negative groupSize', () => {
+  assert.throws(() => {
+    offer.principalLetterBody({ groupSize: -5 });
+  }, new Error('groupSize must be a positive integer'));
+});
