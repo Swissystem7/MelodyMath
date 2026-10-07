@@ -25,3 +25,9 @@ test('the HTML marks ticks and announces the selected number', () => {
   assert.match(html, /נבחר: 4/);
   assert.doesNotMatch(html, /<script/);
 });
+
+test('playJumpSound function should be defined and return undefined for invalid inputs', () => {
+  assert.equal(typeof line.playJumpSound, 'function');
+  assert.equal(line.playJumpSound(null, null), undefined);
+  assert.equal(line.playJumpSound(5, null), undefined);
+});
