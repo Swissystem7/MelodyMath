@@ -96,6 +96,10 @@ test('the offer page is Hebrew RTL and has no checkout', () => {
   assert.doesNotMatch(page, /סוגר פערים|מחקרים מוכיחים|טיפול ADHD/);
 });
 
+test('escapeHtml properly escapes Unicode characters like euro sign', () => {
+  assert.equal(offer.escapeHtml('€10'), '&euro;10');
+});
+
 test('clampGroup throws TypeError for negative input', () => {
   assert.throws(() => offer.normalizeTrialRequest({ groupSize: -5 }), TypeError);
 });
