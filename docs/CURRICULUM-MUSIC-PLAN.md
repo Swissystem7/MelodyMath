@@ -190,3 +190,23 @@
 - עברית ב־RTL ומתמטיקה ב־LTR מבודד.
 - לבקש סקירה מ־Copilot.
 - בלי טענות אפקטיביות בממשק. כל טקסט שיווקי צריך אישור של אבירן.
+
+## 9. מפת משימות ב־GitHub
+| משימה | issue | תוויות |
+|---|---|---|
+| 1. מנוע מוזיקה, פתיחת שמע ב־iOS, מטמון PWA | #100 | factory:auto, kind:hard, factory:claude |
+| 2. מעבר mobile-first | #101 | factory:auto, kind:medium, kind:ui |
+| 3. כיתה א׳ | #102 | factory:auto, kind:medium |
+| 4. כיתה ב׳ | #103 | factory:auto, kind:medium |
+| 5. כיתה ג׳ | #104 | factory:auto, kind:medium |
+| 6. כיתה ד׳, שברים עם תווים | #105 | factory:auto, kind:medium |
+| 7. כיתה ה׳ | #106 (מבוסס על הבנק של #96) | factory:auto, kind:medium |
+| 8. כיתה ו׳ | #107 (מבוסס על הבנק של #96) | factory:auto, kind:medium |
+| 9. מעבדת תדרים | #108 | factory:auto, kind:hard, factory:claude |
+| 10. גאומטריה ומדידות א׳–ד׳ | #94, #95 (קיימים, נוספה הפניה) | factory:auto, kind:medium |
+| 11. מטריצת כיסוי ה׳–ו׳ | #109 | factory:auto, kind:small |
+| 12. מדידת אפקטיביות לפני־אחרי | #110 | factory:auto, kind:medium |
+| תנאי מקדים: חיבור מודולים שלא מחוברים | #33 | factory:auto, kind:hard |
+| תנאי מקדים: תרגילים מוצגים הפוך ב־RTL | #93 | factory:claude |
+
+> הערה: issue #97 מבקש workflow של CI, וזה סותר את `AGENTS.md` ואת `test/honesty.test.js`, שאוסרים על `.github/workflows/`. צריך החלטה של בעל הריפו לפני שעובדים עליו.
