@@ -7,10 +7,23 @@
     Object.assign(root, api);
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  function allItems(student) {
+  // Raw roster JSON (storage, paste, import) may carry a null session, an
+  // items field that is not an array, or a null item. Skip those rows so one
+  // bad row does not blank the whole class dashboard with a TypeError.
+  function isRow(x) {
+    return !!x && typeof x === 'object';
+  }
+
+  function sessionsOf(student) {
     if (!student || !Array.isArray(student.sessions)) return [];
-    return student.sessions.reduce(function (acc, session) {
-      (session.items || []).forEach(function (it) { acc.push(it); });
+    return student.sessions.filter(isRow);
+  }
+
+  function allItems(student) {
+    return sessionsOf(student).reduce(function (acc, session) {
+      (Array.isArray(session.items) ? session.items : []).forEach(function (it) {
+        if (isRow(it)) acc.push(it);
+      });
       return acc;
     }, []);
   }
@@ -118,7 +131,7 @@
     return names.map(function (name) {
       const student = studentsMap[name] || {};
       const report = buildStudentReport(student);
-      const sessions = Array.isArray(student.sessions) ? student.sessions : [];
+      const sessions = sessionsOf(student);
       const last = sessions.length ? sessions[sessions.length - 1] : null;
       const notes = Array.isArray(student.notes) ? student.notes.length : 0;
 
@@ -145,6 +158,8 @@
   }
 
   return {
+    isRow: isRow,
+    sessionsOf: sessionsOf,
     allItems: allItems,
     buildStudentReport: buildStudentReport,
     getDashboardData: getDashboardData,
