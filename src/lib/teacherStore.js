@@ -146,8 +146,9 @@
     const roster = loadRoster(classCode, storage);
     const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
-    const session = student.sessions.find(function (s) { return s.id === sessionId; });
+    const session = student.sessions.find(function (s) { return s && s.id === sessionId; });
     if (!session) return null;
+    if (!Array.isArray(session.items)) session.items = [];
     const row = {
       skill: item.skill || '',
       prompt: item.prompt || '',
@@ -166,7 +167,7 @@
     const roster = loadRoster(classCode, storage);
     const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
-    const session = student.sessions.find(function (s) { return s.id === sessionId; });
+    const session = student.sessions.find(function (s) { return s && s.id === sessionId; });
     if (!session) return null;
     session.ended = Date.now();
     saveRoster(classCode, roster, storage);
@@ -176,7 +177,7 @@
   function allItems(student) {
     if (!student || !Array.isArray(student.sessions)) return [];
     return student.sessions.reduce(function (acc, session) {
-      (session.items || []).forEach(function (it) { acc.push(it); });
+      ((session && session.items) || []).forEach(function (it) { if (it) acc.push(it); });
       return acc;
     }, []);
   }
@@ -214,7 +215,9 @@
       .map(function (k) { return missCount[k]; })
       .filter(function (x) { return x.count >= 2; })
       .sort(function (a, b) { return b.count - a.count; });
-    const sessions = (student && student.sessions) || [];
+    const sessions = ((student && student.sessions) || []).filter(function (s) {
+      return s && typeof s === 'object';
+    });
     return {
       name: student && student.name ? student.name : '',
       total: items.length,
@@ -331,6 +334,31 @@
       if (seen[key]) return;
       seen[key] = true;
       out.push(row);
+    });
+    return out;
+  }
+
+  // Sessions come off the same JSON file. A hand-edited or truncated export
+  // can hold `null`, a bare string, or a session whose `items` is not a list.
+  // Every reader below does `s.items` / `s.id` on each entry, so one such row
+  // would throw from the class board, the report and the practice loop for
+  // that student on every later visit. Keep object rows only, give each a
+  // real items list, and never carry the same session id in twice.
+  function cleanSessions(list) {
+    if (!Array.isArray(list)) return [];
+    const seen = Object.create(null);
+    const out = [];
+    list.forEach(function (s) {
+      if (!s || typeof s !== 'object' || Array.isArray(s)) return;
+      if (s.id != null) {
+        const key = String(s.id);
+        if (seen[key]) return;
+        seen[key] = true;
+      }
+      const items = Array.isArray(s.items)
+        ? s.items.filter(function (it) { return it && typeof it === 'object'; })
+        : [];
+      out.push(Object.assign({}, s, { items: items }));
     });
     return out;
   }
@@ -541,7 +569,7 @@
       // Otherwise a row lands under a name getStudent can never look up.
       const name = studentLabel(rawName);
       if (!name) { skipped += 1; return; }
-      const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
+      const sessions = cleanSessions(incoming.sessions);
       const incomingNotes = cleanNotes(incoming.notes);
       const incomingAssignments = cleanAssignments(incoming.assignments);
       if (!ownStudent(roster, name)) {
