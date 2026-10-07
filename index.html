@@ -331,7 +331,7 @@ function currentDiag(){ return diagnosticItems(selectedGrade); }
 function poolForSkill(skill){
   let rows=rowsOf(skill, selectedGrade);
   if((skill==='multiplication'||skill==='division') && selectedGrade==='ג' && typeof withCoreIfNeeded==='function'){
-    rows=withCoreIfNeeded(rows, typeof coreFactItems==='function'?coreFactItems():[]);
+    rows=withCoreIfNeeded(rows, typeof coreFactItems==='function'?coreFactItems(skill):[]);
   }
   return rows;
 }
