@@ -18,7 +18,7 @@
   .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
   button{min-height:44px;min-width:44px;border:0;border-radius:12px;background:var(--purple);color:#fff;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}
   button.ghost{background:#fff;color:var(--purple);border:1px solid var(--line)}
-  input[type=number]{min-height:44px;width:7rem;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit}
+  input[type=number],input[type=text]{min-height:44px;width:7rem;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit}
   .math{direction:ltr;unicode-bidi:isolate;font-weight:700;white-space:nowrap}
   .fb{min-height:1.5em;font-weight:700}.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
   #now{position:sticky;top:0;z-index:5;background:#fff5ce;border-radius:12px;padding:10px 12px;margin:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
@@ -34,6 +34,11 @@
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
+  .goal{background:#fff;border-inline-start:4px solid var(--purple);border-radius:8px;padding:8px 12px}
+  .plain .fb.good,.plain .fb.bad{color:var(--ink)}
+  .quiz-item{margin:10px 0}
+  body.visual-arm [data-ab],body.visual-arm #harmAll,body.visual-arm #monoPlay,body.visual-arm #tetPlay,body.visual-arm #again,body.visual-arm #mute{display:none}
+  table.ev{border-collapse:collapse;width:100%}table.ev td,table.ev th{border-bottom:1px solid var(--line);padding:4px;text-align:start}
 </style>
 </head>
 <body>
@@ -42,7 +47,21 @@
   <p class="note">העשרה לכיתות ה׳–ו׳ · שברים, "פי" ויחס</p>
   <h1>מעבדת תדרים</h1>
   <p class="lead">צליל הוא רטט. התדר אומר כמה רטטים יש בשנייה (Hz). כאן שומעים מה קורה כשכופלים תדר בשבר. כל צליל מופיע גם בכתב, כך שאפשר לעבוד גם בלי רמקול.</p>
-  <div id="now"><span id="nowText" role="status" aria-live="polite">עוד לא נוגן צליל. נגיעה ראשונה בדף פותחת את השמע.</span><button type="button" id="again" class="ghost">↻ השמע שוב</button></div>
+  <p class="goal"><b>המטרה:</b> אחרי הפעילות יודעים לכפול כמות ביחס, למשל <span class="math">220 × 3/2 = 330</span>, ולומר "פי כמה", למשל <span class="math">440 ÷ 220 = 2</span>.</p>
+  <p class="note" id="armNote" hidden>בגרסה הזו של המעבדה אין צלילים: אותם תרגילים עם מספרים ופס מיתר.</p>
+  <div id="now"><span id="nowText" role="status" aria-live="polite">עוד לא נוגן צליל. נגיעה ראשונה בדף פותחת את השמע.</span><span class="row" style="margin:0"><button type="button" id="again" class="ghost">↻ השמע שוב</button><button type="button" id="mute" class="ghost" aria-pressed="false">🔇 השתקה</button></span></div>
+
+  <section class="card" id="review" aria-labelledby="h-review" hidden>
+    <h2 id="h-review">חזרה קצרה, בלי צליל</h2>
+    <p class="note" id="reviewNote"></p>
+    <div data-quiz="review"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-pre">
+    <h2 id="h-pre">0. שאלה מקדימה, בלי צליל</h2>
+    <p class="note">עונים לפני שמתחילים. זה לא מבחן, רק נקודת פתיחה.</p>
+    <div data-quiz="pre"></div>
+  </section>
 
   <section class="card" aria-labelledby="h-oct">
     <h2 id="h-oct">1. אוקטבה = פי 2</h2>
@@ -77,6 +96,7 @@
     <div class="string" aria-hidden="true"><span id="monoBar"></span></div>
     <p id="monoOut"></p>
     <div class="row"><button type="button" id="monoPlay">▶ מיתר שלם ואז החלק</button></div>
+    <div data-quiz="near"></div>
   </section>
 
   <details class="card">
@@ -84,25 +104,131 @@
     <p>בפסנתר כל חצי טון כופל את התדר באותו מספר, כך ש־12 חצאי טונים נותנים בדיוק פי 2. לכן הקווינטה בפסנתר (7 חצאי טונים) היא <span class="math" id="m-tet"></span> ולא בדיוק <span class="math">3/2 = 1.5</span>. ההפרש קטן מאוד: <span class="math" id="m-cents"></span> (סנט = מאית של חצי טון).</p>
     <div class="row"><button type="button" id="tetPlay">▶ קווינטה טהורה ואז של פסנתר</button></div>
   </details>
+  <section class="card plain" aria-labelledby="h-far">
+    <h2 id="h-far">6. אותו חשבון, בלי צליל</h2>
+    <p>אין כאן צלילים ואין רמזים בצבע. אותה מתמטיקה, בעולם אחר.</p>
+    <div data-quiz="far"></div>
+    <p class="fb" id="learned" aria-live="polite"></p>
+  </section>
+
+  <details class="card">
+    <summary>למורה: מה נמדד במכשיר הזה</summary>
+    <div id="evidence"></div>
+    <p class="note">ההשוואה היא בין ילדים שקיבלו את המעבדה עם צלילים לבין ילדים שקיבלו אותה בלי צלילים. השיוך אקראי, והנתונים נשמרים רק במכשיר. זה לא ניסוי מבוקר.</p>
+  </details>
   <p class="note">עוצמה מוגבלת ותדרים בין 110 ל־1760 Hz. זו העשרה, לא חלק מבנק התרגול.</p>
 </main>
 <script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
+<script src="src/lib/unitEvidence.js"></script>
+<script src="src/lib/freqLab.js"></script>
 <script>
 (function () {
   const BASE = 220, F0 = 110;
   const $ = function (id) { return document.getElementById(id); };
   const hz = function (x) { return Math.round(x * 100) / 100; };
   let last = null;
+  let muted = false;
   installAudioUnlock(document);
+
+  let who = { classCode: '', name: '' };
+  try { who = JSON.parse(localStorage.getItem('mm-who-v1') || 'null') || who; } catch (e) { /* private mode */ }
+  const learner = who.name ? (who.classCode || '') + '|' + who.name : 'device';
+  const arm = assignArm(UNIT_ID, learner);
+  if (arm === 'visual') {
+    document.body.classList.add('visual-arm');
+    $('armNote').hidden = false;
+    $('nowText').textContent = 'בלי צלילים: כל תרגיל מופיע במספרים.';
+  }
 
   function play(events, text) {
     last = { events: events, text: text };
-    $('nowText').textContent = 'מנגן: ' + text;
-    unlockAudio().then(function () { scheduleSequence(events); });
+    if (arm === 'visual') { $('nowText').textContent = text; return; }
+    $('nowText').textContent = (muted ? 'מושתק · ' : 'מנגן: ') + text;
+    if (!muted) unlockAudio().then(function () { scheduleSequence(events); });
   }
   $('again').onclick = function () { if (last) play(last.events, last.text); };
+  $('mute').onclick = function () {
+    muted = !muted;
+    this.setAttribute('aria-pressed', String(muted));
+    this.textContent = muted ? '🔊 הפעלת צליל' : '🔇 השתקה';
+  };
+
+  // One quiz block per stage. Only the first answer to each item is scored,
+  // so "try again" helps the child without inflating the measurement.
+  function quiz(box, items, onDone, prefix) {
+    const pre = prefix || 'q-';
+    const first = {};
+    box.innerHTML = '';
+    items.forEach(function (it) {
+      const wrap = document.createElement('div');
+      wrap.className = 'quiz-item';
+      wrap.innerHTML = '<label for="' + pre + it.id + '"></label><div class="row"><input id="' + pre + it.id
+        + '" type="text" inputmode="decimal" autocomplete="off"><button type="button">בדיקה</button>'
+        + (it.unitHe ? '<span>' + it.unitHe + '</span>' : '') + '</div><p class="fb" aria-live="polite"></p>';
+      wrap.querySelector('label').textContent = it.textHe;
+      const input = wrap.querySelector('input');
+      const fb = wrap.querySelector('.fb');
+      wrap.querySelector('button').onclick = function () {
+        if (input.value.trim() === '') return;
+        const r = explain(it, input.value);
+        fb.className = 'fb ' + (r.ok ? 'good' : 'bad');
+        fb.textContent = r.why;
+        if (!(it.id in first)) {
+          first[it.id] = r.ok;
+          if (Object.keys(first).length === items.length) {
+            onDone({ right: items.filter(function (x) { return first[x.id]; }).length, total: items.length });
+          }
+        }
+      };
+      box.appendChild(wrap);
+    });
+  }
+  function stage(name) {
+    return function (score) { recordStage(UNIT_ID, learner, name, score); paintEvidence(); };
+  }
+  function rec() {
+    const unit = loadEvidence()[UNIT_ID];
+    return unit && Object.prototype.hasOwnProperty.call(unit, learner) ? unit[learner] : null;
+  }
+  const qbox = function (k) { return document.querySelector('[data-quiz="' + k + '"]'); };
+  quiz(qbox('pre'), ITEMS.pre, stage('pre'));
+  quiz(qbox('near'), ITEMS.near, stage('near'));
+  quiz(qbox('far'), ITEMS.far, function (score) {
+    stage('far')(score);
+    $('learned').textContent = unitLearned(rec())
+      ? 'פתרתם הכול בלי צליל. היחידה נלמדה.'
+      : 'עוד לא הכול. נחזור לזה בעוד יום, 3 ימים, שבוע ושבועיים.';
+  });
+
+  const now = Date.now();
+  const r0 = rec();
+  if (retentionDue(r0, now)) {
+    $('review').hidden = false;
+    $('reviewNote').textContent = 'עברו שבועיים מאז החלק בלי הצליל. שלוש שאלות חדשות על אותו חשבון.';
+    quiz(qbox('review'), ITEMS.retention, stage('retention'), 'q-review-');
+  } else if (retrievalDue(r0, now)) {
+    $('review').hidden = false;
+    $('reviewNote').textContent = 'הגיע הזמן לחזור על "פי 3/2" ו"פי כמה".';
+    quiz(qbox('review'), ITEMS.far, stage('far'), 'q-review-');
+  }
+
+  function pct(x) { return x == null ? '—' : Math.round(100 * x) + '%'; }
+  function paintEvidence() {
+    const s = fixOrRemove(UNIT_ID);
+    const row = function (label, a) {
+      return '<tr><th>' + label + '</th><td>' + a.n + '</td><td>' + pct(a.pre) + '</td><td>' + pct(a.post)
+        + '</td><td>' + pct(a.far) + '</td><td>' + pct(a.retention) + '</td></tr>';
+    };
+    const verdict = s.verdict === 'collecting'
+      ? 'עוד אין מספיק ילדים להשוואה (צריך לפחות ' + MIN_PER_ARM + ' בכל גרסה).'
+      : s.verdict === 'keep' ? 'הגרסה עם הצלילים לא נפלה מהגרסה בלי הצלילים בחלק בלי הצליל ובחזרה.'
+        : 'הגרסה עם הצלילים נפלה מהגרסה בלי הצלילים. צריך לתקן את הפעילות (פותחים issue), ואם גם אחרי התיקון אין שיפור, מחליפים את הצלילים בציור.';
+    $('evidence').innerHTML = '<table class="ev"><tr><th>גרסה</th><th>n</th><th>לפני</th><th>אחרי</th><th>בלי צליל</th><th>אחרי 14 יום</th></tr>'
+      + row('עם צלילים', s.music) + row('בלי צלילים', s.visual) + '</table><p>' + verdict + '</p>';
+  }
+  paintEvidence();
 
   function abEvents(a, b) {
     return [{ at: 0, dur: 0.8, hz: a }, { at: 1, dur: 0.8, hz: b },
@@ -119,19 +245,27 @@
   $('m-fifth').textContent = '220 × 3/2 = ' + hz(ratioToHz(BASE, 3, 2));
   $('m-fourth').textContent = '220 × 4/3 ≈ ' + hz(ratioToHz(BASE, 4, 3));
 
-  const answers = {
-    'q-oct': ratioToHz(BASE, 2, 1) / BASE,
-    'q-fifth': ratioToHz(BASE, 3, 2),
-    'q-harm': harmonic(5, F0),
+  const checks = {
+    'q-oct': function (v) { return explain({ kind: 'times', a: ratioToHz(BASE, 2, 1), b: BASE, answer: 2 }, v); },
+    'q-fifth': function (v) { return explain({ kind: 'scale', base: BASE, p: 3, q: 2, answer: ratioToHz(BASE, 3, 2) }, v); },
+    'q-harm': function (v) { return harmonicExplain(5, F0, v); },
   };
+  const postFirst = {};
   document.querySelectorAll('[data-check]').forEach(function (b) {
     const id = b.dataset.check;
     b.onclick = function () {
-      const v = Number(String($(id).value).replace(',', '.'));
-      const ok = $(id).value !== '' && Math.abs(v - answers[id]) < 0.01;
+      if ($(id).value.trim() === '') return;
+      const r = checks[id]($(id).value);
       const fb = $(id + '-fb');
-      fb.className = 'fb ' + (ok ? 'good' : 'bad');
-      fb.textContent = ok ? 'נכון: ' + answers[id] : 'עוד לא. נסו שוב או השמיעו שוב את הצלילים.';
+      fb.className = 'fb ' + (r.ok ? 'good' : 'bad');
+      fb.textContent = r.why;
+      if (!(id in postFirst)) {
+        postFirst[id] = r.ok;
+        const ids = Object.keys(checks);
+        if (Object.keys(postFirst).length === ids.length) {
+          stage('post')({ right: ids.filter(function (k) { return postFirst[k]; }).length, total: ids.length });
+        }
+      }
     };
   });
 
