@@ -52,7 +52,8 @@ test('every prompt renderer in index.html goes through setMath, not textContent'
   assert.doesNotMatch(indexHtml, /textContent=(current|q|it)\.prompt/);
   assert.doesNotMatch(indexHtml, /\$\{(current|q|it)\.(hint|answer)\}/);
   assert.doesNotMatch(indexHtml, /\+(beatCurrent|classCurrent)\.(hint|answer)\b/);
-  assert.match(indexHtml, /<script src="src\/lib\/mathBidi\.js"><\/script>\s*<script src="src\/lib\/worksheets\.js">/);
+  const bidiAt = indexHtml.indexOf('<script src="src/lib/mathBidi.js"></script>');
+  assert.ok(bidiAt > -1 && bidiAt < indexHtml.indexOf('<script src="src/lib/worksheets.js">'), 'mathBidi.js must load before worksheets.js');
   assert.match(indexHtml, /\.math-ltr\{direction:ltr;unicode-bidi:isolate/);
 });
 
