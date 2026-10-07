@@ -468,18 +468,20 @@ function paintMetro(){ if($('metroBpm')) $('metroBpm').value=metroBpmNow(); if($
 function stopMetro(){ metroOn=false; if(metroTimer){clearInterval(metroTimer);metroTimer=null} paintMetro(); }
 function startMetro(){ if(typeof playClick!=='function') return; stopMetro(); metroOn=true; playClick(1100); metroTimer=setInterval(function(){ playClick(1100); }, msPerBeat(metroBpmNow())); paintMetro(); }
 function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
+// Write a tempo and restart the click track only when it actually changed:
+// startMetro() plays a click at once and resets the interval phase, so
+// restarting on every answer put an off-beat click right after each pick.
+function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
 function noteMetro(correct){
   if(!correct){ metroStreak=0; return; }
   metroStreak+=1;
   if($('metroAccel')&&$('metroAccel').checked){
-    const bumped=nextBpm(metroBpmNow(), metroStreak, true);
-    if($('metroBpm')) $('metroBpm').value=bumped;
-    if(metroOn) startMetro();
+    setMetroBpm(nextBpm(metroBpmNow(), metroStreak, true));
   }
 }
 if($('metroToggle'))$('metroToggle').onclick=toggleMetro;
-if($('metroDown'))$('metroDown').onclick=function(){ $('metroBpm').value=clampBpm(metroBpmNow()-4); if(metroOn) startMetro(); };
-if($('metroUp'))$('metroUp').onclick=function(){ $('metroBpm').value=clampBpm(metroBpmNow()+4); if(metroOn) startMetro(); };
+if($('metroDown'))$('metroDown').onclick=function(){ setMetroBpm(metroBpmNow()-4); };
+if($('metroUp'))$('metroUp').onclick=function(){ setMetroBpm(metroBpmNow()+4); };
 if($('metroBpm'))$('metroBpm').onchange=function(){ this.value=clampBpm(this.value); if(metroOn) startMetro(); };
 document.addEventListener('visibilitychange',function(){ if(document.hidden) stopMetro(); });
 paintMetro();
@@ -575,8 +577,7 @@ function finishBeatPick(value, correct, late){
   const paced=typeof applyStreak==='function'?applyStreak(metroBpmNow(), metroStreak, correct && !late, !!( $('metroAccel') && $('metroAccel').checked )):null;
   if(paced){
     metroStreak=paced.streak;
-    if($('metroBpm')) $('metroBpm').value=paced.bpm;
-    if(metroOn) startMetro();
+    setMetroBpm(paced.bpm);
   } else noteMetro(correct && !late);
   logTeacherItem({kind:'beat',skill:beatCurrent.he||beatCurrent.skill,prompt:beatCurrent.prompt,answer:beatCurrent.answer,given:late?'מאוחר':value,correct:correct});
   [...$('beatChoices').children].forEach(b=>{ b.disabled=true; if(isCorrect(b.textContent,beatCurrent.answer)) b.classList.add('picked-good'); });
