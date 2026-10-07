@@ -21,6 +21,7 @@
   let activeHear = null;
   let announcementQueue = [];
   let isSpeaking = false;
+  let currentUtterance = null;
 
   function defaultStorage() {
     try {
@@ -164,16 +165,23 @@
       const opts = item.opts || {};
       u.rate = opts && typeof opts.rate === 'number' && opts.rate > 0 ? opts.rate : 0.9;
 
+      // speechSynthesis.cancel() fires the cancelled utterance's end/error
+      // event later, asynchronously. By then a new utterance may already be
+      // playing; a stale callback must not free the queue for it.
       const onDone = function () {
+        if (currentUtterance !== u) return;
+        currentUtterance = null;
         isSpeaking = false;
         processSpeechQueue();
       };
 
       u.onend = onDone;
       u.onerror = onDone;
+      currentUtterance = u;
       speechSynthesis.speak(u);
       return true;
     } catch (e) {
+      currentUtterance = null;
       isSpeaking = false;
       return false;
     }
@@ -205,6 +213,7 @@
   function cancelSpeech() {
     announcementQueue = [];
     isSpeaking = false;
+    currentUtterance = null;
     if (typeof speechSynthesis === 'undefined') return;
     try { speechSynthesis.cancel(); } catch (e) { /* closed */ }
   }
