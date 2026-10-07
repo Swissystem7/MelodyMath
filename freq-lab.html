@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · מעבדת תדרים (העשרה ה׳–ו׳)</title>
+<meta name="description" content="אוקטבה, קווינטה, טור הרמוני ומונוכורד: יחסים ושברים שאפשר לשמוע. העשרה לכיתות ה׳–ו׳.">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0;--good:#167957;--bad:#b23a52}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:820px;margin:auto;padding:16px 12px 60px}
+  h1{font-size:clamp(1.6rem,6vw,2.4rem);margin:8px 0}
+  h2{font-size:1.2rem;margin:0 0 6px}
+  .lead,.note{color:var(--muted)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
+  button{min-height:44px;min-width:44px;border:0;border-radius:12px;background:var(--purple);color:#fff;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}
+  button.ghost{background:#fff;color:var(--purple);border:1px solid var(--line)}
+  input[type=number]{min-height:44px;width:7rem;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit}
+  .math{direction:ltr;unicode-bidi:isolate;font-weight:700;white-space:nowrap}
+  .fb{min-height:1.5em;font-weight:700}.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+  #now{position:sticky;top:0;z-index:5;background:#fff5ce;border-radius:12px;padding:10px 12px;margin:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+  .harm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .harm button{padding:8px 4px}
+  .string{height:14px;background:#e9e3fb;border-radius:8px;margin:8px 0;direction:ltr}
+  .string span{display:block;height:100%;background:var(--purple);border-radius:8px}
+  input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--purple);direction:ltr}
+  input[type=range]::-webkit-slider-thumb{width:44px;height:44px}
+  input[type=range]::-moz-range-thumb{width:44px;height:44px}
+  details summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
+</style>
+</head>
+<body>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
+<main class="wrap" id="main" tabindex="-1">
+  <p class="note">העשרה לכיתות ה׳–ו׳ · שברים, "פי" ויחס</p>
+  <h1>מעבדת תדרים</h1>
+  <p class="lead">צליל הוא רטט. התדר אומר כמה רטטים יש בשנייה (Hz). כאן שומעים מה קורה כשכופלים תדר בשבר. כל צליל מופיע גם בכתב, כך שאפשר לעבוד גם בלי רמקול.</p>
+  <div id="now"><span id="nowText" role="status" aria-live="polite">עוד לא נוגן צליל. נגיעה ראשונה בדף פותחת את השמע.</span><button type="button" id="again" class="ghost">↻ השמע שוב</button></div>
+
+  <section class="card" aria-labelledby="h-oct">
+    <h2 id="h-oct">1. אוקטבה = פי 2</h2>
+    <p>מנגנים <span class="math">220 Hz</span> ואחריו <span class="math">440 Hz</span>, ובסוף את שניהם יחד.</p>
+    <div class="row"><button type="button" data-ab="2/1">▶ השוואה A/B</button></div>
+    <div class="row"><label for="q-oct">440 הוא פי כמה מ־220?</label><input id="q-oct" type="number" inputmode="decimal"><button type="button" data-check="q-oct">בדיקה</button></div>
+    <p class="fb" id="q-oct-fb" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-fifth">
+    <h2 id="h-fifth">2. קווינטה 3:2 וקוורטה 4:3</h2>
+    <p>כופלים את <span class="math">220</span> בשבר: <span class="math" id="m-fifth"></span> ו־<span class="math" id="m-fourth"></span>. כשהיחס בין המספרים פשוט, הצירוף נשמע "נקי".</p>
+    <div class="row"><button type="button" data-ab="3/2">▶ קווינטה A/B</button><button type="button" data-ab="4/3">▶ קוורטה A/B</button></div>
+    <div class="row"><label for="q-fifth"><span class="math">220 × 3/2 = ?</span></label><input id="q-fifth" type="number" inputmode="decimal"><button type="button" data-check="q-fifth">בדיקה</button></div>
+    <p class="fb" id="q-fifth-fb" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-harm">
+    <h2 id="h-harm">3. טור הרמוני: f, 2f, 3f…</h2>
+    <p>מתחילים מ־<span class="math">f = 110 Hz</span>. כל צליל גדול מהקודם ב־110: זו סדרה חשבונית. באוזן המרווח הולך וקטן, כי היחס בין שכנים קטן: <span class="math">2/1, 3/2, 4/3…</span></p>
+    <div class="harm" id="harm"></div>
+    <div class="row"><button type="button" id="harmAll">▶ כל הטור</button></div>
+    <div class="row"><label for="q-harm">מה התדר של הצליל החמישי בטור?</label><input id="q-harm" type="number" inputmode="decimal"><button type="button" data-check="q-harm">בדיקה</button></div>
+    <p class="fb" id="q-harm-fb" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-mono">
+    <h2 id="h-mono">4. מונוכורד: שבר מהמיתר</h2>
+    <p>מיתר שלם נותן <span class="math">220 Hz</span>. מיתר קצר יותר נותן צליל גבוה יותר: זה יחס הפוך.</p>
+    <label for="mono">אורך המיתר: <span class="math" id="monoFrac"></span></label>
+    <input id="mono" type="range" min="0" max="6" step="1" value="6" aria-describedby="monoOut">
+    <div class="string" aria-hidden="true"><span id="monoBar"></span></div>
+    <p id="monoOut"></p>
+    <div class="row"><button type="button" id="monoPlay">▶ מיתר שלם ואז החלק</button></div>
+  </section>
+
+  <details class="card">
+    <summary>5. למתקדמים: פיתגורס מול שווה מזג</summary>
+    <p>בפסנתר כל חצי טון כופל את התדר באותו מספר, כך ש־12 חצאי טונים נותנים בדיוק פי 2. לכן הקווינטה בפסנתר (7 חצאי טונים) היא <span class="math" id="m-tet"></span> ולא בדיוק <span class="math">3/2 = 1.5</span>. ההפרש קטן מאוד: <span class="math" id="m-cents"></span> (סנט = מאית של חצי טון).</p>
+    <div class="row"><button type="button" id="tetPlay">▶ קווינטה טהורה ואז של פסנתר</button></div>
+  </details>
+  <p class="note">עוצמה מוגבלת ותדרים בין 110 ל־1760 Hz. זו העשרה, לא חלק מבנק התרגול.</p>
+</main>
+<script src="src/lib/musicEngine.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
+<script>
+(function () {
+  const BASE = 220, F0 = 110;
+  const $ = function (id) { return document.getElementById(id); };
+  const hz = function (x) { return Math.round(x * 100) / 100; };
+  let last = null;
+  installAudioUnlock(document);
+
+  function play(events, text) {
+    last = { events: events, text: text };
+    $('nowText').textContent = 'מנגן: ' + text;
+    unlockAudio().then(function () { scheduleSequence(events); });
+  }
+  $('again').onclick = function () { if (last) play(last.events, last.text); };
+
+  function abEvents(a, b) {
+    return [{ at: 0, dur: 0.8, hz: a }, { at: 1, dur: 0.8, hz: b },
+      { at: 2.1, dur: 1.2, hz: a, gain: 0.15 }, { at: 2.1, dur: 1.2, hz: b, gain: 0.15 }];
+  }
+  function ab(p, q) {
+    const top = ratioToHz(BASE, p, q);
+    play(abEvents(BASE, top), BASE + ' הרץ, אחריו ' + hz(top) + ' הרץ (פי ' + p + '/' + q + '), ואז שניהם יחד');
+  }
+  document.querySelectorAll('[data-ab]').forEach(function (b) {
+    const pq = b.dataset.ab.split('/').map(Number);
+    b.onclick = function () { ab(pq[0], pq[1]); };
+  });
+  $('m-fifth').textContent = '220 × 3/2 = ' + hz(ratioToHz(BASE, 3, 2));
+  $('m-fourth').textContent = '220 × 4/3 ≈ ' + hz(ratioToHz(BASE, 4, 3));
+
+  const answers = {
+    'q-oct': ratioToHz(BASE, 2, 1) / BASE,
+    'q-fifth': ratioToHz(BASE, 3, 2),
+    'q-harm': harmonic(5, F0),
+  };
+  document.querySelectorAll('[data-check]').forEach(function (b) {
+    const id = b.dataset.check;
+    b.onclick = function () {
+      const v = Number(String($(id).value).replace(',', '.'));
+      const ok = $(id).value !== '' && Math.abs(v - answers[id]) < 0.01;
+      const fb = $(id + '-fb');
+      fb.className = 'fb ' + (ok ? 'good' : 'bad');
+      fb.textContent = ok ? 'נכון: ' + answers[id] : 'עוד לא. נסו שוב או השמיעו שוב את הצלילים.';
+    };
+  });
+
+  const harm = $('harm');
+  for (let n = 1; n <= 8; n++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ghost';
+    const f = harmonic(n, F0);
+    b.innerHTML = '<span class="math">' + n + 'f = ' + f + '</span>';
+    b.setAttribute('aria-label', 'צליל ' + n + ' בטור: ' + f + ' הרץ');
+    b.onclick = function () { play([{ at: 0, dur: 0.9, hz: f }], f + ' הרץ, הצליל ה־' + n + ' בטור'); };
+    harm.appendChild(b);
+  }
+  $('harmAll').onclick = function () {
+    const ev = [];
+    for (let n = 1; n <= 8; n++) ev.push({ at: (n - 1) * 0.55, dur: 0.5, hz: harmonic(n, F0) });
+    play(ev, 'הטור ההרמוני של 110: 110, 220, 330 … 880 הרץ');
+  };
+
+  const FRACS = ['1/2', '3/5', '2/3', '3/4', '4/5', '8/9', '1/1'];
+  const NAMES = { '1/2': 'אוקטבה', '2/3': 'קווינטה', '3/4': 'קוורטה', '4/5': 'טרצה גדולה', '1/1': 'המיתר כולו' };
+  function mono() {
+    const fr = FRACS[Number($('mono').value)];
+    const f = toFraction(fr);
+    const up = stringLength(fr);
+    const top = ratioToHz(BASE, up.n, up.d);
+    $('monoFrac').textContent = fr;
+    $('monoBar').style.width = (100 * f.n / f.d) + '%';
+    $('mono').setAttribute('aria-valuetext', fr + ' מהמיתר, ' + hz(top) + ' הרץ');
+    $('monoOut').innerHTML = '<span class="math">' + fr + '</span> מהמיתר → פי <span class="math">' + fractionText(up)
+      + '</span> → <span class="math">' + hz(top) + ' Hz</span>' + (NAMES[fr] ? ' · ' + NAMES[fr] : '');
+    return { fr: fr, top: top };
+  }
+  $('mono').oninput = mono;
+  $('monoPlay').onclick = function () {
+    const m = mono();
+    play(abEvents(BASE, m.top), 'מיתר שלם 220 הרץ, ואז ' + m.fr + ' מהמיתר: ' + hz(m.top) + ' הרץ');
+  };
+  mono();
+
+  const tet = equalTemperedRatio(7);
+  $('m-tet').textContent = '≈ ' + tet.toFixed(4);
+  $('m-cents').textContent = '≈ ' + Math.abs(centsBetween(1.5, tet)).toFixed(1) + ' cents';
+  $('tetPlay').onclick = function () {
+    play([{ at: 0, dur: 1.4, hz: BASE }, { at: 0, dur: 1.4, hz: BASE * 1.5, gain: 0.15 },
+      { at: 1.7, dur: 1.4, hz: BASE }, { at: 1.7, dur: 1.4, hz: BASE * tet, gain: 0.15 }],
+    'קווינטה טהורה 220 ו־330 הרץ, ואז קווינטה של פסנתר 220 ו־' + hz(BASE * tet) + ' הרץ');
+  };
+})();
+</script>
+</body>
+</html>
