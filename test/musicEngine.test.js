@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const M = require('../src/lib/musicEngine');
 
 const f = (n, d) => ({ n, d });
@@ -112,4 +114,69 @@ test('planSequence lays fraction notes end to end at the given tempo', () => {
   ], 2, { bpm: 60 });
   assert.deepEqual(plan.map((n) => [n.time, n.dur, n.hz]), [[2, 1, 220], [3.5, 0.5, 330]]);
   assert.deepEqual(M.planSequence('nope', 0), []);
+});
+
+test('the audio half is inert in Node', () => {
+  assert.equal(M.getSharedAudioContext(), null);
+  assert.equal(M.scheduleSequence([{ at: 0, dur: 1, hz: 440 }]), null);
+  return M.unlockAudio().then((state) => assert.equal(state, 'unavailable'));
+});
+
+function fakeWindow() {
+  const made = [];
+  function Param() { this.calls = []; }
+  ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime']
+    .forEach((k) => { Param.prototype[k] = function (v, t) { this.calls.push([k, v, t]); }; });
+  function node() {
+    return { frequency: new Param(), gain: new Param(), connect(n) { return n || this; }, disconnect() {}, start() {}, stop() {} };
+  }
+  function AC() { made.push(this); this.state = 'suspended'; this.currentTime = 3; this.destination = {}; }
+  AC.prototype.resume = function () { this.state = 'running'; return Promise.resolve(); };
+  AC.prototype.createOscillator = function () { const n = node(); (this.oscs = this.oscs || []).push(n); return n; };
+  AC.prototype.createGain = function () { const n = node(); (this.gains = this.gains || []).push(n); return n; };
+  AC.prototype.createBuffer = function () { return {}; };
+  AC.prototype.createBufferSource = function () { return node(); };
+  return { AudioContext: AC, made };
+}
+
+test('one shared context: unlocked by a tap, reused by sonify, timed on currentTime', async () => {
+  const win = fakeWindow();
+  global.window = win;
+  try {
+    win.getSharedAudioContext = M.getSharedAudioContext;
+    const listeners = {};
+    const target = {
+      addEventListener(type, fn) { listeners[type] = fn; },
+      removeEventListener(type) { delete listeners[type]; },
+    };
+    assert.equal(M.installAudioUnlock(target), true);
+    assert.equal(win.made.length, 0, 'no context before a gesture');
+    listeners.pointerdown();
+    assert.equal(listeners.pointerdown, undefined, 'the unlock runs once');
+    await new Promise((r) => setTimeout(r, 0));
+    const ac = M.getSharedAudioContext();
+    assert.equal(ac.state, 'running');
+    delete require.cache[require.resolve('../src/lib/sonify')];
+    const sonify = require('../src/lib/sonify');
+    assert.equal(sonify.getAudioContext(), ac);
+    assert.equal(win.made.length, 1, 'sonify did not open a second context');
+    const r = M.scheduleSequence([{ at: 0, dur: 0.5, hz: 440, gain: 0.9 }]);
+    assert.equal(r.startTime, ac.currentTime + 0.05);
+    const gainCalls = ac.gains[0].gain.calls;
+    assert.ok(gainCalls.every(([, v]) => v <= 0.3), 'gain never above 0.3');
+    assert.equal(gainCalls[0][1], 0.0001, 'the note starts from silence (no click)');
+    assert.equal(gainCalls[gainCalls.length - 1][1], 0.0001, 'and fades back to silence');
+  } finally {
+    delete global.window;
+    delete require.cache[require.resolve('../src/lib/sonify')];
+  }
+});
+
+test('index.html loads the engine before sonify and installs the unlock; sw.js caches it', () => {
+  const root = path.join(__dirname, '..');
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const engine = html.indexOf('src="src/lib/musicEngine.js"');
+  assert.ok(engine > 0 && engine < html.indexOf('src="src/lib/sonify.js"'));
+  assert.match(html, /installAudioUnlock\(document\)/);
+  assert.match(fs.readFileSync(path.join(root, 'sw.js'), 'utf8'), /'\.\/src\/lib\/musicEngine\.js'/);
 });

@@ -253,6 +253,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 </div></section>
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
+<script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/teacherStore.js"></script>
@@ -484,6 +485,8 @@ if($('metroDown'))$('metroDown').onclick=function(){ setMetroBpm(metroBpmNow()-4
 if($('metroUp'))$('metroUp').onclick=function(){ setMetroBpm(metroBpmNow()+4); };
 if($('metroBpm'))$('metroBpm').onchange=function(){ this.value=clampBpm(this.value); if(metroOn) startMetro(); };
 document.addEventListener('visibilitychange',function(){ if(document.hidden) stopMetro(); });
+// One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
+if(typeof installAudioUnlock==='function') installAudioUnlock(document);
 paintMetro();
 renderRosterChips();
 renderClassBoard();
