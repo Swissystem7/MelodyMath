@@ -297,7 +297,7 @@ const GRADE_NOTE={
   'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».'
 };
 let selectedGrade='א';
-try{const g=localStorage.getItem('mm-grade'); if(g&&GRADE_SKILLS[g]) selectedGrade=g;}catch(e){}
+try{const g=localStorage.getItem('mm-grade'); if(isGrade(g)) selectedGrade=g;}catch(e){}
 function saveGrade(g){selectedGrade=g; try{localStorage.setItem('mm-grade',g);}catch(e){} paintGrade();}
 function paintGrade(){
   const box=$('gradePick'); if(!box) return;

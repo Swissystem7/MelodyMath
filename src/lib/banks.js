@@ -755,8 +755,14 @@
     return rowsOf(skill, grade).filter(function (it) { return it.level === want; });
   }
 
+  // Own keys only: a stored grade such as "constructor" must not resolve to
+  // an Object.prototype member and crash the diagnostic.
+  function isGrade(g) {
+    return GRADES.indexOf(g) !== -1;
+  }
+
   function skillsForGrade(grade) {
-    return (GRADE_SKILLS[grade] || []).slice();
+    return isGrade(grade) ? GRADE_SKILLS[grade].slice() : [];
   }
 
   // One base question and one intermediate question per skill: a child who
@@ -778,7 +784,7 @@
   }
 
   function diagnosticItems(grade) {
-    const g = grade && GRADE_SKILLS[grade] ? grade : 'א';
+    const g = isGrade(grade) ? grade : 'א';
     return skillsForGrade(g).flatMap(function (skill) {
       return diagnosticPair(skill, g);
     });
@@ -876,6 +882,7 @@
     skillGrade: skillGrade,
     levelHe: levelHe,
     clampLevel: clampLevel,
+    isGrade: isGrade,
     hearOf: hearOf,
     isShippable: isShippable,
     allItems: allItems,
