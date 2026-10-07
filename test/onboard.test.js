@@ -50,6 +50,18 @@ test('garbage in storage does not crash the first-run gate', () => {
   assert.equal(onboard.shouldShowOnboard(ls), false);
 });
 
+test('when localStorage is unavailable, shouldShowOnboard must return false', () => {
+  // Create a storage that throws when accessed, simulating private browsing mode
+  const brokenStorage = {
+    getItem: () => { throw new Error('localStorage not available'); },
+    setItem: () => { throw new Error('localStorage not available'); },
+    removeItem: () => { throw new Error('localStorage not available'); },
+  };
+
+  // The function should return false even though normalizeState({}) returns { dismissed: false, step: 0 }
+  assert.equal(onboard.shouldShowOnboard(brokenStorage), false);
+});
+
 test('escapeHtml should escape the Euro sign Unicode character to its HTML entity', () => {
   assert.equal(onboard.escapeHtml('Price: €100'), 'Price: &euro;100');
 });

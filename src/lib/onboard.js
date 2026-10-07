@@ -73,7 +73,19 @@
     return next;
   }
 
+  function isStorageAvailable(storage) {
+    const ls = storage || defaultStorage();
+    if (!ls) return false;
+    try {
+      ls.getItem(ONBOARD_KEY);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function shouldShowOnboard(storage) {
+    if (!isStorageAvailable(storage)) return false;
     return !loadOnboard(storage).dismissed;
   }
 
@@ -127,5 +139,6 @@
     setOnboardStep: setOnboardStep,
     renderOnboardHtml: renderOnboardHtml,
     escapeHtml: escapeHtml,
+    isStorageAvailable: isStorageAvailable,
   };
 });
