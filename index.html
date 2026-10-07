@@ -260,6 +260,10 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/mastery.js"></script>
 <script src="src/lib/numberLine.js"></script>
 <script src="src/lib/bar44.js"></script>
+<script src="src/lib/vertical.js"></script>
+<script src="src/lib/measure.js"></script>
+<script src="src/lib/dataViz.js"></script>
+<script src="src/lib/geometryShapes.js"></script>
 <script src="src/lib/worksheets.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
@@ -325,6 +329,24 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='bar44' && typeof bindBar44==='function'){
     host.classList.remove('hidden');
     bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
+  } else if(item.widget==='vertical' && item.vert && typeof bindVertical==='function'){
+    host.classList.remove('hidden');
+    bindVertical(host, item.vert);
+  } else if(item.widget==='ruler' && item.ruler && typeof bindRuler==='function'){
+    host.classList.remove('hidden');
+    bindRuler(host, item.ruler);
+  } else if(item.widget==='clock' && item.clock && typeof bindClock==='function'){
+    host.classList.remove('hidden');
+    bindClock(host, item.clock);
+  } else if(item.widget==='pictogram' && item.chart && typeof renderPictogramHtml==='function'){
+    host.classList.remove('hidden');
+    host.innerHTML=renderPictogramHtml(item.chart);
+  } else if(item.widget==='barchart' && item.chart && typeof renderBarChartHtml==='function'){
+    host.classList.remove('hidden');
+    host.innerHTML=renderBarChartHtml(item.chart);
+  } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
+    const shapes=renderShapesHtml(item.prompt);
+    if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
   }
 }
 function currentDiag(){ return diagnosticItems(selectedGrade); }
