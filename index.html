@@ -19,7 +19,9 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   .panel{display:none!important}
   #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
-  #worksheetCard,#classBoardCard,#parentCard,#certCard{display:none!important}
+  #worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard{display:none!important}
+  body.print-lesson #lessonCard{display:block!important}
+  body.print-lesson #reportCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
   body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
@@ -194,6 +196,21 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   </div>
   <div id="worksheetSheet" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="lessonCard">
+  <span class="tag">מערכי שיעור · לפי תוכנית הלימודים</span>
+  <h2>מערך שיעור לנושא</h2>
+  <p>בוחרים כיתה ונושא מהתוכנית ורואים מטרות ומהלך שיעור. הבנק עוד קטן: לרוב הנושאים אין עדיין מערך.</p>
+  <div class="sheet-actions no-print">
+    <label>כיתה
+      <select id="lessonGrade" aria-label="כיתה למערך שיעור"></select>
+    </label>
+    <label>נושא
+      <select id="lessonTopic" aria-label="נושא מהתוכנית"></select>
+    </label>
+    <button type="button" id="lessonPrint">הדפסת המערך</button>
+  </div>
+  <div id="lessonPlans" aria-live="polite"></div>
+</div>
 <div class="card" id="classBoardCard">
   <span class="tag">כל הילדים בטאבלט הזה</span>
   <h2>לוח כיתה</h2>
@@ -264,6 +281,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
 <script src="src/lib/geometryShapes.js"></script>
+<script src="src/lib/curriculum.js"></script>
+<script src="src/lib/pedagogy.js"></script>
 <script src="src/lib/worksheets.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
@@ -396,8 +415,13 @@ if($('whoSave'))$('whoSave').onclick=saveWhoFromForm;
 if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
 function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
 if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
+// ---- מערכי שיעור (pedagogy.js) לפי כיתה ונושא מהתוכנית (curriculum.js) ----
+function paintLessonTopics(){const g=$('lessonGrade'),t=$('lessonTopic');if(!g||!t||typeof plansFor!=='function')return;const rows=typeof rowsForGrade==='function'?rowsForGrade(g.value):[];const has=new Set(plansFor(g.value,'').map(p=>p.curriculumTopic));t.innerHTML='<option value="">כל הנושאים שיש להם מערך</option>'+rows.map(r=>'<option value="'+escapeHtml(r.topic)+'">'+escapeHtml(r.topic)+(has.has(r.topic)?' · יש מערך':'')+'</option>').join('');renderLessonPlans()}
+function renderLessonPlans(){const g=$('lessonGrade'),t=$('lessonTopic'),box=$('lessonPlans');if(!g||!t||!box||typeof plansFor!=='function')return;box.innerHTML=renderLessonPlansHtml(plansFor(g.value,t.value))}
+if($('lessonGrade')){$('lessonGrade').innerHTML=GRADES.map(g=>'<option value="'+g+'"'+(g===selectedGrade?' selected':'')+'>כיתה '+g+'׳</option>').join('');$('lessonGrade').onchange=paintLessonTopics;$('lessonTopic').onchange=renderLessonPlans;paintLessonTopics()}
+if($('lessonPrint'))$('lessonPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert');document.body.classList.add('print-lesson');renderLessonPlans();window.print()};
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-lesson')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));$('rosterMsg').textContent=summarizeImport(res);if(!res.ok)return;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
