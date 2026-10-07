@@ -799,8 +799,11 @@
     });
   }
 
-  function coreFactItems() {
+  // Pass a skill to borrow only that skill's core facts: a grade-ג division
+  // stage must not fill up with multiplication questions.
+  function coreFactItems(skill) {
     return SHIPPED.filter(function (it) {
+      if (skill != null && it.skill !== skill) return false;
       return (it.skill === 'multiplication' || it.skill === 'division')
         && (it.table === 2 || it.table === 4 || it.table === 5 || it.table === 10);
     });
