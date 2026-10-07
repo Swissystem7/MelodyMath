@@ -645,13 +645,16 @@
     return text;
   }
 
+  // The remembered student goes through the same rule as the roster: a name
+  // the roster refuses (prototype key) must not come back as the current
+  // student, or the bar says the name is saved while every answer is dropped.
   function loadWho(storage) {
     const ls = storage || defaultStorage();
     if (!ls) return { classCode: '', name: '' };
     try {
       const raw = JSON.parse(ls.getItem(WHO_KEY) || 'null');
       if (!raw || typeof raw !== 'object') return { classCode: '', name: '' };
-      return { classCode: normalizeCode(raw.classCode), name: normalizeCode(raw.name) };
+      return { classCode: normalizeCode(raw.classCode), name: studentLabel(raw.name) };
     } catch (e) {
       return { classCode: '', name: '' };
     }
@@ -731,7 +734,7 @@
     try {
       ls.setItem(WHO_KEY, JSON.stringify({
         classCode: normalizeCode(who && who.classCode),
-        name: normalizeCode(who && who.name),
+        name: studentLabel(who && who.name),
       }));
     } catch (e) { /* quota */ }
   }
