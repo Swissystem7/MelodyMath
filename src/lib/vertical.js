@@ -6,6 +6,11 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  // Imported items (banks.js keeps raw.vert as-is) may carry any number; past
+  // four digits String() can switch to exponent form (1e+21) and the column
+  // stops lining up, so operands are capped like the ruler length in measure.js.
+  const MAX_OPERAND = 9999;
+
   function normalizeVertical(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     let a = Math.round(Number(src.a));
@@ -14,6 +19,8 @@
     if (!Number.isFinite(b)) b = 0;
     if (a < 0) a = 0;
     if (b < 0) b = 0;
+    a = Math.min(MAX_OPERAND, a);
+    b = Math.min(MAX_OPERAND, b);
     const op = src.op === '-' ? '-' : '+';
     return { a: a, b: b, op: op };
   }
@@ -47,5 +54,6 @@
     normalizeVertical: normalizeVertical,
     renderVerticalHtml: renderVerticalHtml,
     bindVertical: bindVertical,
+    MAX_OPERAND: MAX_OPERAND,
   };
 });
