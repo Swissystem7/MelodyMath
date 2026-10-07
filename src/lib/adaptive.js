@@ -103,6 +103,9 @@
     if (gf && ef && gf.n * ef.d === ef.n * gf.d) return true;
     // Numeric compare: 3.5 == 3.50, .75 == 0.75, 1,25 == 1.25 (comma already
     // folded by normalizeAnswer). Ratios like 3:2 stay on the string path.
+    // Only plain decimals reach Number(): it would also read 0x10, 1e1 and
+    // 0b11 as 16, 10 and 3, which a child never meant as those answers.
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(g)) return false;
     const gn = Number(g);
     const en = Number(e);
     if (Number.isFinite(gn) && Number.isFinite(en)) {
