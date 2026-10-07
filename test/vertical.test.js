@@ -28,3 +28,14 @@ test('vertical normalize handles negative operands by setting them to 0', () => 
     op: '+'
   });
 });
+
+test('vertical API includes grade ב׳ music activity functions', () => {
+  assert.deepStrictEqual(Object.keys(vert).sort(), [
+    'bindVertical',
+    'normalizeVertical',
+    'renderVerticalHtml',
+    'detectEvenOddBeat',
+    'mapVerticalToInstruments',
+    'mapHalfHourToNote'
+  ].sort());
+});
