@@ -16,6 +16,7 @@ const ASSETS = [
   './manifest.webmanifest',
   './src/lib/core.js',
   './src/lib/sonify.js',
+  './src/lib/musicEngine.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
   './src/lib/banks.js',
