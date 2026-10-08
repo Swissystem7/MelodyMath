@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · בדיקה לפני ואחרי יחידה</title>
+<meta name="description" content="בדיקה קצרה לפני יחידה ואחריה, נשמרת רק במכשיר. לא מחקר מבוקר.">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:720px;margin:auto;padding:20px 14px 60px}
+  h1{font-size:clamp(1.5rem,6vw,2.2rem);margin:6px 0}
+  h2{font-size:1.2rem;margin:0 0 10px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:16px 0}
+  .note{color:var(--muted);font-size:.92rem}
+  label{display:block;margin:8px 0 4px;font-weight:700}
+  input,select{width:100%;min-height:44px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  button{min-height:44px;min-width:44px;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
+  button.secondary{background:#fff;color:var(--purple)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .row button{flex:1 1 9rem}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:8px;margin-top:14px}
+  .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line)}
+  .prompt{font-size:clamp(1.25rem,5vw,1.6rem);margin:8px 0}
+  .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th,td{border-bottom:1px solid var(--line);padding:8px 4px;text-align:start;overflow-wrap:anywhere}
+  .disclaimer{background:#fff7e0;border:1px solid #f0d58a;border-radius:12px;padding:10px 12px;margin:12px 0 0}
+  .hidden{display:none}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  #main:focus{outline:none}
+</style>
+</head>
+<body>
+<main class="wrap" id="main" tabindex="-1">
+  <h1>בדיקה לפני ואחרי יחידה</h1>
+  <p class="note">8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
+
+  <section class="card" id="setup" aria-labelledby="setupTitle">
+    <h2 id="setupTitle">מי נבדק/ת</h2>
+    <label for="classCode">קוד כיתה</label>
+    <input id="classCode" autocomplete="off">
+    <label for="studentName">שם או קוד תלמיד/ה</label>
+    <input id="studentName" autocomplete="off">
+    <label for="unit">יחידה</label>
+    <select id="unit"></select>
+    <div class="row">
+      <button type="button" id="startPre">בדיקה לפני היחידה</button>
+      <button type="button" id="startPost" class="secondary">בדיקה אחרי היחידה</button>
+    </div>
+    <p class="note" id="setupStatus" role="status"></p>
+  </section>
+
+  <section class="card hidden" id="quiz" aria-labelledby="quizProgress">
+    <h2 id="quizProgress" aria-live="polite"></h2>
+    <p class="prompt" id="quizPrompt"></p>
+    <div class="choices" id="quizChoices"></div>
+  </section>
+
+  <section class="card" id="report" aria-labelledby="reportTitle">
+    <h2 id="reportTitle">דוח למורה: לפני מול אחרי</h2>
+    <button type="button" id="showReport" class="secondary">הצגת הדוח לקוד הכיתה</button>
+    <div id="reportBody"></div>
+    <p class="disclaimer" id="disclaimer"></p>
+  </section>
+</main>
+<script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/mathBidi.js"></script>
+<script src="src/lib/unitCheck.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
+<script>
+(function () {
+  const $ = function (id) { return document.getElementById(id); };
+  let run = null;
+
+  $('unit').innerHTML = listUnits().map(function (u) {
+    return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + '</option>';
+  }).join('');
+  const who = loadWho();
+  $('classCode').value = who.classCode;
+  $('studentName').value = who.name;
+  $('disclaimer').textContent = UNIT_CHECK_DISCLAIMER;
+
+  function start(form) {
+    const classCode = normalizeCode($('classCode').value);
+    const name = studentLabel($('studentName').value);
+    if (!name) { $('setupStatus').textContent = 'צריך שם או קוד תלמיד/ה.'; return; }
+    const unitId = $('unit').value;
+    const session = startSession(classCode, name, checkKind(unitId, form));
+    if (!session) { $('setupStatus').textContent = 'לא הצלחנו לפתוח בדיקה במכשיר הזה.'; return; }
+    saveWho({ classCode: classCode, name: name });
+    run = { classCode: classCode, name: name, session: session, items: formItems(unitId, form), at: 0, correct: 0 };
+    $('setupStatus').textContent = '';
+    $('setup').classList.add('hidden');
+    $('quiz').classList.remove('hidden');
+    showItem();
+  }
+
+  function showItem() {
+    const item = run.items[run.at];
+    $('quizProgress').textContent = 'שאלה ' + (run.at + 1) + ' מתוך ' + run.items.length;
+    setMath($('quizPrompt'), item.prompt);
+    $('quizChoices').innerHTML = shuffledChoices(item.choices).map(function (c) {
+      return '<button type="button" data-choice="' + escapeHtml(c) + '"><bdi dir="ltr">' + escapeHtml(c) + '</bdi></button>';
+    }).join('');
+    $('quizChoices').querySelectorAll('button').forEach(function (b) {
+      b.onclick = function () { answer(b.dataset.choice); };
+    });
+    $('quizChoices').querySelector('button').focus();
+  }
+
+  function answer(given) {
+    const item = run.items[run.at];
+    const ok = isCheckCorrect(item, given);
+    if (ok) run.correct++;
+    addItem(run.classCode, run.name, run.session.id, {
+      skill: UNIT_CHECK_SKILL_HE[item.skill] || item.skill, prompt: item.prompt,
+      answer: item.answer, given: given, correct: ok,
+    });
+    run.at++;
+    if (run.at < run.items.length) { showItem(); return; }
+    endSession(run.classCode, run.name, run.session.id);
+    $('quiz').classList.add('hidden');
+    $('setup').classList.remove('hidden');
+    $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.';
+    run = null;
+    renderReport();
+  }
+
+  function cell(check) {
+    return check ? check.correct + '/' + check.total : '—';
+  }
+
+  function renderReport() {
+    const classCode = normalizeCode($('classCode').value);
+    const r = checkReport(loadRoster(classCode).students, $('unit').value);
+    if (!r.rows.length) {
+      $('reportBody').innerHTML = '<p class="note">אין עדיין בדיקות בקוד הכיתה הזה במכשיר הזה.</p>';
+      return;
+    }
+    const fmt = function (x) { return x == null ? '—' : (Math.round(x * 10) / 10) + '/' + r.total; };
+    const rows = r.rows.map(function (row) {
+      const change = row.change == null ? '—' : (row.change > 0 ? '+' : '') + row.change;
+      return '<tr><td>' + escapeHtml(row.name) + '</td><td><bdi dir="ltr">' + cell(row.pre) + '</bdi></td><td><bdi dir="ltr">'
+        + cell(row.post) + '</bdi></td><td><bdi dir="ltr">' + change + '</bdi></td></tr>';
+    }).join('');
+    $('reportBody').innerHTML = '<p>כיתה <b>' + escapeHtml(classCode || 'ברירת מחדל') + '</b> · n = ' + r.n
+      + ' תלמידים עם שתי הבדיקות. ממוצע לפני <bdi dir="ltr">' + fmt(r.meanPre) + '</bdi>, ממוצע אחרי <bdi dir="ltr">'
+      + fmt(r.meanPost) + '</bdi>.' + (r.preOnly ? ' ' + r.preOnly + ' עשו רק את הבדיקה שלפני.' : '')
+      + (r.postOnly ? ' ' + r.postOnly + ' עשו רק את הבדיקה שאחרי.' : '') + '</p>'
+      + '<table><thead><tr><th>תלמיד/ה</th><th>לפני</th><th>אחרי</th><th>שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  $('startPre').onclick = function () { start('pre'); };
+  $('startPost').onclick = function () { start('post'); };
+  $('showReport').onclick = renderReport;
+})();
+</script>
+</body>
+</html>
