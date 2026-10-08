@@ -39,15 +39,15 @@
 <script src="src/lib/core.js"></script>
 <script>
 (function () {
-  const grades = grades();
+  const gradeList = grades();
   const sum = document.getElementById('sum');
   const tables = document.getElementById('tables');
-  sum.innerHTML = grades.map(function (g) {
+  sum.innerHTML = gradeList.map(function (g) {
     const s = summaryForGrade(g);
     return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
       + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
   }).join('');
-  tables.innerHTML = grades.map(function (g) {
+  tables.innerHTML = gradeList.map(function (g) {
     const rows = coverageMatrix().filter(function (r) { return r.grade === g; });
     const body = rows.map(function (r) {
       return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'

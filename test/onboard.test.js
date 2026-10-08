@@ -57,7 +57,7 @@ test('when localStorage is unavailable, shouldShowOnboard must return false', ()
     setItem: () => { throw new Error('localStorage not available'); },
     removeItem: () => { throw new Error('localStorage not available'); },
   };
-
+  
   // The function should return false even though normalizeState({}) returns { dismissed: false, step: 0 }
   assert.equal(onboard.shouldShowOnboard(brokenStorage), false);
 });

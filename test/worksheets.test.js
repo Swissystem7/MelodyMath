@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const sheets = require('../src/lib/worksheets');
 
-test('the diagnostic pack is first two items of each skill in the chosen grade', () => {
+test('the diagnostic pack is two items of each skill in the chosen grade', () => {
   const d = banks.diagnosticItems('א');
   assert.equal(d.length, banks.skillsForGrade('א').length * 2);
   assert.equal(d[0].skill, 'counting');
@@ -62,4 +62,8 @@ test('count-the-beats items carry a hear cue that matches the countable answer',
       assert.ok(n >= 1 && n <= 12);
     });
   });
+});
+
+test('clampCount returns 4 for non-numeric input like "abc"', () => {
+  assert.equal(sheets.clampCount('abc'), 4);
 });
