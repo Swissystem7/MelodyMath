@@ -16,7 +16,7 @@
   };
 
   function isRtl(el) {
-    if (!el) return true;
+    if (!el) return false;
     const node = el.closest ? (el.closest('[dir]') || el) : el;
     const dir = (node.getAttribute && node.getAttribute('dir'))
       || (typeof document !== 'undefined' && document.documentElement.getAttribute('dir'))
