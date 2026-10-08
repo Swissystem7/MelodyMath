@@ -124,3 +124,17 @@ test('the offer page offers the copy box and says what it does', () => {
   assert.match(page, /עותק לפרויקט/);
   assert.doesNotMatch(page, /תשלח עותק לכתובת הפרויקט/);
 });
+
+test('escapeHtml properly escapes Unicode characters like euro sign', () => {
+  assert.equal(offer.escapeHtml('€10'), '&euro;10');
+});
+
+test('clampGroup throws TypeError for negative input', () => {
+  assert.throws(() => offer.normalizeTrialRequest({ groupSize: -5 }), TypeError);
+});
+
+test('principalLetterBody throws error for negative groupSize', () => {
+  assert.throws(() => {
+    offer.principalLetterBody({ groupSize: -5 });
+  }, new Error('groupSize must be a positive integer'));
+});

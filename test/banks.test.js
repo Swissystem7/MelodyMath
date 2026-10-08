@@ -26,7 +26,13 @@ test('banks are split per grade — not one א–ד dump', () => {
       assert.ok(banks.rowsOf(sk, g).length >= 4, g + ' ' + sk);
     });
   });
-  assert.deepEqual(banks.skillsForGrade('א'), ['counting', 'addition', 'subtraction', 'number_line']);
+  // Wave 2 added the strands the Ministry curriculum requires for כיתה א׳ and
+  // that the app previously had nothing of: word problems, measurement,
+  // geometry and data. The old four are still there and still first.
+  assert.deepEqual(banks.skillsForGrade('א'), [
+    'counting', 'addition', 'subtraction', 'number_line',
+    'word_problems', 'measurement', 'geometry', 'data',
+  ]);
   assert.ok(banks.skillsForGrade('ב').includes('division'));
   assert.ok(!banks.skillsForGrade('א').includes('multiplication'));
   assert.ok(!banks.skillsForGrade('ב').includes('basic_fractions'));
@@ -155,4 +161,13 @@ test('grade-א diagnostic keeps the five-drum hear cue', () => {
   assert.deepEqual(d[0].hear, [5]);
   const plus = banks.rowsOf('addition', 'א').find((x) => x.prompt.indexOf('3 פעימות') !== -1);
   assert.deepEqual(plus.hear, [3, 2]);
+});
+
+test('a prototype-key grade falls back instead of crashing', () => {
+  ['constructor', 'toString', '__proto__', 'hasOwnProperty'].forEach((g) => {
+    assert.equal(banks.isGrade(g), false, g);
+    assert.deepEqual(banks.skillsForGrade(g), []);
+    assert.deepEqual(banks.diagnosticItems(g), banks.diagnosticItems('א'));
+  });
+  banks.GRADES.forEach((g) => assert.equal(banks.isGrade(g), true, g));
 });

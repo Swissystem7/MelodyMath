@@ -212,6 +212,7 @@
       $('letterHint').textContent = 'חסרים: שם המורה, בית הספר והשכבה.';
       $('openMail').disabled = true;
       $('copyLetter').disabled = true;
+      $('openMail').removeAttribute('data-href');
       currentMailto = '';
       return mail;
     }
@@ -223,6 +224,7 @@
       + ' אפשר גם להעתיק ולשלוח ידנית.';
     $('openMail').disabled = false;
     $('copyLetter').disabled = false;
+    $('openMail').setAttribute('data-href', mail.mailto);
     currentMailto = mail.mailto;
     return mail;
   }

@@ -70,11 +70,16 @@
   }
 
   function strandHe(s) {
+    if (typeof s !== 'string') return STRAND_HE.numbers;
     return STRAND_HE[s] || s;
   }
 
   function rowsForGrade(grade) {
     return MATRIX.filter(function (r) { return r.grade === grade; });
+  }
+
+  function gapTopicsForGrade(grade) {
+    return rowsForGrade(grade).filter(function (r) { return r.status === GAP; });
   }
 
   function summaryForGrade(grade) {
@@ -115,5 +120,6 @@
     summaryForGrade: summaryForGrade,
     coverageMatrix: coverageMatrix,
     grades: grades,
+    gapTopicsForGrade: gapTopicsForGrade,
   };
 });

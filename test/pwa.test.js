@@ -73,3 +73,27 @@ test('README says where the one contact value lives and that the lab tab is out'
   assert.match(readme, /CONTACT\.email/);
   assert.match(readme, /שעון/);
 });
+
+test('the service-worker cache moved past v7, which pinned the files from before #65-#71', () => {
+  // v7 was set in #64. The seven fixes that followed changed teacherStore.js, measure.js and
+  // index.html without touching sw.js, so a tablet that had visited once never saw them: the old
+  // handler answered from the cache and never asked the network again.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const m = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) > 7, 'CACHE is still v' + m[1]);
+});
+
+test('every script a page loads is in the precache list', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));
+  const pages = fs.readdirSync(root).filter((f) => f.endsWith('.html'));
+  assert.ok(pages.length >= 5, 'expected the site pages at the repo root');
+  pages.forEach((page) => {
+    assert.ok(listed.has(page), page + ' is not precached');
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    [...html.matchAll(/ src="(src\/lib\/[^"]+)"/g)].forEach((m) => {
+      assert.ok(listed.has(m[1]), page + ' loads ' + m[1] + ' which sw.js does not precache');
+    });
+  });
+});
