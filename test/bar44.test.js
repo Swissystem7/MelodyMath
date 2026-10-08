@@ -29,6 +29,10 @@ test('the bar drawing names a 4/4 bar and has eight cells', () => {
   assert.match(html, /מלא: 1\/2/);
 });
 
+test('fractionFromEighths returns 0/8 for input 0', () => {
+  assert.equal(bar.fractionFromEighths(0), '0/8');
+});
+
 test('renderBar44Html should only enable interactivity when interactive is explicitly boolean true', () => {
   // Test with string 'true' - should NOT enable interactivity (disabled buttons)
   const htmlWithString = bar.renderBar44Html({ fraction: '1/2' }, 'true');
