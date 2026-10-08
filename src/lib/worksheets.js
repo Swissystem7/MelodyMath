@@ -11,6 +11,9 @@
   const BANKS = (typeof module === 'object' && module.exports)
     ? require('./banks')
     : (typeof globalThis !== 'undefined' ? globalThis : {});
+  const BIDI = (typeof module === 'object' && module.exports)
+    ? require('./mathBidi')
+    : (typeof globalThis !== 'undefined' ? globalThis : {});
 
   function clampCount(n) {
     const v = Math.round(Number(n));
@@ -41,8 +44,8 @@
   }
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    return String(s == null ? '' : s).replace(/[&<>"'©®™]/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '©': '&copy;', '®': '&reg;', '™': '&trade;' })[c];
     });
   }
 
@@ -130,15 +133,15 @@
     const blanks = s.items.map(function (it, i) {
       return '<div class="sheet-item"><span class="n">' + (i + 1) + '.</span> '
         + '<span class="tag">' + escapeHtml(it.he || it.skill || '') + '</span> '
-        + '<p class="prompt">' + escapeHtml(it.prompt) + '</p>'
+        + '<p class="prompt">' + BIDI.mathHtml(it.prompt) + '</p>'
         + printableWidget(it)
         + '<div class="sheet-blank">תשובה: ________________</div></div>';
     }).join('');
     let html = '<div class="sheet-page">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
     if (s.withAnswers) {
       const key = s.items.map(function (it, i) {
-        return '<li>' + (i + 1) + '. ' + escapeHtml(String(it.answer))
-          + (it.hint ? ' <span class="sheet-hint">(' + escapeHtml(it.hint) + ')</span>' : '')
+        return '<li>' + (i + 1) + '. ' + BIDI.mathHtml(String(it.answer))
+          + (it.hint ? ' <span class="sheet-hint">(' + BIDI.mathHtml(it.hint) + ')</span>' : '')
           + '</li>';
       }).join('');
       html += '<div class="sheet-key"><h3>מחוון למורה — לא לחלק לתלמידים</h3><ol>' + key + '</ol></div>';

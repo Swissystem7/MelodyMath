@@ -61,3 +61,7 @@ test('when localStorage is unavailable, shouldShowOnboard must return false', ()
   // The function should return false even though normalizeState({}) returns { dismissed: false, step: 0 }
   assert.equal(onboard.shouldShowOnboard(brokenStorage), false);
 });
+
+test('escapeHtml should escape the Euro sign Unicode character to its HTML entity', () => {
+  assert.equal(onboard.escapeHtml('Price: €100'), 'Price: &euro;100');
+});

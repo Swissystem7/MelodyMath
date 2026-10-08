@@ -28,6 +28,7 @@ const ASSETS = [
   './src/lib/geometryShapes.js',
   './src/lib/pedagogy.js',
   './src/lib/curriculum.js',
+  './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
   './src/lib/access.js',
