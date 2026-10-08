@@ -75,3 +75,7 @@ test('currentPromptText reads the visible class-mode prompt first', () => {
   assert.equal(access.currentPromptText(doc), 'כמה תופים?');
   assert.equal(access.currentPromptText({ querySelector: () => null }), '');
 });
+
+test('sanitizeHear returns empty array for empty input array', () => {
+  assert.deepEqual(access.sanitizeHear([]), []);
+});
