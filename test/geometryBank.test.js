@@ -87,8 +87,10 @@ test('item ids of the existing bank did not move', () => {
   const ids = banks.allItems().map((it) => it.id);
   ['א-data-345', 'א-data-349', 'א-measurement-321'].forEach((id) => assert.ok(ids.includes(id), id));
   const newIds = geometry('ג').concat(geometry('ד')).map((it) => Number(it.id.split('-').pop()));
+  // ב׳ half hours and perimeter were added after the geometry items.
+  const later = [banks.ST.HALF_HOUR, banks.ST.PERIMETER];
   const oldMax = Math.max(...banks.allItems()
-    .filter((it) => it.grade === 'א' || it.grade === 'ב')
+    .filter((it) => (it.grade === 'א' || it.grade === 'ב') && !later.includes(it.standard))
     .map((it) => Number(it.id.split('-').pop())));
   assert.ok(Math.min(...newIds) > oldMax, 'new items sit after every older item');
 });
