@@ -36,3 +36,37 @@ test('shared chrome registers the service worker', () => {
   assert.match(core, /sw\.js/);
   assert.match(core, /manifest/);
 });
+
+test('the service-worker cache moved past v6, which holds the curriculum.html that threw on load', () => {
+  // sw.js is cache-first and re-caches only when its own bytes change. v6 precached the page whose
+  // `const grades = grades();` threw a TDZ ReferenceError, so a browser that opened any page since
+  // a677d10 keeps serving that copy until CACHE changes.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const m = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) > 6, 'CACHE is still v' + m[1]);
+});
+
+test('the service-worker cache moved past v7, which pinned the files from before #65-#71', () => {
+  // v7 was set in #64. The seven fixes that followed changed teacherStore.js, measure.js and
+  // index.html without touching sw.js, so a tablet that had visited once never saw them: the old
+  // handler answered from the cache and never asked the network again.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const m = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) > 7, 'CACHE is still v' + m[1]);
+});
+
+test('every script a page loads is in the precache list', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));
+  const pages = fs.readdirSync(root).filter((f) => f.endsWith('.html'));
+  assert.ok(pages.length >= 5, 'expected the site pages at the repo root');
+  pages.forEach((page) => {
+    assert.ok(listed.has(page), page + ' is not precached');
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    [...html.matchAll(/ src="(src\/lib\/[^"]+)"/g)].forEach((m) => {
+      assert.ok(listed.has(m[1]), page + ' loads ' + m[1] + ' which sw.js does not precache');
+    });
+  });
+});
