@@ -117,7 +117,7 @@
         + escapeHtml(s.bodyHe) + '</li>';
     }).join('');
     return '<aside class="first-run" id="firstRunInner">'
-      + '<p class="sheet-kicker">פעם ראשונה במכשיר הזה?</p>'
+      + '<span class="tag">פעם ראשונה במכשיר הזה?</span>'
       + '<h2>חמש לחיצות למחנכת שילוב</h2>'
       + '<p>אין חשבון ואין שרת. זה מפת דרכים לדף, לא הבטחה שהתרגול עוזר.</p>'
       + '<ol class="onboard-steps">' + items + '</ol>'
