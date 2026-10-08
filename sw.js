@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v9';
+const CACHE = 'melodymath-offline-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './landing.html',
   './offer.html',
   './curriculum.html',
+  './freq-lab.html',
   './manifest.webmanifest',
   './src/lib/core.js',
   './src/lib/musicEngine.js',

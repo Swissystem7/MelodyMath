@@ -176,6 +176,19 @@
     return makeFraction(f.d, f.n);
   }
 
+  // 12-TET: every semitone multiplies the pitch by the same 2^(1/12), so seven
+  // semitones (a tempered fifth) is 1.4983…, just under the pure 3/2.
+  function equalTemperedRatio(semitones) {
+    if (!Number.isInteger(semitones)) return null;
+    return Math.pow(2, semitones / 12);
+  }
+
+  // How far apart two pitch ratios are, in cents (1200 to the octave).
+  function centsBetween(r1, r2) {
+    if (!positive(r1) || !positive(r2)) return null;
+    return 1200 * Math.log2(r2 / r1);
+  }
+
   // ---------- tempo ----------
   function bpmToSeconds(bpm) {
     return positive(bpm) ? 60 / bpm : null;
@@ -315,6 +328,7 @@
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
+    equalTemperedRatio, centsBetween,
     MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
     getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence, stopSequence,
   };

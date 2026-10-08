@@ -180,3 +180,26 @@ test('index.html loads the engine before sonify and installs the unlock; sw.js c
   assert.match(html, /installAudioUnlock\(document\)/);
   assert.match(fs.readFileSync(path.join(root, 'sw.js'), 'utf8'), /'\.\/src\/lib\/musicEngine\.js'/);
 });
+
+test('12-TET fifth is 2^(7/12), about 2 cents under the pure 3/2', () => {
+  assert.equal(M.equalTemperedRatio(12), 2);
+  assert.equal(M.equalTemperedRatio(0), 1);
+  assert.ok(Math.abs(M.equalTemperedRatio(7) - 1.4983) < 1e-4);
+  assert.equal(M.equalTemperedRatio(0.5), null);
+  assert.ok(Math.abs(M.centsBetween(1, 2) - 1200) < 1e-9);
+  assert.ok(Math.abs(M.centsBetween(1.5, M.equalTemperedRatio(7)) + 1.955) < 0.001);
+  assert.equal(M.centsBetween(0, 1), null);
+});
+
+test('freq-lab.html: linked from index, precached, numbers from the engine, unlock on first tap', () => {
+  const root = path.join(__dirname, '..');
+  const page = fs.readFileSync(path.join(root, 'freq-lab.html'), 'utf8');
+  assert.match(page, /src="src\/lib\/musicEngine\.js"/);
+  assert.match(page, /installAudioUnlock\(document\)/);
+  ['ratioToHz', 'harmonic', 'stringLength', 'equalTemperedRatio', 'centsBetween', 'scheduleSequence']
+    .forEach((fn) => assert.ok(page.includes(fn + '('), fn));
+  assert.match(page, /id="again"/, 'a visible play-again button');
+  assert.match(page, /role="status" aria-live="polite"/, 'every sound is also written out');
+  assert.match(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), /href="freq-lab\.html"/);
+  assert.match(fs.readFileSync(path.join(root, 'sw.js'), 'utf8'), /'\.\/freq-lab\.html'/);
+});
