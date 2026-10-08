@@ -130,3 +130,8 @@ test('the offer form labels its fields and announces status', () => {
   assert.match(offerPage, /id="letterPreview"[^>]*aria-live/);
   assert.match(offerPage, /id="main"/);
 });
+
+test('isRtl returns false for null input', () => {
+  const { isRtl } = require('../src/lib/tabs.js');
+  assert.strictEqual(isRtl(null), false);
+});
