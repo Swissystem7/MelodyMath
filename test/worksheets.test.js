@@ -64,6 +64,10 @@ test('count-the-beats items carry a hear cue that matches the countable answer',
   });
 });
 
+test('Unicode characters are escaped in HTML', () => {
+  assert.equal(sheets.escapeHtml('© MelodyMath'), '&copy; MelodyMath');
+});
+
 test('clampCount returns 4 for non-numeric input like "abc"', () => {
   assert.equal(sheets.clampCount('abc'), 4);
 });
