@@ -24,6 +24,7 @@ test('answer fields are labelled and feedback is announced live', () => {
   assert.match(index, /for="answer"|id="answer"[^>]*aria-label/);
   assert.match(index, /id="rmFeedback"[^>]*aria-live/);
   assert.match(index, /id="feedback"[^>]*aria-live/);
+  assert.match(index, /id="rmReward"[^>]*aria-live/);
   const exam = html('807.html');
   assert.match(exam, /id="ans"[^>]*aria-label/);
   assert.match(exam, /id="feedback"[^>]*aria-live/);
