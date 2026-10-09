@@ -12,6 +12,7 @@ const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
+  'musicEngine.js': 'pure music arithmetic from #117 (docs/CURRICULUM-MUSIC-PLAN.md §3); the shared AudioContext, unlockAudio and page wiring land in the stacked PR for #100, which also precaches it in sw.js',
   'pedagogy.js': 'lesson-plan bank, wired into the teacher tab in the follow-up PR for #33',
 };
 
@@ -29,7 +30,11 @@ test('every src/lib module is loaded by a page or listed as intentionally unused
   const unreachable = fs.readdirSync(libDir)
     .filter((f) => f.endsWith('.js'))
     .filter((f) => !loaded.has(f) && !Object.prototype.hasOwnProperty.call(INTENTIONALLY_UNUSED, f));
-  assert.deepEqual(unreachable, []);
+  // deepEqual alone prints the bare file list, which does not say what to do about it.
+  assert.deepEqual(unreachable, [], 'no page loads ' + unreachable.join(', ')
+    + ': either add <script src="src/lib/NAME.js"></script> to the page that uses it, and precache it'
+    + ' in sw.js with a bumped CACHE (test/pwa.test.js checks that), or add it to INTENTIONALLY_UNUSED'
+    + ' at the top of this file with the reason no page loads it');
 });
 
 test('the intentionally-unused list names real files that really are unused, each with a reason', () => {
