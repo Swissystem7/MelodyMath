@@ -1,4 +1,5 @@
-// MelodyMath — sorting polygons and spotting a right angle (כיתה א׳–ב׳).
+// MelodyMath — sorting polygons and spotting a right angle (כיתה א׳–ב׳),
+// naming angle and triangle kinds (כיתה ג׳).
 //
 // Pure classification facts, no drawing library. Shapes are named and
 // described in the prompt text itself so a screen reader carries the same
@@ -63,6 +64,29 @@
     return Math.round(Number(deg)) === 180;
   }
 
+  // כיתה ג׳ names all four kinds. Outside (0, 180] there is no answer a
+  // child is asked for, so null rather than a guess.
+  function angleKind(deg) {
+    const d = Math.round(Number(deg));
+    if (!Number.isFinite(d) || d <= 0 || d > 180) return null;
+    if (d < 90) return 'חדה';
+    if (d === 90) return 'ישרה';
+    if (d < 180) return 'קהה';
+    return 'שטוחה';
+  }
+
+  // A triangle by its largest angle. Angles that do not sum to 180 are not
+  // a triangle, so null.
+  function triangleByAngles(a, b, c) {
+    const angles = [a, b, c].map(function (x) { return Math.round(Number(x)); });
+    if (angles.some(function (x) { return !Number.isFinite(x) || x <= 0; })) return null;
+    if (angles[0] + angles[1] + angles[2] !== 180) return null;
+    const kind = angleKind(Math.max.apply(null, angles));
+    if (kind === 'חדה') return 'חד־זווית';
+    if (kind === 'ישרה') return 'ישר־זווית';
+    return 'קהה־זווית';
+  }
+
   // The shapes a prompt names, in reading order, so the page can show their
   // glyphs next to the text. Decorative only: the prompt already says it.
   function shapesInText(text) {
@@ -94,5 +118,7 @@
     shapeHe: shapeHe,
     isRightAngle: isRightAngle,
     isStraightAngle: isStraightAngle,
+    angleKind: angleKind,
+    triangleByAngles: triangleByAngles,
   };
 });
