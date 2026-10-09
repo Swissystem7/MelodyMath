@@ -13,6 +13,7 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+.mm-contact-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.mm-contact-links a{text-decoration:none;display:inline-block;width:auto;border-radius:12px;padding:12px 16px;font-weight:800}.mm-contact-links a.ghost{background:#fff;color:var(--purple);border:1px solid var(--line)}.mm-contact-links a.primary{color:#fff;background:var(--purple)}.mm-contact-note{font-size:.85rem;color:var(--muted)}
 @media print{
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
@@ -162,9 +163,10 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <li><b>לפני שבוע 1.</b> אם זו הפעם הראשונה במכשיר — חמשת הצעדים למעלה. בחרו קוד כיתה קבוע (למשל «שילוב-ג»). לכל ילד — שם או קוד. שמרו במכשיר. ייצאו גיבוי JSON לתיקייה שלכם.</li>
     <li><b>שבוע 1.</b> מצב כיתה: מפגש אחד של 8 דקות לכל ילד, לחיצה בלי הקלדה. בסרגל הנגישות — אות גדולה והקראה למי שצריך. החלפה בין ילדים — לחיצה על השם. הדפיסו דוח אחרי המפגש הראשון — זה קו הבסיס, לא ציון.</li>
     <li><b>שבועות 2–3.</b> אותו מפגש, בלי לשנות כללים. מי שבלי טאבלט מקבל דף עבודה מאותם תרגילים (למטה). אחרי כל שיעור: ייצוא גיבוי + מבט בלוח הכיתה. טאבלט בית ספר נמחק לעיתים קרובות — ולכן גם פתיחה חד־פעמית מהקישור שומרת את הדף במכשיר.</li>
-    <li><b>שבוע 4.</b> הדפיסו דוח ומכתב להורה לכל ילד. שאלה אחת לעצמכם: האם ראיתם משהו שדף עבודה לא נותן? אם לא — הפיילוט ענה, והכלי נשאר דמו.</li>
+    <li><b>שבוע 4.</b> הדפיסו דוח ומכתב להורה לכל ילד. שאלה אחת: האם ראיתם משהו שדף עבודה לא נותן? אם לא — הפיילוט ענה, והכלי נשאר דמו. שלחו את התשובה לפרויקט (למטה) — גם «לא» עוזרת להחליט.</li>
   </ol>
   <p><b>מה לא אומרים להורים:</b> «שולט», «טיפול», «מחקרים מוכיחים», «סוגר פערים». אומרים: תרגול קצר במכשיר, הרישום מקומי, בלי שרת.</p>
+  <div class="no-print mm-kit-contact" data-mm-contact data-subject="MelodyMath · שאלת הסיום"></div>
   <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
     <button type="button" id="kitPrint" class="secondary">הדפסת דף ההפעלה</button>
     <button type="button" id="rosterExport" class="secondary">ייצוא גיבוי JSON</button>
@@ -265,6 +267,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/access.js"></script>
 <script src="src/lib/onboard.js"></script>
 <script src="src/lib/tabs.js"></script>
+<script src="src/lib/contact.js"></script>
 <script src="src/lib/core.js"></script>
 <script>
 const exercises=[

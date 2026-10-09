@@ -44,6 +44,9 @@
 
 ## מה אין כאן
 אין backend, אין חשבון, אין תשלום, אין רישום במאגר משרד החינוך, ואין נתוני פיילוט. אין ולו משתמש אחד שאומת ([VALIDATION.md בארכיון](docs/archive/VALIDATION.md), 3.8.2026).
+## פנייה לפרויקט
+ערכי הקשר נמצאים רק ב־`CONTACT` ב־[`src/lib/contact.js`](src/lib/contact.js). `CONTACT.form` הוא ערוץ הפנייה הציבורי: טופס Google «משוב על האפליקציות» של הבעלים, עם MelodyMath ממולא מראש (החלטת הבעלים 28.9). אם מרוקנים אותו, הדפים מציגים במקומו [טופס פנייה ציבורי בגיטהאב](https://github.com/Swissystem7/MelodyMath/issues/new?template=pilot.yml) (`.github/ISSUE_TEMPLATE/pilot.yml`). `CONTACT.email` ריק = קישור הדוא״ל מוסתר. בדף ההצעה, עותק לפרויקט יוצא רק אם המחנכת מסמנת «שלחו עותק לפרויקט».
+
 
 ## מה המחקר מצא
 
