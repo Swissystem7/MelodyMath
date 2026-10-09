@@ -194,6 +194,15 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   </div>
   <div id="worksheetSheet" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="lessonPlanCard">
+  <span class="tag">מתווה שיעור · טיוטה, לא תוכנית משרד</span>
+  <h2>מטרות וצעדים לנושא אחד</h2>
+  <p>מתווים קצרים לכיתה שנבחרה למעלה: מה המטרה ובאילו צעדים. זו טיוטה לדוגמה שנכתבה כאן, ולא מסמך של משרד החינוך. המאגר קטן — מה שאין בו, נאמר במקום להמציא.</p>
+  <label class="no-print" for="planTopic">נושא
+    <select id="planTopic" aria-label="נושא למתווה שיעור"></select>
+  </label>
+  <div id="lessonPlan" aria-live="polite"></div>
+</div>
 <div class="card" id="classBoardCard">
   <span class="tag">כל הילדים בטאבלט הזה</span>
   <h2>לוח כיתה</h2>
@@ -254,6 +263,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
 <script src="src/lib/sonify.js"></script>
+<script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/teacherStore.js"></script>
@@ -266,6 +276,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/dataViz.js"></script>
 <script src="src/lib/geometryShapes.js"></script>
 <script src="src/lib/worksheets.js"></script>
+<script src="src/lib/pedagogy.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/onboard.js"></script>
@@ -289,10 +300,61 @@ document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dat
 $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter')check()};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true)};
 function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
-// yToFreq / formatRhythmPattern / playFreq / playRhythmClicks מגיעים מ-src/lib/sonify.js.
+// yToFreq / playFreq / playRhythmClicks מגיעים מ-src/lib/sonify.js.
 function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);$('freq').textContent=`${hz.toFixed(2)} Hz`;if(play)playFreq(hz)}$('y').oninput=()=>renderFreq(true);renderFreq(false);
-function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
-function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`;if(play)playRhythmClicks(x.pattern,x.bpm)}$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
+// durationToFraction / measureFill / compareFractions / fractionText / bpmToSeconds
+// מגיעים מ-src/lib/musicEngine.js. אורך תו הוא שבר מדויק {n,d} ולא float, ולכן
+// תיבה שלמה מסתכמת בדיוק ב-4/4 ולא ב-0.99999 — וגם השם המודפס («3/8») הוא
+// השבר עצמו ולא התאמה בסבילות של 1e-9 לטבלת שמות.
+const RHYTHM_NOTES=[
+  ['quarter','half'],
+  ['quarter','half','eighth'],
+  ['quarter','half','eighth','dotted quarter'],
+  ['quarter','half','eighth','dotted quarter','half triplet','whole triplet'],
+  ['quarter','half','eighth','dotted quarter','half triplet','whole triplet','sixteenth','dotted eighth']
+];
+const RHYTHM_BAR='4/4';
+// תיבה אחת במילוי חמדני מתוך אורכי התווים של הרמה: בכל צעד נבחר אורך שאינו
+// גדול ממה שנשאר. עם שלישולים השארית יכולה להיות למשל 1/48, שאף אורך תו עד
+// שש־עשרית אינו ממלא — ואז התיבה לא נסגרת. השארית עצמה אינה אורך תו, ולכן
+// אסור לדחוף אותה לתוך התיבה כאילו הייתה תו; מגרילים מחדש, ואם גם זה נכשל —
+// showRhythm אומר במסך מה חסר.
+function fillRhythmBar(names){
+  const lengths=names.map(durationToFraction).filter(Boolean);
+  const picks=[];
+  for(let guard=0;guard<64;guard++){
+    const state=measureFill(RHYTHM_BAR,picks);
+    if(!state||state.fill!=='short')break;
+    const room=lengths.filter(f=>compareFractions(f,state.remainder)<=0);
+    if(!room.length)break;
+    picks.push(room[Math.floor(Math.random()*room.length)]);
+  }
+  return {picks:picks,state:measureFill(RHYTHM_BAR,picks)};
+}
+function generateRhythmExercise(level,accuracy){
+  const names=RHYTHM_NOTES[level-1]||RHYTHM_NOTES[0];
+  let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;
+  if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);
+  let bar=fillRhythmBar(names);
+  for(let tries=0;tries<24&&bar.state.fill!=='full';tries++)bar=fillRhythmBar(names);
+  const beat=bpmToSeconds(bpm),total=bar.state.total;
+  return {
+    pattern:bar.picks.map(f=>f.n/f.d),
+    fractionPattern:bar.picks.map(fractionText).join('+'),
+    bpm:bpm,
+    // משך מה שמנוגן בפועל. בתיבה שלמה זה בדיוק 240/BPM.
+    expectedDuration:+(total.n/total.d*4*beat).toFixed(3),
+    full:bar.state.fill==='full',
+    missing:bar.state.fill==='full'?'':fractionText(bar.state.remainder)
+  };
+}
+function showRhythm(play){
+  const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);
+  const tail=x.full?'':` · התיבה לא נסגרה: חסר ${x.missing} מתוך ${RHYTHM_BAR}`;
+  $('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות${tail}</small>`;
+  if(play)playRhythmClicks(x.pattern,x.bpm);
+}
+$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
 // ---- תרגול לפי כיתה (בנק מתויג; מקצב = פסינג, לא מוצר) ----
 const rmHe=skillHe;
 const GRADE_NOTE={
@@ -314,7 +376,39 @@ function paintGrade(){
   if($('gradeNote')) $('gradeNote').textContent=GRADE_NOTE[selectedGrade]||'';
   if($('rmGradeTag')) $('rmGradeTag').textContent='אבחון קצר · כיתה '+selectedGrade+'׳';
   if($('gateNote')) $('gateNote').classList.toggle('hidden', selectedGrade!=='ג' && selectedGrade!=='ב');
+  renderLessonPlan();
 }
+// ---- מתווה שיעור למורה (lessonPlans / lessonPlanForTopic מ-src/lib/pedagogy.js) ----
+function lessonPlansForGrade(grade){
+  if(typeof lessonPlans!=='function') return [];
+  return lessonPlans().filter(p=>p && p.grade===grade);
+}
+function renderLessonPlan(){
+  const pick=$('planTopic'),box=$('lessonPlan');
+  if(!pick||!box) return;
+  const plans=lessonPlansForGrade(selectedGrade);
+  // המאגר מכסה כרגע א׳ ו־ב׳ בלבד. לכיתה בלי מתווה לא ממציאים מתווה ולא
+  // מציגים את זה של כיתה אחרת — אומרים שאין.
+  if(!plans.length){
+    pick.innerHTML='';pick.disabled=true;
+    box.innerHTML='<p class="note">אין מתווה שיעור לכיתה '+selectedGrade+'׳ במאגר הזה.</p>';
+    return;
+  }
+  pick.disabled=false;
+  const want=plans.some(p=>p.id===pick.value)?pick.value:plans[0].id;
+  pick.innerHTML=plans.map(p=>'<option value="'+escapeHtml(p.id)+'"'+(p.id===want?' selected':'')
+    +'>'+escapeHtml(p.curriculumTopic)+'</option>').join('');
+  // lessonPlanForTopic מחפש לפי plan.id (השם בחתימה מטעה — ראו הערה ב-PR).
+  const plan=lessonPlanForTopic(want);
+  if(!plan){ box.innerHTML='<p class="note">הנושא הזה אינו במאגר המתווים.</p>'; return; }
+  const list=(rows,tag)=>'<'+tag+' class="err-list">'+(Array.isArray(rows)?rows:[])
+    .map(r=>'<li>'+escapeHtml(r)+'</li>').join('')+'</'+tag+'>';
+  box.innerHTML='<h3>'+escapeHtml(plan.curriculumTopic)+'</h3>'
+    +'<p class="note">כיתה '+escapeHtml(plan.grade)+'׳ · '+escapeHtml(plan.strand||'')+'</p>'
+    +'<p><b>מטרות</b></p>'+list(plan.goals,'ul')
+    +'<p><b>צעדים</b></p>'+list(plan.steps,'ol');
+}
+if($('planTopic'))$('planTopic').onchange=renderLessonPlan;
 function itemTagText(it){
   if(!it) return '';
   return 'כיתה '+it.grade+'׳ · '+(it.strand||'')+' · '+(it.standard||'');
