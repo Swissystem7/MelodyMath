@@ -12,6 +12,7 @@ const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
+  'circleOfFifths.js': 'grade ו׳ circle-of-fifths layout and tapped-tempo mean (#107); the widget lands with the step-grid one, index.html is hot',
   'pedagogy.js': 'lesson-plan bank, wired into the teacher tab in the follow-up PR for #33',
 };
 

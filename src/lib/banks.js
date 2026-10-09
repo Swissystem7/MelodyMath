@@ -78,6 +78,8 @@
     DIV_REM: 'חילוק עם שארית',
     MUL_COMPARE: 'השוואה כפלית — פי כמה',
     NUM_10K: 'מספרים עד 10,000 — מבנה עשרוני והשוואה',
+    CIRCLE: 'מעגל — רדיוס, קוטר, היקף וזווית מרכזית',
+    MEAN: 'ממוצע — סכום הערכים חלקי מספרם',
   };
 
   const SKILL_HE = {
@@ -104,7 +106,7 @@
     'ג': ['multiplication', 'division', 'geometry', 'measurement'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
     'ה': ['fractions', 'decimals'],
-    'ו': ['fractions', 'decimals', 'percent'],
+    'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
 
   const RM_SKILLS = [
@@ -1073,6 +1075,58 @@
     HZ('צליל של 1000 הרץ, ועוד 10 צעדים של 100 הרץ. לאיזה תדר מגיעים?' + NO_COMMA, 2000, '10 מאות הן אלף', 2),
     HZ('5 אלפים, 0 מאות, 6 עשרות ו־4 יחידות הרץ. איזה מספר?' + NO_COMMA, 5064, 'אין מאות — 0 במקומן', 2),
     HZ('הצליל הגבוה ביותר בפסנתר הוא 4186 הרץ. כמה חסר לו עד 10,000?' + NO_COMMA, 5814, 'משלימים לאלפים: 4186 ועוד 14 הם 4200', 3)
+  );
+
+  // ---------- כיתה ו׳ · פעילויות מוזיקה (תוכנית §5, #107) ----------
+  // Appended at the end like grades ב׳ and ג׳ (ids are RAW indexes). Dotted
+  // notes and triplets are fraction products, "how many eighths in a half"
+  // is fraction division, intervals are decimal ratios, tempo changes are
+  // percents, the circle of fifths is a 12-gon with 30° steps (layout in
+  // circleOfFifths.js) and the tapped tempo is a mean.
+  function MV(skill, music, prompt, answer, hint, level, standard) {
+    const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO : STRAND.NUM;
+    return I('ו', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
+  }
+  const PI_NOTE = ' (π ≈ 3.14)';
+  RAW.push(
+    MV('fractions', 'dotted', 'רבע מנוקד הוא 1/4 × 3/2. איזה חלק מתיבה שלמה? (כשבר)', '3/8', 'מונה כפול מונה, מכנה כפול מכנה', 1, ST.FRAC_MUL),
+    MV('fractions', 'dotted', 'חצי מנוקד: 1/2 × 3/2 = ? (כשבר)', '3/4', 'הנקודה מוסיפה חצי מאורך התו', 1, ST.FRAC_MUL),
+    MV('fractions', 'dotted', 'שמינית מנוקדת: 1/8 × 3/2 = ? (כשבר)', '3/16', '1 × 3 חלקי 8 × 2', 2, ST.FRAC_MUL),
+    MV('fractions', 'triplet', 'בשלישייה כל שמינית מתנגנת 2/3 מאורכה. 1/8 × 2/3 = ? (כשבר)', '1/12', '2/24 ואז מצמצמים', 3, ST.FRAC_MUL),
+    MV('fractions', 'dotted', 'בתיבה של 4/4 יש רבע מנוקד ושמינית. כמה חסר עד תיבה מלאה? (כשבר)', '1/2', '3/8 + 1/8 = 4/8', 3, ST.FRAC_MUL),
+    MV('fractions', 'durationDiv', 'כמה שמיניות נכנסות בחצי? 1/2 : 1/8 = ?', 4, 'כמה פעמים 1/8 נכנס ב־4/8', 1, ST.FRAC_DIV),
+    MV('fractions', 'durationDiv', 'כמה שש־עשריות נכנסות ברבע? 1/4 : 1/16 = ?', 4, '1/4 = 4/16', 2, ST.FRAC_DIV),
+    MV('fractions', 'durationDiv', 'כמה רבעים מנוקדים (3/8) נכנסים בתיבה של 3/4? 3/4 : 3/8 = ?', 2, '3/4 = 6/8', 2, ST.FRAC_DIV),
+    MV('fractions', 'durationDiv', 'כמה שמיניות מנוקדות (3/16) נכנסות בתיבה של 6/8? 6/8 : 3/16 = ?', 4, '6/8 = 12/16', 3, ST.FRAC_DIV),
+
+    MV('decimals', 'ratioHz', 'קווינטה מעל לה של 440 הרץ: 440 × 1.5 = ?', 660, '440 ועוד חצי מ־440', 1, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'קווינטה מעל 200 הרץ: 200 × 1.5 = ?', 300, '200 ועוד 100', 1, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'קווינטה מעל 330 הרץ: 330 × 1.5 = ?', 495, '330 ועוד 165', 2, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'צליל של 660 הרץ הוא קווינטה מעל איזה תדר? 660 : 1.5 = ?', 440, 'מה כפול 1.5 נותן 660?', 2, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'טרצה גדולה היא פי 1.25. 400 × 1.25 = ?', 500, '400 ועוד רבע מ־400', 3, ST.DEC_MUL),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 90, 100, 110 ו־100 BPM. מה הקצב הממוצע?', 100, 'הסכום 400, חלקי 4', 1, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 78, 82, 80 ו־84 BPM. מה הקצב הממוצע?', 81, 'הסכום 324, חלקי 4', 2, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.75, 'הסכום 327, חלקי 4', 3, ST.MEAN),
+
+    MV('percent', 'tempo', 'קצב של 100 BPM עולה ב־10%. מה הקצב החדש?', 110, '10% מ־100 הם 10', 1, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 80 BPM עולה ב־25%. מה הקצב החדש? (שמעו לפני ואחרי)', 100, '25% מ־80 הם 20', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 120 BPM יורד ב־25%. מה הקצב החדש?', 90, '25% מ־120 הם 30', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 90 BPM עולה ב־20%. מה הקצב החדש?', 108, '10% הם 9, אז 20% הם 18', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'הקצב עלה מ־60 ל־90 BPM. בכמה אחוזים הוא עלה?', 50, 'העלייה 30, וזה חצי מ־60', 3, ST.PERCENT),
+    MV('percent', 'tempo', 'הקצב ירד מ־100 ל־80 BPM. בכמה אחוזים הוא ירד?', 20, 'הירידה 20 מתוך 100', 3, ST.PERCENT),
+
+    MV('geometry', 'circleFifths', 'במעגל הקווינטות 12 נקודות במרחקים שווים. כמה מעלות בין שתי נקודות שכנות?', 30, '360 חלקי 12', 1, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מחברים את 12 הנקודות של מעגל הקווינטות בקווים ישרים. כמה צלעות למצולע?', 12, 'צלע אחת בין כל שתי נקודות שכנות', 1, ST.GEO_SORT),
+    MV('geometry', 'circleFifths', 'מדו לסול — צעד אחד במעגל הקווינטות. כמה מעלות?', 30, 'צעד אחד הוא 1/12 מסיבוב', 1, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'רדיוס מעגל הקווינטות 5 ס״מ. מה הקוטר בס״מ?', 10, 'הקוטר הוא פעמיים הרדיוס', 1, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו לרה — שני צעדים במעגל הקווינטות. כמה מעלות?', 60, '2 כפול 30', 2, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו לפה דיאז — 6 צעדים, חצי סיבוב. כמה מעלות?', 180, 'חצי מ־360', 2, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו ללה — 3 צעדים, 90 מעלות. איזו זווית זו: חדה, ישרה, קהה או שטוחה?', 'ישרה', 'בדיוק 90 מעלות', 2, ST.ANGLE_KINDS),
+    MV('geometry', 'circleFifths', 'קוטר המעגל 10 ס״מ. מה ההיקף בס״מ?' + PI_NOTE, 31.4, 'היקף = קוטר כפול π', 2, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'כמה צעדים במעגל הקווינטות הם 150 מעלות?', 5, '150 חלקי 30', 3, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו למי — 4 צעדים. איזו זווית זו: חדה, ישרה, קהה או שטוחה?', 'קהה', '4 כפול 30 הם 120 מעלות', 3, ST.ANGLE_KINDS),
+    MV('geometry', 'circleFifths', 'רדיוס המעגל 7 ס״מ. מה ההיקף בס״מ?' + PI_NOTE, 43.96, 'היקף = 2 × רדיוס × π', 3, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'היקף המעגל 62.8 ס״מ. מה הרדיוס בס״מ?' + PI_NOTE, 10, '62.8 חלקי 3.14 הם הקוטר, ואז חצי', 3, ST.CIRCLE)
   );
 
   const SHIPPED = [];
