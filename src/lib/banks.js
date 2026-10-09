@@ -80,6 +80,8 @@
     NUM_10K: 'מספרים עד 10,000 — מבנה עשרוני והשוואה',
     CIRCLE: 'מעגל — רדיוס, קוטר, היקף וזווית מרכזית',
     MEAN: 'ממוצע — סכום הערכים חלקי מספרם',
+    LCM: 'כפולה משותפת קטנה ביותר',
+    FACTORS: 'מחלקים, מספרים ראשוניים ופריקים',
   };
 
   const SKILL_HE = {
@@ -105,7 +107,7 @@
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
     'ג': ['multiplication', 'division', 'geometry', 'measurement'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
-    'ה': ['fractions', 'decimals'],
+    'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
 
@@ -1127,6 +1129,57 @@
     MV('geometry', 'circleFifths', 'מדו למי — 4 צעדים. איזו זווית זו: חדה, ישרה, קהה או שטוחה?', 'קהה', '4 כפול 30 הם 120 מעלות', 3, ST.ANGLE_KINDS),
     MV('geometry', 'circleFifths', 'רדיוס המעגל 7 ס״מ. מה ההיקף בס״מ?' + PI_NOTE, 43.96, 'היקף = 2 × רדיוס × π', 3, ST.CIRCLE),
     MV('geometry', 'circleFifths', 'היקף המעגל 62.8 ס״מ. מה הרדיוס בס״מ?' + PI_NOTE, 10, '62.8 חלקי 3.14 הם הקוטר, ואז חצי', 3, ST.CIRCLE)
+  );
+
+  // ---------- כיתה ה׳ · פעילויות מוזיקה (תוכנית §5, #106) ----------
+  // Appended at the end like grades ב׳, ג׳ and ו׳ (ids are RAW indexes).
+  // Two drums meet every lcm beats, a bar of n beats splits into the factors
+  // of n (polyrhythm.js), a mixed bar is added over the shortest note, a beat
+  // lasts 60/BPM seconds, and do-re-mi in Hz is read off a bar chart.
+  function M5(skill, music, prompt, answer, hint, level, standard, chart) {
+    const strand = skill === 'data' ? STRAND.DATA
+      : standard === ST.LCM || standard === ST.FACTORS ? STRAND.NUM
+        : skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
+    return I('ה', skill, prompt, answer, hint, {
+      strand: strand, standard: standard, level: level, music: music,
+      widget: chart ? 'barchart' : undefined, chart: chart,
+    });
+  }
+  const DO_RE_MI = { bars: [{ label: 'דו', value: 262 }, { label: 'רה', value: 294 }, { label: 'מי', value: 330 }] };
+  const SOL_LA_SI = { bars: [{ label: 'סול', value: 392 }, { label: 'לה', value: 440 }, { label: 'סי', value: 494 }] };
+  RAW.push(
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 2 פעימות ותוף שני כל 3 פעימות. אחרי כמה פעימות הם מכים שוב יחד?', 6, 'המספר הקטן ביותר שמתחלק גם ב־2 וגם ב־3', 1, ST.LCM),
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 3 פעימות ותוף שני כל 4 פעימות. אחרי כמה פעימות הם נפגשים?', 12, 'הכפולות של 4: 4, 8, 12 — איזו מתחלקת ב־3?', 2, ST.LCM),
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 4 פעימות ותוף שני כל 6 פעימות. אחרי כמה פעימות הם נפגשים?', 12, 'לא 24: כבר 12 מתחלק גם ב־4 וגם ב־6', 2, ST.LCM),
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 6 פעימות ותוף שני כל 8 פעימות. אחרי כמה פעימות הם נפגשים?', 24, 'הכפולות של 8: 8, 16, 24 — איזו מתחלקת ב־6?', 3, ST.LCM),
+    M5('fractions', 'drumsMeet', 'שלושה תופים מכים כל 2, כל 3 וכל 4 פעימות. אחרי כמה פעימות שלושתם נפגשים?', 12, 'הכפולה המשותפת של 3 ו־4 כבר מתחלקת ב־2', 3, ST.LCM),
+    M5('fractions', 'meters', 'תיבה של 12 פעימות מחולקת לקבוצות של 3 פעימות. כמה קבוצות יש?', 4, '12 חלקי 3', 1, ST.FACTORS),
+    M5('fractions', 'meters', '12 פעימות אפשר לספור בקבוצות שוות של 2, 3, 4 או 6. כמה פעימות בקבוצה אם יש 2 קבוצות?', 6, '12 חלקי 2', 1, ST.FACTORS),
+    M5('fractions', 'meters', 'לכמה גדלים שונים של קבוצות שוות אפשר לחלק 12 פעימות, בלי קבוצה של פעימה אחת ובלי כל ה־12 יחד?', 4, 'המחלקים של 12 בין 1 ל־12: 2, 3, 4, 6', 2, ST.FACTORS),
+    M5('fractions', 'meters', 'לכמה גדלים שונים של קבוצות שוות אפשר לחלק 7 פעימות, בלי קבוצה של פעימה אחת ובלי כל ה־7 יחד?', 0, '7 הוא מספר ראשוני — המחלקים שלו רק 1 ו־7', 2, ST.FACTORS),
+    M5('fractions', 'meters', 'כמה מחלקים יש למספר 18 (כולל 1 ו־18)?', 6, '1, 2, 3, 6, 9, 18', 3, ST.FACTORS),
+    M5('fractions', 'meters', 'תיבות של 5, 7, 9 ו־11 פעימות. איזו מהן אפשר לחלק לקבוצות שוות של 3?', 9, 'רק מספר שאינו ראשוני מתחלק לקבוצות שוות', 3, ST.FACTORS),
+
+    M5('fractions', 'mixedBar', 'רבע ושמינית: 1/4 + 1/8 = ? (כשבר)', '3/8', 'התו הקצר קובע את המכנה: 1/4 = 2/8', 1, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'שמינית ושש־עשרית: 1/8 + 1/16 = ? (כשבר)', '3/16', '1/8 = 2/16', 1, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'רבע, שמינית ושש־עשרית: 1/4 + 1/8 + 1/16 = ? (כשבר)', '7/16', 'הכול בשש־עשריות: 4 + 2 + 1', 2, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'בתיבה של 3/4 יש רבע ושתי שמיניות. כמה חסר עד תיבה מלאה? (כשבר)', '1/4', '1/4 + 2/8 = 1/2', 2, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'בתיבה של 4/4 יש חצי, רבע, שמינית ושש־עשרית. כמה חסר עד תיבה מלאה? (כשבר)', '1/16', 'בשש־עשריות: 8 + 4 + 2 + 1 = 15', 3, ST.FRAC_ADD),
+
+    M5('decimals', 'secPerBeat', 'ב־100 BPM פעימה נמשכת 60/100 שנייה. כמה שניות זה כשבר עשרוני?', 0.6, '60 מאיות הן 6 עשיריות', 1, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־80 BPM פעימה נמשכת 60/80 שנייה. כמה שניות זה כשבר עשרוני?', 0.75, '60/80 = 3/4', 2, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־240 BPM פעימה נמשכת 60/240 שנייה. כמה שניות זה כשבר עשרוני?', 0.25, '60/240 = 1/4', 2, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־150 BPM פעימה נמשכת 60/150 שנייה. כמה שניות זה כשבר עשרוני?', 0.4, '60/150 = 2/5 = 4/10', 3, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'פעימה נמשכת 0.5 שנייה. כמה פעימות בדקה (BPM)?', 120, 'בכל שנייה 2 פעימות, ובדקה 60 שניות', 3, ST.DEC_PLACE),
+
+    M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של דו, רה ומי בהרץ (בקירוב). מה התדר של רה?', 294, 'קראו את גובה העמודה של רה', 1, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'איזה צליל הכי גבוה? כתבו את התדר שלו בהרץ', 330, 'העמודה הגבוהה ביותר', 2, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'בכמה הרץ מי גבוה מדו?', 68, '330 פחות 262', 2, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'מה גדול יותר: הפער בין דו לרה או הפער בין רה למי? כתבו את הפער הגדול בהרץ', 36, '294 − 262 = 32, ו־330 − 294 = 36', 3, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של דו, רה ומי בהרץ (בקירוב). מה התדר של דו?', 262, 'העמודה הנמוכה ביותר', 1, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של סול, לה וסי בהרץ (בקירוב). מה התדר של לה?', 440, 'קראו את גובה העמודה של לה', 1, ST.BARCHART, SOL_LA_SI),
+    M5('data', 'hzChart', 'בכמה הרץ סי גבוה מסול?', 102, '494 פחות 392', 2, ST.BARCHART, SOL_LA_SI),
+    M5('data', 'hzChart', 'דו הגבוה הוא 523 הרץ. כמה הרץ חסרים לסי שבדיאגרמה כדי להגיע אליו?', 29, '523 פחות 494', 3, ST.BARCHART, SOL_LA_SI)
   );
 
   const SHIPPED = [];
