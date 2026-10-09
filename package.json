@@ -3,6 +3,10 @@
   "private": true,
   "description": "Hebrew math practice and graph sonification — no install, no backend",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.0"
   }
 }
