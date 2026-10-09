@@ -71,6 +71,8 @@
 
 `sonify.js` ו־`metro.js` הקיימים ממשיכים לעבוד. המנוע החדש מרכז את ה־AudioContext כדי שיהיה רק אחד.
 
+**מצב:** החשבון הטהור של המנוע נכנס ל־master ב־#117, ועדיין אף דף לא טוען אותו. `scheduleSequence` ו־`unlockAudio` שבטבלה עוד לא קיימים; בינתיים יש `planSequence`, שמחשב את התזמון בלי AudioContext. עד שה־PR העוקב של #100 יחבר את המנוע — AudioContext משותף, `unlockAudio` ב־`pointerdown` הראשון, `<script>` ב־`index.html` ו־precache ב־`sw.js` עם גרסת מטמון חדשה — המודול רשום ב־`INTENTIONALLY_UNUSED` שב־`test/reachability.test.js`, כדי שבדיקת הנגישות של המודולים תישאר ירוקה ותמשיך לתפוס מודול חדש שנשכח.
+
 ---
 
 ## 4. דרישות מובייל וטאבלט (חובה בכל משימה)
