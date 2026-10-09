@@ -13,6 +13,7 @@ const INTENTIONALLY_UNUSED = {
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
   'pedagogy.js': 'lesson-plan bank, wired into the teacher tab in the follow-up PR for #33',
+  'musicEngine.js': 'shared audio engine from #100; the activities that call it land with #105-#108, and the pre/post check of #110 is silent by design',
 };
 
 function loadedByPages() {
