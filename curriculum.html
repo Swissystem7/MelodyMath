@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · כיסוי תכנית הלימודים א׳–ד׳</title>
-<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך לכיתות א׳–ד׳ — ומה לא. בלי טענת יעילות.">
+<title>MelodyMath · כיסוי תכנית הלימודים א׳–ו׳</title>
+<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך לכיתות א׳–ו׳ — ומה לא. בלי טענת יעילות.">
 <style>
   :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
   *{box-sizing:border-box}
@@ -27,12 +27,13 @@
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
-  <p class="mm-product-banner"><b>תרגול יסודי</b> — מוצר נפרד מסוניפיקציית הגרפים. הדף הזה מציג כיסוי מול התוכנית החדשה לכיתות א׳–ג׳ והתוכנית שפורסמה לכיתה ד׳. זה לא אישור משרד ואין טענת יעילות.</p>
+  <p class="mm-product-banner"><b>תרגול יסודי</b> — מוצר נפרד מסוניפיקציית הגרפים. הדף הזה מציג כיסוי מול התוכנית החדשה לכיתות א׳–ג׳ והתוכניות שפורסמו לכיתות ד׳–ו׳. זה לא אישור משרד ואין טענת יעילות.</p>
   <h1>כיסוי תוכנית הלימודים — במפורש</h1>
   <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
   <div class="sum" id="sum"></div>
   <div id="tables"></div>
-  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. גאומטריה ומדידה מכוסות בחלקן (ראו בטבלה מה חסר); חקר נתונים — פער, לא «בקרוב» ממותג.</p>
+  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026; Newprogramgrade5–6.pdf, נקראו ב־7.10.2026. גאומטריה ומדידה מכוסות בחלקן (ראו בטבלה מה חסר); חקר נתונים — פער ברוב הכיתות, לא «בקרוב» ממותג.</p>
+  <p class="note">«מכוסה» סופר פריטים בבנק, לא למידה שנמדדה. מדידת לפני/אחרי והעברה בלי מוזיקה עדיין לא קיימת לכיתות ה׳–ו׳.</p>
 </main>
 <script src="src/lib/curriculum.js"></script>
 <script src="src/lib/banks.js"></script>
@@ -59,8 +60,14 @@
     const bankNote = Object.keys(bank).map(function (sk) {
       return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
     }).join(' · ');
+    // R4: show how much of the grade can be checked without music at all.
+    const items = typeof itemsForGrade === 'function' ? itemsForGrade(g) : [];
+    const plain = items.filter(function (it) { return !it.music; }).length;
+    const plainNote = items.length
+      ? '<p class="note">בלי מוזיקה (בדיקת העברה): ' + plain + ' מתוך ' + items.length + ' פריטים</p>'
+      : '';
     return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
-      + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
+      + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>' + plainNote
       + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
       + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
       + '<tbody>' + body + '</tbody></table></section>';

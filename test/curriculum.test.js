@@ -39,3 +39,18 @@ test('strandHe should return Hebrew translation for numbers when given null', ()
   const result = cur.strandHe(null);
   assert.strictEqual(result, 'מספרים ופעולות');
 });
+
+test('grades ה׳–ו׳ are in the matrix with honest gaps (#109)', () => {
+  assert.deepEqual(cur.grades().slice(-2), ['ה', 'ו']);
+  ['ה', 'ו'].forEach((g) => {
+    const sum = cur.summaryForGrade(g);
+    assert.ok(sum.total >= 6, g);
+    assert.ok(sum.gap >= 1, 'grade ' + g + ' must show at least one honest gap');
+    assert.ok(sum.covered >= 1, g);
+  });
+  const rows = cur.coverageMatrix();
+  assert.ok(rows.some((r) => r.grade === 'ה' && r.strand === 'geometry' && r.status === 'gap' && /מקבילית/.test(r.topic)));
+  assert.ok(rows.some((r) => r.grade === 'ו' && /אחוזים/.test(r.topic) && r.status === 'covered'));
+  assert.ok(rows.some((r) => r.grade === 'ו' && /מעגל/.test(r.topic) && r.status === 'partial' && /אין שטח עיגול/.test(r.note)));
+  assert.equal(cur.strandHe('decimals'), 'שברים עשרוניים ואחוזים');
+});
