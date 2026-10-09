@@ -16,7 +16,7 @@
   };
 
   function isRtl(el) {
-    if (!el) return true;
+    if (!el) return false;
     const node = el.closest ? (el.closest('[dir]') || el) : el;
     const dir = (node.getAttribute && node.getAttribute('dir'))
       || (typeof document !== 'undefined' && document.documentElement.getAttribute('dir'))
@@ -40,6 +40,22 @@
     if (next) return (i + 1) % n;
     if (prev) return (i - 1 + n) % n;
     return i;
+  }
+
+  function getNextTabId(tabIds, currentId, key, rtl) {
+    if (!Array.isArray(tabIds) || tabIds.length === 0) return null;
+    const count = tabIds.length;
+    let idx = tabIds.indexOf(currentId);
+    if (idx < 0) {
+      if (key === KEYS.END) return tabIds[count - 1];
+      if (key === KEYS.HOME) return tabIds[0];
+      idx = 0;
+    }
+    const isRtlMode = typeof rtl === 'boolean'
+      ? rtl
+      : (rtl === 'rtl' || Boolean(rtl && rtl.rtl));
+    const nextIdx = tabIndexAfterKey(idx, count, key, isRtlMode);
+    return tabIds[nextIdx];
   }
 
   function tabsOf(list) {
@@ -102,5 +118,9 @@
     syncRovingTabindex: syncRovingTabindex,
     bindTablist: bindTablist,
     bindAllTablists: bindAllTablists,
+    getNextTabId: getNextTabId,
+    nextTabId: getNextTabId,
+    tabIdAfterKey: getNextTabId,
+    navigateTabs: getNextTabId,
   };
 });

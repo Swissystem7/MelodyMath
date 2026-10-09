@@ -38,7 +38,7 @@
   function fractionFromEighths(count) {
     const c = Math.round(Number(count));
     if (!Number.isFinite(c) || c < 0 || c > BAR_EIGHTHS) return null;
-    if (c === 0) return '0';
+    if (c === 0) return '0/8';
     if (c === 8) return '1';
     if (c === 4) return '1/2';
     if (c === 2) return '1/4';
@@ -59,6 +59,24 @@
   function isUnitFraction(raw) {
     return UNIT_FRACTIONS.indexOf(String(raw == null ? '' : raw).trim()) !== -1
       || sameFraction(raw, '1/2') || sameFraction(raw, '1/4') || sameFraction(raw, '1/8');
+  }
+
+  function isProperFraction(n, d) {
+    if (d === undefined) {
+      if (n && typeof n === 'object' && 'n' in n && 'd' in n) {
+        d = n.d;
+        n = n.n;
+      } else {
+        const f = parseFraction(n);
+        if (!f) return false;
+        n = f.n;
+        d = f.d;
+      }
+    }
+    const num = Number(n);
+    const den = Number(d);
+    if (!Number.isFinite(num) || !Number.isFinite(den) || den === 0) return false;
+    return Math.abs(num) < Math.abs(den);
   }
 
   function normalizeBar(raw) {
@@ -127,6 +145,7 @@
     fractionFromEighths: fractionFromEighths,
     sameFraction: sameFraction,
     isUnitFraction: isUnitFraction,
+    isProperFraction: isProperFraction,
     normalizeBar: normalizeBar,
     renderBar44Html: renderBar44Html,
     bindBar44: bindBar44,

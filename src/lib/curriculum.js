@@ -92,6 +92,10 @@
     return MATRIX.filter(function (r) { return r.grade === grade; });
   }
 
+  function gapTopicsForGrade(grade) {
+    return rowsForGrade(grade).filter(function (r) { return r.status === GAP; });
+  }
+
   function summaryForGrade(grade) {
     const rows = rowsForGrade(grade);
     const out = { grade: grade, total: rows.length, covered: 0, partial: 0, gap: 0 };
@@ -133,5 +137,6 @@
     grades: grades,
     isValidTopicId: isValidTopicId,
     topicById: topicById,
+    gapTopicsForGrade: gapTopicsForGrade,
   };
 });

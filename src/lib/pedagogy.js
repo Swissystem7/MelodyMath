@@ -11,6 +11,49 @@
     ? require('./curriculum')
     : (typeof globalThis !== 'undefined' ? globalThis : {});
 
+  // Mock lesson plan data based on curriculum topics
+  const LESSON_PLANS = [
+    {
+      id: '1',
+      topicId: 'א-מספרים-ספירה עד 100 קדימה ואחורה ממספר כלשהו',
+      goals: ['לספר עד 100 קדימה ואחורה', 'לבחור מספר כלשהו ולחזור ממנו'],
+      steps: [
+        'הצגת ישר המספרים עד 100',
+        'אימון ספירה קדימה ואחורה',
+        'שימוש במשחקים לתרגול'
+      ],
+      curriculumTopic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו',
+      grade: 'א',
+      strand: 'numbers'
+    },
+    {
+      id: '2',
+      topicId: 'א-מספרים-מנייה עד 100, קיבוץ ל־10',
+      goals: ['למיין עד 100', 'לקבץ ל־10'],
+      steps: [
+        'שימוש בדמויות לתרגול קיבוץ',
+        'הצגת טבלאות קיבוץ',
+        'אימון עם חפצים מلمוס'
+      ],
+      curriculumTopic: 'מנייה עד 100, קיבוץ ל־10',
+      grade: 'א',
+      strand: 'numbers'
+    },
+    {
+      id: '3',
+      topicId: 'ב-מספרים-שליטה בכפולות 2, 4, 5, 10',
+      goals: ['לשלוט בכפולות 2, 4, 5, 10', 'לבחון את תכונות הכפל'],
+      steps: [
+        'הצגת טבלאות כפל',
+        'אימון עם מוזיקה',
+        'שימוש במשחקים לתרגול'
+      ],
+      curriculumTopic: 'שליטה בכפולות 2, 4, 5, 10',
+      grade: 'ב',
+      strand: 'numbers'
+    }
+  ];
+
   function goalsForTopic(row) {
     const strand = CUR.strandHe(row.strand);
     return [
@@ -47,6 +90,8 @@
     return {
       id: 'lesson-' + row.topicId,
       curriculumTopicId: row.topicId,
+      topicId: row.topicId,
+      curriculumTopic: row.topic,
       titleHe: 'מערך שיעור · כיתה ' + row.grade + '׳ · ' + row.topic,
       grade: row.grade,
       strand: row.strand,
@@ -68,8 +113,20 @@
     return lessonPlanForRow(row);
   }
 
+  function seedLessonPlans() {
+    return LESSON_PLANS;
+  }
+
+  // Seed plans keep their short ids ('1', '2', ...); any other id falls back
+  // to the curriculum-generated plans.
+  function lessonPlanForTopic(topicId) {
+    return LESSON_PLANS.find(plan => plan.id === topicId) || lessonPlanByTopicId(topicId);
+  }
+
   return {
     lessonPlans: lessonPlans,
     lessonPlanByTopicId: lessonPlanByTopicId,
+    seedLessonPlans: seedLessonPlans,
+    lessonPlanForTopic: lessonPlanForTopic,
   };
 });

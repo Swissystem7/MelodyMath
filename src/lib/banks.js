@@ -755,14 +755,38 @@
     return rowsOf(skill, grade).filter(function (it) { return it.level === want; });
   }
 
+  // Own keys only: a stored grade such as "constructor" must not resolve to
+  // an Object.prototype member and crash the diagnostic.
+  function isGrade(g) {
+    return GRADES.indexOf(g) !== -1;
+  }
+
   function skillsForGrade(grade) {
-    return (GRADE_SKILLS[grade] || []).slice();
+    return isGrade(grade) ? GRADE_SKILLS[grade].slice() : [];
+  }
+
+  // One base question and one intermediate question per skill: a child who
+  // only stumbles at level 2 must look different in the gap report from a
+  // child who is stuck at level 1.
+  function diagnosticPair(skill, grade) {
+    const rows = rowsOf(skill, grade);
+    const pair = [];
+    const base = rows.find(function (it) { return it.level === 1; });
+    const mid = rows.find(function (it) { return it.level === 2; });
+    if (base) pair.push(base);
+    if (mid) pair.push(mid);
+    // A skill missing one of the two levels still contributes two questions,
+    // so the diagnostic keeps its length.
+    rows.forEach(function (it) {
+      if (pair.length < 2 && pair.indexOf(it) === -1) pair.push(it);
+    });
+    return pair;
   }
 
   function diagnosticItems(grade) {
-    const g = grade && GRADE_SKILLS[grade] ? grade : 'א';
+    const g = isGrade(grade) ? grade : 'א';
     return skillsForGrade(g).flatMap(function (skill) {
-      return rowsOf(skill, g).slice(0, 2);
+      return diagnosticPair(skill, g);
     });
   }
 
@@ -781,8 +805,11 @@
     });
   }
 
-  function coreFactItems() {
+  // Pass a skill to borrow only that skill's core facts: a grade-ג division
+  // stage must not fill up with multiplication questions.
+  function coreFactItems(skill) {
     return SHIPPED.filter(function (it) {
+      if (skill != null && it.skill !== skill) return false;
       return (it.skill === 'multiplication' || it.skill === 'division')
         && (it.table === 2 || it.table === 4 || it.table === 5 || it.table === 10);
     });
@@ -855,6 +882,7 @@
     skillGrade: skillGrade,
     levelHe: levelHe,
     clampLevel: clampLevel,
+    isGrade: isGrade,
     hearOf: hearOf,
     isShippable: isShippable,
     allItems: allItems,

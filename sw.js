@@ -1,7 +1,10 @@
 /* MelodyMath — cache the demo so a school tablet survives wifi drops.
    First visit on https still needs a network. After that the listed files
-   come from this cache. Bump CACHE when shipping a new set of assets. */
-const CACHE = 'melodymath-offline-v7';
+   come from this cache, and every online visit refreshes the copy in the
+   background (stale-while-revalidate), so a fix shipped to the site reaches
+   a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
+   is still the way to drop a bad cache at once (see pwa.test.js). */
+const CACHE = 'melodymath-offline-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -19,7 +22,12 @@ const ASSETS = [
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
   './src/lib/bar44.js',
+  './src/lib/vertical.js',
+  './src/lib/measure.js',
+  './src/lib/dataViz.js',
+  './src/lib/geometryShapes.js',
   './src/lib/curriculum.js',
+  './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
   './src/lib/access.js',
@@ -58,21 +66,35 @@ self.addEventListener('activate', function (event) {
   );
 });
 
+// Fetch from the network and, on a good same-origin response, store a copy.
+// Resolves with the network response; rejects when offline.
+function refreshFromNetwork(request) {
+  return fetch(request).then(function (res) {
+    if (!res || res.status !== 200 || res.type !== 'basic') return res;
+    const copy = res.clone();
+    return caches.open(CACHE).then(function (cache) {
+      return cache.put(request, copy);
+    }).then(function () {
+      return res;
+    });
+  });
+}
+
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+  // Start the network request right away: on a cache hit it only refreshes
+  // the stored copy for the next visit; on a miss it is the response.
+  const refresh = refreshFromNetwork(event.request);
+  const refreshQuietly = refresh.catch(function () { return null; });
   event.respondWith(
     caches.match(event.request).then(function (hit) {
-      if (hit) return hit;
-      return fetch(event.request).then(function (res) {
-        if (!res || res.status !== 200 || res.type !== 'basic') return res;
-        const copy = res.clone();
-        caches.open(CACHE).then(function (cache) {
-          cache.put(event.request, copy);
-        });
-        return res;
-      }).catch(function () {
+      if (hit) {
+        event.waitUntil(refreshQuietly);
+        return hit;
+      }
+      return refresh.catch(function () {
         if (event.request.mode === 'navigate') return caches.match('./index.html');
         return caches.match(event.request);
       });

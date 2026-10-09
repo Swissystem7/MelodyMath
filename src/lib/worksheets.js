@@ -11,10 +11,13 @@
   const BANKS = (typeof module === 'object' && module.exports)
     ? require('./banks')
     : (typeof globalThis !== 'undefined' ? globalThis : {});
+  const BIDI = (typeof module === 'object' && module.exports)
+    ? require('./mathBidi')
+    : (typeof globalThis !== 'undefined' ? globalThis : {});
 
   function clampCount(n) {
     const v = Math.round(Number(n));
-    if (!Number.isFinite(v)) return 8;
+    if (!Number.isFinite(v)) return 4;
     return Math.min(24, Math.max(4, v));
   }
 
@@ -41,8 +44,8 @@
   }
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    return String(s == null ? '' : s).replace(/[&<>"'©®™]/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '©': '&copy;', '®': '&reg;', '™': '&trade;' })[c];
     });
   }
 
@@ -95,6 +98,33 @@
     };
   }
 
+  function printableWidget(it) {
+    if (it && it.chart && it.widget === 'pictogram') {
+      const chart = it.chart;
+      const key = Number(chart.key);
+      const unit = Number.isFinite(key) && key > 0 ? key : 1;
+      const icon = escapeHtml(chart.icon);
+      const rows = (Array.isArray(chart.rows) ? chart.rows : []).map(function (row) {
+        const count = Number(row.count);
+        const copies = Number.isFinite(count) ? Math.max(0, Math.ceil(count / unit)) : 0;
+        return '<div class="sheet-widget-row">' + escapeHtml(row.label) + ' ' + Array(copies + 1).join(icon) + '</div>';
+      }).join('');
+      return rows ? '<div class="sheet-widget sheet-pictogram">' + rows + '</div>' : '';
+    }
+    if (it && it.chart && it.widget === 'barchart') {
+      const bars = (Array.isArray(it.chart.bars) ? it.chart.bars : []).map(function (bar) {
+        return '<div class="sheet-widget-row">' + escapeHtml(bar.label) + ' ' + escapeHtml(bar.value) + '</div>';
+      }).join('');
+      return bars ? '<div class="sheet-widget sheet-barchart">' + bars + '</div>' : '';
+    }
+    if (it && it.ruler) {
+      const length = Number(it.ruler.length);
+      const copies = Number.isFinite(length) ? Math.max(0, Math.ceil(length)) : 0;
+      return '<div class="sheet-widget sheet-ruler">' + Array(copies + 1).join('🟫') + '</div>';
+    }
+    return '';
+  }
+
   function renderWorksheetHtml(sheet) {
     const s = sheet || buildWorksheet({});
     const who = [s.studentName, s.classCode].filter(Boolean).join(' · ');
@@ -103,14 +133,15 @@
     const blanks = s.items.map(function (it, i) {
       return '<div class="sheet-item"><span class="n">' + (i + 1) + '.</span> '
         + '<span class="tag">' + escapeHtml(it.he || it.skill || '') + '</span> '
-        + '<p class="prompt">' + escapeHtml(it.prompt) + '</p>'
+        + '<p class="prompt">' + BIDI.mathHtml(it.prompt) + '</p>'
+        + printableWidget(it)
         + '<div class="sheet-blank">תשובה: ________________</div></div>';
     }).join('');
     let html = '<div class="sheet-page">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
     if (s.withAnswers) {
       const key = s.items.map(function (it, i) {
-        return '<li>' + (i + 1) + '. ' + escapeHtml(String(it.answer))
-          + (it.hint ? ' <span class="sheet-hint">(' + escapeHtml(it.hint) + ')</span>' : '')
+        return '<li>' + (i + 1) + '. ' + BIDI.mathHtml(String(it.answer))
+          + (it.hint ? ' <span class="sheet-hint">(' + BIDI.mathHtml(it.hint) + ')</span>' : '')
           + '</li>';
       }).join('');
       html += '<div class="sheet-key"><h3>מחוון למורה — לא לחלק לתלמידים</h3><ol>' + key + '</ol></div>';

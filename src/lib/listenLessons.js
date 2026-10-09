@@ -160,6 +160,20 @@
     };
   }
 
+  // Trend tokens come from graphListen.trendOf. The cue is read aloud in
+  // Hebrew, so the token must never leak into it as an English word.
+  const TREND_WORD_HE = {
+    up: 'עולה',
+    down: 'יורד',
+    'up-then-down': 'עולה ואז יורד',
+    'down-then-up': 'יורד ואז עולה',
+    flat: 'כמעט קבוע',
+  };
+
+  function trendHe(trend) {
+    return TREND_WORD_HE[trend] || TREND_WORD_HE.flat;
+  }
+
   function compareHearing(sumA, sumB) {
     const a = classifyHearing(sumA);
     const b = classifyHearing(sumB);
@@ -175,7 +189,7 @@
       bits.push(a.hasAsymptote ? 'רק א׳ קופץ (אסימפטוטה).' : 'רק ב׳ קופץ (אסימפטוטה).');
     }
     if (a.trend !== b.trend) {
-      bits.push('המגמה שונה: א׳ ' + a.trend + ', ב׳ ' + b.trend + '.');
+      bits.push('המגמה שונה: א׳ ' + trendHe(a.trend) + ', ב׳ ' + trendHe(b.trend) + '.');
     }
     bits.push('השוואה בין שתי דגימות — לא הוכחה ואין כאן «קול הפונקציה».');
     return {
@@ -206,6 +220,7 @@
     checkListenAnswer: checkListenAnswer,
     classifyHearing: classifyHearing,
     compareHearing: compareHearing,
+    trendHe: trendHe,
     describeLessonHe: describeLessonHe,
     summarizeSpec: summarizeSpec,
   };
