@@ -78,6 +78,26 @@
     return audioCtx;
   }
 
+  // iOS Safari keeps the context silent until it is resumed inside a user
+  // gesture. index.html calls this once on the first pointerdown; it plays a
+  // one-sample silent buffer, which is what WebKit needs to count the tap.
+  // TODO(#100): replace with unlockAudio() from the shared music engine
+  // (PR #118) once it lands on master.
+  let audioUnlocked = false;
+  function unlockAudio() {
+    if (audioUnlocked) return true;
+    const ac = getAudioContext();
+    if (!ac) return false;
+    try {
+      const src = ac.createBufferSource();
+      src.buffer = ac.createBuffer(1, 1, 22050);
+      src.connect(ac.destination);
+      src.start(0);
+    } catch (e) { /* older WebKit: resume() above is enough */ }
+    audioUnlocked = true;
+    return true;
+  }
+
   function stopHeldTone() {
     if (heldStopTimer) {
       clearTimeout(heldStopTimer);
@@ -330,7 +350,7 @@
   return {
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
-    getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks,
+    getAudioContext, unlockAudio, playFreq, playRhythmClicks, playClick, playCountClicks,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };
