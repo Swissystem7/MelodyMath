@@ -171,6 +171,101 @@
     return makeFraction(f.d, f.n);
   }
 
+  // ---------- the frequency lab (plan §6) ----------
+  function ratioText(p, q) {
+    const f = makeFraction(p, q == null ? 1 : q);
+    return f && f.n > 0 ? f.n + ':' + f.d : '';
+  }
+
+  function hzText(hz) {
+    if (!positive(hz)) return '';
+    const r = Math.round(hz * 10) / 10;
+    return (Number.isInteger(r) ? String(r) : r.toFixed(1)) + ' Hz';
+  }
+
+  // The first `count` partials of f0. The nth is n·f0, so neighbours always sit
+  // f0 apart: the series is arithmetic with difference f0, even though the
+  // musical interval between neighbours keeps shrinking.
+  function harmonicSeries(f0, count) {
+    const n = Math.round(Number(count));
+    if (!positive(f0) || !Number.isInteger(n) || n < 1 || n > 16) return [];
+    const out = [];
+    for (let i = 1; i <= n; i++) out.push({ n: i, hz: harmonic(i, f0), gap: i === 1 ? 0 : f0 });
+    return out;
+  }
+
+  // The step of an arithmetic sequence, or null when the steps differ.
+  function commonDifference(nums) {
+    if (!Array.isArray(nums) || nums.length < 2) return null;
+    const all = nums.map(Number);
+    if (all.some(function (x) { return !Number.isFinite(x); })) return null;
+    const d = all[1] - all[0];
+    for (let i = 2; i < all.length; i++) {
+      if (Math.abs(all[i] - all[i - 1] - d) > 1e-9) return null;
+    }
+    return d;
+  }
+
+  // The stops the monochord slider steps through, longest string first. They are
+  // kept as simple fractions so every pitch on screen is an exact ratio.
+  const STRING_STOPS = [[1, 1], [7, 8], [5, 6], [4, 5], [3, 4], [2, 3], [3, 5], [1, 2]];
+
+  function stringStops() {
+    return STRING_STOPS.map(function (r) { return makeFraction(r[0], r[1]); });
+  }
+
+  function monochordHz(base, fraction) {
+    const inv = stringLength(fraction);
+    return inv ? ratioToHz(base, inv.n, inv.d) : null;
+  }
+
+  // The interval a fraction of the string gives, when it is one we name.
+  function monochordInterval(fraction) {
+    const inv = stringLength(fraction);
+    if (!inv) return null;
+    const names = Object.keys(INTERVALS);
+    for (let i = 0; i < names.length; i++) {
+      const r = INTERVALS[names[i]];
+      if (r[0] === inv.n && r[1] === inv.d) return names[i];
+    }
+    return null;
+  }
+
+  // 12-TET cuts the octave into twelve equal steps, so one step is the number
+  // that reaches ×2 after twelve multiplications. Callers only ever read the
+  // result as a plain number, so no fractional power has to be taught.
+  function temperedRatio(semitones) {
+    const n = Number(semitones);
+    return Number.isFinite(n) ? Math.pow(2, n / 12) : null;
+  }
+
+  // How far `a` sits above `b`, in percent, to two decimals.
+  function ratioDriftPercent(a, b) {
+    if (!positive(a) || !positive(b)) return null;
+    return Math.round((a / b - 1) * 10000) / 100;
+  }
+
+  // Reads '2', '2:1', 'פי 2', '3/2' or '1.5' as one number: the ratio asked for.
+  function parseRatio(text) {
+    if (typeof text !== 'string') return null;
+    const t = text.replace(/[פיx×*]/g, ' ').replace(/,/g, '.').trim();
+    const pair = t.match(/^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$/);
+    if (pair) {
+      const a = Number(pair[1]), b = Number(pair[2]);
+      return a > 0 && b > 0 ? a / b : null;
+    }
+    const one = t.match(/^(\d+(?:\.\d+)?)$/);
+    return one && Number(one[1]) > 0 ? Number(one[1]) : null;
+  }
+
+  // True when the typed answer means p:q. Decimals pass within 0.01, so 1.5
+  // counts for 3:2 and a child may answer either way.
+  function ratioMatches(text, p, q) {
+    const v = parseRatio(text);
+    if (v == null || !positive(p) || !positive(q)) return false;
+    return Math.abs(v - p / q) < 0.01;
+  }
+
   // ---------- tempo ----------
   function bpmToSeconds(bpm) {
     return positive(bpm) ? 60 / bpm : null;
@@ -229,10 +324,77 @@
     return out;
   }
 
+  // ---------- audio runtime ----------
+  // Everything above is pure and runs in Node. This part needs a browser and
+  // stays inert without one, so `node --test` still loads the file.
+  let ctx = null;
+  const sounding = [];
+
+  // iOS Safari keeps the context suspended until a user gesture, and only
+  // really starts its clock once something has played, hence the silent blip.
+  // Call this from the first `pointerdown` or `keydown`.
+  function unlockAudio() {
+    if (typeof window === 'undefined') return null;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!ctx) ctx = new AC();
+    if (ctx.state === 'suspended') {
+      try { ctx.resume(); } catch (e) { /* autoplay policy */ }
+    }
+    try {
+      const blip = ctx.createBufferSource();
+      blip.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      blip.connect(ctx.destination);
+      blip.start(0);
+    } catch (e) { /* older WebKit */ }
+    return ctx;
+  }
+
+  function audioReady() {
+    return !!(ctx && ctx.state === 'running');
+  }
+
+  function stopAll() {
+    while (sounding.length) {
+      const osc = sounding.pop();
+      try { osc.stop(); } catch (e) { /* already stopped */ }
+      try { osc.disconnect(); } catch (e) { /* already gone */ }
+    }
+  }
+
+  // Plays exactly what planSequence() worked out, one oscillator per note, with
+  // a short attack and release so neither end clicks. Returns the notes that
+  // sounded, which is also the text a screen reader is given.
+  function scheduleSequence(events, opts) {
+    const ac = unlockAudio();
+    if (!ac) return [];
+    stopAll();
+    const notes = planSequence(events, ac.currentTime + 0.06, opts);
+    notes.forEach(function (note) {
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = note.type;
+      osc.frequency.setValueAtTime(note.hz, note.time);
+      gain.gain.setValueAtTime(0, note.time);
+      gain.gain.linearRampToValueAtTime(note.gain, note.time + ATTACK);
+      gain.gain.setValueAtTime(note.gain, note.time + note.dur - RELEASE);
+      gain.gain.linearRampToValueAtTime(0, note.time + note.dur);
+      osc.connect(gain).connect(ac.destination);
+      osc.start(note.time);
+      osc.stop(note.time + note.dur + 0.02);
+      sounding.push(osc);
+    });
+    return notes;
+  }
+
   return {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
     MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
+    ratioText, hzText, harmonicSeries, commonDifference, stringStops,
+    monochordHz, monochordInterval, temperedRatio, ratioDriftPercent,
+    parseRatio, ratioMatches,
+    unlockAudio, audioReady, stopAll, scheduleSequence,
   };
 });
