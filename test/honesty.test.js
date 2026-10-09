@@ -9,9 +9,12 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
-test('there is no GitHub Actions workflow in the repo', () => {
+test('the only GitHub Actions workflow is the test run', () => {
   const wf = path.join(root, '.github', 'workflows');
-  assert.equal(fs.existsSync(wf), false, '.github/workflows must not exist');
+  assert.deepEqual(fs.readdirSync(wf), ['test.yml']);
+  const yml = read('.github/workflows/test.yml');
+  assert.match(yml, /run: node --test/);
+  assert.doesNotMatch(yml, /secrets\.|deploy|pages/i);
 });
 
 test('the unused factory lib/ folder is gone', () => {
