@@ -59,8 +59,10 @@
   }
 
   // Shared Web Audio helper. Inert in Node (no window / AudioContext) so the
-  // same file stays testable. One context is reused by the lab slider tone
-  // and by rhythm clicks; callers must go through a user gesture first.
+  // same file stays testable. The context itself belongs to musicEngine.js
+  // (plan §3) — this file borrows it, so the lab slider tone, rhythm clicks and
+  // the music activities all share one context. Callers must go through a user
+  // gesture first; musicEngine's unlockAudio() handles that on the first tap.
   let audioCtx = null;
   let heldOsc = null;
   let heldGain = null;
@@ -69,13 +71,17 @@
 
   function getAudioContext() {
     if (typeof window === 'undefined') return null;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    if (!audioCtx) audioCtx = new AC();
-    if (audioCtx.state === 'suspended') {
-      try { audioCtx.resume(); } catch (e) { /* autoplay policy */ }
+    // This file never constructs a context of its own: a second one would mean
+    // two audio sessions on iOS and the quieter one losing. Pages that play
+    // sound load musicEngine.js before this file.
+    const shared = typeof globalThis.getSharedAudioContext === 'function'
+      ? globalThis.getSharedAudioContext() : null;
+    if (!shared) return null;
+    if (shared.state === 'suspended') {
+      try { shared.resume(); } catch (e) { /* autoplay policy */ }
     }
-    return audioCtx;
+    audioCtx = shared;
+    return shared;
   }
 
   function stopHeldTone() {

@@ -64,8 +64,9 @@
   const NOTE_VALUES = { whole: 1, half: 2, quarter: 4, eighth: 8, sixteenth: 16 };
   const NOTE_ORDER = ['whole', 'half', 'quarter', 'eighth', 'sixteenth'];
 
-  // 'quarter', 'dotted quarter', 'quarter triplet', or {name, dotted, triplet}.
-  function durationToFraction(note, mods) {
+  // 'quarter', 'dotted quarter', 'quarter triplet', or {name, dotted, triplet}
+  // → {name, dotted, triplet} with a base name we know, or null.
+  function parseDuration(note, mods) {
     let name = note, dotted = false, triplet = false;
     if (note && typeof note === 'object') {
       name = note.name; dotted = !!note.dotted; triplet = !!note.triplet;
@@ -77,10 +78,15 @@
     if (mods && mods.dotted) dotted = true;
     if (mods && mods.triplet) triplet = true;
     const base = words.filter(function (w) { return NOTE_VALUES[w]; })[0];
-    if (!base) return null;
-    let f = makeFraction(1, NOTE_VALUES[base]);
-    if (dotted) f = makeFraction(f.n * 3, f.d * 2);
-    if (triplet) f = makeFraction(f.n * 2, f.d * 3);
+    return base ? { name: base, dotted: dotted, triplet: triplet } : null;
+  }
+
+  function durationToFraction(note, mods) {
+    const p = parseDuration(note, mods);
+    if (!p) return null;
+    let f = makeFraction(1, NOTE_VALUES[p.name]);
+    if (p.dotted) f = makeFraction(f.n * 3, f.d * 2);
+    if (p.triplet) f = makeFraction(f.n * 2, f.d * 3);
     return f;
   }
 
@@ -229,10 +235,207 @@
     return out;
   }
 
+  // An exponential ramp can approach zero but never reach it, so a note fades
+  // to SILENT instead of 0. Jumping straight to full gain clicks, which on a
+  // tablet speaker is louder than the note itself; every note gets a short
+  // attack and release. Pure, so the shape is testable without an audio device.
+  const SILENT = 0.0001;
+
+  function envelopePoints(peak, start, dur) {
+    if (!positive(dur) || typeof start !== 'number' || !Number.isFinite(start) || start < 0) return null;
+    const level = Math.max(clampGain(peak), SILENT);
+    const attack = Math.min(ATTACK, dur / 2);
+    const release = Math.min(RELEASE, dur - attack);
+    return [
+      { t: start, v: SILENT },
+      { t: start + attack, v: level },
+      { t: start + dur - release, v: level },
+      { t: start + dur, v: SILENT },
+    ];
+  }
+
+  // ---------- the one AudioContext ----------
+  // Every page shares this context: sonify.js borrows it instead of building
+  // its own, so a tablet never has two contexts competing for the single iOS
+  // audio session. Inert in Node, where there is no window.
+  let sharedCtx = null;
+  let warmed = false;
+  let unlockInstalled = false;
+  const live = [];
+
+  function audioSupported() {
+    return typeof window !== 'undefined' && !!(window.AudioContext || window.webkitAudioContext);
+  }
+
+  // Built on first use, never at load: an AudioContext created before a user
+  // gesture would be born suspended and, on iOS, count against the page.
+  function getSharedAudioContext() {
+    if (!audioSupported()) return null;
+    if (!sharedCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      sharedCtx = new AC();
+    }
+    return sharedCtx;
+  }
+
+  // 'unsupported' · 'idle' (nothing built yet, so nothing can have sounded) ·
+  // then whatever the context reports: 'suspended' | 'running' | 'closed'.
+  function audioState() {
+    if (!audioSupported()) return 'unsupported';
+    return sharedCtx ? sharedCtx.state : 'idle';
+  }
+
+  // iOS Safari starts audio only inside a user gesture, and resume() on its own
+  // leaves the context 'suspended' until something has actually played — hence
+  // the one silent sample. Call this from the first pointerdown.
+  function unlockAudio() {
+    const ac = getSharedAudioContext();
+    if (!ac) return null;
+    if (ac.state !== 'running' && typeof ac.resume === 'function') {
+      try { ac.resume(); } catch (e) { /* autoplay policy said no */ }
+    }
+    if (!warmed) {
+      try {
+        const src = ac.createBufferSource();
+        src.buffer = ac.createBuffer(1, 1, ac.sampleRate);
+        src.connect(ac.destination);
+        src.start(0);
+        warmed = true;
+      } catch (e) { /* nothing to warm up */ }
+    }
+    return ac;
+  }
+
+  // One set of listeners for the whole app (plan §4.3). Capture phase, so the
+  // tap unlocks even when a widget stops the event; left attached rather than
+  // `once`, because iOS suspends the context again whenever the tab goes to
+  // the background and the next tap has to wake it.
+  function installAudioUnlock(target) {
+    const t = target || (typeof document !== 'undefined' ? document : null);
+    if (!t || typeof t.addEventListener !== 'function' || unlockInstalled) return false;
+    unlockInstalled = true;
+    ['pointerdown', 'touchend', 'keydown'].forEach(function (ev) {
+      t.addEventListener(ev, function () {
+        if (audioState() !== 'running') unlockAudio();
+      }, { capture: true, passive: true });
+    });
+    return true;
+  }
+
+  function stopSequence() {
+    live.forEach(function (osc) {
+      try { osc.stop(); } catch (e) { /* already stopped */ }
+      try { osc.disconnect(); } catch (e) { /* already gone */ }
+    });
+    live.length = 0;
+  }
+
+  // Play `events` on the shared context. Every note is pinned to an absolute
+  // time on the audio clock (currentTime + a lead-in), never to setTimeout, so
+  // a rhythm stays a rhythm while the main thread is busy rendering. Returns
+  // the notes it scheduled — the clamped, audible truth.
+  const LEAD_IN = 0.05;
+  let lastPlayed = null;
+
+  function scheduleSequence(events, opts) {
+    const ac = getSharedAudioContext();
+    if (!ac) return [];
+    const o = opts || {};
+    if (o.replace !== false) stopSequence();
+    const notes = planSequence(events, ac.currentTime + LEAD_IN, o);
+    if (notes.length) lastPlayed = { events: events, opts: o };
+    notes.forEach(function (note) {
+      const points = envelopePoints(note.gain, note.time, note.dur);
+      if (!points) return;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = note.type;
+      osc.frequency.setValueAtTime(note.hz, note.time);
+      gain.gain.setValueAtTime(points[0].v, points[0].t);
+      for (let i = 1; i < points.length; i++) {
+        gain.gain.exponentialRampToValueAtTime(points[i].v, points[i].t);
+      }
+      osc.connect(gain).connect(ac.destination);
+      osc.start(note.time);
+      osc.stop(note.time + note.dur + 0.02);
+      live.push(osc);
+      osc.onended = function () {
+        const i = live.indexOf(osc);
+        if (i >= 0) live.splice(i, 1);
+      };
+    });
+    return notes;
+  }
+
+  // Backs the "play again" button every activity has to show (plan §4.3): the
+  // same events, timed fresh against the audio clock. canReplay() tells the UI
+  // whether there is anything to replay yet.
+  function canReplay() {
+    return !!lastPlayed;
+  }
+
+  function replaySequence() {
+    return lastPlayed ? scheduleSequence(lastPlayed.events, lastPlayed.opts) : [];
+  }
+
+  // ---------- text for ears that cannot hear it ----------
+  // Every sounding event also has a Hebrew line, the pattern access.js uses:
+  // a tap that only makes a noise does not exist for a screen reader.
+  const HE_NOTES = {
+    whole: ['שלם', 'מנוקד'],
+    half: ['חצי', 'מנוקד'],
+    quarter: ['רבע', 'מנוקד'],
+    eighth: ['שמינית', 'מנוקדת'],
+    sixteenth: ['שש־עשרית', 'מנוקדת'],
+  };
+
+  function durationText(note, mods) {
+    const p = parseDuration(note, mods);
+    if (!p) return '';
+    const he = HE_NOTES[p.name];
+    let s = he[0];
+    if (p.dotted) s += ' ' + he[1];
+    if (p.triplet) s += ' בטריולה';
+    return s;
+  }
+
+  // A length as notes if notes can spell it ('3/8' → 'רבע מנוקד',
+  // '5/8' → 'חצי ועוד שמינית'), otherwise as the bare fraction.
+  function lengthText(x) {
+    const notes = fractionToDurations(x);
+    if (notes) {
+      const words = notes.map(function (n) { return durationText(n); }).filter(Boolean);
+      if (words.length) return words.join(' ועוד ');
+    }
+    return fractionText(x);
+  }
+
+  function sequenceNarration(events) {
+    if (!Array.isArray(events)) return '';
+    return events.map(function (e) {
+      if (!e || typeof e !== 'object') return '';
+      const text = e.label || lengthText(e.fraction != null ? e.fraction : e.duration);
+      if (!text) return '';
+      return e.rest ? 'הפסקה ' + text : text;
+    }).filter(Boolean).join(', ');
+  }
+
+  // What a muted or sound-less tablet shows instead. No claim that the sound is
+  // required in order to learn the exercise.
+  function audioStatusText(state) {
+    const s = state || audioState();
+    if (s === 'unsupported') return 'הדפדפן הזה לא משמיע צליל. התרגיל מוצג בטקסט.';
+    if (s === 'running') return 'הצליל פעיל. אם לא שומעים, בדקו את מתג ההשתקה ואת עוצמת הקול.';
+    return 'געו במסך כדי להפעיל את הצליל. אפשר גם לקרוא את התרגיל בטקסט.';
+  }
+
   return {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
-    durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
+    parseDuration, durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
-    MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
+    MAX_GAIN, HZ_MIN, HZ_MAX, ATTACK, RELEASE, clampHz, clampGain, planSequence,
+    envelopePoints, audioSupported, getSharedAudioContext, audioState, unlockAudio,
+    installAudioUnlock, scheduleSequence, stopSequence, canReplay, replaySequence,
+    durationText, lengthText, sequenceNarration, audioStatusText,
   };
 });
