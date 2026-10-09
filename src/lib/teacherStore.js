@@ -36,10 +36,21 @@
     return students[label] || null;
   }
 
+  // A student row is the object upsertStudent writes. A hand-edited or
+  // truncated export, or a build that imported without checking, can leave
+  // roster.students[name] as null, a bare string, a number or an array.
+  // Every reader then does student.sessions / student.assignments on it, so
+  // the class board, the practice loop and the next import all throw for
+  // the whole class. Such a row holds no sessions anyway: drop it.
+  function isStudentRow(row) {
+    return !!row && typeof row === 'object' && !Array.isArray(row);
+  }
+
   function cleanStudents(map) {
     const out = {};
     Object.keys(map).forEach(function (key) {
       if (key in Object.prototype) return;
+      if (!isStudentRow(map[key])) return;
       out[key] = map[key];
     });
     return out;
@@ -146,8 +157,9 @@
     const roster = loadRoster(classCode, storage);
     const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
-    const session = student.sessions.find(function (s) { return s.id === sessionId; });
+    const session = student.sessions.find(function (s) { return s && s.id === sessionId; });
     if (!session) return null;
+    if (!Array.isArray(session.items)) session.items = [];
     const row = {
       skill: item.skill || '',
       prompt: item.prompt || '',
@@ -166,7 +178,7 @@
     const roster = loadRoster(classCode, storage);
     const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
-    const session = student.sessions.find(function (s) { return s.id === sessionId; });
+    const session = student.sessions.find(function (s) { return s && s.id === sessionId; });
     if (!session) return null;
     session.ended = Date.now();
     saveRoster(classCode, roster, storage);
@@ -176,7 +188,7 @@
   function allItems(student) {
     if (!student || !Array.isArray(student.sessions)) return [];
     return student.sessions.reduce(function (acc, session) {
-      (session.items || []).forEach(function (it) { acc.push(it); });
+      ((session && session.items) || []).forEach(function (it) { if (it) acc.push(it); });
       return acc;
     }, []);
   }
@@ -214,7 +226,9 @@
       .map(function (k) { return missCount[k]; })
       .filter(function (x) { return x.count >= 2; })
       .sort(function (a, b) { return b.count - a.count; });
-    const sessions = (student && student.sessions) || [];
+    const sessions = ((student && student.sessions) || []).filter(function (s) {
+      return s && typeof s === 'object';
+    });
     return {
       name: student && student.name ? student.name : '',
       total: items.length,
@@ -335,11 +349,53 @@
     return out;
   }
 
+  // Sessions come off the same JSON file. A hand-edited or truncated export
+  // can hold `null`, a bare string, or a session whose `items` is not a list.
+  // Every reader below does `s.items` / `s.id` on each entry, so one such row
+  // would throw from the class board, the report and the practice loop for
+  // that student on every later visit. Keep object rows only, give each a
+  // real items list, and never carry the same session id in twice.
+  function cleanSessions(list) {
+    if (!Array.isArray(list)) return [];
+    const seen = Object.create(null);
+    const out = [];
+    list.forEach(function (s) {
+      if (!s || typeof s !== 'object' || Array.isArray(s)) return;
+      if (s.id != null) {
+        const key = String(s.id);
+        if (seen[key]) return;
+        seen[key] = true;
+      }
+      const items = Array.isArray(s.items)
+        ? s.items.filter(function (it) { return it && typeof it === 'object'; })
+        : [];
+      out.push(Object.assign({}, s, { items: items }));
+    });
+    return out;
+  }
+
   function itemsSince(student, sinceTs) {
     const all = allItems(student);
     const since = Number(sinceTs);
     if (!Number.isFinite(since)) return all;
     return all.filter(function (it) { return Number(it.at) >= since; });
+  }
+
+  // The class board names the most recent session. Sessions are stored in
+  // the order they arrived, and importRoster appends another tablet's rows
+  // after the local ones, so the last array entry may be older than a
+  // session already here. Pick the latest start time instead; rows without
+  // a usable start time fall back to array order.
+  function latestSession(sessions) {
+    let best = null;
+    let bestAt = -Infinity;
+    (Array.isArray(sessions) ? sessions : []).forEach(function (s) {
+      if (!s || typeof s !== 'object') return;
+      const at = Number(s.started);
+      const when = Number.isFinite(at) ? at : -Infinity;
+      if (!best || when >= bestAt) { best = s; bestAt = when; }
+    });
+    return best;
   }
 
   function buildClassOverview(classCode, storage) {
@@ -351,7 +407,7 @@
       const student = roster.students[name];
       const report = buildReport(student);
       const sessions = student.sessions || [];
-      const last = sessions.length ? sessions[sessions.length - 1] : null;
+      const last = latestSession(sessions);
       return {
         name: name,
         total: report.total,
@@ -396,7 +452,7 @@
       const student = studentsMap[name];
       const report = buildReport(student);
       const sessions = (student && student.sessions) || [];
-      const last = sessions.length ? sessions[sessions.length - 1] : null;
+      const last = latestSession(sessions);
       return {
         name: name,
         total: report.total,
@@ -536,12 +592,15 @@
     let skipped = 0;
     Object.keys(data.students).forEach(function (rawName) {
       const incoming = data.students[rawName];
-      if (!incoming || typeof incoming !== 'object') return;
+      // Same rule as loadRoster: a row that is not an object holds a value
+      // every reader would throw on. Count it so the teacher sees it was
+      // dropped instead of vanishing.
+      if (!isStudentRow(incoming)) { skipped += 1; return; }
       // Same rule as upsertStudent: trimmed, 24 chars, never a prototype key.
       // Otherwise a row lands under a name getStudent can never look up.
       const name = studentLabel(rawName);
       if (!name) { skipped += 1; return; }
-      const sessions = Array.isArray(incoming.sessions) ? incoming.sessions : [];
+      const sessions = cleanSessions(incoming.sessions);
       const incomingNotes = cleanNotes(incoming.notes);
       const incomingAssignments = cleanAssignments(incoming.assignments);
       if (!ownStudent(roster, name)) {
@@ -613,17 +672,20 @@
     let text = parts.length
       ? 'יובא: ' + parts.join(', ') + '.'
       : 'הקובץ נקרא, אבל לא היה בו דבר חדש למכשיר הזה.';
-    if (skipped) text += ' ' + skipped + ' שורות עם שם לא תקין לא יובאו.';
+    if (skipped) text += ' ' + skipped + ' שורות לא תקינות (שם או מבנה) לא יובאו.';
     return text;
   }
 
+  // The remembered student goes through the same rule as the roster: a name
+  // the roster refuses (prototype key) must not come back as the current
+  // student, or the bar says the name is saved while every answer is dropped.
   function loadWho(storage) {
     const ls = storage || defaultStorage();
     if (!ls) return { classCode: '', name: '' };
     try {
       const raw = JSON.parse(ls.getItem(WHO_KEY) || 'null');
       if (!raw || typeof raw !== 'object') return { classCode: '', name: '' };
-      return { classCode: normalizeCode(raw.classCode), name: normalizeCode(raw.name) };
+      return { classCode: normalizeCode(raw.classCode), name: studentLabel(raw.name) };
     } catch (e) {
       return { classCode: '', name: '' };
     }
@@ -703,7 +765,7 @@
     try {
       ls.setItem(WHO_KEY, JSON.stringify({
         classCode: normalizeCode(who && who.classCode),
-        name: normalizeCode(who && who.name),
+        name: studentLabel(who && who.name),
       }));
     } catch (e) { /* quota */ }
   }

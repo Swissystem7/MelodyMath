@@ -14,8 +14,8 @@
   const TRIAL_WEEKS = 4;
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    return String(s == null ? '' : s).replace(/[&<>"'€]/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '€': '&euro;' })[c];
     });
   }
 
@@ -128,6 +128,11 @@
   }
 
   function principalLetterBody(raw) {
+    if (raw && typeof raw === 'object'
+      && Object.prototype.hasOwnProperty.call(raw, 'groupSize')
+      && (!Number.isInteger(raw.groupSize) || raw.groupSize < 1)) {
+      throw new Error('groupSize must be a positive integer');
+    }
     const r = normalizeTrialRequest(raw);
     const name = r.principal ? r.principal : 'מנהל/ת בית הספר';
     const teacher = r.teacher || 'מחנכת שילוב';

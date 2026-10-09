@@ -23,8 +23,14 @@
     6: ['hexagon'],
   };
 
+  // Own keys only: a name like 'toString' or 'constructor' must not
+  // resolve to an Object.prototype member.
+  function own(map, key) {
+    return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : null;
+  }
+
   function shapeOf(name) {
-    return SHAPES[name] || null;
+    return own(SHAPES, name);
   }
 
   function sidesOf(name) {
@@ -38,7 +44,7 @@
   }
 
   function namesForSides(n) {
-    return (NAMES_BY_SIDES[n] || []).slice();
+    return (own(NAMES_BY_SIDES, n) || []).slice();
   }
 
   function shapeHe(name) {
@@ -57,8 +63,30 @@
     return Math.round(Number(deg)) === 180;
   }
 
+  // The shapes a prompt names, in reading order, so the page can show their
+  // glyphs next to the text. Decorative only: the prompt already says it.
+  function shapesInText(text) {
+    const t = String(text == null ? '' : text);
+    return Object.keys(SHAPES).map(function (name) {
+      return { name: name, at: t.indexOf(SHAPES[name].he) };
+    }).filter(function (x) { return x.at >= 0; }).sort(function (a, b) {
+      return a.at - b.at;
+    }).map(function (x) { return x.name; });
+  }
+
+  function renderShapesHtml(text) {
+    const names = shapesInText(text);
+    if (!names.length) return '';
+    return '<div class="shapes" aria-hidden="true">' + names.map(function (name) {
+      return '<span class="shape"><span class="shape-glyph">' + SHAPES[name].glyph + '</span>'
+        + '<span class="shape-name">' + SHAPES[name].he + '</span></span>';
+    }).join('') + '</div>';
+  }
+
   return {
     SHAPES: SHAPES,
+    shapesInText: shapesInText,
+    renderShapesHtml: renderShapesHtml,
     shapeOf: shapeOf,
     sidesOf: sidesOf,
     verticesOf: verticesOf,

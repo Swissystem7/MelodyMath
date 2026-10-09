@@ -15,18 +15,28 @@
   function normalizePictogram(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     const key = Math.max(1, Math.round(Number(src.key)) || 1);
-    const icon = src.icon || '●';
-    const rows = (Array.isArray(src.rows) ? src.rows : []).map(function (r) {
-      return { label: String(r.label || ''), count: Math.max(0, Math.round(Number(r.count)) || 0) };
+    // The icon is interpolated into every row, so keep it a plain non-empty
+    // string here and escape it once in the renderer like the key line does.
+    const rawIcon = typeof src.icon === 'string' || typeof src.icon === 'number' ? String(src.icon).trim() : '';
+    const icon = rawIcon || '●';
+    // A row that is not an object (null from a hand-edited spec, a bare
+    // number) has no label or count to read; skip it instead of throwing.
+    const rows = (Array.isArray(src.rows) ? src.rows : []).filter(isRow).map(function (r) {
+      return { label: String(r.label == null ? '' : r.label), count: Math.max(0, Math.round(Number(r.count)) || 0) };
     });
     return { key: key, icon: icon, rows: rows };
   }
 
+  function isRow(r) {
+    return !!r && typeof r === 'object' && !Array.isArray(r);
+  }
+
   function renderPictogramHtml(spec) {
     const P = normalizePictogram(spec);
+    const icon = escapeHtml(P.icon);
     const rows = P.rows.map(function (r) {
       const symbols = Math.ceil(r.count / P.key);
-      const icons = new Array(symbols).fill(P.icon).join(' ');
+      const icons = new Array(symbols).fill(icon).join(' ');
       return '<tr><th scope="row">' + escapeHtml(r.label) + '</th>'
         + '<td aria-label="' + r.count + '">' + icons + '</td></tr>';
     }).join('');
@@ -38,10 +48,13 @@
 
   function normalizeBars(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
-    const bars = (Array.isArray(src.bars) ? src.bars : []).map(function (b) {
-      return { label: String(b.label || ''), value: Math.max(0, Math.round(Number(b.value)) || 0) };
+    const bars = (Array.isArray(src.bars) ? src.bars : []).filter(isRow).map(function (b) {
+      return { label: String(b.label == null ? '' : b.label), value: Math.max(0, Math.round(Number(b.value)) || 0) };
     });
-    const max = Math.max(1, Math.round(Number(src.max)) || Math.max.apply(null, bars.map(function (b) { return b.value; }).concat([1])));
+    // The tallest bar fills the track; an explicit max only raises the scale.
+    // A max below the tallest bar would draw that bar past the top of the track.
+    const tallest = Math.max.apply(null, bars.map(function (b) { return b.value; }).concat([1]));
+    const max = Math.max(tallest, Math.round(Number(src.max)) || 1);
     return { bars: bars, max: max };
   }
 
