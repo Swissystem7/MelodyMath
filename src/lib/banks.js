@@ -8,7 +8,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const GRADES = ['א', 'ב', 'ג', 'ד'];
+  const GRADES = ['א', 'ב', 'ג', 'ד', 'ו'];
 
   const STRAND = {
     NUM: 'מספרים ופעולות',
@@ -55,6 +55,12 @@
     PICTOGRAM: 'קריאת פיקטוגרם',
     BARCHART: 'קריאת דיאגרמת עמודות',
     TABLE: 'קריאת טבלת נתונים',
+    V_DOT: 'תו מנוקד — כפל בשבר 3/2',
+    V_DUR_DIV: 'חילוק משכי תווים',
+    V_HZ_RATIO: 'תדר × יחס עשרוני',
+    V_TEMPO_PCT: 'שינוי טמפו באחוזים',
+    V_CIRCLE: 'מעגל קווינטות וזוויות',
+    V_MEAN_BPM: 'ממוצע BPM',
   };
 
   const SKILL_HE = {
@@ -65,6 +71,7 @@
     multiplication: 'כפל',
     division: 'חילוק',
     basic_fractions: 'שברים — תיבה 4/4',
+    music_grade_v: 'מוזיקה ומתמטיקה (ו׳)',
     word_problems: 'שאלות מילוליות',
     place_value: 'מבנה עשרוני',
     geometry: 'גאומטריה',
@@ -77,6 +84,7 @@
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
     'ג': ['multiplication', 'division'],
     'ד': ['basic_fractions'],
+    'ו': ['music_grade_v'],
   };
 
   const RM_SKILLS = [
@@ -92,6 +100,7 @@
     ['geometry', SKILL_HE.geometry],
     ['data', SKILL_HE.data],
     ['basic_fractions', SKILL_HE.basic_fractions],
+    ['music_grade_v', SKILL_HE.music_grade_v],
   ];
   const RM_ORDER = {};
   RM_SKILLS.forEach(function (s, i) { RM_ORDER[s[0]] = i; });
@@ -152,6 +161,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      music: extra.music,
     };
   }
 
@@ -705,6 +715,33 @@
     BARC('ב', 'באיזה יום הושאלו הכי מעט ספרים — כתבו את המספר', 30, 'העמודה הנמוכה ביותר', { bars: [{ label: 'שני', value: 40 }, { label: 'שלישי', value: 55 }, { label: 'רביעי', value: 30 }] }, 2)
   );
 
+  // ---------- כיתה ו׳ · מוזיקה ומתמטיקה (תוכנית §5, issue #107) ----------
+  function V6(prompt, answer, hint, extra) {
+    return I('ו', 'music_grade_v', prompt, answer, hint, Object.assign({
+      strand: STRAND.FRAC,
+      standard: extra.standard || ST.V_DOT,
+    }, extra));
+  }
+  RAW.push(
+    V6('רבע מנוקד (♩.): 1/4 × 3/2 = ? (כתבו שבר)', '3/8', 'נקודה מוסיפה חצי מהמשך הבסיסי', { standard: ST.V_DOT, level: 1 }),
+    V6('חצי מנוקד: 1/2 × 3/2 = ? (כתבו שבר)', '3/4', 'אותו כלל כמו ברבע מנוקד', { standard: ST.V_DOT, level: 2 }),
+    V6('כמה שמיניות בתוך חצי תיבה? (1/2 ÷ 1/8)', 4, 'חילוק משכי תווים', { standard: ST.V_DUR_DIV, level: 1 }),
+    V6('כמה שמיניות בשלושה רבעים? (3/4 ÷ 1/8)', 6, 'מחלקים שברים של משך', { standard: ST.V_DUR_DIV, level: 2 }),
+    V6('תדר לה נוכח: 440 Hz × 1.5 = ? (Hz)', 660, 'קווינטה טהורה ≈ פי 1.5', {
+      standard: ST.V_HZ_RATIO, level: 1, widget: 'gradeVMusic', music: { kind: 'hz', base: 440, ratio: 1.5 },
+    }),
+    V6('220 Hz × 3/2 = ? (Hz)', 330, 'יחס קווינטה 3:2', { standard: ST.V_HZ_RATIO, level: 2 }),
+    V6('טמפו 80 BPM עולה ב־25%. מה ה־BPM החדש?', 100, 'מכפילים ב־(100+25)/100', {
+      standard: ST.V_TEMPO_PCT, level: 1, widget: 'gradeVMusic', music: { kind: 'tempo', base: 80, pct: 25 },
+    }),
+    V6('טמפו 120 BPM יורד ב־50%. מה ה־BPM החדש?', 60, 'מכפילים ב־(100−50)/100', { standard: ST.V_TEMPO_PCT, level: 2 }),
+    V6('מעגל קווינטות: 12 נקודות על מעגל. כמה מעלות בין נקודה לנקודה?', 30, '360 ÷ 12', { standard: ST.V_CIRCLE, level: 1 }),
+    V6('כמה נקודות יוצרות מעגל קווינטות מלא?', 12, 'כל קפיצה היא קווינטה', { standard: ST.V_CIRCLE, level: 2 }),
+    V6('ממוצע BPM: 80, 90, 100, 110. מה הממוצע?', 95, '(80+90+100+110) ÷ 4', { standard: ST.V_MEAN_BPM, level: 1 }),
+    V6('ממוצע BPM: 72, 78, 84, 90. מה הממוצע?', 81, 'מחברים ומחלקים ב־4', { standard: ST.V_MEAN_BPM, level: 3 }),
+    V6('טמפו 100 BPM עולה ב־10%. מה ה־BPM החדש?', 110, 'מכפילים ב־1.1', { standard: ST.V_TEMPO_PCT, level: 3 })
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -731,6 +768,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.music) it.music = raw.music;
     SHIPPED.push(it);
   });
 

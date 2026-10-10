@@ -315,6 +315,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
 <script src="src/lib/geometryShapes.js"></script>
+<script src="src/lib/gradeVMusic.js"></script>
 <script src="src/lib/worksheets.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
@@ -351,7 +352,8 @@ const GRADE_NOTE={
   'א':'כיתה א׳: מנייה עד 100, חיבור/חיסור (פירוקי 10, = משמאל, עשרות), ישר מספרים.',
   'ב':'כיתה ב׳: עשרות; כפל 2/4/5/10; חילוק לחלקים ולהכלה. 3/6/7/8/9 חסומים.',
   'ג':'כיתה ג׳: לוח 3/6/7/8/9 וחילוק — רק אחרי שליטה ב־2/4/5/10.',
-  'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».'
+  'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».',
+  'ו':'כיתה ו׳: תווים מנוקדים, תדר×יחס, אחוזים בטמפו, מעגל קווינטות, ממוצע BPM. <a href="music-grade-v.html">פעילויות מוזיקה</a>.'
 };
 let selectedGrade='א';
 try{const g=localStorage.getItem('mm-grade'); if(isGrade(g)) selectedGrade=g;}catch(e){}
@@ -397,6 +399,9 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='barchart' && item.chart && typeof renderBarChartHtml==='function'){
     host.classList.remove('hidden');
     host.innerHTML=renderBarChartHtml(item.chart);
+  } else if(item.widget==='gradeVMusic' && item.music && typeof bindGradeVMusic==='function'){
+    host.classList.remove('hidden');
+    bindGradeVMusic(host, item.music);
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
