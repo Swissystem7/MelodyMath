@@ -184,6 +184,60 @@
     }
   }
 
+  // Drum and musical layer accompaniment for interactive rhythm gameplay:
+  function playDrumSound(type) {
+    const ac = getAudioContext();
+    if (!ac) return;
+    const now = ac.currentTime;
+    if (type === 'snare') {
+      scheduleClick(ac, now, 280, 'triangle', 0.25, 0.08);
+      scheduleClick(ac, now, 1800, 'square', 0.12, 0.04);
+    } else if (type === 'hihat') {
+      scheduleClick(ac, now, 5200, 'square', 0.08, 0.025);
+    } else {
+      // default: punchy kick drum
+      scheduleClick(ac, now, 82, 'sine', 0.35, 0.14);
+      scheduleClick(ac, now, 140, 'sine', 0.2, 0.05);
+    }
+  }
+
+  // Musical chord progressions and bassline based on stage level (1 to 4):
+  const BASS_NOTES = [65.41, 82.41, 98.00, 110.00]; // C2, E2, G2, A2
+  const CHORD_NOTES = [
+    [261.63, 329.63, 392.00], // C major (C4, E4, G4)
+    [349.23, 440.00, 523.25], // F major (F4, A4, C5)
+    [392.00, 493.88, 587.33], // G major (G4, B4, D5)
+    [261.63, 329.63, 523.25]  // C octave bloom
+  ];
+  const MELODY_NOTES = [523.25, 587.33, 659.25, 783.99, 880.00]; // C5, D5, E5, G5, A5 pentatonic
+
+  function playMusicalAccompaniment(stageLevel, stepIndex) {
+    const ac = getAudioContext();
+    if (!ac) return;
+    const lvl = Math.max(1, Math.min(4, Math.round(Number(stageLevel) || 1)));
+    const step = Math.abs(Math.round(Number(stepIndex) || 0));
+    const now = ac.currentTime;
+
+    if (lvl === 1) {
+      playDrumSound('kick');
+      return;
+    }
+    if (lvl >= 2) {
+      const bNote = BASS_NOTES[step % BASS_NOTES.length];
+      scheduleClick(ac, now, bNote, 'sine', 0.32, 0.25);
+    }
+    if (lvl >= 3) {
+      const chord = CHORD_NOTES[step % CHORD_NOTES.length];
+      chord.forEach(function (freq, i) {
+        scheduleClick(ac, now + i * 0.015, freq, 'triangle', 0.18, 0.28);
+      });
+    }
+    if (lvl >= 4) {
+      const mNote = MELODY_NOTES[(step * 2) % MELODY_NOTES.length];
+      scheduleClick(ac, now + 0.04, mNote, 'sine', 0.25, 0.3);
+    }
+  }
+
   // Soft drum taps for "how many beats?" — distinct from the metronome click.
   // groups = [3, 2] plays three taps, a pause, then two. Caps at 12 per group.
   function playCountClicks(groups, bpm) {
@@ -352,6 +406,7 @@
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
     getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks, playHarmonicReward,
+    playDrumSound, playMusicalAccompaniment,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };
