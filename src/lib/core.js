@@ -46,6 +46,17 @@
     document.head.appendChild(link);
   }
 
+  function installAudioUnlock() {
+    if (typeof document === 'undefined') return;
+    var done = false;
+    document.addEventListener('pointerdown', function () {
+      if (done) return;
+      done = true;
+      if (typeof unlockAudio === 'function') unlockAudio();
+      else if (typeof getAudioContext === 'function') getAudioContext();
+    }, { capture: true, passive: true });
+  }
+
   function installPwaHooks() {
     if (typeof document === 'undefined') return;
     const rootHref = siteRoot();
@@ -84,6 +95,7 @@
       document.head.appendChild(link);
     }
     installPwaHooks();
+    installAudioUnlock();
     hookPracticeFinishSummary();
     installAccessBar();
     if (typeof bindAllTablists === 'function') bindAllTablists(document);
@@ -221,8 +233,9 @@
       const on = !!prefs[pair[0]];
       html += '<button type="button" data-acc="' + pair[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + pair[1] + '</button>';
     });
-    html += '<button type="button" id="mm-speak-now">השמע תרגיל</button>';
+    html += '<button type="button" id="mm-speak-now">השמע שוב</button>';
     html += '<button type="button" id="mm-hear" hidden disabled>השמע פעימות</button>';
+    html += '<span id="mm-quiet-fallback" class="mm-quiet-fallback hidden" role="status" aria-live="polite"></span>';
     bar.innerHTML = html;
     const nav = document.getElementById('mm-site-nav');
     if (nav && nav.parentNode) nav.parentNode.insertBefore(bar, nav.nextSibling);

@@ -106,6 +106,12 @@ test('safety: gain is capped at 0.3 and pitch stays within 110–1760 Hz', () =>
   assert.ok(plan[1].dur >= 0.05, 'a very short note still gets room for its attack and release');
 });
 
+test('unlockAudio is inert in Node', () => {
+  assert.equal(typeof M.unlockAudio, 'function');
+  assert.equal(M.getSharedAudioContext(), null);
+  return M.unlockAudio().then((ac) => assert.equal(ac, null));
+});
+
 test('planSequence lays fraction notes end to end at the given tempo', () => {
   const plan = M.planSequence([
     { fraction: 'quarter', hz: 220 }, { fraction: 'eighth', rest: true }, { fraction: '1/8', hz: 330 },

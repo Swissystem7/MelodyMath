@@ -69,6 +69,16 @@
 
   function getAudioContext() {
     if (typeof window === 'undefined') return null;
+    if (typeof getSharedAudioContext === 'function') {
+      const shared = getSharedAudioContext();
+      if (shared) {
+        audioCtx = shared;
+        if (shared.state === 'suspended') {
+          try { shared.resume(); } catch (e) { /* autoplay policy */ }
+        }
+        return shared;
+      }
+    }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     if (!audioCtx) audioCtx = new AC();
