@@ -114,3 +114,12 @@ test('playground includes singing number line with harmonic fraction bells', () 
 test('noteMetro triggers harmonic arpeggio streak rewards', () => {
   assert.match(indexHtml, /playHarmonicReward\(correct \? metroStreak \+ 1 : 0\)/);
 });
+
+test('playground includes interactive rhythm gameplay with progressive musical layers', () => {
+  assert.match(indexHtml, /id="drumPadBtn"/);
+  assert.match(indexHtml, /id="rhythmStageTag"/);
+  assert.match(indexHtml, /id="rhythmCursor"/);
+  assert.match(indexHtml, /id="rhythmStartBtn"/);
+  assert.match(indexHtml, /id="rhythmPatternNextBtn"/);
+  assert.match(indexHtml, /src\/lib\/rhythmGame\.js/);
+});
