@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath — כיתה ו׳ · מוזיקה ומתמטיקה</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="src/lib/print.css">
+<style>
+:root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--line:#ded6f0;--bg:#f7f4ff}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+.wrap{max-width:640px;margin:auto;padding:20px 16px 48px}
+h1{font-size:clamp(1.6rem,5vw,2.2rem);margin:0 0 8px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin:16px 0}
+.card h2{font-size:1.1rem;margin:0 0 10px}
+.secondary{background:#fff;color:var(--purple);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-height:44px;min-width:44px;margin:4px 8px 4px 0;font:inherit;font-weight:700;cursor:pointer}
+.primary{background:var(--purple);color:#fff;border:0;border-radius:10px;padding:10px 16px;min-height:44px;font:inherit;font-weight:700}
+.note{color:var(--muted);font-size:.9rem}
+.math-isolate{unicode-bidi:isolate}
+.gv-circle-wrap{position:relative;margin:12px auto;max-width:320px}
+.gv-circle-svg{display:block;color:var(--purple)}
+.gv-fifths-layer{position:absolute;left:0;top:0}
+.gv-fifth{position:absolute;border-radius:50%;border:2px solid var(--purple);background:#f4f0fc;font-weight:700;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.gv-fifth span{font-size:.72rem}
+.hidden{display:none!important}
+a{color:var(--purple);font-weight:700}
+.mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+.mm-skip:focus{transform:none}
+#main:focus{outline:none}
+</style>
+</head>
+<body>
+<a class="mm-skip" href="#main">דלג לתוכן</a>
+<main id="main" class="wrap" tabindex="-1">
+  <p><a href="index.html">← חזרה לתרגול</a></p>
+  <h1>כיתה ו׳ — מוזיקה ומתמטיקה</h1>
+  <p class="note">אחרי כל פעילות: חישוב, ואז בדיקה בשמיעה. זה תרגול במכשיר — לא הוכחה לשיפור.</p>
+
+  <section class="card gv-activity" data-gv-panel>
+    <h2>תווים מנוקדים</h2>
+    <p>רבע מנוקד: <bdi dir="ltr" class="math-isolate">1/4 × 3/2 = 3/8</bdi></p>
+    <p class="note">שמיעה: רבע + חצי מהרבע = שלוש שמיניות.</p>
+  </section>
+
+  <section class="card gv-activity" data-gv-panel>
+    <h2>חילוק משכים</h2>
+    <p>כמה שמיניות בחצי תיבה? <bdi dir="ltr" class="math-isolate">1/2 ÷ 1/8 = 4</bdi></p>
+  </section>
+
+  <section class="card gv-activity" data-gv-panel>
+    <h2>תדר × יחס</h2>
+    <p><bdi dir="ltr" class="math-isolate">440 × 1.5 = 660 Hz</bdi></p>
+    <button type="button" class="secondary gv-demo-hz" data-hz="660">השמע 660 Hz</button>
+    <button type="button" class="secondary gv-play-again">השמע שוב</button>
+    <p class="gv-muted-note note hidden" aria-live="polite">אין צליל — נגעו במסך קודם.</p>
+  </section>
+
+  <section class="card gv-activity" data-gv-panel>
+    <h2>אחוזים בטמפו</h2>
+    <p>לפני: <bdi dir="ltr">80 BPM</bdi> · אחרי <bdi dir="ltr">+25%</bdi>: <bdi dir="ltr">100 BPM</bdi></p>
+    <button type="button" class="secondary gv-demo-tempo" data-bpm="80">השמע לפני (80)</button>
+    <button type="button" class="secondary gv-demo-tempo" data-bpm="100">השמע אחרי (100)</button>
+    <button type="button" class="secondary gv-play-again">השמע שוב</button>
+    <p class="gv-muted-note note hidden" aria-live="polite">אין צליל — נגעו במסך קודם.</p>
+  </section>
+
+  <section class="card gv-activity" data-gv-panel>
+    <h2>מעגל קווינטות (גאומטריה)</h2>
+    <p class="note">12 נקודות · <bdi dir="ltr">360° ÷ 12 = 30°</bdi> · היקף מעגל ורדיוס (כיתה ו׳).</p>
+    <div id="gvCircle"></div>
+  </section>
+
+  <section class="card gv-activity" data-gv-panel>
+    <h2>ממוצע BPM</h2>
+    <p>הקישו 5 פעמים בקצב קבוע — מחשבים ממוצע מארבעה מרווחים.</p>
+    <button type="button" class="primary" id="gvTapTempo">הקשה לקצב</button>
+    <p id="gvTapOut" class="note" aria-live="polite">עדיין לא הקשתם.</p>
+  </section>
+</main>
+<script src="src/lib/sonify.js"></script>
+<script src="src/lib/gradeVMusic.js"></script>
+<script src="src/lib/core.js"></script>
+<script>
+(function () {
+  if (typeof mountGradeVMusicPage === 'function') mountGradeVMusicPage(document.getElementById('main'));
+  document.querySelectorAll('.gv-demo-hz').forEach(function (btn) {
+    btn.onclick = function () {
+      if (typeof unlockAudio === 'function' && !unlockAudio()) {
+        var n = btn.closest('.gv-activity').querySelector('.gv-muted-note');
+        if (n) n.classList.remove('hidden');
+        return;
+      }
+      if (typeof playFreq === 'function') playFreq(Number(btn.dataset.hz));
+    };
+  });
+  document.querySelectorAll('.gv-play-again').forEach(function (btn) {
+    btn.onclick = function () {
+      var prev = btn.parentElement.querySelector('.gv-demo-tempo[data-bpm="80"], .gv-demo-hz');
+      if (prev) prev.click();
+    };
+  });
+})();
+</script>
+</body>
+</html>
