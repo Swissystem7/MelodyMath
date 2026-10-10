@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · מעבדת תדרים — העשרה לכיתות ה׳–ו׳</title>
+<meta name="description" content="אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד — יחסים שומעים ומחשבים. העשרה לכיתות ה׳–ו׳, בלי טענת יעילות.">
+<style>
+  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:900px;margin:auto;padding:16px 12px 96px}
+  h1{font-size:clamp(1.5rem,5vw,2.3rem);margin:8px 0}
+  h2{font-size:clamp(1.1rem,3.6vw,1.4rem);margin:0 0 6px}
+  .lead,.note{color:var(--muted)}
+  .note{font-size:.9rem}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 12px;margin:14px 0}
+  .tag{display:inline-block;background:#efe9ff;color:var(--purple);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:700;margin-bottom:6px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+  button{font:inherit;min-height:44px;min-width:44px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
+  button.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+  input[type=text]{font:inherit;min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);width:9rem}
+  bdi,.num{unicode-bidi:isolate;direction:ltr}
+  .hz{font-variant-numeric:tabular-nums;font-weight:700}
+  .feedback{margin:8px 0 0;font-weight:700;min-height:1.6em}
+  .ok{color:#1b6b3a}.no{color:#a3243b}
+  .series{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;margin-top:8px}
+  .series span{font-size:.95rem}
+  .bar{background:#efe9ff;border-radius:6px;height:14px}
+  .bar i{display:block;height:100%;background:var(--purple);border-radius:6px}
+  .string{position:relative;height:22px;background:#efe9ff;border-radius:6px;margin:10px 0;direction:ltr}
+  .string i{display:block;height:100%;background:var(--purple);border-radius:6px}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;min-height:48px;background:transparent;margin:0}
+  input[type=range]::-webkit-slider-runnable-track{height:8px;background:#efe9ff;border-radius:999px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;margin-top:-18px;border-radius:50%;background:var(--purple);border:3px solid #fff;box-shadow:0 1px 4px #0003}
+  input[type=range]::-moz-range-track{height:8px;background:#efe9ff;border-radius:999px}
+  input[type=range]::-moz-range-thumb{width:44px;height:44px;border-radius:50%;background:var(--purple);border:3px solid #fff}
+  summary{min-height:44px;padding:10px 0;cursor:pointer}
+  .replay{position:sticky;bottom:8px;display:flex;gap:10px;flex-wrap:wrap;background:#f7f4ffe6;padding:8px 0}
+  .live{margin:0;font-weight:700}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
+<main class="wrap" id="main" tabindex="-1">
+  <p class="tag">העשרה · כיתות ה׳–ו׳</p>
+  <h1>מעבדת תדרים</h1>
+  <p class="lead">כאן שומעים יחסים ומחשבים אותם. כל מספר בדף מחושב ב־<bdi dir="ltr">musicEngine.js</bdi>. העוצמה מוגבלת והטווח <bdi dir="ltr">110–1760 Hz</bdi>. <a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">כיסוי התוכנית</a></p>
+  <p class="note">הצליל נפתח רק אחרי נגיעה או הקשה במקלדת. אם המכשיר במצב שקט לא יישמע כלום — מה שהתנגן נכתב גם במילים בשורת «מה התנגן».</p>
+
+  <section class="card" aria-labelledby="h-oct">
+    <h2 id="h-oct">1. אוקטבה = פי 2</h2>
+    <p>שני הצלילים <bdi dir="ltr">220 Hz</bdi> ו־<bdi dir="ltr">440 Hz</bdi> נשמעים כמו «אותו צליל, גבוה יותר». מה היחס ביניהם?</p>
+    <div class="row">
+      <button type="button" id="octA">נגן <bdi dir="ltr">220 Hz</bdi></button>
+      <button type="button" id="octB">נגן <bdi dir="ltr">440 Hz</bdi></button>
+      <button type="button" id="octAb" class="primary">השמעה משווה <bdi dir="ltr">220 → 440</bdi></button>
+    </div>
+    <div class="row">
+      <label for="octAnswer">היחס הוא</label>
+      <input type="text" id="octAnswer" dir="ltr" autocomplete="off" placeholder="2 או 2:1" aria-label="היחס בין 440 ל־220">
+      <button type="button" id="octCheck">בדיקה</button>
+    </div>
+    <p class="feedback" id="octFeedback" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-int">
+    <h2 id="h-int">2. קווינטה <bdi dir="ltr">3:2</bdi> וקוורטה <bdi dir="ltr">4:3</bdi></h2>
+    <p>מכפילים את הצליל הבסיסי <bdi dir="ltr">220 Hz</bdi> ביחס, ומקבלים את הצליל השני.</p>
+    <div id="intRows"></div>
+    <p class="note">ככל שהמספרים ביחס קטנים ופשוטים יותר, הצירוף נשמע לרוב «נקי» יותר. זו תכונה של היחס, לא קביעה על טעם.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-harm">
+    <h2 id="h-harm">3. טור הרמוני — סדרה חשבונית</h2>
+    <p>הצליל ה־<bdi dir="ltr">n</bdi> בטור הוא <bdi dir="ltr">n · f₀</bdi>. בחרו את <bdi dir="ltr">f₀</bdi>:</p>
+    <div class="row" id="harmPick" role="group" aria-label="בחירת תדר יסוד"></div>
+    <div class="series" id="harmRows"></div>
+    <p class="note" id="harmNote"></p>
+    <div class="row"><button type="button" id="harmPlay" class="primary">השמעת הטור</button></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-mono">
+    <h2 id="h-mono">4. מונוכורד — יחס הפוך</h2>
+    <p>מחליקים את הסוכר על המיתר ומשמיעים רק חלק ממנו. מיתר קצר יותר נותן צליל <b>גבוה</b> יותר, ולכן התדר מוכפל ב<b>הופכי</b> של השבר.</p>
+    <div class="string" aria-hidden="true"><i id="stringBar"></i></div>
+    <label for="stringSlider">אורך המיתר שמשמיע</label>
+    <input type="range" id="stringSlider" min="0" max="7" step="1" value="0" aria-describedby="stringOut">
+    <p id="stringOut" class="hz" role="status" aria-live="polite"></p>
+    <div class="row">
+      <button type="button" id="stringPlay" class="primary">השמעה משווה: מיתר שלם → החלק</button>
+    </div>
+    <p class="note">חצים ימינה/שמאלה במקלדת מזיזים את הסוכר צעד אחד.</p>
+  </section>
+
+  <details class="card" id="advanced">
+    <summary><b>5. למתקדמים: פיתגורס מול שווה־מזג</b></summary>
+    <p>פיתגורס בונה את כל הצלילים מקווינטות של <bdi dir="ltr">3:2</bdi> בדיוק. הבעיה: אם עולים שתים־עשרה קווינטות כאלה לא מגיעים בדיוק לשבע אוקטבות — נשאר שארית קטנה.</p>
+    <p>בכיוון השני, שווה־מזג (<bdi dir="ltr">12-TET</bdi>) מחלק את האוקטבה לשתים־עשרה מדרגות <b>שוות</b>: מספר אחד שמכפיל את התדר שתים־עשרה פעמים ומגיע בדיוק לפי 2. אין צורך לחשב אותו — זו פשוט מכפלה אחת, <span id="tetValue" class="hz"></span>, במקום <bdi dir="ltr">3:2 = 1.5</bdi>.</p>
+    <p id="tetDrift"></p>
+    <div class="row"><button type="button" id="tetAb" class="primary">השמעה משווה: קווינטה טהורה → שווה־מזג</button></div>
+    <p class="note">ההפרש קטן מאוד, ולכן שתי הקווינטות נשמעות דומות. בפסנתר משתמשים בשווה־מזג כדי שכל הסולמות יישמעו אותו דבר.</p>
+  </details>
+
+  <div class="replay">
+    <button type="button" id="again" class="primary">▶ השמע שוב</button>
+    <p class="live" id="live" role="status" aria-live="polite">מה התנגן: עוד לא התנגן כלום.</p>
+  </div>
+</main>
+<script src="src/lib/musicEngine.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
+<script>
+(function () {
+  const $ = function (id) { return document.getElementById(id); };
+  const BASE = 220;
+  const NAMES = { unison: 'יוניסון', octave: 'אוקטבה', fifth: 'קווינטה', fourth: 'קוורטה', majorthird: 'טרצה גדולה' };
+  let lastPlay = null;
+
+  // One unlock for the page: the first gesture of any kind opens the context,
+  // so the tap that lands on a play button already has sound.
+  function unlock() { unlockAudio(); }
+  document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+  document.addEventListener('keydown', unlock, { once: true, capture: true });
+
+  function say(text) { $('live').textContent = 'מה התנגן: ' + text; }
+
+  // Every sound goes through here, so every sound also leaves its text behind
+  // and the «השמע שוב» button always has something to repeat.
+  function play(events, text) {
+    lastPlay = function () { scheduleSequence(events); say(text); };
+    lastPlay();
+  }
+
+  function tone(hz, at, dur, gain) {
+    return { at: at, dur: dur || 0.85, hz: hz, gain: gain == null ? 0.18 : gain };
+  }
+
+  function compare(a, b, text) {
+    play([tone(a, 0), tone(b, 1.05)], text);
+  }
+
+  // ---- 1. octave ----
+  $('octA').addEventListener('click', function () { play([tone(BASE, 0)], hzText(BASE)); });
+  $('octB').addEventListener('click', function () { play([tone(BASE * 2, 0)], hzText(BASE * 2)); });
+  $('octAb').addEventListener('click', function () {
+    compare(BASE, BASE * 2, 'קודם ' + hzText(BASE) + ', אחר כך ' + hzText(BASE * 2) + ' — אוקטבה.');
+  });
+  $('octCheck').addEventListener('click', function () {
+    const el = $('octFeedback');
+    const right = ratioMatches($('octAnswer').value, 2, 1);
+    el.className = 'feedback ' + (right ? 'ok' : 'no');
+    el.textContent = right
+      ? 'נכון. 440 חלקי 220 הוא 2, כלומר היחס 2:1 — אוקטבה.'
+      : 'לא. חלקו 440 ב־220 וכתבו את התוצאה (אפשר גם בצורת יחס).';
+  });
+
+  // ---- 2. fifth and fourth ----
+  ['fifth', 'fourth'].forEach(function (name) {
+    const r = intervalRatio(name);
+    const hz = ratioToHz(BASE, r.p, r.q);
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = '<span><b>' + NAMES[name] + '</b> <bdi dir="ltr">' + ratioText(r.p, r.q)
+      + '</bdi> · <bdi dir="ltr">' + BASE + ' × ' + r.p + '/' + r.q + ' = </bdi>'
+      + '<span class="hz"><bdi dir="ltr">' + hzText(hz) + '</bdi></span></span>';
+    const ab = document.createElement('button');
+    ab.type = 'button';
+    ab.id = 'ab-' + name;
+    ab.textContent = 'השמעה משווה';
+    ab.setAttribute('aria-label', 'השמעה משווה ' + NAMES[name]);
+    ab.addEventListener('click', function () {
+      compare(BASE, hz, NAMES[name] + ': קודם ' + hzText(BASE) + ', אחר כך ' + hzText(hz) + '.');
+    });
+    const both = document.createElement('button');
+    both.type = 'button';
+    both.id = 'both-' + name;
+    both.textContent = 'ביחד';
+    both.setAttribute('aria-label', NAMES[name] + ' — שני הצלילים ביחד');
+    both.addEventListener('click', function () {
+      play([tone(BASE, 0, 1.6, 0.12), tone(hz, 0, 1.6, 0.12)],
+        NAMES[name] + ': ' + hzText(BASE) + ' ו־' + hzText(hz) + ' ביחד.');
+    });
+    row.appendChild(ab);
+    row.appendChild(both);
+    $('intRows').appendChild(row);
+  });
+
+  // ---- 3. harmonic series ----
+  const COUNT = 6;
+  let f0 = 110;
+  function drawHarmonics() {
+    const series = harmonicSeries(f0, COUNT);
+    const top = series[series.length - 1].hz;
+    $('harmRows').innerHTML = series.map(function (h) {
+      return '<span><bdi dir="ltr">' + h.n + ' × ' + f0 + '</bdi></span>'
+        + '<span class="bar"><i style="width:' + Math.round(h.hz / top * 100) + '%"></i></span>'
+        + '<span class="hz"><bdi dir="ltr">' + hzText(h.hz) + '</bdi></span>';
+    }).join('');
+    const step = commonDifference(series.map(function (h) { return h.hz; }));
+    $('harmNote').innerHTML = 'ההפרש בין כל שני צלילים שכנים קבוע: <bdi dir="ltr">'
+      + hzText(step) + '</bdi>. זו סדרה חשבונית. אבל המרווח המוזיקלי הולך וקטן, '
+      + 'כי <bdi dir="ltr">2:1</bdi> גדול מ־<bdi dir="ltr">3:2</bdi>, וזה גדול מ־<bdi dir="ltr">4:3</bdi>.';
+    [].forEach.call($('harmPick').children, function (b) {
+      b.setAttribute('aria-pressed', String(Number(b.dataset.f0) === f0));
+    });
+  }
+  [110, 220].forEach(function (hz) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.f0 = String(hz);
+    b.innerHTML = '<bdi dir="ltr">f₀ = ' + hz + ' Hz</bdi>';
+    b.addEventListener('click', function () { f0 = hz; drawHarmonics(); });
+    $('harmPick').appendChild(b);
+  });
+  drawHarmonics();
+  $('harmPlay').addEventListener('click', function () {
+    const series = harmonicSeries(f0, COUNT);
+    play(series.map(function (h, i) { return tone(h.hz, i * 0.55, 0.5, 0.16); }),
+      'הטור ההרמוני מ־' + hzText(f0) + ': ' + series.map(function (h) { return Math.round(h.hz); }).join(', ') + ' הרץ.');
+  });
+
+  // ---- 4. monochord ----
+  const STOPS = stringStops();
+  // The sentence stays Hebrew RTL; only the numbers are isolated LTR, so
+  // «1/2 מהמיתר» never comes out mirrored.
+  function stopParts(f) {
+    const name = monochordInterval(f);
+    return [fractionText(f), ' מהמיתר · ', hzText(monochordHz(BASE, f)),
+      name ? ' · ' + NAMES[name] + ' · פי ' : ' · פי ', fractionText(stringLength(f))];
+  }
+  function drawString() {
+    const f = STOPS[Number($('stringSlider').value)];
+    const p = stopParts(f);
+    $('stringBar').style.width = Math.round(f.n / f.d * 100) + '%';
+    $('stringOut').innerHTML = '<bdi dir="ltr">' + p[0] + '</bdi>' + p[1]
+      + '<bdi dir="ltr">' + p[2] + '</bdi>' + p[3] + '<bdi dir="ltr">' + p[4] + '</bdi>';
+    $('stringSlider').setAttribute('aria-valuetext', p.join(''));
+    return f;
+  }
+  function playString(f) {
+    const hz = monochordHz(BASE, f);
+    const name = monochordInterval(f);
+    compare(BASE, hz, 'מיתר שלם ' + hzText(BASE) + ', אחר כך ' + fractionText(f)
+      + ' מהמיתר: ' + hzText(hz) + (name ? ' — ' + NAMES[name] : '') + '.');
+  }
+  $('stringSlider').addEventListener('input', function () {
+    const f = drawString();
+    // Only sound once a gesture has already opened the context, so dragging
+    // never tries to play before the browser allows it.
+    if (audioReady()) playString(f);
+  });
+  $('stringPlay').addEventListener('click', function () { playString(drawString()); });
+  drawString();
+
+  // ---- 5. advanced ----
+  const pure = 3 / 2;
+  const tet = temperedRatio(7);
+  $('tetValue').innerHTML = '<bdi dir="ltr">' + (Math.round(tet * 10000) / 10000) + '</bdi>';
+  $('tetDrift').innerHTML = 'הקווינטה של שווה־מזג צרה מזו של פיתגורס ב־<bdi dir="ltr">'
+    + Math.abs(ratioDriftPercent(tet, pure)) + '%</bdi> בלבד: <bdi dir="ltr">'
+    + hzText(BASE * tet) + '</bdi> במקום <bdi dir="ltr">' + hzText(BASE * pure) + '</bdi>.';
+  $('tetAb').addEventListener('click', function () {
+    compare(BASE * pure, BASE * tet, 'קווינטה טהורה ' + hzText(BASE * pure)
+      + ', אחר כך שווה־מזג ' + hzText(BASE * tet) + '.');
+  });
+
+  // ---- play again ----
+  $('again').addEventListener('click', function () {
+    if (lastPlay) lastPlay();
+    else compare(BASE, BASE * 2, 'קודם ' + hzText(BASE) + ', אחר כך ' + hzText(BASE * 2) + ' — אוקטבה.');
+  });
+})();
+</script>
+</body>
+</html>
