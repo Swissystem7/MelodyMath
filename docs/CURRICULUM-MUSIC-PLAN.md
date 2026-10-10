@@ -187,7 +187,7 @@
 
 ## 8. כללי עבודה לכל משימה
 - PR כטיוטה (DRAFT) בלבד, מענף `factory/...`. אסור לדחוף ל־master או ל־main, ואסור force-push.
-- `npm test` (`node --test`) עובר. בלי תלויות, בלי bundler, בלי CDN ובלי GitHub Actions (ראו `AGENTS.md`).
+- `npm test` (`node --test`) עובר מקומית לפני דחיפה. בלי תלויות, בלי bundler ובלי CDN. ב־GitHub Actions יש workflow אחד לבדיקות בלבד, ולא יותר (ראו `AGENTS.md`).
 - Playwright ב־820×1180, 390×844 ו־360×740, ובהדמיית iPhone 13 ו־Pixel 7: אפס שגיאות קונסול, יעדי מגע של 44px לפחות, אין גלילה אופקית, השמע נפתח אחרי נגיעה, ועובד אופליין.
 - עברית ב־RTL ומתמטיקה ב־LTR מבודד.
 - לבקש סקירה מ־Copilot.
@@ -211,7 +211,7 @@
 | תנאי מקדים: חיבור מודולים שלא מחוברים | #33 | factory:auto, kind:hard |
 | תנאי מקדים: תרגילים מוצגים הפוך ב־RTL | #93 | factory:claude |
 
-> הערה: issue #97 מבקש workflow של CI, וזה סותר את `AGENTS.md` ואת `test/honesty.test.js`, שאוסרים על `.github/workflows/`. צריך החלטה של בעל הריפו לפני שעובדים עליו.
+> הערה: issue #97 הוכרע — יש workflow אחד לבדיקות בלבד (`.github/workflows/test.yml`), ו־`test/honesty.test.js` שומר שלא ייווסף עוד אחד. `AGENTS.md` עודכן בהתאם.
 
 
 ---
