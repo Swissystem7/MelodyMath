@@ -48,13 +48,13 @@
     { grade: 'ב', strand: 'measure', topic: 'ס״מ, היקף, נפח תיבות, חצאי שעות', status: GAP, note: 'גל 2' },
     { grade: 'ב', strand: 'data', topic: 'טבלה, עמודות, פיקטוגרם', status: GAP, note: 'גל 2' },
 
-    { grade: 'ג', strand: 'numbers', topic: 'מספרים עד 10,000, מבנה עשרוני', status: GAP, note: 'גל 2' },
+    { grade: 'ג', strand: 'numbers', topic: 'מספרים עד 10,000, מבנה עשרוני', status: PARTIAL, note: 'השוואת Hz עד 10,000 בשמיעה' },
     { grade: 'ג', strand: 'numbers', topic: 'חיבור/חיסור במאוזן ובמאונך עד רבבה', status: GAP, note: 'גל 2' },
-    { grade: 'ג', strand: 'numbers', topic: 'לוח כפל 10×10 (אחרי 2/4/5/10)', status: PARTIAL, note: '3, 6, 7, 8, 9 נפתחים אחרי השער; אין אלגוריתם כפל' },
-    { grade: 'ג', strand: 'numbers', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', status: GAP, note: 'יש חילוק שלם בסיסי בלבד' },
-    { grade: 'ג', strand: 'numbers', topic: 'שאלות השוואה כפליות ודו־שלביות', status: GAP, note: 'גל 2' },
+    { grade: 'ג', strand: 'numbers', topic: 'לוח כפל 10×10 (אחרי 2/4/5/10)', status: PARTIAL, note: '3/6 במקצב 3/4 ו־6/8; 7–9 אחרי השער' },
+    { grade: 'ג', strand: 'numbers', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', status: PARTIAL, note: 'שארית בפעמות; ×÷ ב־10/100/1000 עדיין לא' },
+    { grade: 'ג', strand: 'numbers', topic: 'שאלות השוואה כפליות ודו־שלביות', status: PARTIAL, note: 'פי בתדר ובטמפו בשמיעה' },
     { grade: 'ג', strand: 'geometry', topic: 'זווית שטוחה/קהה/ישרה/חדה; מיון משולשים', status: GAP, note: 'גל 2' },
-    { grade: 'ג', strand: 'measure', topic: 'שטח מלבן; שעות ודקות', status: GAP, note: 'גל 2' },
+    { grade: 'ג', strand: 'measure', topic: 'שטח מלבן; שעות ודקות', status: PARTIAL, note: 'רשת מקצב לשטח; דקות↔שניות למנגינה' },
     { grade: 'ג', strand: 'data', topic: 'איסוף, ארגון, דיאגרמות', status: GAP, note: 'גל 2' },
 
     { grade: 'ד', strand: 'numbers', topic: 'מספרים עד מיליון; אלגוריתמים במאונך; סדר פעולות', status: GAP, note: 'גל 2+' },

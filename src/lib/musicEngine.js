@@ -229,10 +229,41 @@
     return out;
   }
 
+  let audioCtx = null;
+
+  function unlockAudio() {
+    if (typeof window === 'undefined') return null;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === 'suspended') {
+      try { audioCtx.resume(); } catch (e) { /* autoplay policy */ }
+    }
+    return audioCtx;
+  }
+
+  function playPlanned(events, opts) {
+    const ac = unlockAudio();
+    if (!ac || !Array.isArray(events)) return;
+    const notes = planSequence(events, ac.currentTime + 0.05, opts || {});
+    notes.forEach(function (n) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = n.type || 'sine';
+      o.frequency.setValueAtTime(n.hz, n.time);
+      g.gain.setValueAtTime(0.0001, n.time);
+      g.gain.exponentialRampToValueAtTime(Math.max(n.gain, 0.0002), n.time + ATTACK);
+      g.gain.exponentialRampToValueAtTime(0.0001, n.time + n.dur);
+      o.connect(g).connect(ac.destination);
+      o.start(n.time);
+      o.stop(n.time + n.dur + 0.02);
+    });
+  }
+
   return {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
-    MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
+    MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence, unlockAudio, playPlanned,
   };
 });

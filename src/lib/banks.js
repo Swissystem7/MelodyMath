@@ -55,6 +55,12 @@
     PICTOGRAM: 'קריאת פיקטוגרם',
     BARCHART: 'קריאת דיאגרמת עמודות',
     TABLE: 'קריאת טבלת נתונים',
+    G3_TABLE: 'לוח כפל במקצב — 3/4 ו־6/8',
+    G3_DIV_REM: 'חילוק עם שארית בפעמות',
+    G3_TIMES: 'השוואה כפלית (פי) בטמפו ובתדר',
+    G3_AREA: 'שטח מלבן כרשת מקצב',
+    G3_TIME: 'זמן מנגינה — דקות ושניות',
+    G3_HZ: 'השוואת תדרים עד 10,000 Hz',
   };
 
   const SKILL_HE = {
@@ -70,12 +76,13 @@
     geometry: 'גאומטריה',
     measurement: 'מדידה',
     data: 'נתונים',
+    music_g3: 'מוזיקה ג׳',
   };
 
   const GRADE_SKILLS = {
     'א': ['counting', 'addition', 'subtraction', 'number_line', 'word_problems', 'measurement', 'geometry', 'data'],
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
-    'ג': ['multiplication', 'division'],
+    'ג': ['multiplication', 'division', 'music_g3'],
     'ד': ['basic_fractions'],
   };
 
@@ -92,6 +99,7 @@
     ['geometry', SKILL_HE.geometry],
     ['data', SKILL_HE.data],
     ['basic_fractions', SKILL_HE.basic_fractions],
+    ['music_g3', SKILL_HE.music_g3],
   ];
   const RM_ORDER = {};
   RM_SKILLS.forEach(function (s, i) { RM_ORDER[s[0]] = i; });
@@ -152,6 +160,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g3: extra.g3,
     };
   }
 
@@ -705,6 +714,31 @@
     BARC('ב', 'באיזה יום הושאלו הכי מעט ספרים — כתבו את המספר', 30, 'העמודה הנמוכה ביותר', { bars: [{ label: 'שני', value: 40 }, { label: 'שלישי', value: 55 }, { label: 'רביעי', value: 30 }] }, 2)
   );
 
+  // ---------- כיתה ג׳ · מוזיקה ומתמטיקה (issue #104) — appended so bank ids stay stable ----------
+  function MG3(widget, prompt, answer, hint, g3, extra) {
+    extra = extra || {};
+    extra.widget = widget;
+    extra.g3 = g3;
+    extra.strand = extra.strand || STRAND.NUM;
+    return I('ג', 'music_g3', prompt, answer, hint, extra);
+  }
+  RAW.push(
+    MG3('g3table', 'במשקל 3/4, איזו כפולה של 3 מודגשת אחרי 9 פעמות?', 9, '3, 6, 9 — הכפולה השלישית', { table: 3, meter: '3/4' }, { standard: ST.G3_TABLE, table: 3, level: 1 }),
+    MG3('g3table', 'במשקל 6/8, איזו כפולה של 6 נשמעת מודגשת אחרי 12 פעמות?', 12, '6, 12 — הכפולה השנייה', { table: 6, meter: '6/8' }, { standard: ST.G3_TABLE, table: 6, level: 2 }),
+    MG3('g3remainder', '14 פעמות בתיבות של 4. כמה תיבות מלאות וכמה פעמות נשארו? (למשל 3 שארית 2)', '3 שארית 2', '14 ÷ 4 = 3 ונשארו 2', { total: 14, bar: 4 }, { standard: ST.G3_DIV_REM, level: 1 }),
+    MG3('g3remainder', '17 פעמות בתיבות של 5. כמה תיבות ומה השארית?', '3 שארית 2', '17 ÷ 5 = 3 ונשארו 2', { total: 17, bar: 5 }, { standard: ST.G3_DIV_REM, level: 2 }),
+    MG3('g3remainder', '23 פעמות בתיבות של 6. כמה תיבות ומה השארית?', '3 שארית 5', '23 ÷ 6 = 3 ונשארו 5', { total: 23, bar: 6 }, { standard: ST.G3_DIV_REM, level: 3 }),
+    MG3('g3times', 'שמעו שני תדרים — השני גבוה פי 2 (אוקטבה). פי כמה?', 2, 'אוקטבה = פי 2 בתדר', { kind: 'pitch', factor: 2, base: 220 }, { standard: ST.G3_TIMES, level: 1 }),
+    MG3('g3times', 'שמעו שני טמפו — השני מהיר פי 3. פי כמה?', 3, 'הטמפו השני פי 3 מהראשון', { kind: 'tempo', factor: 3, base: 70 }, { standard: ST.G3_TIMES, level: 2 }),
+    MG3('g3sequencer', 'רשת מקצב: 4 שורות × 8 צעדים. מה השטח (מספר התאים)?', 32, '4 × 8 = 32', { rows: 4, cols: 8 }, { standard: ST.G3_AREA, level: 1 }),
+    MG3('g3sequencer', 'רשת 3 שורות על 6 צעדים. כמה תאים?', 18, '3 × 6', { rows: 3, cols: 6 }, { standard: ST.G3_AREA, level: 2 }),
+    MG3('g3tune', 'מנגינה נמשכת 2 דקות ו-30 שניות. כמה שניות בסך הכול?', 150, '2×60 + 30', { min: 2, sec: 30 }, { standard: ST.G3_TIME, level: 1 }),
+    MG3('g3tune', 'מנגינה נמשכת 1 דקה ו-45 שניות. כמה שניות?', 105, '60 + 45', { min: 1, sec: 45 }, { standard: ST.G3_TIME, level: 2 }),
+    MG3('g3hz', 'איזה תדר גבוה יותר — 880 Hz או 3520 Hz? (כתבו המספר הגבוה)', 3520, '3520 > 880', { a: 880, b: 3520 }, { standard: ST.G3_HZ, level: 1 }),
+    MG3('g3hz', 'איזה תדר גבוה יותר — 440 Hz או 2200 Hz?', 2200, 'השוו את המספרים', { a: 440, b: 2200 }, { standard: ST.G3_HZ, level: 2 }),
+    MG3('g3hz', 'איזה תדר גבוה יותר — 1500 Hz או 9999 Hz?', 9999, 'טווח השמיעה עד כ־10,000 Hz', { a: 1500, b: 9999 }, { standard: ST.G3_HZ, level: 3 })
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -731,6 +765,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g3) it.g3 = raw.g3;
     SHIPPED.push(it);
   });
 
