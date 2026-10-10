@@ -29,6 +29,18 @@ test('vertical normalize handles negative operands by setting them to 0', () => 
   });
 });
 
+test('vertical API includes grade ב׳ music activity functions', () => {
+  assert.deepStrictEqual(Object.keys(vert).sort(), [
+    'bindVertical',
+    'normalizeVertical',
+    'renderVerticalHtml',
+    'detectEvenOddBeat',
+    'mapVerticalToInstruments',
+    'mapHalfHourToNote',
+    'MAX_OPERAND'
+  ].sort());
+});
+
 test('vertical normalize caps huge operands so the column never shows exponent form', () => {
   const V = vert.normalizeVertical({ a: 1e21, b: Infinity, op: '+' });
   assert.equal(V.a, vert.MAX_OPERAND);
