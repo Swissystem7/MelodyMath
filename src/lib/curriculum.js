@@ -1,7 +1,10 @@
-// MelodyMath — honest coverage of the official א׳–ד׳ programme.
+// MelodyMath — honest coverage of the official א׳–ו׳ programme.
 //
 // Every row is a topic the Ministry document names. Status is covered,
 // partial, or gap. Gaps stay visible. This is not a marketing matrix.
+//
+// A row may only read 'covered' when banks.js actually ships tagged items for
+// it. banks.js ships א׳–ד׳ only, so every ה׳/ו׳ row below is a gap.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -63,6 +66,24 @@
     { grade: 'ד', strand: 'geometry', topic: 'מקבילים, מאונכים, מרובעים, שטח פנים', status: GAP, note: 'גל 2' },
     { grade: 'ד', strand: 'measure', topic: 'יחידות אורך; זמן בלוח עברי/לועזי', status: GAP, note: 'גל 2' },
     { grade: 'ד', strand: 'data', topic: 'טבלאות ודיאגרמות כולל שברים', status: GAP, note: 'גל 2' },
+
+    // Grades ה׳–ו׳ from Newprogramgrade5.pdf and Newprogramgrade6.pdf, read
+    // 7.10.2026; the headers and the hour counts are recorded in
+    // docs/CURRICULUM-MUSIC-PLAN.md §2 and §5. No bank exists for these grades
+    // yet, so nothing here is covered or partial — the whole programme is a gap.
+    { grade: 'ה', strand: 'numbers', topic: 'הכרת המספרים: ראשוניים, פריקים, פירוק לגורמים וסימני התחלקות', status: GAP, note: 'כ־23 ש׳ בתוכנית; אין בנק לכיתה ה׳' },
+    { grade: 'ה', strand: 'fractions', topic: 'שברים: הרחבה, צמצום, השוואה, חיבור וחיסור במכנים שונים', status: GAP, note: 'כ־35 ש׳; ב־bar44 יש רק 1/2 · 1/4 · 1/8 מול תיבה אחת — לא מכנים שונים' },
+    { grade: 'ה', strand: 'fractions', topic: 'שברים עשרוניים: קריאה, השוואה, חיבור וחיסור', status: GAP, note: 'כ־25 ש׳; אין פריט עשרוני בבנק' },
+    { grade: 'ה', strand: 'geometry', topic: 'גאומטריה ומדידות: משולשים, גובה, שטח משולש ושטח מקבילית', status: GAP, note: 'כ־30 ש׳; geometryShapes.js הוא א׳–ג׳ ואינו מחובר לדף' },
+    { grade: 'ה', strand: 'data', topic: 'חקר נתונים: טבלאות ודיאגרמות', status: GAP, note: 'כ־12 ש׳; dataViz.js אינו מחובר לדף' },
+
+    { grade: 'ו', strand: 'numbers', topic: 'מספרים טבעיים ו־0; סדר פעולות', status: GAP, note: 'כ־15 ש׳; אין בנק לכיתה ו׳' },
+    { grade: 'ו', strand: 'fractions', topic: 'שברים: משמעויות ופעולות — כפל וחילוק שברים', status: GAP, note: 'תחום השברים כ־62 ש׳; אין כפל או חילוק שברים בבנק' },
+    { grade: 'ו', strand: 'fractions', topic: 'שברים עשרוניים: כפל וחילוק', status: GAP, note: 'כ־50 ש׳ מתוך תחום השברים' },
+    { grade: 'ו', strand: 'fractions', topic: 'אחוזים', status: GAP, note: 'כ־12 ש׳ מתוך תחום השברים' },
+    { grade: 'ו', strand: 'geometry', topic: 'גאומטריה ומדידות: מצולעים מורכבים, מעגל ועיגול — היקף ושטח', status: GAP, note: 'כ־29 ש׳ לגאומטריה ולמדידות' },
+    { grade: 'ו', strand: 'measure', topic: 'נפח', status: GAP, note: 'בתוך כ־29 ש׳ הגאומטריה והמדידות' },
+    { grade: 'ו', strand: 'data', topic: 'ממוצע', status: GAP, note: 'מופיע בקובץ כיתה ו׳; אין חישוב ממוצע בבנק' },
   ];
 
   function statusHe(s) {
@@ -104,7 +125,7 @@
   }
 
   function grades() {
-    return ['א', 'ב', 'ג', 'ד'];
+    return ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
   }
 
   return {
