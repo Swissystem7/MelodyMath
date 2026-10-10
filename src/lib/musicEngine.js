@@ -229,10 +229,65 @@
     return out;
   }
 
+  // ---------- playback ----------
+  // The page owns the single AudioContext — sonify.js creates it — so the
+  // engine asks for it instead of opening a second one. In Node nothing
+  // injects a provider and every call below is a no-op.
+  let contextProvider = null;
+  let unlocked = false;
+
+  function setAudioContextProvider(fn) {
+    contextProvider = typeof fn === 'function' ? fn : null;
+    return !!contextProvider;
+  }
+
+  function audioContext() {
+    if (!contextProvider) return null;
+    try { return contextProvider() || null; } catch (e) { return null; }
+  }
+
+  // iOS Safari starts the context suspended and only resumes it inside a user
+  // gesture, so every page calls this from the first pointerdown.
+  function unlockAudio() {
+    const ac = audioContext();
+    if (!ac) return false;
+    if (ac.state === 'suspended') {
+      try { ac.resume(); } catch (e) { return false; }
+    }
+    unlocked = true;
+    return true;
+  }
+
+  function isAudioUnlocked() {
+    return unlocked;
+  }
+
+  // Sounds what planSequence planned, on the AudioContext clock rather than
+  // setTimeout. Returns the notes it started.
+  function playSequence(events, opts) {
+    const ac = audioContext();
+    if (!ac) return [];
+    const notes = planSequence(events, ac.currentTime + 0.06, opts);
+    notes.forEach(function (n) {
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = n.type;
+      osc.frequency.setValueAtTime(n.hz, n.time);
+      gain.gain.setValueAtTime(0.0001, n.time);
+      gain.gain.exponentialRampToValueAtTime(n.gain, n.time + ATTACK);
+      gain.gain.exponentialRampToValueAtTime(0.0001, n.time + n.dur);
+      osc.connect(gain).connect(ac.destination);
+      osc.start(n.time);
+      osc.stop(n.time + n.dur + RELEASE);
+    });
+    return notes;
+  }
+
   return {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
     MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
+    setAudioContextProvider, unlockAudio, isAudioUnlocked, playSequence,
   };
 });

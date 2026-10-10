@@ -72,6 +72,19 @@
     });
   }
 
+  // One AudioContext per page, and iOS Safari only lets a user gesture start
+  // it: sonify.js owns the context, musicEngine.js borrows it through the
+  // provider, and the first pointerdown anywhere resumes it (plan §4.3).
+  function installAudioUnlock() {
+    if (typeof document === 'undefined') return false;
+    if (typeof setAudioContextProvider !== 'function' || typeof getAudioContext !== 'function') return false;
+    setAudioContextProvider(getAudioContext);
+    document.addEventListener('pointerdown', function () {
+      if (typeof unlockAudio === 'function') unlockAudio();
+    }, { once: true });
+    return true;
+  }
+
   function installSharedChrome() {
     if (typeof document === 'undefined') return;
     const script = document.currentScript || document.querySelector('script[src*="core.js"]');
@@ -84,6 +97,7 @@
       document.head.appendChild(link);
     }
     installPwaHooks();
+    installAudioUnlock();
     hookPracticeFinishSummary();
     installAccessBar();
     if (typeof bindAllTablists === 'function') bindAllTablists(document);

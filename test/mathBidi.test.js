@@ -64,6 +64,17 @@ test('answer inputs and choice buttons are LTR', () => {
   assert.equal((indexHtml.match(/b\.className='choice';\s*b\.dir='ltr';/g) || []).length, 2);
 });
 
+test('a division with remainder stays LTR, so "3 שארית 2" is never read as "2 שארית 3"', () => {
+  assert.deepEqual(mathRuns('3 שארית 2'), ['3 שארית 2']);
+  assert.equal(mathHtml('3 שארית 2'), LTR + '3 שארית 2</span>');
+  // The word is an operator only between two operands: plain Hebrew prose that
+  // happens to use it stays RTL.
+  assert.deepEqual(mathRuns('מה השארית של החלוקה?'), []);
+  assert.deepEqual(mathRuns('נשארה שארית'), []);
+  const sentence = mathHtml('14 פעמות בתיבות של 4: התשובה היא 3 שארית 2.');
+  assert.ok(sentence.includes(LTR + '3 שארית 2</span>'), sentence);
+});
+
 test('printed worksheets and the answer key keep expressions LTR', () => {
   const sheet = sheets.buildWorksheet({ pack: 'grade', grade: 'ב', count: 24, seed: 3, withAnswers: true });
   sheet.items.unshift({ skill: 'addition', he: 'חיבור', prompt: '40 + 40 = ?', answer: 80, hint: '4+4 עשרות' });

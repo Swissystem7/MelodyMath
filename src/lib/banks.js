@@ -55,6 +55,11 @@
     PICTOGRAM: 'קריאת פיקטוגרם',
     BARCHART: 'קריאת דיאגרמת עמודות',
     TABLE: 'קריאת טבלת נתונים',
+    NUM10K: 'מספרים עד 10,000 — קריאה, כתיבה והשוואה',
+    DIV_REM: 'חילוק עם שארית',
+    TIMES_MORE: 'שאלת השוואה כפלית — פי כמה',
+    AREA_RECT: 'שטח מלבן — שורות × עמודות',
+    TIME_MIN_SEC: 'זמן — המרה בין דקות לשניות',
   };
 
   const SKILL_HE = {
@@ -75,7 +80,7 @@
   const GRADE_SKILLS = {
     'א': ['counting', 'addition', 'subtraction', 'number_line', 'word_problems', 'measurement', 'geometry', 'data'],
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
-    'ג': ['multiplication', 'division'],
+    'ג': ['multiplication', 'division', 'place_value', 'word_problems', 'measurement'],
     'ד': ['basic_fractions'],
   };
 
@@ -152,6 +157,8 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g3: extra.g3,
+      typed: extra.typed,
     };
   }
 
@@ -705,6 +712,88 @@
     BARC('ב', 'באיזה יום הושאלו הכי מעט ספרים — כתבו את המספר', 30, 'העמודה הנמוכה ביותר', { bars: [{ label: 'שני', value: 40 }, { label: 'שלישי', value: 55 }, { label: 'רביעי', value: 30 }] }, 2)
   );
 
+  // ---------- כיתה ג׳ · מוזיקה (issue #104, תוכנית §5) ----------
+  // כל פריט כאן מצמיד את המבנה המוזיקלי למבנה המתמטי: המשקל הוא לוח הכפל,
+  // התיבה היא המחלק, הרשת היא המלבן והאוקטבה היא "פי 2".
+  function G3(skill, prompt, answer, hint, extra) {
+    const e = extra || {};
+    return I('ג', skill, prompt, answer, hint, {
+      strand: e.strand || STRAND.NUM,
+      standard: e.standard,
+      widget: e.g3 ? 'g3' : undefined,
+      g3: e.g3,
+      table: e.table,
+      typed: e.typed,
+      level: e.level || 1,
+    });
+  }
+
+  // לוח הכפל כמשקל: לוח 3 ב־3/4, לוח 6 ב־6/8, הדגשה על כל כפולה.
+  // עדיין מתויג table=3/6, ולכן השער של mastery.js חל גם כאן.
+  RAW.push(
+    G3('multiplication', 'במשקל 3/4 שמעתם 2 תיבות מלאות. כמה פעמות שמעתם?', 6, '2 תיבות של 3 פעמות', { standard: ST.MUL_C, table: 3, level: 1, g3: { kind: 'meter', table: 3, bars: 2 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 4 תיבות. כל כפולה של 3 מודגשת. כמה פעמות בסך הכול?', 12, '4 × 3 — ההדגשה האחרונה היא התשובה', { standard: ST.MUL_C, table: 3, level: 2, g3: { kind: 'meter', table: 3, bars: 4 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 7 תיבות. על איזו פעמה נופלת ההדגשה האחרונה?', 21, '7 × 3', { standard: ST.MUL_C, table: 3, level: 3, g3: { kind: 'meter', table: 3, bars: 7 } }),
+    G3('multiplication', 'במשקל 6/8 שמעתם 3 תיבות של 6 פעמות. כמה פעמות בסך הכול?', 18, '3 × 6', { standard: ST.MUL_C, table: 6, level: 2, g3: { kind: 'meter', table: 6, bars: 3 } }),
+    G3('multiplication', 'במשקל 6/8, כמה תיבות שלמות נדרשות כדי להגיע ל־42 פעמות?', 7, '42 : 6', { standard: ST.MUL_C, table: 6, level: 3, g3: { kind: 'meter', table: 6, bars: 7 } })
+  );
+
+  // חילוק עם שארית: הפעמות שנשארו מתנגנות בצליל אחר, וזו השארית.
+  // בלי `table`: תשובה נכונה כאן אינה עובדה מלוח הכפל, ולכן היא לא נחשבת
+  // שליטה בליבה ולא פותחת את השער של 3/6/7/8/9.
+  function REM(beats, perBar, level) {
+    const bars = Math.floor(beats / perBar);
+    const rest = beats % perBar;
+    return G3('division',
+      beats + ' פעמות נכנסות לתיבות של ' + perBar + '. כמה תיבות שלמות וכמה פעמות נשארות? כתבו תיבות, המילה שארית, ואז הפעמות — למשל 2 שארית 1.',
+      bars + ' שארית ' + rest,
+      bars + ' × ' + perBar + ' = ' + bars * perBar + ', ונשארות ' + rest + ' פעמות',
+      {
+        standard: ST.DIV_REM, typed: true, level: level,
+        g3: { kind: 'remainder', beats: beats, perBar: perBar },
+      });
+  }
+  RAW.push(
+    REM(14, 4, 1), REM(17, 4, 2), REM(19, 4, 2), REM(23, 5, 3), REM(20, 4, 1)
+  );
+
+  // השוואה כפלית: אוקטבה = פי 2 בתדר, והכפלת BPM = פי 2 בטמפו.
+  RAW.push(
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. פי כמה גבוה התדר השני?', 2, 'אוקטבה היא יחס 2:1', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 220, b: 440, unit: 'hz' } }),
+    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. פי כמה מהיר הטמפו השני?', 2, '120 : 60', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 60, b: 120, unit: 'bpm' } }),
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 880 Hz. פי כמה גבוה התדר השני?', 4, 'שתי אוקטבות: 2 × 2', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 220, b: 880, unit: 'hz' } }),
+    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. פי כמה מהיר הטמפו השני?', 3, '150 : 50', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 50, b: 150, unit: 'bpm' } }),
+    G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. פי כמה יותר תיבות בשנייה?', 3, 'השוואה כפלית בלי צליל: 18 : 6', { standard: ST.TIMES_MORE, level: 3 }),
+    G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. פי כמה ארוכה השנייה?', 3, '12 : 4', { standard: ST.TIMES_MORE, level: 1 }),
+    G3('word_problems', 'הצליל הראשון 330 Hz והשני 660 Hz. פי כמה גבוה התדר השני?', 2, 'גם כאן אוקטבה: 660 : 330', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 330, b: 660, unit: 'hz' } }),
+    G3('word_problems', 'בלהקה 5 מתופפים, ובמקהלה פי 4 זמרים. כמה זמרים במקהלה?', 20, '«פי 4» הוא כפל: 5 × 4', { standard: ST.TIMES_MORE, level: 3 })
+  );
+
+  // שטח מלבן כרשת מקצב, וזמן כמשך מנגינה.
+  RAW.push(
+    G3('measurement', 'רשת מקצב של 3 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 24, '3 × 8 — שורות כפול תאים', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 1, g3: { kind: 'grid', rows: 3, steps: 8 } }),
+    G3('measurement', 'רשת מקצב של 4 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 32, '4 × 8', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 2, g3: { kind: 'grid', rows: 4, steps: 8 } }),
+    G3('measurement', 'ברשת 2 שורות ו־16 תאים בשורה. כמה תאים בסך הכול?', 32, '2 × 16 — אותו שטח, מלבן אחר', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 3, g3: { kind: 'grid', rows: 2, steps: 16 } }),
+    G3('measurement', 'המנגינה נמשכת 2 דקות ו־30 שניות. כמה שניות זה?', 150, 'בכל דקה 60 שניות: 2 × 60 + 30', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 1 }),
+    G3('measurement', 'שיר נמשך 180 שניות. כמה דקות זה?', 3, '180 : 60', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 2 }),
+    G3('measurement', 'מנגינה נמשכת 1 דקה ו־45 שניות. כמה שניות זה?', 105, '60 + 45', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 3 }),
+    G3('measurement', 'רשת מקצב של 4 שורות ו־4 תאים בשורה. כמה תאים יש ברשת?', 16, '4 × 4 — רשת ריבועית', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 1, g3: { kind: 'grid', rows: 4, steps: 4 } }),
+    G3('measurement', 'כמה שניות יש ב־4 דקות של מנגינה?', 240, '4 × 60', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 2 })
+  );
+
+  // מספרים עד 10,000: השוואת שני תדרים בשמיעה, ואז בלי צליל.
+  RAW.push(
+    G3('place_value', 'איזה תדר גבוה יותר: 1200 Hz או 1020 Hz? כתבו את המספר.', 1200, 'משווים ספרה־ספרה ממקום האלפים', { standard: ST.NUM10K, level: 1, g3: { kind: 'pair', a: 1200, b: 1020, unit: 'hz' } }),
+    G3('place_value', 'איזה תדר גבוה יותר: 1480 Hz או 1740 Hz? כתבו את המספר.', 1740, 'במקום המאות: 7 גדול מ־4', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1480, b: 1740, unit: 'hz' } }),
+    G3('place_value', 'איזה תדר נמוך יותר: 1320 Hz או 1230 Hz? כתבו את המספר.', 1230, 'במקום המאות: 2 קטן מ־3', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1320, b: 1230, unit: 'hz' } }),
+    G3('place_value', 'מה הספרה במקום האלפים במספר 4705?', 4, 'הספרה השמאלית במספר ארבע־ספרתי', { standard: ST.NUM10K, level: 1 }),
+    G3('place_value', 'איזה מספר גדול יותר: 3090 או 3900? כתבו את המספר.', 3900, 'אותן אלפים, ובמקום המאות 9 גדול מ־0', { standard: ST.NUM10K, level: 3 }),
+    G3('place_value', 'איזה תדר גבוה יותר: 1640 Hz או 1460 Hz? כתבו את המספר.', 1640, 'במקום המאות: 6 גדול מ־4', { standard: ST.NUM10K, level: 3, g3: { kind: 'pair', a: 1640, b: 1460, unit: 'hz' } }),
+    G3('place_value', 'מה הספרה במקום העשרות במספר 3164?', 6, 'הספרה השנייה מימין', { standard: ST.NUM10K, level: 2 }),
+    G3('place_value', 'איזה מספר קטן יותר: 7050 או 7500? כתבו את המספר.', 7050, 'אותן אלפים, ובמקום המאות 0 קטן מ־5', { standard: ST.NUM10K, level: 1 }),
+    G3('place_value', 'כמה מאות שלמות יש במספר 2800?', 28, '2800 : 100', { standard: ST.NUM10K, level: 3 })
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -731,6 +820,8 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g3) it.g3 = raw.g3;
+    if (raw.typed) it.typed = true;
     SHIPPED.push(it);
   });
 
