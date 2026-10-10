@@ -27,6 +27,7 @@ const ASSETS = [
   './src/lib/dataViz.js',
   './src/lib/geometryShapes.js',
   './src/lib/curriculum.js',
+  './src/lib/remediation.js',
   './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
