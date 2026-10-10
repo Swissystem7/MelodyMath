@@ -9,9 +9,25 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
-test('there is no GitHub Actions workflow in the repo', () => {
+test('the only GitHub Actions workflow is the test run', () => {
   const wf = path.join(root, '.github', 'workflows');
-  assert.equal(fs.existsSync(wf), false, '.github/workflows must not exist');
+  assert.ok(fs.existsSync(wf), '.github/workflows must exist');
+  assert.deepEqual(fs.readdirSync(wf).sort(), ['test.yml']);
+});
+
+test('the test workflow stays minimal: no secrets, no deploy, read-only', () => {
+  const yml = read(path.join('.github', 'workflows', 'test.yml'));
+  assert.match(yml, /^on:\n(?:\s+.*\n)*?\s+pull_request:/m, 'must run on pull_request');
+  assert.match(yml, /permissions:\n\s+contents: read/);
+  assert.match(yml, /runs-on: ubuntu-latest/);
+  assert.match(yml, /actions\/setup-node/);
+  assert.match(yml, /run: node --test/);
+  // One job only, and nothing that could publish, deploy or read a secret.
+  const jobsBlock = yml.split(/^jobs:$/m)[1] || '';
+  assert.deepEqual(jobsBlock.match(/^ {2}\w[\w-]*:$/gm), ['  test:'], 'exactly one job');
+  assert.doesNotMatch(yml, /secrets\.|\$\{\{\s*secrets/);
+  assert.doesNotMatch(yml, /deploy|pages|strategy:|matrix:|cache:/i);
+  assert.ok(yml.split('\n').length < 30, 'workflow must stay under 30 lines');
 });
 
 test('the unused factory lib/ folder is gone', () => {
