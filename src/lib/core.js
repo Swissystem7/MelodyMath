@@ -72,6 +72,24 @@
     });
   }
 
+  // Plan §4.3: iOS Safari and Android Chrome only let a page make sound from
+  // inside a user gesture, so the first pointerdown anywhere opens the shared
+  // AudioContext. Nothing is audible here — the unlock buffer is silent — and
+  // no sound can start before this, because every play path goes through the
+  // same context. The global is looked up per event on purpose: sonify.js
+  // defines unlockAudio today, and issue #100's engine half will assign its
+  // own over the same name without a change here.
+  function installAudioUnlock() {
+    if (typeof document === 'undefined') return;
+    const g = typeof globalThis !== 'undefined' ? globalThis : root;
+    function unlock() {
+      if (typeof g.unlockAudio === 'function') g.unlockAudio();
+    }
+    document.addEventListener('pointerdown', unlock, { once: true, capture: true });
+    // Old WebKit has no pointer events; touchstart is the same first gesture.
+    document.addEventListener('touchstart', unlock, { once: true, capture: true, passive: true });
+  }
+
   function installSharedChrome() {
     if (typeof document === 'undefined') return;
     const script = document.currentScript || document.querySelector('script[src*="core.js"]');
@@ -84,6 +102,7 @@
       document.head.appendChild(link);
     }
     installPwaHooks();
+    installAudioUnlock();
     hookPracticeFinishSummary();
     installAccessBar();
     if (typeof bindAllTablists === 'function') bindAllTablists(document);
@@ -258,6 +277,7 @@
     return Object.assign({}, parts, {
       installSharedChrome: installSharedChrome,
       installAccessBar: installAccessBar,
+      installAudioUnlock: installAudioUnlock,
       countSessionCorrectAnswers: countSessionCorrectAnswers,
       showExerciseSessionSummary: showExerciseSessionSummary,
     });

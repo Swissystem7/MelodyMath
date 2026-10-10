@@ -286,9 +286,72 @@
     return '';
   }
 
+  // ---------- finger targets (WCAG 2.5.5, plan §4.2) ----------
+  // A target is at least 44×44 CSS px with at least 8px to its neighbours.
+  // Pure on purpose: `node --test` owns the rule, and the Playwright mobile
+  // spec only feeds it boundingBox() results, so the two cannot disagree.
+  const TARGET_MIN_PX = 44;
+  const TARGET_GAP_PX = 8;
+  // Layout lands on fractions of a pixel. Half a pixel of slack keeps a
+  // 43.98px-tall button from failing a 44px rule it really satisfies.
+  const PX_SLACK = 0.5;
+
+  function targetTooSmall(box, minPx) {
+    const min = typeof minPx === 'number' ? minPx : TARGET_MIN_PX;
+    if (!box || typeof box.width !== 'number' || typeof box.height !== 'number') return true;
+    if (!isFinite(box.width) || !isFinite(box.height)) return true;
+    return box.width < min - PX_SLACK || box.height < min - PX_SLACK;
+  }
+
+  // Shortest empty distance between two boxes. Boxes that only miss each other
+  // on one axis are neighbours along that axis; boxes offset on both get the
+  // diagonal, which is what a fingertip actually has to clear.
+  function targetGap(a, b) {
+    if (!a || !b) return Infinity;
+    const dx = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
+    const dy = Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0);
+    if (dx > 0 && dy > 0) return Math.sqrt(dx * dx + dy * dy);
+    return dx + dy;
+  }
+
+  // Returns one row per offending target: {label, reason: 'size' | 'gap'}.
+  // A gap of exactly 0 means the boxes touch or nest (a button inside its
+  // label), which is not a spacing mistake, so only a positive gap under the
+  // minimum counts.
+  function touchTargetIssues(boxes, opts) {
+    opts = opts || {};
+    const min = typeof opts.min === 'number' ? opts.min : TARGET_MIN_PX;
+    const gap = typeof opts.gap === 'number' ? opts.gap : TARGET_GAP_PX;
+    const list = Array.isArray(boxes) ? boxes : [];
+    const name = function (box, i) {
+      return (box && box.label) || '#' + i;
+    };
+    const out = [];
+    list.forEach(function (box, i) {
+      if (targetTooSmall(box, min)) {
+        out.push({ label: name(box, i), reason: 'size', box: box || null });
+        return;
+      }
+      for (let j = 0; j < list.length; j++) {
+        if (j === i || targetTooSmall(list[j], min)) continue;
+        const d = targetGap(box, list[j]);
+        if (d > 0 && d < gap - PX_SLACK) {
+          out.push({ label: name(box, i), reason: 'gap', other: name(list[j], j), gap: d });
+          return;
+        }
+      }
+    });
+    return out;
+  }
+
   return {
     ACCESS_KEY: ACCESS_KEY,
     DEFAULTS: DEFAULTS,
+    TARGET_MIN_PX: TARGET_MIN_PX,
+    TARGET_GAP_PX: TARGET_GAP_PX,
+    targetTooSmall: targetTooSmall,
+    targetGap: targetGap,
+    touchTargetIssues: touchTargetIssues,
     normalizePrefs: normalizePrefs,
     loadAccess: loadAccess,
     saveAccess: saveAccess,

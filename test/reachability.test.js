@@ -12,6 +12,7 @@ const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
+  'musicEngine.js': 'pure music arithmetic from #117; the engine half that a page would call (scheduleSequence, unlockAudio of plan §3) has not landed yet, so loading it would only add bytes. sw.js precaches it so the day it is wired in, an offline tablet already has it',
   'pedagogy.js': 'lesson-plan bank, wired into the teacher tab in the follow-up PR for #33',
 };
 
