@@ -84,6 +84,7 @@
 }
 #mm-access button[aria-pressed="true"]{background:#21183b;color:#fff}
 #mm-access button:focus-visible{outline:3px solid #6946e8;outline-offset:2px}
+#mm-access .mm-quiet-fallback{flex-basis:100%;font-size:.82rem;color:#534a6b;font-weight:600}
 
 body.mm-contrast{
   background:#fff!important;color:#000!important

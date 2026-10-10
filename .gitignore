@@ -10,3 +10,4 @@ __pycache__/
 Thumbs.db
 dist/
 build/
+test/e2e/node_modules/

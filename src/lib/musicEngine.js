@@ -229,10 +229,31 @@
     return out;
   }
 
+  // Shared Web Audio context for pages that load this module in the browser.
+  let sharedAudioCtx = null;
+
+  function getSharedAudioContext() {
+    if (typeof window === 'undefined') return null;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!sharedAudioCtx) sharedAudioCtx = new AC();
+    return sharedAudioCtx;
+  }
+
+  function unlockAudio() {
+    const ac = getSharedAudioContext();
+    if (!ac) return Promise.resolve(null);
+    if (ac.state === 'suspended') {
+      return ac.resume().catch(function () { return ac; });
+    }
+    return Promise.resolve(ac);
+  }
+
   return {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
     MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
+    getSharedAudioContext, unlockAudio,
   };
 });

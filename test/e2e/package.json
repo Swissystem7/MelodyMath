@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "name": "melodymath-mobile-e2e",
+  "dependencies": {
+    "playwright": "1.49.1"
+  }
+}

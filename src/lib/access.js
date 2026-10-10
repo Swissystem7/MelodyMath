@@ -87,6 +87,7 @@
     next.forEach(function (c) { d.body.classList.add(c); });
     d.body.dataset.mmSpeak = normalizePrefs(prefs).speak ? '1' : '0';
     d.body.dataset.mmWait = normalizePrefs(prefs).wait ? '1' : '0';
+    updateQuietFallback(d);
     return next;
   }
 
@@ -236,6 +237,29 @@
     return out.length ? out : null;
   }
 
+  function hearFallbackText(groups) {
+    if (!Array.isArray(groups) || !groups.length) return '';
+    return groups.map(function (n) { return n + ' פעימות'; }).join(', ואז ');
+  }
+
+  function updateQuietFallback(doc) {
+    const d = doc || (typeof document !== 'undefined' ? document : null);
+    if (!d || !d.getElementById) return;
+    const el = d.getElementById('mm-quiet-fallback');
+    if (!el) return;
+    const prefs = loadAccess();
+    const hear = getActiveHear();
+    if (prefs.quiet && hear) {
+      el.textContent = 'מצב שקט: ' + hearFallbackText(hear) + ' (תיאור במקום צליל)';
+      el.hidden = false;
+      el.classList.remove('hidden');
+    } else {
+      el.textContent = '';
+      el.hidden = true;
+      el.classList.add('hidden');
+    }
+  }
+
   function setActiveHear(groups) {
     activeHear = sanitizeHear(groups);
     if (typeof document === 'undefined') return activeHear;
@@ -244,6 +268,7 @@
       b.hidden = !activeHear;
       b.disabled = !activeHear;
     }
+    updateQuietFallback();
     return activeHear;
   }
 
@@ -257,7 +282,6 @@
     const b = d.getElementById('mm-speak-now');
     const t = currentPromptText(d);
     if (b) {
-      b.hidden = !t;
       b.disabled = !t;
     }
     return t;
