@@ -100,9 +100,18 @@
   }
 
   function listStudents(classCode, storage) {
+    return listClassStudents(classCode, storage).map(function (row) {
+      return row.name;
+    });
+  }
+
+  function listClassStudents(classCode, storage) {
     const roster = loadRoster(classCode, storage);
     return Object.keys(roster.students).sort(function (a, b) {
       return a.localeCompare(b, 'he');
+    }).map(function (name) {
+      const student = roster.students[name];
+      return { name: student.name, created: student.created };
     });
   }
 
@@ -773,7 +782,7 @@
   return {
     PREFIX, WHO_KEY,
     normalizeCode, studentLabel, storageKey, emptyRoster,
-    loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
+    loadRoster, saveRoster, listStudents, listClassStudents, upsertStudent, getStudent,
     assignTask, listAssignments,
     startSession, addItem, endSession, buildReport, allItems,
     addNote, listNotes, itemsSince, buildClassOverview, getDashboardData,
