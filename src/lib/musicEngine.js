@@ -4,6 +4,11 @@
 // interval ratios, the harmonic series, the monochord and tempo. Fractions are
 // {n, d} pairs in lowest terms and are never turned into floats, so
 // 1/4 + 1/8 + 1/8 + 1/2 is exactly one bar and not 0.9999999.
+//
+// Then the one AudioContext of the page. sonify.js asks for it through
+// getSharedAudioContext(), so the slider tone, the metronome click and every
+// new activity share a single context, unlocked by unlockAudio() on the first
+// tap (iOS Safari plays nothing before a user gesture). Inert in Node.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -229,10 +234,88 @@
     return out;
   }
 
+  // ---------- the shared AudioContext ----------
+  let audioCtx = null;
+  const live = [];
+
+  function getSharedAudioContext() {
+    if (typeof window === 'undefined') return null;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!audioCtx || audioCtx.state === 'closed') audioCtx = new AC();
+    return audioCtx;
+  }
+
+  // Call from a user gesture. Resumes the context and plays one silent sample,
+  // which is what iOS Safari needs before it lets any later sound through.
+  function unlockAudio() {
+    const ac = getSharedAudioContext();
+    if (!ac) return Promise.resolve('unavailable');
+    try {
+      const src = ac.createBufferSource();
+      src.buffer = ac.createBuffer(1, 1, 22050);
+      src.connect(ac.destination);
+      src.start(0);
+    } catch (e) { /* older engines */ }
+    if (ac.state === 'running') return Promise.resolve('running');
+    let p;
+    try { p = ac.resume(); } catch (e) { p = null; }
+    return Promise.resolve(p).then(function () { return ac.state; }, function () { return ac.state; });
+  }
+
+  // Unlocks on the first pointerdown (or key press, for keyboard users).
+  function installAudioUnlock(target) {
+    const t = target || (typeof document !== 'undefined' ? document : null);
+    if (!t || typeof t.addEventListener !== 'function') return false;
+    function once() {
+      t.removeEventListener('pointerdown', once, true);
+      t.removeEventListener('keydown', once, true);
+      unlockAudio();
+    }
+    t.addEventListener('pointerdown', once, true);
+    t.addEventListener('keydown', once, true);
+    return true;
+  }
+
+  function stopSequence() {
+    live.forEach(function (node) {
+      try { node.stop(); } catch (e) { /* already stopped */ }
+      try { node.disconnect(); } catch (e) { /* already gone */ }
+    });
+    live.length = 0;
+  }
+
+  // Schedules on AudioContext.currentTime, never setTimeout, so long
+  // sequences keep their timing on a busy phone.
+  function scheduleSequence(events, opts) {
+    const ac = getSharedAudioContext();
+    if (!ac) return null;
+    stopSequence();
+    const start = ac.currentTime + 0.05;
+    const plan = planSequence(events, start, opts);
+    plan.forEach(function (note) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = note.type;
+      o.frequency.setValueAtTime(note.hz, note.time);
+      g.gain.setValueAtTime(0.0001, note.time);
+      g.gain.linearRampToValueAtTime(note.gain, note.time + ATTACK);
+      g.gain.setValueAtTime(note.gain, note.time + note.dur - RELEASE);
+      g.gain.linearRampToValueAtTime(0.0001, note.time + note.dur);
+      o.connect(g).connect(ac.destination);
+      o.start(note.time);
+      o.stop(note.time + note.dur + 0.02);
+      live.push(o);
+    });
+    const end = plan.reduce(function (m, n) { return Math.max(m, n.time + n.dur); }, start);
+    return { startTime: start, endTime: end, notes: plan.length };
+  }
+
   return {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
     MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
+    getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence, stopSequence,
   };
 });

@@ -67,11 +67,15 @@
   let heldStopTimer = null;
   const scheduled = [];
 
+  // When musicEngine.js is on the page its context is the only one; this
+  // file keeps its own only for pages that do not load the engine.
   function getAudioContext() {
     if (typeof window === 'undefined') return null;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    if (!audioCtx) audioCtx = new AC();
+    if (typeof window.getSharedAudioContext === 'function') audioCtx = window.getSharedAudioContext();
+    else if (!audioCtx) audioCtx = new AC();
+    if (!audioCtx) return null;
     if (audioCtx.state === 'suspended') {
       try { audioCtx.resume(); } catch (e) { /* autoplay policy */ }
     }
