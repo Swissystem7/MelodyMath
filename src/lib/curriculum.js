@@ -65,6 +65,20 @@
     { grade: 'ד', strand: 'data', topic: 'טבלאות ודיאגרמות כולל שברים', status: GAP, note: 'גל 2' },
   ];
 
+  MATRIX.forEach(function (row, index) {
+    row.topicId = 'mm-cur-' + index;
+  });
+
+  function isValidTopicId(id) {
+    if (typeof id !== 'string' || !id) return false;
+    return MATRIX.some(function (r) { return r.topicId === id; });
+  }
+
+  function topicById(id) {
+    if (!isValidTopicId(id)) return null;
+    return MATRIX.find(function (r) { return r.topicId === id; }) || null;
+  }
+
   function statusHe(s) {
     return STATUS_HE[s] || s;
   }
@@ -92,6 +106,7 @@
   function coverageMatrix() {
     return MATRIX.map(function (r) {
       return {
+        topicId: r.topicId,
         grade: r.grade,
         strand: r.strand,
         strandHe: strandHe(r.strand),
@@ -120,6 +135,8 @@
     summaryForGrade: summaryForGrade,
     coverageMatrix: coverageMatrix,
     grades: grades,
+    isValidTopicId: isValidTopicId,
+    topicById: topicById,
     gapTopicsForGrade: gapTopicsForGrade,
   };
 });
