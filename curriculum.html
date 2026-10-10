@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · כיסוי תכנית הלימודים א׳–ד׳</title>
-<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך לכיתות א׳–ד׳ — ומה לא. בלי טענת יעילות.">
+<title>MelodyMath · כיסוי תכנית הלימודים א׳–ו׳</title>
+<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך לכיתות א׳–ו׳ — ומה לא. בלי טענת יעילות.">
 <style>
   :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
   *{box-sizing:border-box}
@@ -13,12 +13,32 @@
   h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:8px 0}
   .lead{color:var(--muted);max-width:58ch}
   .sum{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:8rem}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:8rem;flex:1 1 9rem}
   .stat strong{display:block;font-size:1.4rem}
   .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0}
   .note{color:var(--muted);font-size:.9rem}
+  /* The matrix is four columns wide and the phone is 360px. The table keeps a
+     min-width and scrolls inside this box, so the page itself never scrolls
+     sideways (documentElement.scrollWidth stays <= innerWidth). */
+  .table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px;border:1px solid var(--line);border-radius:12px}
+  .cov-table{border-collapse:collapse;width:100%;min-width:34rem;font-size:.95rem}
+  .cov-table th,.cov-table td{text-align:start;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .cov-table thead th{background:#f1ecfe}
+  .cov-table tbody tr:last-child td{border-bottom:0}
+  /* The aria-label tells a screen reader the region scrolls; this tells everyone else. */
+  .scroll-hint{display:none;margin:8px 0 0}
+  @media(max-width:620px){.scroll-hint{display:block}}
+  /* The status cell always spells the status out in words; the colour only
+     repeats what the text already says. */
+  .st-covered,.st-partial,.st-gap{white-space:nowrap;font-weight:700}
+  .st-covered{color:#1b6b43}
+  .st-partial{color:#7a4c00}
+  .st-gap{color:#8c1d33}
+  /* "«חצי מ־8 = 4»" must not come out as "«חצי מ־4 = 8»" (#93). */
+  .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
-  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
 </style>
@@ -26,14 +46,15 @@
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
-  <p class="mm-product-banner"><b>תרגול יסודי</b> — מוצר נפרד מסוניפיקציית הגרפים. הדף הזה מציג כיסוי מול התוכנית החדשה לכיתות א׳–ג׳ והתוכנית שפורסמה לכיתה ד׳. זה לא אישור משרד ואין טענת יעילות.</p>
+  <p class="mm-product-banner"><b>תרגול יסודי</b> — מוצר נפרד מסוניפיקציית הגרפים. הדף הזה מציג כיסוי מול התוכנית החדשה לכיתות א׳–ו׳. בכיתות ה׳ ו־ו׳ אין בנק פריטים בכלל, ולכן כל נושא שם מסומן «לא מכוסה». זה לא אישור משרד ואין טענת יעילות.</p>
   <h1>כיסוי תוכנית הלימודים — במפורש</h1>
   <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
   <div class="sum" id="sum"></div>
   <div id="tables"></div>
-  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. אין כאן גאומטריה, מדידה או חקר נתונים — אלה פערים, לא «בקרוב» ממותג.</p>
+  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026, ו־Newprogramgrade5–6.pdf, נקראו ב־7.10.2026. אין כאן גאומטריה, מדידה או חקר נתונים, ואין שום פריט לכיתות ה׳–ו׳ — אלה פערים, לא «בקרוב» ממותג.</p>
 </main>
 <script src="src/lib/curriculum.js"></script>
+<script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
@@ -49,20 +70,24 @@
   }).join('');
   tables.innerHTML = gradeList.map(function (g) {
     const rows = coverageMatrix().filter(function (r) { return r.grade === g; });
+    // mathHtml escapes the text and wraps every expression in an LTR isolate,
+    // so "«חצי מ־8 = 4»" keeps its order inside the RTL table.
     const body = rows.map(function (r) {
-      return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
-        + '<td class="st-' + r.status + '">' + r.statusHe + '</td>'
-        + '<td>' + r.note + '</td></tr>';
+      return '<tr><td>' + mathHtml(r.strandHe) + '</td><td>' + mathHtml(r.topic) + '</td>'
+        + '<td class="st-' + r.status + '">' + mathHtml(r.statusHe) + '</td>'
+        + '<td>' + mathHtml(r.note) + '</td></tr>';
     }).join('');
     const bank = (typeof coverageByGrade === 'function' ? coverageByGrade()[g] : {}) || {};
     const bankNote = Object.keys(bank).map(function (sk) {
-      return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
+      return mathHtml(bank[sk].he + ': ' + bank[sk].total + ' פריטים');
     }).join(' · ');
     return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
       + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
+      + '<div class="table-scroll" role="region" tabindex="0" aria-label="טבלת כיסוי כיתה ' + g + '׳, נגללת לרוחב">'
       + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
       + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
-      + '<tbody>' + body + '</tbody></table></section>';
+      + '<tbody>' + body + '</tbody></table></div>'
+      + '<p class="note scroll-hint">גללו את הטבלה לצדדים כדי לראות את הסטטוס ואת ההערה.</p></section>';
   }).join('');
 })();
 </script>
