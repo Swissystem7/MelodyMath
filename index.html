@@ -13,6 +13,10 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+/* phones 360-430px (#101): 44px targets, tables scroll inside themselves, never the page */
+html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedback{overflow-wrap:anywhere}button,select,input:not([type=checkbox]):not([type=radio]),summary,.level,.navcard{min-height:44px}
+@media(max-width:680px){.report-table,.class-board{display:block;max-width:100%;overflow-x:auto}}
+@media(max-width:480px){.wrap{padding:16px 12px 48px}.tabs{gap:8px}.tab{flex:1 1 calc(50% - 8px)}.levels{gap:8px}.level{padding:14px 10px}.choices{gap:8px}.metro-bar{padding:8px 10px}.metro-bar input[type=number]{width:64px;min-height:44px}.stat{min-width:0;flex-basis:calc(50% - 10px)}.class-timer{font-size:1.8rem}.class-kids button{min-width:44px}h1{font-size:2rem}}
 @media print{
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
@@ -278,6 +282,7 @@ const exercises=[
 [25,3,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 12/8?',12,'המספר העליון מציין שמיניות'],[26,3,'יחסים','מרווחים','מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?','75:64','בכוונון טבעי 5-limit היחס הוא 75:64'],[27,3,'פונקציות','מלודיה','תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה: 4−2=2; כפול 3'],[28,3,'חזקות','טמפו','קצב מתחיל ב־20 BPM ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?',540,'20 × 3³'],[29,3,'שברים','קצב','כמה רבעים שווה שלם עם שתי נקודות הארכה?',7,'4 + 2 + 1 = 7'],[30,3,'יחסים','מרווחים','מה יחס התדרים בטריטון בכיוון עולה?','45:32','בכוונון טבעי היחס הוא 45:32'],[31,3,'פונקציות','מלודיה','תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?',35,'5 × 7'],[32,3,'חזקות','טמפו','קצב מתחיל ב־10 BPM ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?',80,'10 × 2³'],[33,3,'שברים','קצב','כמה שמיניות שווה רבע עם שתי נקודות הארכה?',3.5,'2 + 1 + 0.5 = 3.5'],[34,3,'יחסים','מרווחים','מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?','64:45','בכוונון טבעי היחס הוא 64:45'],[35,3,'פונקציות','מלודיה','תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?',-12,'בכל חזרה: ‎-6+3=-3; כפול 4']
 ].map(([id,level,mathTopic,musicConcept,prompt,answer,hint])=>({id,level,mathTopic,musicConcept,prompt,answer,hint}));
 let chosenLevel=1,history=[],current=null,answered=false,seed=Date.now()&0x7fffffff;
+document.addEventListener('pointerdown',function(){if(typeof unlockAudio==='function')unlockAudio()},{once:true,capture:true});
 const $=id=>document.getElementById(id); const show=(id,on)=>$(id).classList.toggle('hidden',!on);
 function rng(n){let s=n|0;return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
 function nextExercise(){const pool=eligibleExercises(exercises,history,current&&current.id,chosenLevel);const random=rng(seed+history.length*97);return pool[Math.floor(random()*pool.length)]}
