@@ -10,3 +10,6 @@ __pycache__/
 Thumbs.db
 dist/
 build/
+# Output of a throwaway `npx playwright test test/e2e` run (see the spec header).
+test-results/
+playwright-report/
