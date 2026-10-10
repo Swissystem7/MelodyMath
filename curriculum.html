@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · כיסוי תכנית הלימודים א׳–ד׳</title>
-<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך לכיתות א׳–ד׳ — ומה לא. בלי טענת יעילות.">
+<title>MelodyMath · כיסוי תכנית הלימודים א׳–ד׳, מוקדי כשל ובסיס מחקרי</title>
+<meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך, מוקדי כשל במבחני ראמ״ה ומיצ״ב, בסיס מחקרי והמענה המוזיקלי. בלי טענת יעילות.">
 <style>
   :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
   *{box-sizing:border-box}
@@ -21,19 +21,54 @@
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
+  .cov-table{width:100%;border-collapse:collapse;margin-top:12px}
+  .cov-table th,.cov-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+  .cov-table th{background:#f1f5f9;font-weight:700}
+  .st-covered{color:#059669;font-weight:700}
+  .st-partial{color:#d97706;font-weight:700}
+  .st-gap{color:#dc2626;font-weight:700}
+  .rem-card{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+  .rem-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:.8rem;font-weight:700;background:var(--purple);color:#fff;margin-bottom:8px}
+  .rem-badge.mid{background:#3730a3}
+  .rem-title{font-size:1.2rem;font-weight:800;margin:4px 0 8px;color:var(--ink)}
+  .rem-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+  @media(max-width:680px){.rem-grid{grid-template-columns:1fr}}
+  .rem-box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.92rem}
+  .rem-box strong{display:block;color:var(--purple);margin-bottom:6px;font-size:.95rem}
+  .rem-box.music-box strong{color:#059669}
+  .sound-btn{margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem}
+  .sound-btn:hover{background:#4f46e5}
+  .status-sound{margin-top:6px;font-size:.85rem;color:var(--muted);min-height:1.2em}
 </style>
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
-  <p class="mm-product-banner"><b>תרגול יסודי</b> — מוצר נפרד מסוניפיקציית הגרפים. הדף הזה מציג כיסוי מול התוכנית החדשה לכיתות א׳–ג׳ והתוכנית שפורסמה לכיתה ד׳. זה לא אישור משרד ואין טענת יעילות.</p>
+  <p class="mm-product-banner"><b>תרגול יסודי וסוניפיקציה לחטיבה</b> — הדף הזה מציג כיסוי מול התוכנית לכיתות א׳–ד׳, מיפוי מוקדי כשל לאומיים (ראמ״ה / מיצ״ב), ובסיס מחקרי פדגוגי. זה לא אישור משרד ואין טענת יעילות.</p>
   <h1>כיסוי תוכנית הלימודים — במפורש</h1>
   <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
   <div class="sum" id="sum"></div>
   <div id="tables"></div>
   <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. אין כאן גאומטריה, מדידה או חקר נתונים — אלה פערים, לא «בקרוב» ממותג.</p>
+
+  <section class="grade-block" id="remediation-section" style="border: 2px solid var(--purple); background: #ffffff; margin-top: 36px;">
+    <h2 style="color: var(--purple); margin-top: 0;">מוקדי כשל לאומיים (ראמ״ה / מיצ״ב) ומנגנוני תיקון מוזיקליים</h2>
+    <p class="lead" style="max-width: 100%;">
+      ניתוח מוקדי הקושי המרכזיים ביסודי ובחטיבת ביניים, המכשול התפיסתי המדויק (Misconception), והמנגנון המוזיקלי המייצר אינטואיציה ישירה ללא תלות בשינון טכני.
+    </p>
+    <div id="remediation-tables"></div>
+  </section>
+
+  <section class="grade-block" id="research-section" style="background: #ffffff; margin-top: 36px;">
+    <h2 style="margin-top: 0; color: var(--ink);">בסיס מחקרי ופדגוגי</h2>
+    <p class="lead" style="max-width: 100%;">
+      עוגנים מתוך מחקרים קוגניטיביים ונוירו-מוזיקליים המבססים את השימוש במקצב, תדר וסוניפיקציה להפחתת עומס ולבניית אינטואיציה מתמטית.
+    </p>
+    <div id="research-cards"></div>
+  </section>
 </main>
 <script src="src/lib/curriculum.js"></script>
+<script src="src/lib/remediation.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
@@ -42,28 +77,166 @@
   const gradeList = grades();
   const sum = document.getElementById('sum');
   const tables = document.getElementById('tables');
-  sum.innerHTML = gradeList.map(function (g) {
-    const s = summaryForGrade(g);
-    return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
-      + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
-  }).join('');
-  tables.innerHTML = gradeList.map(function (g) {
-    const rows = coverageMatrix().filter(function (r) { return r.grade === g; });
-    const body = rows.map(function (r) {
-      return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
-        + '<td class="st-' + r.status + '">' + r.statusHe + '</td>'
-        + '<td>' + r.note + '</td></tr>';
+  if (sum) {
+    sum.innerHTML = gradeList.map(function (g) {
+      const s = summaryForGrade(g);
+      return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
+        + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
     }).join('');
-    const bank = (typeof coverageByGrade === 'function' ? coverageByGrade()[g] : {}) || {};
-    const bankNote = Object.keys(bank).map(function (sk) {
-      return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
-    }).join(' · ');
-    return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
-      + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
-      + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
-      + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
-      + '<tbody>' + body + '</tbody></table></section>';
-  }).join('');
+  }
+  if (tables) {
+    tables.innerHTML = gradeList.map(function (g) {
+      const rows = coverageMatrix().filter(function (r) { return r.grade === g; });
+      const body = rows.map(function (r) {
+        return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
+          + '<td class="st-' + r.status + '">' + r.statusHe + '</td>'
+          + '<td>' + r.note + '</td></tr>';
+      }).join('');
+      const bank = (typeof coverageByGrade === 'function' ? coverageByGrade()[g] : {}) || {};
+      const bankNote = Object.keys(bank).map(function (sk) {
+        return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
+      }).join(' · ');
+      return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
+        + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
+        + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
+        + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
+        + '<tbody>' + body + '</tbody></table></section>';
+    }).join('');
+  }
+
+  const remContainer = document.getElementById('remediation-tables');
+  if (remContainer && typeof getAllFailurePoints === 'function') {
+    const points = getAllFailurePoints();
+    remContainer.innerHTML = points.map(function (p) {
+      const badgeCls = p.tier === 'middle' ? 'rem-badge mid' : 'rem-badge';
+      return '<div class="rem-card">'
+        + '<span class="' + badgeCls + '">' + p.tierHe + ' · כיתות ' + p.grades + '</span>'
+        + '<div class="rem-title">' + p.topicHe + '</div>'
+        + '<p class="note" style="margin:2px 0 8px;"><strong>נתוני ראמ״ה/מיצ״ב:</strong> ' + p.nationalIssue + '</p>'
+        + '<div class="rem-grid">'
+        + '<div class="rem-box"><strong>התפיסה השגויה (המכשול הקוגניטיבי):</strong>' + p.misconception + '</div>'
+        + '<div class="rem-box music-box"><strong>המנגנון המוזיקלי המתקן:</strong>' + p.musicalMechanism + '</div>'
+        + '</div>'
+        + '<p class="note" style="margin-top:8px;">סילבוס רשמי: ' + p.syllabusRef + '</p>'
+        + '<button type="button" class="sound-btn" data-action="' + p.exerciseRef + '">השמעת המחשה מוזיקלית</button>'
+        + '<div class="status-sound" id="status-' + p.exerciseRef + '"></div>'
+        + '</div>';
+    }).join('');
+
+    // Audio handlers
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtor();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, dur, delay, type) {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + dur);
+    }
+
+    function playSweep(startFreq, endFreq, dur, delay) {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(startFreq, ctx.currentTime + delay);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(40, endFreq), ctx.currentTime + delay + dur);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + delay + dur - 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + dur);
+    }
+
+    remContainer.addEventListener('click', function (e) {
+      const btn = e.target.closest('.sound-btn');
+      if (!btn) return;
+      const action = btn.getAttribute('data-action');
+      const status = document.getElementById('status-' + action);
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+
+      if (action === 'bar44') {
+        if (status) status.textContent = 'משמיע: רבע (1/4) מול שמינית (1/8) — הקשב להבדל במשך הפעימה!';
+        playTone(440, 0.45, 0); // quarter
+        playTone(440, 0.20, 0.6); // eighth
+        playTone(440, 0.20, 0.9); // eighth
+        setTimeout(function () { if (status) status.textContent = 'שמינית נשמעת ונמשכת בדיוק חצי מרבע.'; }, 1400);
+      } else if (action === 'functionsSlope') {
+        if (status) status.textContent = 'משמיע: שיפוע חיובי (צליל נוסק) מול שיפוע שלילי (צליל צונח)';
+        playSweep(220, 660, 0.8, 0); // positive slope
+        playSweep(660, 220, 0.8, 1.1); // negative slope
+        setTimeout(function () { if (status) status.textContent = 'השיפוע נתפס מיידית ככיוון וקצב שינוי.'; }, 2200);
+      } else if (action === 'functionsParabola') {
+        if (status) status.textContent = 'משמיע: פרבולה סימטרית — ירידה, פעמון בקודקוד, ועלייה בחזרה';
+        playSweep(550, 220, 0.7, 0); // down
+        playTone(880, 0.3, 0.75, 'sine'); // vertex bell
+        playSweep(220, 550, 0.7, 0.9); // up
+        setTimeout(function () { if (status) status.textContent = 'הקודקוד נשמע בבירור כנקודת המפנה והסימטריה.'; }, 1800);
+      } else if (action === 'accentGroup') {
+        if (status) status.textContent = 'משמיע: דאון־ביט מודגש (עשרת) + פעימות קלות (אחדות)';
+        playTone(260, 0.3, 0, 'triangle');
+        playTone(520, 0.1, 0.4, 'sine');
+        playTone(520, 0.1, 0.7, 'sine');
+        setTimeout(function () { if (status) status.textContent = 'הבחנה שמיעתית ברורה בין עשרות לאחדות.'; }, 1200);
+      } else if (action === 'octavePowers') {
+        if (status) status.textContent = 'משמיע: אוקטבות מוזיקליות — כל דרגה מכפילה את התדר פי 2 (חזקות 2^n)!';
+        playTone(220, 0.35, 0);
+        playTone(440, 0.35, 0.45);
+        playTone(880, 0.35, 0.9);
+        playTone(1760, 0.4, 1.35);
+        setTimeout(function () { if (status) status.textContent = 'האוזן שומעת קצב גידול כפלי ולא חיבור קבוע.'; }, 2000);
+      } else if (action === 'pythagorasHarmony') {
+        if (status) status.textContent = 'משמיע: יחסים פיתגוראיים — יסוד (300Hz), קוורטה 3:4 (400Hz), קווינטה 2:3 (450Hz)';
+        playTone(300, 0.4, 0);
+        playTone(400, 0.4, 0.5);
+        playTone(450, 0.4, 1.0);
+        playTone(300, 0.6, 1.6);
+        playTone(450, 0.6, 1.6);
+        setTimeout(function () { if (status) status.textContent = 'יחס אורכים גיאומטרי מתורגם להרמוניה שמיעתית צלולה.'; }, 2400);
+      } else if (action === 'sineWaveLab') {
+        if (status) status.textContent = 'משמיע: גל סינוס טהור (440Hz) עם תנודת משרעת (עוצמת קול)';
+        playTone(440, 0.8, 0, 'sine');
+        setTimeout(function () { if (status) status.textContent = 'גל הסינוס הפיזיקלי: גובה הצליל הוא התדר, עוצמת הקול היא המשרעת.'; }, 1200);
+      } else if (action === 'expDecaySound') {
+        if (status) status.textContent = 'משמיע: דעיכה מעריכית טבעית (זמן מחצית חיים של מיתר)';
+        playSweep(520, 260, 1.2, 0);
+        setTimeout(function () { if (status) status.textContent = 'דעיכה יחסית מתמתנת בזמן, בדיוק כמו במודלים מעריכיים.'; }, 1500);
+      } else {
+        if (status) status.textContent = 'השמעה פעילה.';
+        playTone(440, 0.3, 0);
+      }
+    });
+  }
+
+  const resContainer = document.getElementById('research-cards');
+  if (resContainer && typeof getResearchFoundations === 'function') {
+    const foundations = getResearchFoundations();
+    resContainer.innerHTML = foundations.map(function (rf) {
+      return '<div class="rem-card" style="border-inline-start: 4px solid var(--purple);">'
+        + '<div class="rem-title" style="font-size:1.1rem; color:var(--purple);">' + rf.nameHe + '</div>'
+        + '<p class="note" style="margin:2px 0 6px;"><strong>חוקרים ומקורות:</strong> ' + rf.keyResearchers + '</p>'
+        + '<p style="margin:0; font-size:.92rem; color:var(--ink);">' + rf.coreFinding + '</p>'
+        + '</div>';
+    }).join('');
+  }
 })();
 </script>
 </body>
