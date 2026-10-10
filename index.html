@@ -261,6 +261,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/mastery.js"></script>
 <script src="src/lib/numberLine.js"></script>
 <script src="src/lib/bar44.js"></script>
+<script src="src/lib/musicEngine.js"></script>
+<script src="src/lib/grade3Music.js"></script>
 <script src="src/lib/vertical.js"></script>
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
@@ -348,7 +350,23 @@ function renderWidget(hostId, item, inputId){
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
+  } else if(item.widget==='g3table' && item.g3 && typeof bindGrade3Widget==='function'){
+    bindGrade3Widget(host, item, fill);
+  } else if(item.widget==='g3remainder' && item.g3 && typeof bindGrade3Widget==='function'){
+    bindGrade3Widget(host, item, fill);
+  } else if(item.widget==='g3times' && item.g3 && typeof bindGrade3Widget==='function'){
+    bindGrade3Widget(host, item, fill);
+  } else if(item.widget==='g3sequencer' && item.g3 && typeof bindGrade3Widget==='function'){
+    bindGrade3Widget(host, item, fill);
+  } else if(item.widget==='g3tune' && item.g3 && typeof bindGrade3Widget==='function'){
+    bindGrade3Widget(host, item, fill);
+  } else if(item.widget==='g3hz' && item.g3 && typeof bindGrade3Widget==='function'){
+    bindGrade3Widget(host, item, fill);
   }
+}
+function answerCorrect(given,it){
+  if(it&&it.g3&&typeof itemAnswerCorrect==='function') return itemAnswerCorrect(it,given);
+  return isCorrect(given,it.answer);
 }
 function currentDiag(){ return diagnosticItems(selectedGrade); }
 function poolForSkill(skill){
@@ -363,14 +381,14 @@ function prefsNow(){return typeof loadAccess==='function'?loadAccess():{}}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null);if(!groups)return;if(prefsNow().quiet)return;if(typeof playCountClicks==='function')playCountClicks(groups,76)}
 function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').textContent=`שאלה ${rmIdx+1}/${RM_DIAG.length}`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;if($('rmItemTag'))$('rmItemTag').textContent=itemTagText(q);setMath($('rmPrompt'),q.prompt);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
-function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=isCorrect($('rmAnswer').value,q.answer);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(q.hint)}. התשובה: <b>${mathHtml(q.answer)}</b></div>`;show('rmFeedback',true);$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים'}
+function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerCorrect($('rmAnswer').value,q);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(q.hint)}. התשובה: <b>${mathHtml(q.answer)}</b></div>`;show('rmFeedback',true);$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים'}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
 function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
 const PLAN_PER_SKILL=6;
 function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items;const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
 function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))$('rmPlanTag').textContent=itemTagText(it);setMath($('rmPlanPrompt'),it.prompt);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
-function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=isCorrect($('rmPlanAnswer').value,it.answer);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(it.hint)}. התשובה: <b>${mathHtml(it.answer)}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
+function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerCorrect($('rmPlanAnswer').value,it);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(it.hint)}. התשובה: <b>${mathHtml(it.answer)}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
 function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true}}
 $('rmBegin').onclick=()=>{RM_DIAG=currentDiag();rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
