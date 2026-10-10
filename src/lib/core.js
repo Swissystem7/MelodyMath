@@ -74,6 +74,10 @@
 
   function installSharedChrome() {
     if (typeof document === 'undefined') return;
+    // iOS Safari only lets audio start inside a user gesture, so the shared
+    // AudioContext is unlocked on the first tap anywhere on the page
+    // (plan §4.3). Absent on the pages that load no audio engine.
+    if (typeof root.installAudioUnlock === 'function') root.installAudioUnlock(document);
     const script = document.currentScript || document.querySelector('script[src*="core.js"]');
     const base = script && script.src ? script.src.replace(/[^/]+$/, '') : 'src/lib/';
     if (!document.querySelector('link[data-mm-print]')) {

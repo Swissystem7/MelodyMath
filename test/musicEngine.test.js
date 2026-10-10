@@ -1,7 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const M = require('../src/lib/musicEngine');
 
+const root = path.join(__dirname, '..');
 const f = (n, d) => ({ n, d });
 
 test('note names are exact fractions of a whole note', () => {
@@ -112,4 +115,93 @@ test('planSequence lays fraction notes end to end at the given tempo', () => {
   ], 2, { bpm: 60 });
   assert.deepEqual(plan.map((n) => [n.time, n.dur, n.hz]), [[2, 1, 220], [3.5, 0.5, 330]]);
   assert.deepEqual(M.planSequence('nope', 0), []);
+});
+
+test('every note fades in and out, so none of them clicks', () => {
+  const env = M.envelopePoints(0.2, 10, 1);
+  assert.deepEqual(env.map((p) => p.t), [10, 10 + M.ATTACK, 11 - M.RELEASE, 11]);
+  assert.equal(env[1].v, 0.2);
+  assert.equal(env[2].v, 0.2);
+  assert.ok(env[0].v > 0 && env[0].v < 0.001, 'an exponential ramp cannot reach 0');
+  assert.equal(env[3].v, env[0].v);
+  // Monotonic in time even when the note is shorter than attack + release.
+  const short = M.envelopePoints(0.2, 0, 0.02);
+  assert.deepEqual(short.map((p) => p.t), [0, 0.01, 0.01, 0.02]);
+  assert.equal(M.envelopePoints(0.2, 0, 0), null);
+  assert.equal(M.envelopePoints(0.2, -1, 1), null);
+  assert.equal(M.envelopePoints(5, 0, 1)[1].v, M.MAX_GAIN, 'the peak still obeys the gain cap');
+});
+
+test('the engine is inert in Node: no AudioContext, no sound, nothing thrown', () => {
+  assert.equal(M.audioSupported(), false);
+  assert.equal(M.audioState(), 'unsupported');
+  assert.equal(M.getSharedAudioContext(), null);
+  assert.equal(M.unlockAudio(), null);
+  assert.equal(M.installAudioUnlock(null), false);
+  assert.deepEqual(M.scheduleSequence([{ at: 0, dur: 1, hz: 440 }]), []);
+  assert.doesNotThrow(() => M.stopSequence());
+  // Nothing has sounded, so "play again" has nothing to play again.
+  assert.equal(M.canReplay(), false);
+  assert.deepEqual(M.replaySequence(), []);
+});
+
+test('every sounding event also has Hebrew text, the way access.js does it', () => {
+  assert.equal(M.durationText('quarter'), 'רבע');
+  assert.equal(M.durationText('dotted quarter'), 'רבע מנוקד');
+  assert.equal(M.durationText('dotted eighth'), 'שמינית מנוקדת');
+  assert.equal(M.durationText({ name: 'eighth', triplet: true }), 'שמינית בטריולה');
+  assert.equal(M.durationText('banana'), '');
+  assert.equal(M.lengthText('3/8'), 'רבע מנוקד');
+  assert.equal(M.lengthText('5/8'), 'חצי ועוד שמינית');
+  assert.equal(M.lengthText('1/5'), '1/5', 'a length no notes spell is still read out');
+  assert.equal(
+    M.sequenceNarration([{ fraction: 'quarter' }, { fraction: '1/8', rest: true }, { fraction: '1/2' }]),
+    'רבע, הפסקה שמינית, חצי'
+  );
+  assert.equal(M.sequenceNarration([{ fraction: 'quarter', label: 'דו' }]), 'דו');
+  assert.equal(M.sequenceNarration([null, {}]), '');
+  assert.equal(M.sequenceNarration('nope'), '');
+});
+
+test('a silent or sound-less device gets text instead, with no efficacy claim', () => {
+  assert.match(M.audioStatusText('unsupported'), /טקסט/);
+  assert.match(M.audioStatusText('suspended'), /געו במסך/);
+  assert.match(M.audioStatusText('running'), /השתקה/);
+  assert.equal(M.audioStatusText(), M.audioStatusText('unsupported'), 'defaults to the live state');
+  ['unsupported', 'idle', 'suspended', 'running'].forEach((s) => {
+    assert.doesNotMatch(M.audioStatusText(s), /משפר|יעילות|חייב/);
+  });
+});
+
+test('one AudioContext for the whole app, unlocked on the first gesture', () => {
+  const sonify = fs.readFileSync(path.join(root, 'src/lib/sonify.js'), 'utf8');
+  assert.doesNotMatch(sonify, /new\s+AC\s*\(|new\s+(window\.)?(webkit)?AudioContext/);
+  assert.match(sonify, /getSharedAudioContext/);
+  fs.readdirSync(path.join(root, 'src/lib')).filter((n) => n.endsWith('.js') && n !== 'musicEngine.js')
+    .forEach((n) => {
+      const src = fs.readFileSync(path.join(root, 'src/lib', n), 'utf8');
+      assert.doesNotMatch(src, /new\s+AC\s*\(/, n + ' builds a second AudioContext');
+    });
+  const engine = fs.readFileSync(path.join(root, 'src/lib/musicEngine.js'), 'utf8');
+  assert.match(fs.readFileSync(path.join(root, 'src/lib/core.js'), 'utf8'), /installAudioUnlock/);
+  assert.match(engine, /'pointerdown'/);
+  // Timing comes off the audio clock, not off the main thread.
+  assert.match(engine, /currentTime \+ LEAD_IN/);
+  assert.doesNotMatch(engine, /setTimeout\(|setInterval\(/);
+});
+
+test('every page that plays sound loads the engine first, and sw.js caches it', () => {
+  fs.readdirSync(root).filter((p) => p.endsWith('.html')).forEach((page) => {
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    const sonify = html.indexOf('src/lib/sonify.js');
+    if (sonify < 0) return;
+    const engine = html.indexOf('src/lib/musicEngine.js');
+    assert.ok(engine >= 0 && engine < sonify, page + ' loads sonify.js before musicEngine.js');
+  });
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  assert.match(sw, /'\.\/src\/lib\/musicEngine\.js'/);
+  // A tablet that visited while sw.js was at v9 has no musicEngine.js in its
+  // cache, so the version has to move for it to pick the new file up offline.
+  const v = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(Number(v[1]) > 9, 'CACHE is still v' + v[1]);
 });
