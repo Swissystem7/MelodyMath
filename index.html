@@ -51,6 +51,19 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 .cert h2{font-size:1.7rem;margin:8px 0}
 .cert-count{font-size:1.25rem}
 .cert-who{color:var(--muted);font-weight:700}
+.g3{margin:4px 0 2px}
+.g3-row{display:flex;flex-wrap:wrap;gap:10px;direction:ltr;margin:0 0 12px}
+.g3-bar{display:flex;gap:4px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#faf8ff}
+.g3-bar i{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#ece7f5;font:700 .8rem Arial,sans-serif;font-style:normal;color:var(--muted)}
+.g3-bar i.on{background:var(--purple);color:#fff}
+.g3-bar i.left{background:var(--yellow);color:var(--ink);border-radius:6px}
+.g3-play{width:auto;min-height:44px;min-width:44px}
+.g3-note{margin:10px 0 0;color:var(--muted);font-size:.88rem;line-height:1.5}
+.g3-values{direction:ltr;unicode-bidi:isolate;font-weight:800;font-size:1.2rem;margin:0 0 10px}
+.g3-grid{display:flex;flex-direction:column;gap:var(--g3-gap,8px);direction:ltr;margin:0 0 12px}
+.g3-grow{display:grid;grid-template-columns:repeat(var(--g3-cols,4),var(--g3-cell,44px));gap:var(--g3-gap,8px)}
+.g3-cell{min-width:44px;min-height:44px;width:var(--g3-cell,44px);height:var(--g3-cell,44px);padding:0;border-radius:10px;background:#ece7f5;border:1px solid var(--line)}
+.g3-cell.on{background:var(--purple);border-color:var(--purple)}
 @media print{
   body.print-cert #certCard,body.print-cert #certSheet{display:block!important}
   body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard{display:none!important}
@@ -254,6 +267,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
 <script src="src/lib/sonify.js"></script>
+<script src="src/lib/musicEngine.js"></script>
+<script src="src/lib/grade3Music.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/teacherStore.js"></script>
@@ -298,7 +313,7 @@ const rmHe=skillHe;
 const GRADE_NOTE={
   'א':'כיתה א׳: מנייה עד 100, חיבור/חיסור (פירוקי 10, = משמאל, עשרות), ישר מספרים.',
   'ב':'כיתה ב׳: עשרות; כפל 2/4/5/10; חילוק לחלקים ולהכלה. 3/6/7/8/9 חסומים.',
-  'ג':'כיתה ג׳: לוח 3/6/7/8/9 וחילוק — רק אחרי שליטה ב־2/4/5/10.',
+  'ג':'כיתה ג׳: לוח 3 ב־3/4 ולוח 6 ב־6/8, חילוק עם שארית, «פי כמה», שטח כרשת מקצב, דקות ושניות ותדרים עד 10,000. הלוחות 3/6/7/8/9 נפתחים רק אחרי שליטה ב־2/4/5/10.',
   'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».'
 };
 let selectedGrade='א';
@@ -330,6 +345,9 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='bar44' && typeof bindBar44==='function'){
     host.classList.remove('hidden');
     bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
+  } else if(item.widget==='g3' && item.g3 && typeof bindGrade3==='function'){
+    host.classList.remove('hidden');
+    bindGrade3(host, item.g3);
   } else if(item.widget==='vertical' && item.vert && typeof bindVertical==='function'){
     host.classList.remove('hidden');
     bindVertical(host, item.vert);
@@ -362,15 +380,21 @@ let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rpStep=0,rpItem=0,rpAnswered=f
 function prefsNow(){return typeof loadAccess==='function'?loadAccess():{}}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null);if(!groups)return;if(prefsNow().quiet)return;if(typeof playCountClicks==='function')playCountClicks(groups,76)}
+// «3 שארית 2» is not a number, so it goes through the pure validator in
+// grade3Music.js instead of the numeric isCorrect path, and a miss gets the
+// message that names the mistake (R5).
+function remSpec(it){const s=it&&it.g3;return s&&s.kind==='remainder'&&typeof isRemainderAnswer==='function'?s:null}
+function answerOk(it,given){const s=remSpec(it);if(!s)return isCorrect(given,it.answer);return isRemainderAnswer(given,barsAndRemainder(s.beats,s.perBar))}
+function answerHint(it,given,correct){const s=remSpec(it);if(correct||!s||typeof remainderMiss!=='function')return it.hint;return remainderMiss(given,s)}
 function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').textContent=`שאלה ${rmIdx+1}/${RM_DIAG.length}`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;if($('rmItemTag'))$('rmItemTag').textContent=itemTagText(q);setMath($('rmPrompt'),q.prompt);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
-function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=isCorrect($('rmAnswer').value,q.answer);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(q.hint)}. התשובה: <b>${mathHtml(q.answer)}</b></div>`;show('rmFeedback',true);$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים'}
+function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>`;show('rmFeedback',true);$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים'}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
 function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
 const PLAN_PER_SKILL=6;
 function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items;const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
 function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))$('rmPlanTag').textContent=itemTagText(it);setMath($('rmPlanPrompt'),it.prompt);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
-function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=isCorrect($('rmPlanAnswer').value,it.answer);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(it.hint)}. התשובה: <b>${mathHtml(it.answer)}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
+function rpCheck(){if(rpAnswered||!normalizeAnswer($('rmPlanAnswer').value))return;rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerOk(it,$('rmPlanAnswer').value);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(answerHint(it,$('rmPlanAnswer').value,correct))}. התשובה: <b>${mathHtml(it.answer)}</b></div>`;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא'}
 function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true}}
 $('rmBegin').onclick=()=>{RM_DIAG=currentDiag();rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
@@ -554,7 +578,9 @@ function beatPool(){
   else if(pack==='multiplication' || pack==='division' || pack==='basic_fractions') pool=rowsOf(pack);
   else pool=classItems();
   if(typeof gateItems==='function') pool=gateItems(pool, beatHist, typeof allItems==='function'?allItems():pool);
-  return pool;
+  // Beat mode answers by tapping a choice, so an item that needs a typed
+  // «3 שארית 2» stays in the typed flows only.
+  return pool.filter(it=>!it.typed);
 }
 function showBeatCard(id){ ['beatGate','beatPlay','beatDone'].forEach(x=>show(x,x===id)); }
 let beatTimerId=null, beatOpenedAt=0, beatCurrent=null, beatAnswered=false, beatSeed=1, beatHist=[], beatLevel=1, beatLastId=null;
