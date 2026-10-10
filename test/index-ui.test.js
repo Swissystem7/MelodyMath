@@ -63,6 +63,7 @@ test('the who form refuses a name the roster refuses instead of saying it was sa
       saveWho: (w) => { calls.push(['saveWho', w.classCode, w.name]); },
       endTeacherSession: () => { calls.push(['end']); },
       applyWhoToForm: () => {}, renderTeacherReport: () => {}, renderClassBoard: () => {}, renderClassKids: () => {},
+      ppRenderReport: () => {},
       who: { classCode: '', name: '' }, openSess: null,
     };
     vm.createContext(ctx);

@@ -13,6 +13,8 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+/* הבדיקה (#110): פסי השמיניות אינם יעדי מגע, ולכן הם מתכווצים ואין גלילה אופקית ב־360px */
+.pp-bar{display:flex;gap:3px;border:3px solid var(--purple);border-radius:12px;padding:4px;background:#fff;margin:14px 0}.pp-cell{flex:1 1 0;min-width:0;height:48px;background:#f4f0fc;border:1px solid var(--line);border-radius:8px}.pp-cell.on{background:var(--purple);border-color:var(--purple)}.pp-kicker{margin:0;color:var(--muted);font-size:.9rem;font-weight:700}.pp-report .report-table td{white-space:nowrap}.pp-report .report-table td:first-child{white-space:normal;word-break:break-word}#prePost label,#ppUnit{max-width:100%}#prePost .topline{flex-wrap:wrap;gap:4px 10px}
 @media print{
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
@@ -250,6 +252,27 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <h3>יומן מפגשים</h3>
     <table class="report-table" id="reportSessions"><caption class="sr-only">יומן מפגשים</caption><thead><tr><th scope="col">מתי</th><th scope="col">סוג</th><th scope="col">נכונות</th><th scope="col">מתוך</th></tr></thead><tbody></tbody></table>
   </div>
+  <div id="prePost">
+    <h3>בדיקת לפני/אחרי ביחידה</h3>
+    <p>שתי בדיקות של 8 שאלות באותה רמת קושי, עם מספרים שונים — טופס פתיחה וטופס סיום. הבדיקה שקטה בכוונה: רוצים לראות מה הילד/ה פותר/ת בלי רמז מהצליל, ולכן גם אין משוב בזמן הבדיקה. <b>זו ספירה מקומית בטאבלט הזה ולא ניסוי מבוקר</b> — אין קבוצת ביקורת ואין הקצאה אקראית, ולכן השינוי במספרים אינו מראה שהתרגול הוא שגרם לו.</p>
+    <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:12px 0">
+      <label>יחידה<select id="ppUnit" aria-label="יחידת מדידה"></select></label>
+      <button type="button" id="ppStartPre" class="secondary">בדיקת פתיחה</button>
+      <button type="button" id="ppStartPost" class="secondary">בדיקת סיום</button>
+      <button type="button" id="ppRefresh" class="secondary">רענון</button>
+      <span id="ppMsg" class="who-status"></span>
+    </div>
+    <div id="ppRun" class="hidden no-print">
+      <p class="topline"><span id="ppProgress"></span><span id="ppWhich"></span></p>
+      <p class="prompt" id="ppPrompt"></p>
+      <div id="ppBar"></div>
+      <div class="choices" id="ppChoices" role="group" aria-label="אפשרויות תשובה"></div>
+      <p class="note">אין משוב בזמן הבדיקה — הדוח מופיע בסוף.</p>
+      <p class="sr-only" id="ppLive" aria-live="polite"></p>
+      <button type="button" id="ppStop" class="secondary">עצירת הבדיקה</button>
+    </div>
+    <div id="ppReport" aria-live="polite"></div>
+  </div>
 </div></section>
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
@@ -261,6 +284,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/mastery.js"></script>
 <script src="src/lib/numberLine.js"></script>
 <script src="src/lib/bar44.js"></script>
+<script src="src/lib/prepost.js"></script>
 <script src="src/lib/vertical.js"></script>
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
@@ -383,13 +407,26 @@ const KIND_HE={diag:'אבחון',plan:'תרגול פערים',practice:'תרגו
 let who={classCode:'',name:''},openSess=null;
 function currentWho(){return who.name?who:null}
 function applyWhoToForm(){if($('classCode'))$('classCode').value=who.classCode||'';if($('studentName'))$('studentName').value=who.name||'';if($('whoStatus'))$('whoStatus').textContent=who.name?`נשמר: ${who.name} · כיתה ${who.classCode||'ברירת מחדל'}`:'';renderRosterChips()}
-function saveWhoFromForm(){const code=normalizeCode($('classCode').value);const typed=normalizeCode($('studentName').value);if(!typed){$('whoStatus').textContent='צריך שם או קוד תלמיד/ה.';return}const name=studentLabel(typed);if(!name){$('whoStatus').textContent='השם הזה שמור למערכת ולא נרשם. בחרו שם או כינוי אחר.';return}if(openSess)endTeacherSession();who={classCode:code,name:name};upsertStudent(code,name);saveWho(who);applyWhoToForm();renderTeacherReport();renderClassBoard();renderClassKids()}
+function saveWhoFromForm(){const code=normalizeCode($('classCode').value);const typed=normalizeCode($('studentName').value);if(!typed){$('whoStatus').textContent='צריך שם או קוד תלמיד/ה.';return}const name=studentLabel(typed);if(!name){$('whoStatus').textContent='השם הזה שמור למערכת ולא נרשם. בחרו שם או כינוי אחר.';return}if(openSess)endTeacherSession();who={classCode:code,name:name};upsertStudent(code,name);saveWho(who);applyWhoToForm();renderTeacherReport();renderClassBoard();renderClassKids();ppRenderReport()}
 function ensureTeacherSession(kind){if(!who.name)return null;if(openSess&&openSess.kind===kind)return openSess;if(openSess)endTeacherSession();openSess=startSession(who.classCode,who.name,kind);return openSess}
 function logTeacherItem(item){const s=ensureTeacherSession(item.kind);if(!s)return;addItem(who.classCode,who.name,s.id,item)}
 function endTeacherSession(){if(!openSess||!who.name){openSess=null;return null}const s=openSess;openSess=null;return endSession(who.classCode,who.name,s.id)||s}
 function fmtWhen(ts){if(!ts)return '—';try{return new Date(ts).toLocaleString('he-IL')}catch(e){return String(ts)}}
 function renderTeacherReport(){const empty=$('reportEmpty'),body=$('reportBody');if(!empty||!body)return;if(!who.name){show('reportEmpty',true);show('reportBody',false);return}const student=getStudent(who.classCode,who.name);if(!student||!allItems(student).length){empty.textContent='אין עדיין רישום לתלמיד/ה הזו במכשיר הזה. אחרי תרגול או אבחון — הנתונים יופיעו כאן.';show('reportEmpty',true);show('reportBody',false);return}const r=buildReport(student);show('reportEmpty',false);show('reportBody',true);$('reportTitle').textContent=`${r.name} · כיתה ${who.classCode||'ברירת מחדל'}`;$('reportStats').innerHTML=`<div class="stat"><strong>${r.correct}/${r.total}</strong>נכונות במכשיר</div><div class="stat"><strong>${r.total?Math.round(100*r.correct/r.total):0}%</strong>דיוק מצטבר</div><div class="stat"><strong>${r.streak.current}</strong>רצף נוכחי</div><div class="stat"><strong>${r.streak.best}</strong>רצף שיא</div>`;const tb=$('reportSkills').querySelector('tbody');tb.innerHTML=r.perSkill.length?r.perSkill.map(s=>`<tr><td>${escapeHtml(s.skill)}</td><td>${s.correct}</td><td>${s.total}</td><td>${Math.round(s.accuracy*100)}%</td></tr>`).join(''):'<tr><td colspan="4">אין עדיין פירוט מיומנות.</td></tr>';const el=$('reportErrors');el.innerHTML=r.repeatingErrors.length?r.repeatingErrors.map(e=>`<li>${mathHtml(e.prompt)} — ${e.count} פעמים${e.skill?' · '+escapeHtml(e.skill):''}</li>`).join(''):'<li>אין תרגיל שנפסל פעמיים או יותר.</li>';const sb=$('reportSessions').querySelector('tbody');sb.innerHTML=r.sessions.length?r.sessions.slice().reverse().map(s=>`<tr><td>${fmtWhen(s.started)}</td><td>${escapeHtml(KIND_HE[s.kind]||s.kind)}</td><td>${s.correct}</td><td>${s.total}</td></tr>`).join(''):'<tr><td colspan="4">אין מפגשים.</td></tr>'}
 function renderClassBoard(){const empty=$('classBoardEmpty'),table=$('classBoard');if(!empty||!table)return;const rows=buildClassOverview(who.classCode||'');if(!rows.length){show('classBoardEmpty',true);table.classList.add('hidden');return}show('classBoardEmpty',false);table.classList.remove('hidden');table.querySelector('tbody').innerHTML=rows.map(r=>`<tr><td><button type="button" class="secondary" data-kid="${escapeHtml(r.name)}">${escapeHtml(r.name)}</button></td><td>${r.correct}</td><td>${r.total}</td><td>${r.total?Math.round(100*r.accuracy):0}%</td><td>${r.repeating}</td><td>${r.lastAt?fmtWhen(r.lastAt)+' · '+escapeHtml(KIND_HE[r.lastKind]||r.lastKind):'—'}</td></tr>`).join('');table.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>switchToKid(b.dataset.kid))}
+// ---- בדיקת לפני/אחרי ליחידה (#110) ----
+// הבדיקה נרשמת כמפגש רגיל ב־teacherStore עם kind "pre:<יחידה>" / "post:<יחידה>",
+// ולכן אין כאן אחסון חדש. היא שקטה ובלי משוב בכוונה: §10 R4 שלב 7 מבקש את אותה
+// מתמטיקה בלי צליל, ומשוב בין הפריטים היה הופך את בדיקת הסיום לקלה יותר.
+Object.assign(KIND_HE,kindLabels());
+let ppState=null;
+function ppUnitId(){const sel=$('ppUnit');const id=sel&&sel.value?sel.value:unitIds()[0];return unitById(id)?id:unitIds()[0]}
+function ppFillUnits(){const sel=$('ppUnit');if(!sel)return;sel.innerHTML=unitIds().map(id=>`<option value="${escapeHtml(id)}">${escapeHtml(unitById(id).title)} · כיתה ${escapeHtml(unitById(id).grade)}׳</option>`).join('')}
+function ppHalt(msg){if(ppState){endSession(who.classCode,who.name,ppState.sess.id);ppState=null}show('ppRun',false);if($('ppMsg'))$('ppMsg').textContent=msg||''}
+function ppStart(phase){const box=$('ppMsg');if(!who.name){if(box)box.textContent='בחרו קוד כיתה ושם תלמיד/ה בסרגל למעלה, ואז «שמירה במכשיר».';return}const unitId=ppUnitId();const items=itemsForPhase(unitId,phase);if(!items.length)return;ppHalt('');if(openSess)endTeacherSession();const sess=startSession(who.classCode,who.name,checkKind(unitId,phase));if(!sess){if(box)box.textContent='לא הצלחנו לפתוח רישום בטאבלט הזה.';return}ppState={unitId:unitId,phase:phase,items:items,i:0,sess:sess};if(box)box.textContent='';show('ppRun',true);ppRender()}
+function ppRender(){const s=ppState;if(!s||!$('ppPrompt')||!$('ppChoices'))return;const it=s.items[s.i];$('ppProgress').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}`;$('ppWhich').textContent=`${phaseLabel(s.phase)} · ${unitById(s.unitId).title}`;setMath($('ppPrompt'),it.prompt);$('ppBar').innerHTML=renderCheckBarHtml(it.eighths);$('ppChoices').innerHTML=it.choices.map((c,n)=>`<button type="button" class="choice" data-c="${n}"><bdi dir="ltr">${escapeHtml(String(c))}</bdi></button>`).join('');$('ppChoices').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ppPick(it.choices[Number(b.dataset.c)]));$('ppLive').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}: ${it.prompt}`}
+function ppPick(given){const s=ppState;if(!s)return;const it=s.items[s.i];addItem(who.classCode,who.name,s.sess.id,{skill:it.skill,prompt:it.prompt,answer:it.answer,given:given,correct:checkItemCorrect(it,given)});s.i+=1;if(s.i<s.items.length){ppRender();return}ppHalt('הבדיקה נרשמה בטאבלט הזה.');ppRenderReport();renderTeacherReport();renderClassBoard()}
+function ppRenderReport(){const box=$('ppReport');if(!box)return;box.innerHTML=renderPrePostHtml(classPrePost(loadRoster(who.classCode||''),ppUnitId()))}
 function renderParentLetter(){const box=$('parentLetter');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const letter=buildParentNote(student,{classCode:who.classCode,observation:$('teacherNote')?$('teacherNote').value:''});box.innerHTML=renderParentNoteHtml(letter);box.classList.remove('hidden')}
 function saveTeacherNote(){if(!who.name){$('noteMsg').textContent='בחרו תלמיד/ה קודם.';return}const text=$('teacherNote')?$('teacherNote').value:'';const note=addNote(who.classCode,who.name,text);$('noteMsg').textContent=note?'ההערה נשמרה במכשיר.':'צריך טקסט קצר.';if(note)$('teacherNote').value='';renderParentLetter()}
 who=loadWho();applyWhoToForm();
@@ -397,6 +434,12 @@ if($('whoSave'))$('whoSave').onclick=saveWhoFromForm;
 if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
 function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
 if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
+ppFillUnits();ppRenderReport();
+if($('ppUnit'))$('ppUnit').onchange=()=>{ppHalt('');ppRenderReport()};
+if($('ppStartPre'))$('ppStartPre').onclick=()=>ppStart('pre');
+if($('ppStartPost'))$('ppStartPost').onclick=()=>ppStart('post');
+if($('ppRefresh'))$('ppRefresh').onclick=ppRenderReport;
+if($('ppStop'))$('ppStop').onclick=()=>ppHalt('הבדיקה הופסקה. התשובות שנרשמו עד כאן נשמרו.');
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
 window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
