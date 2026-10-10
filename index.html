@@ -13,6 +13,62 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+
+/* ---- Mobile pass, plan §4.1–§4.2 ------------------------------------------
+   The page was tuned for a 820px tablet. These rules make it hold at 360px
+   without a horizontal scrollbar, and pin every finger target to 44×44px.
+   The 8px gap each row already uses is the required spacing. */
+
+/* Touch targets. 13px of padding alone gives a ~45px tall button on a word
+   label but only ~43px wide on "−" and "+", so both axes are pinned. */
+button,.primary,.secondary,.tab,.choice,.level,summary,label.secondary{min-height:44px;min-width:44px}
+input,select,textarea{min-height:44px}
+/* `input{width:100%}` above also hits the checkboxes, which then stretch
+   across their flex label. A checkbox is tapped through its label, and the
+   label is what carries the 44px. */
+input[type=checkbox]{width:auto;min-width:24px;min-height:24px;flex:0 0 auto}
+input[type=range]{min-height:44px;padding:0}
+/* The checkbox rows are tapped through the label, so the label is the target.
+   `.metro-bar label` is already flex; the worksheet copy of .metro-acc is not,
+   and min-height does nothing to an inline box. */
+.metro-acc{display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.who-bar label,.sheet-actions label{min-height:44px}
+.navcard{min-height:44px}
+/* Half of an edge tick hangs outside the rail, and the widget box below
+   clips what leaves it, so the rail keeps 24px for a 44px tick to hang into. */
+.nline-rail{margin-inline:24px}
+/* A table wider than the phone scrolls inside its own box. Without this the
+   six-column class board widens the document and every screen scrolls. */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-scroll>table{margin:12px 0;min-width:26rem}
+/* Same idea for the drawn widgets (number line, bar 4/4, vertical sums,
+   ruler, clock, bar chart): they scroll in place, never the page. */
+#rmWidget,#rmPlanWidget,#classWidget,#beatWidget{overflow-x:auto;overflow-y:hidden}
+.topline{flex-wrap:wrap}
+.metro-step{display:flex;gap:8px}
+.replay{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.replay button{width:auto}
+.quiet-note{margin:6px 0 0;font-size:.85rem;color:var(--muted);font-weight:700}
+.sheet-actions select,.sheet-actions input[type=number]{max-width:100%}
+@media(max-width:430px){
+  .wrap{padding:16px 12px 48px}
+  h1{font-size:clamp(1.7rem,8vw,2.4rem)}
+  /* Six tabs in two even columns; wrapping flex left odd 70px-wide slivers. */
+  .tabs{display:grid;grid-template-columns:1fr 1fr}
+  .tab{width:100%}
+  .who-bar,.metro-bar{padding:10px}
+  /* One control per row. A label plus its button side by side cannot both
+     stay above 44px at this width. `>` keeps the roster, class and grade
+     chips wrapping as chips instead of stretching full width. */
+  .who-bar label,.sheet-actions label{flex-basis:100%;min-width:0}
+  .who-bar>button,.metro-bar>button,.sheet-actions>button,.onboard-actions .primary{width:100%}
+  .metro-step{display:flex;flex-basis:100%;gap:8px}
+  .metro-step button{flex:1}
+  .stat{flex-basis:100%}
+  .levels,.playgrid,.more-nav,.choices,.sheet-grid{grid-template-columns:1fr}
+  .answer-row{display:block}
+  .answer-row button{width:100%;margin-top:9px}
+}
 @media print{
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
@@ -73,8 +129,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <summary>מקצב אופציונלי — נקישה לקצב, לא טיפול</summary>
   <button type="button" id="metroToggle" aria-pressed="false">▶ מקצב</button>
   <label>BPM <input id="metroBpm" type="number" min="40" max="140" value="80" inputmode="numeric" aria-label="פעימות לדקה"></label>
-  <button type="button" id="metroDown" aria-label="האט">−</button>
-  <button type="button" id="metroUp" aria-label="האץ">+</button>
+  <span class="metro-step"><button type="button" id="metroDown" aria-label="האט">−</button><button type="button" id="metroUp" aria-label="האץ">+</button></span>
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
   <span class="note">נקישה לקצב התרגול במכשיר. המורה שולטת ב־BPM. לא טיפול ואין טענת יעילות.</span>
 </details>
@@ -203,7 +258,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <button type="button" id="boardPrint">הדפסת הלוח</button>
   </div>
   <div id="classBoardEmpty" class="note">שמרו קוד כיתה ושם בסרגל, תרגלו, ואז הלוח יתמלא.</div>
-  <table class="class-board hidden" id="classBoard"><caption class="sr-only">כל התלמידים בקוד הכיתה במכשיר הזה</caption><thead><tr><th scope="col">שם</th><th scope="col">נכונות</th><th scope="col">מתוך</th><th scope="col">דיוק</th><th scope="col">שגיאות שחזרו</th><th scope="col">מפגש אחרון</th></tr></thead><tbody></tbody></table>
+  <div class="table-scroll" tabindex="0" role="group" aria-label="לוח כיתה — אפשר לגלול לצדדים"><table class="class-board hidden" id="classBoard"><caption class="sr-only">כל התלמידים בקוד הכיתה במכשיר הזה</caption><thead><tr><th scope="col">שם</th><th scope="col">נכונות</th><th scope="col">מתוך</th><th scope="col">דיוק</th><th scope="col">שגיאות שחזרו</th><th scope="col">מפגש אחרון</th></tr></thead><tbody></tbody></table></div>
 </div>
 <div class="card" id="parentCard">
   <span class="tag">מכתב להורה · בלי טענת שליטה</span>
@@ -244,14 +299,14 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <h3 id="reportTitle"></h3>
     <div id="reportStats" class="session"></div>
     <h3>דיוק לפי מיומנות</h3>
-    <table class="report-table" id="reportSkills"><caption class="sr-only">דיוק לפי מיומנות</caption><thead><tr><th scope="col">מיומנות</th><th scope="col">נכונות</th><th scope="col">מתוך</th><th scope="col">דיוק</th></tr></thead><tbody></tbody></table>
+    <div class="table-scroll" tabindex="0" role="group" aria-label="דיוק לפי מיומנות — אפשר לגלול לצדדים"><table class="report-table" id="reportSkills"><caption class="sr-only">דיוק לפי מיומנות</caption><thead><tr><th scope="col">מיומנות</th><th scope="col">נכונות</th><th scope="col">מתוך</th><th scope="col">דיוק</th></tr></thead><tbody></tbody></table></div>
     <h3>שגיאות שחזרו</h3>
     <ul class="err-list" id="reportErrors"></ul>
     <h3>יומן מפגשים</h3>
-    <table class="report-table" id="reportSessions"><caption class="sr-only">יומן מפגשים</caption><thead><tr><th scope="col">מתי</th><th scope="col">סוג</th><th scope="col">נכונות</th><th scope="col">מתוך</th></tr></thead><tbody></tbody></table>
+    <div class="table-scroll" tabindex="0" role="group" aria-label="יומן מפגשים — אפשר לגלול לצדדים"><table class="report-table" id="reportSessions"><caption class="sr-only">יומן מפגשים</caption><thead><tr><th scope="col">מתי</th><th scope="col">סוג</th><th scope="col">נכונות</th><th scope="col">מתוך</th></tr></thead><tbody></tbody></table></div>
   </div>
 </div></section>
-<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
+<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" role="status" aria-live="polite"></div><div class="replay"><button type="button" id="freqPlay" class="secondary">השמע שוב</button></div><p class="quiet-note" id="freqQuiet" hidden>מצב «שקט» דלוק — התדר מוצג כאן בטקסט ולא מתנגן.</p></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><div class="replay"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><button type="button" id="rhythmPlay" class="secondary">השמע שוב</button></div><div id="rhythm" class="result rhythm" role="status" aria-live="polite"></div><p class="quiet-note" id="rhythmQuiet" hidden>מצב «שקט» דלוק — התיבה מוצגת כאן בשברים ולא מתנגנת.</p></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
@@ -290,9 +345,13 @@ $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show(
 function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
 // yToFreq / formatRhythmPattern / playFreq / playRhythmClicks מגיעים מ-src/lib/sonify.js.
-function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);$('freq').textContent=`${hz.toFixed(2)} Hz`;if(play)playFreq(hz)}$('y').oninput=()=>renderFreq(true);renderFreq(false);
+// כל אירוע צלילי מקבל גם טקסט (תבנית access.js), וב«שקט» רק הטקסט נשאר.
+function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);const quiet=!!prefsNow().quiet;$('freq').innerHTML=`<bdi dir="ltr">${hz.toFixed(2)} Hz</bdi>`;$('freqQuiet').hidden=!quiet;if(play&&!quiet)playFreq(hz)}$('y').oninput=()=>renderFreq(true);$('freqPlay').onclick=()=>renderFreq(true);renderFreq(false);
 function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
-function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`;if(play)playRhythmClicks(x.pattern,x.bpm)}$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
+let lastRhythm=null;
+function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);lastRhythm=x;$('rhythm').innerHTML=`<bdi dir="ltr">${x.fractionPattern}</bdi><br><small><bdi dir="ltr">${x.bpm} BPM</bdi> · <bdi dir="ltr">${x.expectedDuration}</bdi> שניות</small>`;playRhythm(play)}
+function playRhythm(play){const quiet=!!prefsNow().quiet;$('rhythmQuiet').hidden=!quiet;if(play&&!quiet&&lastRhythm)playRhythmClicks(lastRhythm.pattern,lastRhythm.bpm)}
+$('makeRhythm').onclick=()=>showRhythm(true);$('rhythmPlay').onclick=()=>playRhythm(true);showRhythm(false);
 // ---- תרגול לפי כיתה (בנק מתויג; מקצב = פסינג, לא מוצר) ----
 const rmHe=skillHe;
 const GRADE_NOTE={

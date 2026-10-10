@@ -67,6 +67,8 @@
   let heldStopTimer = null;
   const scheduled = [];
 
+  let primed = false;
+
   function getAudioContext() {
     if (typeof window === 'undefined') return null;
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -75,7 +77,46 @@
     if (audioCtx.state === 'suspended') {
       try { audioCtx.resume(); } catch (e) { /* autoplay policy */ }
     }
+    // The minimal unlock, inlined here so that any play path that happens to be
+    // the very first user gesture still gets a running context (plan §4.3).
+    primeForGesture(audioCtx);
     return audioCtx;
+  }
+
+  // iOS Safari keeps a context 'suspended' until a silent buffer has actually
+  // been started from inside a user-gesture handler; resume() alone is not
+  // enough there. One sample at the device rate is inaudible on every device.
+  // TODO: the shared engine of issue #100 is meant to own this
+  // (https://github.com/Swissystem7/MelodyMath/issues/100 — musicEngine.js
+  // landed with the pure arithmetic only, no unlockAudio). When its audio half
+  // ships it assigns unlockAudio over the same global and this becomes a
+  // fallback for pages that do not load the engine.
+  function primeForGesture(ac) {
+    if (primed || !ac || typeof ac.createBufferSource !== 'function') return;
+    try {
+      const src = ac.createBufferSource();
+      src.buffer = ac.createBuffer(1, 1, ac.sampleRate);
+      src.connect(ac.destination);
+      if (typeof src.start === 'function') src.start(0);
+      else if (typeof src.noteOn === 'function') src.noteOn(0);
+    } catch (e) { return; /* ancient WebKit; resume() above is all we get */ }
+    // Only stop priming once the context really runs. A silent sample started
+    // outside a gesture does not wake iOS, so a context that is still
+    // suspended has to be primed again on the next call.
+    primed = ac.state === 'running';
+  }
+
+  // Call from the first pointerdown. Returns the context, or null in Node and
+  // in a browser without Web Audio, so a caller can fall back to text.
+  function unlockAudio() {
+    return getAudioContext();
+  }
+
+  // Is there a context, and is it actually running? Nothing can have sounded
+  // while this is false. The Playwright mobile spec reads it around the first
+  // tap; before the tap there is no context at all.
+  function audioUnlocked() {
+    return !!audioCtx && audioCtx.state === 'running';
   }
 
   function stopHeldTone() {
@@ -330,7 +371,8 @@
   return {
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
-    getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks,
+    getAudioContext, unlockAudio, audioUnlocked,
+    playFreq, playRhythmClicks, playClick, playCountClicks,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };
