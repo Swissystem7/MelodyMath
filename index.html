@@ -54,11 +54,50 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 @media print{
   body.print-cert #certCard,body.print-cert #certSheet{display:block!important}
   body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard{display:none!important}
+  body.print-rama #ramaCard,body.print-rama #ramaSheet{display:block!important}
+  body.print-rama #trialKit,body.print-rama #reportCard,body.print-rama #classBoardCard,body.print-rama #parentCard,body.print-rama #worksheetCard,body.print-rama #certCard{display:none!important}
   .first-run,#firstRun{display:none!important}
 }
+.smartboard-mode{font-size:1.22rem}
+.smartboard-mode .wrap{max-width:1240px}
+.smartboard-mode h1{font-size:clamp(2.8rem,8vw,5.2rem)}
+.smartboard-mode .prompt{font-size:clamp(2rem,5vw,3.2rem);line-height:1.35}
+.smartboard-mode .choice{min-height:90px;font-size:2.2rem;border-width:3px}
+.smartboard-mode button,.smartboard-mode input,.smartboard-mode select{min-height:56px;font-size:1.2rem}
+.smartboard-mode .card{box-shadow:0 25px 60px #4638702c;border-width:2px}
+.quick-tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.quick-tools button{width:auto;min-height:44px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(33,24,59,.72);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.modal-card{background:#fff;border-radius:24px;padding:26px;max-width:380px;width:100%;position:relative;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.modal-close{position:absolute;top:12px;left:12px;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px;min-height:auto}
+.qr-box{display:flex;justify-content:center;margin:14px 0;padding:12px;background:#fdfcff;border-radius:16px;border:1px solid var(--line)}
+.qr-img{max-width:220px;height:auto}
+.share-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.wa-btn{display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:800;padding:13px 18px;border-radius:12px;color:#0b6b43;background:#e5f6ef;border:1px solid #167957}
+.rama-card{border:2px solid var(--purple);background:#fff;border-radius:20px;padding:24px;margin:16px 0}
+.rama-item{background:#f8f6fc;border-radius:14px;padding:14px 16px;margin:10px 0;border-right:4px solid var(--purple)}
 </style></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+<div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
+  <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
+  <button type="button" id="qrShareBtn" class="secondary">📱 קוד QR ושיתוף מהיר</button>
+</div>
+<div id="qrModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="qrCloseBtn" aria-label="סגירה">✕</button>
+    <h3 id="qrTitle">שיתוף מהיר לכיתה ולהורים</h3>
+    <p class="note">סרקו ישירות מהטלפון או הטאבלט כדי לפתוח את התרגול ללא התקנה וללא רישום:</p>
+    <div class="qr-box">
+      <img src="icons/qr-code.svg" alt="קוד QR עבור MelodyMath" width="220" height="220" class="qr-img">
+    </div>
+    <div class="share-actions">
+      <button type="button" id="copyLinkBtn" class="primary">📋 העתקת קישור</button>
+      <a id="whatsappShareBtn" href="https://api.whatsapp.com/send?text=%D7%AA%D7%A8%D7%92%D7%95%D7%9C%20%D7%9E%D7%AA%D7%9E%D7%98%D7%99%D7%A7%D7%94%20%D7%9E%D7%95%D7%96%D7%99%D7%A7%D7%9C%D7%99%20%D7%9C%D7%9C%D7%90%20%D7%94%D7%A8%D7%A9%D7%9E%D7%94%3A%20https%3A%2F%2Fswissystem7.github.io%2FMelodyMath%2F" target="_blank" rel="noopener" class="secondary wa-btn">💬 שיתוף בוואטסאפ</a>
+    </div>
+    <span id="copyMsg" class="who-status" role="status" aria-live="polite"></span>
+  </div>
+</div>
 <div class="who-bar" id="whoBar">
   <label>קוד כיתה <input id="classCode" maxlength="24" autocomplete="off" placeholder="למשל שילוב-ג"></label>
   <label>שם או קוד תלמיד/ה <input id="studentName" maxlength="24" autocomplete="off" placeholder="למשל נועה / נ-14"></label>
@@ -250,9 +289,20 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <h3>יומן מפגשים</h3>
     <table class="report-table" id="reportSessions"><caption class="sr-only">יומן מפגשים</caption><thead><tr><th scope="col">מתי</th><th scope="col">סוג</th><th scope="col">נכונות</th><th scope="col">מתוך</th></tr></thead><tbody></tbody></table>
   </div>
+</div>
+<div class="card" id="ramaCard">
+  <span class="tag">מיפוי ראמ״ה ומיצ״ב · מוקדי כשל</span>
+  <h2>כרטיס אבחון ראמ״ה ומענה מוזיקלי</h2>
+  <p>מיפוי 10 מוקדי הכשל הארציים מול תוכנית הלימודים, שיוך למחקרים קוגניטיביים והתאמת תוכנית מוזיקלית אישית. רישום פדגוגי מקומי לצוות ההוראה — ללא אבחון קליני.</p>
+  <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+    <button type="button" id="ramaMake" class="secondary">הצגת כרטיס האבחון</button>
+    <button type="button" id="ramaPrint">הדפסת כרטיס ראמ״ה</button>
+  </div>
+  <div id="ramaSheet" class="hidden" aria-live="polite"></div>
 </div></section>
-<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
+<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div><div class="tool" style="grid-column:1 / -1;"><h3>ישר מספרים מנגן — שברים ותדרים</h3><p>מזיזים את המחוון או לוחצים על שברים מדויקים כדי לשמוע את גובה הצליל (מ־130.8Hz ועד שתי אוקטבות מעלה). בנקודות שבר מפתח (0, 1/4, 1/2, 3/4, 1) נשמע פעמון הרמוני מיוחד.</p><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"></div><div class="nl-keys" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"><button type="button" class="secondary" data-pct="0">0 (בסיס)</button><button type="button" class="secondary" data-pct="25">1/4 (רבע)</button><button type="button" class="secondary" data-pct="50">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
+<script src="src/lib/remediation.js"></script>
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
@@ -293,6 +343,8 @@ document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activat
 function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);$('freq').textContent=`${hz.toFixed(2)} Hz`;if(play)playFreq(hz)}$('y').oninput=()=>renderFreq(true);renderFreq(false);
 function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
 function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`;if(play)playRhythmClicks(x.pattern,x.bpm)}$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
+function updateSingingLine(val,play){if(typeof soundForTick!=='function')return;const v=Math.max(0,Math.min(100,Math.round(Number(val)||0)));if($('singingLine'))$('singingLine').value=v;const s=soundForTick(v,{min:0,max:100});const lbl=s.pointName?`${v}% (${s.pointName})`:`${v}%`;if($('singingLabel'))$('singingLabel').textContent=lbl;const bell=s.isKeyPoint?` 🔔 פעמון שבר: ${s.pointName}`:'';if($('singingResult'))$('singingResult').innerHTML=`<b>${s.frequency} Hz</b> · ${lbl}${bell}`;if(play&&typeof playFreq==='function')playFreq(s.frequency)}
+if($('singingLine')){$('singingLine').oninput=function(){updateSingingLine(this.value,true)};document.querySelectorAll('.nl-keys [data-pct]').forEach(b=>b.onclick=()=>updateSingingLine(b.dataset.pct,true));updateSingingLine(50,false)}
 // ---- תרגול לפי כיתה (בנק מתויג; מקצב = פסינג, לא מוצר) ----
 const rmHe=skillHe;
 const GRADE_NOTE={
@@ -398,7 +450,7 @@ if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
 function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
 if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));$('rosterMsg').textContent=summarizeImport(res);if(!res.ok)return;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
@@ -408,6 +460,9 @@ if($('boardPrint'))$('boardPrint').onclick=()=>{document.body.classList.remove('
 if($('noteSave'))$('noteSave').onclick=saveTeacherNote;
 if($('parentMake'))$('parentMake').onclick=renderParentLetter;
 if($('parentPrint'))$('parentPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class');document.body.classList.add('print-parent');renderParentLetter();window.print()};
+function renderRamaReport(){const box=$('ramaSheet');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const rep=buildReport(student);const pts=typeof getRemediationPoints==='function'?getRemediationPoints():[];const when=(function(){try{return new Date().toLocaleDateString('he-IL')}catch(e){return ''}})();const weak=(rep.perSkill||[]).filter(s=>s.accuracy<.75||(s.total-s.correct)>=2).map(s=>s.skill);const errs=(rep.repeatingErrors||[]).map(e=>e.skill||e.prompt);const matched=pts.filter(p=>weak.some(w=>p.title.includes(w)||p.topic.includes(w))||errs.some(e=>p.title.includes(e)||p.topic.includes(e)));const list=matched.length?matched:pts.slice(0,3);box.innerHTML=`<div class="rama-card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px;"><h3 style="margin:0;">כרטיס אבחון ומיפוי מוקדי קושי (ראמ״ה / מיצ״ב)</h3><span class="tag">${escapeHtml(when)}</span></div><p><b>תלמיד/ה:</b> ${escapeHtml(who.name)} · <b>קוד כיתה:</b> ${escapeHtml(who.classCode||'ברירת מחדל')} · <b>תרגילים שנרשמו במכשיר:</b> ${rep.total} (דיוק: ${rep.total?Math.round(100*rep.correct/rep.total):0}%)</p><div style="margin:16px 0;"><h4 style="margin:0 0 8px;">מוקדי כשל שזוהו בבנקים ומענה פדגוגי מותאם:</h4>${list.map(p=>`<div class="rama-item"><strong>${escapeHtml(p.grade)} · ${escapeHtml(p.title)} (${escapeHtml(p.ramaSection)})</strong><div style="color:var(--bad);font-size:.9rem;margin:4px 0;"><b>נקודת כשל:</b> ${escapeHtml(p.failureReason)}</div><div style="color:var(--good);font-size:.9rem;"><b>מענה מוזיקלי מותאם:</b> ${escapeHtml(p.musicalRemediation)}</div><div style="color:var(--muted);font-size:.8rem;margin-top:4px;"><b>בסיס מחקרי:</b> ${escapeHtml(p.foundation)}</div></div>`).join('')}</div><p class="note" style="margin-top:12px;font-size:.8rem;">כרטיס פדגוגי מקומי לצוות ההוראה. הנתונים נשמרים במכשיר בלבד. אין כאן אבחון קליני ואין טענת שליטה.</p></div>`;box.classList.remove('hidden')}
+if($('ramaMake'))$('ramaMake').onclick=renderRamaReport;
+if($('ramaPrint'))$('ramaPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert');document.body.classList.add('print-rama');renderRamaReport();window.print()};
 
 const CLASS_MS=8*60*1000;
 const CLASS_BANK=classItems();
@@ -496,6 +551,9 @@ function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
 // restarting on every answer put an off-beat click right after each pick.
 function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
 function noteMetro(correct){
+  if(typeof playHarmonicReward==='function'){
+    playHarmonicReward(correct ? metroStreak + 1 : 0);
+  }
   if(!correct){ metroStreak=0; return; }
   metroStreak+=1;
   if($('metroAccel')&&$('metroAccel').checked){
@@ -510,6 +568,12 @@ document.addEventListener('visibilitychange',function(){ if(document.hidden) sto
 paintMetro();
 renderRosterChips();
 renderClassBoard();
+function toggleSmartboard(){const on=document.body.classList.toggle('smartboard-mode');const btn=$('smartboardToggle');if(btn){btn.setAttribute('aria-pressed',on?'true':'false');btn.classList.toggle('active',on)}try{if(on&&!document.fullscreenElement&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>{})}else if(!on&&document.fullscreenElement&&document.exitFullscreen){document.exitFullscreen().catch(()=>{})}}catch(e){}}
+if($('smartboardToggle'))$('smartboardToggle').onclick=toggleSmartboard;
+if($('qrShareBtn'))$('qrShareBtn').onclick=()=>{show('qrModal',true);if($('copyMsg'))$('copyMsg').textContent=''};
+if($('qrCloseBtn'))$('qrCloseBtn').onclick=()=>show('qrModal',false);
+if($('qrModal'))$('qrModal').onclick=(e)=>{if(e.target===$('qrModal'))show('qrModal',false)};
+if($('copyLinkBtn'))$('copyLinkBtn').onclick=()=>{try{navigator.clipboard.writeText('https://swissystem7.github.io/MelodyMath/').then(()=>{if($('copyMsg'))$('copyMsg').textContent='הקישור הועתק ללוח! 📋'}).catch(()=>{if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'})}catch(e){if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'}};
 
 function renderFirstRun(){
   const box=$('firstRun'); if(!box || typeof shouldShowOnboard!=='function') return;

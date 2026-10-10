@@ -25,3 +25,23 @@ test('the HTML marks ticks and announces the selected number', () => {
   assert.match(html, /נבחר: 4/);
   assert.doesNotMatch(html, /<script/);
 });
+
+test('soundForTick calculates frequencies and identifies key fraction points', () => {
+  const s0 = line.soundForTick(0, { min: 0, max: 100 });
+  assert.equal(s0.percent, 0);
+  assert.equal(s0.isKeyPoint, true);
+  assert.equal(s0.pointName, '0');
+
+  const s50 = line.soundForTick(50, { min: 0, max: 100 });
+  assert.equal(s50.percent, 50);
+  assert.equal(s50.isKeyPoint, true);
+  assert.equal(s50.pointName, '1/2');
+
+  const s100 = line.soundForTick(100, { min: 0, max: 100 });
+  assert.equal(s100.percent, 100);
+  assert.equal(s100.isKeyPoint, true);
+  assert.equal(s100.pointName, '1');
+
+  assert.ok(s100.frequency > s50.frequency);
+  assert.ok(s50.frequency > s0.frequency);
+});

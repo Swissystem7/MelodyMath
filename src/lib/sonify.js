@@ -163,6 +163,27 @@
     scheduleClick(ac, ac.currentTime, hz > 0 ? hz : 1100, 'square', 0.18, 0.055);
   }
 
+  // Harmonic streak feedback: C4 (261.63Hz), E4 (329.63Hz), G4 (392.00Hz), C5 (523.25Hz).
+  const STREAK_NOTES = [261.63, 329.63, 392.00, 523.25];
+  function playHarmonicReward(streak) {
+    const ac = getAudioContext();
+    if (!ac) return;
+    const s = Math.max(0, Math.round(Number(streak) || 0));
+    const now = ac.currentTime;
+    if (s <= 0) {
+      scheduleClick(ac, now, 196, 'sine', 0.15, 0.12);
+      return;
+    }
+    const idx = Math.min(s - 1, STREAK_NOTES.length - 1);
+    if (s >= 4) {
+      STREAK_NOTES.forEach(function (f, i) {
+        scheduleClick(ac, now + i * 0.07, f, 'triangle', 0.22, 0.22);
+      });
+    } else {
+      scheduleClick(ac, now, STREAK_NOTES[idx], 'triangle', 0.22, 0.2);
+    }
+  }
+
   // Soft drum taps for "how many beats?" — distinct from the metronome click.
   // groups = [3, 2] plays three taps, a pause, then two. Caps at 12 per group.
   function playCountClicks(groups, bpm) {
@@ -330,7 +351,7 @@
   return {
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
-    getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks,
+    getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks, playHarmonicReward,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };

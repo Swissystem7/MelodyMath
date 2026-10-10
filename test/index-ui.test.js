@@ -78,3 +78,39 @@ test('the who form refuses a name the roster refuses instead of saying it was sa
   assert.equal(good.who.name, 'נועה');
   assert.equal(run('').calls.length, 0);
 });
+
+test('index.html provides Smartboard mode toggle and classroom projection styles', () => {
+  assert.match(indexHtml, /id="smartboardToggle"/);
+  assert.match(indexHtml, /\.smartboard-mode/);
+  assert.match(indexHtml, /toggleSmartboard/);
+});
+
+test('index.html provides Quick QR Code modal and WhatsApp share for classrooms', () => {
+  assert.match(indexHtml, /id="qrShareBtn"/);
+  assert.match(indexHtml, /id="qrModal"/);
+  assert.match(indexHtml, /id="qrCloseBtn"/);
+  assert.match(indexHtml, /id="copyLinkBtn"/);
+  assert.match(indexHtml, /id="whatsappShareBtn"/);
+  assert.match(indexHtml, /icons\/qr-code\.svg/);
+});
+
+test('teacher tab provides a printable RAMA failure-point diagnostic card', () => {
+  assert.match(indexHtml, /id="ramaCard"/);
+  assert.match(indexHtml, /id="ramaMake"/);
+  assert.match(indexHtml, /id="ramaPrint"/);
+  assert.match(indexHtml, /id="ramaSheet"/);
+  assert.match(indexHtml, /print-rama/);
+  assert.match(indexHtml, /src\/lib\/remediation\.js/);
+});
+
+test('playground includes singing number line with harmonic fraction bells', () => {
+  assert.match(indexHtml, /id="singingLine"/);
+  assert.match(indexHtml, /id="singingLabel"/);
+  assert.match(indexHtml, /id="singingResult"/);
+  assert.match(indexHtml, /updateSingingLine/);
+  assert.match(indexHtml, /soundForTick/);
+});
+
+test('noteMetro triggers harmonic arpeggio streak rewards', () => {
+  assert.match(indexHtml, /playHarmonicReward\(correct \? metroStreak \+ 1 : 0\)/);
+});
