@@ -194,11 +194,27 @@
       scheduleClick(ac, now, 1800, 'square', 0.12, 0.04);
     } else if (type === 'hihat') {
       scheduleClick(ac, now, 5200, 'square', 0.08, 0.025);
+    } else if (type === 'clap') {
+      scheduleClick(ac, now, 1200, 'triangle', 0.2, 0.06);
+      scheduleClick(ac, now + 0.015, 800, 'triangle', 0.16, 0.05);
+      scheduleClick(ac, now + 0.03, 1600, 'square', 0.12, 0.04);
     } else {
       // default: punchy kick drum
       scheduleClick(ac, now, 82, 'sine', 0.35, 0.14);
       scheduleClick(ac, now, 140, 'sine', 0.2, 0.05);
     }
+  }
+
+  // 8-note diatonic rainbow xylophone / glockenspiel (C4 to C5):
+  const XYLO_FREQS = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+  function playXylophoneNote(index) {
+    const ac = getAudioContext();
+    if (!ac) return;
+    const idx = Math.max(0, Math.min(XYLO_FREQS.length - 1, Math.round(Number(index) || 0)));
+    const freq = XYLO_FREQS[idx];
+    const now = ac.currentTime;
+    scheduleClick(ac, now, freq, 'sine', 0.28, 0.32);
+    scheduleClick(ac, now, freq * 2.76, 'sine', 0.08, 0.12);
   }
 
   // Musical chord progressions and bassline based on stage level (1 to 4):
@@ -406,7 +422,7 @@
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
     getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks, playHarmonicReward,
-    playDrumSound, playMusicalAccompaniment,
+    playDrumSound, playMusicalAccompaniment, playXylophoneNote, XYLO_FREQS,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,
   };
