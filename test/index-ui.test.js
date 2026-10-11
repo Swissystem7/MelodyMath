@@ -135,3 +135,22 @@ test('playground includes interactive rhythm gameplay with progressive musical l
   assert.match(indexHtml, /src\/lib\/rhythmGame\.js/);
 });
 
+test('home provides interactive guided micro-lessons studio with manipulatives and stepper', () => {
+  assert.match(indexHtml, /id="tab-lessons"/);
+  assert.match(indexHtml, /data-tab="lessons"/);
+  assert.match(indexHtml, /id="lessons"/);
+  assert.match(indexHtml, /id="lessonsGrid"/);
+  assert.match(indexHtml, /id="lessonsGradeFilter"/);
+  assert.match(indexHtml, /id="activeLessonCard"/);
+  assert.match(indexHtml, /id="lessonStepper"/);
+  assert.match(indexHtml, /id="stepInteractiveBox"/);
+  assert.match(indexHtml, /id="stepQuizBox"/);
+  assert.match(indexHtml, /id="stepPracticeBtn"/);
+  assert.match(indexHtml, /src\/lib\/interactiveLessons\.js/);
+  assert.match(indexHtml, /renderLessonsUI/);
+  assert.match(indexHtml, /renderFractionBuilderUI/);
+  assert.match(indexHtml, /renderMultExplorerUI/);
+  assert.match(indexHtml, /renderTensBuilderUI/);
+  assert.match(indexHtml, /renderLineExplorerUI/);
+});
+
