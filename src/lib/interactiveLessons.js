@@ -178,11 +178,24 @@
     };
   }
 
+  function registerLesson(lesson) {
+    if (!lesson || typeof lesson !== 'object') return false;
+    if (!lesson.id || !lesson.title || !lesson.grade || !Array.isArray(lesson.steps)) return false;
+    const existingIdx = LESSONS.findIndex(function (l) { return l.id === lesson.id; });
+    if (existingIdx >= 0) {
+      LESSONS[existingIdx] = lesson;
+    } else {
+      LESSONS.push(lesson);
+    }
+    return true;
+  }
+
   return {
     LESSONS,
     getAllLessons,
     getLessonById,
     getLessonsForGrade,
-    evaluateStepAnswer
+    evaluateStepAnswer,
+    registerLesson
   };
 });

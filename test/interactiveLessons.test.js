@@ -70,3 +70,32 @@ test('interactive lessons strictly avoid false efficacy claims', () => {
   assert.doesNotMatch(text, /טיפול/);
   assert.doesNotMatch(text, /ADHD|דיסקלקול/i);
 });
+
+test('registerLesson adds and updates modular learning content dynamically', () => {
+  const { registerLesson } = require('../src/lib/interactiveLessons');
+  assert.equal(typeof registerLesson, 'function');
+
+  const customLesson = {
+    id: 'test-custom-geometry',
+    title: 'מקצבים אוקלידיים ומעגלי זמן',
+    grade: 'ד',
+    strand: 'גיאומטריה',
+    icon: '⭕',
+    summary: 'חלוקה שווה של זמן ומצולעים',
+    steps: [
+      { title: 'מעגל הזמן', body: 'הסבר', actionType: 'circleDemo' },
+      { title: 'הדגמה', body: 'הדגמה', actionType: 'circleAudio' },
+      { title: 'חקר', body: 'התנסות', actionType: 'euclideanWheel' },
+      { title: 'בדיקה', body: 'שאלה', options: ['א', 'ב'], correctIndex: 0, explanation: 'נכון' }
+    ]
+  };
+
+  const ok = registerLesson(customLesson);
+  assert.equal(ok, true);
+  assert.equal(getLessonById('test-custom-geometry').title, 'מקצבים אוקלידיים ומעגלי זמן');
+
+  // Rejection of invalid structure
+  assert.equal(registerLesson(null), false);
+  assert.equal(registerLesson({ id: 'broken' }), false);
+});
+
