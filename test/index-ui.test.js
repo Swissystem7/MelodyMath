@@ -117,9 +117,21 @@ test('noteMetro triggers harmonic arpeggio streak rewards', () => {
 
 test('playground includes interactive rhythm gameplay with progressive musical layers', () => {
   assert.match(indexHtml, /id="drumPadBtn"/);
+  assert.match(indexHtml, /id="drumSnareBtn"/);
+  assert.match(indexHtml, /id="drumHihatBtn"/);
+  assert.match(indexHtml, /id="drumClapBtn"/);
   assert.match(indexHtml, /id="rhythmStageTag"/);
+  assert.match(indexHtml, /id="bandStage"/);
+  assert.match(indexHtml, /id="bandDrums"/);
+  assert.match(indexHtml, /id="bandBass"/);
+  assert.match(indexHtml, /id="bandChords"/);
+  assert.match(indexHtml, /id="bandMelody"/);
   assert.match(indexHtml, /id="rhythmCursor"/);
+  assert.match(indexHtml, /id="rhythmSpark"/);
+  assert.match(indexHtml, /id="xyloStudio"/);
+  assert.match(indexHtml, /id="xyloKeys"/);
   assert.match(indexHtml, /id="rhythmStartBtn"/);
   assert.match(indexHtml, /id="rhythmPatternNextBtn"/);
   assert.match(indexHtml, /src\/lib\/rhythmGame\.js/);
 });
+
