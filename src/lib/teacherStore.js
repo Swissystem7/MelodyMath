@@ -52,6 +52,7 @@
       if (key in Object.prototype) return;
       if (!isStudentRow(map[key])) return;
       out[key] = map[key];
+      if (typeof ensureUnitMeasures === 'function') ensureUnitMeasures(out[key]);
     });
     return out;
   }
@@ -118,7 +119,7 @@
     if (!label) return null;
     const roster = loadRoster(classCode, storage);
     if (!ownStudent(roster, label)) {
-      roster.students[label] = { name: label, created: Date.now(), sessions: [], assignments: [] };
+      roster.students[label] = { name: label, created: Date.now(), sessions: [], assignments: [], unitMeasures: Object.create(null) };
       saveRoster(classCode, roster, storage);
     } else if (!Array.isArray(roster.students[label].assignments)) {
       roster.students[label].assignments = [];
@@ -610,6 +611,7 @@
           sessions: sessions,
           assignments: incomingAssignments,
           notes: incomingNotes,
+          unitMeasures: cleanUnitMeasures(incoming.unitMeasures),
         };
         added += 1;
         notes += incomingNotes.length;
@@ -648,6 +650,14 @@
         haveAssignments[String(a.id)] = true;
         target.assignments.push(a);
         assignments += 1;
+      });
+      const incomingMeasures = cleanUnitMeasures(incoming.unitMeasures);
+      ensureUnitMeasures(target);
+      Object.keys(incomingMeasures).forEach(function (uid) {
+        const inc = incomingMeasures[uid];
+        if (!target.unitMeasures[uid]) target.unitMeasures[uid] = Object.create(null);
+        if (inc.pre && !target.unitMeasures[uid].pre) target.unitMeasures[uid].pre = inc.pre;
+        if (inc.post && !target.unitMeasures[uid].post) target.unitMeasures[uid].post = inc.post;
       });
     });
     saveRoster(classCode, roster, storage);
@@ -770,6 +780,135 @@
     } catch (e) { /* quota */ }
   }
 
+  const unitChecksApi = (typeof module === 'object' && module.exports)
+    ? require('./unitChecks')
+    : (typeof globalThis !== 'undefined' ? globalThis : {});
+
+  function cleanUnitPhase(row) {
+    if (!row || typeof row !== 'object') return null;
+    const correct = Number(row.correct);
+    const total = Number(row.total);
+    if (!Number.isFinite(correct) || !Number.isFinite(total) || total <= 0) return null;
+    const at = Number(row.at);
+    const formId = String(row.formId || '').slice(0, 32);
+    return {
+      at: Number.isFinite(at) ? at : Date.now(),
+      correct: Math.max(0, Math.min(total, Math.floor(correct))),
+      total: Math.floor(total),
+      formId: formId,
+      n: Math.floor(total),
+    };
+  }
+
+  function cleanUnitMeasures(map) {
+    const src = map && typeof map === 'object' && !Array.isArray(map) ? map : {};
+    const out = Object.create(null);
+    Object.keys(src).forEach(function (unitId) {
+      if (unitId in Object.prototype) return;
+      const key = String(unitId).slice(0, 48);
+      if (!key) return;
+      const row = src[unitId];
+      if (!row || typeof row !== 'object') return;
+      const pre = cleanUnitPhase(row.pre);
+      const post = cleanUnitPhase(row.post);
+      if (!pre && !post) return;
+      out[key] = {};
+      if (pre) out[key].pre = pre;
+      if (post) out[key].post = post;
+    });
+    return out;
+  }
+
+  function ensureUnitMeasures(student) {
+    if (!student || typeof student !== 'object') return student;
+    student.unitMeasures = cleanUnitMeasures(student.unitMeasures);
+    return student;
+  }
+
+  function recordUnitCheck(classCode, name, unitId, phase, payload, storage) {
+    const label = studentLabel(name);
+    const uid = String(unitId || '').slice(0, 48);
+    if (!label || !uid || (phase !== 'pre' && phase !== 'post')) return null;
+    const body = payload && typeof payload === 'object' ? payload : {};
+    const scored = unitChecksApi.scoreForm
+      ? unitChecksApi.scoreForm(
+        unitChecksApi.getUnitForm ? unitChecksApi.getUnitForm(uid, phase) : null,
+        body.answers
+      )
+      : null;
+    const correct = scored ? scored.correct : Number(body.correct);
+    const total = scored ? scored.total : Number(body.total);
+    if (!Number.isFinite(correct) || !Number.isFinite(total) || total <= 0) return null;
+    const roster = loadRoster(classCode, storage);
+    const target = ensureUnitMeasures(ownStudent(roster, label) || upsertStudent(classCode, label, storage));
+    if (!target) return null;
+    if (!ownStudent(roster, label)) roster.students[label] = target;
+    const form = unitChecksApi.getUnitForm ? unitChecksApi.getUnitForm(uid, phase) : null;
+    const row = {
+      at: Date.now(),
+      correct: Math.max(0, Math.min(total, Math.floor(correct))),
+      total: Math.floor(total),
+      formId: String((form && form.id) || body.formId || '').slice(0, 32),
+      n: Math.floor(total),
+    };
+    if (!target.unitMeasures[uid]) target.unitMeasures[uid] = Object.create(null);
+    target.unitMeasures[uid][phase] = row;
+    saveRoster(classCode, roster, storage);
+    return row;
+  }
+
+  function unitMeasureDisclaimer() {
+    return unitChecksApi.DISCLAIMER
+      || 'השוואת לפני־אחרי נשמרת רק במכשיר הזה. זה לא ניסוי מבוקר ולא הוכחה שהתרגול עוזר.';
+  }
+
+  function buildStudentUnitMeasureReport(student, unitId) {
+    const uid = String(unitId || '').slice(0, 48);
+    const unit = unitChecksApi.getUnit ? unitChecksApi.getUnit(uid) : null;
+    const measures = student && student.unitMeasures ? student.unitMeasures[uid] : null;
+    const pre = measures && measures.pre ? measures.pre : null;
+    const post = measures && measures.post ? measures.post : null;
+    return {
+      unitId: uid,
+      titleHe: unit ? unit.titleHe : uid,
+      pre: pre ? { correct: pre.correct, total: pre.total, n: pre.n || pre.total, at: pre.at } : { correct: 0, total: 0, n: 0 },
+      post: post ? { correct: post.correct, total: post.total, n: post.n || post.total, at: post.at } : { correct: 0, total: 0, n: 0 },
+      disclaimer: unitMeasureDisclaimer(),
+    };
+  }
+
+  function buildClassUnitMeasureOverview(classCode, unitId, storage) {
+    const uid = String(unitId || '').slice(0, 48);
+    const unit = unitChecksApi.getUnit ? unitChecksApi.getUnit(uid) : null;
+    const roster = loadRoster(classCode, storage);
+    const names = Object.keys(roster.students).sort(function (a, b) {
+      return a.localeCompare(b, 'he');
+    });
+    const students = [];
+    const totals = { preCorrect: 0, preTotal: 0, preN: 0, postCorrect: 0, postTotal: 0, postN: 0 };
+    names.forEach(function (name) {
+      const rep = buildStudentUnitMeasureReport(roster.students[name], uid);
+      students.push({ name: name, pre: rep.pre, post: rep.post });
+      if (rep.pre.n) {
+        totals.preCorrect += rep.pre.correct;
+        totals.preTotal += rep.pre.total;
+        totals.preN += 1;
+      }
+      if (rep.post.n) {
+        totals.postCorrect += rep.post.correct;
+        totals.postTotal += rep.post.total;
+        totals.postN += 1;
+      }
+    });
+    return {
+      unitId: uid,
+      titleHe: unit ? unit.titleHe : uid,
+      students: students,
+      classTotals: totals,
+      disclaimer: unitMeasureDisclaimer(),
+    };
+  }
+
   return {
     PREFIX, WHO_KEY,
     normalizeCode, studentLabel, storageKey, emptyRoster,
@@ -780,5 +919,7 @@
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
     loadWho, saveWho, makeChoices, exportRoster, importRoster, summarizeImport,
     loadJson, saveJson, jsonKey,
+    recordUnitCheck, buildStudentUnitMeasureReport, buildClassUnitMeasureOverview,
+    cleanUnitMeasures,
   };
 });

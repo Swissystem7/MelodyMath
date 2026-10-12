@@ -22,6 +22,16 @@ test('the teacher tab has a class board and a parent letter, not a paywall', () 
   assert.match(indexHtml, /חינם לתמיד/);
 });
 
+test('teacher tab exposes local unit pre/post checks and honest measure copy', () => {
+  assert.match(indexHtml, /id="unitMeasureCard"/);
+  assert.match(indexHtml, /id="unitCheckPre"/);
+  assert.match(indexHtml, /id="reportUnitMeasure"/);
+  assert.match(indexHtml, /src="src\/lib\/unitChecks\.js"/);
+  assert.match(indexHtml, /לא ניסוי מבוקר/);
+  assert.match(indexHtml, /unit-measure-stats/);
+  assert.match(indexHtml, /id="unitCheckHear"/);
+});
+
 test('home is the elementary product: grade picker, coverage link, no mixed sonify hero', () => {
   assert.match(indexHtml, /id="gradePick"/);
   assert.match(indexHtml, /curriculum\.html/);
