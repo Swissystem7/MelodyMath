@@ -22,6 +22,95 @@ test('the teacher tab has a class board and a parent letter, not a paywall', () 
   assert.match(indexHtml, /חינם לתמיד/);
 });
 
+test('the teacher tab runs the local unit pre/post check and says what it is not', () => {
+  assert.match(indexHtml, /id="unitMeasureCard"/);
+  assert.match(indexHtml, /id="unitCheckPre"/);
+  assert.match(indexHtml, /id="unitCheckPost"/);
+  assert.match(indexHtml, /id="unitCheckHear"/);
+  assert.match(indexHtml, /id="unitCheckDisclaimer"/);
+  assert.match(indexHtml, /src="src\/lib\/unitChecks\.js"/);
+  assert.match(indexHtml, /לא ניסוי מבוקר/);
+  // The check player is screen-only: it must not land on a printed worksheet,
+  // class board or parent letter.
+  assert.match(indexHtml, /#certCard,#unitMeasureCard\{display:none!important\}/);
+});
+
+// Drives the real player source out of index.html against a fake DOM, the way
+// the saveWhoFromForm test below does: a string match would not notice the
+// player logging the wrong session kind or never closing itself.
+test('the unit check player runs a whole form, logs every item, and closes itself', () => {
+  const vm = require('node:vm');
+  const unit = require('../src/lib/unitChecks');
+  const store = require('../src/lib/teacherStore');
+  const adaptive = require('../src/lib/adaptive');
+  const src = indexHtml.match(/const UNIT_CHECK_ID=[\s\S]*?\nfunction cancelUnitCheck\(\)\{[^\n]*\n/)[0];
+
+  function el() {
+    const node = {
+      textContent: '', className: '', disabled: false, children: [],
+      classList: { add: () => {}, toggle: () => {} },
+      setAttribute: () => {},
+      appendChild: (c) => node.children.push(c),
+      set innerHTML(v) { node._html = v; if (v === '') node.children.length = 0; },
+      get innerHTML() { return node._html || ''; },
+    };
+    return node;
+  }
+
+  function harness(who) {
+    const nodes = Object.create(null);
+    const shown = Object.create(null);
+    const logged = [];
+    const ctx = {
+      $: (id) => (nodes[id] || (nodes[id] = el())),
+      show: (id, on) => { shown[id] = !!on; },
+      prefsNow: () => ({ quiet: true }),
+      maybeSpeak: () => { throw new Error('must not speak on a muted device'); },
+      setMath: (node, text) => { node.textContent = text; },
+      renderWidget: () => {}, renderTeacherReport: () => {}, renderClassBoard: () => {},
+      noteMetro: () => {}, mathHtml: String, preferLessMotion: () => true,
+      rng: () => () => 0.5, setTimeout: (fn) => fn(), document: { createElement: el },
+      makeChoices: store.makeChoices, isCorrect: adaptive.isCorrect,
+      getUnitForm: unit.getUnitForm, scoreForm: unit.scoreForm, who: who,
+      UNIT_CHECK_UNIT_ID: unit.UNIT_CHECK_UNIT_ID,
+      logTeacherItem: (item) => logged.push(item.kind),
+      endTeacherSession: () => logged.push('end'),
+    };
+    vm.createContext(ctx);
+    vm.runInContext(src, ctx);
+    return { ctx, nodes, shown, logged };
+  }
+
+  const items = unit.getUnitForm(unit.UNIT_CHECK_UNIT_ID, 'pre').items;
+  const h = harness({ classCode: 'ד׳', name: 'רועי' });
+  vm.runInContext('startUnitCheck("pre")', h.ctx);
+  assert.equal(h.shown.unitCheckPlay, true);
+  assert.equal(h.shown.unitCheckGate, false);
+  assert.equal(h.shown.unitCheckMuted, true, 'a muted device gets the read-it-yourself note');
+
+  items.forEach((it, i) => {
+    assert.equal(h.nodes.unitCheckPrompt.textContent, it.prompt, 'item ' + i + ' prompt');
+    const right = h.nodes.unitCheckChoices.children.filter((b) => adaptive.isCorrect(b.textContent, it.answer));
+    assert.equal(h.nodes.unitCheckChoices.children.length, 4);
+    assert.equal(right.length, 1);
+    right[0].onclick();
+  });
+
+  assert.deepEqual(h.logged, items.map(() => 'unitPre').concat(['end']));
+  assert.equal(h.shown.unitCheckPlay, false, 'the player closes after the last item');
+  assert.equal(h.shown.unitCheckGate, true);
+  assert.match(h.nodes.unitCheckFeedback.innerHTML, new RegExp('ltr">' + items.length + '/' + items.length));
+
+  // No student saved, and a phase with no form: neither opens an empty player
+  // or logs an item into a session startSession() would refuse to make.
+  [[{ classCode: '', name: '' }, 'pre'], [{ classCode: 'ד׳', name: 'רועי' }, 'during']].forEach(([w, phase]) => {
+    const g = harness(w);
+    vm.runInContext('startUnitCheck("' + phase + '")', g.ctx);
+    assert.equal(g.shown.unitCheckPlay, undefined, phase);
+    assert.deepEqual(g.logged, [], phase);
+  });
+});
+
 test('home is the elementary product: grade picker, coverage link, no mixed sonify hero', () => {
   assert.match(indexHtml, /id="gradePick"/);
   assert.match(indexHtml, /curriculum\.html/);

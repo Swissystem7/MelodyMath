@@ -13,13 +13,14 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+.unit-check-note{font-size:.82rem;color:var(--muted);margin-top:12px}#unitCheckCounter{color:var(--muted)}
 @media print{
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
   .panel{display:none!important}
   #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
-  #worksheetCard,#classBoardCard,#parentCard,#certCard{display:none!important}
+  #worksheetCard,#classBoardCard,#parentCard,#certCard,#unitMeasureCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
   body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
@@ -278,6 +279,27 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   </div>
   <div id="worksheetSheet" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="unitMeasureCard">
+  <span class="tag">ספירה במכשיר · לא ניסוי מבוקר</span>
+  <h2>בדיקה קצרה לפני ואחרי יחידה</h2>
+  <p>7 פריטים ליחידת השברים של כיתה ד׳: טופס «לפני» וטופס «אחרי» באותה רמת קושי, עם פריטים שונים — כדי שהטופס הראשון לא ילמד את השני. שמרו קודם שם תלמיד/ה בסרגל למעלה, כדי שהפריטים ייכנסו ליומן המפגשים.</p>
+  <div id="unitCheckGate" class="no-print" style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0">
+    <button type="button" id="unitCheckPre" class="secondary">בדיקה לפני היחידה</button>
+    <button type="button" id="unitCheckPost" class="secondary">בדיקה אחרי היחידה</button>
+    <button type="button" id="unitCheckCancel" class="secondary hidden">ביטול</button>
+  </div>
+  <div id="unitCheckPlay" class="hidden" aria-live="polite">
+    <p id="unitCheckTag" class="tag"></p>
+    <p id="unitCheckCounter" class="topline"></p>
+    <p id="unitCheckPrompt" class="prompt"></p>
+    <div id="unitCheckWidget"></div>
+    <p id="unitCheckMuted" class="note hidden">המכשיר במצב שקט — אפשר לקרוא את השאלה ולבחור למטה.</p>
+    <button type="button" id="unitCheckHear" class="secondary" style="min-height:44px;margin:8px 0">השמע שוב</button>
+    <div id="unitCheckChoices" class="choices" role="group" aria-label="בחירת תשובה"></div>
+  </div>
+  <div id="unitCheckFeedback" class="feedback hidden"></div>
+  <p class="note unit-check-note" id="unitCheckDisclaimer"></p>
+</div>
 <div class="card" id="classBoardCard">
   <span class="tag">כל הילדים בטאבלט הזה</span>
   <h2>לוח כיתה</h2>
@@ -353,6 +375,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
+<script src="src/lib/unitChecks.js"></script>
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/mastery.js"></script>
@@ -658,7 +681,7 @@ $('rmRestart').onclick=()=>{show('rmReport',false);show('rmStart',true)};
 $('rmPlanCheck').onclick=rpCheck;$('rmPlanAnswer').onkeydown=e=>{if(e.key==='Enter')rpCheck()};$('rmPlanNext').onclick=rpAdvance;
 
 // ---- דוח מורה: זהות מקומית + רישום מפגשים (teacherStore) ----
-const KIND_HE={diag:'אבחון',plan:'תרגול פערים',practice:'תרגול קצב',class:'מצב כיתה',beat:'על הפעימה'};
+const KIND_HE={diag:'אבחון',plan:'תרגול פערים',practice:'תרגול קצב',class:'מצב כיתה',beat:'על הפעימה',unitPre:'בדיקה לפני היחידה',unitPost:'בדיקה אחרי היחידה'};
 let who={classCode:'',name:''},openSess=null;
 function currentWho(){return who.name?who:null}
 function applyWhoToForm(){if($('classCode'))$('classCode').value=who.classCode||'';if($('studentName'))$('studentName').value=who.name||'';if($('whoStatus'))$('whoStatus').textContent=who.name?`נשמר: ${who.name} · כיתה ${who.classCode||'ברירת מחדל'}`:'';renderRosterChips()}
@@ -667,6 +690,25 @@ function ensureTeacherSession(kind){if(!who.name)return null;if(openSess&&openSe
 function logTeacherItem(item){const s=ensureTeacherSession(item.kind);if(!s)return;addItem(who.classCode,who.name,s.id,item)}
 function endTeacherSession(){if(!openSess||!who.name){openSess=null;return null}const s=openSess;openSess=null;return endSession(who.classCode,who.name,s.id)||s}
 function fmtWhen(ts){if(!ts)return '—';try{return new Date(ts).toLocaleString('he-IL')}catch(e){return String(ts)}}
+// ---- בדיקה קצרה לפני/אחרי יחידה (src/lib/unitChecks.js) ----
+// הסבב נספר כאן ובמכשיר; שמירה של «לפני» מול «אחרי» לכל תלמיד/ה תגיע ב-PR המשך.
+const UNIT_CHECK_ID=(typeof UNIT_CHECK_UNIT_ID!=='undefined'&&UNIT_CHECK_UNIT_ID)||'grade-d-fractions-bar44';
+function unitCheckDisclaimerText(){return typeof UNIT_CHECK_DISCLAIMER!=='undefined'?UNIT_CHECK_DISCLAIMER:'הספירה נשמרת במכשיר הזה בלבד וזה לא ניסוי מבוקר.'}
+let ucPhase='',ucForm=null,ucIdx=0,ucAnswers=[],ucAnswered=false,ucSeed=1;
+function paintUnitCheckMuted(){if($('unitCheckMuted'))show('unitCheckMuted',!!prefsNow().quiet)}
+function unitCheckHear(){const it=ucForm&&ucForm.items?ucForm.items[ucIdx]:null;if(!it)return;paintUnitCheckMuted();if(prefsNow().quiet)return;maybeSpeak(it.prompt)}
+function renderUnitCheckItem(){const it=ucForm&&ucForm.items?ucForm.items[ucIdx]:null;if(!it){finishUnitCheck();return}ucAnswered=false;$('unitCheckTag').textContent=ucPhase==='pre'?'לפני היחידה · שברים ד׳':'אחרי היחידה · שברים ד׳';$('unitCheckCounter').textContent=`פריט ${ucIdx+1}/${ucForm.items.length}`;setMath($('unitCheckPrompt'),it.prompt);renderWidget('unitCheckWidget',it,null);paintUnitCheckMuted();const random=rng(ucSeed++);const box=$('unitCheckChoices');box.innerHTML='';makeChoices(it.answer,random).forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.setAttribute('aria-label','תשובה '+String(v));b.textContent=String(v);b.onclick=()=>pickUnitCheck(v,b);box.appendChild(b)});show('unitCheckFeedback',false);unitCheckHear()}
+function pickUnitCheck(value,btn){if(ucAnswered||!ucForm)return;ucAnswered=true;const it=ucForm.items[ucIdx];const correct=isCorrect(value,it.answer);ucAnswers[ucIdx]=value;noteMetro(correct);logTeacherItem({kind:ucPhase==='pre'?'unitPre':'unitPost',skill:it.skill,prompt:it.prompt,answer:it.answer,given:value,correct});[...$('unitCheckChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,it.answer))b.classList.add('picked-good')});if(!correct&&btn)btn.classList.add('picked-bad');const fb=$('unitCheckFeedback');fb.className='feedback '+(correct?'good':'bad');fb.innerHTML=`<strong>${correct?'נכון.':'לא הפעם.'}</strong> <span class="hint">${mathHtml(it.hint)}</span>`;show('unitCheckFeedback',true);const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?350:900);setTimeout(()=>{ucIdx+=1;renderUnitCheckItem()},wait)}
+function finishUnitCheck(){const form=ucForm,phase=ucPhase,answers=ucAnswers.slice();closeUnitCheckPlayer();const scored=form&&typeof scoreForm==='function'?scoreForm(form,answers):null;endTeacherSession();renderTeacherReport();renderClassBoard();if(!scored)return;const fb=$('unitCheckFeedback');fb.className='feedback good';fb.innerHTML=`<strong>${phase==='pre'?'הטופס «לפני» הושלם.':'הטופס «אחרי» הושלם.'}</strong> <span class="hint"><bdi dir="ltr">${scored.correct}/${scored.total}</bdi> נכונות · הפריטים נרשמו ביומן המפגשים</span>`;show('unitCheckFeedback',true)}
+function closeUnitCheckPlayer(){ucForm=null;ucPhase='';ucIdx=0;ucAnswers=[];ucAnswered=false;show('unitCheckPlay',false);show('unitCheckCancel',false);show('unitCheckGate',true)}
+function startUnitCheck(phase){const form=typeof getUnitForm==='function'?getUnitForm(UNIT_CHECK_ID,phase):null;if(!form||!form.items||!form.items.length){$('unitCheckFeedback').className='feedback bad';$('unitCheckFeedback').textContent='הבדיקה לא זמינה במכשיר הזה.';show('unitCheckFeedback',true);return}if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל, כדי שהפריטים ייכנסו ליומן.';$('unitCheckFeedback').className='feedback bad';$('unitCheckFeedback').textContent='בחרו תלמיד/ה בסרגל למעלה ואז התחילו את הבדיקה.';show('unitCheckFeedback',true);return}ucPhase=phase;ucForm=form;ucIdx=0;ucAnswers=[];ucSeed=Date.now()&0x7fffffff;show('unitCheckGate',false);show('unitCheckCancel',true);show('unitCheckPlay',true);renderUnitCheckItem()}
+// Cancelling keeps the items already answered: a half-finished form is an honest partial session, not a deleted one.
+function cancelUnitCheck(){closeUnitCheckPlayer();endTeacherSession();renderTeacherReport();show('unitCheckFeedback',false)}
+if($('unitCheckDisclaimer'))$('unitCheckDisclaimer').textContent=unitCheckDisclaimerText();
+if($('unitCheckPre'))$('unitCheckPre').onclick=()=>startUnitCheck('pre');
+if($('unitCheckPost'))$('unitCheckPost').onclick=()=>startUnitCheck('post');
+if($('unitCheckCancel'))$('unitCheckCancel').onclick=cancelUnitCheck;
+if($('unitCheckHear'))$('unitCheckHear').onclick=unitCheckHear;
 function renderTeacherReport(){const empty=$('reportEmpty'),body=$('reportBody');if(!empty||!body)return;if(!who.name){show('reportEmpty',true);show('reportBody',false);return}const student=getStudent(who.classCode,who.name);if(!student||!allItems(student).length){empty.textContent='אין עדיין רישום לתלמיד/ה הזו במכשיר הזה. אחרי תרגול או אבחון — הנתונים יופיעו כאן.';show('reportEmpty',true);show('reportBody',false);return}const r=buildReport(student);show('reportEmpty',false);show('reportBody',true);$('reportTitle').textContent=`${r.name} · כיתה ${who.classCode||'ברירת מחדל'}`;$('reportStats').innerHTML=`<div class="stat"><strong>${r.correct}/${r.total}</strong>נכונות במכשיר</div><div class="stat"><strong>${r.total?Math.round(100*r.correct/r.total):0}%</strong>דיוק מצטבר</div><div class="stat"><strong>${r.streak.current}</strong>רצף נוכחי</div><div class="stat"><strong>${r.streak.best}</strong>רצף שיא</div>`;const tb=$('reportSkills').querySelector('tbody');tb.innerHTML=r.perSkill.length?r.perSkill.map(s=>`<tr><td>${escapeHtml(s.skill)}</td><td>${s.correct}</td><td>${s.total}</td><td>${Math.round(s.accuracy*100)}%</td></tr>`).join(''):'<tr><td colspan="4">אין עדיין פירוט מיומנות.</td></tr>';const el=$('reportErrors');el.innerHTML=r.repeatingErrors.length?r.repeatingErrors.map(e=>`<li>${mathHtml(e.prompt)} — ${e.count} פעמים${e.skill?' · '+escapeHtml(e.skill):''}</li>`).join(''):'<li>אין תרגיל שנפסל פעמיים או יותר.</li>';const sb=$('reportSessions').querySelector('tbody');sb.innerHTML=r.sessions.length?r.sessions.slice().reverse().map(s=>`<tr><td>${fmtWhen(s.started)}</td><td>${escapeHtml(KIND_HE[s.kind]||s.kind)}</td><td>${s.correct}</td><td>${s.total}</td></tr>`).join(''):'<tr><td colspan="4">אין מפגשים.</td></tr>'}
 function renderClassBoard(){const empty=$('classBoardEmpty'),table=$('classBoard');if(!empty||!table)return;const rows=buildClassOverview(who.classCode||'');if(!rows.length){show('classBoardEmpty',true);table.classList.add('hidden');return}show('classBoardEmpty',false);table.classList.remove('hidden');table.querySelector('tbody').innerHTML=rows.map(r=>`<tr><td><button type="button" class="secondary" data-kid="${escapeHtml(r.name)}">${escapeHtml(r.name)}</button></td><td>${r.correct}</td><td>${r.total}</td><td>${r.total?Math.round(100*r.accuracy):0}%</td><td>${r.repeating}</td><td>${r.lastAt?fmtWhen(r.lastAt)+' · '+escapeHtml(KIND_HE[r.lastKind]||r.lastKind):'—'}</td></tr>`).join('');table.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>switchToKid(b.dataset.kid))}
 function renderParentLetter(){const box=$('parentLetter');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const letter=buildParentNote(student,{classCode:who.classCode,observation:$('teacherNote')?$('teacherNote').value:''});box.innerHTML=renderParentNoteHtml(letter);box.classList.remove('hidden')}

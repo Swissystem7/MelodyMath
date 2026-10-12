@@ -61,7 +61,11 @@ test('answer inputs and choice buttons are LTR', () => {
   for (const id of ['answer', 'rmAnswer', 'rmPlanAnswer']) {
     assert.match(indexHtml, new RegExp('<input id="' + id + '" dir="ltr"'));
   }
-  assert.equal((indexHtml.match(/b\.className='choice';\s*b\.dir='ltr';/g) || []).length, 2);
+  // Every builder of a .choice button sets dir="ltr", not just the first two:
+  // count the builders and require the same number of dir assignments.
+  const builders = (indexHtml.match(/\.className='choice';/g) || []).length;
+  assert.ok(builders >= 3, 'expected the quiz, beat and unit-check choice builders, got ' + builders);
+  assert.equal((indexHtml.match(/\.className='choice';\s*b\.dir='ltr';/g) || []).length, builders);
 });
 
 test('printed worksheets and the answer key keep expressions LTR', () => {
