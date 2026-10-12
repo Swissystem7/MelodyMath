@@ -154,3 +154,21 @@ test('home provides interactive guided micro-lessons studio with manipulatives a
   assert.match(indexHtml, /renderLineExplorerUI/);
 });
 
+test('lesson steps offer Hebrew read-aloud and an idle pulse hint', () => {
+  assert.match(indexHtml, /id="stepSpeakBtn"/);
+  assert.match(indexHtml, /aria-label="הקראת השלב בקול"/);
+  assert.match(indexHtml, /he-IL/);
+  assert.match(indexHtml, /\.pulse-hint\{/);
+  assert.match(indexHtml, /prefers-reduced-motion:reduce\)\{\.pulse-hint\{animation:none\}/);
+  // ההקראה והרמז החזותי נעצרים ביציאה מהשיעור
+  assert.match(indexHtml, /cancelStepSpeech\(\);\s*\n\s*clearStepPulseHint\(\);/);
+});
+
+test('division lesson exposes an equal-groups rhythm explorer', () => {
+  assert.match(indexHtml, /renderDivExplorerUI/);
+  assert.match(indexHtml, /id="divTotBtns"/);
+  assert.match(indexHtml, /id="divGrpBtns"/);
+  assert.match(indexHtml, /playGroupedBeats/);
+  assert.match(indexHtml, /\{ id: 'ג', label: 'כיתה ג׳' \}/);
+});
+

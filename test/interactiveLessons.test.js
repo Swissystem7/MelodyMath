@@ -36,6 +36,22 @@ test('getLessonById retrieves lesson or null', () => {
   assert.equal(getLessonById(null), null);
 });
 
+test('division lesson teaches equal groups and the inverse of multiplication', () => {
+  const div = getLessonById('division-groups');
+  assert.ok(div, 'division-groups lesson should be registered');
+  assert.equal(div.grade, 'ג');
+  assert.equal(div.strand, 'כפל וחילוק');
+  assert.deepEqual(
+    div.steps.slice(0, 3).map((s) => s.actionType),
+    ['divConcept', 'divInverse', 'divExplorer']
+  );
+
+  const check = evaluateStepAnswer('division-groups', 3, 1);
+  assert.equal(check.correct, true);
+  assert.match(check.explanation, /12 לחלק ל-4/);
+  assert.equal(evaluateStepAnswer('division-groups', 3, 2).correct, false);
+});
+
 test('getLessonsForGrade filters lessons accurately', () => {
   const gradeD = getLessonsForGrade('ד');
   assert.ok(gradeD.length >= 1);
