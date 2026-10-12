@@ -152,5 +152,10 @@ test('home provides interactive guided micro-lessons studio with manipulatives a
   assert.match(indexHtml, /renderMultExplorerUI/);
   assert.match(indexHtml, /renderTensBuilderUI/);
   assert.match(indexHtml, /renderLineExplorerUI/);
+  assert.match(indexHtml, /renderDivExplorerUI/);
+  assert.match(indexHtml, /renderEuclideanWheelUI/);
+  assert.match(indexHtml, /renderEvenOddExplorerUI/);
+  assert.match(indexHtml, /id="stepSpeakBtn"/);
+  assert.match(indexHtml, /pulse-hint/);
 });
 

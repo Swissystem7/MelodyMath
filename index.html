@@ -118,6 +118,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 .step-pill.active{background:var(--purple);color:#fff;border-color:var(--purple)}
 .step-pill.done{background:#e5f6ef;color:var(--good);border-color:#167957}
 .fraction-brick{display:inline-block;padding:8px 14px;border-radius:8px;font-weight:bold;margin:4px;cursor:pointer;color:#fff}
+@keyframes pulseHint{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(105,70,232,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,0)}}
+.pulse-hint{animation:pulseHint 2s infinite ease-in-out}
 </style></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
@@ -173,7 +175,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag"></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button></div>
 <div id="rmReport" class="card hidden"><span class="tag">דוח פערים להורה</span><h2>מה מצאנו</h2><div id="rmStats" class="session"></div><p id="rmSummary"></p><button type="button" id="rmPractice" class="primary hidden">מתחילים תרגול אישי</button><button type="button" id="rmRestart" class="secondary hidden">אבחון חדש</button></div>
 <div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag"></p><h2 id="rmPlanPrompt" class="prompt"></h2><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button></div></section>
-<section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" style="display:flex;gap:6px;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:36px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><h4 id="stepTitle" style="margin-top:0;font-size:1.15rem;color:var(--purple);"></h4><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
+<section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" style="display:flex;gap:6px;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:36px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;"><h4 id="stepTitle" style="margin:0;font-size:1.15rem;color:var(--purple);"></h4><button type="button" id="stepSpeakBtn" class="secondary" style="width:auto;min-height:34px;padding:4px 12px;font-size:0.85rem;" aria-label="הקראת השלב בקול">🔊 הקשב</button></div><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
 <section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">לא תכנית א׳–ד׳ · מרווחים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחס מרווחים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
 <div id="quiz" class="card hidden"><div class="topline"><span id="counter"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button></div>
 <div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button type="button" id="again" class="primary">אימון חדש</button></div></section>
@@ -941,6 +943,11 @@ let tensBuilderTens = 2;
 let tensBuilderOnes = 5;
 let lineExplorerPos = 0;
 let lineExplorerStep = 2;
+let divExplorerTotal = 12;
+let divExplorerGroups = 3;
+let euclideanPulses = 3;
+let euclideanSteps = 8;
+let evenOddCount = 6;
 
 function renderLessonsGradeFilter() {
   const box = $('lessonsGradeFilter');
@@ -949,6 +956,7 @@ function renderLessonsGradeFilter() {
     { id: 'all', label: 'הכל' },
     { id: 'א', label: 'כיתה א׳' },
     { id: 'ב', label: 'כיתה ב׳' },
+    { id: 'ג', label: 'כיתה ג׳' },
     { id: 'ד', label: 'כיתה ד׳' }
   ];
   box.innerHTML = filters.map(f => {
@@ -1017,6 +1025,11 @@ function openLesson(id) {
   tensBuilderOnes = 5;
   lineExplorerPos = 0;
   lineExplorerStep = 2;
+  divExplorerTotal = 12;
+  divExplorerGroups = 3;
+  euclideanPulses = 4;
+  euclideanSteps = 16;
+  evenOddCount = 6;
 
   $('activeLessonBadge').textContent = `כיתה ${l.grade}׳ · ${l.strand}`;
   $('activeLessonTitle').textContent = `${l.icon || ''} ${l.title}`;
@@ -1064,9 +1077,27 @@ function renderActiveStep() {
   const step = l.steps[activeStepIndex];
   if (!step) return;
 
+  const bodyText = step.body || step.description || step.question || '';
   $('stepTitle').textContent = step.title;
-  $('stepBody').textContent = step.body;
+  $('stepBody').textContent = bodyText;
   $('stepCounterDisplay').textContent = `שלב ${activeStepIndex + 1} מתוך ${l.steps.length}`;
+
+  if ($('stepSpeakBtn')) {
+    $('stepSpeakBtn').onclick = () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(step.title + '. ' + bodyText);
+        u.lang = 'he-IL';
+        window.speechSynthesis.speak(u);
+      }
+    };
+  }
+
+  if (window._pulseTimer) clearTimeout(window._pulseTimer);
+  window._pulseTimer = setTimeout(() => {
+    const actBtn = document.querySelector('#stepInteractiveBox button.primary') || $('stepNextBtn');
+    if (actBtn) actBtn.classList.add('pulse-hint');
+  }, 3500);
 
   $('stepPrevBtn').disabled = activeStepIndex === 0;
 
@@ -1350,6 +1381,227 @@ function renderStepAction(step) {
     renderLineExplorerUI(box);
     return;
   }
+
+  if (step.actionType === 'divConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">12 פעימות מחולקות ל-3 קבוצות שוות של 4:</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 1</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+          </div>
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 2</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+          </div>
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 3</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+          </div>
+        </div>
+        <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+          12 ÷ 3 = <span style="color:var(--purple);font-size:1.4rem;">4</span> פעימות בכל קבוצה!
+        </div>
+        <button type="button" class="primary" id="btnPlayDivConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו 12 פעימות ב-3 קבוצות 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDivConcept');
+    if (btn) btn.onclick = () => {
+      let t = 0;
+      for (let g = 0; g < 3; g++) {
+        for (let b = 0; b < 4; b++) {
+          setTimeout(() => {
+            if (b === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+            else if (typeof playDrumSound === 'function') playDrumSound('snare');
+          }, t * 200);
+          t++;
+        }
+        t += 0.8;
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'divInverse') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">פעולות הפוכות: חילוק מפרק, כפל מרכיב!</div>
+        <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f9f7fd;border:1px solid #d1c4e9;border-radius:10px;padding:12px 18px;text-align:center;">
+            <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">חילוק</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:var(--purple);margin-top:4px;">12 ÷ 3 = 4</div>
+          </div>
+          <div style="font-size:1.6rem;font-weight:bold;color:var(--purple);">⇄</div>
+          <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px 18px;text-align:center;">
+            <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">כפל</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:#f57f17;margin-top:4px;">3 × 4 = 12</div>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayDivInverse" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו כפל שמחזיר את המקצב השלם 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDivInverse');
+    if (btn) btn.onclick = () => {
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          if (i % 4 === 0 && typeof playHarmonicReward === 'function' && i === 11) playHarmonicReward();
+          else if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          else if (typeof playXylophoneNote === 'function') playXylophoneNote(i % 5);
+        }, i * 180);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'divExplorer') {
+    renderDivExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'geoConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">מצולע של 3 צלילים על מעגל של 12 פעימות (משולש שווה צלעות):</div>
+        <div style="display:flex;justify-content:center;margin:12px 0;">
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <circle cx="90" cy="90" r="70" fill="none" stroke="#ddd" stroke-width="3" />
+            <polygon points="90,20 150.62,125 29.38,125" fill="rgba(107,70,193,0.12)" stroke="var(--purple)" stroke-width="3" />
+            <circle cx="90" cy="20" r="8" fill="var(--purple)" />
+            <circle cx="150.62" cy="125" r="8" fill="var(--purple)" />
+            <circle cx="29.38" cy="125" r="8" fill="var(--purple)" />
+          </svg>
+        </div>
+        <div style="font-size:1.1rem;color:var(--ink);font-weight:bold;margin:8px 0;">3 פעימות במרווח שווה של 4 תיבות = משולש מוזיקלי יציב!</div>
+        <button type="button" class="primary" id="btnPlayGeoConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו מצולע פעימות על מעגל 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayGeoConcept');
+    if (btn) btn.onclick = () => {
+      [0, 1, 2].forEach(i => {
+        setTimeout(() => {
+          if (typeof playDrumSound === 'function') playDrumSound('kick');
+          if (typeof playFreq === 'function') playFreq(440, 240);
+        }, i * 350);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'squareDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">ריבוע מוזיקלי: 4 פעימות במרחק שווה מתוך 16:</div>
+        <div style="display:flex;justify-content:center;margin:12px 0;">
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <circle cx="90" cy="90" r="70" fill="none" stroke="#ddd" stroke-width="3" />
+            <polygon points="90,20 160,90 90,160 20,90" fill="rgba(67,160,71,0.12)" stroke="#43a047" stroke-width="3" />
+            <circle cx="90" cy="20" r="8" fill="#43a047" />
+            <circle cx="160" cy="90" r="8" fill="#43a047" />
+            <circle cx="90" cy="160" r="8" fill="#43a047" />
+            <circle cx="20" cy="90" r="8" fill="#43a047" />
+          </svg>
+        </div>
+        <div style="font-size:1.1rem;color:var(--ink);font-weight:bold;margin:8px 0;">16 ÷ 4 = 4. כל פעימה מגיעה בדיוק כל 4 צעדים!</div>
+        <button type="button" class="primary" id="btnPlaySquareDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו מקצב ריבוע (4 מתוך 16) 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlaySquareDemo');
+    if (btn) btn.onclick = () => {
+      for (let s = 0; s < 16; s++) {
+        setTimeout(() => {
+          if (s % 4 === 0) {
+            if (typeof playDrumSound === 'function') playDrumSound('kick');
+            if (typeof playFreq === 'function') playFreq(523.25, 180);
+          } else {
+            if (typeof playDrumSound === 'function') playDrumSound('hihat');
+          }
+        }, s * 140);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'euclideanWheel') {
+    renderEuclideanWheelUI(box);
+    return;
+  }
+
+  if (step.actionType === 'evenOddConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">זוגי מוצא חבר, אי-זוגי נשאר עם אחד לבד:</div>
+        <div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#e8f5e9;border:2px solid #43a047;border-radius:12px;padding:12px 18px;text-align:center;">
+            <div style="font-weight:bold;color:#2e7d32;margin-bottom:6px;">מספר 4 (זוגי)</div>
+            <div style="font-size:1.4rem;">(● ●) (● ●)</div>
+            <div style="font-size:0.85rem;color:#2e7d32;margin-top:6px;">2 זוגות שלמים! אין בודד.</div>
+          </div>
+          <div style="background:#fff3e0;border:2px solid #fb8c00;border-radius:12px;padding:12px 18px;text-align:center;">
+            <div style="font-weight:bold;color:#e65100;margin-bottom:6px;">מספר 5 (אי-זוגי)</div>
+            <div style="font-size:1.4rem;">(● ●) (● ●) <span style="color:#d84315;">●</span></div>
+            <div style="font-size:0.85rem;color:#e65100;margin-top:6px;">2 זוגות ועוד 1 בודד!</div>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayEvenOddConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו צמדים מול צליל בודד 🔔'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayEvenOddConcept');
+    if (btn) btn.onclick = () => {
+      [0, 1, 2, 3, 4].forEach((idx, i) => {
+        setTimeout(() => {
+          if (idx < 4) {
+            if (typeof playFreq === 'function') playFreq(idx % 2 === 0 ? 330 : 392, 160);
+          } else {
+            if (typeof playFreq === 'function') playFreq(880, 400);
+          }
+        }, i * 250);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'evenOddDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">השוואה מוזיקלית: 6 מול 7</div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <button type="button" class="secondary" id="btnPlaySix" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;width:auto;padding:10px 18px;">
+            השמעת 6 צלילים (זוגי) 🎶
+          </button>
+          <button type="button" class="secondary" id="btnPlaySeven" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;width:auto;padding:10px 18px;">
+            השמעת 7 צלילים (אי-זוגי) 🔔
+          </button>
+        </div>
+      </div>
+    `;
+    const b6 = $('btnPlaySix');
+    const b7 = $('btnPlaySeven');
+    if (b6) b6.onclick = () => {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(i % 2 === 0 ? 392 : 440, 160);
+        }, i * 220);
+      }
+    };
+    if (b7) b7.onclick = () => {
+      for (let i = 0; i < 7; i++) {
+        setTimeout(() => {
+          if (i < 6) {
+            if (typeof playFreq === 'function') playFreq(i % 2 === 0 ? 392 : 440, 160);
+          } else {
+            if (typeof playFreq === 'function') playFreq(880, 400);
+          }
+        }, i * 220);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'evenOddExplorer') {
+    renderEvenOddExplorerUI(box);
+    return;
+  }
 }
 
 // ---- התנסויות אינטראקטיביות (Manipulatives) ----
@@ -1562,6 +1814,202 @@ function renderLineExplorerUI(box) {
     if (typeof playFreq === 'function') playFreq(yToFreq(0, 0, 20), 160);
     renderLineExplorerUI(box);
   };
+}
+
+function renderDivExplorerUI(box) {
+  const sizePerGroup = Math.floor(divExplorerTotal / divExplorerGroups);
+  const remainder = divExplorerTotal % divExplorerGroups;
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">מעבדת חלוקה שווה ומקצב:</div>
+      <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">כמות פעימות:</label>
+          <div style="display:inline-flex;gap:4px;" id="divTotBtns">
+            ${[8, 12, 16].map(t => `<button type="button" class="secondary ${t === divExplorerTotal ? 'primary' : ''}" data-t="${t}" style="width:42px;min-height:36px;padding:0;">${t}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">קבוצות שוות:</label>
+          <div style="display:inline-flex;gap:4px;" id="divGrpBtns">
+            ${[2, 3, 4].map(g => `<button type="button" class="secondary ${g === divExplorerGroups ? 'primary' : ''}" data-g="${g}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+        ${Array.from({ length: divExplorerGroups }).map((_, gi) => `
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 14px;text-align:center;">
+            <div style="font-size:0.85rem;font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה ${gi + 1}</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">${'● '.repeat(sizePerGroup).trim()}</div>
+            <div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">${sizePerGroup} פעימות</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        ${divExplorerTotal} ÷ ${divExplorerGroups} = <span style="color:var(--purple);">${sizePerGroup}</span> בכל קבוצה ${remainder > 0 ? `(נשאר ${remainder})` : 'במדויק!'}
+      </div>
+      <button type="button" class="primary" id="btnPlayDivExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת חלוקת המקצב</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#divTotBtns button').forEach(b => {
+    b.onclick = () => { divExplorerTotal = +b.dataset.t; renderDivExplorerUI(box); };
+  });
+  box.querySelectorAll('#divGrpBtns button').forEach(b => {
+    b.onclick = () => { divExplorerGroups = +b.dataset.g; renderDivExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayDivExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      let t = 0;
+      for (let g = 0; g < divExplorerGroups; g++) {
+        for (let s = 0; s < sizePerGroup; s++) {
+          setTimeout(() => {
+            if (s === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+            else if (typeof playDrumSound === 'function') playDrumSound('snare');
+          }, t * 190);
+          t++;
+        }
+        t += 0.7;
+      }
+    };
+  }
+}
+
+function renderEuclideanWheelUI(box) {
+  const total = euclideanSteps;
+  const k = euclideanPulses;
+  const hits = [];
+  for (let i = 0; i < total; i++) {
+    const isHit = Math.floor((i + 1) * k / total) > Math.floor(i * k / total);
+    hits.push(isHit);
+  }
+
+  const r = 70;
+  const cx = 90;
+  const cy = 90;
+  const coords = [];
+  for (let i = 0; i < total; i++) {
+    const angle = (2 * Math.PI * i / total) - (Math.PI / 2);
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    coords.push({ x, y, isHit: hits[i] });
+  }
+
+  const polygonPoints = coords.filter(c => c.isHit).map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">גלגל הזמן והמקצבים האוקלידי:</div>
+      <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">סה״כ צעדים במעגל:</label>
+          <div style="display:inline-flex;gap:4px;" id="eucStepsBtns">
+            ${[8, 12, 16].map(s => `<button type="button" class="secondary ${s === euclideanSteps ? 'primary' : ''}" data-s="${s}" style="width:38px;min-height:36px;padding:0;">${s}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">צלילים פעילים (קדקודים):</label>
+          <div style="display:inline-flex;gap:4px;" id="eucPulsesBtns">
+            ${[3, 4, 5].map(p => `<button type="button" class="secondary ${p === euclideanPulses ? 'primary' : ''}" data-p="${p}" style="width:36px;min-height:36px;padding:0;">${p}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;margin:12px 0;">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ddd" stroke-width="2" />
+          ${polygonPoints ? `<polygon points="${polygonPoints}" fill="rgba(107,70,193,0.15)" stroke="var(--purple)" stroke-width="2.5" />` : ''}
+          ${coords.map((c, idx) => `
+            <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${c.isHit ? 6.5 : 3.5}" fill="${c.isHit ? 'var(--purple)' : '#bbb'}" />
+          `).join('')}
+        </svg>
+      </div>
+      <div style="font-size:1.15rem;font-weight:bold;color:var(--ink);margin:8px 0;">
+        מצולע של <span style="color:var(--purple);">${euclideanPulses}</span> קודקודים מתוך <span style="color:var(--purple);">${euclideanSteps}</span> פעימות
+      </div>
+      <button type="button" class="primary" id="btnPlayEucExp" style="width:auto;margin:8px auto;padding:10px 24px;">🎶 סיבוב גלגל והשמעת המקצב</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#eucStepsBtns button').forEach(b => {
+    b.onclick = () => { euclideanSteps = +b.dataset.s; renderEuclideanWheelUI(box); };
+  });
+  box.querySelectorAll('#eucPulsesBtns button').forEach(b => {
+    b.onclick = () => { euclideanPulses = +b.dataset.p; renderEuclideanWheelUI(box); };
+  });
+  const playBtn = $('btnPlayEucExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      coords.forEach((c, idx) => {
+        setTimeout(() => {
+          if (c.isHit) {
+            if (typeof playDrumSound === 'function') playDrumSound('kick');
+            if (typeof playFreq === 'function') playFreq(440 + (idx * 20), 180);
+          } else {
+            if (typeof playDrumSound === 'function') playDrumSound('hihat');
+          }
+        }, idx * 140);
+      });
+    };
+  }
+}
+
+function renderEvenOddExplorerUI(box) {
+  const pairs = Math.floor(evenOddCount / 2);
+  const isOdd = evenOddCount % 2 !== 0;
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">חוקר הזוגי והאי־זוגי:</div>
+      <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <label style="font-weight:bold;">בחרו מספר:</label>
+        <div style="display:inline-flex;gap:4px;flex-wrap:wrap;" id="eoNumBtns">
+          ${[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" class="secondary ${n === evenOddCount ? 'primary' : ''}" data-n="${n}" style="width:34px;min-height:34px;padding:0;">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:16px 0;">
+        ${Array.from({ length: pairs }).map((_, pi) => `
+          <div style="background:#e8f5e9;border:2px solid #43a047;border-radius:10px;padding:8px 12px;text-align:center;">
+            <div style="font-size:0.75rem;font-weight:bold;color:#2e7d32;">זוג ${pi + 1}</div>
+            <div style="font-size:1.3rem;">● ●</div>
+          </div>
+        `).join('')}
+        ${isOdd ? `
+          <div style="background:#fff3e0;border:2px dashed #fb8c00;border-radius:10px;padding:8px 12px;text-align:center;">
+            <div style="font-size:0.75rem;font-weight:bold;color:#e65100;">בודד!</div>
+            <div style="font-size:1.3rem;color:#d84315;">●</div>
+          </div>
+        ` : ''}
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;margin:10px 0;">
+        המספר ${evenOddCount} הוא:
+        <span style="color:${isOdd ? '#e65100' : '#2e7d32'};font-size:1.4rem;">
+          ${isOdd ? 'אי-זוגי (יש צליל בודד)' : 'זוגי (כולם בצמדים!)'}
+        </span>
+      </div>
+      <button type="button" class="primary" id="btnPlayEoExp" style="width:auto;margin:8px auto;padding:10px 24px;">🎵 השמעת הזוגות והבודד</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#eoNumBtns button').forEach(b => {
+    b.onclick = () => { evenOddCount = +b.dataset.n; renderEvenOddExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayEoExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      let t = 0;
+      for (let p = 0; p < pairs; p++) {
+        setTimeout(() => { if (typeof playFreq === 'function') playFreq(392, 140); }, t * 200);
+        setTimeout(() => { if (typeof playFreq === 'function') playFreq(440, 140); }, (t + 1) * 200);
+        t += 2.5;
+      }
+      if (isOdd) {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(880, 400);
+        }, t * 200);
+      }
+    };
+  }
 }
 
 if ($('lessonCloseBtn')) $('lessonCloseBtn').onclick = closeLesson;
