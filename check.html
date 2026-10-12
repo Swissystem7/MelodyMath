@@ -3,163 +3,210 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · בדיקה לפני ואחרי יחידה</title>
-<meta name="description" content="בדיקה קצרה לפני יחידה ואחריה, נשמרת רק במכשיר. לא מחקר מבוקר.">
+<title>MelodyMath · בדיקה קצרה לפני ואחרי יחידה</title>
+<meta name="description" content="בדיקת פתיחה ובדיקת סיום לאותה יחידה, שני טפסים מקבילים בלי מוזיקה. הספירה נשארת בטאבלט הזה וזה לא מחקר מבוקר.">
+<!-- The page deliberately skips core.js (it would pull the audio chrome into a
+     silent check), so it links the manifest itself to stay installable. -->
 <link rel="manifest" href="manifest.webmanifest">
 <style>
   :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
-  .wrap{max-width:720px;margin:auto;padding:20px 14px 60px}
-  h1{font-size:clamp(1.5rem,6vw,2.2rem);margin:6px 0}
-  h2{font-size:1.2rem;margin:0 0 10px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:16px 0}
-  .note{color:var(--muted);font-size:.92rem}
-  label{display:block;margin:8px 0 4px;font-weight:700}
-  input,select{width:100%;min-height:44px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
-  button{min-height:44px;min-width:44px;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
-  button.secondary{background:#fff;color:var(--purple)}
-  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .row button{flex:1 1 9rem}
-  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:8px;margin-top:14px}
-  .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line)}
-  .prompt{font-size:clamp(1.25rem,5vw,1.6rem);margin:8px 0}
-  .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
-  table{width:100%;border-collapse:collapse;font-size:.95rem}
-  th,td{border-bottom:1px solid var(--line);padding:8px 4px;text-align:start;overflow-wrap:anywhere}
-  .disclaimer{background:#fff7e0;border:1px solid #f0d58a;border-radius:12px;padding:10px 12px;margin:12px 0 0}
-  .hidden{display:none}
+  .wrap{max-width:720px;margin:auto;padding:24px 16px 60px}
+  h1{font-size:clamp(1.6rem,5vw,2.2rem);margin:8px 0}h2{font-size:1.15rem;margin:0 0 8px}
+  .lead{color:var(--muted);max-width:58ch}.note{color:var(--muted);font-size:.9rem}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0}
+  .tag{display:inline-block;background:#eee9ff;color:var(--purple);border-radius:8px;padding:3px 10px;font-size:.78rem;font-weight:700}
+  label{display:block;font-size:.88rem;font-weight:700;margin:10px 0 4px}
+  input,select{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff;color:inherit}
+  button{min-height:44px;padding:10px 16px;border:none;border-radius:12px;background:var(--purple);color:#fff;font-weight:700;font-size:1rem;font-family:inherit;cursor:pointer}
+  button.secondary{background:#eee9ff;color:var(--ink)}button[disabled]{opacity:.7;cursor:default}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.row button{flex:1 1 180px}
+  .prompt{font-size:clamp(1.3rem,4.5vw,1.8rem);font-weight:800;margin:14px 0}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+  .choice{min-height:56px;font-size:1.3rem;background:#fff;color:var(--ink);border:2px solid var(--line)}
+  /* One neutral "your tap registered" colour. A green-for-correct choice here
+     would turn the check into practice and change what the post-form measures. */
+  .choice.picked{background:#eee9ff;border-color:var(--purple)}
+  @media(max-width:430px){.choices{grid-template-columns:1fr}}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+  .stat{background:#faf8ff;border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-width:7rem;font-size:.85rem;color:var(--muted)}
+  .stat strong{display:block;font-size:1.3rem;color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem;table-layout:fixed}
+  th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right;word-break:break-word}
+  th{color:var(--muted);font-size:.78rem}.hidden{display:none}#main:focus{outline:none}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
-  #main:focus{outline:none}
 </style>
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
-  <h1>בדיקה לפני ואחרי יחידה</h1>
-  <p class="note">8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
-
-  <section class="card" id="setup" aria-labelledby="setupTitle">
-    <h2 id="setupTitle">מי נבדק/ת</h2>
-    <label for="classCode">קוד כיתה</label>
-    <input id="classCode" autocomplete="off">
-    <label for="studentName">שם או קוד תלמיד/ה</label>
-    <input id="studentName" autocomplete="off">
-    <label for="unit">יחידה</label>
-    <select id="unit"></select>
+  <p class="tag">רישום מקומי בטאבלט הזה</p>
+  <h1>בדיקה קצרה לפני ואחרי יחידה</h1>
+  <p class="lead">לכל יחידה שני טפסים מקבילים: אותה מיומנות ואותה רמה בכל סלוט, מספרים אחרים. הבדיקה עצמה בלי מוזיקה ובלי רמז קולי, כדי שהיא תמדוד מה הילד/ה יודע/ת בלי תמיכה. <a href="index.html">חזרה לתרגול</a></p>
+  <div class="card" id="setup">
+    <h2>מי נבדק/ת</h2>
+    <label for="checkName">שם התלמיד/ה</label>
+    <input id="checkName" autocomplete="off" placeholder="לדוגמה: דנה">
+    <label for="checkClass">קוד כיתה (לא חובה)</label>
+    <input id="checkClass" autocomplete="off" dir="ltr" placeholder="4a">
+    <label for="checkUnit">יחידה</label>
+    <select id="checkUnit"></select>
     <div class="row">
-      <button type="button" id="startPre">בדיקה לפני היחידה</button>
-      <button type="button" id="startPost" class="secondary">בדיקה אחרי היחידה</button>
+      <button type="button" id="startPre">בדיקת פתיחה</button>
+      <button type="button" id="startPost">בדיקת סיום</button>
     </div>
-    <p class="note" id="setupStatus" role="status"></p>
-  </section>
-
-  <section class="card hidden" id="quiz" aria-labelledby="quizProgress">
-    <h2 id="quizProgress" aria-live="polite"></h2>
-    <p class="prompt" id="quizPrompt"></p>
-    <div class="choices" id="quizChoices"></div>
-  </section>
-
-  <section class="card" id="report" aria-labelledby="reportTitle">
-    <h2 id="reportTitle">דוח למורה: לפני מול אחרי</h2>
-    <button type="button" id="showReport" class="secondary">הצגת הדוח לקוד הכיתה</button>
+    <p class="note" id="setupMsg" aria-live="polite"></p>
+  </div>
+  <div class="card hidden" id="play">
+    <p class="tag" id="playPhase"></p>
+    <p class="note" id="playCounter"></p>
+    <p class="prompt" id="playPrompt"></p>
+    <div class="choices" id="playChoices" role="group" aria-label="בחירת תשובה"></div>
+    <p class="note" aria-live="polite" id="playEcho"></p>
+    <div class="row"><button type="button" class="secondary" id="playQuit">עצירה בלי לשמור ציון</button></div>
+  </div>
+  <div class="card" id="report">
+    <h2>לפני ואחרי — בטאבלט הזה</h2>
     <div id="reportBody"></div>
-    <p class="disclaimer" id="disclaimer"></p>
-  </section>
+    <p class="note" id="reportDisclaimer"></p>
+  </div>
 </main>
-<script src="src/lib/teacherStore.js"></script>
-<script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/unitCheck.js"></script>
-<script src="src/lib/access.js"></script>
-<script src="src/lib/core.js"></script>
+<script src="src/lib/teacherStore.js"></script>
 <script>
+// The page is a thin shell: every rule about what an item is, which form goes
+// with which phase and how a pre/post row is counted lives in
+// src/lib/unitCheck.js, and every byte it stores goes through
+// src/lib/teacherStore.js. See test/unitCheck.test.js.
 (function () {
-  const $ = function (id) { return document.getElementById(id); };
+  const $ = (id) => document.getElementById(id);
+  const PHASE_HE = { pre: 'בדיקת פתיחה', post: 'בדיקת סיום' };
+  // An abandoned check keeps no score (unitCheck.latestCheck ignores a session
+  // with no `ended`), so quitting mid-way is safe and needs no cleanup.
   let run = null;
 
-  $('unit').innerHTML = listUnits().map(function (u) {
-    return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + '</option>';
-  }).join('');
-  const who = loadWho();
-  $('classCode').value = who.classCode;
-  $('studentName').value = who.name;
-  $('disclaimer').textContent = UNIT_CHECK_DISCLAIMER;
+  const who = () => ({ classCode: $('checkClass').value, name: $('checkName').value });
+  const unitId = () => $('checkUnit').value;
+  const show = (id, on) => $(id).classList.toggle('hidden', !on);
+  const ltr = (text) => '<bdi dir="ltr">' + escapeHtml(text) + '</bdi>';
+  const unitTitle = (id) => (listUnits().filter((u) => u.id === id)[0] || { he: '' }).he;
 
-  function start(form) {
-    const classCode = normalizeCode($('classCode').value);
-    const name = studentLabel($('studentName').value);
-    if (!name) { $('setupStatus').textContent = 'צריך שם או קוד תלמיד/ה.'; return; }
-    const unitId = $('unit').value;
-    const session = startSession(classCode, name, checkKind(unitId, form));
-    if (!session) { $('setupStatus').textContent = 'לא הצלחנו לפתוח בדיקה במכשיר הזה.'; return; }
-    saveWho({ classCode: classCode, name: name });
-    run = { classCode: classCode, name: name, session: session, items: formItems(unitId, form), at: 0, correct: 0 };
-    $('setupStatus').textContent = '';
-    $('setup').classList.add('hidden');
-    $('quiz').classList.remove('hidden');
-    showItem();
+  function start(phase) {
+    const w = who();
+    const items = formItems(unitId(), phase);
+    const say = (msg) => { $('setupMsg').textContent = msg; };
+    if (!studentLabel(w.name)) { say('קודם כותבים שם תלמיד/ה.'); $('checkName').focus(); return; }
+    if (!items.length) { say('אין טופס ליחידה הזו.'); return; }
+    saveWho(w);
+    const session = startSession(w.classCode, w.name, checkKind(unitId(), phase), null);
+    // No local storage (private mode, full quota) means there is nothing to count.
+    if (!session) { say('הטאבלט לא מאפשר שמירה מקומית, ולכן אין מה לספור.'); return; }
+    run = { phase, unit: unitId(), who: w, session, items, at: 0, answered: false };
+    $('setupMsg').textContent = '';
+    show('setup', false);
+    show('play', true);
+    show('report', false);
+    paint();
   }
 
-  function showItem() {
-    const item = run.items[run.at];
-    $('quizProgress').textContent = 'שאלה ' + (run.at + 1) + ' מתוך ' + run.items.length;
-    setMath($('quizPrompt'), item.prompt);
-    $('quizChoices').innerHTML = shuffledChoices(item.choices).map(function (c) {
-      return '<button type="button" data-choice="' + escapeHtml(c) + '"><bdi dir="ltr">' + escapeHtml(c) + '</bdi></button>';
-    }).join('');
-    $('quizChoices').querySelectorAll('button').forEach(function (b) {
-      b.onclick = function () { answer(b.dataset.choice); };
+  function paint() {
+    const it = run.items[run.at];
+    if (!it) return finish();
+    run.answered = false;
+    $('playPhase').textContent = PHASE_HE[run.phase] + ' · ' + unitTitle(run.unit);
+    $('playCounter').textContent = 'פריט ' + (run.at + 1) + ' מתוך ' + run.items.length;
+    $('playPrompt').textContent = it.prompt;
+    $('playEcho').textContent = '';
+    const box = $('playChoices');
+    box.innerHTML = '';
+    // Shuffled per item so a child who sees a neighbour's screen, or who takes
+    // both forms, cannot answer by position.
+    shuffledChoices(it.choices).forEach((value) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'choice'; b.dir = 'ltr'; b.textContent = String(value);
+      b.setAttribute('aria-label', 'תשובה ' + String(value));
+      b.onclick = () => pick(value, b);
+      box.appendChild(b);
     });
-    $('quizChoices').querySelector('button').focus();
   }
 
-  function answer(given) {
-    const item = run.items[run.at];
-    const ok = isCheckCorrect(item, given);
-    if (ok) run.correct++;
-    addItem(run.classCode, run.name, run.session.id, {
-      skill: UNIT_CHECK_SKILL_HE[item.skill] || item.skill, prompt: item.prompt,
-      answer: item.answer, given: given, correct: ok,
-    });
-    run.at++;
-    if (run.at < run.items.length) { showItem(); return; }
-    endSession(run.classCode, run.name, run.session.id);
-    $('quiz').classList.add('hidden');
-    $('setup').classList.remove('hidden');
-    $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.';
+  // No right/wrong feedback: this is a measurement, not practice. The child
+  // sees that the tap registered and the next item follows.
+  function pick(value, btn) {
+    if (!run || run.answered) return;
+    run.answered = true;
+    const it = run.items[run.at];
+    [...$('playChoices').children].forEach((b) => { b.disabled = true; });
+    btn.classList.add('picked');
+    $('playEcho').textContent = 'נרשם.';
+    addItem(run.who.classCode, run.who.name, run.session.id, {
+      skill: it.skill, prompt: it.prompt, answer: it.answer, given: value,
+      correct: isCheckCorrect(it, value),
+    }, null);
+    setTimeout(() => {
+      if (!run) return;
+      run.at += 1;
+      paint();
+    }, 350);
+  }
+
+  // Both ways out of a check: `ended` is what tells unitCheck.latestCheck that
+  // a sitting is a score, so only finish() writes one.
+  function stop(message, ended) {
+    if (!run) return;
+    const w = run.who;
+    if (ended) endSession(w.classCode, w.name, run.session.id, null);
     run = null;
-    renderReport();
+    show('play', false);
+    show('setup', true);
+    show('report', true);
+    $('setupMsg').textContent = message;
+    renderReport(w.classCode);
   }
 
-  function cell(check) {
-    return check ? check.correct + '/' + check.total : '—';
+  function finish() { stop('הבדיקה נשמרה בטאבלט הזה.', true); }
+  function quit() { stop('הבדיקה נעצרה ולא נספרה.', false); }
+
+  const scoreCell = (s) => (s ? ltr(s.correct + '/' + s.total) : '—');
+  const changeCell = (c) => (c == null ? '—' : ltr((c > 0 ? '+' : '') + c));
+  const mean = (v) => (v == null ? '—' : ltr(Math.round(v * 10) / 10));
+  const stat = (big, label) => '<div class="stat"><strong>' + big + '</strong>' + label + '</div>';
+
+  function renderReport(classCode) {
+    const r = checkReport(loadRoster(classCode, null).students, unitId());
+    const rows = r.rows.map((row) => '<tr><td>' + escapeHtml(row.name) + '</td><td>' + scoreCell(row.pre)
+      + '</td><td>' + scoreCell(row.post) + '</td><td>' + changeCell(row.change) + '</td></tr>').join('');
+    $('reportBody').innerHTML = '<div class="stats">'
+      + stat(mean(r.meanPre), 'ממוצע פתיחה מתוך ' + r.total)
+      + stat(mean(r.meanPost), 'ממוצע סיום מתוך ' + r.total)
+      + stat(ltr(r.n), 'תלמידים עם שתי הבדיקות')
+      + stat(ltr(r.preOnly + r.postOnly), 'עם בדיקה אחת בלבד')
+      + '</div>'
+      + (rows
+        ? '<table><caption class="sr-only">פתיחה וסיום לכל תלמיד/ה בטאבלט הזה</caption>'
+          + '<thead><tr><th scope="col">שם</th><th scope="col">פתיחה</th>'
+          + '<th scope="col">סיום</th><th scope="col">שינוי</th></tr></thead>'
+          + '<tbody>' + rows + '</tbody></table>'
+        : '<p class="note">עוד לא נרשמה בדיקה ביחידה הזו בטאבלט הזה.</p>');
+    // The one line that must never be dropped: UNIT_CHECK_DISCLAIMER says in
+    // words what these numbers are not. test/unitCheck.test.js pins it here.
+    $('reportDisclaimer').textContent = UNIT_CHECK_DISCLAIMER;
   }
 
-  function renderReport() {
-    const classCode = normalizeCode($('classCode').value);
-    const r = checkReport(loadRoster(classCode).students, $('unit').value);
-    if (!r.rows.length) {
-      $('reportBody').innerHTML = '<p class="note">אין עדיין בדיקות בקוד הכיתה הזה במכשיר הזה.</p>';
-      return;
-    }
-    const fmt = function (x) { return x == null ? '—' : (Math.round(x * 10) / 10) + '/' + r.total; };
-    const rows = r.rows.map(function (row) {
-      const change = row.change == null ? '—' : (row.change > 0 ? '+' : '') + row.change;
-      return '<tr><td>' + escapeHtml(row.name) + '</td><td><bdi dir="ltr">' + cell(row.pre) + '</bdi></td><td><bdi dir="ltr">'
-        + cell(row.post) + '</bdi></td><td><bdi dir="ltr">' + change + '</bdi></td></tr>';
-    }).join('');
-    $('reportBody').innerHTML = '<p>כיתה <b>' + escapeHtml(classCode || 'ברירת מחדל') + '</b> · n = ' + r.n
-      + ' תלמידים עם שתי הבדיקות. ממוצע לפני <bdi dir="ltr">' + fmt(r.meanPre) + '</bdi>, ממוצע אחרי <bdi dir="ltr">'
-      + fmt(r.meanPost) + '</bdi>.' + (r.preOnly ? ' ' + r.preOnly + ' עשו רק את הבדיקה שלפני.' : '')
-      + (r.postOnly ? ' ' + r.postOnly + ' עשו רק את הבדיקה שאחרי.' : '') + '</p>'
-      + '<table><thead><tr><th>תלמיד/ה</th><th>לפני</th><th>אחרי</th><th>שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
-  }
-
-  $('startPre').onclick = function () { start('pre'); };
-  $('startPost').onclick = function () { start('post'); };
-  $('showReport').onclick = renderReport;
+  $('checkUnit').innerHTML = listUnits().map((u) => '<option value="' + escapeHtml(u.id) + '">'
+    + escapeHtml(u.he) + ' · ' + u.length + ' פריטים</option>').join('');
+  const remembered = loadWho(null);
+  $('checkName').value = remembered.name || '';
+  $('checkClass').value = remembered.classCode || '';
+  $('startPre').onclick = () => start('pre');
+  $('startPost').onclick = () => start('post');
+  $('playQuit').onclick = quit;
+  $('checkUnit').onchange = () => renderReport(who().classCode);
+  renderReport(remembered.classCode);
 })();
 </script>
 </body>
