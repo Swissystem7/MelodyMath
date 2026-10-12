@@ -327,31 +327,71 @@
   // ---------- audio runtime ----------
   // Everything above is pure and runs in Node. This part needs a browser and
   // stays inert without one, so `node --test` still loads the file.
-  let ctx = null;
+  let contextProvider = null;
+  let ownCtx = null;
+  let unlocked = false;
   const sounding = [];
+
+  // A page that already owns an AudioContext — sonify.js makes one — hands it
+  // over here, so the engine plays through that one instead of opening a
+  // second one (§3: "רק אחד"). Call it during page setup, before any audio.
+  // A page that leaves it unset gets the context made in unlockAudio() below.
+  function setAudioContextProvider(fn) {
+    const next = typeof fn === 'function' ? fn : null;
+    if (next !== contextProvider) {
+      // Whatever is sounding belongs to the context we are leaving, and the
+      // one we move to needs its own gesture before it counts as unlocked.
+      stopAll();
+      unlocked = false;
+    }
+    contextProvider = next;
+    return !!contextProvider;
+  }
+
+  // The context to play on: the page's when it supplies one, else our own.
+  // Null while a provider is set but has not made its context yet — we wait
+  // for it rather than opening the second context it is there to prevent.
+  function audioContext() {
+    if (contextProvider) {
+      try { return contextProvider() || null; } catch (e) { return null; }
+    }
+    return ownCtx;
+  }
 
   // iOS Safari keeps the context suspended until a user gesture, and only
   // really starts its clock once something has played, hence the silent blip.
   // Call this from the first `pointerdown` or `keydown`.
   function unlockAudio() {
-    if (typeof window === 'undefined') return null;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    if (!ctx) ctx = new AC();
-    if (ctx.state === 'suspended') {
-      try { ctx.resume(); } catch (e) { /* autoplay policy */ }
+    let ac = audioContext();
+    if (!ac) {
+      if (contextProvider || typeof window === 'undefined') return null;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ownCtx = new AC();
+      ac = ownCtx;
+    }
+    if (ac.state === 'suspended') {
+      try { ac.resume(); } catch (e) { /* autoplay policy */ }
     }
     try {
-      const blip = ctx.createBufferSource();
-      blip.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
-      blip.connect(ctx.destination);
+      const blip = ac.createBufferSource();
+      blip.buffer = ac.createBuffer(1, 1, ac.sampleRate);
+      blip.connect(ac.destination);
       blip.start(0);
     } catch (e) { /* older WebKit */ }
-    return ctx;
+    unlocked = true;
+    return ac;
   }
 
   function audioReady() {
-    return !!(ctx && ctx.state === 'running');
+    const ac = audioContext();
+    return !!(ac && ac.state === 'running');
+  }
+
+  // True once a user gesture has run unlockAudio() through. `audioReady()`
+  // asks the stricter question — whether the clock is running right now.
+  function isAudioUnlocked() {
+    return unlocked;
   }
 
   function stopAll() {
@@ -395,6 +435,9 @@
     ratioText, hzText, harmonicSeries, commonDifference, stringStops,
     monochordHz, monochordInterval, temperedRatio, ratioDriftPercent,
     parseRatio, ratioMatches,
-    unlockAudio, audioReady, stopAll, scheduleSequence,
+    setAudioContextProvider, unlockAudio, audioReady, isAudioUnlocked,
+    stopAll, scheduleSequence,
+    // `playSequence` is the name the grade-3 widgets call it by.
+    playSequence: scheduleSequence,
   };
 });

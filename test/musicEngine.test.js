@@ -113,3 +113,76 @@ test('planSequence lays fraction notes end to end at the given tempo', () => {
   assert.deepEqual(plan.map((n) => [n.time, n.dur, n.hz]), [[2, 1, 220], [3.5, 0.5, 330]]);
   assert.deepEqual(M.planSequence('nope', 0), []);
 });
+
+// A fake just rich enough for the audio runtime: it records what was played.
+function fakeContext(state) {
+  const ctx = {
+    state: state || 'running', currentTime: 1, sampleRate: 48000,
+    destination: {}, started: [], stopped: 0, resumed: 0, buffers: 0,
+    resume() { ctx.resumed += 1; ctx.state = 'running'; },
+    createBuffer() { ctx.buffers += 1; return {}; },
+    createBufferSource() { return { buffer: null, connect() {}, start() {} }; },
+    createGain() {
+      return {
+        gain: { setValueAtTime() {}, linearRampToValueAtTime() {} },
+        connect: () => ctx.destination,
+      };
+    },
+    createOscillator() {
+      return {
+        type: '', frequency: { setValueAtTime() {} }, connect: (g) => g,
+        start: (t) => ctx.started.push(t),
+        stop: () => { ctx.stopped += 1; },
+        disconnect: () => {},
+      };
+    },
+  };
+  return ctx;
+}
+
+test('the audio runtime is inert in Node — no context, no throw', () => {
+  M.setAudioContextProvider(null);
+  assert.equal(M.unlockAudio(), null, 'there is no window to make a context from');
+  assert.equal(M.audioReady(), false);
+  assert.deepEqual(M.scheduleSequence([{ at: 0, dur: 0.5, hz: 440 }]), []);
+  assert.doesNotThrow(() => M.stopAll());
+});
+
+test('the page supplies the one AudioContext instead of the engine opening a second', () => {
+  const ctx = fakeContext('suspended');
+  assert.equal(M.setAudioContextProvider(() => ctx), true);
+  assert.equal(M.unlockAudio(), ctx, 'unlockAudio hands back the page context');
+  assert.equal(ctx.resumed, 1, 'a suspended context is resumed inside the gesture');
+  assert.ok(ctx.buffers >= 1, 'the silent blip really starts the iOS clock');
+  assert.equal(M.isAudioUnlocked(), true);
+  assert.equal(M.audioReady(), true);
+  M.setAudioContextProvider(() => fakeContext());
+  assert.equal(M.isAudioUnlocked(), false, 'a context we just moved to needs its own gesture');
+  M.setAudioContextProvider(null);
+});
+
+test('a provider with no context yet is waited for, not worked around', () => {
+  M.setAudioContextProvider(() => null);
+  assert.equal(M.unlockAudio(), null);
+  assert.equal(M.audioReady(), false);
+  assert.deepEqual(M.scheduleSequence([{ at: 0, dur: 0.5, hz: 440 }]), []);
+  M.setAudioContextProvider(() => { throw new Error('page not ready'); });
+  assert.equal(M.unlockAudio(), null, 'a throwing provider is a missing context, not a crash');
+  M.setAudioContextProvider(null);
+});
+
+test('scheduleSequence sounds what planSequence planned, and playSequence is the same call', () => {
+  const ctx = fakeContext();
+  M.setAudioContextProvider(() => ctx);
+  assert.equal(M.playSequence, M.scheduleSequence);
+  const notes = M.playSequence([
+    { fraction: 'quarter', hz: 220 }, { fraction: 'quarter', hz: 5000, gain: 1 },
+  ], { bpm: 60 });
+  assert.deepEqual(notes.map((n) => [n.hz, n.gain]), [[220, 0.2], [1760, 0.3]], 'clamped for hearing safety');
+  assert.deepEqual(ctx.started, notes.map((n) => n.time), 'one oscillator per planned note');
+  assert.ok(notes[0].time > ctx.currentTime, 'scheduled ahead of the clock, not at it');
+  ctx.stopped = 0;
+  M.stopAll();
+  assert.equal(ctx.stopped, 2, 'stopAll silences the notes still sounding');
+  M.setAudioContextProvider(null);
+});

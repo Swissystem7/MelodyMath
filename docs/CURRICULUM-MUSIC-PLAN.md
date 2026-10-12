@@ -68,6 +68,7 @@
 | `tempoChange(bpm, pct)` | שינוי טמפו באחוזים | אחוזים (ו׳) |
 | `scheduleSequence(events)` | תזמון מדויק עם `AudioContext.currentTime` במקום setTimeout | |
 | `unlockAudio()` | פותח את ה־AudioContext בנגיעה הראשונה (ב־iOS Safari הצליל פועל רק אחרי מחווה של המשתמש) | |
+| `setAudioContextProvider(fn)` | דף שכבר יש לו AudioContext (למשל דרך `sonify.js`) מעביר אותו למנוע, כדי שלא ייפתח שני | |
 
 `sonify.js` ו־`metro.js` הקיימים ממשיכים לעבוד. המנוע החדש מרכז את ה־AudioContext כדי שיהיה רק אחד.
 
