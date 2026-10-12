@@ -120,6 +120,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 .fraction-brick{display:inline-block;padding:8px 14px;border-radius:8px;font-weight:bold;margin:4px;cursor:pointer;color:#fff}
 @keyframes pulseHint{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(105,70,232,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,0)}}
 .pulse-hint{animation:pulseHint 2s infinite ease-in-out}
+@media (prefers-reduced-motion:reduce){.pulse-hint{animation:none}}
 </style></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
@@ -948,6 +949,7 @@ let divExplorerGroups = 3;
 let euclideanPulses = 3;
 let euclideanSteps = 8;
 let evenOddCount = 6;
+let stepPulseTimer = null;
 
 function renderLessonsGradeFilter() {
   const box = $('lessonsGradeFilter');
@@ -1042,6 +1044,8 @@ function openLesson(id) {
 
 function closeLesson() {
   if (typeof stopAllAudio === 'function') stopAllAudio();
+  cancelStepSpeech();
+  clearStepPulseHint();
   activeLessonId = null;
   activeStepIndex = 0;
   $('activeLessonCard').classList.add('hidden');
@@ -1070,6 +1074,38 @@ function renderStepperPills() {
   });
 }
 
+// הקראת טקסט השלב בעברית, אם הדפדפן תומך בסינתזת דיבור
+function speakStepAloud(title, body) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance([title, body].filter(Boolean).join('. '));
+  u.lang = 'he-IL';
+  window.speechSynthesis.speak(u);
+  return true;
+}
+
+function cancelStepSpeech() {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+// רמז חזותי עדין: אחרי שהייה ללא פעולה, כפתור ההמשך/ההשמעה פועם
+function armStepPulseHint() {
+  clearStepPulseHint();
+  stepPulseTimer = setTimeout(() => {
+    const target = document.querySelector('#stepInteractiveBox button.primary') || $('stepNextBtn');
+    if (target) target.classList.add('pulse-hint');
+  }, 3500);
+}
+
+function clearStepPulseHint() {
+  if (stepPulseTimer) {
+    clearTimeout(stepPulseTimer);
+    stepPulseTimer = null;
+  }
+  document.querySelectorAll('#lessonStepContent .pulse-hint, #stepNextBtn.pulse-hint')
+    .forEach(el => el.classList.remove('pulse-hint'));
+}
+
 function renderActiveStep() {
   if (!activeLessonId) return;
   const l = getLessonById(activeLessonId);
@@ -1082,22 +1118,14 @@ function renderActiveStep() {
   $('stepBody').textContent = bodyText;
   $('stepCounterDisplay').textContent = `שלב ${activeStepIndex + 1} מתוך ${l.steps.length}`;
 
-  if ($('stepSpeakBtn')) {
-    $('stepSpeakBtn').onclick = () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(step.title + '. ' + bodyText);
-        u.lang = 'he-IL';
-        window.speechSynthesis.speak(u);
-      }
-    };
+  // הקראה בעברית של השלב הנוכחי (לקוראים מתקשים)
+  const speakBtn = $('stepSpeakBtn');
+  if (speakBtn) {
+    speakBtn.onclick = () => speakStepAloud(step.title, bodyText);
   }
-
-  if (window._pulseTimer) clearTimeout(window._pulseTimer);
-  window._pulseTimer = setTimeout(() => {
-    const actBtn = document.querySelector('#stepInteractiveBox button.primary') || $('stepNextBtn');
-    if (actBtn) actBtn.classList.add('pulse-hint');
-  }, 3500);
+  // מתחילים שלב חדש — עוצרים הקראה קודמת ורמז חזותי קודם
+  cancelStepSpeech();
+  armStepPulseHint();
 
   $('stepPrevBtn').disabled = activeStepIndex === 0;
 
@@ -1387,18 +1415,12 @@ function renderStepAction(step) {
       <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
         <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">12 פעימות מחולקות ל-3 קבוצות שוות של 4:</div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
-          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
-            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 1</div>
-            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
-          </div>
-          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
-            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 2</div>
-            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
-          </div>
-          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
-            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 3</div>
-            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
-          </div>
+          ${[1, 2, 3].map(g => `
+            <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+              <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה ${g}</div>
+              <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+            </div>
+          `).join('')}
         </div>
         <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
           12 ÷ 3 = <span style="color:var(--purple);font-size:1.4rem;">4</span> פעימות בכל קבוצה!
@@ -1407,19 +1429,7 @@ function renderStepAction(step) {
       </div>
     `;
     const btn = $('btnPlayDivConcept');
-    if (btn) btn.onclick = () => {
-      let t = 0;
-      for (let g = 0; g < 3; g++) {
-        for (let b = 0; b < 4; b++) {
-          setTimeout(() => {
-            if (b === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
-            else if (typeof playDrumSound === 'function') playDrumSound('snare');
-          }, t * 200);
-          t++;
-        }
-        t += 0.8;
-      }
-    };
+    if (btn) btn.onclick = () => playGroupedBeats(3, 4, 200);
     return;
   }
 
@@ -1430,12 +1440,12 @@ function renderStepAction(step) {
         <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin:14px 0;">
           <div style="background:#f9f7fd;border:1px solid #d1c4e9;border-radius:10px;padding:12px 18px;text-align:center;">
             <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">חילוק</div>
-            <div style="font-size:1.3rem;font-weight:bold;color:var(--purple);margin-top:4px;">12 ÷ 3 = 4</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:var(--purple);margin-top:4px;" dir="ltr">12 ÷ 3 = 4</div>
           </div>
           <div style="font-size:1.6rem;font-weight:bold;color:var(--purple);">⇄</div>
           <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px 18px;text-align:center;">
             <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">כפל</div>
-            <div style="font-size:1.3rem;font-weight:bold;color:#f57f17;margin-top:4px;">3 × 4 = 12</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:#f57f17;margin-top:4px;" dir="ltr">3 × 4 = 12</div>
           </div>
         </div>
         <button type="button" class="primary" id="btnPlayDivInverse" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו כפל שמחזיר את המקצב השלם 🎵'}</button>
@@ -1445,11 +1455,14 @@ function renderStepAction(step) {
     if (btn) btn.onclick = () => {
       for (let i = 0; i < 12; i++) {
         setTimeout(() => {
-          if (i % 4 === 0 && typeof playHarmonicReward === 'function' && i === 11) playHarmonicReward();
-          else if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
           else if (typeof playXylophoneNote === 'function') playXylophoneNote(i % 5);
         }, i * 180);
       }
+      // המקצב השלם חוזר — צליל סיום הרמוני
+      setTimeout(() => {
+        if (typeof playHarmonicReward === 'function') playHarmonicReward();
+      }, 12 * 180);
     };
     return;
   }
@@ -1601,6 +1614,20 @@ function renderStepAction(step) {
   if (step.actionType === 'evenOddExplorer') {
     renderEvenOddExplorerUI(box);
     return;
+  }
+}
+
+// השמעת קבוצות שוות של פעימות: בס בראש כל קבוצה, סנר לשאר, והפסקה בין קבוצות
+function playGroupedBeats(groups, sizePerGroup, stepMs) {
+  if (typeof playDrumSound !== 'function' || sizePerGroup < 1) return;
+  let slot = 0;
+  for (let g = 0; g < groups; g++) {
+    for (let b = 0; b < sizePerGroup; b++) {
+      const sound = b === 0 ? 'kick' : 'snare';
+      setTimeout(() => playDrumSound(sound), slot * stepMs);
+      slot++;
+    }
+    slot += 0.8; // נשימה קצרה בין קבוצות כדי לשמוע את החלוקה
   }
 }
 
@@ -1825,14 +1852,14 @@ function renderDivExplorerUI(box) {
       <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">כמות פעימות:</label>
-          <div style="display:inline-flex;gap:4px;" id="divTotBtns">
-            ${[8, 12, 16].map(t => `<button type="button" class="secondary ${t === divExplorerTotal ? 'primary' : ''}" data-t="${t}" style="width:42px;min-height:36px;padding:0;">${t}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="divTotBtns" role="group" aria-label="כמות פעימות">
+            ${[8, 12, 16].map(t => `<button type="button" class="${t === divExplorerTotal ? 'primary' : 'secondary'}" data-t="${t}" aria-pressed="${t === divExplorerTotal}" style="width:42px;min-height:36px;padding:0;">${t}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">קבוצות שוות:</label>
-          <div style="display:inline-flex;gap:4px;" id="divGrpBtns">
-            ${[2, 3, 4].map(g => `<button type="button" class="secondary ${g === divExplorerGroups ? 'primary' : ''}" data-g="${g}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="divGrpBtns" role="group" aria-label="מספר קבוצות שוות">
+            ${[2, 3, 4].map(g => `<button type="button" class="${g === divExplorerGroups ? 'primary' : 'secondary'}" data-g="${g}" aria-pressed="${g === divExplorerGroups}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -1844,9 +1871,17 @@ function renderDivExplorerUI(box) {
             <div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">${sizePerGroup} פעימות</div>
           </div>
         `).join('')}
+        ${remainder > 0 ? `
+          <div style="background:#fff3e0;border:2px dashed #fb8c00;border-radius:10px;padding:10px 14px;text-align:center;">
+            <div style="font-size:0.85rem;font-weight:bold;color:#e65100;margin-bottom:4px;">שארית</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;color:#d84315;">${'● '.repeat(remainder).trim()}</div>
+            <div style="font-size:0.85rem;color:#e65100;margin-top:2px;">${remainder} ללא קבוצה</div>
+          </div>
+        ` : ''}
       </div>
-      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
-        ${divExplorerTotal} ÷ ${divExplorerGroups} = <span style="color:var(--purple);">${sizePerGroup}</span> בכל קבוצה ${remainder > 0 ? `(נשאר ${remainder})` : 'במדויק!'}
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;" role="status" aria-live="polite">
+        <span dir="ltr">${divExplorerTotal} ÷ ${divExplorerGroups} = ${sizePerGroup}</span>
+        בכל קבוצה ${remainder > 0 ? `(נשארות ${remainder} פעימות בודדות)` : '— במדויק, בלי שארית!'}
       </div>
       <button type="button" class="primary" id="btnPlayDivExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת חלוקת המקצב</button>
     </div>
@@ -1859,21 +1894,7 @@ function renderDivExplorerUI(box) {
     b.onclick = () => { divExplorerGroups = +b.dataset.g; renderDivExplorerUI(box); };
   });
   const playBtn = $('btnPlayDivExp');
-  if (playBtn) {
-    playBtn.onclick = () => {
-      let t = 0;
-      for (let g = 0; g < divExplorerGroups; g++) {
-        for (let s = 0; s < sizePerGroup; s++) {
-          setTimeout(() => {
-            if (s === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
-            else if (typeof playDrumSound === 'function') playDrumSound('snare');
-          }, t * 190);
-          t++;
-        }
-        t += 0.7;
-      }
-    };
-  }
+  if (playBtn) playBtn.onclick = () => playGroupedBeats(divExplorerGroups, sizePerGroup, 190);
 }
 
 function renderEuclideanWheelUI(box) {
