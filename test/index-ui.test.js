@@ -147,6 +147,8 @@ test('home provides interactive guided micro-lessons studio with manipulatives a
   assert.match(indexHtml, /id="stepQuizBox"/);
   assert.match(indexHtml, /id="stepPracticeBtn"/);
   assert.match(indexHtml, /src\/lib\/interactiveLessons\.js/);
+  assert.match(indexHtml, /src\/lib\/polyrhythm\.js/);
+  assert.match(indexHtml, /src\/lib\/circleOfFifths\.js/);
   assert.match(indexHtml, /renderLessonsUI/);
   assert.match(indexHtml, /renderFractionBuilderUI/);
   assert.match(indexHtml, /renderMultExplorerUI/);
@@ -155,7 +157,7 @@ test('home provides interactive guided micro-lessons studio with manipulatives a
   assert.match(indexHtml, /renderDivExplorerUI/);
   assert.match(indexHtml, /renderEuclideanWheelUI/);
   assert.match(indexHtml, /renderEvenOddExplorerUI/);
+  assert.match(indexHtml, /circleFifthsExplorer/);
   assert.match(indexHtml, /id="stepSpeakBtn"/);
   assert.match(indexHtml, /pulse-hint/);
 });
-
