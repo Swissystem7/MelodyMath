@@ -136,6 +136,80 @@
     };
   }
 
+  function fractionOfQuantity(fraction, total) {
+    if (total == null || typeof total === 'boolean') return null;
+    const f = parseFraction(fraction);
+    const tot = Number(total);
+    if (!f || !Number.isFinite(tot) || f.d === 0) return null;
+    return (f.n / f.d) * tot;
+  }
+
+  function areFractionsEquivalent(a, b) {
+    return sameFraction(a, b);
+  }
+
+  function getEquivalentFractions(raw) {
+    const f = parseFraction(raw);
+    if (!f) return [];
+    const val = f.n / f.d;
+    const candidates = ['1/8', '2/8', '3/8', '4/8', '5/8', '6/8', '7/8', '8/8', '1/4', '2/4', '3/4', '4/4', '1/2', '2/2', '1'];
+    const res = [];
+    candidates.forEach(function (c) {
+      const pc = parseFraction(c);
+      if (pc && Math.abs((pc.n / pc.d) - val) < 0.0001 && res.indexOf(c) === -1) {
+        res.push(c);
+      }
+    });
+    return res;
+  }
+
+  function compareFractions(a, b) {
+    const pa = parseFraction(a);
+    const pb = parseFraction(b);
+    if (!pa || !pb) return null;
+    const diff = (pa.n * pb.d) - (pb.n * pa.d);
+    if (diff > 0) return 1;
+    if (diff < 0) return -1;
+    return 0;
+  }
+
+  function measureFill(notes, maxEighths) {
+    const cap = Number.isFinite(maxEighths) ? Number(maxEighths) : BAR_EIGHTHS;
+    const arr = Array.isArray(notes) ? notes : [];
+    let filled = 0;
+    arr.forEach(function (n) {
+      const e = eighthsOf(n);
+      if (e != null) filled += e;
+    });
+    return {
+      filled: filled,
+      remaining: Math.max(0, cap - filled),
+      isFull: filled === cap,
+      isOverflow: filled > cap,
+      fraction: fractionFromEighths(filled),
+    };
+  }
+
+  function retrograde(seq) {
+    if (!Array.isArray(seq)) return [];
+    return seq.slice().reverse();
+  }
+
+  function invertPitch(pitches, center) {
+    if (!Array.isArray(pitches)) return [];
+    const c = Number.isFinite(center) ? Number(center) : (pitches[0] || 0);
+    return pitches.map(function (p) {
+      const val = Number(p);
+      if (!Number.isFinite(val)) return p;
+      return c - (val - c);
+    });
+  }
+
+  function isMeter34(eighths) {
+    const val = Number(eighths);
+    return Number.isFinite(val) && val === 6;
+  }
+
   return {
     UNIT_FRACTIONS: UNIT_FRACTIONS,
     BAR_EIGHTHS: BAR_EIGHTHS,
@@ -149,5 +223,13 @@
     normalizeBar: normalizeBar,
     renderBar44Html: renderBar44Html,
     bindBar44: bindBar44,
+    fractionOfQuantity: fractionOfQuantity,
+    areFractionsEquivalent: areFractionsEquivalent,
+    getEquivalentFractions: getEquivalentFractions,
+    compareFractions: compareFractions,
+    measureFill: measureFill,
+    retrograde: retrograde,
+    invertPitch: invertPitch,
+    isMeter34: isMeter34,
   };
 });
