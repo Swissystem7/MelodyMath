@@ -45,3 +45,21 @@ test('soundForTick calculates frequencies and identifies key fraction points', (
   assert.ok(s100.frequency > s50.frequency);
   assert.ok(s50.frequency > s0.frequency);
 });
+
+test('scaleJumpSound plays scale step frequencies where a jump of 10 is an octave', () => {
+  const base = 220;
+  const octaveJump = line.scaleJumpSound(0, 10, base);
+  assert.equal(octaveJump.jump, 10);
+  assert.equal(octaveJump.frequency, 440);
+  assert.equal(octaveJump.isOctave, true);
+
+  const stepJump = line.scaleJumpSound(2, 3, base);
+  assert.equal(stepJump.jump, 1);
+  assert.equal(stepJump.frequency, Math.round(base * Math.pow(2, 1 / 10) * 100) / 100);
+  assert.equal(stepJump.isOctave, false);
+
+  const downOctave = line.scaleJumpSound(15, 5, base);
+  assert.equal(downOctave.jump, -10);
+  assert.equal(downOctave.frequency, 110);
+  assert.equal(downOctave.isOctave, true);
+});
