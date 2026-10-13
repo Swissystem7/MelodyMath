@@ -125,10 +125,16 @@
     });
     run.at++;
     if (run.at < run.items.length) { showItem(); return; }
-    endSession(run.classCode, run.name, run.session.id);
+    // startSession falls back to an in-memory row when the tablet cannot
+    // persist (quota, private mode) so the check still runs to its end — but
+    // then nothing was written, and endSession has no stored session to close
+    // and returns null. A measurement page must not report a score as kept
+    // when it was not; test/checkPage.test.js pins both wordings.
+    const saved = endSession(run.classCode, run.name, run.session.id);
     $('quiz').classList.add('hidden');
     $('setup').classList.remove('hidden');
-    $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.';
+    $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length
+      + (saved ? '. נשמר במכשיר הזה.' : '. המכשיר הזה לא אפשר שמירה, ולכן הבדיקה לא נרשמה.');
     run = null;
     renderReport();
   }
