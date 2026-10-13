@@ -46,6 +46,18 @@ const UNIT = uc.listUnits()[0].id;
 // uses: elements appear on demand and localStorage is a Map, so a run leaves a
 // real roster the assertions can read back through teacherStore. readyState
 // 'loading' keeps core.js from installing the shared chrome.
+function stripTags(s) {
+  let res = "";
+  let inTag = false;
+  const str = String(s == null ? "" : s);
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === "<") inTag = true;
+    else if (str[i] === ">") inTag = false;
+    else if (!inTag) res += str[i];
+  }
+  return res;
+}
+
 function runPage(seed) {
   const data = new Map(seed ? Object.entries(seed) : []);
   const localStorage = {
@@ -66,7 +78,7 @@ function runPage(seed) {
       const b = makeEl('button');
       const choice = /data-choice="([^"]*)"/.exec(m[1]);
       if (choice) b.dataset.choice = unentity(choice[1]);
-      b.textContent = unentity(m[2].replace(/<[^>]*>/g, ''));
+      b.textContent = unentity(stripTags(m[2]));
       return b;
     });
   }
@@ -130,7 +142,7 @@ function runPage(seed) {
     setTimeout: (fn) => { fn(); return 0; }, clearTimeout() {},
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)).forEach((m) => {
+  Array.from(page.matchAll(/<script\b(?:\s+src="([^"]+)")?[^>]*>([\s\S]*?)<\/script[^>]*>/gi)).forEach((m) => {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
     else vm.runInContext(m[2], ctx, { filename: 'check.html inline script' });
   });
@@ -195,7 +207,7 @@ test('the started form decides the session kind, so pre and post never mix', () 
   out.get('startPost').onclick();
   const [session] = out.roster('').students['דנה'].sessions;
   assert.equal(session.kind, uc.checkKind(UNIT, 'post'));
-  assert.equal(out.get('quizPrompt').innerHTML.replace(/<[^>]*>/g, ''),
+  assert.equal(stripTags(out.get('quizPrompt').innerHTML),
     uc.formItems(UNIT, 'post')[0].prompt, 'and the post form is the one on screen');
 });
 
@@ -267,7 +279,7 @@ test('an expression prompt is isolated left-to-right, not reordered by the RTL p
   for (let i = 0; i < at; i++) out.tap(items[i].answer);
   const shown = out.get('quizPrompt').innerHTML;
   assert.match(shown, /<span class="math-ltr" dir="ltr">/, 'the expression run is wrapped');
-  assert.equal(shown.replace(/<[^>]*>/g, ''), items[at].prompt, 'and no text was lost');
+  assert.equal(stripTags(shown), items[at].prompt, 'and no text was lost');
 });
 
 // teacherStore.buildReport groups items by `skill` and the teacher tab prints
