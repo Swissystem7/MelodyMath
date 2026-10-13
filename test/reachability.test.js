@@ -13,6 +13,8 @@ const INTENTIONALLY_UNUSED = {
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
   'pedagogy.js': 'lesson-plan bank, wired into the teacher tab in the follow-up PR for #33',
+  'prepost.js': 'pre/post unit check item bank and statistics, wired in teacher tab follow-up PR #173',
+  'grade3Music.js': 'pure core logic for grade 3 music activities; wired into index.html in part 2 (#177)',
 };
 
 function loadedByPages() {
