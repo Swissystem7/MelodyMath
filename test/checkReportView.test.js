@@ -92,7 +92,7 @@ function runPage(seed) {
     console: { error: function () { errors.push(Array.prototype.join.call(arguments, ' ')); }, warn: function () {}, log: function () {} },
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)).forEach(function (m) {
+  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script\s*>/gi)).forEach(function (m) {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
     else vm.runInContext(m[2], ctx, { filename: 'check.html inline script' });
   });
