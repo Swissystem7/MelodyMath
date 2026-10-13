@@ -61,6 +61,15 @@ test('getLessonsForGrade filters lessons accurately', () => {
   assert.equal(all.length, LESSONS.length);
 });
 
+test('Grade 5 and 6 music lessons are registered with their interactive actions', () => {
+  const grade5 = getLessonsForGrade('ה');
+  const grade6 = getLessonsForGrade('ו');
+  assert.ok(grade5.some((l) => l.id === 'polyrhythm-lcm'));
+  assert.ok(grade5.find((l) => l.id === 'polyrhythm-lcm').steps.some((s) => s.actionType === 'polyrhythmExplorer'));
+  assert.ok(grade6.some((l) => l.id === 'circle-of-fifths-tempo'));
+  assert.ok(grade6.find((l) => l.id === 'circle-of-fifths-tempo').steps.some((s) => s.actionType === 'circleFifthsExplorer'));
+});
+
 test('evaluateStepAnswer grades choices and provides explanations', () => {
   const correct = evaluateStepAnswer('fractions-intro', 3, 1);
   assert.equal(correct.valid, true);
@@ -114,4 +123,3 @@ test('registerLesson adds and updates modular learning content dynamically', () 
   assert.equal(registerLesson(null), false);
   assert.equal(registerLesson({ id: 'broken' }), false);
 });
-

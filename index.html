@@ -170,6 +170,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 </div>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
   <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב: שברים, שיפוע פונקציה ומענה מוזיקלי מותאם.</span></a>
+  <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
   <a class="navcard" href="landing.html"><strong>מוצר אחר · סוניפיקציה</strong><span>גרפים לחטיבה ולתיכון. לא חלק מבנק א׳–ד׳.</span></a>
 </nav>
 <section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.</div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button></div>
@@ -351,6 +352,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/remediation.js"></script>
 <script src="src/lib/rhythmGame.js"></script>
 <script src="src/lib/interactiveLessons.js"></script>
+<script src="src/lib/polyrhythm.js"></script>
+<script src="src/lib/circleOfFifths.js"></script>
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
@@ -950,6 +953,10 @@ let euclideanPulses = 3;
 let euclideanSteps = 8;
 let evenOddCount = 6;
 let stepPulseTimer = null;
+let polyrhythmCycleA = 2;
+let polyrhythmCycleB = 3;
+let fractionDivBase = '1/2';
+let fractionDivUnit = '1/8';
 
 function renderLessonsGradeFilter() {
   const box = $('lessonsGradeFilter');
@@ -959,7 +966,9 @@ function renderLessonsGradeFilter() {
     { id: 'א', label: 'כיתה א׳' },
     { id: 'ב', label: 'כיתה ב׳' },
     { id: 'ג', label: 'כיתה ג׳' },
-    { id: 'ד', label: 'כיתה ד׳' }
+    { id: 'ד', label: 'כיתה ד׳' },
+    { id: 'ה', label: 'כיתה ה׳' },
+    { id: 'ו', label: 'כיתה ו׳' }
   ];
   box.innerHTML = filters.map(f => {
     const on = f.id === lessonGradeFilter;
@@ -1615,6 +1624,181 @@ function renderStepAction(step) {
     renderEvenOddExplorerUI(box);
     return;
   }
+
+  if (step.actionType === 'polyrhythmConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">שני תופים במקצבים שונים:</div>
+        <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>תוף א׳ (בס)</b><br>כל 2 פעימות: 0, 2, 4, 6...
+          </div>
+          <div style="background:#e8f5e9;border:2px solid #43a047;border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>תוף ב׳ (סנר)</b><br>כל 3 פעימות: 0, 3, 6, 9...
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayPolyConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו תוף 2 מול תוף 3 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayPolyConcept');
+    if (btn) btn.onclick = () => {
+      for (let p = 0; p <= 6; p++) {
+        setTimeout(() => {
+          if (p % 2 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (p % 3 === 0 && typeof playDrumSound === 'function') playDrumSound('snare');
+        }, p * 250);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'polyrhythmDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">כפולה משותפת מינימלית: מפגש בפעימה 6!</div>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          ${Array.from({ length: 7 }).map((_, i) => `
+            <div style="padding:8px 12px;border:2px solid ${i === 6 || i === 0 ? 'var(--good)' : 'var(--line)'};background:${i === 6 ? '#e8f5e9' : '#fff'};border-radius:8px;text-align:center;min-width:36px;">
+              <b>${i}</b><br>
+              <small>${i === 0 || i === 6 ? '💥 יחד!' : i % 2 === 0 ? '🥁 א' : i % 3 === 0 ? '🪘 ב' : '·'}</small>
+            </div>
+          `).join('')}
+        </div>
+        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">LCM(2, 3) = 6. אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
+        <button type="button" class="primary" id="btnPlayPolyDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את רגע המפגש בפעימה 6 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayPolyDemo');
+    if (btn) btn.onclick = () => {
+      for (let p = 0; p <= 6; p++) {
+        setTimeout(() => {
+          if (p === 6 && typeof playHarmonicReward === 'function') playHarmonicReward();
+          if (p % 2 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (p % 3 === 0 && typeof playDrumSound === 'function') playDrumSound('snare');
+        }, p * 250);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'polyrhythmExplorer') {
+    renderPolyrhythmExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'circleFifthsConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <div style="max-width:360px;margin:0 auto 12px;">${typeof renderFifthsSvg === 'function' ? renderFifthsSvg(320) : ''}</div>
+        <div style="font-size:1.1rem;font-weight:700;">12 נקודות, 30 מעלות בין נקודות שכנות</div>
+      </div>
+    `;
+    return;
+  }
+
+  if (step.actionType === 'circleFifthsDemo') {
+    const angle = typeof fifthsAngle === 'function' ? fifthsAngle(0, 1) : 30;
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">מדו לסול: צעד אחד בכיוון השעון</div>
+        <div style="font-size:2rem;color:var(--purple);font-weight:bold;">${angle}°</div>
+        <button type="button" class="primary" id="btnPlayCircleDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את הצעדים במעגל 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayCircleDemo');
+    if (btn) btn.onclick = () => {
+      if (typeof playFreq !== 'function') return;
+      playFreq(261.63, 220);
+      setTimeout(() => playFreq(392, 320), 280);
+    };
+    return;
+  }
+
+  if (step.actionType === 'circleFifthsExplorer') {
+    let taps = [];
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <button type="button" class="primary" id="btnTapTempo" style="width:auto;padding:12px 28px;">הקשה ${step.actionLabel || '🎵'}</button>
+        <button type="button" class="secondary" id="btnResetTempo" style="width:auto;padding:10px 18px;margin-inline-start:8px;">איפוס</button>
+        <div id="tapTempoResult" class="result" aria-live="polite" style="margin-top:12px;">הקישו לפחות פעמיים לקבלת BPM.</div>
+      </div>
+    `;
+    const result = $('tapTempoResult');
+    const tap = $('btnTapTempo');
+    const reset = $('btnResetTempo');
+    if (tap) tap.onclick = () => {
+      taps.push(Date.now());
+      const bpms = typeof tapsToBpm === 'function' ? tapsToBpm(taps) : [];
+      const mean = typeof meanOf === 'function' ? meanOf(bpms) : null;
+      result.textContent = mean == null
+        ? `הקשות: ${taps.length}. הקישו שוב.`
+        : `BPM בין הקשות: ${bpms.join(', ')} · ממוצע: ${mean}`;
+    };
+    if (reset) reset.onclick = () => {
+      taps = [];
+      result.textContent = 'הקישו לפחות פעמיים לקבלת BPM.';
+    };
+    return;
+  }
+
+  if (step.actionType === 'dottedConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">רבע רגיל (1/4) מול רבע מנוקד (3/8):</div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>רבע רגיל (1/4)</b><br>משך: 2 שמיניות (2/8)
+          </div>
+          <div style="background:#fff8e1;border:2px solid #fbc02d;border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>רבע מנוקד (♩.)</b><br>משך: 1/4 + 1/8 = <b>3/8</b>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayDottedConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו רבע רגיל מול רבע מנוקד 🔔'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDottedConcept');
+    if (btn) btn.onclick = () => {
+      if (typeof playFreq === 'function') {
+        playFreq(392, 300);
+        setTimeout(() => playFreq(523.25, 450), 600);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'dottedDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">כמה שמיניות (1/8) נכנסות בחצי (1/2)?</div>
+        <div style="background:#f0ebff;border-radius:8px;padding:12px;margin:12px auto;max-width:380px;">
+          <div style="font-weight:bold;margin-bottom:6px;">חצי שלם (1/2):</div>
+          <div style="display:flex;gap:4px;">
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+          </div>
+        </div>
+        <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:8px 0;">1/2 ÷ 1/8 = <span style="color:var(--purple);font-size:1.4rem;">4</span> פעמים בדיוק!</div>
+        <button type="button" class="primary" id="btnPlayDottedDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו 4 שמיניות ממלאות חצי תיבה 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDottedDemo');
+    if (btn) btn.onclick = () => {
+      [0, 1, 2, 3].forEach(i => {
+        setTimeout(() => {
+          if (typeof playDrumSound === 'function') playDrumSound('snare');
+          if (typeof playFreq === 'function') playFreq(440 + i * 40, 160);
+        }, i * 200);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'fractionDivExplorer') {
+    renderFractionDivExplorerUI(box);
+    return;
+  }
 }
 
 // השמעת קבוצות שוות של פעימות: בס בראש כל קבוצה, סנר לשאר, והפסקה בין קבוצות
@@ -2028,6 +2212,131 @@ function renderEvenOddExplorerUI(box) {
         setTimeout(() => {
           if (typeof playFreq === 'function') playFreq(880, 400);
         }, t * 200);
+      }
+    };
+  }
+}
+
+function renderPolyrhythmExplorerUI(box) {
+  const stepLcm = (typeof lcmOf === 'function') ? (lcmOf(polyrhythmCycleA, polyrhythmCycleB) || 12) : 6;
+  const maxSpan = Math.max(12, stepLcm);
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">מעבדת פוליריתמיקה וכפולה משותפת:</div>
+      <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">תוף א׳ מכה כל:</label>
+          <div style="display:inline-flex;gap:4px;" id="polyABtns">
+            ${[2, 3, 4].map(a => `<button type="button" class="secondary ${a === polyrhythmCycleA ? 'primary' : ''}" data-a="${a}" style="width:38px;min-height:36px;padding:0;">${a}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">תוף ב׳ מכה כל:</label>
+          <div style="display:inline-flex;gap:4px;" id="polyBBtns">
+            ${[3, 4, 6].map(b => `<button type="button" class="secondary ${b === polyrhythmCycleB ? 'primary' : ''}" data-b="${b}" style="width:38px;min-height:36px;padding:0;">${b}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+        ${Array.from({ length: maxSpan + 1 }).map((_, i) => {
+          const isA = i % polyrhythmCycleA === 0;
+          const isB = i % polyrhythmCycleB === 0;
+          const isBoth = isA && isB;
+          return `
+            <div style="padding:6px 8px;border:2px solid ${isBoth ? 'var(--good)' : 'var(--line)'};background:${isBoth ? '#e8f5e9' : '#fff'};border-radius:6px;text-align:center;min-width:32px;">
+              <b>${i}</b><br>
+              <small style="font-size:0.75rem;">${isBoth ? '💥' : isA ? '🥁' : isB ? '🪘' : '·'}</small>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (LCM של ${polyrhythmCycleA} ו־${polyrhythmCycleB} הוא ${stepLcm})
+      </div>
+      <button type="button" class="primary" id="btnPlayPolyExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת שני התופים יחד</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#polyABtns button').forEach(b => {
+    b.onclick = () => { polyrhythmCycleA = +b.dataset.a; renderPolyrhythmExplorerUI(box); };
+  });
+  box.querySelectorAll('#polyBBtns button').forEach(b => {
+    b.onclick = () => { polyrhythmCycleB = +b.dataset.b; renderPolyrhythmExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayPolyExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      for (let p = 0; p <= stepLcm; p++) {
+        setTimeout(() => {
+          const isA = p % polyrhythmCycleA === 0;
+          const isB = p % polyrhythmCycleB === 0;
+          if (isA && isB && p > 0 && typeof playHarmonicReward === 'function') playHarmonicReward();
+          if (isA && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (isB && typeof playDrumSound === 'function') playDrumSound('snare');
+        }, p * 220);
+      }
+    };
+  }
+}
+
+function renderFractionDivExplorerUI(box) {
+  const baseMap = { '1/2': 0.5, '3/4': 0.75, '3/8': 0.375 };
+  const unitMap = { '1/8': 0.125, '1/16': 0.0625 };
+  const baseVal = baseMap[fractionDivBase] || 0.5;
+  const unitVal = unitMap[fractionDivUnit] || 0.125;
+  const count = Math.round(baseVal / unitVal);
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">מעבדת חילוק שברים לפי משכי צליל:</div>
+      <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">משך היעד:</label>
+          <div style="display:inline-flex;gap:4px;" id="fdBaseBtns">
+            ${[['1/2', 'חצי'], ['3/8', 'רבע מנוקד'], ['3/4', '3/4']].map(([k, label]) => `
+              <button type="button" class="secondary ${k === fractionDivBase ? 'primary' : ''}" data-base="${k}" style="padding:6px 12px;min-height:36px;">${label} (${k})</button>
+            `).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">יחידת החלוקה:</label>
+          <div style="display:inline-flex;gap:4px;" id="fdUnitBtns">
+            ${[['1/8', 'שמינית'], ['1/16', 'שש־עשרית']].map(([k, label]) => `
+              <button type="button" class="secondary ${k === fractionDivUnit ? 'primary' : ''}" data-unit="${k}" style="padding:6px 12px;min-height:36px;">${label} (${k})</button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="background:#f4f0ff;border-radius:10px;padding:14px;max-width:440px;margin:12px auto;">
+        <div style="display:flex;gap:4px;justify-content:center;">
+          ${Array.from({ length: count }).map((_, i) => `
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px 4px;text-align:center;font-weight:bold;font-size:0.85rem;">
+              ${fractionDivUnit}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        ${fractionDivBase} ÷ ${fractionDivUnit} = <span style="color:var(--purple);font-size:1.4rem;">${count}</span> תווים בדיוק!
+      </div>
+      <button type="button" class="primary" id="btnPlayFdExp" style="width:auto;margin:8px auto;padding:10px 24px;">🎵 השמעת החלוקה למקצב</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#fdBaseBtns button').forEach(b => {
+    b.onclick = () => { fractionDivBase = b.dataset.base; renderFractionDivExplorerUI(box); };
+  });
+  box.querySelectorAll('#fdUnitBtns button').forEach(b => {
+    b.onclick = () => { fractionDivUnit = b.dataset.unit; renderFractionDivExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayFdExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          if (typeof playXylophoneNote === 'function') playXylophoneNote(i % 5);
+          if (typeof playDrumSound === 'function') playDrumSound('snare');
+        }, i * 200);
       }
     };
   }
