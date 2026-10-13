@@ -10,6 +10,18 @@ const root = path.join(__dirname, '..');
 const page = fs.readFileSync(path.join(root, 'check.html'), 'utf8');
 const UNIT = uc.listUnits()[0].id;
 
+function stripTags(s) {
+  let res = '';
+  let inTag = false;
+  const str = String(s == null ? '' : s);
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '<') inTag = true;
+    else if (str[i] === '>') inTag = false;
+    else if (!inTag) res += str[i];
+  }
+  return res;
+}
+
 // A fake DOM just big enough for check.html, in the shape test/frequencyLab.test.js
 // uses: elements appear on demand, `setTimeout` is a queue the test flushes, and
 // localStorage is a Map, so a run leaves a real roster the assertions can read.
@@ -76,7 +88,7 @@ function runPage(seed) {
     setTimeout: (fn) => { timers.push(fn); return timers.length; },
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)).forEach((m) => {
+  Array.from(page.matchAll(/<script\b(?:\s+src="([^"]+)")?[^>]*>([\s\S]*?)<\/script[^>]*>/gi)).forEach((m) => {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
     else vm.runInContext(m[2], ctx, { filename: 'check.html inline script' });
   });
@@ -187,7 +199,7 @@ test('an expression prompt is isolated left-to-right, not reordered by the RTL p
   for (let i = 0; i < at; i++) { out.get('playChoices').children[0].onclick(); out.flush(); }
   const shown = out.get('playPrompt').innerHTML;
   assert.match(shown, /<span class="math-ltr" dir="ltr">/, 'the expression run is wrapped');
-  assert.equal(shown.replace(/<[^>]*>/g, ''), items[at].prompt, 'and no text was lost');
+  assert.equal(stripTags(shown), items[at].prompt, 'and no text was lost');
 });
 
 // teacherStore.buildReport groups items by `skill` and the teacher tab prints
