@@ -42,6 +42,7 @@ const ASSETS = [
   './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
+  './src/lib/musicEngine.js',
   './src/lib/access.js',
   './src/lib/graphListen.js',
   './src/lib/listenLessons.js',
