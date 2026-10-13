@@ -8,6 +8,24 @@ const cur = require('../src/lib/curriculum');
 const root = path.join(__dirname, '..');
 const page = fs.readFileSync(path.join(root, 'curriculum.html'), 'utf8');
 
+// [tag, src, body] for every <script> in the page, found with indexOf instead of
+// a tag regexp (CodeQL js/bad-tag-filter).
+function scriptTags(html) {
+  const out = [];
+  const lower = html.toLowerCase();
+  let at = lower.indexOf('<script');
+  while (at !== -1) {
+    const open = lower.indexOf('>', at);
+    const close = lower.indexOf('</script', open);
+    if (open === -1 || close === -1) break;
+    const tag = html.slice(at, open + 1);
+    const src = /src="([^"]+)"/.exec(tag);
+    out.push([tag, src ? src[1] : undefined, html.slice(open + 1, close)]);
+    at = lower.indexOf('<script', close);
+  }
+  return out;
+}
+
 // Run curriculum.html's scripts the way the browser does: every <script src> in
 // order, then the inline script, against a document that only has #sum and #tables.
 // readyState 'loading' keeps core.js from installing the site chrome.
@@ -19,7 +37,7 @@ function runPage() {
     getElementById: function (id) { return els[id] || null; },
   };
   const ctx = vm.createContext({ document: document });
-  const scripts = Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g));
+  const scripts = scriptTags(page);
   assert.ok(scripts.some((m) => !m[1] && m[2].trim()), 'the page has an inline script');
   scripts.forEach(function (m) {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
