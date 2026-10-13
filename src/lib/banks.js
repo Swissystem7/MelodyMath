@@ -105,8 +105,11 @@
   const GRADE_SKILLS = {
     'א': ['counting', 'addition', 'subtraction', 'number_line', 'word_problems', 'measurement', 'geometry', 'data'],
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
-    'ג': ['multiplication', 'division', 'geometry'],
-    'ד': ['basic_fractions', 'geometry'],
+    // ג׳ and ד׳ carry measurement items (minutes and area; unit changes and
+    // the calendar). The skill has to be listed here too, or the diagnostic —
+    // and with it the personal practice plan it feeds — never reaches them.
+    'ג': ['multiplication', 'division', 'geometry', 'measurement'],
+    'ד': ['basic_fractions', 'geometry', 'measurement'],
     'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
