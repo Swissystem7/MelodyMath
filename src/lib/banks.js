@@ -134,7 +134,7 @@
   const LEVEL_HE = { 1: 'בסיס', 2: 'ביניים', 3: 'אתגר' };
 
   function skillHe(k) {
-    return SKILL_HE[k] || k;
+    return Object.prototype.hasOwnProperty.call(SKILL_HE, k) ? SKILL_HE[k] : k;
   }
 
   function clampLevel(n) {
