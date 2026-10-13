@@ -40,18 +40,22 @@ test('the teacher tab has a lesson-plan card wired to pedagogy.js', () => {
   assert.match(src, /lessonPlans\(\)/);
   assert.match(src, /lessonPlanForTopic\(want\)/);
   // The grade picker repaint is what refreshes the card.
-  assert.match(indexHtml, /renderLessonPlan\(\);\n\}/);
+  assert.match(indexHtml, /renderLessonPlan\(\);\r?\n\}/);
 });
 
 test('a grade with a plan shows that plan goals and steps', () => {
   const { pick, box } = render('א');
-  const first = pedagogy.lessonPlans().filter((p) => p.grade === 'א')[0];
+  const gradePlans = pedagogy.lessonPlans().filter((p) => p.grade === 'א');
+  const first = gradePlans[0];
   assert.equal(pick.disabled, false);
-  assert.equal(pick.innerHTML.match(/<option /g).length, 2);
+  assert.equal(pick.innerHTML.match(/<option /g).length, gradePlans.length);
   assert.match(pick.innerHTML, new RegExp('value="' + first.id + '" selected'));
   assert.match(box.innerHTML, new RegExp(escapeHtml(first.curriculumTopic)));
   first.goals.forEach((g) => assert.match(box.innerHTML, new RegExp('<li>' + escapeHtml(g) + '</li>')));
-  first.steps.forEach((s) => assert.match(box.innerHTML, new RegExp('<li>' + escapeHtml(s) + '</li>')));
+  first.steps.forEach((s) => {
+    const text = typeof s === 'string' ? s : ((s.titleHe ? s.titleHe + ': ' : '') + (s.bodyHe || ''));
+    assert.ok(box.innerHTML.includes(escapeHtml(text)), 'box should contain step: ' + text);
+  });
   assert.match(box.innerHTML, /<ul class="err-list">/);
   assert.match(box.innerHTML, /<ol class="err-list">/);
 });
@@ -64,8 +68,7 @@ test('a selected topic survives a repaint instead of snapping back to the first'
 });
 
 test('a grade with no plan says so instead of showing another grade plan', () => {
-  // The bank covers א׳ and ב׳ only. ג׳ and ד׳ must not borrow a plan.
-  ['ג', 'ד'].forEach((grade) => {
+  ['ז', 'ח'].forEach((grade) => {
     assert.equal(pedagogy.lessonPlans().filter((p) => p.grade === grade).length, 0);
     const { pick, box } = render(grade);
     assert.equal(pick.disabled, true);
