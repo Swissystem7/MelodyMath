@@ -37,3 +37,7 @@ test('prototype keys are not shapes and do not throw', () => {
   }
   assert.deepEqual(geo.namesForSides(7), []);
 });
+
+test('sidesOf throws TypeError for null input', () => {
+  assert.throws(() => geo.sidesOf(null), TypeError);
+});

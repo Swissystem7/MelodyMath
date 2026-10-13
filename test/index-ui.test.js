@@ -37,7 +37,8 @@ test('teacher report escapes imported item text before injecting it into HTML', 
   // prompt / skill / kind must be escaped at render time, like student names.
   const report = indexHtml.match(/function renderTeacherReport\(\)[\s\S]*?\n/)[0];
   assert.match(report, /<td>\$\{escapeHtml\(s\.skill\)\}<\/td>/);
-  assert.match(report, /<li>\$\{escapeHtml\(e\.prompt\)\}/);
+  // mathHtml escapes too (see mathBidi.test.js) and keeps "40 + 40 = ?" LTR.
+  assert.match(report, /<li>\$\{mathHtml\(e\.prompt\)\}/);
   assert.match(report, /escapeHtml\(e\.skill\)/);
   assert.match(report, /escapeHtml\(KIND_HE\[s\.kind\]\|\|s\.kind\)/);
   assert.doesNotMatch(report, /\$\{s\.skill\}|\$\{e\.prompt\}|\|\|s\.kind\}/);
@@ -76,4 +77,87 @@ test('the who form refuses a name the roster refuses instead of saying it was sa
   assert.deepEqual(good.calls, [['upsert', 'שילוב', 'נועה'], ['saveWho', 'שילוב', 'נועה']]);
   assert.equal(good.who.name, 'נועה');
   assert.equal(run('').calls.length, 0);
+});
+
+test('index.html provides Smartboard mode toggle and classroom projection styles', () => {
+  assert.match(indexHtml, /id="smartboardToggle"/);
+  assert.match(indexHtml, /\.smartboard-mode/);
+  assert.match(indexHtml, /toggleSmartboard/);
+});
+
+test('index.html provides Quick QR Code modal and WhatsApp share for classrooms', () => {
+  assert.match(indexHtml, /id="qrShareBtn"/);
+  assert.match(indexHtml, /id="qrModal"/);
+  assert.match(indexHtml, /id="qrCloseBtn"/);
+  assert.match(indexHtml, /id="copyLinkBtn"/);
+  assert.match(indexHtml, /id="whatsappShareBtn"/);
+  assert.match(indexHtml, /icons\/qr-code\.svg/);
+});
+
+test('teacher tab provides a printable RAMA failure-point diagnostic card', () => {
+  assert.match(indexHtml, /id="ramaCard"/);
+  assert.match(indexHtml, /id="ramaMake"/);
+  assert.match(indexHtml, /id="ramaPrint"/);
+  assert.match(indexHtml, /id="ramaSheet"/);
+  assert.match(indexHtml, /print-rama/);
+  assert.match(indexHtml, /src\/lib\/remediation\.js/);
+});
+
+test('playground includes singing number line with harmonic fraction bells', () => {
+  assert.match(indexHtml, /id="singingLine"/);
+  assert.match(indexHtml, /id="singingLabel"/);
+  assert.match(indexHtml, /id="singingResult"/);
+  assert.match(indexHtml, /updateSingingLine/);
+  assert.match(indexHtml, /soundForTick/);
+});
+
+test('noteMetro triggers harmonic arpeggio streak rewards', () => {
+  assert.match(indexHtml, /playHarmonicReward\(correct \? metroStreak \+ 1 : 0\)/);
+});
+
+test('playground includes interactive rhythm gameplay with progressive musical layers', () => {
+  assert.match(indexHtml, /id="drumPadBtn"/);
+  assert.match(indexHtml, /id="drumSnareBtn"/);
+  assert.match(indexHtml, /id="drumHihatBtn"/);
+  assert.match(indexHtml, /id="drumClapBtn"/);
+  assert.match(indexHtml, /id="rhythmStageTag"/);
+  assert.match(indexHtml, /id="bandStage"/);
+  assert.match(indexHtml, /id="bandDrums"/);
+  assert.match(indexHtml, /id="bandBass"/);
+  assert.match(indexHtml, /id="bandChords"/);
+  assert.match(indexHtml, /id="bandMelody"/);
+  assert.match(indexHtml, /id="rhythmCursor"/);
+  assert.match(indexHtml, /id="rhythmSpark"/);
+  assert.match(indexHtml, /id="xyloStudio"/);
+  assert.match(indexHtml, /id="xyloKeys"/);
+  assert.match(indexHtml, /id="rhythmStartBtn"/);
+  assert.match(indexHtml, /id="rhythmPatternNextBtn"/);
+  assert.match(indexHtml, /src\/lib\/rhythmGame\.js/);
+});
+
+test('home provides interactive guided micro-lessons studio with manipulatives and stepper', () => {
+  assert.match(indexHtml, /id="tab-lessons"/);
+  assert.match(indexHtml, /data-tab="lessons"/);
+  assert.match(indexHtml, /id="lessons"/);
+  assert.match(indexHtml, /id="lessonsGrid"/);
+  assert.match(indexHtml, /id="lessonsGradeFilter"/);
+  assert.match(indexHtml, /id="activeLessonCard"/);
+  assert.match(indexHtml, /id="lessonStepper"/);
+  assert.match(indexHtml, /id="stepInteractiveBox"/);
+  assert.match(indexHtml, /id="stepQuizBox"/);
+  assert.match(indexHtml, /id="stepPracticeBtn"/);
+  assert.match(indexHtml, /src\/lib\/interactiveLessons\.js/);
+  assert.match(indexHtml, /src\/lib\/polyrhythm\.js/);
+  assert.match(indexHtml, /src\/lib\/circleOfFifths\.js/);
+  assert.match(indexHtml, /renderLessonsUI/);
+  assert.match(indexHtml, /renderFractionBuilderUI/);
+  assert.match(indexHtml, /renderMultExplorerUI/);
+  assert.match(indexHtml, /renderTensBuilderUI/);
+  assert.match(indexHtml, /renderLineExplorerUI/);
+  assert.match(indexHtml, /renderDivExplorerUI/);
+  assert.match(indexHtml, /renderEuclideanWheelUI/);
+  assert.match(indexHtml, /renderEvenOddExplorerUI/);
+  assert.match(indexHtml, /circleFifthsExplorer/);
+  assert.match(indexHtml, /id="stepSpeakBtn"/);
+  assert.match(indexHtml, /pulse-hint/);
 });

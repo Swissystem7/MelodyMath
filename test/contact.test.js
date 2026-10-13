@@ -76,6 +76,9 @@ test('CONTACT.form is the owner\'s Google Form; the pages link to it instead of 
   assert.doesNotMatch(bad, /javascript:/);
 });
 
-test('contact.js changed, so the service worker cache moved to v9', () => {
-  assert.match(read('sw.js'), /const CACHE = 'melodymath-offline-v9';/);
+test('contact.js changed, so the service worker cache moved to v9 or later', () => {
+  const m = read('sw.js').match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) >= 9, 'CACHE should be at least v9');
+  assert.ok(read('sw.js').includes("'./src/lib/contact.js'"), 'contact.js is in ASSETS');
 });
