@@ -70,6 +70,16 @@
     return saveAccess(prefs, storage);
   }
 
+  function setHighContrast(highContrast, storage) {
+    const prefs = loadAccess(storage);
+    prefs.contrast = !!highContrast;
+    const saved = saveAccess(prefs, storage);
+    return {
+      highContrast: saved.contrast,
+      bodyClass: saved.contrast ? 'mm-contrast' : '',
+    };
+  }
+
   function bodyClassList(prefs) {
     const p = normalizePrefs(prefs);
     const out = [];
@@ -293,6 +303,7 @@
     loadAccess: loadAccess,
     saveAccess: saveAccess,
     toggleAccess: toggleAccess,
+    setHighContrast: setHighContrast,
     bodyClassList: bodyClassList,
     applyAccessToDocument: applyAccessToDocument,
     speakHebrew: speakHebrew,
