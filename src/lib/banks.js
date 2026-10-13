@@ -8,7 +8,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const GRADES = ['א', 'ב', 'ג', 'ד'];
+  const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 
   const STRAND = {
     NUM: 'מספרים ופעולות',
@@ -50,11 +50,38 @@
     WORD_COMPARE: 'שאלת מילים — השוואה בין שתי כמויות',
     GEO_SORT: 'מיון מצולעים לפי מספר צלעות וקודקודים',
     RIGHT_ANGLE: 'זיהוי זווית ישרה',
+    ANGLE_KINDS: 'זווית חדה, ישרה, קהה ושטוחה',
+    TRI_SORT: 'מיון משולשים לפי זוויות ולפי צלעות',
+    PARALLEL: 'ישרים מקבילים וישרים מאונכים',
+    QUAD_SORT: 'מיון מרובעים — ריבוע, מלבן, מעוין, מקבילית, טרפז; אלכסונים',
+    BOX: 'תיבה וקובייה — פאות, מקצועות וקודקודים',
     LENGTH: 'מדידת אורך ביחידות מתווכות ואז בס״מ',
     CLOCK: 'קריאת שעון אנלוגי בשעות שלמות',
+    HALF_HOUR: 'חצאי שעות',
+    PERIMETER: 'היקף מצולע — סכום אורכי הצלעות',
+    MINUTES: 'שעות ודקות; משך זמן',
+    AREA: 'שטח מלבן ביחידות ריבועיות',
+    UNITS: 'המרת יחידות — אורך, משקל ונפח',
+    CALENDAR: 'זמן — יממות, שבועות, חודשים ושנים',
     PICTOGRAM: 'קריאת פיקטוגרם',
     BARCHART: 'קריאת דיאגרמת עמודות',
     TABLE: 'קריאת טבלת נתונים',
+    FRAC_EQUIV: 'שברים שקולים — הרחבה, צמצום והשוואה',
+    FRAC_ADD: 'חיבור וחיסור שברים, גם במכנים שונים',
+    FRAC_OF: 'שבר מכמות',
+    DEC_PLACE: 'שברים עשרוניים — ערך המקום, השוואה ומעבר משבר פשוט',
+    DEC_ADD: 'חיבור וחיסור שברים עשרוניים',
+    FRAC_MUL: 'כפל שברים',
+    FRAC_DIV: 'חילוק שברים',
+    DEC_MUL: 'כפל וחילוק שברים עשרוניים',
+    PERCENT: 'אחוזים — אחוז מכמות, שבר כאחוז, שינוי באחוזים',
+    DIV_REM: 'חילוק עם שארית',
+    MUL_COMPARE: 'השוואה כפלית — פי כמה',
+    NUM_10K: 'מספרים עד 10,000 — מבנה עשרוני והשוואה',
+    CIRCLE: 'מעגל — רדיוס, קוטר, היקף וזווית מרכזית',
+    MEAN: 'ממוצע — סכום הערכים חלקי מספרם',
+    LCM: 'כפולה משותפת קטנה ביותר',
+    FACTORS: 'מחלקים, מספרים ראשוניים ופריקים',
   };
 
   const SKILL_HE = {
@@ -70,6 +97,9 @@
     geometry: 'גאומטריה',
     measurement: 'מדידה',
     data: 'נתונים',
+    fractions: 'שברים',
+    decimals: 'שברים עשרוניים',
+    percent: 'אחוזים',
   };
 
   const GRADE_SKILLS = {
@@ -77,6 +107,8 @@
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
     'ג': ['multiplication', 'division'],
     'ד': ['basic_fractions'],
+    'ה': ['fractions', 'decimals', 'data'],
+    'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
 
   const RM_SKILLS = [
@@ -92,6 +124,9 @@
     ['geometry', SKILL_HE.geometry],
     ['data', SKILL_HE.data],
     ['basic_fractions', SKILL_HE.basic_fractions],
+    ['fractions', SKILL_HE.fractions],
+    ['decimals', SKILL_HE.decimals],
+    ['percent', SKILL_HE.percent],
   ];
   const RM_ORDER = {};
   RM_SKILLS.forEach(function (s, i) { RM_ORDER[s[0]] = i; });
@@ -152,6 +187,8 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      music: extra.music,
+      grid: extra.grid,
     };
   }
 
@@ -705,6 +742,446 @@
     BARC('ב', 'באיזה יום הושאלו הכי מעט ספרים — כתבו את המספר', 30, 'העמודה הנמוכה ביותר', { bars: [{ label: 'שני', value: 40 }, { label: 'שלישי', value: 55 }, { label: 'רביעי', value: 30 }] }, 2)
   );
 
+  // Item ids are RAW indexes, and stored histories and tests hold them:
+  // new items go below this line, never in the middle of the bank.
+
+  // ---------- כיתה ג׳ · גאומטריה — סוגי זוויות ומיון משולשים ----------
+  // Word answers are one word (or one hyphenated term): isCorrect ignores
+  // spaces and hyphens, so חד זווית, חד-זווית and חד־זווית all match.
+  RAW.push(
+    GEOA('ג', 'זווית של 30 מעלות — חדה, ישרה, קהה או שטוחה?', 'חדה', 'קטנה מ־90 מעלות', 1, ST.ANGLE_KINDS),
+    GEOA('ג', 'זווית של 150 מעלות — חדה, ישרה, קהה או שטוחה?', 'קהה', 'בין 90 ל־180 מעלות', 1, ST.ANGLE_KINDS),
+    GEOA('ג', 'כמה זוויות ישרות יש במלבן?', 4, 'בכל אחת מארבע הפינות', 1, ST.ANGLE_KINDS),
+    GEOA('ג', 'זווית של 180 מעלות — חדה, ישרה, קהה או שטוחה?', 'שטוחה', 'שתי השוקיים על קו ישר אחד', 2, ST.ANGLE_KINDS),
+    GEOA('ג', 'בשעה 3:00 מחוגי השעון יוצרים זווית — חדה, ישרה, קהה או שטוחה?', 'ישרה', 'רבע סיבוב — כמו פינת דף', 2, ST.ANGLE_KINDS),
+    GEOA('ג', 'בשעה 6:00 מחוגי השעון יוצרים זווית — חדה, ישרה, קהה או שטוחה?', 'שטוחה', 'המחוגים בקו ישר אחד', 3, ST.ANGLE_KINDS),
+    GEOA('ג', 'שתי זוויות ישרות זו ליד זו יוצרות יחד זווית — חדה, ישרה, קהה או שטוחה?', 'שטוחה', '90 ועוד 90 הם 180 מעלות', 3, ST.ANGLE_KINDS),
+    GEOA('ג', 'משולש שיש בו זווית של 90 מעלות — חד־זווית, ישר־זווית או קהה־זווית?', 'ישר־זווית', 'יש בו זווית ישרה', 1, ST.TRI_SORT),
+    GEOA('ג', 'משולש שכל שלוש זוויותיו חדות — חד־זווית, ישר־זווית או קהה־זווית?', 'חד־זווית', 'כל הזוויות קטנות מ־90', 2, ST.TRI_SORT),
+    GEOA('ג', 'זוויות המשולש הן 100, 40 ו־40 מעלות — חד־זווית, ישר־זווית או קהה־זווית?', 'קהה־זווית', '100 גדולה מ־90', 3, ST.TRI_SORT),
+    GEOA('ג', 'למשולש יש בדיוק שתי צלעות שוות — שווה־צלעות, שווה־שוקיים או שונה־צלעות?', 'שווה־שוקיים', 'שתי השוקיים שוות', 2, ST.TRI_SORT),
+    GEOA('ג', 'כמה זוויות ישרות יכולות להיות לכל היותר במשולש אחד?', 1, 'שתי זוויות ישרות כבר 180 מעלות — לא נשאר לשלישית', 3, ST.TRI_SORT)
+  );
+
+  // ---------- כיתה ד׳ · גאומטריה — מקבילים, מאונכים, מרובעים, תיבה ----------
+  RAW.push(
+    GEOA('ד', 'שני ישרים שלעולם אינם נפגשים — מקבילים או מאונכים?', 'מקבילים', 'כמו פסי רכבת', 1, ST.PARALLEL),
+    GEOA('ד', 'במלבן, שתי צלעות שנפגשות בפינה — מקבילות או מאונכות?', 'מאונכות', 'הן יוצרות זווית ישרה', 1, ST.PARALLEL),
+    GEOA('ד', 'כמה זוגות של צלעות מקבילות יש לריבוע?', 2, 'למעלה ולמטה, ימין ושמאל', 2, ST.PARALLEL),
+    GEOA('ד', 'כמה זוגות של צלעות מקבילות יש לטרפז?', 1, 'לטרפז יש זוג אחד בדיוק', 2, ST.PARALLEL),
+    GEOA('ד', 'מרובע שכל צלעותיו שוות וכל זוויותיו ישרות — איך קוראים לו?', 'ריבוע', 'ארבע צלעות שוות וארבע זוויות ישרות', 1, ST.QUAD_SORT),
+    GEOA('ד', 'כמה אלכסונים יש למרובע?', 2, 'מכל קודקוד לקודקוד שמולו', 2, ST.QUAD_SORT),
+    GEOA('ד', 'מרובע שכל ארבע צלעותיו שוות אבל זוויותיו אינן ישרות — איך קוראים לו?', 'מעוין', 'ריבוע ״מוטה״', 3, ST.QUAD_SORT),
+    GEOA('ד', 'מרובע עם שני זוגות של צלעות מקבילות ובלי זווית ישרה — מקבילית או טרפז?', 'מקבילית', 'לטרפז יש רק זוג אחד', 3, ST.QUAD_SORT),
+    GEOA('ד', 'כמה פאות יש לתיבה?', 6, 'למעלה, למטה וארבע דפנות', 1, ST.BOX),
+    GEOA('ד', 'כמה מקצועות יש לתיבה?', 12, '4 למעלה, 4 למטה ו־4 עומדים', 2, ST.BOX),
+    GEOA('ד', 'כמה קודקודים יש לקובייה?', 8, '4 למעלה ו־4 למטה', 2, ST.BOX),
+    GEOA('ד', 'כל פאות הקובייה הן אותה צורה. איזו?', 'ריבוע', 'כל המקצועות של קובייה שווים', 3, ST.BOX)
+  );
+
+  // ---------- מדידה ב׳–ד׳ — בלי ציור: הנתונים כתובים בשאלה ----------
+  // Answers are whole numbers so a child types digits only; the unit is in
+  // the prompt. test/measurementBank.test.js checks them against measure.js.
+  function MEAS(grade, prompt, answer, hint, level, standard) {
+    return I(grade, 'measurement', prompt, answer, hint, { strand: STRAND.MEASURE, standard: standard, level: level });
+  }
+
+  // ---------- כיתה ב׳ · מדידה — חצאי שעות והיקף ----------
+  RAW.push(
+    MEAS('ב', 'כמה דקות יש בחצי שעה?', 30, 'שעה היא 60 דקות, וחצי ממנה', 1, ST.HALF_HOUR),
+    MEAS('ב', 'השעון מראה 3:30. כמה דקות עברו מאז 3:00?', 30, 'מחוג הדקות על 6 — חצי סיבוב', 1, ST.HALF_HOUR),
+    MEAS('ב', 'כמה חצאי שעה יש בשעה אחת?', 2, 'שני חצאים הם שלם', 2, ST.HALF_HOUR),
+    MEAS('ב', 'השעון מראה 7:30. מחוג השעות נמצא בין 7 לאיזה מספר?', 8, 'חצי הדרך אל השעה הבאה', 2, ST.HALF_HOUR),
+    MEAS('ב', 'יצאנו ב־4:00 וחזרנו ב־5:30. כמה חצאי שעה עברו?', 3, 'שעה שלמה היא שני חצאים, ועוד חצי', 3, ST.HALF_HOUR),
+    MEAS('ב', 'שיר ארוך חצי שעה ועוד שיר ארוך חצי שעה. כמה דקות בסך הכול?', 60, '30 ועוד 30', 3, ST.HALF_HOUR),
+    MEAS('ב', 'לריבוע צלע של 3 ס״מ. מה ההיקף בס״מ?', 12, 'ארבע צלעות שוות: 3+3+3+3', 1, ST.PERIMETER),
+    MEAS('ב', 'למשולש צלעות של 3, 4 ו־5 ס״מ. מה ההיקף בס״מ?', 12, 'מחברים את שלוש הצלעות', 1, ST.PERIMETER),
+    MEAS('ב', 'למלבן צלעות של 5 ס״מ ו־2 ס״מ. מה ההיקף בס״מ?', 14, '5+2+5+2', 2, ST.PERIMETER),
+    MEAS('ב', 'למחומש 5 צלעות של 2 ס״מ כל אחת. מה ההיקף בס״מ?', 10, 'חמש פעמים 2', 2, ST.PERIMETER),
+    MEAS('ב', 'היקף ריבוע הוא 20 ס״מ. כמה ס״מ אורך כל צלע?', 5, '20 מתחלק לארבע צלעות שוות', 3, ST.PERIMETER),
+    MEAS('ב', 'היקף מלבן הוא 10 ס״מ, ואחת מצלעותיו 3 ס״מ. כמה ס״מ הצלע הסמוכה לה?', 2, '3+3 כבר 6; נשארו 4 לשתי הצלעות האחרות', 3, ST.PERIMETER)
+  );
+
+  // ---------- כיתה ג׳ · מדידה — שעות ודקות; שטח מלבן ----------
+  RAW.push(
+    MEAS('ג', 'כמה דקות יש ב־1 שעה?', 60, 'מחוג הדקות עושה סיבוב שלם', 1, ST.MINUTES),
+    MEAS('ג', 'כמה דקות יש ברבע שעה?', 15, 'רבע מ־60', 1, ST.MINUTES),
+    MEAS('ג', 'השיעור התחיל ב־8:00 ונגמר ב־8:45. כמה דקות נמשך?', 45, 'מ־00 עד 45', 2, ST.MINUTES),
+    MEAS('ג', 'כמה דקות יש ב־3 שעות?', 180, 'שלוש פעמים 60', 2, ST.MINUTES),
+    MEAS('ג', 'האוטובוס יוצא ב־10:40. עכשיו 10:25. בעוד כמה דקות הוא יוצא?', 15, 'מ־25 עד 40', 3, ST.MINUTES),
+    MEAS('ג', 'האימון התחיל ב־4:30 ונגמר ב־6:00. כמה דקות נמשך?', 90, 'חצי שעה עד 5:00 ועוד שעה שלמה', 3, ST.MINUTES),
+    MEAS('ג', 'מלבן בנוי מ־3 שורות של 4 משבצות. כמה משבצות יש בו?', 12, '3 פעמים 4', 1, ST.AREA),
+    MEAS('ג', 'מלבן שאורכו 5 ס״מ ורוחבו 2 ס״מ. מה שטחו בסמ״ר?', 10, 'אורך כפול רוחב', 1, ST.AREA),
+    MEAS('ג', 'ריבוע שצלעו 4 ס״מ. מה שטחו בסמ״ר?', 16, '4 כפול 4', 2, ST.AREA),
+    MEAS('ג', 'מלבן שאורכו 7 ס״מ ורוחבו 3 ס״מ. מה שטחו בסמ״ר?', 21, '7 כפול 3', 2, ST.AREA),
+    MEAS('ג', 'שטח מלבן הוא 24 סמ״ר ואורכו 6 ס״מ. כמה ס״מ רוחבו?', 4, 'איזה מספר כפול 6 נותן 24?', 3, ST.AREA),
+    MEAS('ג', 'מלבן שאורכו 5 ס״מ ורוחבו 2 ס״מ, וריבוע שצלעו 3 ס״מ. כמה סמ״ר שטחם יחד?', 19, '10 ועוד 9', 3, ST.AREA)
+  );
+
+  // ---------- כיתה ד׳ · מדידה — המרת יחידות; זמן בלוח השנה ----------
+  RAW.push(
+    MEAS('ד', 'כמה ס״מ יש ב־2 מטרים?', 200, 'במטר אחד 100 ס״מ', 1, ST.UNITS),
+    MEAS('ד', 'כמה גרם יש ב־3 ק״ג?', 3000, 'בקילוגרם אחד 1,000 גרם', 1, ST.UNITS),
+    MEAS('ד', 'כמה מ״מ יש ב־3 ס״מ?', 30, 'בסנטימטר אחד 10 מילימטרים', 2, ST.UNITS),
+    MEAS('ד', 'כמה מטרים יש ב־2 ק״מ?', 2000, 'בקילומטר אחד 1,000 מטרים', 2, ST.UNITS),
+    MEAS('ד', 'כמה מ״ל יש בחצי ליטר?', 500, 'בליטר אחד 1,000 מ״ל', 3, ST.UNITS),
+    MEAS('ד', 'חבל באורך 3 מטרים נחתך לחתיכות של 50 ס״מ. כמה חתיכות יש?', 6, '3 מטרים הם 300 ס״מ', 3, ST.UNITS),
+    MEAS('ד', 'כמה חודשים יש בשנה לועזית?', 12, 'מינואר עד דצמבר', 1, ST.CALENDAR),
+    MEAS('ד', 'כמה ימים יש ב־3 שבועות?', 21, 'בשבוע 7 ימים', 1, ST.CALENDAR),
+    MEAS('ד', 'כמה שעות יש ב־1 יממה?', 24, 'יום ולילה יחד', 2, ST.CALENDAR),
+    MEAS('ד', 'כמה ימים יש בשנה לועזית רגילה, לא מעוברת?', 365, 'בשנה מעוברת יש יום אחד יותר', 2, ST.CALENDAR),
+    MEAS('ד', 'כמה שעות יש ב־2 יממות?', 48, 'פעמיים 24', 3, ST.CALENDAR),
+    MEAS('ד', 'יום ההולדת בעוד 4 שבועות ו־3 ימים. בעוד כמה ימים?', 31, '4 פעמים 7, ועוד 3', 3, ST.CALENDAR)
+  );
+
+  // ---------- ה׳–ו׳ — שברים, עשרוניים, אחוזים (#96) ----------
+  // Fraction answers are typed as a/b; adaptive.isCorrect accepts any
+  // equivalent fraction, so 2/4 counts for 1/2. Decimal answers are numbers.
+  // `music` names the music issue that reuses the item: lcm/bars/bpm for
+  // #106 (grade ה׳), dotted/tempo/mean for #107 (grade ו׳).
+  function G56(grade, skill, prompt, answer, hint, level, standard, music) {
+    const strand = skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
+    return I(grade, skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
+  }
+
+  // ---------- כיתה ה׳ · שברים ----------
+  RAW.push(
+    G56('ה', 'fractions', 'השלימו: 1/2 = ?/8. מה המונה?', 4, 'כופלים מונה ומכנה באותו מספר', 1, ST.FRAC_EQUIV),
+    G56('ה', 'fractions', 'צמצמו עד הסוף: 6/8', '3/4', 'מחלקים מונה ומכנה ב־2', 1, ST.FRAC_EQUIV),
+    G56('ה', 'fractions', 'כמה שמיניות יש ב־3/4?', 6, '3/4 = 6/8', 2, ST.FRAC_EQUIV, 'bars'),
+    G56('ה', 'fractions', 'מה גדול יותר, 2/3 או 3/5? כתבו את השבר הגדול.', '2/3', 'מכנה משותף 15: 10/15 מול 9/15', 3, ST.FRAC_EQUIV),
+    G56('ה', 'fractions', '1/4 + 2/4 = ?', '3/4', 'אותו מכנה — מחברים מונים', 1, ST.FRAC_ADD),
+    G56('ה', 'fractions', '1/2 + 1/4 = ?', '3/4', '1/2 = 2/4', 1, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', '1/2 + 1/3 = ?', '5/6', 'מכנה משותף 6: 3/6 + 2/6', 2, ST.FRAC_ADD, 'lcm'),
+    G56('ה', 'fractions', '3/4 − 1/8 = ?', '5/8', '3/4 = 6/8', 2, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', '2/3 + 1/4 = ?', '11/12', 'מכנה משותף 12: 8/12 + 3/12', 3, ST.FRAC_ADD, 'lcm'),
+    G56('ה', 'fractions', 'תיבה של 4/4 מכילה רבע, שמינית ושמינית. כמה חסר עד תיבה מלאה? (כשבר)', '1/2', '1/4 + 1/8 + 1/8 = 1/2', 3, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', 'כמה זה 1/3 מ־12?', 4, 'מחלקים ל־3 חלקים שווים', 1, ST.FRAC_OF),
+    G56('ה', 'fractions', 'כמה זה 3/4 מ־20?', 15, 'רבע מ־20 הוא 5, ושלושה רבעים', 2, ST.FRAC_OF),
+    G56('ה', 'fractions', 'בכיתה 30 ילדים, 2/5 מהם מנגנים. כמה ילדים מנגנים?', 12, 'חמישית מ־30 היא 6', 3, ST.FRAC_OF)
+  );
+
+  // ---------- כיתה ה׳ · שברים עשרוניים ----------
+  RAW.push(
+    G56('ה', 'decimals', 'כתבו כשבר עשרוני: 7/10', 0.7, 'עשיריות — ספרה אחת אחרי הנקודה', 1, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'במספר 3.46, איזו ספרה במקום המאיות?', 6, 'הספרה השנייה אחרי הנקודה', 1, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'מה גדול יותר, 0.5 או 0.45? כתבו את הגדול.', 0.5, '0.50 מול 0.45', 2, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'כתבו כשבר עשרוני: 1/4', 0.25, '1/4 = 25/100', 2, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'פעימה ב־120 BPM נמשכת 60/120 שנייה. כמה שניות זה כשבר עשרוני?', 0.5, '60 חלקי 120', 3, ST.DEC_PLACE, 'bpm'),
+    G56('ה', 'decimals', '0.3 + 0.4 = ?', 0.7, 'שלוש עשיריות ועוד ארבע עשיריות', 1, ST.DEC_ADD),
+    G56('ה', 'decimals', '2.5 + 1.25 = ?', 3.75, 'מיישרים את הנקודות: 2.50 + 1.25', 2, ST.DEC_ADD),
+    G56('ה', 'decimals', '5 − 1.6 = ?', 3.4, '5.0 − 1.6', 2, ST.DEC_ADD),
+    G56('ה', 'decimals', 'מחברת עולה 4.90 ₪ ועט 2.35 ₪. כמה עודף מ־10 ₪?', 2.75, '4.90 + 2.35 = 7.25', 3, ST.DEC_ADD)
+  );
+
+  // ---------- כיתה ו׳ · כפל וחילוק שברים ----------
+  RAW.push(
+    G56('ו', 'fractions', '1/2 × 1/3 = ?', '1/6', 'מונה כפול מונה, מכנה כפול מכנה', 1, ST.FRAC_MUL),
+    G56('ו', 'fractions', '3 × 1/4 = ?', '3/4', 'שלושה רבעים', 1, ST.FRAC_MUL),
+    G56('ו', 'fractions', 'תו מנוקד ארוך פי 3/2 מהתו. כמה פעימות נמשך חצי מנוקד? (חצי = 2 פעימות)', 3, '2 × 3/2', 2, ST.FRAC_MUL, 'dotted'),
+    G56('ו', 'fractions', '2/3 × 3/4 = ?', '1/2', '6/12 ואז מצמצמים', 2, ST.FRAC_MUL),
+    G56('ו', 'fractions', '3 : 1/2 = ?', 6, 'כמה חצאים נכנסים ב־3?', 2, ST.FRAC_DIV),
+    G56('ו', 'fractions', '3/4 : 1/8 = ?', 6, 'כמה שמיניות ב־3/4? 3/4 = 6/8', 3, ST.FRAC_DIV, 'bars'),
+    G56('ו', 'fractions', '2/3 : 2 = ?', '1/3', 'חצי מ־2/3', 3, ST.FRAC_DIV)
+  );
+
+  // ---------- כיתה ו׳ · כפל וחילוק עשרוניים ----------
+  RAW.push(
+    G56('ו', 'decimals', '0.4 × 10 = ?', 4, 'כפל ב־10 מזיז את הנקודה ימינה', 1, ST.DEC_MUL),
+    G56('ו', 'decimals', '3.2 : 100 = ?', 0.032, 'חילוק ב־100 מזיז את הנקודה שני מקומות שמאלה', 1, ST.DEC_MUL),
+    G56('ו', 'decimals', '1.5 × 4 = ?', 6, '1.5 + 1.5 + 1.5 + 1.5', 2, ST.DEC_MUL),
+    G56('ו', 'decimals', '0.3 × 0.2 = ?', 0.06, '3 × 2 = 6, ושתי ספרות אחרי הנקודה', 2, ST.DEC_MUL),
+    G56('ו', 'decimals', '7.5 : 3 = ?', 2.5, '7.5 הם 75 עשיריות', 3, ST.DEC_MUL),
+    G56('ו', 'decimals', 'שלושה שירים: 3.5, 4 ו־4.5 דקות. מה האורך הממוצע בדקות?', 4, '12 חלקי 3', 3, ST.DEC_MUL, 'mean')
+  );
+
+  // ---------- כיתה ו׳ · אחוזים ----------
+  RAW.push(
+    G56('ו', 'percent', 'כמה זה 50% מ־80?', 40, '50% הם חצי', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה זה 10% מ־70?', 7, '10% הם עשירית', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה זה 25% מ־60?', 15, '25% הם רבע', 2, ST.PERCENT),
+    G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 3/4', 75, '3/4 = 75/100', 2, ST.PERCENT),
+    G56('ו', 'percent', 'קצב של 100 BPM עולה ב־20%. מה הקצב החדש?', 120, '20% מ־100 הם 20', 3, ST.PERCENT, 'tempo'),
+    G56('ו', 'percent', 'מחיר 40 ₪ ירד ב־25%. מה המחיר החדש?', 30, '25% מ־40 הם 10', 3, ST.PERCENT)
+  );
+
+  // ---------- כיתה ב׳ · פעילויות מוזיקה (תוכנית §5, #103) ----------
+  // Appended at the end: ids are RAW indexes, so earlier items keep theirs.
+  // `music` names the activity; tables stay on 2/4/5/10 so the mastery gate
+  // for 3/6/7/8/9 is untouched.
+  function MB(skill, music, prompt, answer, hint, level, extra) {
+    extra = extra || {};
+    extra.level = level;
+    extra.music = music;
+    return I('ב', skill, prompt, answer, hint, extra);
+  }
+  function EVEN(n, level) {
+    const even = n % 2 === 0;
+    return MB('place_value', 'evenOdd', 'הקשיבו לפעימות: ' + '🥁'.repeat(n) + ' — לכל פעימה יש זוג? (כתבו זוגי או אי־זוגי)',
+      even ? 'זוגי' : 'אי-זוגי',
+      even ? 'מחלקים לזוגות — אף פעימה לא נשארת לבד' : 'בסוף נשארת פעימה אחת בלי זוג',
+      level, { standard: ST.PLACE_VALUE, hear: [n] });
+  }
+  function DUO(op, a, b, answer, hint, level) {
+    return MB(op === '+' ? 'addition' : 'subtraction', 'twoInstruments',
+      'תוף מנגן את היחידות, בס מנגן את העשרות. חשבו במאונך: ' + a + ' ' + (op === '+' ? '+' : '−') + ' ' + b,
+      answer, hint, level,
+      { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'vertical', vert: { a: a, b: b, op: op } });
+  }
+  function BARS(prompt, answer, hint, table, level) {
+    return MB('multiplication', 'beatsBars', prompt, answer, hint, level, { standard: ST.MUL_B, table: table });
+  }
+  function HALF(prompt, answer, hint, level) {
+    return MB('measurement', 'halfBar', prompt, answer, hint, level, { strand: STRAND.MEASURE, standard: ST.HALF_HOUR });
+  }
+  function REG(prompt, answer, hint, level, hear) {
+    return MB('place_value', 'registers', prompt, answer, hint, level, { standard: ST.PLACE_VALUE, hear: hear });
+  }
+  const REGROUP = '10 מכות תוף מתקבצות לצליל בס אחד';
+  const UNGROUP = 'אין מספיק מכות תוף — צליל בס אחד נפרט ל־10 מכות תוף';
+  RAW.push(
+    EVEN(4, 1), EVEN(3, 1), EVEN(6, 1), EVEN(5, 1),
+    EVEN(7, 2), EVEN(8, 2), EVEN(9, 2),
+    EVEN(10, 3), EVEN(11, 3), EVEN(12, 3),
+
+    DUO('+', 23, 14, 37, 'התוף מנגן 3 + 4, הבס מנגן 2 + 1', 1),
+    DUO('+', 41, 36, 77, 'התוף מנגן 1 + 6, הבס מנגן 4 + 3', 1),
+    DUO('-', 58, 24, 34, 'התוף מנגן 8 − 4, הבס מנגן 5 − 2', 1),
+    DUO('+', 38, 25, 63, '8 + 5 = 13 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 47, 16, 63, '7 + 6 = 13 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 29, 29, 58, '9 + 9 = 18 מכות תוף: ' + REGROUP, 2),
+    DUO('-', 63, 28, 35, '3 − 8 לא יוצא: ' + UNGROUP, 2),
+    DUO('+', 56, 37, 93, '6 + 7 = 13 מכות תוף: ' + REGROUP, 3),
+    DUO('-', 70, 46, 24, 'אפס מכות תוף: ' + UNGROUP, 3),
+    DUO('-', 85, 39, 46, '5 − 9 לא יוצא: ' + UNGROUP, 3),
+
+    BARS('2 תיבות של 5/4 — כמה פעימות בסך הכול?', 10, 'בכל תיבה 5 פעימות, פעמיים', 5, 1),
+    BARS('3 תיבות של 4/4 — כמה פעימות בסך הכול?', 12, '4, 8, 12', 4, 1),
+    BARS('4 תיבות של 4/4 — כמה פעימות בסך הכול?', 16, '4 פעמים 4', 4, 1),
+    BARS('6 תיבות של 2/4 — כמה פעימות בסך הכול?', 12, 'סופרים בדילוגים של 2', 2, 1),
+    BARS('5 תיבות של 4/4 — כמה פעימות בסך הכול?', 20, '5 פעמים 4', 4, 2),
+    BARS('9 תיבות של 2/4 — כמה פעימות בסך הכול?', 18, '9 פעמים 2', 2, 2),
+    BARS('3 תיבות של 5/4 — כמה פעימות בסך הכול?', 15, '5, 10, 15', 5, 2),
+    BARS('8 תיבות, ובכל תיבה 10 פעימות — כמה פעימות בסך הכול?', 80, 'סופרים בעשרות', 10, 2),
+    BARS('קטע של 10 תיבות 4/4 — כמה פעימות בסך הכול?', 40, '10 פעמים 4', 10, 3),
+    BARS('8 תיבות של 4/4 — כמה פעימות בסך הכול?', 32, '4 תיבות הן 16, ועוד 4 תיבות', 4, 3),
+    BARS('7 תיבות של 5/4 — כמה פעימות בסך הכול?', 35, '7 פעמים 5', 5, 3),
+
+    HALF('בתיבה 4/4 יש 4 פעימות. כמה פעימות בחצי תיבה?', 2, 'חצי מ־4', 1),
+    HALF('תו חצי ממלא חצי תיבה 4/4. כמה פעימות הוא נמשך?', 2, 'חצי מ־4 פעימות', 1),
+    HALF('כמה תווי חצי ממלאים תיבה 4/4 שלמה?', 2, 'חצי ועוד חצי הם שלם', 1),
+    HALF('שעה היא כמו תיבה שלמה. כמה חצאי שעה יש בשעה?', 2, 'כמו שני תווי חצי בתיבה', 1),
+    HALF('שעה היא 60 דקות, כמו תיבה שלמה. כמה דקות בחצי שעה — חצי תיבה?', 30, 'חצי מ־60', 1),
+    HALF('2 תיבות של 4/4. כמה תווי חצי צריך כדי למלא אותן?', 4, '2 בכל תיבה', 2),
+    HALF('שיר נמשך 4 תיבות. כמה תיבות הן חצי מהשיר?', 2, 'חצי מ־4', 2),
+    HALF('מחוג הדקות עשה חצי סיבוב מ־2:00. מה השעה? (כתבו כמו 2:30)', '2:30', 'חצי סיבוב הוא חצי שעה', 2),
+    HALF('החזרה מתחילה ב־10:00 ונמשכת חצי שעה. מתי היא נגמרת? (כתבו כמו 10:30)', '10:30', 'מוסיפים 30 דקות', 2),
+    HALF('כמה דקות עוברות מ־6:30 עד 7:00?', 30, 'החצי השני של השעה', 3),
+    HALF('חצי שעה, ועוד חצי שעה, ועוד חצי שעה. כמה דקות בסך הכול?', 90, '30 + 30 + 30', 3),
+
+    REG('בס = מאות, פסנתר = עשרות, פעמון = יחידות. הבס מנגן 3, הפסנתר 4, הפעמון 2. איזה מספר?', 342, 'בס, פסנתר, פעמון — מאות, עשרות, יחידות', 1, [3, 4, 2]),
+    REG('הבס מנגן 7 צלילים, הפסנתר והפעמון שותקים. איזה מספר?', 700, '7 מאות', 1),
+    REG('במספר 618 — כמה צלילי בס (מאות)?', 6, 'ספרת המאות', 1),
+    REG('במספר 618 — כמה צלילי פסנתר (עשרות)?', 1, 'ספרת העשרות', 1),
+    REG('במספר 480 — כמה צלילי בס (מאות)?', 4, 'ספרת המאות', 1),
+    REG('הבס מנגן 5, הפסנתר שותק, הפעמון מנגן 7. איזה מספר?', 507, 'אין עשרות — 0 באמצע', 2),
+    REG('הבס מנגן 2, הפסנתר 6, הפעמון שותק. איזה מספר?', 260, 'אין יחידות — 0 בסוף', 2),
+    REG('במספר 905 — כמה צלילי פסנתר (עשרות)?', 0, 'הפסנתר שותק', 2),
+    REG('10 צלילי פסנתר (עשרות) מתקבצים לצליל בס אחד. כמה הוא שווה?', 100, '10 עשרות הן מאה', 2),
+    REG('הבס מנגן 4, הפסנתר 12, הפעמון 3. איזה מספר?', 523, '12 עשרות הן מאה ועוד 2 עשרות', 3, [4, 12, 3]),
+    REG('הבס מנגן 9, הפסנתר 9, הפעמון 10. איזה מספר?', 1000, '10 יחידות הן עשרה, ואז הכול מתקבץ', 3)
+  );
+
+  // ---------- כיתה ג׳ · פעילויות מוזיקה (תוכנית §5, #104) ----------
+  // Appended at the end like grade ב׳. Every item that leans on table
+  // 3/6/7/8/9 carries `table`, so the mastery gate still holds it back.
+  // Remainder answers ("3 שארית 2") are checked by parseRemainderAnswer.
+  function MC(skill, music, prompt, answer, hint, level, extra) {
+    extra = extra || {};
+    extra.level = level;
+    extra.music = music;
+    return I('ג', skill, prompt, answer, hint, extra);
+  }
+  function METER(prompt, answer, hint, table, level) {
+    return MC('multiplication', 'meters', prompt, answer, hint, level, { standard: ST.MUL_C, table: table });
+  }
+  function LEFT(total, bar, level, table) {
+    const q = Math.floor(total / bar);
+    const r = total % bar;
+    return MC('division', 'leftoverBeats',
+      total + ' פעימות בתיבות של ' + bar + ' — כמה תיבות שלמות, וכמה פעימות נשארות? (כתבו כמו 3 שארית 2)',
+      q + ' שארית ' + r,
+      q + ' תיבות של ' + bar + ' הן ' + (q * bar) + ' פעימות; ' + (r ? 'הנותרות מתנגנות בצליל אחר' : 'לא נשארת אף פעימה'),
+      level, { standard: ST.DIV_REM, meaning: 'quotative', table: table });
+  }
+  function TIMES(prompt, answer, hint, level, table) {
+    return MC('word_problems', 'howManyTimes', prompt, answer, hint, level, { standard: ST.MUL_COMPARE, table: table });
+  }
+  function GRID(rows, steps, prompt, answer, hint, level, table) {
+    return MC('measurement', 'stepGrid', prompt, answer, hint, level,
+      { strand: STRAND.MEASURE, standard: ST.AREA, grid: { rows: rows, steps: steps }, table: table });
+  }
+  function TUNE(prompt, answer, hint, level) {
+    return MC('measurement', 'tuneTime', prompt, answer, hint, level, { strand: STRAND.MEASURE, standard: ST.MINUTES });
+  }
+  function HZ(prompt, answer, hint, level) {
+    return MC('place_value', 'hzCompare', prompt, answer, hint, level, { standard: ST.NUM_10K });
+  }
+  const NO_COMMA = ' (כתבו בלי פסיק)';
+  RAW.push(
+    METER('בתיבה של 3/4 יש 3 פעימות, והראשונה מודגשת. כמה פעימות ב־4 תיבות?', 12, 'לוח ה־3: 3, 6, 9, 12', 3, 1),
+    METER('כמה פעימות ב־5 תיבות של 3/4?', 15, '5 פעמים 3', 3, 1),
+    METER('כמה פעימות ב־7 תיבות של 3/4?', 21, '7 פעמים 3', 3, 2),
+    METER('ואלס של 9 תיבות 3/4. כמה פעימות?', 27, '9 פעמים 3', 3, 2),
+    METER('במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'כן', '18 בלוח ה־3, אז היא פותחת תיבה חדשה', 3, 2),
+    METER('במשקל 3/4, פעימה 20 — היא מודגשת? (כתבו כן או לא)', 'לא', '20 לא בלוח ה־3', 3, 3),
+    METER('בתיבה של 6/8 יש 6 שמיניות. כמה שמיניות ב־3 תיבות?', 18, '6, 12, 18', 6, 2),
+    METER('כמה שמיניות ב־4 תיבות של 6/8?', 24, '4 פעמים 6', 6, 2),
+    METER('כמה שמיניות ב־7 תיבות של 6/8?', 42, '7 פעמים 6', 6, 3),
+    METER('במשקל 6/8, שמינית 36 — היא סוגרת תיבה? (כתבו כן או לא)', 'כן', '36 בלוח ה־6: 6 תיבות שלמות', 6, 3),
+
+    LEFT(9, 4, 1), LEFT(14, 4, 1), LEFT(11, 5, 1), LEFT(22, 5, 2),
+    LEFT(19, 4, 2), LEFT(16, 4, 2), LEFT(23, 10, 2),
+    LEFT(17, 3, 2, 3), LEFT(20, 6, 3, 6), LEFT(30, 7, 3, 7),
+
+    TIMES('תוף אחד מנגן 60 פעימות בדקה, ותוף שני 120. פי כמה השני מהיר?', 2, '60 ועוד 60 הם 120', 1),
+    TIMES('צליל של 220 הרץ וצליל של 440 הרץ — אוקטבה. פי כמה התדר הגבוה?', 2, 'אוקטבה מכפילה את התדר', 1),
+    TIMES('צליל של 110 הרץ וצליל של 440 הרץ — שתי אוקטבות. פי כמה התדר הגבוה?', 4, 'פי 2 ואז שוב פי 2', 2),
+    TIMES('מטרונום על 40, ואז על 200. פי כמה הוא מהיר יותר?', 5, '40 כפול 5', 2),
+    TIMES('שיר אחד 10 תיבות, ושיר שני 50 תיבות. פי כמה השני ארוך?', 5, '10 כפול 5', 2),
+    TIMES('תווה של 100 הרץ ותווה של 300 הרץ. פי כמה התדר הגבוה?', 3, '100 כפול 3', 2, 3),
+    TIMES('גיטרה מנגנת 8 תווים, ופסנתר מנגן פי 4 תווים. כמה תווים מנגן הפסנתר?', 32, '8 כפול 4', 2),
+    TIMES('דנה מתופפת 7 מכות, ויובל מתופף פי 6. כמה מכות מתופף יובל?', 42, '7 כפול 6', 3, 6),
+
+    GRID(4, 8, 'בסקוונסר יש 4 שורות (תוף, מצילה, בס, כפיים) ו־8 צעדים. כמה משבצות יש ברשת?', 32, 'שטח מלבן: שורות כפול צעדים, 4 כפול 8', 1),
+    GRID(2, 5, 'רשת של 2 שורות ו־5 צעדים. כמה משבצות?', 10, '2 כפול 5', 1),
+    GRID(5, 4, 'רשת של 5 שורות ו־4 צעדים. כמה משבצות?', 20, '5 כפול 4', 1),
+    GRID(4, 10, 'רשת של 4 שורות ו־10 צעדים. כמה משבצות?', 40, '4 כפול 10', 2),
+    GRID(4, 6, 'רשת של 4 שורות ו־6 צעדים. כמה משבצות?', 24, '4 כפול 6', 2, 6),
+    GRID(3, 8, 'רשת של 3 שורות ו־8 צעדים. כמה משבצות?', 24, '3 כפול 8', 2, 3),
+    GRID(4, 8, 'ברשת 32 משבצות ו־4 שורות. כמה צעדים בכל שורה?', 8, '32 לחלק ל־4', 2),
+    GRID(6, 8, 'רשת של 6 שורות ו־8 צעדים. כמה משבצות?', 48, '6 כפול 8', 3, 8),
+
+    TUNE('שיר נמשך דקה אחת. כמה שניות?', 60, 'בדקה 60 שניות', 1),
+    TUNE('שיר נמשך 2 דקות. כמה שניות?', 120, '60 ועוד 60', 1),
+    TUNE('מנגינה של 3 דקות. כמה שניות?', 180, '3 פעמים 60', 2),
+    TUNE('קטע של 90 שניות. כמה דקות ושניות? (כתבו כמו 1:30)', '1:30', '60 שניות הן דקה, ונשארות 30', 2),
+    TUNE('קטע של 150 שניות. כמה דקות ושניות? (כתבו כמו 2:30)', '2:30', '120 שניות הן 2 דקות', 2),
+    TUNE('שיר של 1:45. כמה שניות בסך הכול?', 105, '60 ועוד 45', 3),
+    TUNE('שני שירים, כל אחד 2:30. כמה דקות בסך הכול?', 5, 'שתי דקות וחצי, פעמיים', 3),
+
+    HZ('צליל א׳ 4186 הרץ, צליל ב׳ 4816 הרץ. איזה מספר גדול יותר?' + NO_COMMA, 4816, 'משווים אלפים, ואז מאות: 8 מאות מול 1', 1),
+    HZ('צליל של 2093 הרץ. כמה אלפים יש במספר?', 2, 'ספרת האלפים', 1),
+    HZ('צליל של 3520 הרץ. מה ספרת המאות?', 5, '3 אלפים, 5 מאות, 2 עשרות', 1),
+    HZ('איזה גבוה יותר: 7040 הרץ או 7400 הרץ?' + NO_COMMA, 7400, 'אותם אלפים; 4 מאות מול 0', 2),
+    HZ('צליל של 1000 הרץ, ועוד 10 צעדים של 100 הרץ. לאיזה תדר מגיעים?' + NO_COMMA, 2000, '10 מאות הן אלף', 2),
+    HZ('5 אלפים, 0 מאות, 6 עשרות ו־4 יחידות הרץ. איזה מספר?' + NO_COMMA, 5064, 'אין מאות — 0 במקומן', 2),
+    HZ('הצליל הגבוה ביותר בפסנתר הוא 4186 הרץ. כמה חסר לו עד 10,000?' + NO_COMMA, 5814, 'משלימים לאלפים: 4186 ועוד 14 הם 4200', 3)
+  );
+
+  // ---------- כיתה ו׳ · פעילויות מוזיקה (תוכנית §5, #107) ----------
+  // Appended at the end like grades ב׳ and ג׳ (ids are RAW indexes). Dotted
+  // notes and triplets are fraction products, "how many eighths in a half"
+  // is fraction division, intervals are decimal ratios, tempo changes are
+  // percents, the circle of fifths is a 12-gon with 30° steps (layout in
+  // circleOfFifths.js) and the tapped tempo is a mean.
+  function MV(skill, music, prompt, answer, hint, level, standard) {
+    const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO : STRAND.NUM;
+    return I('ו', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
+  }
+  const PI_NOTE = ' (π ≈ 3.14)';
+  RAW.push(
+    MV('fractions', 'dotted', 'רבע מנוקד הוא 1/4 × 3/2. איזה חלק מתיבה שלמה? (כשבר)', '3/8', 'מונה כפול מונה, מכנה כפול מכנה', 1, ST.FRAC_MUL),
+    MV('fractions', 'dotted', 'חצי מנוקד: 1/2 × 3/2 = ? (כשבר)', '3/4', 'הנקודה מוסיפה חצי מאורך התו', 1, ST.FRAC_MUL),
+    MV('fractions', 'dotted', 'שמינית מנוקדת: 1/8 × 3/2 = ? (כשבר)', '3/16', '1 × 3 חלקי 8 × 2', 2, ST.FRAC_MUL),
+    MV('fractions', 'triplet', 'בשלישייה כל שמינית מתנגנת 2/3 מאורכה. 1/8 × 2/3 = ? (כשבר)', '1/12', '2/24 ואז מצמצמים', 3, ST.FRAC_MUL),
+    MV('fractions', 'dotted', 'בתיבה של 4/4 יש רבע מנוקד ושמינית. כמה חסר עד תיבה מלאה? (כשבר)', '1/2', '3/8 + 1/8 = 4/8', 3, ST.FRAC_MUL),
+    MV('fractions', 'durationDiv', 'כמה שמיניות נכנסות בחצי? 1/2 : 1/8 = ?', 4, 'כמה פעמים 1/8 נכנס ב־4/8', 1, ST.FRAC_DIV),
+    MV('fractions', 'durationDiv', 'כמה שש־עשריות נכנסות ברבע? 1/4 : 1/16 = ?', 4, '1/4 = 4/16', 2, ST.FRAC_DIV),
+    MV('fractions', 'durationDiv', 'כמה רבעים מנוקדים (3/8) נכנסים בתיבה של 3/4? 3/4 : 3/8 = ?', 2, '3/4 = 6/8', 2, ST.FRAC_DIV),
+    MV('fractions', 'durationDiv', 'כמה שמיניות מנוקדות (3/16) נכנסות בתיבה של 6/8? 6/8 : 3/16 = ?', 4, '6/8 = 12/16', 3, ST.FRAC_DIV),
+
+    MV('decimals', 'ratioHz', 'קווינטה מעל לה של 440 הרץ: 440 × 1.5 = ?', 660, '440 ועוד חצי מ־440', 1, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'קווינטה מעל 200 הרץ: 200 × 1.5 = ?', 300, '200 ועוד 100', 1, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'קווינטה מעל 330 הרץ: 330 × 1.5 = ?', 495, '330 ועוד 165', 2, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'צליל של 660 הרץ הוא קווינטה מעל איזה תדר? 660 : 1.5 = ?', 440, 'מה כפול 1.5 נותן 660?', 2, ST.DEC_MUL),
+    MV('decimals', 'ratioHz', 'טרצה גדולה היא פי 1.25. 400 × 1.25 = ?', 500, '400 ועוד רבע מ־400', 3, ST.DEC_MUL),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 90, 100, 110 ו־100 BPM. מה הקצב הממוצע?', 100, 'הסכום 400, חלקי 4', 1, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 78, 82, 80 ו־84 BPM. מה הקצב הממוצע?', 81, 'הסכום 324, חלקי 4', 2, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.75, 'הסכום 327, חלקי 4', 3, ST.MEAN),
+
+    MV('percent', 'tempo', 'קצב של 100 BPM עולה ב־10%. מה הקצב החדש?', 110, '10% מ־100 הם 10', 1, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 80 BPM עולה ב־25%. מה הקצב החדש? (שמעו לפני ואחרי)', 100, '25% מ־80 הם 20', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 120 BPM יורד ב־25%. מה הקצב החדש?', 90, '25% מ־120 הם 30', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 90 BPM עולה ב־20%. מה הקצב החדש?', 108, '10% הם 9, אז 20% הם 18', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'הקצב עלה מ־60 ל־90 BPM. בכמה אחוזים הוא עלה?', 50, 'העלייה 30, וזה חצי מ־60', 3, ST.PERCENT),
+    MV('percent', 'tempo', 'הקצב ירד מ־100 ל־80 BPM. בכמה אחוזים הוא ירד?', 20, 'הירידה 20 מתוך 100', 3, ST.PERCENT),
+
+    MV('geometry', 'circleFifths', 'במעגל הקווינטות 12 נקודות במרחקים שווים. כמה מעלות בין שתי נקודות שכנות?', 30, '360 חלקי 12', 1, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מחברים את 12 הנקודות של מעגל הקווינטות בקווים ישרים. כמה צלעות למצולע?', 12, 'צלע אחת בין כל שתי נקודות שכנות', 1, ST.GEO_SORT),
+    MV('geometry', 'circleFifths', 'מדו לסול — צעד אחד במעגל הקווינטות. כמה מעלות?', 30, 'צעד אחד הוא 1/12 מסיבוב', 1, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'רדיוס מעגל הקווינטות 5 ס״מ. מה הקוטר בס״מ?', 10, 'הקוטר הוא פעמיים הרדיוס', 1, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו לרה — שני צעדים במעגל הקווינטות. כמה מעלות?', 60, '2 כפול 30', 2, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו לפה דיאז — 6 צעדים, חצי סיבוב. כמה מעלות?', 180, 'חצי מ־360', 2, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו ללה — 3 צעדים, 90 מעלות. איזו זווית זו: חדה, ישרה, קהה או שטוחה?', 'ישרה', 'בדיוק 90 מעלות', 2, ST.ANGLE_KINDS),
+    MV('geometry', 'circleFifths', 'קוטר המעגל 10 ס״מ. מה ההיקף בס״מ?' + PI_NOTE, 31.4, 'היקף = קוטר כפול π', 2, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'כמה צעדים במעגל הקווינטות הם 150 מעלות?', 5, '150 חלקי 30', 3, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'מדו למי — 4 צעדים. איזו זווית זו: חדה, ישרה, קהה או שטוחה?', 'קהה', '4 כפול 30 הם 120 מעלות', 3, ST.ANGLE_KINDS),
+    MV('geometry', 'circleFifths', 'רדיוס המעגל 7 ס״מ. מה ההיקף בס״מ?' + PI_NOTE, 43.96, 'היקף = 2 × רדיוס × π', 3, ST.CIRCLE),
+    MV('geometry', 'circleFifths', 'היקף המעגל 62.8 ס״מ. מה הרדיוס בס״מ?' + PI_NOTE, 10, '62.8 חלקי 3.14 הם הקוטר, ואז חצי', 3, ST.CIRCLE)
+  );
+
+  // ---------- כיתה ה׳ · פעילויות מוזיקה (תוכנית §5, #106) ----------
+  // Appended at the end like grades ב׳, ג׳ and ו׳ (ids are RAW indexes).
+  // Two drums meet every lcm beats, a bar of n beats splits into the factors
+  // of n (polyrhythm.js), a mixed bar is added over the shortest note, a beat
+  // lasts 60/BPM seconds, and do-re-mi in Hz is read off a bar chart.
+  function M5(skill, music, prompt, answer, hint, level, standard, chart) {
+    const strand = skill === 'data' ? STRAND.DATA
+      : standard === ST.LCM || standard === ST.FACTORS ? STRAND.NUM
+        : skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
+    return I('ה', skill, prompt, answer, hint, {
+      strand: strand, standard: standard, level: level, music: music,
+      widget: chart ? 'barchart' : undefined, chart: chart,
+    });
+  }
+  const DO_RE_MI = { bars: [{ label: 'דו', value: 262 }, { label: 'רה', value: 294 }, { label: 'מי', value: 330 }] };
+  const SOL_LA_SI = { bars: [{ label: 'סול', value: 392 }, { label: 'לה', value: 440 }, { label: 'סי', value: 494 }] };
+  RAW.push(
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 2 פעימות ותוף שני כל 3 פעימות. אחרי כמה פעימות הם מכים שוב יחד?', 6, 'המספר הקטן ביותר שמתחלק גם ב־2 וגם ב־3', 1, ST.LCM),
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 3 פעימות ותוף שני כל 4 פעימות. אחרי כמה פעימות הם נפגשים?', 12, 'הכפולות של 4: 4, 8, 12 — איזו מתחלקת ב־3?', 2, ST.LCM),
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 4 פעימות ותוף שני כל 6 פעימות. אחרי כמה פעימות הם נפגשים?', 12, 'לא 24: כבר 12 מתחלק גם ב־4 וגם ב־6', 2, ST.LCM),
+    M5('fractions', 'drumsMeet', 'תוף אחד מכה כל 6 פעימות ותוף שני כל 8 פעימות. אחרי כמה פעימות הם נפגשים?', 24, 'הכפולות של 8: 8, 16, 24 — איזו מתחלקת ב־6?', 3, ST.LCM),
+    M5('fractions', 'drumsMeet', 'שלושה תופים מכים כל 2, כל 3 וכל 4 פעימות. אחרי כמה פעימות שלושתם נפגשים?', 12, 'הכפולה המשותפת של 3 ו־4 כבר מתחלקת ב־2', 3, ST.LCM),
+    M5('fractions', 'meters', 'תיבה של 12 פעימות מחולקת לקבוצות של 3 פעימות. כמה קבוצות יש?', 4, '12 חלקי 3', 1, ST.FACTORS),
+    M5('fractions', 'meters', '12 פעימות אפשר לספור בקבוצות שוות של 2, 3, 4 או 6. כמה פעימות בקבוצה אם יש 2 קבוצות?', 6, '12 חלקי 2', 1, ST.FACTORS),
+    M5('fractions', 'meters', 'לכמה גדלים שונים של קבוצות שוות אפשר לחלק 12 פעימות, בלי קבוצה של פעימה אחת ובלי כל ה־12 יחד?', 4, 'המחלקים של 12 בין 1 ל־12: 2, 3, 4, 6', 2, ST.FACTORS),
+    M5('fractions', 'meters', 'לכמה גדלים שונים של קבוצות שוות אפשר לחלק 7 פעימות, בלי קבוצה של פעימה אחת ובלי כל ה־7 יחד?', 0, '7 הוא מספר ראשוני — המחלקים שלו רק 1 ו־7', 2, ST.FACTORS),
+    M5('fractions', 'meters', 'כמה מחלקים יש למספר 18 (כולל 1 ו־18)?', 6, '1, 2, 3, 6, 9, 18', 3, ST.FACTORS),
+    M5('fractions', 'meters', 'תיבות של 5, 7, 9 ו־11 פעימות. איזו מהן אפשר לחלק לקבוצות שוות של 3?', 9, 'רק מספר שאינו ראשוני מתחלק לקבוצות שוות', 3, ST.FACTORS),
+
+    M5('fractions', 'mixedBar', 'רבע ושמינית: 1/4 + 1/8 = ? (כשבר)', '3/8', 'התו הקצר קובע את המכנה: 1/4 = 2/8', 1, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'שמינית ושש־עשרית: 1/8 + 1/16 = ? (כשבר)', '3/16', '1/8 = 2/16', 1, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'רבע, שמינית ושש־עשרית: 1/4 + 1/8 + 1/16 = ? (כשבר)', '7/16', 'הכול בשש־עשריות: 4 + 2 + 1', 2, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'בתיבה של 3/4 יש רבע ושתי שמיניות. כמה חסר עד תיבה מלאה? (כשבר)', '1/4', '1/4 + 2/8 = 1/2', 2, ST.FRAC_ADD),
+    M5('fractions', 'mixedBar', 'בתיבה של 4/4 יש חצי, רבע, שמינית ושש־עשרית. כמה חסר עד תיבה מלאה? (כשבר)', '1/16', 'בשש־עשריות: 8 + 4 + 2 + 1 = 15', 3, ST.FRAC_ADD),
+
+    M5('decimals', 'secPerBeat', 'ב־100 BPM פעימה נמשכת 60/100 שנייה. כמה שניות זה כשבר עשרוני?', 0.6, '60 מאיות הן 6 עשיריות', 1, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־80 BPM פעימה נמשכת 60/80 שנייה. כמה שניות זה כשבר עשרוני?', 0.75, '60/80 = 3/4', 2, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־240 BPM פעימה נמשכת 60/240 שנייה. כמה שניות זה כשבר עשרוני?', 0.25, '60/240 = 1/4', 2, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־150 BPM פעימה נמשכת 60/150 שנייה. כמה שניות זה כשבר עשרוני?', 0.4, '60/150 = 2/5 = 4/10', 3, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'פעימה נמשכת 0.5 שנייה. כמה פעימות בדקה (BPM)?', 120, 'בכל שנייה 2 פעימות, ובדקה 60 שניות', 3, ST.DEC_PLACE),
+
+    M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של דו, רה ומי בהרץ (בקירוב). מה התדר של רה?', 294, 'קראו את גובה העמודה של רה', 1, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'איזה צליל הכי גבוה? כתבו את התדר שלו בהרץ', 330, 'העמודה הגבוהה ביותר', 2, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'בכמה הרץ מי גבוה מדו?', 68, '330 פחות 262', 2, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'מה גדול יותר: הפער בין דו לרה או הפער בין רה למי? כתבו את הפער הגדול בהרץ', 36, '294 − 262 = 32, ו־330 − 294 = 36', 3, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של דו, רה ומי בהרץ (בקירוב). מה התדר של דו?', 262, 'העמודה הנמוכה ביותר', 1, ST.BARCHART, DO_RE_MI),
+    M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של סול, לה וסי בהרץ (בקירוב). מה התדר של לה?', 440, 'קראו את גובה העמודה של לה', 1, ST.BARCHART, SOL_LA_SI),
+    M5('data', 'hzChart', 'בכמה הרץ סי גבוה מסול?', 102, '494 פחות 392', 2, ST.BARCHART, SOL_LA_SI),
+    M5('data', 'hzChart', 'דו הגבוה הוא 523 הרץ. כמה הרץ חסרים לסי שבדיאגרמה כדי להגיע אליו?', 29, '523 פחות 494', 3, ST.BARCHART, SOL_LA_SI)
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -731,6 +1208,8 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.music) it.music = raw.music;
+    if (raw.grid) it.grid = raw.grid;
     SHIPPED.push(it);
   });
 
@@ -755,8 +1234,14 @@
     return rowsOf(skill, grade).filter(function (it) { return it.level === want; });
   }
 
+  // Own keys only: a stored grade such as "constructor" must not resolve to
+  // an Object.prototype member and crash the diagnostic.
+  function isGrade(g) {
+    return GRADES.indexOf(g) !== -1;
+  }
+
   function skillsForGrade(grade) {
-    return (GRADE_SKILLS[grade] || []).slice();
+    return isGrade(grade) ? GRADE_SKILLS[grade].slice() : [];
   }
 
   // One base question and one intermediate question per skill: a child who
@@ -778,7 +1263,7 @@
   }
 
   function diagnosticItems(grade) {
-    const g = grade && GRADE_SKILLS[grade] ? grade : 'א';
+    const g = isGrade(grade) ? grade : 'א';
     return skillsForGrade(g).flatMap(function (skill) {
       return diagnosticPair(skill, g);
     });
@@ -799,8 +1284,11 @@
     });
   }
 
-  function coreFactItems() {
+  // Pass a skill to borrow only that skill's core facts: a grade-ג division
+  // stage must not fill up with multiplication questions.
+  function coreFactItems(skill) {
     return SHIPPED.filter(function (it) {
+      if (skill != null && it.skill !== skill) return false;
       return (it.skill === 'multiplication' || it.skill === 'division')
         && (it.table === 2 || it.table === 4 || it.table === 5 || it.table === 10);
     });
@@ -873,6 +1361,7 @@
     skillGrade: skillGrade,
     levelHe: levelHe,
     clampLevel: clampLevel,
+    isGrade: isGrade,
     hearOf: hearOf,
     isShippable: isShippable,
     allItems: allItems,

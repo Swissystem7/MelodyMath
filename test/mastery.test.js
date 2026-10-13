@@ -49,3 +49,14 @@ test('grade-ג practice can borrow core 2/4/5/10 facts to unlock the gate', () =
   assert.ok(merged.some((it) => it.table === 2 && it.grade === 'ב'));
   assert.ok(merged.some((it) => it.table === 7 && it.grade === 'ג'));
 });
+
+test('grade-ג practice borrows core facts of the same skill only', () => {
+  for (const skill of ['multiplication', 'division']) {
+    const rows = mastery.withCoreIfNeeded(banks.rowsOf(skill, 'ג'), banks.coreFactItems(skill));
+    const gated = mastery.gateItems(rows, [], rows);
+    assert.ok(gated.length > 0, skill);
+    assert.ok(gated.every((it) => it.skill === skill), skill);
+    for (const t of mastery.CORE_TABLES) assert.ok(gated.some((it) => it.table === t), skill + ' ' + t);
+  }
+  assert.ok(banks.coreFactItems().some((it) => it.skill === 'division'));
+});

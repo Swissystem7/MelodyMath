@@ -26,3 +26,18 @@ test('isRightAngle is true only at exactly 90 degrees', () => {
   assert.equal(geo.isRightAngle(180), false);
   assert.equal(geo.isRightAngle(45), false);
 });
+
+test('prototype keys are not shapes and do not throw', () => {
+  for (const key of ['toString', 'constructor', '__proto__', 'hasOwnProperty']) {
+    assert.equal(geo.shapeOf(key), null);
+    assert.equal(geo.sidesOf(key), null);
+    assert.equal(geo.verticesOf(key), null);
+    assert.equal(geo.shapeHe(key), key);
+    assert.deepEqual(geo.namesForSides(key), []);
+  }
+  assert.deepEqual(geo.namesForSides(7), []);
+});
+
+test('sidesOf throws TypeError for null input', () => {
+  assert.throws(() => geo.sidesOf(null), TypeError);
+});

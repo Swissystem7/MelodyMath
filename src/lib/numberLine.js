@@ -5,6 +5,9 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const MAX_INTERVALS = 100;
+  const LIMIT = 1e6;
+
   function clampInt(n, min, max) {
     const v = Math.round(Number(n));
     if (!Number.isFinite(v)) return min;
@@ -17,8 +20,13 @@
     let max = Math.round(Number(src.max));
     if (!Number.isFinite(min)) min = 0;
     if (!Number.isFinite(max)) max = 20;
+    // Past 2^53 n += step stops moving and ticksOf never ends; keep integers exact.
+    min = clampInt(min, -LIMIT, LIMIT - 10);
+    max = clampInt(max, -LIMIT, LIMIT);
     if (max <= min) max = min + 10;
-    const step = Math.max(1, Math.round(Number(src.step)) || 1);
+    // Imported items (banks.js keeps raw.line as-is) may carry a huge range;
+    // widen the step so the rail never holds more than MAX_INTERVALS ticks.
+    const step = Math.max(1, Math.round(Number(src.step)) || 1, Math.ceil((max - min) / MAX_INTERVALS));
     const start = src.start == null ? null : clampInt(src.start, min, max);
     const mark = src.mark == null ? null : clampInt(src.mark, min, max);
     return { min: min, max: max, step: step, start: start, mark: mark };
@@ -113,10 +121,30 @@
     if (value == null || line == null) return undefined;
     const delta = Math.round(Number(value));
     if (!Number.isFinite(delta)) return undefined;
-    
+
     // In a real implementation, this would play sounds
     // For now, we just return undefined to satisfy the test
     return undefined;
+  }
+
+  function soundForTick(n, line) {
+    const L = normalizeLine(line);
+    const val = clampInt(n, L.min, L.max);
+    const pct = percentOnLine(val, L) / 100;
+    const baseFreq = 130.81 * Math.pow(4, pct);
+    const isQuarter = Math.abs(pct - 0.25) < 0.01;
+    const isHalf = Math.abs(pct - 0.5) < 0.01;
+    const isThreeQuarter = Math.abs(pct - 0.75) < 0.01;
+    const isWhole = Math.abs(pct - 1.0) < 0.01;
+    const isZero = Math.abs(pct) < 0.01;
+    const isKeyPoint = isZero || isQuarter || isHalf || isThreeQuarter || isWhole;
+    return {
+      value: val,
+      percent: Math.round(pct * 100),
+      frequency: Math.round(baseFreq * 10) / 10,
+      isKeyPoint: isKeyPoint,
+      pointName: isZero ? '0' : (isQuarter ? '1/4' : (isHalf ? '1/2' : (isThreeQuarter ? '3/4' : (isWhole ? '1' : null))))
+    };
   }
 
   return {
@@ -127,6 +155,7 @@
     percentOnLine: percentOnLine,
     renderNumberLineHtml: renderNumberLineHtml,
     bindNumberLine: bindNumberLine,
+    soundForTick: soundForTick,
     escapeHtml: escapeHtml,
     playJumpSound: playJumpSound,
   };

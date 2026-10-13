@@ -28,7 +28,7 @@ test('summarizeImport leaves out zero counters and says when nothing changed', (
 
 test('summarizeImport reports rows skipped for an unusable name', () => {
   const text = store.summarizeImport({ ok: true, added: 0, merged: 0, notes: 0, assignments: 0, skipped: 2 });
-  assert.match(text, /2 שורות עם שם לא תקין לא יובאו./);
+  assert.ok(text.includes('2 שורות לא תקינות (שם או מבנה) לא יובאו.'));
   assert.match(text, /^הקובץ נקרא/);
 });
 
@@ -48,5 +48,5 @@ test('summarizeImport agrees with a real importRoster round trip', () => {
   const dst = memory();
   const res = store.importRoster('שילוב', JSON.stringify(raw), dst);
   assert.equal(res.ok, true);
-  assert.equal(store.summarizeImport(res), 'יובא: 1 תלמידים חדשים, 1 הערות מורה. 1 שורות עם שם לא תקין לא יובאו.');
+  assert.equal(store.summarizeImport(res), 'יובא: 1 תלמידים חדשים, 1 הערות מורה. 1 שורות לא תקינות (שם או מבנה) לא יובאו.');
 });

@@ -99,3 +99,14 @@ test('a recently missed item is preferred on the following turn', () => {
   const pool = eligibleExercises(bank, history, 2, 1);
   assert.deepEqual(pool.map((x) => x.id), [1]);
 });
+
+test('hex, exponent and binary spellings do not pass as the number they encode', () => {
+  assert.equal(isCorrect('0x10', '16'), false);
+  assert.equal(isCorrect('1e1', '10'), false);
+  assert.equal(isCorrect('0b11', '3'), false);
+  assert.equal(isCorrect('0o7', '7'), false);
+  assert.equal(isCorrect('+5', '5'), true);
+  assert.equal(isCorrect('3.', '3'), true);
+  assert.equal(isCorrect('.75', '0.75'), true);
+  assert.equal(isCorrect('-2,5', '-2.5'), true);
+});

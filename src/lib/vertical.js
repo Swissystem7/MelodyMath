@@ -6,6 +6,11 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  // Imported items (banks.js keeps raw.vert as-is) may carry any number; past
+  // four digits String() can switch to exponent form (1e+21) and the column
+  // stops lining up, so operands are capped like the ruler length in measure.js.
+  const MAX_OPERAND = 9999;
+
   function normalizeVertical(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     let a = Math.round(Number(src.a));
@@ -14,6 +19,8 @@
     if (!Number.isFinite(b)) b = 0;
     if (a < 0) a = 0;
     if (b < 0) b = 0;
+    a = Math.min(MAX_OPERAND, a);
+    b = Math.min(MAX_OPERAND, b);
     const op = src.op === '-' ? '-' : '+';
     return { a: a, b: b, op: op };
   }
@@ -43,9 +50,51 @@
     return {};
   }
 
+  function detectEvenOddBeat(rhythm) {
+    // Assuming rhythm is an array of beat durations (in beats)
+    const totalBeats = rhythm.reduce((sum, beat) => sum + beat, 0);
+    return totalBeats % 2 === 0 ? 'even' : 'odd';
+  }
+
+  function mapVerticalToInstruments(vert) {
+    // Map vertical operation to instruments: ones on drum, tens on bass
+    const V = normalizeVertical(vert);
+    const onesA = V.a % 10;
+    const tensA = Math.floor(V.a / 10);
+    const onesB = V.b % 10;
+    const tensB = Math.floor(V.b / 10);
+    
+    if (V.op === '+') {
+      return {
+        drum: onesA + onesB,
+        bass: tensA + tensB
+      };
+    } else {
+      return {
+        drum: onesA - onesB,
+        bass: tensA - tensB
+      };
+    }
+  }
+
+  function mapHalfHourToNote(hour) {
+    // Map half-hour to half note (assuming hour is in 24-hour format)
+    const minutes = hour % 100;
+    const hours = Math.floor(hour / 100);
+    
+    if (minutes === 30) {
+      return 'half-note';
+    }
+    return 'full-note';
+  }
+
   return {
     normalizeVertical: normalizeVertical,
     renderVerticalHtml: renderVerticalHtml,
     bindVertical: bindVertical,
+    MAX_OPERAND: MAX_OPERAND,
+    detectEvenOddBeat: detectEvenOddBeat,
+    mapVerticalToInstruments: mapVerticalToInstruments,
+    mapHalfHourToNote: mapHalfHourToNote,
   };
 });

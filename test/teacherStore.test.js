@@ -223,6 +223,17 @@ test('a student name that is a prototype key never pollutes Object.prototype', (
   assert.equal(({}).notes, undefined);
 });
 
+test('the remembered student follows the roster rule: a prototype-key name is not saved or loaded', () => {
+  const ls = memory();
+  store.saveWho({ classCode: 'שילוב', name: 'constructor' }, ls);
+  assert.deepEqual(store.loadWho(ls), { classCode: 'שילוב', name: '' });
+  // A stale value written before the roster refused such names.
+  ls.setItem(store.WHO_KEY, JSON.stringify({ classCode: 'שילוב', name: '__proto__' }));
+  assert.deepEqual(store.loadWho(ls), { classCode: 'שילוב', name: '' });
+  store.saveWho({ classCode: ' שילוב ', name: '  נועה  ' }, ls);
+  assert.deepEqual(store.loadWho(ls), { classCode: 'שילוב', name: 'נועה' });
+});
+
 test('importRoster skips prototype-key names and normalizes the rest', () => {
   const dest = memory();
   // Written as text on purpose: an object literal with a __proto__ key sets the
