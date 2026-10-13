@@ -29,6 +29,7 @@ const ASSETS = [
   './src/lib/measure.js',
   './src/lib/dataViz.js',
   './src/lib/geometryShapes.js',
+  './src/lib/pedagogy.js',
   './src/lib/curriculum.js',
   './src/lib/remediation.js',
   './src/lib/rhythmGame.js',
