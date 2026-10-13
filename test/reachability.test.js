@@ -13,7 +13,7 @@ const INTENTIONALLY_UNUSED = {
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
   'pedagogy.js': 'lesson-plan bank, wired into the teacher tab in the follow-up PR for #33',
-  'prepost.js': 'pre/post unit check item bank and statistics, wired in teacher tab follow-up PR #173',
+  'prepost.js': 'second pre/post bank (8 slots with a drawn 4/4 bar) for #110; check.html runs unitCheck.js, and the follow-up PR for #216 adds prepost.js tests before any page loads it',
 };
 
 function loadedByPages() {
