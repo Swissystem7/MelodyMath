@@ -12,7 +12,7 @@ const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
-  'musicEngine.js': 'music engine core from #117 (1/2 of #100); index.html starts loading it in part 2 (#118), which drops this entry',
+  'prepost.js': 'pre/post unit check item bank and statistics, wired in teacher tab follow-up PR #173',
 };
 
 function loadedByPages() {

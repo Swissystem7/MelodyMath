@@ -1,8 +1,15 @@
+// MelodyMath — lesson plans tied to Ministry curriculum rows.
+//
+// Each plan links one matrix topic to classroom steps so a teacher can show
+// how on-screen practice maps to the official programme — not a efficacy claim.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const CUR = (typeof module === 'object' && module.exports)
+    ? require('./curriculum')
+    : (typeof globalThis !== 'undefined' ? globalThis : {});
 
   // Mock lesson plan data based on curriculum topics
   const LESSON_PLANS = [
@@ -47,14 +54,84 @@
     }
   ];
 
+  function goalsForTopic(row) {
+    const strand = CUR.strandHe(row.strand);
+    return [
+      'לקשר תרגול ב־MelodyMath לסעיף «' + row.topic + '» בתוכנית לכיתה ' + row.grade + '׳.',
+      'להדגיש תחום «' + strand + '» בלי לטעון כיסוי מלא כשהסטטוס הוא ' + CUR.statusHe(row.status) + '.',
+      'לתת למורה ניסוח להצדקת שילוב הכלי בשיעור מול הורים או הנהלה.',
+    ];
+  }
+
+  function stepsForTopic(row) {
+    const statusNote = row.status === CUR.GAP
+      ? 'הנושא עדיין לא בבנק — השתמשו בתוכנית כהכנה בלבד.'
+      : 'בחרו בבנק פריטים שמתויגים לכיתה ' + row.grade + '׳ ולמיומנות הרלוונטית.';
+    return [
+      {
+        order: 1,
+        titleHe: 'מיפוי לתוכנית',
+        bodyHe: 'הציגו את שורת התוכנית: «' + row.topic + '». ' + statusNote,
+      },
+      {
+        order: 2,
+        titleHe: 'תרגול מונחה',
+        bodyHe: '8–12 דקות במצב כיתה או תרגול אישי; המורה מקריאה את המשימה, הילדים עובדים עם הקול או בלי לפי ההתאמה.',
+      },
+      {
+        order: 3,
+        titleHe: 'שיקוף וסגירה',
+        bodyHe: 'שאלו מה היה קשה; ציינו במפורש מה עדיין לא מכוסה (' + row.note + ').',
+      },
+    ];
+  }
+
+  function lessonPlanForRow(row) {
+    return {
+      id: 'lesson-' + row.topicId,
+      curriculumTopicId: row.topicId,
+      topicId: row.topicId,
+      curriculumTopic: row.topic,
+      titleHe: 'מערך שיעור · כיתה ' + row.grade + '׳ · ' + row.topic,
+      grade: row.grade,
+      strand: row.strand,
+      status: row.status,
+      goals: goalsForTopic(row),
+      steps: stepsForTopic(row),
+    };
+  }
+
+  let cachedPlans = null;
   function lessonPlans() {
+    if (!cachedPlans) {
+      cachedPlans = CUR.MATRIX
+        .filter(function (r) { return r.status === CUR.COVERED || r.status === CUR.PARTIAL; })
+        .map(lessonPlanForRow);
+    }
+    return cachedPlans;
+  }
+
+  function lessonPlanByTopicId(topicId) {
+    const cleanId = (topicId || '').replace(/^lesson-/, '');
+    const row = CUR.topicById(cleanId) || CUR.topicById(topicId);
+    if (!row || row.status === CUR.GAP) return null;
+    return lessonPlanForRow(row);
+  }
+
+  function seedLessonPlans() {
     return LESSON_PLANS;
   }
 
-  // Older callers pass the plan id ('1'); the curriculum key is the topicId.
+  // Seed plans keep their short ids ('1', '2', ...) or topicId; any other id falls back
+  // to the curriculum-generated plans.
   function lessonPlanForTopic(topicId) {
-    return LESSON_PLANS.find(plan => plan.topicId === topicId)
-      || LESSON_PLANS.find(plan => plan.id === topicId);
+    if (!topicId) return undefined;
+    const cleanId = String(topicId).replace(/^lesson-/, '');
+    const seed = LESSON_PLANS.find(plan => plan.topicId === topicId || plan.id === topicId || plan.topicId === cleanId);
+    if (seed) return seed;
+    const fromMatrix = lessonPlans().find(plan => plan.id === topicId || plan.topicId === topicId || plan.curriculumTopicId === cleanId || plan.topicId === cleanId);
+    if (fromMatrix) return fromMatrix;
+    return undefined;
   }
 
   // Plans for one grade, optionally for one curriculum topic (the exact topic
@@ -73,10 +150,13 @@
     const list = Array.isArray(plans) ? plans : [];
     if (!list.length) return '<p class="note">אין עדיין מערך שיעור לנושא הזה.</p>';
     return list.map(function (plan) {
-      const li = function (x) { return '<li>' + escapeHtml(x) + '</li>'; };
+      const li = function (x) {
+        const text = typeof x === 'string' ? x : (x && x.titleHe ? x.titleHe + ': ' + x.bodyHe : '');
+        return '<li>' + escapeHtml(text) + '</li>';
+      };
       return '<article class="lesson-plan">'
         + '<h3>כיתה ' + escapeHtml(plan.grade) + '׳ · ' + escapeHtml(plan.curriculumTopic) + '</h3>'
-        + '<h4>מטרות</h4><ul>' + (plan.goals || []).map(li).join('') + '</ul>'
+        + '<h4>מטרות</h4><ul>' + (plan.goals || []).map(function (g) { return '<li>' + escapeHtml(g) + '</li>'; }).join('') + '</ul>'
         + '<h4>מהלך השיעור</h4><ol>' + (plan.steps || []).map(li).join('') + '</ol>'
         + '</article>';
     }).join('');
@@ -84,8 +164,10 @@
 
   return {
     lessonPlans: lessonPlans,
+    lessonPlanByTopicId: lessonPlanByTopicId,
+    seedLessonPlans: seedLessonPlans,
     lessonPlanForTopic: lessonPlanForTopic,
     plansFor: plansFor,
-    renderLessonPlansHtml: renderLessonPlansHtml
+    renderLessonPlansHtml: renderLessonPlansHtml,
   };
 });
