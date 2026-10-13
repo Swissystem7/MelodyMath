@@ -67,15 +67,39 @@
   let heldStopTimer = null;
   const scheduled = [];
 
+  // When musicEngine.js is on the page its context is the only one; this
+  // file keeps its own only for pages that do not load the engine.
   function getAudioContext() {
     if (typeof window === 'undefined') return null;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    if (!audioCtx) audioCtx = new AC();
+    if (typeof window.getSharedAudioContext === 'function') audioCtx = window.getSharedAudioContext();
+    else if (!audioCtx) audioCtx = new AC();
+    if (!audioCtx) return null;
     if (audioCtx.state === 'suspended') {
       try { audioCtx.resume(); } catch (e) { /* autoplay policy */ }
     }
     return audioCtx;
+  }
+
+  // iOS Safari keeps the context silent until it is resumed inside a user
+  // gesture. index.html calls this once on the first pointerdown; it plays a
+  // one-sample silent buffer, which is what WebKit needs to count the tap.
+  // TODO(#100): replace with unlockAudio() from the shared music engine
+  // (PR #118) once it lands on master.
+  let audioUnlocked = false;
+  function unlockAudio() {
+    if (audioUnlocked) return true;
+    const ac = getAudioContext();
+    if (!ac) return false;
+    try {
+      const src = ac.createBufferSource();
+      src.buffer = ac.createBuffer(1, 1, 22050);
+      src.connect(ac.destination);
+      src.start(0);
+    } catch (e) { /* older WebKit: resume() above is enough */ }
+    audioUnlocked = true;
+    return true;
   }
 
   function stopHeldTone() {
@@ -421,7 +445,7 @@
   return {
     yToFreq, midiToFreq, MIDI_LOW, MIDI_HIGH, FMIN, FMAX, toFreq,
     fractionName, formatRhythmPattern,
-    getAudioContext, playFreq, playRhythmClicks, playClick, playCountClicks, playHarmonicReward,
+    getAudioContext, unlockAudio, playFreq, playRhythmClicks, playClick, playCountClicks, playHarmonicReward,
     playDrumSound, playMusicalAccompaniment, playXylophoneNote, XYLO_FREQS,
     startVoice, setVoice, stopVoice, playValueSweep, stopValueSweep,
     stopAllAudio, sweepNarration, formatSweepCoord, preferLessMotion,

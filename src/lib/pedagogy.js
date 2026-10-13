@@ -16,7 +16,7 @@
     {
       id: '1',
       topicId: 'א-מספרים-ספירה עד 100 קדימה ואחורה ממספר כלשהו',
-      goals: ['לספר עד 100 קדימה ואחורה', 'לבחור מספר כלשהו ולחזור ממנו'],
+      goals: ['לספור עד 100 קדימה ואחורה', 'להתחיל ממספר כלשהו ולספור ממנו'],
       steps: [
         'הצגת ישר המספרים עד 100',
         'אימון ספירה קדימה ואחורה',
@@ -29,11 +29,11 @@
     {
       id: '2',
       topicId: 'א-מספרים-מנייה עד 100, קיבוץ ל־10',
-      goals: ['למיין עד 100', 'לקבץ ל־10'],
+      goals: ['למנות עד 100', 'לקבץ ל־10'],
       steps: [
         'שימוש בדמויות לתרגול קיבוץ',
         'הצגת טבלאות קיבוץ',
-        'אימון עם חפצים מلمוס'
+        'אימון עם חפצים מוחשיים'
       ],
       curriculumTopic: 'מנייה עד 100, קיבוץ ל־10',
       grade: 'א',
@@ -101,14 +101,19 @@
     };
   }
 
+  let cachedPlans = null;
   function lessonPlans() {
-    return CUR.MATRIX
-      .filter(function (r) { return r.status === CUR.COVERED || r.status === CUR.PARTIAL; })
-      .map(lessonPlanForRow);
+    if (!cachedPlans) {
+      cachedPlans = CUR.MATRIX
+        .filter(function (r) { return r.status === CUR.COVERED || r.status === CUR.PARTIAL; })
+        .map(lessonPlanForRow);
+    }
+    return cachedPlans;
   }
 
   function lessonPlanByTopicId(topicId) {
-    const row = CUR.topicById(topicId);
+    const cleanId = (topicId || '').replace(/^lesson-/, '');
+    const row = CUR.topicById(cleanId) || CUR.topicById(topicId);
     if (!row || row.status === CUR.GAP) return null;
     return lessonPlanForRow(row);
   }
@@ -117,10 +122,44 @@
     return LESSON_PLANS;
   }
 
-  // Seed plans keep their short ids ('1', '2', ...); any other id falls back
+  // Seed plans keep their short ids ('1', '2', ...) or topicId; any other id falls back
   // to the curriculum-generated plans.
   function lessonPlanForTopic(topicId) {
-    return LESSON_PLANS.find(plan => plan.id === topicId) || lessonPlanByTopicId(topicId);
+    if (!topicId) return undefined;
+    const cleanId = String(topicId).replace(/^lesson-/, '');
+    const seed = LESSON_PLANS.find(plan => plan.topicId === topicId || plan.id === topicId || plan.topicId === cleanId);
+    if (seed) return seed;
+    const fromMatrix = lessonPlans().find(plan => plan.id === topicId || plan.topicId === topicId || plan.curriculumTopicId === cleanId || plan.topicId === cleanId);
+    if (fromMatrix) return fromMatrix;
+    return undefined;
+  }
+
+  // Plans for one grade, optionally for one curriculum topic (the exact topic
+  // string from curriculum.js). An empty topic means every plan in the grade.
+  function plansFor(grade, topic) {
+    return LESSON_PLANS.filter(plan => plan.grade === grade && (!topic || plan.curriculumTopic === topic));
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  function renderLessonPlansHtml(plans) {
+    const list = Array.isArray(plans) ? plans : [];
+    if (!list.length) return '<p class="note">אין עדיין מערך שיעור לנושא הזה.</p>';
+    return list.map(function (plan) {
+      const li = function (x) {
+        const text = typeof x === 'string' ? x : (x && x.titleHe ? x.titleHe + ': ' + x.bodyHe : '');
+        return '<li>' + escapeHtml(text) + '</li>';
+      };
+      return '<article class="lesson-plan">'
+        + '<h3>כיתה ' + escapeHtml(plan.grade) + '׳ · ' + escapeHtml(plan.curriculumTopic) + '</h3>'
+        + '<h4>מטרות</h4><ul>' + (plan.goals || []).map(function (g) { return '<li>' + escapeHtml(g) + '</li>'; }).join('') + '</ul>'
+        + '<h4>מהלך השיעור</h4><ol>' + (plan.steps || []).map(li).join('') + '</ol>'
+        + '</article>';
+    }).join('');
   }
 
   return {
@@ -128,5 +167,7 @@
     lessonPlanByTopicId: lessonPlanByTopicId,
     seedLessonPlans: seedLessonPlans,
     lessonPlanForTopic: lessonPlanForTopic,
+    plansFor: plansFor,
+    renderLessonPlansHtml: renderLessonPlansHtml,
   };
 });

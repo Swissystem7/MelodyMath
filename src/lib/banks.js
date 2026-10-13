@@ -107,8 +107,8 @@
   const GRADE_SKILLS = {
     'א': ['counting', 'addition', 'subtraction', 'number_line', 'word_problems', 'measurement', 'geometry', 'data'],
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
-    'ג': ['multiplication', 'division'],
-    'ד': ['basic_fractions'],
+    'ג': ['multiplication', 'division', 'geometry'],
+    'ד': ['basic_fractions', 'geometry'],
     'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
