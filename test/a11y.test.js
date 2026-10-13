@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.join(__dirname, '..');
-const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html', 'curriculum.html'];
+const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html', 'curriculum.html', 'frequency.html', 'check.html'];
 
 function html(name) {
   return fs.readFileSync(path.join(root, name), 'utf8');
@@ -129,4 +129,9 @@ test('the offer form labels its fields and announces status', () => {
   assert.match(offerPage, /id="formStatus"[^>]*aria-live/);
   assert.match(offerPage, /id="letterPreview"[^>]*aria-live/);
   assert.match(offerPage, /id="main"/);
+});
+
+test('isRtl returns false for null input', () => {
+  const { isRtl } = require('../src/lib/tabs.js');
+  assert.strictEqual(isRtl(null), false);
 });

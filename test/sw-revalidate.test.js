@@ -157,7 +157,10 @@ test('POST and cross-origin requests are left to the browser', async () => {
 });
 
 test('install precaches the asset list and activate drops the previous cache', async () => {
-  const sw = loadSw({ cacheNames: ['melodymath-offline-v7', 'melodymath-offline-v8', 'melodymath-offline-v6'] });
+  // Read the live name so bumping CACHE in sw.js does not break this test.
+  const current = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'sw.js'), 'utf8')
+    .match(/const CACHE = '([^']+)'/)[1];
+  const sw = loadSw({ cacheNames: ['melodymath-offline-v7', current, 'melodymath-offline-v6'] });
   await dispatchLifecycle(sw, 'install');
   assert.ok(sw.store.has(urlOf('./index.html')));
   assert.ok(sw.store.has(urlOf('./src/lib/teacherStore.js')));

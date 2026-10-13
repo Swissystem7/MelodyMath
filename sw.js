@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v8';
+const CACHE = 'melodymath-offline-v15';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,8 @@ const ASSETS = [
   './landing.html',
   './offer.html',
   './curriculum.html',
+  './frequency.html',
+  './check.html',
   './manifest.webmanifest',
   './src/lib/core.js',
   './src/lib/sonify.js',
@@ -22,7 +24,20 @@ const ASSETS = [
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
   './src/lib/bar44.js',
+  './src/lib/vertical.js',
+  './src/lib/measure.js',
+  './src/lib/dataViz.js',
+  './src/lib/geometryShapes.js',
   './src/lib/curriculum.js',
+  './src/lib/remediation.js',
+  './src/lib/rhythmGame.js',
+  './src/lib/interactiveLessons.js',
+  './src/lib/musicEngine.js',
+  './src/lib/polyrhythm.js',
+  './src/lib/circleOfFifths.js',
+  './src/lib/unitCheck.js',
+  './src/lib/prepost.js',
+  './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
   './src/lib/access.js',
@@ -35,6 +50,7 @@ const ASSETS = [
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/qr-code.svg',
 ];
 
 self.addEventListener('install', function (event) {
