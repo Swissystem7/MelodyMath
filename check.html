@@ -23,6 +23,11 @@
   .row button{flex:1 1 9rem}
   .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:8px;margin-top:14px}
   .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line)}
+  /* One neutral "your tap registered" colour. A green-for-correct cue here would
+     turn the check into practice and change what the second form measures. */
+  .choices button.picked{background:#eee9ff;border-color:var(--purple)}
+  .choices button[disabled]{opacity:.75;cursor:default}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .prompt{font-size:clamp(1.25rem,5vw,1.6rem);margin:8px 0}
   .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
   table{width:100%;border-collapse:collapse;font-size:.95rem}
@@ -59,12 +64,17 @@
   <section class="card hidden" id="quiz" aria-labelledby="quizProgress">
     <h2 id="quizProgress" aria-live="polite"></h2>
     <p class="prompt" id="quizPrompt"></p>
-    <div class="choices" id="quizChoices"></div>
+    <div class="choices" id="quizChoices" role="group" aria-label="בחירת תשובה"></div>
+    <!-- tabindex="-1" so focus has somewhere to land when the answered row locks:
+         disabling the focused button would otherwise drop focus to the document. -->
+    <p class="note" id="quizEcho" role="status" tabindex="-1"></p>
+    <div class="row">
+      <button type="button" id="quizQuit" class="secondary">עצירה בלי לשמור ציון</button>
+    </div>
   </section>
 
   <section class="card" id="report" aria-labelledby="reportTitle">
     <h2 id="reportTitle">דוח למורה: לפני מול אחרי</h2>
-    <button type="button" id="showReport" class="secondary">הצגת הדוח לקוד הכיתה</button>
     <div id="reportBody"></div>
     <p class="disclaimer" id="disclaimer"></p>
   </section>
@@ -78,6 +88,9 @@
 (function () {
   const $ = function (id) { return document.getElementById(id); };
   let run = null;
+  // The pending "move to the next item" timer, held so that leaving a check can
+  // cancel it instead of letting it fire into whatever is on screen 350 ms later.
+  let advance = null;
 
   $('unit').innerHTML = listUnits().map(function (u) {
     return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + '</option>';
@@ -102,41 +115,95 @@
     showItem();
   }
 
-  function showItem() {
-    const item = run.items[run.at];
-    $('quizProgress').textContent = 'שאלה ' + (run.at + 1) + ' מתוך ' + run.items.length;
-    setMath($('quizPrompt'), item.prompt);
-    $('quizChoices').innerHTML = shuffledChoices(item.choices).map(function (c) {
-      return '<button type="button" data-choice="' + escapeHtml(c) + '"><bdi dir="ltr">' + escapeHtml(c) + '</bdi></button>';
-    }).join('');
-    $('quizChoices').querySelectorAll('button').forEach(function (b) {
-      b.onclick = function () { answer(b.dataset.choice); };
-    });
-    $('quizChoices').querySelector('button').focus();
+  function choiceButtons() {
+    return Array.prototype.slice.call($('quizChoices').children);
   }
 
-  function answer(given) {
+  function showItem() {
+    const item = run.items[run.at];
+    run.answered = false;
+    $('quizProgress').textContent = 'שאלה ' + (run.at + 1) + ' מתוך ' + run.items.length;
+    setMath($('quizPrompt'), item.prompt);
+    $('quizEcho').textContent = '';
+    const box = $('quizChoices');
+    box.innerHTML = '';
+    // Shuffled per item so a child who glances at a neighbour's screen, or who
+    // sits both forms, cannot answer by remembering a position.
+    shuffledChoices(item.choices).forEach(function (choice) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dir = 'ltr';
+      b.textContent = String(choice);
+      b.setAttribute('aria-label', 'תשובה ' + String(choice));
+      b.onclick = function () { pick(choice, b); };
+      box.appendChild(b);
+    });
+    choiceButtons()[0].focus();
+  }
+
+  function pick(given, btn) {
+    if (!run || run.answered) return;
+    run.answered = true;
     const item = run.items[run.at];
     const ok = isCheckCorrect(item, given);
     if (ok) run.correct++;
+    // The tap is acknowledged and the row locks, but nothing here says whether it
+    // was right. A correct/incorrect cue would teach between the two forms and
+    // inflate the one that is supposed to measure what the unit taught.
+    choiceButtons().forEach(function (b) { b.disabled = true; });
+    btn.classList.add('picked');
+    $('quizEcho').textContent = 'נרשם.';
+    // The tapped button is now disabled, so the browser takes focus off it. Park
+    // focus on the echo line, which is also the live region, so a keyboard or
+    // switch-access child is not thrown back to the top of the page for 350 ms.
+    $('quizEcho').focus();
     addItem(run.classCode, run.name, run.session.id, {
       skill: UNIT_CHECK_SKILL_HE[item.skill] || item.skill, prompt: item.prompt,
       answer: item.answer, given: given, correct: ok,
     });
-    run.at++;
-    if (run.at < run.items.length) { showItem(); return; }
-    endSession(run.classCode, run.name, run.session.id);
+    // The locked row plus a short pause is also the double-tap guard: the items
+    // used to swap in the same tick, so two quick taps at one spot on a tablet
+    // answered two items.
+    advance = setTimeout(function () {
+      advance = null;
+      if (!run) return;
+      run.at++;
+      if (run.at < run.items.length) { showItem(); return; }
+      finish();
+    }, 350);
+  }
+
+  // Both ways out of a check. `ended` is what tells unitCheck.latestCheck that a
+  // sitting is a score, so only finish() writes one: a check that was stopped
+  // stays in the roster as an un-ended session and is counted nowhere.
+  function stop(message, ended) {
+    if (!run) return;
+    if (ended) endSession(run.classCode, run.name, run.session.id);
+    // Without this, a sitting started inside the 350 ms after the last tap would
+    // inherit the old timer and skip straight past its own first item.
+    if (advance != null) { clearTimeout(advance); advance = null; }
+    run = null;
     $('quiz').classList.add('hidden');
     $('setup').classList.remove('hidden');
-    $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.';
-    run = null;
+    $('setupStatus').textContent = message;
     renderReport();
+  }
+
+  function finish() {
+    stop(run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.', true);
+  }
+
+  function quit() {
+    stop('הבדיקה נעצרה ולא נספרה.', false);
   }
 
   function cell(check) {
     return check ? check.correct + '/' + check.total : '—';
   }
 
+  // The numbers are all here; the presentation half of #221 — the stat tiles for
+  // the two means, the two-column choice grid and the restyled header — is the
+  // second PR for #226, so that neither lands over 400 changed lines.
   function renderReport() {
     const classCode = normalizeCode($('classCode').value);
     const r = checkReport(loadRoster(classCode).students, $('unit').value);
@@ -154,12 +221,22 @@
       + ' תלמידים עם שתי הבדיקות. ממוצע לפני <bdi dir="ltr">' + fmt(r.meanPre) + '</bdi>, ממוצע אחרי <bdi dir="ltr">'
       + fmt(r.meanPost) + '</bdi>.' + (r.preOnly ? ' ' + r.preOnly + ' עשו רק את הבדיקה שלפני.' : '')
       + (r.postOnly ? ' ' + r.postOnly + ' עשו רק את הבדיקה שאחרי.' : '') + '</p>'
-      + '<table><thead><tr><th>תלמיד/ה</th><th>לפני</th><th>אחרי</th><th>שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
+      + '<table><caption class="sr-only">בדיקה לפני ואחרי לכל תלמיד/ה בקוד הכיתה הזה</caption>'
+      + '<thead><tr><th scope="col">תלמיד/ה</th><th scope="col">לפני</th>'
+      + '<th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
   $('startPre').onclick = function () { start('pre'); };
   $('startPost').onclick = function () { start('post'); };
-  $('showReport').onclick = renderReport;
+  $('quizQuit').onclick = quit;
+  // The before/after report is the point of the page, so it is on screen from the
+  // first load and follows the pickers, instead of waiting for a tap on a button
+  // a teacher had to know to look for.
+  $('unit').onchange = renderReport;
+  // `input`, not `change`: a text input only fires change on blur, so a teacher
+  // typing a class code would otherwise read the previous class's numbers.
+  $('classCode').oninput = renderReport;
+  renderReport();
 })();
 </script>
 </body>
