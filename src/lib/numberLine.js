@@ -115,6 +115,26 @@
     };
   }
 
+  function soundForTick(n, line) {
+    const L = normalizeLine(line);
+    const val = clampInt(n, L.min, L.max);
+    const pct = percentOnLine(val, L) / 100;
+    const baseFreq = 130.81 * Math.pow(4, pct);
+    const isQuarter = Math.abs(pct - 0.25) < 0.01;
+    const isHalf = Math.abs(pct - 0.5) < 0.01;
+    const isThreeQuarter = Math.abs(pct - 0.75) < 0.01;
+    const isWhole = Math.abs(pct - 1.0) < 0.01;
+    const isZero = Math.abs(pct) < 0.01;
+    const isKeyPoint = isZero || isQuarter || isHalf || isThreeQuarter || isWhole;
+    return {
+      value: val,
+      percent: Math.round(pct * 100),
+      frequency: Math.round(baseFreq * 10) / 10,
+      isKeyPoint: isKeyPoint,
+      pointName: isZero ? '0' : (isQuarter ? '1/4' : (isHalf ? '1/2' : (isThreeQuarter ? '3/4' : (isWhole ? '1' : null))))
+    };
+  }
+
   return {
     normalizeLine: normalizeLine,
     ticksOf: ticksOf,
@@ -123,6 +143,7 @@
     percentOnLine: percentOnLine,
     renderNumberLineHtml: renderNumberLineHtml,
     bindNumberLine: bindNumberLine,
+    soundForTick: soundForTick,
     escapeHtml: escapeHtml,
   };
 });
