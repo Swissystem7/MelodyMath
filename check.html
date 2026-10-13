@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · בדיקה לפני ואחרי יחידה</title>
-<meta name="description" content="בדיקה קצרה לפני יחידה ואחריה, נשמרת רק במכשיר. לא מחקר מבוקר.">
+<title>MelodyMath · בדיקה קצרה לפני ואחרי יחידה</title>
+<meta name="description" content="בדיקת פתיחה ובדיקת סיום לאותה יחידה, שני טפסים מקבילים בלי מוזיקה. הספירה נשארת במכשיר הזה וזה לא מחקר מבוקר.">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
   :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
@@ -15,18 +15,31 @@
   h2{font-size:1.2rem;margin:0 0 10px}
   .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:16px 0}
   .note{color:var(--muted);font-size:.92rem}
+  .lead{color:var(--muted);max-width:58ch}
+  .tag{display:inline-block;background:#eee9ff;color:var(--purple);border-radius:8px;padding:3px 10px;font-size:.78rem;font-weight:700}
   label{display:block;margin:8px 0 4px;font-weight:700}
   input,select{width:100%;min-height:44px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
   button{min-height:44px;min-width:44px;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
   button.secondary{background:#fff;color:var(--purple)}
   .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .row button{flex:1 1 9rem}
-  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:8px;margin-top:14px}
-  .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line)}
+  /* Two columns on a tablet and one on a phone, instead of as many as fit: a
+     56px row is a surer tap target for a child who is being measured, and a
+     mis-tap here is stored as a wrong answer that no one can undo. */
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .choices button{min-height:56px;font-size:1.3rem;background:#fff;color:var(--ink);border-color:var(--line)}
+  @media(max-width:430px){.choices{grid-template-columns:1fr}}
   .prompt{font-size:clamp(1.25rem,5vw,1.6rem);margin:8px 0}
   .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+  /* The two means and the n behind them, as tiles: the figure in ink and its
+     label in muted text, so the size is read first. No tile is coloured as
+     good or bad — a higher mean is not proof that the unit caused it. */
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+  .stat{background:#faf8ff;border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-width:7.5rem;font-size:.85rem;color:var(--muted)}
+  .stat strong{display:block;font-size:1.35rem;color:var(--ink)}
   table{width:100%;border-collapse:collapse;font-size:.95rem}
   th,td{border-bottom:1px solid var(--line);padding:8px 4px;text-align:start;overflow-wrap:anywhere}
+  th{color:var(--muted);font-size:.82rem}
   .disclaimer{background:#fff7e0;border:1px solid #f0d58a;border-radius:12px;padding:10px 12px;margin:12px 0 0}
   .hidden{display:none}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
@@ -38,8 +51,9 @@
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
-  <h1>בדיקה לפני ואחרי יחידה</h1>
-  <p class="note">8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
+  <p class="tag">רישום מקומי · לא ציון ואין טענת שליטה</p>
+  <h1>בדיקה קצרה לפני ואחרי יחידה</h1>
+  <p class="lead">לכל יחידה שני טפסים מקבילים: אותה מיומנות ואותה רמה בכל שאלה, עם מספרים אחרים. הבדיקה עצמה בלי מוזיקה ובלי רמז קולי, כדי שתמדוד מה הילד/ה יודע/ת בלי תמיכה. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה. <a href="index.html">חזרה לתרגול</a></p>
 
   <section class="card" id="setup" aria-labelledby="setupTitle">
     <h2 id="setupTitle">מי נבדק/ת</h2>
@@ -79,8 +93,10 @@
   const $ = function (id) { return document.getElementById(id); };
   let run = null;
 
+  // The item count rides along in the option, so a teacher sees how long the
+  // check is before starting one — the header used to hard-code "8 questions".
   $('unit').innerHTML = listUnits().map(function (u) {
-    return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + '</option>';
+    return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + ' · ' + u.length + ' שאלות</option>';
   }).join('');
   const who = loadWho();
   $('classCode').value = who.classCode;
@@ -137,6 +153,17 @@
     return check ? check.correct + '/' + check.total : '—';
   }
 
+  function ltr(text) {
+    return '<bdi dir="ltr">' + escapeHtml(String(text)) + '</bdi>';
+  }
+
+  function stat(value, label) {
+    return '<div class="stat"><strong>' + value + '</strong>' + label + '</div>';
+  }
+
+  // The two class means and the n behind them lead the report as tiles instead
+  // of as a sentence a teacher has to parse mid-lesson. The per-student table
+  // and the disclaimer stay: the tiles are a summary, not the evidence.
   function renderReport() {
     const classCode = normalizeCode($('classCode').value);
     const r = checkReport(loadRoster(classCode).students, $('unit').value);
@@ -147,13 +174,22 @@
     const fmt = function (x) { return x == null ? '—' : (Math.round(x * 10) / 10) + '/' + r.total; };
     const rows = r.rows.map(function (row) {
       const change = row.change == null ? '—' : (row.change > 0 ? '+' : '') + row.change;
-      return '<tr><td>' + escapeHtml(row.name) + '</td><td><bdi dir="ltr">' + cell(row.pre) + '</bdi></td><td><bdi dir="ltr">'
-        + cell(row.post) + '</bdi></td><td><bdi dir="ltr">' + change + '</bdi></td></tr>';
+      return '<tr><td>' + escapeHtml(row.name) + '</td><td>' + ltr(cell(row.pre)) + '</td><td>'
+        + ltr(cell(row.post)) + '</td><td>' + ltr(change) + '</td></tr>';
     }).join('');
-    $('reportBody').innerHTML = '<p>כיתה <b>' + escapeHtml(classCode || 'ברירת מחדל') + '</b> · n = ' + r.n
-      + ' תלמידים עם שתי הבדיקות. ממוצע לפני <bdi dir="ltr">' + fmt(r.meanPre) + '</bdi>, ממוצע אחרי <bdi dir="ltr">'
-      + fmt(r.meanPost) + '</bdi>.' + (r.preOnly ? ' ' + r.preOnly + ' עשו רק את הבדיקה שלפני.' : '')
-      + (r.postOnly ? ' ' + r.postOnly + ' עשו רק את הבדיקה שאחרי.' : '') + '</p>'
+    // Students who sat one form only are counted on their own line: folding
+    // them into the means would move a class average by who was absent.
+    const onlyOne = [
+      r.preOnly ? r.preOnly + ' עשו רק את הבדיקה שלפני.' : '',
+      r.postOnly ? r.postOnly + ' עשו רק את הבדיקה שאחרי.' : '',
+    ].filter(function (s) { return s; }).join(' ');
+    $('reportBody').innerHTML = '<p>כיתה <b>' + escapeHtml(classCode || 'ברירת מחדל') + '</b></p>'
+      + '<div class="stats">'
+      + stat(ltr(fmt(r.meanPre)), 'ממוצע לפני')
+      + stat(ltr(fmt(r.meanPost)), 'ממוצע אחרי')
+      + stat(ltr(r.n), 'תלמידים עם שתי הבדיקות')
+      + '</div>'
+      + (onlyOne ? '<p class="note">' + onlyOne + '</p>' : '')
       + '<table><thead><tr><th>תלמיד/ה</th><th>לפני</th><th>אחרי</th><th>שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
