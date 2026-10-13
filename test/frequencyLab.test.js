@@ -103,6 +103,9 @@ test('frequency.html loads without throwing and fills in the computed numbers', 
   assert.match(out.els.intRows.children[0].innerHTML, /330 Hz/);
   assert.match(out.els.intRows.children[1].innerHTML, /4:3/);
   assert.match(out.els.tetDrift.innerHTML, /0\.11%/);
+  // The same gap twice: percent for the arithmetic, cents for the musicians.
+  assert.match(out.els.tetCents.innerHTML, /סנט/);
+  assert.match(out.els.tetCents.innerHTML, />1\.96</);
   assert.match(out.els.stringOut.innerHTML, /220 Hz/);
   assert.equal(out.els.stringBar.style.width, '100%');
 });

@@ -103,6 +103,7 @@
     <p>פיתגורס בונה את כל הצלילים מקווינטות של <bdi dir="ltr">3:2</bdi> בדיוק. הבעיה: אם עולים שתים־עשרה קווינטות כאלה לא מגיעים בדיוק לשבע אוקטבות — נשאר שארית קטנה.</p>
     <p>בכיוון השני, שווה־מזג (<bdi dir="ltr">12-TET</bdi>) מחלק את האוקטבה לשתים־עשרה מדרגות <b>שוות</b>: מספר אחד שמכפיל את התדר שתים־עשרה פעמים ומגיע בדיוק לפי 2. אין צורך לחשב אותו — זו פשוט מכפלה אחת, <span id="tetValue" class="hz"></span>, במקום <bdi dir="ltr">3:2 = 1.5</bdi>.</p>
     <p id="tetDrift"></p>
+    <p id="tetCents"></p>
     <div class="row"><button type="button" id="tetAb" class="primary">השמעה משווה: קווינטה טהורה → שווה־מזג</button></div>
     <p class="note">ההפרש קטן מאוד, ולכן שתי הקווינטות נשמעות דומות. בפסנתר משתמשים בשווה־מזג כדי שכל הסולמות יישמעו אותו דבר.</p>
   </details>
@@ -265,6 +266,10 @@
   $('tetDrift').innerHTML = 'הקווינטה של שווה־מזג צרה מזו של פיתגורס ב־<bdi dir="ltr">'
     + Math.abs(ratioDriftPercent(tet, pure)) + '%</bdi> בלבד: <bdi dir="ltr">'
     + hzText(BASE * tet) + '</bdi> במקום <bdi dir="ltr">' + hzText(BASE * pure) + '</bdi>.';
+  $('tetCents').innerHTML = 'מוזיקאים מודדים הפרש כזה ב<b>סנט</b>: מאית של חצי טון, <bdi dir="ltr">1200</bdi> סנט לאוקטבה. '
+    + 'כאן ההפרש הוא <bdi dir="ltr">' + Math.abs(centsBetween(tet, pure)) + '</bdi> סנט בלבד. '
+    + 'באחוזים הגודל תלוי מאיפה מתחילים, ובסנט לא: אוקטבה היא <bdi dir="ltr">1200</bdi> סנט '
+    + 'גם מ־<bdi dir="ltr">' + hzText(220) + '</bdi> וגם מ־<bdi dir="ltr">' + hzText(880) + '</bdi>.';
   $('tetAb').addEventListener('click', function () {
     compare(BASE * pure, BASE * tet, 'קווינטה טהורה ' + hzText(BASE * pure)
       + ', אחר כך שווה־מזג ' + hzText(BASE * tet) + '.');

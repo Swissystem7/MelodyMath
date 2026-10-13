@@ -76,3 +76,16 @@ test('the 12-TET fifth is a hair under 3:2, as a plain number', () => {
   assert.equal(me.ratioDriftPercent(1, 0), null);
   assert.equal(me.temperedRatio('x'), null);
 });
+
+test('the same gap in cents: 1200 to the octave, about two under the pure fifth', () => {
+  assert.equal(me.centsBetween(2, 1), 1200, 'an octave is 1200 cents');
+  assert.equal(me.centsBetween(1, 2), -1200, 'and down an octave is -1200');
+  assert.equal(me.centsBetween(4, 1), 2400, 'cents add up where percent does not');
+  assert.equal(me.centsBetween(1, 1), 0);
+  assert.equal(me.centsBetween(me.temperedRatio(7), 1.5), -1.96, 'the tempered fifth sits just under 3:2');
+  // Unlike percent, the size of a step does not depend on where it starts.
+  assert.equal(me.centsBetween(220 * 2, 220), me.centsBetween(880 * 2, 880));
+  assert.equal(me.centsBetween(0, 1), null);
+  assert.equal(me.centsBetween(1, -1), null);
+  assert.equal(me.centsBetween('x', 1), null);
+});

@@ -250,6 +250,15 @@
     return Math.round((a / b - 1) * 10000) / 100;
   }
 
+  // The same gap in the unit musicians use: cents, 1200 to the octave and so a
+  // hundred to a semitone. Percent shrinks as the ratios grow, cents does not —
+  // an octave is 1200 cents whether it starts at 110 Hz or at 880. Same
+  // direction as ratioDriftPercent: positive when `a` is the higher of the two.
+  function centsBetween(a, b) {
+    if (!positive(a) || !positive(b)) return null;
+    return Math.round(1200 * Math.log2(a / b) * 100) / 100;
+  }
+
   // Reads '2', '2:1', 'פי 2', '3/2' or '1.5' as one number: the ratio asked for.
   function parseRatio(text) {
     if (typeof text !== 'string') return null;
@@ -420,7 +429,7 @@
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
     MAX_GAIN, HZ_MIN, HZ_MAX, clampHz, clampGain, planSequence,
     ratioText, hzText, harmonicSeries, commonDifference, stringStops,
-    monochordHz, monochordInterval, temperedRatio, ratioDriftPercent,
+    monochordHz, monochordInterval, temperedRatio, ratioDriftPercent, centsBetween,
     parseRatio, ratioMatches,
     getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence,
     stopSequence, stopAll, audioReady,
