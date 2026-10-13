@@ -57,6 +57,23 @@ test('the service-worker cache moved past v7, which pinned the files from before
   assert.ok(Number(m[1]) > 7, 'CACHE is still v' + m[1]);
 });
 
+test('every page names an icon, so no page asks for /favicon.ico and logs a 404', () => {
+  // A page with no rel="icon" makes the browser guess /favicon.ico, which this
+  // site does not serve: one 404 in the console on every single page load.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));
+  const pages = fs.readdirSync(root).filter((f) => f.endsWith('.html'));
+  assert.ok(pages.length >= 5, 'expected the site pages at the repo root');
+  pages.forEach((page) => {
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    // No '<' in the pattern: this asserts an attribute pair, it is not a tag filter.
+    const icon = /\srel="icon"\s+href="([^"]+)"/.exec(html);
+    assert.ok(icon, page + ' has no <link rel="icon">, so it will 404 on /favicon.ico');
+    assert.ok(fs.existsSync(path.join(root, icon[1])), page + ' points at a missing ' + icon[1]);
+    assert.ok(listed.has(icon[1]), page + ' points at ' + icon[1] + ' which sw.js does not precache');
+  });
+});
+
 test('every script a page loads is in the precache list', () => {
   const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));

@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const me = require('../src/lib/musicEngine');
+const { scriptTags } = require('./helpers/scriptTags');
 
 const root = path.join(__dirname, '..');
 const page = fs.readFileSync(path.join(root, 'frequency.html'), 'utf8');
@@ -85,9 +86,9 @@ function runPage() {
     setTimeout, clearTimeout, localStorage: undefined,
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)).forEach((m) => {
-    if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
-    else vm.runInContext(m[2], ctx, { filename: 'frequency.html inline script' });
+  scriptTags(page).forEach((s) => {
+    if (s.src) vm.runInContext(fs.readFileSync(path.join(root, s.src), 'utf8'), ctx, { filename: s.src });
+    else vm.runInContext(s.body, ctx, { filename: 'frequency.html inline script' });
   });
   return { els, get: (id) => document.getElementById(id), docHandlers, sounded, gains, errors };
 }

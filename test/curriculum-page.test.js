@@ -4,27 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const cur = require('../src/lib/curriculum');
+const { scriptTags } = require('./helpers/scriptTags');
 
 const root = path.join(__dirname, '..');
 const page = fs.readFileSync(path.join(root, 'curriculum.html'), 'utf8');
-
-// [tag, src, body] for every <script> in the page, found with indexOf instead of
-// a tag regexp (CodeQL js/bad-tag-filter).
-function scriptTags(html) {
-  const out = [];
-  const lower = html.toLowerCase();
-  let at = lower.indexOf('<script');
-  while (at !== -1) {
-    const open = lower.indexOf('>', at);
-    const close = lower.indexOf('</script', open);
-    if (open === -1 || close === -1) break;
-    const tag = html.slice(at, open + 1);
-    const src = /src="([^"]+)"/.exec(tag);
-    out.push([tag, src ? src[1] : undefined, html.slice(open + 1, close)]);
-    at = lower.indexOf('<script', close);
-  }
-  return out;
-}
 
 // Run curriculum.html's scripts the way the browser does: every <script src> in
 // order, then the inline script, against a document that only has #sum and #tables.
@@ -38,10 +21,10 @@ function runPage() {
   };
   const ctx = vm.createContext({ document: document });
   const scripts = scriptTags(page);
-  assert.ok(scripts.some((m) => !m[1] && m[2].trim()), 'the page has an inline script');
-  scripts.forEach(function (m) {
-    if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
-    else vm.runInContext(m[2], ctx, { filename: 'curriculum.html inline script' });
+  assert.ok(scripts.some((s) => !s.src && s.body.trim()), 'the page has an inline script');
+  scripts.forEach(function (s) {
+    if (s.src) vm.runInContext(fs.readFileSync(path.join(root, s.src), 'utf8'), ctx, { filename: s.src });
+    else vm.runInContext(s.body, ctx, { filename: 'curriculum.html inline script' });
   });
   return els;
 }
