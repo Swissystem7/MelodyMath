@@ -13,13 +13,21 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+/* phones 360-430px (#101): 44px targets, tables scroll inside themselves, never the page */
+html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedback{overflow-wrap:anywhere}button,select,input:not([type=checkbox]):not([type=radio]),summary,.level,.navcard{min-height:44px}
+@media(max-width:680px){.report-table,.class-board{display:block;max-width:100%;overflow-x:auto}}
+@media(max-width:480px){.wrap{padding:16px 12px 48px}.tabs{gap:8px}.tab{flex:1 1 calc(50% - 8px)}.levels{gap:8px}.level{padding:14px 10px}.choices{gap:8px}.metro-bar{padding:8px 10px}.metro-bar input[type=number]{width:64px;min-height:44px}.stat{min-width:0;flex-basis:calc(50% - 10px)}.class-timer{font-size:1.8rem}.class-kids button{min-width:44px}h1{font-size:2rem}}
+/* הבדיקה (#110): פסי השמיניות אינם יעדי מגע, ולכן הם מתכווצים ואין גלילה אופקית ב־360px */
+.pp-bar{display:flex;gap:3px;border:3px solid var(--purple);border-radius:12px;padding:4px;background:#fff;margin:14px 0}.pp-cell{flex:1 1 0;min-width:0;height:48px;background:#f4f0fc;border:1px solid var(--line);border-radius:8px}.pp-cell.on{background:var(--purple);border-color:var(--purple)}.pp-kicker{margin:0;color:var(--muted);font-size:.9rem;font-weight:700}.pp-report .report-table td{white-space:nowrap}.pp-report .report-table td:first-child{white-space:normal;word-break:break-word}#prePost label,#ppUnit{max-width:100%}#prePost .topline{flex-wrap:wrap;gap:4px 10px}
 @media print{
   body{background:#fff;color:#000}
-  header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#playground,#classMode,#beatMode,#firstRun{display:none!important}
+  header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#classMode,#beatMode,#firstRun{display:none!important}
   .panel{display:none!important}
   #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
-  #worksheetCard,#classBoardCard,#parentCard,#certCard{display:none!important}
+  #worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard{display:none!important}
+  body.print-lesson #lessonCard{display:block!important}
+  body.print-lesson #reportCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
   body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
@@ -120,6 +128,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 .fraction-brick{display:inline-block;padding:8px 14px;border-radius:8px;font-weight:bold;margin:4px;cursor:pointer;color:#fff}
 @keyframes pulseHint{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(105,70,232,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,0)}}
 .pulse-hint{animation:pulseHint 2s infinite ease-in-out}
+@media (prefers-reduced-motion:reduce){.pulse-hint{animation:none}}
 </style></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
@@ -161,7 +170,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
   <span class="note">נקישה לקצב התרגול במכשיר. המורה שולטת ב־BPM. לא טיפול ואין טענת יעילות.</span>
 </details>
-<p class="mm-product-banner"><b>מוצר 1 · תרגול יסודי.</b> כיתה נבחרת למטה. <a href="curriculum.html">כיסוי מול התוכנית — כולל מה שאין</a>. סוניפיקציה לחטיבה/תיכון היא <a href="landing.html">מוצר נפרד</a>.</p>
+<p class="mm-product-banner"><b>תרגול יסודי א׳–ד׳.</b> כיתה נבחרת למטה. <a href="curriculum.html">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
 <div class="who-bar" id="gradeBar">
   <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
   <div class="grade-pick" id="gradePick" role="group" aria-label="בחירת כיתה"></div>
@@ -169,8 +178,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 </div>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
   <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב: שברים, שיפוע פונקציה ומענה מוזיקלי מותאם.</span></a>
+  <a class="navcard" href="offer.html"><strong>ניסוי כיתתי · 4 שבועות · חינם</strong><span>מכתב מוכן למנהל/ת ודף אחד להדפסה. בלי חשבונית ובלי טענת יעילות.</span></a>
   <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
-  <a class="navcard" href="landing.html"><strong>מוצר אחר · סוניפיקציה</strong><span>גרפים לחטיבה ולתיכון. לא חלק מבנק א׳–ד׳.</span></a>
 </nav>
 <section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.</div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button></div>
 <div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag"></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button></div>
@@ -186,6 +195,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <p>תרגול קצר בלחיצה מבנק כיתה א׳ (מנייה, חיבור, חיסור, ישר מספרים). השמירה לפי <b>קוד כיתה + שם</b> בסרגל למעלה, במכשיר הזה בלבד. זה מפגש תרגול, לא אבחון ואין כאן טענת יעילות.</p>
   <p class="note">בחרו תלמיד/ה קיים/ת או כתבו שם חדש בסרגל ולחצו «שמירה במכשיר».</p>
   <div class="class-kids" id="classKids"></div>
+  <label class="metro-acc" style="display:flex;gap:8px;align-items:center;margin:0 0 12px;font-weight:700"><input type="checkbox" id="classClockShow" style="width:auto"> להציג לילד/ה שעון עוצר (בלי סימון: אין שעון על המסך, והמפגש נגמר אחרי 8 דקות)</label>
   <button type="button" id="classStart" class="primary">התחלת מפגש 8 דקות</button>
 </div>
 <div class="card hidden" id="classPlay">
@@ -279,6 +289,21 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   </div>
   <div id="worksheetSheet" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="lessonCard">
+  <span class="tag">מערכי שיעור · לפי תוכנית הלימודים</span>
+  <h2>מערך שיעור לנושא</h2>
+  <p>בוחרים כיתה ונושא מהתוכנית ורואים מטרות ומהלך שיעור. הבנק עוד קטן: לרוב הנושאים אין עדיין מערך.</p>
+  <div class="sheet-actions no-print">
+    <label>כיתה
+      <select id="lessonGrade" aria-label="כיתה למערך שיעור"></select>
+    </label>
+    <label>נושא
+      <select id="lessonTopic" aria-label="נושא מהתוכנית"></select>
+    </label>
+    <button type="button" id="lessonPrint">הדפסת המערך</button>
+  </div>
+  <div id="lessonPlans" aria-live="polite"></div>
+</div>
 <div class="card" id="classBoardCard">
   <span class="tag">כל הילדים בטאבלט הזה</span>
   <h2>לוח כיתה</h2>
@@ -345,9 +370,31 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <button type="button" id="ramaPrint">הדפסת כרטיס ראמ״ה</button>
   </div>
   <div id="ramaSheet" class="hidden" aria-live="polite"></div>
+  <div id="prePost">
+    <h3>בדיקת לפני/אחרי ביחידה</h3>
+    <p>שתי בדיקות של 8 שאלות באותה רמת קושי, עם מספרים שונים — טופס פתיחה וטופס סיום. הבדיקה שקטה בכוונה: רוצים לראות מה הילד/ה פותר/ת בלי רמז מהצליל, ולכן גם אין משוב בזמן הבדיקה. <b>זו ספירה מקומית בטאבלט הזה ולא ניסוי מבוקר</b> — אין קבוצת ביקורת ואין הקצאה אקראית, ולכן השינוי במספרים אינו מראה שהתרגול הוא שגרם לו.</p>
+    <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:12px 0">
+      <label>יחידה<select id="ppUnit" aria-label="יחידת מדידה"></select></label>
+      <button type="button" id="ppStartPre" class="secondary">בדיקת פתיחה</button>
+      <button type="button" id="ppStartPost" class="secondary">בדיקת סיום</button>
+      <button type="button" id="ppRefresh" class="secondary">רענון</button>
+      <span id="ppMsg" class="who-status"></span>
+    </div>
+    <div id="ppRun" class="hidden no-print">
+      <p class="topline"><span id="ppProgress"></span><span id="ppWhich"></span></p>
+      <p class="prompt" id="ppPrompt"></p>
+      <div id="ppBar"></div>
+      <div class="choices" id="ppChoices" role="group" aria-label="אפשרויות תשובה"></div>
+      <p class="note">אין משוב בזמן הבדיקה — הדוח מופיע בסוף.</p>
+      <p class="sr-only" id="ppLive" aria-live="polite"></p>
+      <button type="button" id="ppStop" class="secondary">עצירת הבדיקה</button>
+    </div>
+    <div id="ppReport" aria-live="polite"></div>
+  </div>
 </div></section>
-<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div><div class="tool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><h3 style="margin:0;">ישר מספרים מנגן — שברים ותדרים</h3><span class="tag">מחוון רציף ופעמוני שבר</span></div><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"></div><div class="nl-keys" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"><button type="button" class="secondary" data-pct="0">0 (בסיס)</button><button type="button" class="secondary" data-pct="25">1/4 (רבע)</button><button type="button" class="secondary" data-pct="50">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div><div class="tool rhythm-studio" id="rhythmGameTool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><h3 style="margin:0;color:var(--pink);font-size:1.35rem;">🥁 סטודיו מקצב ומוזיקה — מנגנים עם הלהקה</h3><span class="tag" id="rhythmStageTag">שלב 1: פעימת מקצב (4/4)</span></div><div class="band-stage" id="bandStage" role="region" aria-label="שלבי הלהקה"><div class="band-card unlocked" id="bandDrums" data-level="1"><span class="band-icon">🥁</span><span class="band-name">תופים</span><span class="band-level">שלב 1 · פעימה</span></div><div class="band-card" id="bandBass" data-level="2"><span class="band-icon">🎸</span><span class="band-name">קו בס</span><span class="band-level">שלב 2 · רצף 3+</span></div><div class="band-card" id="bandChords" data-level="3"><span class="band-icon">🎹</span><span class="band-name">אקורדים</span><span class="band-level">שלב 3 · רצף 6+</span></div><div class="band-card" id="bandMelody" data-level="4"><span class="band-icon">🎷</span><span class="band-name">סולו</span><span class="band-level">שלב 4 · רצף 10+</span></div></div><div class="rhythm-highway-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.95rem;color:#ded6f0;"><span id="rhythmPatternName" style="color:#fff;"><b>תבנית:</b> ארבעה רבעים (4/4)</span><span id="rhythmBpmDisplay" style="color:#ffd85d;font-weight:bold;"><b>טמפו:</b> 80 BPM</span></div><div class="rhythm-highway" id="rhythmFractionsVisual" aria-label="חלוקת התיבה לשברים"></div><div class="rhythm-track" style="position:relative;height:12px;background:rgba(255,255,255,0.15);border-radius:99px;overflow:hidden;margin-top:10px;"><div id="rhythmCursor" class="rhythm-cursor-line"></div></div><div id="rhythmSpark" class="rhythm-spark" aria-live="assertive">בול! 💥</div></div><div class="drum-pads-grid" role="group" aria-label="פדים לתופים"><button type="button" id="drumPadBtn" class="drum-pad pad-kick" data-sound="kick" title="בס (Kick) — רווח או מקש 1"><span class="pad-icon">🥁</span><span class="pad-label">בס (Kick)</span><span class="pad-key">רווח / 1</span></button><button type="button" id="drumSnareBtn" class="drum-pad pad-snare" data-sound="snare" title="סנר (Snare) — מקש 2"><span class="pad-icon">🪘</span><span class="pad-label">סנר (Snare)</span><span class="pad-key">מקש 2</span></button><button type="button" id="drumHihatBtn" class="drum-pad pad-hihat" data-sound="hihat" title="היי-האט — מקש 3"><span class="pad-icon">🪙</span><span class="pad-label">היי-האט</span><span class="pad-key">מקש 3</span></button><button type="button" id="drumClapBtn" class="drum-pad pad-clap" data-sound="clap" title="מחיאת כף — מקש 4"><span class="pad-icon">👏</span><span class="pad-label">כף (Clap)</span><span class="pad-key">מקש 4</span></button></div><div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap;"><button type="button" id="rhythmStartBtn" class="primary" style="width:auto;min-height:48px;padding:12px 24px;">▶ התחלת נגינה</button><button type="button" id="rhythmPatternNextBtn" class="secondary" style="width:auto;min-height:48px;padding:12px 20px;">🔄 החלף מקצב</button></div><div style="display:flex;justify-content:space-around;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin:12px 0;"><div><span style="font-size:0.8rem;color:var(--muted);display:block;">רצף מקצב</span><b id="rhythmStreakDisplay" style="font-size:1.45rem;color:var(--purple);">0</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">שכבה מוזיקלית</span><b id="rhythmLayerDisplay" style="font-size:1.45rem;color:var(--good);">רק תופים</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">דיוק פעימה</span><b id="rhythmAccuracyDisplay" style="font-size:1.45rem;color:var(--ink);">-</b></div></div><div class="xylo-shelf" id="xyloStudio"><div style="display:flex;justify-content:space-between;align-items:center;color:#ded6f0;margin-bottom:10px;font-size:0.88rem;"><span style="color:#fff;"><b>🎹 קסילופון צבעוני:</b> הקישו על הקלידים או במקלדת A–K / 1–8</span><span id="xyloLastNote" style="color:#ffd85d;font-weight:bold;">נגנו מנגינה עם המקצב!</span></div><div class="xylo-keys" id="xyloKeys" role="group" aria-label="קלידי קסילופון 8 צלילים"></div></div></div></div></div></section></main>
+<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">סטודיו מקצב וצליל · העשרה</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div><div class="tool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><h3 style="margin:0;">ישר מספרים מנגן — שברים ותדרים</h3><span class="tag">מחוון רציף ופעמוני שבר</span></div><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"></div><div class="nl-keys" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"><button type="button" class="secondary" data-pct="0">0 (בסיס)</button><button type="button" class="secondary" data-pct="25">1/4 (רבע)</button><button type="button" class="secondary" data-pct="50">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div><div class="tool rhythm-studio" id="rhythmGameTool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><h3 style="margin:0;color:var(--pink);font-size:1.35rem;">🥁 סטודיו מקצב ומוזיקה — מנגנים עם הלהקה</h3><span class="tag" id="rhythmStageTag">שלב 1: פעימת מקצב (4/4)</span></div><div class="band-stage" id="bandStage" role="region" aria-label="שלבי הלהקה"><div class="band-card unlocked" id="bandDrums" data-level="1"><span class="band-icon">🥁</span><span class="band-name">תופים</span><span class="band-level">שלב 1 · פעימה</span></div><div class="band-card" id="bandBass" data-level="2"><span class="band-icon">🎸</span><span class="band-name">קו בס</span><span class="band-level">שלב 2 · רצף 3+</span></div><div class="band-card" id="bandChords" data-level="3"><span class="band-icon">🎹</span><span class="band-name">אקורדים</span><span class="band-level">שלב 3 · רצף 6+</span></div><div class="band-card" id="bandMelody" data-level="4"><span class="band-icon">🎷</span><span class="band-name">סולו</span><span class="band-level">שלב 4 · רצף 10+</span></div></div><div class="rhythm-highway-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.95rem;color:#ded6f0;"><span id="rhythmPatternName" style="color:#fff;"><b>תבנית:</b> ארבעה רבעים (4/4)</span><span id="rhythmBpmDisplay" style="color:#ffd85d;font-weight:bold;"><b>טמפו:</b> 80 BPM</span></div><div class="rhythm-highway" id="rhythmFractionsVisual" aria-label="חלוקת התיבה לשברים"></div><div class="rhythm-track" style="position:relative;height:12px;background:rgba(255,255,255,0.15);border-radius:99px;overflow:hidden;margin-top:10px;"><div id="rhythmCursor" class="rhythm-cursor-line"></div></div><div id="rhythmSpark" class="rhythm-spark" aria-live="assertive">בול! 💥</div></div><div class="drum-pads-grid" role="group" aria-label="פדים לתופים"><button type="button" id="drumPadBtn" class="drum-pad pad-kick" data-sound="kick" title="בס (Kick) — רווח או מקש 1"><span class="pad-icon">🥁</span><span class="pad-label">בס (Kick)</span><span class="pad-key">רווח / 1</span></button><button type="button" id="drumSnareBtn" class="drum-pad pad-snare" data-sound="snare" title="סנר (Snare) — מקש 2"><span class="pad-icon">🪘</span><span class="pad-label">סנר (Snare)</span><span class="pad-key">מקש 2</span></button><button type="button" id="drumHihatBtn" class="drum-pad pad-hihat" data-sound="hihat" title="היי-האט — מקש 3"><span class="pad-icon">🪙</span><span class="pad-label">היי-האט</span><span class="pad-key">מקש 3</span></button><button type="button" id="drumClapBtn" class="drum-pad pad-clap" data-sound="clap" title="מחיאת כף — מקש 4"><span class="pad-icon">👏</span><span class="pad-label">כף (Clap)</span><span class="pad-key">מקש 4</span></button></div><div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap;"><button type="button" id="rhythmStartBtn" class="primary" style="width:auto;min-height:48px;padding:12px 24px;">▶ התחלת נגינה</button><button type="button" id="rhythmPatternNextBtn" class="secondary" style="width:auto;min-height:48px;padding:12px 20px;">🔄 החלף מקצב</button></div><div style="display:flex;justify-content:space-around;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin:12px 0;"><div><span style="font-size:0.8rem;color:var(--muted);display:block;">רצף מקצב</span><b id="rhythmStreakDisplay" style="font-size:1.45rem;color:var(--purple);">0</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">שכבה מוזיקלית</span><b id="rhythmLayerDisplay" style="font-size:1.45rem;color:var(--good);">רק תופים</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">דיוק פעימה</span><b id="rhythmAccuracyDisplay" style="font-size:1.45rem;color:var(--ink);">-</b></div></div><div class="xylo-shelf" id="xyloStudio"><div style="display:flex;justify-content:space-between;align-items:center;color:#ded6f0;margin-bottom:10px;font-size:0.88rem;"><span style="color:#fff;"><b>🎹 קסילופון צבעוני:</b> הקישו על הקלידים או במקלדת A–K / 1–8</span><span id="xyloLastNote" style="color:#ffd85d;font-weight:bold;">נגנו מנגינה עם המקצב!</span></div><div class="xylo-keys" id="xyloKeys" role="group" aria-label="קלידי קסילופון 8 צלילים"></div></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
+<script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/remediation.js"></script>
 <script src="src/lib/rhythmGame.js"></script>
 <script src="src/lib/interactiveLessons.js"></script>
@@ -361,10 +408,13 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/mastery.js"></script>
 <script src="src/lib/numberLine.js"></script>
 <script src="src/lib/bar44.js"></script>
+<script src="src/lib/prepost.js"></script>
 <script src="src/lib/vertical.js"></script>
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
 <script src="src/lib/geometryShapes.js"></script>
+<script src="src/lib/curriculum.js"></script>
+<script src="src/lib/pedagogy.js"></script>
 <script src="src/lib/worksheets.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
@@ -378,6 +428,7 @@ const exercises=[
 [25,3,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 12/8?',12,'המספר העליון מציין שמיניות'],[26,3,'יחסים','מרווחים','מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?','75:64','בכוונון טבעי 5-limit היחס הוא 75:64'],[27,3,'פונקציות','מלודיה','תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה: 4−2=2; כפול 3'],[28,3,'חזקות','טמפו','קצב מתחיל ב־20 BPM ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?',540,'20 × 3³'],[29,3,'שברים','קצב','כמה רבעים שווה שלם עם שתי נקודות הארכה?',7,'4 + 2 + 1 = 7'],[30,3,'יחסים','מרווחים','מה יחס התדרים בטריטון בכיוון עולה?','45:32','בכוונון טבעי היחס הוא 45:32'],[31,3,'פונקציות','מלודיה','תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?',35,'5 × 7'],[32,3,'חזקות','טמפו','קצב מתחיל ב־10 BPM ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?',80,'10 × 2³'],[33,3,'שברים','קצב','כמה שמיניות שווה רבע עם שתי נקודות הארכה?',3.5,'2 + 1 + 0.5 = 3.5'],[34,3,'יחסים','מרווחים','מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?','64:45','בכוונון טבעי היחס הוא 64:45'],[35,3,'פונקציות','מלודיה','תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?',-12,'בכל חזרה: ‎-6+3=-3; כפול 4']
 ].map(([id,level,mathTopic,musicConcept,prompt,answer,hint])=>({id,level,mathTopic,musicConcept,prompt,answer,hint}));
 let chosenLevel=1,history=[],current=null,answered=false,seed=Date.now()&0x7fffffff;
+document.addEventListener('pointerdown',function(){if(typeof unlockAudio==='function')unlockAudio()},{once:true,capture:true});
 const $=id=>document.getElementById(id); const show=(id,on)=>$(id).classList.toggle('hidden',!on);
 function rng(n){let s=n|0;return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
 function nextExercise(){const pool=eligibleExercises(exercises,history,current&&current.id,chosenLevel);const random=rng(seed+history.length*97);return pool[Math.floor(random()*pool.length)]}
@@ -389,8 +440,7 @@ document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dat
 $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter')check()};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true)};
 function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
-// yToFreq / formatRhythmPattern / playFreq / playRhythmClicks מגיעים מ-src/lib/sonify.js.
-function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);$('freq').textContent=`${hz.toFixed(2)} Hz`;if(play)playFreq(hz)}$('y').oninput=()=>renderFreq(true);renderFreq(false);
+// playRhythmClicks מגיע מ-src/lib/sonify.js (פעימות אחרי מיומנות). מעבדת התדר הוצאה מהדף (CUT, 28.9.2026).
 function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
 function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`;if(play)playRhythmClicks(x.pattern,x.bpm)}$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
 function updateSingingLine(val,play){if(typeof soundForTick!=='function')return;const v=Math.max(0,Math.min(100,Math.round(Number(val)||0)));if($('singingLine'))$('singingLine').value=v;const s=soundForTick(v,{min:0,max:100});const lbl=s.pointName?`${v}% (${s.pointName})`:`${v}%`;if($('singingLabel'))$('singingLabel').textContent=lbl;const bell=s.isKeyPoint?` 🔔 פעמון שבר: ${s.pointName}`:'';if($('singingResult'))$('singingResult').innerHTML=`<b>${s.frequency} Hz</b> · ${lbl}${bell}`;if(play&&typeof playFreq==='function')playFreq(s.frequency)}
@@ -665,13 +715,26 @@ const KIND_HE={diag:'אבחון',plan:'תרגול פערים',practice:'תרגו
 let who={classCode:'',name:''},openSess=null;
 function currentWho(){return who.name?who:null}
 function applyWhoToForm(){if($('classCode'))$('classCode').value=who.classCode||'';if($('studentName'))$('studentName').value=who.name||'';if($('whoStatus'))$('whoStatus').textContent=who.name?`נשמר: ${who.name} · כיתה ${who.classCode||'ברירת מחדל'}`:'';renderRosterChips()}
-function saveWhoFromForm(){const code=normalizeCode($('classCode').value);const typed=normalizeCode($('studentName').value);if(!typed){$('whoStatus').textContent='צריך שם או קוד תלמיד/ה.';return}const name=studentLabel(typed);if(!name){$('whoStatus').textContent='השם הזה שמור למערכת ולא נרשם. בחרו שם או כינוי אחר.';return}if(openSess)endTeacherSession();who={classCode:code,name:name};upsertStudent(code,name);saveWho(who);applyWhoToForm();renderTeacherReport();renderClassBoard();renderClassKids()}
+function saveWhoFromForm(){const code=normalizeCode($('classCode').value);const typed=normalizeCode($('studentName').value);if(!typed){$('whoStatus').textContent='צריך שם או קוד תלמיד/ה.';return}const name=studentLabel(typed);if(!name){$('whoStatus').textContent='השם הזה שמור למערכת ולא נרשם. בחרו שם או כינוי אחר.';return}if(openSess)endTeacherSession();who={classCode:code,name:name};upsertStudent(code,name);saveWho(who);applyWhoToForm();renderTeacherReport();renderClassBoard();renderClassKids();ppRenderReport()}
 function ensureTeacherSession(kind){if(!who.name)return null;if(openSess&&openSess.kind===kind)return openSess;if(openSess)endTeacherSession();openSess=startSession(who.classCode,who.name,kind);return openSess}
 function logTeacherItem(item){const s=ensureTeacherSession(item.kind);if(!s)return;addItem(who.classCode,who.name,s.id,item)}
 function endTeacherSession(){if(!openSess||!who.name){openSess=null;return null}const s=openSess;openSess=null;return endSession(who.classCode,who.name,s.id)||s}
 function fmtWhen(ts){if(!ts)return '—';try{return new Date(ts).toLocaleString('he-IL')}catch(e){return String(ts)}}
 function renderTeacherReport(){const empty=$('reportEmpty'),body=$('reportBody');if(!empty||!body)return;if(!who.name){show('reportEmpty',true);show('reportBody',false);return}const student=getStudent(who.classCode,who.name);if(!student||!allItems(student).length){empty.textContent='אין עדיין רישום לתלמיד/ה הזו במכשיר הזה. אחרי תרגול או אבחון — הנתונים יופיעו כאן.';show('reportEmpty',true);show('reportBody',false);return}const r=buildReport(student);show('reportEmpty',false);show('reportBody',true);$('reportTitle').textContent=`${r.name} · כיתה ${who.classCode||'ברירת מחדל'}`;$('reportStats').innerHTML=`<div class="stat"><strong>${r.correct}/${r.total}</strong>נכונות במכשיר</div><div class="stat"><strong>${r.total?Math.round(100*r.correct/r.total):0}%</strong>דיוק מצטבר</div><div class="stat"><strong>${r.streak.current}</strong>רצף נוכחי</div><div class="stat"><strong>${r.streak.best}</strong>רצף שיא</div>`;const tb=$('reportSkills').querySelector('tbody');tb.innerHTML=r.perSkill.length?r.perSkill.map(s=>`<tr><td>${escapeHtml(s.skill)}</td><td>${s.correct}</td><td>${s.total}</td><td>${Math.round(s.accuracy*100)}%</td></tr>`).join(''):'<tr><td colspan="4">אין עדיין פירוט מיומנות.</td></tr>';const el=$('reportErrors');el.innerHTML=r.repeatingErrors.length?r.repeatingErrors.map(e=>`<li>${mathHtml(e.prompt)} — ${e.count} פעמים${e.skill?' · '+escapeHtml(e.skill):''}</li>`).join(''):'<li>אין תרגיל שנפסל פעמיים או יותר.</li>';const sb=$('reportSessions').querySelector('tbody');sb.innerHTML=r.sessions.length?r.sessions.slice().reverse().map(s=>`<tr><td>${fmtWhen(s.started)}</td><td>${escapeHtml(KIND_HE[s.kind]||s.kind)}</td><td>${s.correct}</td><td>${s.total}</td></tr>`).join(''):'<tr><td colspan="4">אין מפגשים.</td></tr>'}
 function renderClassBoard(){const empty=$('classBoardEmpty'),table=$('classBoard');if(!empty||!table)return;const rows=buildClassOverview(who.classCode||'');if(!rows.length){show('classBoardEmpty',true);table.classList.add('hidden');return}show('classBoardEmpty',false);table.classList.remove('hidden');table.querySelector('tbody').innerHTML=rows.map(r=>`<tr><td><button type="button" class="secondary" data-kid="${escapeHtml(r.name)}">${escapeHtml(r.name)}</button></td><td>${r.correct}</td><td>${r.total}</td><td>${r.total?Math.round(100*r.accuracy):0}%</td><td>${r.repeating}</td><td>${r.lastAt?fmtWhen(r.lastAt)+' · '+escapeHtml(KIND_HE[r.lastKind]||r.lastKind):'—'}</td></tr>`).join('');table.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>switchToKid(b.dataset.kid))}
+// ---- בדיקת לפני/אחרי ליחידה (#110) ----
+// הבדיקה נרשמת כמפגש רגיל ב־teacherStore עם kind "pre:<יחידה>" / "post:<יחידה>",
+// ולכן אין כאן אחסון חדש. היא שקטה ובלי משוב בכוונה: §10 R4 שלב 7 מבקש את אותה
+// מתמטיקה בלי צליל, ומשוב בין הפריטים היה הופך את בדיקת הסיום לקלה יותר.
+Object.assign(KIND_HE,kindLabels());
+let ppState=null;
+function ppUnitId(){const sel=$('ppUnit');const id=sel&&sel.value?sel.value:unitIds()[0];return unitById(id)?id:unitIds()[0]}
+function ppFillUnits(){const sel=$('ppUnit');if(!sel)return;sel.innerHTML=unitIds().map(id=>`<option value="${escapeHtml(id)}">${escapeHtml(unitById(id).title)} · כיתה ${escapeHtml(unitById(id).grade)}׳</option>`).join('')}
+function ppHalt(msg){if(ppState){endSession(who.classCode,who.name,ppState.sess.id);ppState=null}show('ppRun',false);if($('ppMsg'))$('ppMsg').textContent=msg||''}
+function ppStart(phase){const box=$('ppMsg');if(!who.name){if(box)box.textContent='בחרו קוד כיתה ושם תלמיד/ה בסרגל למעלה, ואז «שמירה במכשיר».';return}const unitId=ppUnitId();const items=itemsForPhase(unitId,phase);if(!items.length)return;ppHalt('');if(openSess)endTeacherSession();const sess=startSession(who.classCode,who.name,checkKind(unitId,phase));if(!sess){if(box)box.textContent='לא הצלחנו לפתוח רישום בטאבלט הזה.';return}ppState={unitId:unitId,phase:phase,items:items,i:0,sess:sess};if(box)box.textContent='';show('ppRun',true);ppRender()}
+function ppRender(){const s=ppState;if(!s||!$('ppPrompt')||!$('ppChoices'))return;const it=s.items[s.i];$('ppProgress').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}`;$('ppWhich').textContent=`${phaseLabel(s.phase)} · ${unitById(s.unitId).title}`;setMath($('ppPrompt'),it.prompt);$('ppBar').innerHTML=renderCheckBarHtml(it.eighths);$('ppChoices').innerHTML=it.choices.map((c,n)=>`<button type="button" class="choice" data-c="${n}"><bdi dir="ltr">${escapeHtml(String(c))}</bdi></button>`).join('');$('ppChoices').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ppPick(it.choices[Number(b.dataset.c)]));$('ppLive').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}: ${it.prompt}`}
+function ppPick(given){const s=ppState;if(!s)return;const it=s.items[s.i];addItem(who.classCode,who.name,s.sess.id,{skill:it.skill,prompt:it.prompt,answer:it.answer,given:given,correct:checkItemCorrect(it,given)});s.i+=1;if(s.i<s.items.length){ppRender();return}ppHalt('הבדיקה נרשמה בטאבלט הזה.');ppRenderReport();renderTeacherReport();renderClassBoard()}
+function ppRenderReport(){const box=$('ppReport');if(!box)return;box.innerHTML=renderPrePostHtml(classPrePost(loadRoster(who.classCode||''),ppUnitId()))}
 function renderParentLetter(){const box=$('parentLetter');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const letter=buildParentNote(student,{classCode:who.classCode,observation:$('teacherNote')?$('teacherNote').value:''});box.innerHTML=renderParentNoteHtml(letter);box.classList.remove('hidden')}
 function saveTeacherNote(){if(!who.name){$('noteMsg').textContent='בחרו תלמיד/ה קודם.';return}const text=$('teacherNote')?$('teacherNote').value:'';const note=addNote(who.classCode,who.name,text);$('noteMsg').textContent=note?'ההערה נשמרה במכשיר.':'צריך טקסט קצר.';if(note)$('teacherNote').value='';renderParentLetter()}
 who=loadWho();applyWhoToForm();
@@ -679,8 +742,19 @@ if($('whoSave'))$('whoSave').onclick=saveWhoFromForm;
 if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
 function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
 if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
+ppFillUnits();ppRenderReport();
+if($('ppUnit'))$('ppUnit').onchange=()=>{ppHalt('');ppRenderReport()};
+if($('ppStartPre'))$('ppStartPre').onclick=()=>ppStart('pre');
+if($('ppStartPost'))$('ppStartPost').onclick=()=>ppStart('post');
+if($('ppRefresh'))$('ppRefresh').onclick=ppRenderReport;
+if($('ppStop'))$('ppStop').onclick=()=>ppHalt('הבדיקה הופסקה. התשובות שנרשמו עד כאן נשמרו.');
+// ---- מערכי שיעור (pedagogy.js) לפי כיתה ונושא מהתוכנית (curriculum.js) ----
+function paintLessonTopics(){const g=$('lessonGrade'),t=$('lessonTopic');if(!g||!t||typeof plansFor!=='function')return;const rows=typeof rowsForGrade==='function'?rowsForGrade(g.value):[];const has=new Set(plansFor(g.value,'').map(p=>p.curriculumTopic));t.innerHTML='<option value="">כל הנושאים שיש להם מערך</option>'+rows.map(r=>'<option value="'+escapeHtml(r.topic)+'">'+escapeHtml(r.topic)+(has.has(r.topic)?' · יש מערך':'')+'</option>').join('');renderLessonPlans()}
+function renderLessonPlans(){const g=$('lessonGrade'),t=$('lessonTopic'),box=$('lessonPlans');if(!g||!t||!box||typeof plansFor!=='function')return;box.innerHTML=renderLessonPlansHtml(plansFor(g.value,t.value))}
+if($('lessonGrade')){$('lessonGrade').innerHTML=GRADES.map(g=>'<option value="'+g+'"'+(g===selectedGrade?' selected':'')+'>כיתה '+g+'׳</option>').join('');$('lessonGrade').onchange=paintLessonTopics;$('lessonTopic').onchange=renderLessonPlans;paintLessonTopics()}
+if($('lessonPrint'))$('lessonPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert');document.body.classList.add('print-lesson');renderLessonPlans();window.print()};
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama','print-lesson')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));$('rosterMsg').textContent=summarizeImport(res);if(!res.ok)return;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
@@ -700,7 +774,8 @@ const preferLessMotion=()=>typeof matchMedia==='function'&&matchMedia('(prefers-
 let classTimerId=null,classEndsAt=0,classCurrent=null,classAnswered=false,classSeed=1;
 document.querySelectorAll('.tabs [role="tab"]').forEach(function(b){b.addEventListener('click',function(){document.body.classList.toggle('class-live',b.dataset.tab==='classMode'&&classEndsAt>Date.now())})});
 function renderClassKids(){const box=$('classKids');if(!box)return;const names=who.classCode||who.name?listStudents(who.classCode):[];box.innerHTML=names.length?names.map(n=>`<button type="button" data-kid="${escapeHtml(n)}" aria-pressed="${n===who.name?'true':'false'}">${escapeHtml(n)}</button>`).join(''):'<span class="note">עדיין אין תלמידים בקוד הכיתה הזה במכשיר.</span>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>switchToKid(b.dataset.kid))}
-function classTick(){const left=Math.max(0,classEndsAt-Date.now());const m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$('classTimer').textContent=`${m}:${String(s).padStart(2,'0')}`;if(left<=0)endClassSession('time')}
+function classTick(){const left=Math.max(0,classEndsAt-Date.now());const t=classClockText(left,classClockVisible());if($('classTimer').textContent!==t)$('classTimer').textContent=t;if(left<=0)endClassSession('time')}
+if($('classClockShow')){$('classClockShow').checked=classClockVisible();$('classClockShow').onchange=()=>{setClassClockVisible($('classClockShow').checked);if(classEndsAt)classTick()}}
 function showClassCard(id){['classGate','classPlay','classDone'].forEach(x=>show(x,x===id))}
 function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const q=CLASS_BANK[Math.floor(random()*CLASS_BANK.length)];classCurrent=q;if($('classItemTag'))$('classItemTag').textContent=itemTagText(q);setMath($('classPrompt'),q.prompt);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.onclick=()=>pickClass(v,b);box.appendChild(b)});maybeHear(q);maybeSpeak(q.prompt)}
 function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);noteMetro(correct);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
@@ -795,6 +870,8 @@ if($('metroDown'))$('metroDown').onclick=function(){ setMetroBpm(metroBpmNow()-4
 if($('metroUp'))$('metroUp').onclick=function(){ setMetroBpm(metroBpmNow()+4); };
 if($('metroBpm'))$('metroBpm').onchange=function(){ this.value=clampBpm(this.value); if(metroOn) startMetro(); };
 document.addEventListener('visibilitychange',function(){ if(document.hidden) stopMetro(); });
+// One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
+if(typeof installAudioUnlock==='function') installAudioUnlock(document);
 paintMetro();
 renderRosterChips();
 renderClassBoard();
@@ -951,6 +1028,7 @@ let divExplorerGroups = 3;
 let euclideanPulses = 3;
 let euclideanSteps = 8;
 let evenOddCount = 6;
+let stepPulseTimer = null;
 let polyrhythmCycleA = 2;
 let polyrhythmCycleB = 3;
 let fractionDivBase = '1/2';
@@ -1051,6 +1129,8 @@ function openLesson(id) {
 
 function closeLesson() {
   if (typeof stopAllAudio === 'function') stopAllAudio();
+  cancelStepSpeech();
+  clearStepPulseHint();
   activeLessonId = null;
   activeStepIndex = 0;
   $('activeLessonCard').classList.add('hidden');
@@ -1079,6 +1159,38 @@ function renderStepperPills() {
   });
 }
 
+// הקראת טקסט השלב בעברית, אם הדפדפן תומך בסינתזת דיבור
+function speakStepAloud(title, body) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance([title, body].filter(Boolean).join('. '));
+  u.lang = 'he-IL';
+  window.speechSynthesis.speak(u);
+  return true;
+}
+
+function cancelStepSpeech() {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+// רמז חזותי עדין: אחרי שהייה ללא פעולה, כפתור ההמשך/ההשמעה פועם
+function armStepPulseHint() {
+  clearStepPulseHint();
+  stepPulseTimer = setTimeout(() => {
+    const target = document.querySelector('#stepInteractiveBox button.primary') || $('stepNextBtn');
+    if (target) target.classList.add('pulse-hint');
+  }, 3500);
+}
+
+function clearStepPulseHint() {
+  if (stepPulseTimer) {
+    clearTimeout(stepPulseTimer);
+    stepPulseTimer = null;
+  }
+  document.querySelectorAll('#lessonStepContent .pulse-hint, #stepNextBtn.pulse-hint')
+    .forEach(el => el.classList.remove('pulse-hint'));
+}
+
 function renderActiveStep() {
   if (!activeLessonId) return;
   const l = getLessonById(activeLessonId);
@@ -1091,22 +1203,14 @@ function renderActiveStep() {
   $('stepBody').textContent = bodyText;
   $('stepCounterDisplay').textContent = `שלב ${activeStepIndex + 1} מתוך ${l.steps.length}`;
 
-  if ($('stepSpeakBtn')) {
-    $('stepSpeakBtn').onclick = () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(step.title + '. ' + bodyText);
-        u.lang = 'he-IL';
-        window.speechSynthesis.speak(u);
-      }
-    };
+  // הקראה בעברית של השלב הנוכחי (לקוראים מתקשים)
+  const speakBtn = $('stepSpeakBtn');
+  if (speakBtn) {
+    speakBtn.onclick = () => speakStepAloud(step.title, bodyText);
   }
-
-  if (window._pulseTimer) clearTimeout(window._pulseTimer);
-  window._pulseTimer = setTimeout(() => {
-    const actBtn = document.querySelector('#stepInteractiveBox button.primary') || $('stepNextBtn');
-    if (actBtn) actBtn.classList.add('pulse-hint');
-  }, 3500);
+  // מתחילים שלב חדש — עוצרים הקראה קודמת ורמז חזותי קודם
+  cancelStepSpeech();
+  armStepPulseHint();
 
   $('stepPrevBtn').disabled = activeStepIndex === 0;
 
@@ -1396,18 +1500,12 @@ function renderStepAction(step) {
       <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
         <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">12 פעימות מחולקות ל-3 קבוצות שוות של 4:</div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
-          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
-            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 1</div>
-            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
-          </div>
-          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
-            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 2</div>
-            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
-          </div>
-          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
-            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 3</div>
-            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
-          </div>
+          ${[1, 2, 3].map(g => `
+            <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+              <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה ${g}</div>
+              <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+            </div>
+          `).join('')}
         </div>
         <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
           12 ÷ 3 = <span style="color:var(--purple);font-size:1.4rem;">4</span> פעימות בכל קבוצה!
@@ -1416,19 +1514,7 @@ function renderStepAction(step) {
       </div>
     `;
     const btn = $('btnPlayDivConcept');
-    if (btn) btn.onclick = () => {
-      let t = 0;
-      for (let g = 0; g < 3; g++) {
-        for (let b = 0; b < 4; b++) {
-          setTimeout(() => {
-            if (b === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
-            else if (typeof playDrumSound === 'function') playDrumSound('snare');
-          }, t * 200);
-          t++;
-        }
-        t += 0.8;
-      }
-    };
+    if (btn) btn.onclick = () => playGroupedBeats(3, 4, 200);
     return;
   }
 
@@ -1439,12 +1525,12 @@ function renderStepAction(step) {
         <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin:14px 0;">
           <div style="background:#f9f7fd;border:1px solid #d1c4e9;border-radius:10px;padding:12px 18px;text-align:center;">
             <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">חילוק</div>
-            <div style="font-size:1.3rem;font-weight:bold;color:var(--purple);margin-top:4px;">12 ÷ 3 = 4</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:var(--purple);margin-top:4px;" dir="ltr">12 ÷ 3 = 4</div>
           </div>
           <div style="font-size:1.6rem;font-weight:bold;color:var(--purple);">⇄</div>
           <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px 18px;text-align:center;">
             <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">כפל</div>
-            <div style="font-size:1.3rem;font-weight:bold;color:#f57f17;margin-top:4px;">3 × 4 = 12</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:#f57f17;margin-top:4px;" dir="ltr">3 × 4 = 12</div>
           </div>
         </div>
         <button type="button" class="primary" id="btnPlayDivInverse" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו כפל שמחזיר את המקצב השלם 🎵'}</button>
@@ -1454,11 +1540,14 @@ function renderStepAction(step) {
     if (btn) btn.onclick = () => {
       for (let i = 0; i < 12; i++) {
         setTimeout(() => {
-          if (i % 4 === 0 && typeof playHarmonicReward === 'function' && i === 11) playHarmonicReward();
-          else if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
           else if (typeof playXylophoneNote === 'function') playXylophoneNote(i % 5);
         }, i * 180);
       }
+      // המקצב השלם חוזר — צליל סיום הרמוני
+      setTimeout(() => {
+        if (typeof playHarmonicReward === 'function') playHarmonicReward();
+      }, 12 * 180);
     };
     return;
   }
@@ -1788,6 +1877,20 @@ function renderStepAction(step) {
   }
 }
 
+// השמעת קבוצות שוות של פעימות: בס בראש כל קבוצה, סנר לשאר, והפסקה בין קבוצות
+function playGroupedBeats(groups, sizePerGroup, stepMs) {
+  if (typeof playDrumSound !== 'function' || sizePerGroup < 1) return;
+  let slot = 0;
+  for (let g = 0; g < groups; g++) {
+    for (let b = 0; b < sizePerGroup; b++) {
+      const sound = b === 0 ? 'kick' : 'snare';
+      setTimeout(() => playDrumSound(sound), slot * stepMs);
+      slot++;
+    }
+    slot += 0.8; // נשימה קצרה בין קבוצות כדי לשמוע את החלוקה
+  }
+}
+
 // ---- התנסויות אינטראקטיביות (Manipulatives) ----
 
 function renderFractionBuilderUI(box) {
@@ -2009,14 +2112,14 @@ function renderDivExplorerUI(box) {
       <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">כמות פעימות:</label>
-          <div style="display:inline-flex;gap:4px;" id="divTotBtns">
-            ${[8, 12, 16].map(t => `<button type="button" class="secondary ${t === divExplorerTotal ? 'primary' : ''}" data-t="${t}" style="width:42px;min-height:36px;padding:0;">${t}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="divTotBtns" role="group" aria-label="כמות פעימות">
+            ${[8, 12, 16].map(t => `<button type="button" class="${t === divExplorerTotal ? 'primary' : 'secondary'}" data-t="${t}" aria-pressed="${t === divExplorerTotal}" style="width:42px;min-height:36px;padding:0;">${t}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">קבוצות שוות:</label>
-          <div style="display:inline-flex;gap:4px;" id="divGrpBtns">
-            ${[2, 3, 4].map(g => `<button type="button" class="secondary ${g === divExplorerGroups ? 'primary' : ''}" data-g="${g}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="divGrpBtns" role="group" aria-label="מספר קבוצות שוות">
+            ${[2, 3, 4].map(g => `<button type="button" class="${g === divExplorerGroups ? 'primary' : 'secondary'}" data-g="${g}" aria-pressed="${g === divExplorerGroups}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2028,9 +2131,17 @@ function renderDivExplorerUI(box) {
             <div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">${sizePerGroup} פעימות</div>
           </div>
         `).join('')}
+        ${remainder > 0 ? `
+          <div style="background:#fff3e0;border:2px dashed #fb8c00;border-radius:10px;padding:10px 14px;text-align:center;">
+            <div style="font-size:0.85rem;font-weight:bold;color:#e65100;margin-bottom:4px;">שארית</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;color:#d84315;">${'● '.repeat(remainder).trim()}</div>
+            <div style="font-size:0.85rem;color:#e65100;margin-top:2px;">${remainder} ללא קבוצה</div>
+          </div>
+        ` : ''}
       </div>
-      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
-        ${divExplorerTotal} ÷ ${divExplorerGroups} = <span style="color:var(--purple);">${sizePerGroup}</span> בכל קבוצה ${remainder > 0 ? `(נשאר ${remainder})` : 'במדויק!'}
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;" role="status" aria-live="polite">
+        <span dir="ltr">${divExplorerTotal} ÷ ${divExplorerGroups} = ${sizePerGroup}</span>
+        בכל קבוצה ${remainder > 0 ? `(נשארות ${remainder} פעימות בודדות)` : '— במדויק, בלי שארית!'}
       </div>
       <button type="button" class="primary" id="btnPlayDivExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת חלוקת המקצב</button>
     </div>
@@ -2043,21 +2154,7 @@ function renderDivExplorerUI(box) {
     b.onclick = () => { divExplorerGroups = +b.dataset.g; renderDivExplorerUI(box); };
   });
   const playBtn = $('btnPlayDivExp');
-  if (playBtn) {
-    playBtn.onclick = () => {
-      let t = 0;
-      for (let g = 0; g < divExplorerGroups; g++) {
-        for (let s = 0; s < sizePerGroup; s++) {
-          setTimeout(() => {
-            if (s === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
-            else if (typeof playDrumSound === 'function') playDrumSound('snare');
-          }, t * 190);
-          t++;
-        }
-        t += 0.7;
-      }
-    };
-  }
+  if (playBtn) playBtn.onclick = () => playGroupedBeats(divExplorerGroups, sizePerGroup, 190);
 }
 
 function renderEuclideanWheelUI(box) {

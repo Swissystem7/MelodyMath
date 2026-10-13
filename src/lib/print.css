@@ -57,6 +57,11 @@
 .barchart-val{grid-row:1;font-weight:800;font-size:.9rem}
 .barchart-bar{grid-row:2;align-self:end;width:100%;min-height:2px;background:#6946e8;border-radius:8px 8px 0 0;border-bottom:3px solid #21183b}
 .barchart-label{grid-row:3;font-size:.85rem;margin-top:4px}
+#lessonCard label{max-width:100%}
+#lessonCard select{max-width:100%;width:100%}
+.lesson-plan{border-top:1px solid #ded6f0;padding-top:10px;margin-top:12px}
+.lesson-plan h3{margin:0 0 6px}
+.lesson-plan h4{margin:10px 0 4px;font-size:.95rem;color:#534a6b}
 .shapes{display:flex;flex-wrap:wrap;gap:16px;margin:14px 0}
 .shape{display:flex;flex-direction:column;align-items:center;gap:2px}
 .shape-glyph{font-size:2.6rem;line-height:1;color:#6946e8}

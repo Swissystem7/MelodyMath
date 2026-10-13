@@ -26,6 +26,12 @@ test('the HTML marks ticks and announces the selected number', () => {
   assert.doesNotMatch(html, /<script/);
 });
 
+test('playJumpSound function should be defined and return undefined for invalid inputs', () => {
+  assert.equal(typeof line.playJumpSound, 'function');
+  assert.equal(line.playJumpSound(null, null), undefined);
+  assert.equal(line.playJumpSound(5, null), undefined);
+});
+
 test('soundForTick calculates frequencies and identifies key fraction points', () => {
   const s0 = line.soundForTick(0, { min: 0, max: 100 });
   assert.equal(s0.percent, 0);
