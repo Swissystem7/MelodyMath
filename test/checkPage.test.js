@@ -83,7 +83,7 @@ function runPage() {
     clearTimeout: (id) => { timers.delete(id); },
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/gi)).forEach((m) => {
+  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script\s*>/gi)).forEach((m) => {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
     else vm.runInContext(m[2], ctx, { filename: 'check.html inline script' });
   });
