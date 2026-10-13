@@ -56,11 +56,94 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 @media print{
   body.print-cert #certCard,body.print-cert #certSheet{display:block!important}
   body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard{display:none!important}
+  body.print-rama #ramaCard,body.print-rama #ramaSheet{display:block!important}
+  body.print-rama #trialKit,body.print-rama #reportCard,body.print-rama #classBoardCard,body.print-rama #parentCard,body.print-rama #worksheetCard,body.print-rama #certCard{display:none!important}
   .first-run,#firstRun{display:none!important}
 }
+.smartboard-mode{font-size:1.22rem}
+.smartboard-mode .wrap{max-width:1240px}
+.smartboard-mode h1{font-size:clamp(2.8rem,8vw,5.2rem)}
+.smartboard-mode .prompt{font-size:clamp(2rem,5vw,3.2rem);line-height:1.35}
+.smartboard-mode .choice{min-height:90px;font-size:2.2rem;border-width:3px}
+.smartboard-mode button,.smartboard-mode input,.smartboard-mode select{min-height:56px;font-size:1.2rem}
+.smartboard-mode .card{box-shadow:0 25px 60px #4638702c;border-width:2px}
+.quick-tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.quick-tools button{width:auto;min-height:44px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(33,24,59,.72);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.modal-card{background:#fff;border-radius:24px;padding:26px;max-width:380px;width:100%;position:relative;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.modal-close{position:absolute;top:12px;left:12px;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px;min-height:auto}
+.qr-box{display:flex;justify-content:center;margin:14px 0;padding:12px;background:#fdfcff;border-radius:16px;border:1px solid var(--line)}
+.qr-img{max-width:220px;height:auto}
+.share-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.wa-btn{display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:800;padding:13px 18px;border-radius:12px;color:#0b6b43;background:#e5f6ef;border:1px solid #167957}
+.rama-card{border:2px solid var(--purple);background:#fff;border-radius:20px;padding:24px;margin:16px 0}
+.rama-item{background:#f8f6fc;border-radius:14px;padding:14px 16px;margin:10px 0;border-right:4px solid var(--purple)}
+.rhythm-studio{background:linear-gradient(180deg,#fff7fc 0%,#faf8ff 100%);border:2px solid #f6c8e3;border-radius:24px;padding:22px;margin:16px 0}
+.band-stage{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.band-card{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 6px;text-align:center;transition:all .2s ease;opacity:.45}
+.band-card.unlocked{opacity:1;border-color:var(--purple);box-shadow:0 6px 18px rgba(105,70,232,.15)}
+.band-card.pulse{transform:scale(1.06);border-color:var(--pink);box-shadow:0 8px 24px rgba(242,82,154,.35)}
+.band-icon{font-size:1.8rem;display:block;margin-bottom:3px}
+.band-name{font-weight:800;font-size:.88rem;color:var(--ink);display:block}
+.band-level{font-size:.72rem;color:var(--muted);display:block}
+.rhythm-highway-wrap{position:relative;margin:16px 0;background:#201738;border-radius:18px;padding:14px;box-shadow:inset 0 4px 14px rgba(0,0,0,.4)}
+.rhythm-highway{display:flex;gap:8px;position:relative;min-height:56px}
+.rhythm-slot{flex:1;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.05rem;transition:background .15s,border-color .15s}
+.rhythm-slot.highlight{background:rgba(242,82,154,.38);border-color:var(--pink);box-shadow:0 0 16px rgba(242,82,154,.6)}
+.rhythm-slot small{font-size:.72rem;color:#ded6f0;font-weight:normal}
+.rhythm-cursor-line{position:absolute;top:0;bottom:0;width:6px;background:#fff;border-radius:4px;box-shadow:0 0 16px #f2529a,0 0 8px #fff;pointer-events:none;transition:left .04s linear;z-index:5;left:0%}
+.rhythm-spark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:1.35rem;font-weight:900;color:#ffd85d;text-shadow:0 2px 10px rgba(0,0,0,.85);pointer-events:none;transition:transform .2s ease,opacity .3s;z-index:10;opacity:0}
+.rhythm-spark.show{transform:translate(-50%,-50%) scale(1.15);opacity:1}
+.drum-pads-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.drum-pad{border:0;border-radius:18px;padding:16px 6px;font-weight:900;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:92px;transition:transform .08s ease,filter .1s;box-shadow:0 8px 18px rgba(0,0,0,.15)}
+.drum-pad:active,.drum-pad.hit-active{transform:scale(.92)!important;filter:brightness(1.22)}
+.drum-pad .pad-icon{font-size:2rem}
+.drum-pad .pad-label{font-size:.95rem}
+.drum-pad .pad-key{font-size:.72rem;background:rgba(0,0,0,.28);padding:2px 7px;border-radius:6px;margin-top:2px}
+.pad-kick{background:linear-gradient(145deg,#f2529a,#d62070);box-shadow:0 8px 20px rgba(242,82,154,.35)}
+.pad-snare{background:linear-gradient(145deg,#6946e8,#4c29cc);box-shadow:0 8px 20px rgba(105,70,232,.35)}
+.pad-hihat{background:linear-gradient(145deg,#ffb300,#e67e00);box-shadow:0 8px 20px rgba(255,179,0,.35);color:#21183b}
+.pad-clap{background:linear-gradient(145deg,#00b0ff,#0081cb);box-shadow:0 8px 20px rgba(0,176,255,.35)}
+.xylo-shelf{background:#2a1f44;border-radius:18px;padding:16px 14px;margin:16px 0;box-shadow:inset 0 4px 12px rgba(0,0,0,.35)}
+.xylo-keys{display:flex;gap:6px;align-items:flex-end;justify-content:center;height:150px}
+.xylo-key{flex:1;border:0;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 2px;color:#fff;font-weight:800;transition:transform .08s ease,filter .1s;box-shadow:0 6px 12px rgba(0,0,0,.25)}
+.xylo-key:active,.xylo-key.active-key{transform:scale(.93) translateY(3px)!important;filter:brightness(1.28)}
+.xylo-key .k-note{font-size:.92rem;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.xylo-key .k-degree{font-size:1.1rem;font-weight:900}
+.xylo-key .k-frac{font-size:.7rem;opacity:.9;background:rgba(0,0,0,.22);padding:1px 4px;border-radius:4px}
+.xylo-key .k-shortcut{font-size:.65rem;opacity:.75}
+@media(max-width:680px){.drum-pads-grid{grid-template-columns:repeat(2,1fr);gap:8px}.band-stage{grid-template-columns:repeat(2,1fr);gap:8px}.xylo-keys{height:120px;gap:4px}.xylo-key .k-shortcut{display:none}}
+.lesson-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;cursor:pointer;transition:all .2s ease;display:flex;flex-direction:column;justify-content:space-between;text-align:right}
+.lesson-card:hover,.lesson-card:focus-visible{border-color:var(--purple);box-shadow:0 8px 24px rgba(105,70,232,.15);outline:none;transform:translateY(-2px)}
+.lesson-stepper{display:flex;gap:8px}
+.step-pill{flex:1;text-align:center;padding:8px 4px;border-radius:10px;background:#f0ebff;color:var(--muted);font-weight:700;font-size:.82rem;border:1px solid transparent;transition:all .2s}
+.step-pill.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.step-pill.done{background:#e5f6ef;color:var(--good);border-color:#167957}
+.fraction-brick{display:inline-block;padding:8px 14px;border-radius:8px;font-weight:bold;margin:4px;cursor:pointer;color:#fff}
+@keyframes pulseHint{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(105,70,232,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,0)}}
+.pulse-hint{animation:pulseHint 2s infinite ease-in-out}
 </style></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
-<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+<div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
+  <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
+  <button type="button" id="qrShareBtn" class="secondary">📱 קוד QR ושיתוף מהיר</button>
+</div>
+<div id="qrModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="qrCloseBtn" aria-label="סגירה">✕</button>
+    <h3 id="qrTitle">שיתוף מהיר לכיתה ולהורים</h3>
+    <p class="note">סרקו ישירות מהטלפון או הטאבלט כדי לפתוח את התרגול ללא התקנה וללא רישום:</p>
+    <div class="qr-box">
+      <img src="icons/qr-code.svg" alt="קוד QR עבור MelodyMath" width="220" height="220" class="qr-img">
+    </div>
+    <div class="share-actions">
+      <button type="button" id="copyLinkBtn" class="primary">📋 העתקת קישור</button>
+      <a id="whatsappShareBtn" href="https://api.whatsapp.com/send?text=%D7%AA%D7%A8%D7%92%D7%95%D7%9C%20%D7%9E%D7%AA%D7%9E%D7%98%D7%99%D7%A7%D7%94%20%D7%9E%D7%95%D7%96%D7%99%D7%A7%D7%9C%D7%99%20%D7%9C%D7%9C%D7%90%20%D7%94%D7%A8%D7%A9%D7%9E%D7%94%3A%20https%3A%2F%2Fswissystem7.github.io%2FMelodyMath%2F" target="_blank" rel="noopener" class="secondary wa-btn">💬 שיתוף בוואטסאפ</a>
+    </div>
+    <span id="copyMsg" class="who-status" role="status" aria-live="polite"></span>
+  </div>
+</div>
 <div class="who-bar" id="whoBar">
   <label>קוד כיתה <input id="classCode" maxlength="24" autocomplete="off" placeholder="למשל שילוב-ג"></label>
   <label>שם או קוד תלמיד/ה <input id="studentName" maxlength="24" autocomplete="off" placeholder="למשל נועה / נ-14"></label>
@@ -87,13 +170,15 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   <p class="note" id="gradeNote">כיתה א׳: מנייה עד 100, חיבור/חיסור, ישר מספרים.</p>
 </div>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
-  <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית הלימודים</strong><span>לפי כיתה ותחום: מה מכוסה, מה חלקי, ומה אין. הפערים גלויים.</span></a>
+  <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב: שברים, שיפוע פונקציה ומענה מוזיקלי מותאם.</span></a>
+  <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
   <a class="navcard" href="landing.html"><strong>מוצר אחר · סוניפיקציה</strong><span>גרפים לחטיבה ולתיכון. לא חלק מבנק א׳–ד׳.</span></a>
 </nav>
 <section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.</div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button></div>
 <div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag"></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button></div>
 <div id="rmReport" class="card hidden"><span class="tag">דוח פערים להורה</span><h2>מה מצאנו</h2><div id="rmStats" class="session"></div><p id="rmSummary"></p><button type="button" id="rmPractice" class="primary hidden">מתחילים תרגול אישי</button><button type="button" id="rmRestart" class="secondary hidden">אבחון חדש</button></div>
 <div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag"></p><h2 id="rmPlanPrompt" class="prompt"></h2><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button></div></section>
+<section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" style="display:flex;gap:6px;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:36px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;"><h4 id="stepTitle" style="margin:0;font-size:1.15rem;color:var(--purple);"></h4><button type="button" id="stepSpeakBtn" class="secondary" style="width:auto;min-height:34px;padding:4px 12px;font-size:0.85rem;" aria-label="הקראת השלב בקול">🔊 הקשב</button></div><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
 <section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">לא תכנית א׳–ד׳ · מרווחים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחס מרווחים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
 <div id="quiz" class="card hidden"><div class="topline"><span id="counter"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button></div>
 <div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button type="button" id="again" class="primary">אימון חדש</button></div></section>
@@ -252,6 +337,16 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <h3>יומן מפגשים</h3>
     <table class="report-table" id="reportSessions"><caption class="sr-only">יומן מפגשים</caption><thead><tr><th scope="col">מתי</th><th scope="col">סוג</th><th scope="col">נכונות</th><th scope="col">מתוך</th></tr></thead><tbody></tbody></table>
   </div>
+</div>
+<div class="card" id="ramaCard">
+  <span class="tag">מיפוי ראמ״ה ומיצ״ב · מוקדי כשל</span>
+  <h2>כרטיס אבחון ראמ״ה ומענה מוזיקלי</h2>
+  <p>מיפוי 10 מוקדי הכשל הארציים מול תוכנית הלימודים, שיוך למחקרים קוגניטיביים והתאמת תוכנית מוזיקלית אישית. רישום פדגוגי מקומי לצוות ההוראה — ללא אבחון קליני.</p>
+  <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+    <button type="button" id="ramaMake" class="secondary">הצגת כרטיס האבחון</button>
+    <button type="button" id="ramaPrint">הדפסת כרטיס ראמ״ה</button>
+  </div>
+  <div id="ramaSheet" class="hidden" aria-live="polite"></div>
   <div id="prePost">
     <h3>בדיקת לפני/אחרי ביחידה</h3>
     <p>שתי בדיקות של 8 שאלות באותה רמת קושי, עם מספרים שונים — טופס פתיחה וטופס סיום. הבדיקה שקטה בכוונה: רוצים לראות מה הילד/ה פותר/ת בלי רמז מהצליל, ולכן גם אין משוב בזמן הבדיקה. <b>זו ספירה מקומית בטאבלט הזה ולא ניסוי מבוקר</b> — אין קבוצת ביקורת ואין הקצאה אקראית, ולכן השינוי במספרים אינו מראה שהתרגול הוא שגרם לו.</p>
@@ -274,8 +369,13 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
     <div id="ppReport" aria-live="polite"></div>
   </div>
 </div></section>
-<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><p>המרת מיקום אנכי לתדר בין MIDI 48 ל־84 באמצעות <code>yToFreq</code>.</p><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div></div></div></section></main>
+<section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div><div class="tool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><h3 style="margin:0;">ישר מספרים מנגן — שברים ותדרים</h3><span class="tag">מחוון רציף ופעמוני שבר</span></div><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"></div><div class="nl-keys" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"><button type="button" class="secondary" data-pct="0">0 (בסיס)</button><button type="button" class="secondary" data-pct="25">1/4 (רבע)</button><button type="button" class="secondary" data-pct="50">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div><div class="tool rhythm-studio" id="rhythmGameTool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><h3 style="margin:0;color:var(--pink);font-size:1.35rem;">🥁 סטודיו מקצב ומוזיקה — מנגנים עם הלהקה</h3><span class="tag" id="rhythmStageTag">שלב 1: פעימת מקצב (4/4)</span></div><div class="band-stage" id="bandStage" role="region" aria-label="שלבי הלהקה"><div class="band-card unlocked" id="bandDrums" data-level="1"><span class="band-icon">🥁</span><span class="band-name">תופים</span><span class="band-level">שלב 1 · פעימה</span></div><div class="band-card" id="bandBass" data-level="2"><span class="band-icon">🎸</span><span class="band-name">קו בס</span><span class="band-level">שלב 2 · רצף 3+</span></div><div class="band-card" id="bandChords" data-level="3"><span class="band-icon">🎹</span><span class="band-name">אקורדים</span><span class="band-level">שלב 3 · רצף 6+</span></div><div class="band-card" id="bandMelody" data-level="4"><span class="band-icon">🎷</span><span class="band-name">סולו</span><span class="band-level">שלב 4 · רצף 10+</span></div></div><div class="rhythm-highway-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.95rem;color:#ded6f0;"><span id="rhythmPatternName" style="color:#fff;"><b>תבנית:</b> ארבעה רבעים (4/4)</span><span id="rhythmBpmDisplay" style="color:#ffd85d;font-weight:bold;"><b>טמפו:</b> 80 BPM</span></div><div class="rhythm-highway" id="rhythmFractionsVisual" aria-label="חלוקת התיבה לשברים"></div><div class="rhythm-track" style="position:relative;height:12px;background:rgba(255,255,255,0.15);border-radius:99px;overflow:hidden;margin-top:10px;"><div id="rhythmCursor" class="rhythm-cursor-line"></div></div><div id="rhythmSpark" class="rhythm-spark" aria-live="assertive">בול! 💥</div></div><div class="drum-pads-grid" role="group" aria-label="פדים לתופים"><button type="button" id="drumPadBtn" class="drum-pad pad-kick" data-sound="kick" title="בס (Kick) — רווח או מקש 1"><span class="pad-icon">🥁</span><span class="pad-label">בס (Kick)</span><span class="pad-key">רווח / 1</span></button><button type="button" id="drumSnareBtn" class="drum-pad pad-snare" data-sound="snare" title="סנר (Snare) — מקש 2"><span class="pad-icon">🪘</span><span class="pad-label">סנר (Snare)</span><span class="pad-key">מקש 2</span></button><button type="button" id="drumHihatBtn" class="drum-pad pad-hihat" data-sound="hihat" title="היי-האט — מקש 3"><span class="pad-icon">🪙</span><span class="pad-label">היי-האט</span><span class="pad-key">מקש 3</span></button><button type="button" id="drumClapBtn" class="drum-pad pad-clap" data-sound="clap" title="מחיאת כף — מקש 4"><span class="pad-icon">👏</span><span class="pad-label">כף (Clap)</span><span class="pad-key">מקש 4</span></button></div><div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap;"><button type="button" id="rhythmStartBtn" class="primary" style="width:auto;min-height:48px;padding:12px 24px;">▶ התחלת נגינה</button><button type="button" id="rhythmPatternNextBtn" class="secondary" style="width:auto;min-height:48px;padding:12px 20px;">🔄 החלף מקצב</button></div><div style="display:flex;justify-content:space-around;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin:12px 0;"><div><span style="font-size:0.8rem;color:var(--muted);display:block;">רצף מקצב</span><b id="rhythmStreakDisplay" style="font-size:1.45rem;color:var(--purple);">0</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">שכבה מוזיקלית</span><b id="rhythmLayerDisplay" style="font-size:1.45rem;color:var(--good);">רק תופים</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">דיוק פעימה</span><b id="rhythmAccuracyDisplay" style="font-size:1.45rem;color:var(--ink);">-</b></div></div><div class="xylo-shelf" id="xyloStudio"><div style="display:flex;justify-content:space-between;align-items:center;color:#ded6f0;margin-bottom:10px;font-size:0.88rem;"><span style="color:#fff;"><b>🎹 קסילופון צבעוני:</b> הקישו על הקלידים או במקלדת A–K / 1–8</span><span id="xyloLastNote" style="color:#ffd85d;font-weight:bold;">נגנו מנגינה עם המקצב!</span></div><div class="xylo-keys" id="xyloKeys" role="group" aria-label="קלידי קסילופון 8 צלילים"></div></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
+<script src="src/lib/remediation.js"></script>
+<script src="src/lib/rhythmGame.js"></script>
+<script src="src/lib/interactiveLessons.js"></script>
+<script src="src/lib/polyrhythm.js"></script>
+<script src="src/lib/circleOfFifths.js"></script>
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
@@ -311,12 +411,194 @@ function check(){if(answered||!normalizeAnswer($('answer').value))return;answere
 function finish(){endTeacherSession();show('quiz',false);show('summary',true);const good=history.filter(x=>x.correct).length;const level=Math.max(...history.map(x=>exercises.find(e=>e.id===x.id).level));$('stats').innerHTML=`<div class="stat"><strong>${good}/${history.length}</strong>נכונות</div><div class="stat"><strong>${Math.round(good/history.length*100)||0}%</strong>דיוק בסבב</div><div class="stat"><strong>${level}</strong>רמה מרבית בסבב</div>`;$('summaryText').textContent='ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.'}
 document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dataset.level;document.querySelectorAll('.level').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})});
 $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter')check()};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true)};
-function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
+function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
 // yToFreq / formatRhythmPattern / playFreq / playRhythmClicks מגיעים מ-src/lib/sonify.js.
 function renderFreq(play){const y=+$('y').value;$('yLabel').textContent=y;const hz=yToFreq(y,0,100);$('freq').textContent=`${hz.toFixed(2)} Hz`;if(play)playFreq(hz)}$('y').oninput=()=>renderFreq(true);renderFreq(false);
 function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
 function showRhythm(play){const x=generateRhythmExercise(+$('rhythmLevel').value,+$('accuracy').value/100);$('rhythm').innerHTML=`${x.fractionPattern}<br><small>${x.bpm} BPM · ${x.expectedDuration} שניות</small>`;if(play)playRhythmClicks(x.pattern,x.bpm)}$('makeRhythm').onclick=()=>showRhythm(true);showRhythm(false);
+function updateSingingLine(val,play){if(typeof soundForTick!=='function')return;const v=Math.max(0,Math.min(100,Math.round(Number(val)||0)));if($('singingLine'))$('singingLine').value=v;const s=soundForTick(v,{min:0,max:100});const lbl=s.pointName?`${v}% (${s.pointName})`:`${v}%`;if($('singingLabel'))$('singingLabel').textContent=lbl;const bell=s.isKeyPoint?` 🔔 פעמון שבר: ${s.pointName}`:'';if($('singingResult'))$('singingResult').innerHTML=`<b>${s.frequency} Hz</b> · ${lbl}${bell}`;if(play&&typeof playFreq==='function')playFreq(s.frequency)}
+if($('singingLine')){$('singingLine').oninput=function(){updateSingingLine(this.value,true)};document.querySelectorAll('.nl-keys [data-pct]').forEach(b=>b.onclick=()=>updateSingingLine(b.dataset.pct,true));updateSingingLine(50,false)}
+// ---- משחק מקצב מוזיקלי וליווי מתפתח (rhythmGame) ----
+let rgPatternIdx=0,rgStreak=0,rgActive=false,rgTimer=null,rgBarStart=0,rgBpm=80,rgBeatIdx=0;
+function currentRgPattern(){const pts=typeof PATTERNS!=='undefined'?PATTERNS:[];return pts[rgPatternIdx%pts.length]||{id:'four',name:'4/4',durations:[0.25,0.25,0.25,0.25],fractions:['1/4','1/4','1/4','1/4'],beats:[0,1,2,3]};}
+function paintRgPattern(){
+  const p=currentRgPattern();
+  if($('rhythmPatternName'))$('rhythmPatternName').innerHTML=`<b>תבנית:</b> ${escapeHtml(p.name)}`;
+  if($('rhythmBpmDisplay'))$('rhythmBpmDisplay').innerHTML=`<b>טמפו:</b> ${rgBpm} BPM`;
+  const vis=$('rhythmFractionsVisual');
+  if(vis){
+    vis.innerHTML=p.fractions.map((f,idx)=>`<div class="rhythm-slot" id="rgSlot_${idx}" style="flex:${p.durations[idx]*4}"><span>${f}</span><small>פעימה ${idx+1}</small></div>`).join('');
+  }
+}
+function updateRgStage(){
+  const stage=typeof stageForStreak==='function'?stageForStreak(rgStreak):{level:1,name:'פעימת מקצב'};
+  if($('rhythmStageTag'))$('rhythmStageTag').textContent=`שלב ${stage.level}: ${stage.name}`;
+  if($('rhythmStreakDisplay'))$('rhythmStreakDisplay').textContent=String(rgStreak);
+  if($('rhythmLayerDisplay'))$('rhythmLayerDisplay').textContent=stage.name;
+  const cards=[{id:'bandDrums',lvl:1},{id:'bandBass',lvl:2},{id:'bandChords',lvl:3},{id:'bandMelody',lvl:4}];
+  cards.forEach(c=>{
+    const el=$(c.id);
+    if(el)el.classList.toggle('unlocked',stage.level>=c.lvl);
+  });
+}
+function showSpark(txt,good){
+  const sp=$('rhythmSpark');
+  if(!sp)return;
+  sp.textContent=txt;
+  sp.style.color=good?'#ffd85d':'#ff7b92';
+  sp.classList.add('show');
+  setTimeout(()=>{if(sp)sp.classList.remove('show');},320);
+}
+function rgTick(){
+  if(!rgActive)return;
+  const barMs=(240/rgBpm)*1000;
+  const elapsed=(Date.now()-rgBarStart)%barMs;
+  const pct=Math.min(100,Math.max(0,(elapsed/barMs)*100));
+  if($('rhythmCursor'))$('rhythmCursor').style.left=`${pct}%`;
+  const p=currentRgPattern();
+  const beatMs=(60/rgBpm)*1000;
+  p.beats.forEach((b,idx)=>{
+    const slot=$(`rgSlot_${idx}`);
+    if(!slot)return;
+    const slotStart=(b*beatMs);
+    const slotDur=p.durations[idx]*4*beatMs;
+    const isNow=elapsed>=slotStart && elapsed<slotStart+slotDur;
+    slot.classList.toggle('highlight',isNow);
+  });
+}
+function handleDrumTap(soundType){
+  const snd=soundType||'kick';
+  const now=Date.now();
+  const p=currentRgPattern();
+  const barMs=(240/rgBpm)*1000;
+  const beatMs=(60/rgBpm)*1000;
+  const elapsed=(now-rgBarStart)%barMs;
+  let closestBeat=p.beats[0];
+  let minDiff=999999;
+  p.beats.forEach((b,idx)=>{
+    const exp=b*beatMs;
+    const diff=Math.abs(elapsed-exp);
+    if(diff<minDiff){minDiff=diff;closestBeat=b;rgBeatIdx=idx;}
+  });
+  const evalRes=typeof evaluateTap==='function'?evaluateTap(closestBeat*beatMs,elapsed,160):{hit:true,rating:'good',text:'בול!'};
+  if($('rhythmAccuracyDisplay'))$('rhythmAccuracyDisplay').textContent=evalRes.text;
+  if(evalRes.hit){
+    rgStreak+=1;
+    rgBpm=typeof bpmForStreak==='function'?bpmForStreak(80,rgStreak):rgBpm;
+    updateRgStage();
+    paintRgPattern();
+    const stage=typeof stageForStreak==='function'?stageForStreak(rgStreak):{level:1};
+    if(typeof playDrumSound==='function')playDrumSound(snd);
+    if(typeof playMusicalAccompaniment==='function')playMusicalAccompaniment(stage.level,rgBeatIdx);
+    showSpark(`${evalRes.text} 💥`,true);
+    const cardIds=['bandDrums','bandBass','bandChords','bandMelody'];
+    const activeCard=$(cardIds[Math.min(stage.level-1,cardIds.length-1)]);
+    if(activeCard){
+      activeCard.classList.add('pulse');
+      setTimeout(()=>{if(activeCard)activeCard.classList.remove('pulse');},160);
+    }
+  }else{
+    rgStreak=Math.max(0,rgStreak-1);
+    updateRgStage();
+    if(typeof playDrumSound==='function')playDrumSound('hihat');
+    showSpark('פספוס 🪙',false);
+  }
+}
+function toggleRgPlay(){
+  rgActive=!rgActive;
+  if($('rhythmStartBtn'))$('rhythmStartBtn').textContent=rgActive?'⏹ עצור נגינה':'▶ התחלת נגינה';
+  if(rgActive){
+    rgBarStart=Date.now();
+    rgTimer=setInterval(rgTick,25);
+    if(typeof playDrumSound==='function')playDrumSound('kick');
+  }else{
+    if(rgTimer){clearInterval(rgTimer);rgTimer=null;}
+    if($('rhythmCursor'))$('rhythmCursor').style.left='0%';
+    const p=currentRgPattern();
+    p.beats.forEach((_,idx)=>{const slot=$(`rgSlot_${idx}`);if(slot)slot.classList.remove('highlight');});
+  }
+}
+const drumPads=[
+  {id:'drumPadBtn',sound:'kick'},
+  {id:'drumSnareBtn',sound:'snare'},
+  {id:'drumHihatBtn',sound:'hihat'},
+  {id:'drumClapBtn',sound:'clap'}
+];
+drumPads.forEach(dp=>{
+  const btn=$(dp.id);
+  if(!btn)return;
+  btn.onclick=()=>{
+    if(!rgActive)toggleRgPlay();
+    btn.classList.add('hit-active');
+    setTimeout(()=>btn.classList.remove('hit-active'),100);
+    handleDrumTap(dp.sound);
+  };
+});
+if($('rhythmStartBtn'))$('rhythmStartBtn').onclick=toggleRgPlay;
+if($('rhythmPatternNextBtn'))$('rhythmPatternNextBtn').onclick=()=>{rgPatternIdx++;paintRgPattern();};
+
+// ---- קסילופון 8 צלילים אינטראקטיבי ----
+const XYLO_KEYS_DEF=[
+  {note:'דו',deg:'1',frac:'1/8',key:'A',num:'1',color:'#e53935',h:100},
+  {note:'רה',deg:'2',frac:'2/8',key:'S',num:'2',color:'#fb8c00',h:95},
+  {note:'מי',deg:'3',frac:'3/8',key:'D',num:'3',color:'#fdd835',h:90,tc:'#21183b'},
+  {note:'פה',deg:'4',frac:'4/8 (1/2)',key:'F',num:'4',color:'#43a047',h:85},
+  {note:'סול',deg:'5',frac:'5/8',key:'G',num:'5',color:'#00acc1',h:80},
+  {note:'לה',deg:'6',frac:'6/8 (3/4)',key:'H',num:'6',color:'#1e88e5',h:75},
+  {note:'סי',deg:'7',frac:'7/8',key:'J',num:'7',color:'#5e35b1',h:70},
+  {note:'דו׳',deg:'8',frac:'1 שלם',key:'K',num:'8',color:'#d81b60',h:65}
+];
+function initXylophone(){
+  const box=$('xyloKeys');
+  if(!box)return;
+  box.innerHTML=XYLO_KEYS_DEF.map((k,idx)=>`
+    <button type="button" class="xylo-key" id="xk_${idx}" style="background:${k.color};height:${k.h}%;color:${k.tc||'#fff'};" data-idx="${idx}" aria-label="צליל ${k.note} דרגה ${k.deg} שבר ${k.frac}">
+      <span class="k-shortcut">[${k.key}]</span>
+      <span class="k-degree">${k.deg}</span>
+      <span class="k-note">${k.note}</span>
+      <span class="k-frac">${k.frac}</span>
+    </button>
+  `).join('');
+  box.querySelectorAll('.xylo-key').forEach(b=>{
+    b.onclick=()=>triggerXyloKey(+b.dataset.idx);
+  });
+}
+function triggerXyloKey(idx){
+  const k=XYLO_KEYS_DEF[idx];
+  if(!k)return;
+  if(typeof playXylophoneNote==='function')playXylophoneNote(idx);
+  const btn=$(`xk_${idx}`);
+  if(btn){
+    btn.classList.add('active-key');
+    setTimeout(()=>btn.classList.remove('active-key'),120);
+  }
+  if($('xyloLastNote'))$('xyloLastNote').textContent=`${k.note} (דרגה ${k.deg} · ${k.frac})`;
+}
+initXylophone();
+
+const XYLO_KEY_MAP={'KeyA':0,'KeyS':1,'KeyD':2,'KeyF':3,'KeyG':4,'KeyH':5,'KeyJ':6,'KeyK':7};
+const DRUM_KEY_MAP={'Space':'kick','Digit1':'kick','Numpad1':'kick','Digit2':'snare','Numpad2':'snare','Digit3':'hihat','Numpad3':'hihat','Digit4':'clap','Numpad4':'clap'};
+document.addEventListener('keydown',function(e){
+  const pg=$('playground');
+  if(!pg||pg.hidden)return;
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;
+  if(DRUM_KEY_MAP[e.code]){
+    e.preventDefault();
+    if(!rgActive)toggleRgPlay();
+    const snd=DRUM_KEY_MAP[e.code];
+    const padBtn=snd==='kick'?$('drumPadBtn'):snd==='snare'?$('drumSnareBtn'):snd==='hihat'?$('drumHihatBtn'):$('drumClapBtn');
+    if(padBtn){padBtn.classList.add('hit-active');setTimeout(()=>padBtn.classList.remove('hit-active'),100);}
+    handleDrumTap(snd);
+    return;
+  }
+  if(XYLO_KEY_MAP[e.code]!=null){
+    e.preventDefault();
+    triggerXyloKey(XYLO_KEY_MAP[e.code]);
+  }
+});
+paintRgPattern();updateRgStage();
 // ---- תרגול לפי כיתה (בנק מתויג; מקצב = פסינג, לא מוצר) ----
 const rmHe=skillHe;
 const GRADE_NOTE={
@@ -441,7 +723,7 @@ if($('ppStartPost'))$('ppStartPost').onclick=()=>ppStart('post');
 if($('ppRefresh'))$('ppRefresh').onclick=ppRenderReport;
 if($('ppStop'))$('ppStop').onclick=()=>ppHalt('הבדיקה הופסקה. התשובות שנרשמו עד כאן נשמרו.');
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));$('rosterMsg').textContent=summarizeImport(res);if(!res.ok)return;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
@@ -451,6 +733,9 @@ if($('boardPrint'))$('boardPrint').onclick=()=>{document.body.classList.remove('
 if($('noteSave'))$('noteSave').onclick=saveTeacherNote;
 if($('parentMake'))$('parentMake').onclick=renderParentLetter;
 if($('parentPrint'))$('parentPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class');document.body.classList.add('print-parent');renderParentLetter();window.print()};
+function renderRamaReport(){const box=$('ramaSheet');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const rep=buildReport(student);const pts=typeof getRemediationPoints==='function'?getRemediationPoints():[];const when=(function(){try{return new Date().toLocaleDateString('he-IL')}catch(e){return ''}})();const weak=(rep.perSkill||[]).filter(s=>s.accuracy<.75||(s.total-s.correct)>=2).map(s=>s.skill);const errs=(rep.repeatingErrors||[]).map(e=>e.skill||e.prompt);const matched=pts.filter(p=>weak.some(w=>p.title.includes(w)||p.topic.includes(w))||errs.some(e=>p.title.includes(e)||p.topic.includes(e)));const list=matched.length?matched:pts.slice(0,3);box.innerHTML=`<div class="rama-card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px;"><h3 style="margin:0;">כרטיס אבחון ומיפוי מוקדי קושי (ראמ״ה / מיצ״ב)</h3><span class="tag">${escapeHtml(when)}</span></div><p><b>תלמיד/ה:</b> ${escapeHtml(who.name)} · <b>קוד כיתה:</b> ${escapeHtml(who.classCode||'ברירת מחדל')} · <b>תרגילים שנרשמו במכשיר:</b> ${rep.total} (דיוק: ${rep.total?Math.round(100*rep.correct/rep.total):0}%)</p><div style="margin:16px 0;"><h4 style="margin:0 0 8px;">מוקדי כשל שזוהו בבנקים ומענה פדגוגי מותאם:</h4>${list.map(p=>`<div class="rama-item"><strong>${escapeHtml(p.grade)} · ${escapeHtml(p.title)} (${escapeHtml(p.ramaSection)})</strong><div style="color:var(--bad);font-size:.9rem;margin:4px 0;"><b>נקודת כשל:</b> ${escapeHtml(p.failureReason)}</div><div style="color:var(--good);font-size:.9rem;"><b>מענה מוזיקלי מותאם:</b> ${escapeHtml(p.musicalRemediation)}</div><div style="color:var(--muted);font-size:.8rem;margin-top:4px;"><b>בסיס מחקרי:</b> ${escapeHtml(p.foundation)}</div></div>`).join('')}</div><p class="note" style="margin-top:12px;font-size:.8rem;">כרטיס פדגוגי מקומי לצוות ההוראה. הנתונים נשמרים במכשיר בלבד. אין כאן אבחון קליני ואין טענת שליטה.</p></div>`;box.classList.remove('hidden')}
+if($('ramaMake'))$('ramaMake').onclick=renderRamaReport;
+if($('ramaPrint'))$('ramaPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert');document.body.classList.add('print-rama');renderRamaReport();window.print()};
 
 const CLASS_MS=8*60*1000;
 const CLASS_BANK=classItems();
@@ -539,6 +824,9 @@ function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
 // restarting on every answer put an off-beat click right after each pick.
 function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
 function noteMetro(correct){
+  if(typeof playHarmonicReward==='function'){
+    playHarmonicReward(correct ? metroStreak + 1 : 0);
+  }
   if(!correct){ metroStreak=0; return; }
   metroStreak+=1;
   if($('metroAccel')&&$('metroAccel').checked){
@@ -553,6 +841,12 @@ document.addEventListener('visibilitychange',function(){ if(document.hidden) sto
 paintMetro();
 renderRosterChips();
 renderClassBoard();
+function toggleSmartboard(){const on=document.body.classList.toggle('smartboard-mode');const btn=$('smartboardToggle');if(btn){btn.setAttribute('aria-pressed',on?'true':'false');btn.classList.toggle('active',on)}try{if(on&&!document.fullscreenElement&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>{})}else if(!on&&document.fullscreenElement&&document.exitFullscreen){document.exitFullscreen().catch(()=>{})}}catch(e){}}
+if($('smartboardToggle'))$('smartboardToggle').onclick=toggleSmartboard;
+if($('qrShareBtn'))$('qrShareBtn').onclick=()=>{show('qrModal',true);if($('copyMsg'))$('copyMsg').textContent=''};
+if($('qrCloseBtn'))$('qrCloseBtn').onclick=()=>show('qrModal',false);
+if($('qrModal'))$('qrModal').onclick=(e)=>{if(e.target===$('qrModal'))show('qrModal',false)};
+if($('copyLinkBtn'))$('copyLinkBtn').onclick=()=>{try{navigator.clipboard.writeText('https://swissystem7.github.io/MelodyMath/').then(()=>{if($('copyMsg'))$('copyMsg').textContent='הקישור הועתק ללוח! 📋'}).catch(()=>{if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'})}catch(e){if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'}};
 
 function renderFirstRun(){
   const box=$('firstRun'); if(!box || typeof shouldShowOnboard!=='function') return;
@@ -683,4 +977,1414 @@ function endBeatSession(){
 if($('beatStart'))$('beatStart').onclick=startBeatSession;
 if($('beatStop'))$('beatStop').onclick=endBeatSession;
 if($('beatAgain'))$('beatAgain').onclick=function(){ showBeatCard('beatGate'); };
+
+// ---- שיעורים מודרכים ואינטראקטיביים (interactiveLessons) ----
+let activeLessonId = null;
+let activeStepIndex = 0;
+let lessonGradeFilter = 'all';
+let fractionBuilderBlocks = [];
+let multExplorerGroups = 3;
+let multExplorerSize = 4;
+let tensBuilderTens = 2;
+let tensBuilderOnes = 5;
+let lineExplorerPos = 0;
+let lineExplorerStep = 2;
+let divExplorerTotal = 12;
+let divExplorerGroups = 3;
+let euclideanPulses = 3;
+let euclideanSteps = 8;
+let evenOddCount = 6;
+let polyrhythmCycleA = 2;
+let polyrhythmCycleB = 3;
+let fractionDivBase = '1/2';
+let fractionDivUnit = '1/8';
+
+function renderLessonsGradeFilter() {
+  const box = $('lessonsGradeFilter');
+  if (!box) return;
+  const filters = [
+    { id: 'all', label: 'הכל' },
+    { id: 'א', label: 'כיתה א׳' },
+    { id: 'ב', label: 'כיתה ב׳' },
+    { id: 'ג', label: 'כיתה ג׳' },
+    { id: 'ד', label: 'כיתה ד׳' },
+    { id: 'ה', label: 'כיתה ה׳' },
+    { id: 'ו', label: 'כיתה ו׳' }
+  ];
+  box.innerHTML = filters.map(f => {
+    const on = f.id === lessonGradeFilter;
+    return `<button type="button" class="tab ${on ? 'active' : ''}" data-lesson-filter="${f.id}" style="padding:4px 12px;font-size:0.85rem;min-height:32px;">${f.label}</button>`;
+  }).join('');
+  box.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      lessonGradeFilter = btn.dataset.lessonFilter;
+      renderLessonsGradeFilter();
+      renderLessonsUI();
+    };
+  });
+}
+
+function renderLessonsUI() {
+  renderLessonsGradeFilter();
+  const grid = $('lessonsGrid');
+  if (!grid || typeof getAllLessons !== 'function') return;
+
+  if (activeLessonId) {
+    grid.classList.add('hidden');
+    $('activeLessonCard').classList.remove('hidden');
+    renderActiveStep();
+    return;
+  }
+
+  $('activeLessonCard').classList.add('hidden');
+  grid.classList.remove('hidden');
+
+  let list = getAllLessons();
+  if (lessonGradeFilter !== 'all') {
+    list = list.filter(l => l.grade === lessonGradeFilter);
+  }
+
+  grid.innerHTML = list.map(l => `
+    <div class="lesson-card" tabindex="0" role="button" aria-label="שיעור: ${escapeHtml(l.title)}" data-lesson-id="${l.id}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:2rem;">${l.icon || '📖'}</span>
+          <span class="tag">כיתה ${l.grade}׳ · ${escapeHtml(l.strand)}</span>
+        </div>
+        <h3 style="margin:4px 0 8px;font-size:1.15rem;color:var(--ink);">${escapeHtml(l.title)}</h3>
+        <p style="font-size:0.9rem;color:var(--muted);line-height:1.45;margin:0 0 12px;">${escapeHtml(l.summary)}</p>
+      </div>
+      <button type="button" class="primary" style="margin-top:10px;pointer-events:none;">התחלת שיעור ←</button>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.lesson-card').forEach(card => {
+    card.onclick = () => openLesson(card.dataset.lessonId);
+    card.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLesson(card.dataset.lessonId); } };
+  });
+}
+
+function openLesson(id) {
+  if (typeof getLessonById !== 'function') return;
+  const l = getLessonById(id);
+  if (!l) return;
+  activeLessonId = id;
+  activeStepIndex = 0;
+  fractionBuilderBlocks = [];
+  multExplorerGroups = 3;
+  multExplorerSize = 4;
+  tensBuilderTens = 2;
+  tensBuilderOnes = 5;
+  lineExplorerPos = 0;
+  lineExplorerStep = 2;
+  divExplorerTotal = 12;
+  divExplorerGroups = 3;
+  euclideanPulses = 4;
+  euclideanSteps = 16;
+  evenOddCount = 6;
+
+  $('activeLessonBadge').textContent = `כיתה ${l.grade}׳ · ${l.strand}`;
+  $('activeLessonTitle').textContent = `${l.icon || ''} ${l.title}`;
+
+  renderStepperPills();
+  $('lessonsGrid').classList.add('hidden');
+  $('activeLessonCard').classList.remove('hidden');
+  renderActiveStep();
+}
+
+function closeLesson() {
+  if (typeof stopAllAudio === 'function') stopAllAudio();
+  activeLessonId = null;
+  activeStepIndex = 0;
+  $('activeLessonCard').classList.add('hidden');
+  $('lessonsGrid').classList.remove('hidden');
+  renderLessonsUI();
+}
+
+function renderStepperPills() {
+  const stepper = $('lessonStepper');
+  if (!stepper || !activeLessonId) return;
+  const l = getLessonById(activeLessonId);
+  if (!l) return;
+  const stepNames = ['1. מושג', '2. הדגמה', '3. התנסות', '4. בדיקה'];
+  stepper.innerHTML = l.steps.map((_, idx) => `
+    <button type="button" class="step-pill ${idx === activeStepIndex ? 'active' : ''} ${idx < activeStepIndex ? 'done' : ''}" data-step-idx="${idx}">
+      ${stepNames[idx] || ('שלב ' + (idx + 1))}
+    </button>
+  `).join('');
+
+  stepper.querySelectorAll('.step-pill').forEach(btn => {
+    btn.onclick = () => {
+      activeStepIndex = +btn.dataset.stepIdx;
+      renderStepperPills();
+      renderActiveStep();
+    };
+  });
+}
+
+function renderActiveStep() {
+  if (!activeLessonId) return;
+  const l = getLessonById(activeLessonId);
+  if (!l) return;
+  const step = l.steps[activeStepIndex];
+  if (!step) return;
+
+  const bodyText = step.body || step.description || step.question || '';
+  $('stepTitle').textContent = step.title;
+  $('stepBody').textContent = bodyText;
+  $('stepCounterDisplay').textContent = `שלב ${activeStepIndex + 1} מתוך ${l.steps.length}`;
+
+  if ($('stepSpeakBtn')) {
+    $('stepSpeakBtn').onclick = () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(step.title + '. ' + bodyText);
+        u.lang = 'he-IL';
+        window.speechSynthesis.speak(u);
+      }
+    };
+  }
+
+  if (window._pulseTimer) clearTimeout(window._pulseTimer);
+  window._pulseTimer = setTimeout(() => {
+    const actBtn = document.querySelector('#stepInteractiveBox button.primary') || $('stepNextBtn');
+    if (actBtn) actBtn.classList.add('pulse-hint');
+  }, 3500);
+
+  $('stepPrevBtn').disabled = activeStepIndex === 0;
+
+  const isLast = activeStepIndex === l.steps.length - 1;
+  $('stepNextBtn').classList.toggle('hidden', isLast);
+  $('stepPracticeBtn').classList.toggle('hidden', !isLast);
+
+  renderStepperPills();
+
+  if (Array.isArray(step.options)) {
+    $('stepInteractiveBox').classList.add('hidden');
+    $('stepQuizBox').classList.remove('hidden');
+    renderStepQuiz(l, step);
+  } else {
+    $('stepInteractiveBox').classList.remove('hidden');
+    $('stepQuizBox').classList.add('hidden');
+    renderStepAction(step);
+  }
+}
+
+function renderStepQuiz(lesson, step) {
+  const choicesBox = $('stepQuizChoices');
+  const feed = $('stepQuizFeedback');
+  if (!choicesBox || !feed) return;
+  feed.classList.add('hidden');
+
+  choicesBox.innerHTML = step.options.map((opt, idx) => `
+    <button type="button" class="secondary quiz-choice" data-choice-idx="${idx}" style="padding:12px;font-size:1.05rem;font-weight:bold;text-align:center;">
+      ${escapeHtml(opt)}
+    </button>
+  `).join('');
+
+  choicesBox.querySelectorAll('.quiz-choice').forEach(btn => {
+    btn.onclick = () => {
+      const idx = +btn.dataset.choiceIdx;
+      const res = evaluateStepAnswer(lesson.id, activeStepIndex, idx);
+      choicesBox.querySelectorAll('.quiz-choice').forEach((b, i) => {
+        b.disabled = true;
+        if (i === res.correctIndex) {
+          b.style.background = '#e5f6ef';
+          b.style.borderColor = '#167957';
+          b.style.color = '#167957';
+        } else if (i === idx && !res.correct) {
+          b.style.background = '#fde8ea';
+          b.style.borderColor = '#c5221f';
+          b.style.color = '#c5221f';
+        }
+      });
+      feed.className = `feedback ${res.correct ? 'good' : 'bad'}`;
+      feed.innerHTML = `<strong>${res.correct ? 'מעולה! תשובה מדויקת! 🎵' : 'לא בדיוק הפעם.'}</strong><div>${escapeHtml(res.explanation)}</div>`;
+      feed.classList.remove('hidden');
+      if (res.correct && typeof playHarmonicReward === 'function') playHarmonicReward();
+    };
+  });
+}
+
+function renderStepAction(step) {
+  const box = $('stepInteractiveBox');
+  if (!box) return;
+
+  if (step.actionType === 'wholeSound') {
+    box.innerHTML = `
+      <div style="background:#fff;border:2px solid var(--purple);border-radius:12px;padding:20px;margin-bottom:12px;" id="wholeVisualBox">
+        <div style="font-size:1.4rem;font-weight:900;color:var(--purple);">1 שלם = תיבה מלאה של 4/4</div>
+        <div style="background:#eee;border-radius:8px;height:32px;margin:12px auto;width:90%;position:relative;overflow:hidden;">
+          <div id="wholeBarFill" style="background:var(--purple);height:100%;width:100%;border-radius:8px;transition:opacity .3s;"></div>
+        </div>
+        <button type="button" class="primary" id="btnPlayWhole" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו שלם 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayWhole');
+    if (btn) btn.onclick = () => {
+      if (typeof playFreq === 'function') playFreq(261.63, 1600);
+      const fill = $('wholeBarFill');
+      if (fill) { fill.style.opacity = '0.3'; setTimeout(() => fill.style.opacity = '1', 1600); }
+    };
+    return;
+  }
+
+  if (step.actionType === 'quartersSound') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">ארבעה רבעים מרכיבים שלם אחד (1/4 + 1/4 + 1/4 + 1/4 = 1)</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin:14px 0;" id="quartersBox">
+          <div class="rhythm-slot" style="padding:12px 18px;border:2px solid var(--purple);border-radius:8px;background:#fdfaff;" id="qslot_0"><b>1/4</b><br><small>רבע 1</small></div>
+          <div class="rhythm-slot" style="padding:12px 18px;border:2px solid var(--purple);border-radius:8px;background:#fdfaff;" id="qslot_1"><b>1/4</b><br><small>רבע 2</small></div>
+          <div class="rhythm-slot" style="padding:12px 18px;border:2px solid var(--purple);border-radius:8px;background:#fdfaff;" id="qslot_2"><b>1/4</b><br><small>רבע 3</small></div>
+          <div class="rhythm-slot" style="padding:12px 18px;border:2px solid var(--purple);border-radius:8px;background:#fdfaff;" id="qslot_3"><b>1/4</b><br><small>רבע 4</small></div>
+        </div>
+        <button type="button" class="primary" id="btnPlayQuarters" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו 4 רבעים במקצב 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayQuarters');
+    if (btn) btn.onclick = () => {
+      if (typeof playRhythmClicks === 'function') playRhythmClicks([0.25, 0.25, 0.25, 0.25], 84);
+      [0, 1, 2, 3].forEach(i => {
+        setTimeout(() => {
+          const el = $(`qslot_${i}`);
+          if (el) { el.classList.add('highlight'); setTimeout(() => el.classList.remove('highlight'), 350); }
+        }, i * (60 / 84) * 1000);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'builder') {
+    renderFractionBuilderUI(box);
+    return;
+  }
+
+  if (step.actionType === 'multConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">3 קבוצות × 4 פריטים = 12 פריטים בסך הכל</div>
+        <div style="display:flex;gap:14px;justify-content:center;margin:14px 0;flex-wrap:wrap;">
+          <div style="background:#f0ebff;border:2px solid var(--purple);border-radius:12px;padding:12px 16px;text-align:center;">
+            <b>קבוצה 1</b><div style="font-size:1.6rem;letter-spacing:4px;margin-top:4px;">● ● ● ●</div>
+          </div>
+          <div style="background:#f0ebff;border:2px solid var(--purple);border-radius:12px;padding:12px 16px;text-align:center;">
+            <b>קבוצה 2</b><div style="font-size:1.6rem;letter-spacing:4px;margin-top:4px;">● ● ● ●</div>
+          </div>
+          <div style="background:#f0ebff;border:2px solid var(--purple);border-radius:12px;padding:12px 16px;text-align:center;">
+            <b>קבוצה 3</b><div style="font-size:1.6rem;letter-spacing:4px;margin-top:4px;">● ● ● ●</div>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayMultConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו 3 קבוצות של 4 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayMultConcept');
+    if (btn) btn.onclick = () => {
+      for (let g = 0; g < 3; g++) {
+        for (let b = 0; b < 4; b++) {
+          setTimeout(() => {
+            if (b === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+            else if (typeof playDrumSound === 'function') playDrumSound('snare');
+          }, (g * 4 + b) * 200);
+        }
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'multAccent') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">פעימת עוגן (Kick בס) בכל ראש קבוצה:</div>
+        <div style="display:flex;gap:12px;justify-content:center;margin:14px 0;flex-wrap:wrap;">
+          <div style="background:#fdfaff;border:2px solid #5e35b1;border-radius:10px;padding:10px 14px;">
+            <b style="color:#5e35b1;">תיבה 1:</b> 💥 1 (עוגן) · 2 · 3 · 4
+          </div>
+          <div style="background:#fdfaff;border:2px solid #5e35b1;border-radius:10px;padding:10px 14px;">
+            <b style="color:#5e35b1;">תיבה 2:</b> 💥 5 (עוגן) · 6 · 7 · 8
+          </div>
+          <div style="background:#fdfaff;border:2px solid #5e35b1;border-radius:10px;padding:10px 14px;">
+            <b style="color:#5e35b1;">תיבה 3:</b> 💥 9 (עוגן) · 10 · 11 · 12
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayMultAccent" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו עם הדגשת עוגן 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayMultAccent');
+    if (btn) btn.onclick = () => {
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          else if (typeof playDrumSound === 'function') playDrumSound('hihat');
+        }, i * 220);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'multExplorer') {
+    renderMultExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'tensConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">14 = עשרת אחת (10) ועוד 4 אחדות בודדות</div>
+        <div style="display:flex;gap:20px;justify-content:center;align-items:center;margin:16px 0;flex-wrap:wrap;">
+          <div style="background:#ede7f6;border:2px solid var(--purple);border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>עשרת (10)</b><div style="height:32px;background:var(--purple);width:100px;border-radius:6px;margin:8px auto;line-height:32px;color:#fff;font-weight:bold;">[ 10 יח׳ ]</div>
+          </div>
+          <div style="font-size:1.5rem;font-weight:bold;">+</div>
+          <div style="background:#fff8e1;border:2px solid #fbc02d;border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>4 אחדות</b><div style="font-size:1.4rem;margin-top:8px;">🟦 🟦 🟦 🟦</div>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayTensConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו עשרת אחת + 4 אחדות 🔔'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayTensConcept');
+    if (btn) btn.onclick = () => {
+      if (typeof playFreq === 'function') playFreq(130.81, 400); // Low bass C3
+      for (let i = 0; i < 4; i++) {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(880, 100); // Chime A5
+        }, 550 + i * 160);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'tensSound') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:14px;">האזינו להבדל בין צליל עשרת לצליל אחדה:</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button type="button" class="primary" id="btnSoundTen" style="background:#5e35b1;width:auto;padding:10px 20px;">🔊 עשרת (בס עמוק — כבד)</button>
+          <button type="button" class="secondary" id="btnSoundOne" style="border-color:#f57f17;color:#f57f17;width:auto;padding:10px 20px;">🔔 אחדה (פעמון צלול — גבוה)</button>
+        </div>
+      </div>
+    `;
+    const b1 = $('btnSoundTen');
+    const b2 = $('btnSoundOne');
+    if (b1) b1.onclick = () => { if (typeof playFreq === 'function') playFreq(130.81, 350); };
+    if (b2) b2.onclick = () => { if (typeof playFreq === 'function') playFreq(880, 120); };
+    return;
+  }
+
+  if (step.actionType === 'tensBuilder') {
+    renderTensBuilderUI(box);
+    return;
+  }
+
+  if (step.actionType === 'lineConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">תנועה ימינה על הישר מעלה את הערך ומגביהה את הצליל:</div>
+        <div style="background:#f4f0ff;border-radius:8px;padding:14px;margin:14px auto;max-width:440px;position:relative;">
+          <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:1.1rem;direction:ltr;">
+            <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>
+          </div>
+          <div style="height:4px;background:var(--purple);margin:8px 0;border-radius:2px;"></div>
+        </div>
+        <button type="button" class="primary" id="btnPlayLineConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו טיפוס על הישר 📈'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayLineConcept');
+    if (btn) btn.onclick = () => {
+      [0, 2, 4, 6, 8, 10].forEach((val, i) => {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(yToFreq(val, 0, 10), 180);
+        }, i * 220);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'lineJumps') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">קפיצות קצביות של 2: [0 ➔ 2 ➔ 4 ➔ 6 ➔ 8]</div>
+        <div style="background:#f4f0ff;border-radius:8px;padding:14px;margin:14px auto;max-width:440px;">
+          <div style="display:flex;justify-content:space-around;font-weight:bold;font-size:1.15rem;">
+            <span>0</span><span style="color:var(--purple);">+2</span>
+            <span>2</span><span style="color:var(--purple);">+2</span>
+            <span>4</span><span style="color:var(--purple);">+2</span>
+            <span>6</span><span style="color:var(--purple);">+2</span>
+            <span>8</span>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayLineJumps" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו קפיצות של 2 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayLineJumps');
+    if (btn) btn.onclick = () => {
+      [0, 2, 4, 6, 8].forEach((val, i) => {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(yToFreq(val, 0, 10), 200);
+          if (typeof playDrumSound === 'function') playDrumSound('snare');
+        }, i * 280);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'lineExplorer') {
+    renderLineExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'divConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">12 פעימות מחולקות ל-3 קבוצות שוות של 4:</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 1</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+          </div>
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 2</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+          </div>
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה 3</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">● ● ● ●</div>
+          </div>
+        </div>
+        <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+          12 ÷ 3 = <span style="color:var(--purple);font-size:1.4rem;">4</span> פעימות בכל קבוצה!
+        </div>
+        <button type="button" class="primary" id="btnPlayDivConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו 12 פעימות ב-3 קבוצות 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDivConcept');
+    if (btn) btn.onclick = () => {
+      let t = 0;
+      for (let g = 0; g < 3; g++) {
+        for (let b = 0; b < 4; b++) {
+          setTimeout(() => {
+            if (b === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+            else if (typeof playDrumSound === 'function') playDrumSound('snare');
+          }, t * 200);
+          t++;
+        }
+        t += 0.8;
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'divInverse') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">פעולות הפוכות: חילוק מפרק, כפל מרכיב!</div>
+        <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f9f7fd;border:1px solid #d1c4e9;border-radius:10px;padding:12px 18px;text-align:center;">
+            <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">חילוק</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:var(--purple);margin-top:4px;">12 ÷ 3 = 4</div>
+          </div>
+          <div style="font-size:1.6rem;font-weight:bold;color:var(--purple);">⇄</div>
+          <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px 18px;text-align:center;">
+            <div style="font-size:0.9rem;color:var(--muted);font-weight:bold;">כפל</div>
+            <div style="font-size:1.3rem;font-weight:bold;color:#f57f17;margin-top:4px;">3 × 4 = 12</div>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayDivInverse" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו כפל שמחזיר את המקצב השלם 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDivInverse');
+    if (btn) btn.onclick = () => {
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          if (i % 4 === 0 && typeof playHarmonicReward === 'function' && i === 11) playHarmonicReward();
+          else if (i % 4 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          else if (typeof playXylophoneNote === 'function') playXylophoneNote(i % 5);
+        }, i * 180);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'divExplorer') {
+    renderDivExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'geoConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">מצולע של 3 צלילים על מעגל של 12 פעימות (משולש שווה צלעות):</div>
+        <div style="display:flex;justify-content:center;margin:12px 0;">
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <circle cx="90" cy="90" r="70" fill="none" stroke="#ddd" stroke-width="3" />
+            <polygon points="90,20 150.62,125 29.38,125" fill="rgba(107,70,193,0.12)" stroke="var(--purple)" stroke-width="3" />
+            <circle cx="90" cy="20" r="8" fill="var(--purple)" />
+            <circle cx="150.62" cy="125" r="8" fill="var(--purple)" />
+            <circle cx="29.38" cy="125" r="8" fill="var(--purple)" />
+          </svg>
+        </div>
+        <div style="font-size:1.1rem;color:var(--ink);font-weight:bold;margin:8px 0;">3 פעימות במרווח שווה של 4 תיבות = משולש מוזיקלי יציב!</div>
+        <button type="button" class="primary" id="btnPlayGeoConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו מצולע פעימות על מעגל 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayGeoConcept');
+    if (btn) btn.onclick = () => {
+      [0, 1, 2].forEach(i => {
+        setTimeout(() => {
+          if (typeof playDrumSound === 'function') playDrumSound('kick');
+          if (typeof playFreq === 'function') playFreq(440, 240);
+        }, i * 350);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'squareDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">ריבוע מוזיקלי: 4 פעימות במרחק שווה מתוך 16:</div>
+        <div style="display:flex;justify-content:center;margin:12px 0;">
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <circle cx="90" cy="90" r="70" fill="none" stroke="#ddd" stroke-width="3" />
+            <polygon points="90,20 160,90 90,160 20,90" fill="rgba(67,160,71,0.12)" stroke="#43a047" stroke-width="3" />
+            <circle cx="90" cy="20" r="8" fill="#43a047" />
+            <circle cx="160" cy="90" r="8" fill="#43a047" />
+            <circle cx="90" cy="160" r="8" fill="#43a047" />
+            <circle cx="20" cy="90" r="8" fill="#43a047" />
+          </svg>
+        </div>
+        <div style="font-size:1.1rem;color:var(--ink);font-weight:bold;margin:8px 0;">16 ÷ 4 = 4. כל פעימה מגיעה בדיוק כל 4 צעדים!</div>
+        <button type="button" class="primary" id="btnPlaySquareDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו מקצב ריבוע (4 מתוך 16) 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlaySquareDemo');
+    if (btn) btn.onclick = () => {
+      for (let s = 0; s < 16; s++) {
+        setTimeout(() => {
+          if (s % 4 === 0) {
+            if (typeof playDrumSound === 'function') playDrumSound('kick');
+            if (typeof playFreq === 'function') playFreq(523.25, 180);
+          } else {
+            if (typeof playDrumSound === 'function') playDrumSound('hihat');
+          }
+        }, s * 140);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'euclideanWheel') {
+    renderEuclideanWheelUI(box);
+    return;
+  }
+
+  if (step.actionType === 'evenOddConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">זוגי מוצא חבר, אי-זוגי נשאר עם אחד לבד:</div>
+        <div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#e8f5e9;border:2px solid #43a047;border-radius:12px;padding:12px 18px;text-align:center;">
+            <div style="font-weight:bold;color:#2e7d32;margin-bottom:6px;">מספר 4 (זוגי)</div>
+            <div style="font-size:1.4rem;">(● ●) (● ●)</div>
+            <div style="font-size:0.85rem;color:#2e7d32;margin-top:6px;">2 זוגות שלמים! אין בודד.</div>
+          </div>
+          <div style="background:#fff3e0;border:2px solid #fb8c00;border-radius:12px;padding:12px 18px;text-align:center;">
+            <div style="font-weight:bold;color:#e65100;margin-bottom:6px;">מספר 5 (אי-זוגי)</div>
+            <div style="font-size:1.4rem;">(● ●) (● ●) <span style="color:#d84315;">●</span></div>
+            <div style="font-size:0.85rem;color:#e65100;margin-top:6px;">2 זוגות ועוד 1 בודד!</div>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayEvenOddConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו צמדים מול צליל בודד 🔔'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayEvenOddConcept');
+    if (btn) btn.onclick = () => {
+      [0, 1, 2, 3, 4].forEach((idx, i) => {
+        setTimeout(() => {
+          if (idx < 4) {
+            if (typeof playFreq === 'function') playFreq(idx % 2 === 0 ? 330 : 392, 160);
+          } else {
+            if (typeof playFreq === 'function') playFreq(880, 400);
+          }
+        }, i * 250);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'evenOddDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">השוואה מוזיקלית: 6 מול 7</div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <button type="button" class="secondary" id="btnPlaySix" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;width:auto;padding:10px 18px;">
+            השמעת 6 צלילים (זוגי) 🎶
+          </button>
+          <button type="button" class="secondary" id="btnPlaySeven" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;width:auto;padding:10px 18px;">
+            השמעת 7 צלילים (אי-זוגי) 🔔
+          </button>
+        </div>
+      </div>
+    `;
+    const b6 = $('btnPlaySix');
+    const b7 = $('btnPlaySeven');
+    if (b6) b6.onclick = () => {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(i % 2 === 0 ? 392 : 440, 160);
+        }, i * 220);
+      }
+    };
+    if (b7) b7.onclick = () => {
+      for (let i = 0; i < 7; i++) {
+        setTimeout(() => {
+          if (i < 6) {
+            if (typeof playFreq === 'function') playFreq(i % 2 === 0 ? 392 : 440, 160);
+          } else {
+            if (typeof playFreq === 'function') playFreq(880, 400);
+          }
+        }, i * 220);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'evenOddExplorer') {
+    renderEvenOddExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'polyrhythmConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">שני תופים במקצבים שונים:</div>
+        <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>תוף א׳ (בס)</b><br>כל 2 פעימות: 0, 2, 4, 6...
+          </div>
+          <div style="background:#e8f5e9;border:2px solid #43a047;border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>תוף ב׳ (סנר)</b><br>כל 3 פעימות: 0, 3, 6, 9...
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayPolyConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו תוף 2 מול תוף 3 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayPolyConcept');
+    if (btn) btn.onclick = () => {
+      for (let p = 0; p <= 6; p++) {
+        setTimeout(() => {
+          if (p % 2 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (p % 3 === 0 && typeof playDrumSound === 'function') playDrumSound('snare');
+        }, p * 250);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'polyrhythmDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">כפולה משותפת מינימלית: מפגש בפעימה 6!</div>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          ${Array.from({ length: 7 }).map((_, i) => `
+            <div style="padding:8px 12px;border:2px solid ${i === 6 || i === 0 ? 'var(--good)' : 'var(--line)'};background:${i === 6 ? '#e8f5e9' : '#fff'};border-radius:8px;text-align:center;min-width:36px;">
+              <b>${i}</b><br>
+              <small>${i === 0 || i === 6 ? '💥 יחד!' : i % 2 === 0 ? '🥁 א' : i % 3 === 0 ? '🪘 ב' : '·'}</small>
+            </div>
+          `).join('')}
+        </div>
+        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">LCM(2, 3) = 6. אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
+        <button type="button" class="primary" id="btnPlayPolyDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את רגע המפגש בפעימה 6 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayPolyDemo');
+    if (btn) btn.onclick = () => {
+      for (let p = 0; p <= 6; p++) {
+        setTimeout(() => {
+          if (p === 6 && typeof playHarmonicReward === 'function') playHarmonicReward();
+          if (p % 2 === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (p % 3 === 0 && typeof playDrumSound === 'function') playDrumSound('snare');
+        }, p * 250);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'polyrhythmExplorer') {
+    renderPolyrhythmExplorerUI(box);
+    return;
+  }
+
+  if (step.actionType === 'circleFifthsConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <div style="max-width:360px;margin:0 auto 12px;">${typeof renderFifthsSvg === 'function' ? renderFifthsSvg(320) : ''}</div>
+        <div style="font-size:1.1rem;font-weight:700;">12 נקודות, 30 מעלות בין נקודות שכנות</div>
+      </div>
+    `;
+    return;
+  }
+
+  if (step.actionType === 'circleFifthsDemo') {
+    const angle = typeof fifthsAngle === 'function' ? fifthsAngle(0, 1) : 30;
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">מדו לסול: צעד אחד בכיוון השעון</div>
+        <div style="font-size:2rem;color:var(--purple);font-weight:bold;">${angle}°</div>
+        <button type="button" class="primary" id="btnPlayCircleDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את הצעדים במעגל 🎵'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayCircleDemo');
+    if (btn) btn.onclick = () => {
+      if (typeof playFreq !== 'function') return;
+      playFreq(261.63, 220);
+      setTimeout(() => playFreq(392, 320), 280);
+    };
+    return;
+  }
+
+  if (step.actionType === 'circleFifthsExplorer') {
+    let taps = [];
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <button type="button" class="primary" id="btnTapTempo" style="width:auto;padding:12px 28px;">הקשה ${step.actionLabel || '🎵'}</button>
+        <button type="button" class="secondary" id="btnResetTempo" style="width:auto;padding:10px 18px;margin-inline-start:8px;">איפוס</button>
+        <div id="tapTempoResult" class="result" aria-live="polite" style="margin-top:12px;">הקישו לפחות פעמיים לקבלת BPM.</div>
+      </div>
+    `;
+    const result = $('tapTempoResult');
+    const tap = $('btnTapTempo');
+    const reset = $('btnResetTempo');
+    if (tap) tap.onclick = () => {
+      taps.push(Date.now());
+      const bpms = typeof tapsToBpm === 'function' ? tapsToBpm(taps) : [];
+      const mean = typeof meanOf === 'function' ? meanOf(bpms) : null;
+      result.textContent = mean == null
+        ? `הקשות: ${taps.length}. הקישו שוב.`
+        : `BPM בין הקשות: ${bpms.join(', ')} · ממוצע: ${mean}`;
+    };
+    if (reset) reset.onclick = () => {
+      taps = [];
+      result.textContent = 'הקישו לפחות פעמיים לקבלת BPM.';
+    };
+    return;
+  }
+
+  if (step.actionType === 'dottedConcept') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">רבע רגיל (1/4) מול רבע מנוקד (3/8):</div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>רבע רגיל (1/4)</b><br>משך: 2 שמיניות (2/8)
+          </div>
+          <div style="background:#fff8e1;border:2px solid #fbc02d;border-radius:10px;padding:12px 18px;text-align:center;">
+            <b>רבע מנוקד (♩.)</b><br>משך: 1/4 + 1/8 = <b>3/8</b>
+          </div>
+        </div>
+        <button type="button" class="primary" id="btnPlayDottedConcept" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו רבע רגיל מול רבע מנוקד 🔔'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDottedConcept');
+    if (btn) btn.onclick = () => {
+      if (typeof playFreq === 'function') {
+        playFreq(392, 300);
+        setTimeout(() => playFreq(523.25, 450), 600);
+      }
+    };
+    return;
+  }
+
+  if (step.actionType === 'dottedDemo') {
+    box.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">כמה שמיניות (1/8) נכנסות בחצי (1/2)?</div>
+        <div style="background:#f0ebff;border-radius:8px;padding:12px;margin:12px auto;max-width:380px;">
+          <div style="font-weight:bold;margin-bottom:6px;">חצי שלם (1/2):</div>
+          <div style="display:flex;gap:4px;">
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px;text-align:center;font-weight:bold;">1/8</div>
+          </div>
+        </div>
+        <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:8px 0;">1/2 ÷ 1/8 = <span style="color:var(--purple);font-size:1.4rem;">4</span> פעמים בדיוק!</div>
+        <button type="button" class="primary" id="btnPlayDottedDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו 4 שמיניות ממלאות חצי תיבה 🥁'}</button>
+      </div>
+    `;
+    const btn = $('btnPlayDottedDemo');
+    if (btn) btn.onclick = () => {
+      [0, 1, 2, 3].forEach(i => {
+        setTimeout(() => {
+          if (typeof playDrumSound === 'function') playDrumSound('snare');
+          if (typeof playFreq === 'function') playFreq(440 + i * 40, 160);
+        }, i * 200);
+      });
+    };
+    return;
+  }
+
+  if (step.actionType === 'fractionDivExplorer') {
+    renderFractionDivExplorerUI(box);
+    return;
+  }
+}
+
+// ---- התנסויות אינטראקטיביות (Manipulatives) ----
+
+function renderFractionBuilderUI(box) {
+  const sum = fractionBuilderBlocks.reduce((a, b) => a + b, 0);
+  const isPerfect = Math.abs(sum - 1) < 0.001;
+  const isOver = sum > 1.001;
+
+  let blockColors = { 0.5: '#43a047', 0.25: '#5e35b1', 0.125: '#fb8c00' };
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">הרכיבו בדיוק 1 שלם:</div>
+      <div style="background:#f0ebff;border:2px dashed #999;border-radius:10px;height:48px;width:100%;max-width:500px;margin:12px auto;display:flex;overflow:hidden;position:relative;">
+        ${fractionBuilderBlocks.map(b => `
+          <div style="flex:${b};background:${blockColors[b]||'#7e57c2'};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.85rem;border-left:1px solid rgba(255,255,255,0.4);">
+            ${b === 0.5 ? '1/2' : b === 0.25 ? '1/4' : '1/8'}
+          </div>
+        `).join('')}
+      </div>
+      <div style="font-weight:bold;font-size:1.15rem;margin:8px 0;">
+        סה״כ: <span style="color:${isPerfect ? 'var(--good)' : isOver ? '#c5221f' : 'var(--purple)'};">${sum.toFixed(3).replace(/\.?0+$/, '')}</span> מתוך 1
+        ${isPerfect ? ' 🎉 מושלם! 1 שלם מדויק!' : isOver ? ' ⚠️ עברתם את השלם!' : ''}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;">
+        <button type="button" class="secondary" id="fbAddHalf" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;width:auto;padding:8px 16px;">+ 1/2 (חצי)</button>
+        <button type="button" class="secondary" id="fbAddQuarter" style="background:#ede7f6;color:#4527a0;border-color:#b39ddb;width:auto;padding:8px 16px;">+ 1/4 (רבע)</button>
+        <button type="button" class="secondary" id="fbAddEighth" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;width:auto;padding:8px 16px;">+ 1/8 (שמינית)</button>
+        <button type="button" class="secondary" id="fbReset" style="width:auto;padding:8px 14px;">🗑️ איפוס</button>
+      </div>
+      ${fractionBuilderBlocks.length > 0 ? `
+        <button type="button" class="primary" id="fbPlayBuilt" style="width:auto;margin:6px auto;padding:8px 20px;">🎵 השמעת השברים שבניתם במקצב</button>
+      ` : ''}
+    </div>
+  `;
+
+  $('fbAddHalf').onclick = () => { fractionBuilderBlocks.push(0.5); checkFbSound(0.5); renderFractionBuilderUI(box); };
+  $('fbAddQuarter').onclick = () => { fractionBuilderBlocks.push(0.25); checkFbSound(0.25); renderFractionBuilderUI(box); };
+  $('fbAddEighth').onclick = () => { fractionBuilderBlocks.push(0.125); checkFbSound(0.125); renderFractionBuilderUI(box); };
+  $('fbReset').onclick = () => { fractionBuilderBlocks = []; renderFractionBuilderUI(box); };
+  if ($('fbPlayBuilt')) {
+    $('fbPlayBuilt').onclick = () => {
+      if (typeof playRhythmClicks === 'function') playRhythmClicks(fractionBuilderBlocks, 90);
+    };
+  }
+}
+
+function checkFbSound(val) {
+  const sum = fractionBuilderBlocks.reduce((a, b) => a + b, 0);
+  if (Math.abs(sum - 1) < 0.001) {
+    if (typeof playHarmonicReward === 'function') playHarmonicReward();
+  } else {
+    if (typeof playXylophoneNote === 'function') {
+      const idx = val === 0.5 ? 3 : val === 0.25 ? 1 : 0;
+      playXylophoneNote(idx);
+    }
+  }
+}
+
+function renderMultExplorerUI(box) {
+  const total = multExplorerGroups * multExplorerSize;
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">חקרו קבוצות שוות:</div>
+      <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">מספר קבוצות:</label>
+          <div style="display:inline-flex;gap:4px;" id="mgGroupBtns">
+            ${[2, 3, 4, 5].map(g => `<button type="button" class="secondary ${g === multExplorerGroups ? 'primary' : ''}" data-g="${g}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">גודל כל קבוצה:</label>
+          <div style="display:inline-flex;gap:4px;" id="mgSizeBtns">
+            ${[2, 3, 4, 5].map(s => `<button type="button" class="secondary ${s === multExplorerSize ? 'primary' : ''}" data-s="${s}" style="width:36px;min-height:36px;padding:0;">${s}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+        ${Array.from({ length: multExplorerGroups }).map((_, gi) => `
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 14px;text-align:center;">
+            <div style="font-size:0.85rem;font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה ${gi + 1}</div>
+            <div style="font-size:1.4rem;letter-spacing:4px;">${'● '.repeat(multExplorerSize).trim()}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        ${multExplorerGroups} קבוצות של ${multExplorerSize} = <span style="color:var(--purple);">${total}</span> (${multExplorerGroups} × ${multExplorerSize} = ${total})
+      </div>
+      <button type="button" class="primary" id="btnPlayMultExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת המקצב של הקבוצות</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#mgGroupBtns button').forEach(b => {
+    b.onclick = () => { multExplorerGroups = +b.dataset.g; renderMultExplorerUI(box); };
+  });
+  box.querySelectorAll('#mgSizeBtns button').forEach(b => {
+    b.onclick = () => { multExplorerSize = +b.dataset.s; renderMultExplorerUI(box); };
+  });
+  $('btnPlayMultExp').onclick = () => {
+    for (let g = 0; g < multExplorerGroups; g++) {
+      for (let s = 0; s < multExplorerSize; s++) {
+        setTimeout(() => {
+          if (s === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+          else if (typeof playDrumSound === 'function') playDrumSound('snare');
+        }, (g * multExplorerSize + s) * 200);
+      }
+    }
+  };
+}
+
+function renderTensBuilderUI(box) {
+  const total = tensBuilderTens * 10 + tensBuilderOnes;
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">בנו מספר באמצעות עשרות ואחדות:</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
+        <button type="button" class="secondary" id="tbAddTen" style="background:#ede7f6;color:#5e35b1;border-color:#b39ddb;width:auto;padding:8px 14px;">+ עשרת (10)</button>
+        <button type="button" class="secondary" id="tbSubTen" style="width:auto;padding:8px 14px;" ${tensBuilderTens <= 0 ? 'disabled' : ''}>- עשרת</button>
+        <button type="button" class="secondary" id="tbAddOne" style="background:#fff8e1;color:#f57f17;border-color:#ffe082;width:auto;padding:8px 14px;">+ אחדה (1)</button>
+        <button type="button" class="secondary" id="tbSubOne" style="width:auto;padding:8px 14px;" ${tensBuilderOnes <= 0 ? 'disabled' : ''}>- אחדה</button>
+        <button type="button" class="secondary" id="tbReset" style="width:auto;padding:8px 14px;">🗑️ איפוס</button>
+      </div>
+      <div style="display:flex;gap:20px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin:14px 0;">
+        <div style="background:#f9f7fd;border:1px solid #d1c4e9;border-radius:10px;padding:12px 18px;min-width:140px;text-align:center;">
+          <div style="font-weight:bold;color:#5e35b1;margin-bottom:6px;">עשרות: ${tensBuilderTens} (${tensBuilderTens * 10})</div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+            ${Array.from({ length: tensBuilderTens }).map(() => `
+              <div style="background:var(--purple);color:#fff;border-radius:4px;width:70px;height:16px;font-size:0.75rem;line-height:16px;font-weight:bold;">10</div>
+            `).join('')}
+          </div>
+        </div>
+        <div style="background:#fffdf7;border:1px solid #ffe082;border-radius:10px;padding:12px 18px;min-width:140px;text-align:center;">
+          <div style="font-weight:bold;color:#f57f17;margin-bottom:6px;">אחדות: ${tensBuilderOnes}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:120px;margin:auto;">
+            ${Array.from({ length: tensBuilderOnes }).map(() => `
+              <div style="background:#fbc02d;border-radius:3px;width:14px;height:14px;"></div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="font-size:1.35rem;font-weight:bold;margin:10px 0;">
+        המספר שנבנה: <span style="color:var(--purple);font-size:1.6rem;">${total}</span>
+      </div>
+      <button type="button" class="primary" id="btnPlayTensExp" style="width:auto;margin:8px auto;padding:10px 24px;">🔊 השמעת המספר (עשרות + אחדות)</button>
+    </div>
+  `;
+
+  $('tbAddTen').onclick = () => { if (tensBuilderTens < 9) tensBuilderTens++; if (typeof playFreq === 'function') playFreq(130.81, 200); renderTensBuilderUI(box); };
+  $('tbSubTen').onclick = () => { if (tensBuilderTens > 0) tensBuilderTens--; renderTensBuilderUI(box); };
+  $('tbAddOne').onclick = () => { if (tensBuilderOnes < 9) tensBuilderOnes++; if (typeof playFreq === 'function') playFreq(880, 100); renderTensBuilderUI(box); };
+  $('tbSubOne').onclick = () => { if (tensBuilderOnes > 0) tensBuilderOnes--; renderTensBuilderUI(box); };
+  $('tbReset').onclick = () => { tensBuilderTens = 0; tensBuilderOnes = 0; renderTensBuilderUI(box); };
+  $('btnPlayTensExp').onclick = () => {
+    for (let t = 0; t < tensBuilderTens; t++) {
+      setTimeout(() => { if (typeof playFreq === 'function') playFreq(130.81, 220); }, t * 300);
+    }
+    const delay = tensBuilderTens * 300 + 100;
+    for (let o = 0; o < tensBuilderOnes; o++) {
+      setTimeout(() => { if (typeof playFreq === 'function') playFreq(880, 100); }, delay + o * 160);
+    }
+  };
+}
+
+function renderLineExplorerUI(box) {
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">צעדו וקפצו על ישר המספרים:</div>
+      <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <label style="font-weight:bold;">גודל דילוג:</label>
+        <div style="display:inline-flex;gap:6px;" id="leStepBtns">
+          ${[1, 2, 5].map(s => `<button type="button" class="secondary ${s === lineExplorerStep ? 'primary' : ''}" data-step="${s}" style="width:40px;min-height:36px;padding:0;">+${s}</button>`).join('')}
+        </div>
+      </div>
+      <div style="background:#f4f0ff;border-radius:12px;padding:16px;margin:14px auto;max-width:520px;overflow-x:auto;">
+        <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:0.95rem;direction:ltr;margin-bottom:6px;">
+          ${Array.from({ length: 11 }).map((_, i) => `<span style="${i * 2 === lineExplorerPos ? 'color:var(--purple);font-size:1.2rem;' : ''}">${i * 2}</span>`).join('')}
+        </div>
+        <div style="height:6px;background:#d1c4e9;border-radius:3px;position:relative;">
+          <div style="position:absolute;left:${Math.min(100, (lineExplorerPos / 20) * 100)}%;top:-8px;transform:translateX(-50%);font-size:1.3rem;">📍</div>
+        </div>
+      </div>
+      <div style="font-size:1.3rem;font-weight:bold;margin:12px 0;">
+        מיקום נוכחי על הישר: <span style="color:var(--purple);font-size:1.6rem;">${lineExplorerPos}</span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="primary" id="leJumpFwd" style="width:auto;padding:10px 20px;">קפיצה קדימה (+${lineExplorerStep}) 🦘</button>
+        <button type="button" class="secondary" id="leJumpBack" style="width:auto;padding:10px 16px;" ${lineExplorerPos <= 0 ? 'disabled' : ''}>קפיצה אחורה (-${lineExplorerStep})</button>
+        <button type="button" class="secondary" id="leReset" style="width:auto;padding:10px 16px;">איפוס ל-0</button>
+      </div>
+    </div>
+  `;
+
+  box.querySelectorAll('#leStepBtns button').forEach(b => {
+    b.onclick = () => { lineExplorerStep = +b.dataset.step; renderLineExplorerUI(box); };
+  });
+  $('leJumpFwd').onclick = () => {
+    lineExplorerPos = Math.min(20, lineExplorerPos + lineExplorerStep);
+    if (typeof playFreq === 'function') playFreq(yToFreq(lineExplorerPos, 0, 20), 200);
+    renderLineExplorerUI(box);
+  };
+  $('leJumpBack').onclick = () => {
+    lineExplorerPos = Math.max(0, lineExplorerPos - lineExplorerStep);
+    if (typeof playFreq === 'function') playFreq(yToFreq(lineExplorerPos, 0, 20), 200);
+    renderLineExplorerUI(box);
+  };
+  $('leReset').onclick = () => {
+    lineExplorerPos = 0;
+    if (typeof playFreq === 'function') playFreq(yToFreq(0, 0, 20), 160);
+    renderLineExplorerUI(box);
+  };
+}
+
+function renderDivExplorerUI(box) {
+  const sizePerGroup = Math.floor(divExplorerTotal / divExplorerGroups);
+  const remainder = divExplorerTotal % divExplorerGroups;
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">מעבדת חלוקה שווה ומקצב:</div>
+      <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">כמות פעימות:</label>
+          <div style="display:inline-flex;gap:4px;" id="divTotBtns">
+            ${[8, 12, 16].map(t => `<button type="button" class="secondary ${t === divExplorerTotal ? 'primary' : ''}" data-t="${t}" style="width:42px;min-height:36px;padding:0;">${t}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">קבוצות שוות:</label>
+          <div style="display:inline-flex;gap:4px;" id="divGrpBtns">
+            ${[2, 3, 4].map(g => `<button type="button" class="secondary ${g === divExplorerGroups ? 'primary' : ''}" data-g="${g}" style="width:36px;min-height:36px;padding:0;">${g}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+        ${Array.from({ length: divExplorerGroups }).map((_, gi) => `
+          <div style="background:#f4f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 14px;text-align:center;">
+            <div style="font-size:0.85rem;font-weight:bold;color:var(--purple);margin-bottom:4px;">קבוצה ${gi + 1}</div>
+            <div style="font-size:1.3rem;letter-spacing:3px;">${'● '.repeat(sizePerGroup).trim()}</div>
+            <div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">${sizePerGroup} פעימות</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        ${divExplorerTotal} ÷ ${divExplorerGroups} = <span style="color:var(--purple);">${sizePerGroup}</span> בכל קבוצה ${remainder > 0 ? `(נשאר ${remainder})` : 'במדויק!'}
+      </div>
+      <button type="button" class="primary" id="btnPlayDivExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת חלוקת המקצב</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#divTotBtns button').forEach(b => {
+    b.onclick = () => { divExplorerTotal = +b.dataset.t; renderDivExplorerUI(box); };
+  });
+  box.querySelectorAll('#divGrpBtns button').forEach(b => {
+    b.onclick = () => { divExplorerGroups = +b.dataset.g; renderDivExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayDivExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      let t = 0;
+      for (let g = 0; g < divExplorerGroups; g++) {
+        for (let s = 0; s < sizePerGroup; s++) {
+          setTimeout(() => {
+            if (s === 0 && typeof playDrumSound === 'function') playDrumSound('kick');
+            else if (typeof playDrumSound === 'function') playDrumSound('snare');
+          }, t * 190);
+          t++;
+        }
+        t += 0.7;
+      }
+    };
+  }
+}
+
+function renderEuclideanWheelUI(box) {
+  const total = euclideanSteps;
+  const k = euclideanPulses;
+  const hits = [];
+  for (let i = 0; i < total; i++) {
+    const isHit = Math.floor((i + 1) * k / total) > Math.floor(i * k / total);
+    hits.push(isHit);
+  }
+
+  const r = 70;
+  const cx = 90;
+  const cy = 90;
+  const coords = [];
+  for (let i = 0; i < total; i++) {
+    const angle = (2 * Math.PI * i / total) - (Math.PI / 2);
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    coords.push({ x, y, isHit: hits[i] });
+  }
+
+  const polygonPoints = coords.filter(c => c.isHit).map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">גלגל הזמן והמקצבים האוקלידי:</div>
+      <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">סה״כ צעדים במעגל:</label>
+          <div style="display:inline-flex;gap:4px;" id="eucStepsBtns">
+            ${[8, 12, 16].map(s => `<button type="button" class="secondary ${s === euclideanSteps ? 'primary' : ''}" data-s="${s}" style="width:38px;min-height:36px;padding:0;">${s}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">צלילים פעילים (קדקודים):</label>
+          <div style="display:inline-flex;gap:4px;" id="eucPulsesBtns">
+            ${[3, 4, 5].map(p => `<button type="button" class="secondary ${p === euclideanPulses ? 'primary' : ''}" data-p="${p}" style="width:36px;min-height:36px;padding:0;">${p}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;margin:12px 0;">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ddd" stroke-width="2" />
+          ${polygonPoints ? `<polygon points="${polygonPoints}" fill="rgba(107,70,193,0.15)" stroke="var(--purple)" stroke-width="2.5" />` : ''}
+          ${coords.map((c, idx) => `
+            <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${c.isHit ? 6.5 : 3.5}" fill="${c.isHit ? 'var(--purple)' : '#bbb'}" />
+          `).join('')}
+        </svg>
+      </div>
+      <div style="font-size:1.15rem;font-weight:bold;color:var(--ink);margin:8px 0;">
+        מצולע של <span style="color:var(--purple);">${euclideanPulses}</span> קודקודים מתוך <span style="color:var(--purple);">${euclideanSteps}</span> פעימות
+      </div>
+      <button type="button" class="primary" id="btnPlayEucExp" style="width:auto;margin:8px auto;padding:10px 24px;">🎶 סיבוב גלגל והשמעת המקצב</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#eucStepsBtns button').forEach(b => {
+    b.onclick = () => { euclideanSteps = +b.dataset.s; renderEuclideanWheelUI(box); };
+  });
+  box.querySelectorAll('#eucPulsesBtns button').forEach(b => {
+    b.onclick = () => { euclideanPulses = +b.dataset.p; renderEuclideanWheelUI(box); };
+  });
+  const playBtn = $('btnPlayEucExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      coords.forEach((c, idx) => {
+        setTimeout(() => {
+          if (c.isHit) {
+            if (typeof playDrumSound === 'function') playDrumSound('kick');
+            if (typeof playFreq === 'function') playFreq(440 + (idx * 20), 180);
+          } else {
+            if (typeof playDrumSound === 'function') playDrumSound('hihat');
+          }
+        }, idx * 140);
+      });
+    };
+  }
+}
+
+function renderEvenOddExplorerUI(box) {
+  const pairs = Math.floor(evenOddCount / 2);
+  const isOdd = evenOddCount % 2 !== 0;
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">חוקר הזוגי והאי־זוגי:</div>
+      <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <label style="font-weight:bold;">בחרו מספר:</label>
+        <div style="display:inline-flex;gap:4px;flex-wrap:wrap;" id="eoNumBtns">
+          ${[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" class="secondary ${n === evenOddCount ? 'primary' : ''}" data-n="${n}" style="width:34px;min-height:34px;padding:0;">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:16px 0;">
+        ${Array.from({ length: pairs }).map((_, pi) => `
+          <div style="background:#e8f5e9;border:2px solid #43a047;border-radius:10px;padding:8px 12px;text-align:center;">
+            <div style="font-size:0.75rem;font-weight:bold;color:#2e7d32;">זוג ${pi + 1}</div>
+            <div style="font-size:1.3rem;">● ●</div>
+          </div>
+        `).join('')}
+        ${isOdd ? `
+          <div style="background:#fff3e0;border:2px dashed #fb8c00;border-radius:10px;padding:8px 12px;text-align:center;">
+            <div style="font-size:0.75rem;font-weight:bold;color:#e65100;">בודד!</div>
+            <div style="font-size:1.3rem;color:#d84315;">●</div>
+          </div>
+        ` : ''}
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;margin:10px 0;">
+        המספר ${evenOddCount} הוא:
+        <span style="color:${isOdd ? '#e65100' : '#2e7d32'};font-size:1.4rem;">
+          ${isOdd ? 'אי-זוגי (יש צליל בודד)' : 'זוגי (כולם בצמדים!)'}
+        </span>
+      </div>
+      <button type="button" class="primary" id="btnPlayEoExp" style="width:auto;margin:8px auto;padding:10px 24px;">🎵 השמעת הזוגות והבודד</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#eoNumBtns button').forEach(b => {
+    b.onclick = () => { evenOddCount = +b.dataset.n; renderEvenOddExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayEoExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      let t = 0;
+      for (let p = 0; p < pairs; p++) {
+        setTimeout(() => { if (typeof playFreq === 'function') playFreq(392, 140); }, t * 200);
+        setTimeout(() => { if (typeof playFreq === 'function') playFreq(440, 140); }, (t + 1) * 200);
+        t += 2.5;
+      }
+      if (isOdd) {
+        setTimeout(() => {
+          if (typeof playFreq === 'function') playFreq(880, 400);
+        }, t * 200);
+      }
+    };
+  }
+}
+
+function renderPolyrhythmExplorerUI(box) {
+  const stepLcm = (typeof lcmOf === 'function') ? (lcmOf(polyrhythmCycleA, polyrhythmCycleB) || 12) : 6;
+  const maxSpan = Math.max(12, stepLcm);
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">מעבדת פוליריתמיקה וכפולה משותפת:</div>
+      <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">תוף א׳ מכה כל:</label>
+          <div style="display:inline-flex;gap:4px;" id="polyABtns">
+            ${[2, 3, 4].map(a => `<button type="button" class="secondary ${a === polyrhythmCycleA ? 'primary' : ''}" data-a="${a}" style="width:38px;min-height:36px;padding:0;">${a}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">תוף ב׳ מכה כל:</label>
+          <div style="display:inline-flex;gap:4px;" id="polyBBtns">
+            ${[3, 4, 6].map(b => `<button type="button" class="secondary ${b === polyrhythmCycleB ? 'primary' : ''}" data-b="${b}" style="width:38px;min-height:36px;padding:0;">${b}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:14px 0;">
+        ${Array.from({ length: maxSpan + 1 }).map((_, i) => {
+          const isA = i % polyrhythmCycleA === 0;
+          const isB = i % polyrhythmCycleB === 0;
+          const isBoth = isA && isB;
+          return `
+            <div style="padding:6px 8px;border:2px solid ${isBoth ? 'var(--good)' : 'var(--line)'};background:${isBoth ? '#e8f5e9' : '#fff'};border-radius:6px;text-align:center;min-width:32px;">
+              <b>${i}</b><br>
+              <small style="font-size:0.75rem;">${isBoth ? '💥' : isA ? '🥁' : isB ? '🪘' : '·'}</small>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (LCM של ${polyrhythmCycleA} ו־${polyrhythmCycleB} הוא ${stepLcm})
+      </div>
+      <button type="button" class="primary" id="btnPlayPolyExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת שני התופים יחד</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#polyABtns button').forEach(b => {
+    b.onclick = () => { polyrhythmCycleA = +b.dataset.a; renderPolyrhythmExplorerUI(box); };
+  });
+  box.querySelectorAll('#polyBBtns button').forEach(b => {
+    b.onclick = () => { polyrhythmCycleB = +b.dataset.b; renderPolyrhythmExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayPolyExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      for (let p = 0; p <= stepLcm; p++) {
+        setTimeout(() => {
+          const isA = p % polyrhythmCycleA === 0;
+          const isB = p % polyrhythmCycleB === 0;
+          if (isA && isB && p > 0 && typeof playHarmonicReward === 'function') playHarmonicReward();
+          if (isA && typeof playDrumSound === 'function') playDrumSound('kick');
+          if (isB && typeof playDrumSound === 'function') playDrumSound('snare');
+        }, p * 220);
+      }
+    };
+  }
+}
+
+function renderFractionDivExplorerUI(box) {
+  const baseMap = { '1/2': 0.5, '3/4': 0.75, '3/8': 0.375 };
+  const unitMap = { '1/8': 0.125, '1/16': 0.0625 };
+  const baseVal = baseMap[fractionDivBase] || 0.5;
+  const unitVal = unitMap[fractionDivUnit] || 0.125;
+  const count = Math.round(baseVal / unitVal);
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">מעבדת חילוק שברים לפי משכי צליל:</div>
+      <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">משך היעד:</label>
+          <div style="display:inline-flex;gap:4px;" id="fdBaseBtns">
+            ${[['1/2', 'חצי'], ['3/8', 'רבע מנוקד'], ['3/4', '3/4']].map(([k, label]) => `
+              <button type="button" class="secondary ${k === fractionDivBase ? 'primary' : ''}" data-base="${k}" style="padding:6px 12px;min-height:36px;">${label} (${k})</button>
+            `).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:bold;margin-left:6px;">יחידת החלוקה:</label>
+          <div style="display:inline-flex;gap:4px;" id="fdUnitBtns">
+            ${[['1/8', 'שמינית'], ['1/16', 'שש־עשרית']].map(([k, label]) => `
+              <button type="button" class="secondary ${k === fractionDivUnit ? 'primary' : ''}" data-unit="${k}" style="padding:6px 12px;min-height:36px;">${label} (${k})</button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div style="background:#f4f0ff;border-radius:10px;padding:14px;max-width:440px;margin:12px auto;">
+        <div style="display:flex;gap:4px;justify-content:center;">
+          ${Array.from({ length: count }).map((_, i) => `
+            <div style="flex:1;background:var(--purple);color:#fff;border-radius:6px;padding:8px 4px;text-align:center;font-weight:bold;font-size:0.85rem;">
+              ${fractionDivUnit}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="font-size:1.25rem;font-weight:bold;color:var(--ink);margin:10px 0;">
+        ${fractionDivBase} ÷ ${fractionDivUnit} = <span style="color:var(--purple);font-size:1.4rem;">${count}</span> תווים בדיוק!
+      </div>
+      <button type="button" class="primary" id="btnPlayFdExp" style="width:auto;margin:8px auto;padding:10px 24px;">🎵 השמעת החלוקה למקצב</button>
+    </div>
+  `;
+
+  box.querySelectorAll('#fdBaseBtns button').forEach(b => {
+    b.onclick = () => { fractionDivBase = b.dataset.base; renderFractionDivExplorerUI(box); };
+  });
+  box.querySelectorAll('#fdUnitBtns button').forEach(b => {
+    b.onclick = () => { fractionDivUnit = b.dataset.unit; renderFractionDivExplorerUI(box); };
+  });
+  const playBtn = $('btnPlayFdExp');
+  if (playBtn) {
+    playBtn.onclick = () => {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          if (typeof playXylophoneNote === 'function') playXylophoneNote(i % 5);
+          if (typeof playDrumSound === 'function') playDrumSound('snare');
+        }, i * 200);
+      }
+    };
+  }
+}
+
+if ($('lessonCloseBtn')) $('lessonCloseBtn').onclick = closeLesson;
+if ($('stepPrevBtn')) $('stepPrevBtn').onclick = () => {
+  if (activeStepIndex > 0) {
+    activeStepIndex--;
+    renderActiveStep();
+  }
+};
+if ($('stepNextBtn')) $('stepNextBtn').onclick = () => {
+  if (!activeLessonId) return;
+  const l = getLessonById(activeLessonId);
+  if (l && activeStepIndex < l.steps.length - 1) {
+    activeStepIndex++;
+    renderActiveStep();
+  }
+};
+if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
+  if (!activeLessonId) return;
+  const l = getLessonById(activeLessonId);
+  closeLesson();
+  if (l && typeof saveGrade === 'function') saveGrade(l.grade);
+  const tabRem = $('tab-remediation');
+  if (tabRem && typeof activateHomeTab === 'function') activateHomeTab(tabRem);
+};
 </script></body></html>
