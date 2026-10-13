@@ -12,6 +12,7 @@ const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
+  'grade3Music.js': 'pure grade-3 core for meter and remainder; the rest of plan §5 and the bindGrade3 widgets land in the follow-up PRs for #104',
   'prepost.js': 'pre/post unit check item bank and statistics, wired in teacher tab follow-up PR #173',
 };
 
