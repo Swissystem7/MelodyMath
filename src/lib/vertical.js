@@ -50,10 +50,51 @@
     return {};
   }
 
+  function detectEvenOddBeat(rhythm) {
+    // Assuming rhythm is an array of beat durations (in beats)
+    const totalBeats = rhythm.reduce((sum, beat) => sum + beat, 0);
+    return totalBeats % 2 === 0 ? 'even' : 'odd';
+  }
+
+  function mapVerticalToInstruments(vert) {
+    // Map vertical operation to instruments: ones on drum, tens on bass
+    const V = normalizeVertical(vert);
+    const onesA = V.a % 10;
+    const tensA = Math.floor(V.a / 10);
+    const onesB = V.b % 10;
+    const tensB = Math.floor(V.b / 10);
+    
+    if (V.op === '+') {
+      return {
+        drum: onesA + onesB,
+        bass: tensA + tensB
+      };
+    } else {
+      return {
+        drum: onesA - onesB,
+        bass: tensA - tensB
+      };
+    }
+  }
+
+  function mapHalfHourToNote(hour) {
+    // Map half-hour to half note (assuming hour is in 24-hour format)
+    const minutes = hour % 100;
+    const hours = Math.floor(hour / 100);
+    
+    if (minutes === 30) {
+      return 'half-note';
+    }
+    return 'full-note';
+  }
+
   return {
     normalizeVertical: normalizeVertical,
     renderVerticalHtml: renderVerticalHtml,
     bindVertical: bindVertical,
     MAX_OPERAND: MAX_OPERAND,
+    detectEvenOddBeat: detectEvenOddBeat,
+    mapVerticalToInstruments: mapVerticalToInstruments,
+    mapHalfHourToNote: mapHalfHourToNote,
   };
 });
