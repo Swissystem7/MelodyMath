@@ -13,6 +13,10 @@
 body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font-size:var(--class-font)}body.class-live .choice{font-size:2rem;min-height:76px}body.class-live .card{padding:28px}
 .class-timer{font-size:2.2rem;font-weight:900;color:var(--purple);letter-spacing:.04em;direction:ltr;text-align:center}.class-kids{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.class-kids button{width:auto;background:#eee9ff;color:var(--ink)}
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
+/* phones 360-430px (#101): 44px targets, tables scroll inside themselves, never the page */
+html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedback{overflow-wrap:anywhere}button,select,input:not([type=checkbox]):not([type=radio]),summary,.level,.navcard{min-height:44px}
+@media(max-width:680px){.report-table,.class-board{display:block;max-width:100%;overflow-x:auto}}
+@media(max-width:480px){.wrap{padding:16px 12px 48px}.tabs{gap:8px}.tab{flex:1 1 calc(50% - 8px)}.levels{gap:8px}.level{padding:14px 10px}.choices{gap:8px}.metro-bar{padding:8px 10px}.metro-bar input[type=number]{width:64px;min-height:44px}.stat{min-width:0;flex-basis:calc(50% - 10px)}.class-timer{font-size:1.8rem}.class-kids button{min-width:44px}h1{font-size:2rem}}
 /* הבדיקה (#110): פסי השמיניות אינם יעדי מגע, ולכן הם מתכווצים ואין גלילה אופקית ב־360px */
 .pp-bar{display:flex;gap:3px;border:3px solid var(--purple);border-radius:12px;padding:4px;background:#fff;margin:14px 0}.pp-cell{flex:1 1 0;min-width:0;height:48px;background:#f4f0fc;border:1px solid var(--line);border-radius:8px}.pp-cell.on{background:var(--purple);border-color:var(--purple)}.pp-kicker{margin:0;color:var(--muted);font-size:.9rem;font-weight:700}.pp-report .report-table td{white-space:nowrap}.pp-report .report-table td:first-child{white-space:normal;word-break:break-word}#prePost label,#ppUnit{max-width:100%}#prePost .topline{flex-wrap:wrap;gap:4px 10px}
 @media print{
@@ -21,7 +25,9 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   .panel{display:none!important}
   #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
-  #worksheetCard,#classBoardCard,#parentCard,#certCard{display:none!important}
+  #worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard{display:none!important}
+  body.print-lesson #lessonCard{display:block!important}
+  body.print-lesson #reportCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
   body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
@@ -281,6 +287,21 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
   </div>
   <div id="worksheetSheet" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="lessonCard">
+  <span class="tag">מערכי שיעור · לפי תוכנית הלימודים</span>
+  <h2>מערך שיעור לנושא</h2>
+  <p>בוחרים כיתה ונושא מהתוכנית ורואים מטרות ומהלך שיעור. הבנק עוד קטן: לרוב הנושאים אין עדיין מערך.</p>
+  <div class="sheet-actions no-print">
+    <label>כיתה
+      <select id="lessonGrade" aria-label="כיתה למערך שיעור"></select>
+    </label>
+    <label>נושא
+      <select id="lessonTopic" aria-label="נושא מהתוכנית"></select>
+    </label>
+    <button type="button" id="lessonPrint">הדפסת המערך</button>
+  </div>
+  <div id="lessonPlans" aria-live="polite"></div>
+</div>
 <div class="card" id="classBoardCard">
   <span class="tag">כל הילדים בטאבלט הזה</span>
   <h2>לוח כיתה</h2>
@@ -371,6 +392,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 </div></section>
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">מעבדה · לא שיעור</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון</label><input id="accuracy" type="range" min="0" max="100" value="70"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm"></div></div><div class="tool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><h3 style="margin:0;">ישר מספרים מנגן — שברים ותדרים</h3><span class="tag">מחוון רציף ופעמוני שבר</span></div><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100"></div><div class="nl-keys" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"><button type="button" class="secondary" data-pct="0">0 (בסיס)</button><button type="button" class="secondary" data-pct="25">1/4 (רבע)</button><button type="button" class="secondary" data-pct="50">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div><div class="tool rhythm-studio" id="rhythmGameTool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><h3 style="margin:0;color:var(--pink);font-size:1.35rem;">🥁 סטודיו מקצב ומוזיקה — מנגנים עם הלהקה</h3><span class="tag" id="rhythmStageTag">שלב 1: פעימת מקצב (4/4)</span></div><div class="band-stage" id="bandStage" role="region" aria-label="שלבי הלהקה"><div class="band-card unlocked" id="bandDrums" data-level="1"><span class="band-icon">🥁</span><span class="band-name">תופים</span><span class="band-level">שלב 1 · פעימה</span></div><div class="band-card" id="bandBass" data-level="2"><span class="band-icon">🎸</span><span class="band-name">קו בס</span><span class="band-level">שלב 2 · רצף 3+</span></div><div class="band-card" id="bandChords" data-level="3"><span class="band-icon">🎹</span><span class="band-name">אקורדים</span><span class="band-level">שלב 3 · רצף 6+</span></div><div class="band-card" id="bandMelody" data-level="4"><span class="band-icon">🎷</span><span class="band-name">סולו</span><span class="band-level">שלב 4 · רצף 10+</span></div></div><div class="rhythm-highway-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.95rem;color:#ded6f0;"><span id="rhythmPatternName" style="color:#fff;"><b>תבנית:</b> ארבעה רבעים (4/4)</span><span id="rhythmBpmDisplay" style="color:#ffd85d;font-weight:bold;"><b>טמפו:</b> 80 BPM</span></div><div class="rhythm-highway" id="rhythmFractionsVisual" aria-label="חלוקת התיבה לשברים"></div><div class="rhythm-track" style="position:relative;height:12px;background:rgba(255,255,255,0.15);border-radius:99px;overflow:hidden;margin-top:10px;"><div id="rhythmCursor" class="rhythm-cursor-line"></div></div><div id="rhythmSpark" class="rhythm-spark" aria-live="assertive">בול! 💥</div></div><div class="drum-pads-grid" role="group" aria-label="פדים לתופים"><button type="button" id="drumPadBtn" class="drum-pad pad-kick" data-sound="kick" title="בס (Kick) — רווח או מקש 1"><span class="pad-icon">🥁</span><span class="pad-label">בס (Kick)</span><span class="pad-key">רווח / 1</span></button><button type="button" id="drumSnareBtn" class="drum-pad pad-snare" data-sound="snare" title="סנר (Snare) — מקש 2"><span class="pad-icon">🪘</span><span class="pad-label">סנר (Snare)</span><span class="pad-key">מקש 2</span></button><button type="button" id="drumHihatBtn" class="drum-pad pad-hihat" data-sound="hihat" title="היי-האט — מקש 3"><span class="pad-icon">🪙</span><span class="pad-label">היי-האט</span><span class="pad-key">מקש 3</span></button><button type="button" id="drumClapBtn" class="drum-pad pad-clap" data-sound="clap" title="מחיאת כף — מקש 4"><span class="pad-icon">👏</span><span class="pad-label">כף (Clap)</span><span class="pad-key">מקש 4</span></button></div><div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap;"><button type="button" id="rhythmStartBtn" class="primary" style="width:auto;min-height:48px;padding:12px 24px;">▶ התחלת נגינה</button><button type="button" id="rhythmPatternNextBtn" class="secondary" style="width:auto;min-height:48px;padding:12px 20px;">🔄 החלף מקצב</button></div><div style="display:flex;justify-content:space-around;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin:12px 0;"><div><span style="font-size:0.8rem;color:var(--muted);display:block;">רצף מקצב</span><b id="rhythmStreakDisplay" style="font-size:1.45rem;color:var(--purple);">0</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">שכבה מוזיקלית</span><b id="rhythmLayerDisplay" style="font-size:1.45rem;color:var(--good);">רק תופים</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">דיוק פעימה</span><b id="rhythmAccuracyDisplay" style="font-size:1.45rem;color:var(--ink);">-</b></div></div><div class="xylo-shelf" id="xyloStudio"><div style="display:flex;justify-content:space-between;align-items:center;color:#ded6f0;margin-bottom:10px;font-size:0.88rem;"><span style="color:#fff;"><b>🎹 קסילופון צבעוני:</b> הקישו על הקלידים או במקלדת A–K / 1–8</span><span id="xyloLastNote" style="color:#ffd85d;font-weight:bold;">נגנו מנגינה עם המקצב!</span></div><div class="xylo-keys" id="xyloKeys" role="group" aria-label="קלידי קסילופון 8 צלילים"></div></div></div></div></div></section></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
+<script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/remediation.js"></script>
 <script src="src/lib/rhythmGame.js"></script>
 <script src="src/lib/interactiveLessons.js"></script>
@@ -389,6 +411,8 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
 <script src="src/lib/geometryShapes.js"></script>
+<script src="src/lib/curriculum.js"></script>
+<script src="src/lib/pedagogy.js"></script>
 <script src="src/lib/worksheets.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
@@ -402,6 +426,7 @@ const exercises=[
 [25,3,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 12/8?',12,'המספר העליון מציין שמיניות'],[26,3,'יחסים','מרווחים','מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?','75:64','בכוונון טבעי 5-limit היחס הוא 75:64'],[27,3,'פונקציות','מלודיה','תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה: 4−2=2; כפול 3'],[28,3,'חזקות','טמפו','קצב מתחיל ב־20 BPM ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?',540,'20 × 3³'],[29,3,'שברים','קצב','כמה רבעים שווה שלם עם שתי נקודות הארכה?',7,'4 + 2 + 1 = 7'],[30,3,'יחסים','מרווחים','מה יחס התדרים בטריטון בכיוון עולה?','45:32','בכוונון טבעי היחס הוא 45:32'],[31,3,'פונקציות','מלודיה','תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?',35,'5 × 7'],[32,3,'חזקות','טמפו','קצב מתחיל ב־10 BPM ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?',80,'10 × 2³'],[33,3,'שברים','קצב','כמה שמיניות שווה רבע עם שתי נקודות הארכה?',3.5,'2 + 1 + 0.5 = 3.5'],[34,3,'יחסים','מרווחים','מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?','64:45','בכוונון טבעי היחס הוא 64:45'],[35,3,'פונקציות','מלודיה','תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?',-12,'בכל חזרה: ‎-6+3=-3; כפול 4']
 ].map(([id,level,mathTopic,musicConcept,prompt,answer,hint])=>({id,level,mathTopic,musicConcept,prompt,answer,hint}));
 let chosenLevel=1,history=[],current=null,answered=false,seed=Date.now()&0x7fffffff;
+document.addEventListener('pointerdown',function(){if(typeof unlockAudio==='function')unlockAudio()},{once:true,capture:true});
 const $=id=>document.getElementById(id); const show=(id,on)=>$(id).classList.toggle('hidden',!on);
 function rng(n){let s=n|0;return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
 function nextExercise(){const pool=eligibleExercises(exercises,history,current&&current.id,chosenLevel);const random=rng(seed+history.length*97);return pool[Math.floor(random()*pool.length)]}
@@ -722,8 +747,13 @@ if($('ppStartPre'))$('ppStartPre').onclick=()=>ppStart('pre');
 if($('ppStartPost'))$('ppStartPost').onclick=()=>ppStart('post');
 if($('ppRefresh'))$('ppRefresh').onclick=ppRenderReport;
 if($('ppStop'))$('ppStop').onclick=()=>ppHalt('הבדיקה הופסקה. התשובות שנרשמו עד כאן נשמרו.');
+// ---- מערכי שיעור (pedagogy.js) לפי כיתה ונושא מהתוכנית (curriculum.js) ----
+function paintLessonTopics(){const g=$('lessonGrade'),t=$('lessonTopic');if(!g||!t||typeof plansFor!=='function')return;const rows=typeof rowsForGrade==='function'?rowsForGrade(g.value):[];const has=new Set(plansFor(g.value,'').map(p=>p.curriculumTopic));t.innerHTML='<option value="">כל הנושאים שיש להם מערך</option>'+rows.map(r=>'<option value="'+escapeHtml(r.topic)+'">'+escapeHtml(r.topic)+(has.has(r.topic)?' · יש מערך':'')+'</option>').join('');renderLessonPlans()}
+function renderLessonPlans(){const g=$('lessonGrade'),t=$('lessonTopic'),box=$('lessonPlans');if(!g||!t||!box||typeof plansFor!=='function')return;box.innerHTML=renderLessonPlansHtml(plansFor(g.value,t.value))}
+if($('lessonGrade')){$('lessonGrade').innerHTML=GRADES.map(g=>'<option value="'+g+'"'+(g===selectedGrade?' selected':'')+'>כיתה '+g+'׳</option>').join('');$('lessonGrade').onchange=paintLessonTopics;$('lessonTopic').onchange=renderLessonPlans;paintLessonTopics()}
+if($('lessonPrint'))$('lessonPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert');document.body.classList.add('print-lesson');renderLessonPlans();window.print()};
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama','print-lesson')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));$('rosterMsg').textContent=summarizeImport(res);if(!res.ok)return;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
@@ -838,6 +868,8 @@ if($('metroDown'))$('metroDown').onclick=function(){ setMetroBpm(metroBpmNow()-4
 if($('metroUp'))$('metroUp').onclick=function(){ setMetroBpm(metroBpmNow()+4); };
 if($('metroBpm'))$('metroBpm').onchange=function(){ this.value=clampBpm(this.value); if(metroOn) startMetro(); };
 document.addEventListener('visibilitychange',function(){ if(document.hidden) stopMetro(); });
+// One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
+if(typeof installAudioUnlock==='function') installAudioUnlock(document);
 paintMetro();
 renderRosterChips();
 renderClassBoard();

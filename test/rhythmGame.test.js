@@ -41,3 +41,9 @@ test('all rhythm patterns strictly sum to a full 4/4 whole note', () => {
     assert.equal(p.durations.length, p.fractions.length);
   });
 });
+
+test('isWithinTolerance returns true when difference is within tolerance and evaluateTap uses it', () => {
+  const result = rhythm.evaluateTap(1000, 1050, 100);
+  assert.deepStrictEqual(result, { hit: true, rating: 'good', text: '🎵 קרוב מאוד!', delta: 50 });
+  assert.strictEqual(rhythm.isWithinTolerance(1000, 1050, 100), true);
+});
