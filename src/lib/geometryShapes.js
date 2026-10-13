@@ -34,6 +34,9 @@
   }
 
   function sidesOf(name) {
+    if (name === null || name === undefined || typeof name !== 'string') {
+      throw new TypeError();
+    }
     const s = shapeOf(name);
     return s ? s.sides : null;
   }
