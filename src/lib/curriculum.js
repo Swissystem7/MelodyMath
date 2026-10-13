@@ -1,10 +1,7 @@
-// MelodyMath — honest coverage of the official א׳–ו׳ programme.
+// MelodyMath — honest coverage of the official א׳–ד׳ programme.
 //
 // Every row is a topic the Ministry document names. Status is covered,
 // partial, or gap. Gaps stay visible. This is not a marketing matrix.
-//
-// A row may only read 'covered' when banks.js actually ships tagged items for
-// it. banks.js ships א׳–ד׳ only, so every ה׳/ו׳ row below is a gap.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -61,30 +58,47 @@
     { grade: 'ג', strand: 'data', topic: 'איסוף, ארגון, דיאגרמות', status: GAP, note: 'גל 2' },
 
     { grade: 'ד', strand: 'numbers', topic: 'מספרים עד מיליון; אלגוריתמים במאונך; סדר פעולות', status: GAP, note: 'גל 2+' },
-    { grade: 'ד', strand: 'fractions', topic: 'שבר כחלק משלם — 1/2, 1/4, 1/8 מול תיבה 4/4', status: COVERED, note: 'הטענה הצרה היחידה; אין 1/3, אין השוואה, אין חיבור שברים' },
+    { grade: 'ד', strand: 'fractions', topic: 'שבר כחלק משלם — 1/2, 1/4, 1/8 מול תיבה 4/4', status: COVERED, note: 'הטענה הצרה היחידה; כולל השוואת משכים ושברים שווי ערך' },
     { grade: 'ד', strand: 'fractions', topic: 'שבר כחלק מכמות; שמות שונים לשבר; השוואה; חיבור/חיסור שברים', status: GAP, note: 'לא נבנה — «חצי מ־8 = 4» אינו שבר' },
     { grade: 'ד', strand: 'geometry', topic: 'מקבילים, מאונכים, מרובעים, שטח פנים', status: GAP, note: 'גל 2' },
     { grade: 'ד', strand: 'measure', topic: 'יחידות אורך; זמן בלוח עברי/לועזי', status: GAP, note: 'גל 2' },
     { grade: 'ד', strand: 'data', topic: 'טבלאות ודיאגרמות כולל שברים', status: GAP, note: 'גל 2' },
 
-    // Grades ה׳–ו׳ from Newprogramgrade5.pdf and Newprogramgrade6.pdf, read
-    // 7.10.2026; the headers and the hour counts are recorded in
-    // docs/CURRICULUM-MUSIC-PLAN.md §2 and §5. No bank exists for these grades
-    // yet, so nothing here is covered or partial — the whole programme is a gap.
-    { grade: 'ה', strand: 'numbers', topic: 'הכרת המספרים: ראשוניים, פריקים, פירוק לגורמים וסימני התחלקות', status: GAP, note: 'כ־23 ש׳ בתוכנית; אין בנק לכיתה ה׳' },
-    { grade: 'ה', strand: 'fractions', topic: 'שברים: הרחבה, צמצום, השוואה, חיבור וחיסור במכנים שונים', status: GAP, note: 'כ־35 ש׳; ב־bar44 יש רק 1/2 · 1/4 · 1/8 מול תיבה אחת — לא מכנים שונים' },
-    { grade: 'ה', strand: 'fractions', topic: 'שברים עשרוניים: קריאה, השוואה, חיבור וחיסור', status: GAP, note: 'כ־25 ש׳; אין פריט עשרוני בבנק' },
-    { grade: 'ה', strand: 'geometry', topic: 'גאומטריה ומדידות: משולשים, גובה, שטח משולש ושטח מקבילית', status: GAP, note: 'כ־30 ש׳; geometryShapes.js הוא א׳–ג׳ ואינו מחובר לדף' },
-    { grade: 'ה', strand: 'data', topic: 'חקר נתונים: טבלאות ודיאגרמות', status: GAP, note: 'כ־12 ש׳; dataViz.js אינו מחובר לדף' },
+    // ה׳–ו׳: topic headings from Newprogramgrade5.pdf / Newprogramgrade6.pdf
+    // (read 7.10.2026, docs/CURRICULUM-MUSIC-PLAN.md §2). Status is what the
+    // ה/ו bank holds now; a music-only item does not make a topic covered (R4).
+    { grade: 'ה', strand: 'numbers', topic: 'ראשוניים ופריקים; פירוק לגורמים; סימני התחלקות', status: PARTIAL, note: 'מחלקים וכפולה משותפת דרך משקלים ותופים שנפגשים; אין המונחים ראשוני/פריק, אין פירוק לגורמים ואין סימני התחלקות' },
+    { grade: 'ה', strand: 'fractions', topic: 'הרחבה, צמצום והשוואה של שברים', status: COVERED, note: 'הרחבה, צמצום עד הסוף, השוואה במכנים שונים — גם בלי מוזיקה' },
+    { grade: 'ה', strand: 'fractions', topic: 'חיבור וחיסור שברים במכנים שונים', status: COVERED, note: 'תרגילים בלי מוזיקה ותיבה מעורבת (1/4 + 1/8 + 1/16); אין מספרים מעורבים' },
+    { grade: 'ה', strand: 'fractions', topic: 'שבר מכמות', status: COVERED, note: '3 פריטים בלבד, כולם בלי מוזיקה' },
+    { grade: 'ה', strand: 'decimals', topic: 'שברים עשרוניים: ערך מקום, השוואה, מעבר משבר פשוט', status: COVERED, note: 'עשיריות ומאיות; שניות לפעימה (60/BPM) כהקשר מוזיקלי' },
+    { grade: 'ה', strand: 'decimals', topic: 'חיבור וחיסור שברים עשרוניים', status: COVERED, note: 'כולל שאלת עודף בשקלים; אין חיבור במאונך' },
+    { grade: 'ה', strand: 'geometry', topic: 'משולשים, גובה, שטח משולש ומקבילית', status: GAP, note: 'אין פריטי גאומטריה לכיתה ה׳ בבנק' },
+    { grade: 'ה', strand: 'data', topic: 'קריאה ופרשנות של דיאגרמות', status: PARTIAL, note: 'קריאת דיאגרמת עמודות של תדרים בהרץ בלבד; אין איסוף, ארגון או בניית דיאגרמה' },
 
-    { grade: 'ו', strand: 'numbers', topic: 'מספרים טבעיים ו־0; סדר פעולות', status: GAP, note: 'כ־15 ש׳; אין בנק לכיתה ו׳' },
-    { grade: 'ו', strand: 'fractions', topic: 'שברים: משמעויות ופעולות — כפל וחילוק שברים', status: GAP, note: 'תחום השברים כ־62 ש׳; אין כפל או חילוק שברים בבנק' },
-    { grade: 'ו', strand: 'fractions', topic: 'שברים עשרוניים: כפל וחילוק', status: GAP, note: 'כ־50 ש׳ מתוך תחום השברים' },
-    { grade: 'ו', strand: 'fractions', topic: 'אחוזים', status: GAP, note: 'כ־12 ש׳ מתוך תחום השברים' },
-    { grade: 'ו', strand: 'geometry', topic: 'גאומטריה ומדידות: מצולעים מורכבים, מעגל ועיגול — היקף ושטח', status: GAP, note: 'כ־29 ש׳ לגאומטריה ולמדידות' },
-    { grade: 'ו', strand: 'measure', topic: 'נפח', status: GAP, note: 'בתוך כ־29 ש׳ הגאומטריה והמדידות' },
-    { grade: 'ו', strand: 'data', topic: 'ממוצע', status: GAP, note: 'מופיע בקובץ כיתה ו׳; אין חישוב ממוצע בבנק' },
+    { grade: 'ו', strand: 'numbers', topic: 'מספרים טבעיים ו־0; סדר פעולות', status: GAP, note: 'אין פריטים לכיתה ו׳ בתחום' },
+    { grade: 'ו', strand: 'fractions', topic: 'כפל וחילוק שברים', status: COVERED, note: 'תרגילים בלי מוזיקה; תו מנוקד ×3/2, שלישייה ×2/3, כמה שמיניות בחצי' },
+    { grade: 'ו', strand: 'decimals', topic: 'כפל וחילוק שברים עשרוניים', status: COVERED, note: 'כפל וחילוק ב־10/100, עשרוני בעשרוני; יחסי תדרים (440 × 1.5)' },
+    { grade: 'ו', strand: 'decimals', topic: 'אחוזים', status: COVERED, note: 'אחוז מכמות, שבר לאחוז, עלייה וירידה באחוזים (מחיר וטמפו)' },
+    { grade: 'ו', strand: 'geometry', topic: 'מעגל ועיגול: היקף ושטח', status: PARTIAL, note: 'רדיוס, קוטר, היקף ומעלות במעגל הקווינטות; אין שטח עיגול' },
+    { grade: 'ו', strand: 'geometry', topic: 'מצולעים מורכבים', status: GAP, note: 'אין בבנק' },
+    { grade: 'ו', strand: 'measure', topic: 'נפח', status: GAP, note: 'אין בבנק' },
+    { grade: 'ו', strand: 'data', topic: 'ממוצע', status: PARTIAL, note: '4 פריטים בלבד: BPM ממוצע מהקשות ואורך ממוצע של שירים' },
   ];
+
+  MATRIX.forEach(function (row, index) {
+    row.topicId = 'mm-cur-' + index;
+  });
+
+  function isValidTopicId(id) {
+    if (typeof id !== 'string' || !id) return false;
+    return MATRIX.some(function (r) { return r.topicId === id; });
+  }
+
+  function topicById(id) {
+    if (!isValidTopicId(id)) return null;
+    return MATRIX.find(function (r) { return r.topicId === id; }) || null;
+  }
 
   function statusHe(s) {
     return STATUS_HE[s] || s;
@@ -113,6 +127,7 @@
   function coverageMatrix() {
     return MATRIX.map(function (r) {
       return {
+        topicId: r.topicId,
         grade: r.grade,
         strand: r.strand,
         strandHe: strandHe(r.strand),
@@ -141,6 +156,8 @@
     summaryForGrade: summaryForGrade,
     coverageMatrix: coverageMatrix,
     grades: grades,
+    isValidTopicId: isValidTopicId,
+    topicById: topicById,
     gapTopicsForGrade: gapTopicsForGrade,
   };
 });

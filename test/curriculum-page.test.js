@@ -50,8 +50,7 @@ test('the page renders a block and every topic header for כיתה ה׳ and כי
       assert.ok(html.indexOf('>' + r.statusHe + '</td>') !== -1, 'status missing for ' + r.topic);
     });
   });
-  // No bank ships for ה׳–ו׳, so the per-grade bank line must say so out loud.
-  assert.match(html, /בבנק עכשיו: אין/);
+
 });
 
 test('expressions in the table are isolated LTR, so none renders mirrored (#93)', () => {
