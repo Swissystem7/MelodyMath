@@ -8,7 +8,8 @@
 //   שטח מלבן = שורות × תאים ברשת מקצב
 //   זמן: דקות ↔ שניות של מנגינה קצרה, ומספרים עד 10,000 כהשוואת Hz
 //
-// The widgets (bindGrade3) land in the follow-up PR; they need a document.
+// Below that line sit the widgets (bindGrade3). They need a document, and
+// everything they draw is computed by the pure half above.
 (function (root, factory) {
   const IN_NODE = typeof module === 'object' && !!module.exports;
   const engine = IN_NODE ? require('./musicEngine') : root;
@@ -297,6 +298,149 @@
     if (!Number.isFinite(x) || !Number.isFinite(y) || x <= 0 || y <= 0) return null;
     return Math.max(x, y);
   }
+
+  // ---------- the widgets ----------
+  // Quiet mode is a hard mute. Every narration below is on screen too, so a
+  // silenced tablet loses nothing (§4.3, §4.7).
+  function isQuiet() {
+    if (typeof loadAccess !== 'function') return false;
+    try { return !!loadAccess().quiet; } catch (e) { return false; }
+  }
+
+  function playEvents(events) {
+    if (isQuiet() || !events || !events.length) return null;
+    if (typeof engine.playSequence !== 'function') return null;
+    return engine.playSequence(events);
+  }
+
+  // Only ever reached past the bindGrade3 guard, so a document is in scope.
+  function node(tag, cls, text) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  function addPlay(box, label, makeEvents) {
+    const b = node('button', 'g3-play', label);
+    b.type = 'button';
+    b.addEventListener('click', function () { playEvents(makeEvents()); });
+    box.appendChild(b);
+    return b;
+  }
+
+  function addNote(box, text) { box.appendChild(node('p', 'g3-note', text)); }
+
+  function pads(count, cls) {
+    const group = node('span', cls === 'left' ? 'g3-bar g3-leftover' : 'g3-bar');
+    for (let i = 0; i < count; i++) group.appendChild(node('i', cls === 'left' ? 'left' : 'on'));
+    return group;
+  }
+
+  // One bordered box per bar, one pad per beat, the accented beat carrying the
+  // multiple it lands on — the picture of meterNarration.
+  function drawMeter(box, spec) {
+    const beats = meterBeats(spec.table, spec.bars);
+    if (!beats.length) return false;
+    const per = meterForTable(spec.table).beatsPerBar;
+    const row = node('div', 'g3-row');
+    row.dir = 'ltr';
+    for (let bar = 1; bar * per <= beats.length; bar++) {
+      const group = node('span', 'g3-bar');
+      beats.filter(function (b) { return b.bar === bar; }).forEach(function (b) {
+        group.appendChild(node('i', b.accent ? 'on' : '', b.accent ? String(b.count) : ''));
+      });
+      row.appendChild(group);
+    }
+    box.appendChild(row);
+    addPlay(box, '▶ השמע את המשקל', function () { return meterEvents(spec.table, spec.bars, spec.bpm); });
+    addNote(box, meterNarration(spec.table, spec.bars));
+    return true;
+  }
+
+  // The full bars, then the beats that never filled one: the remainder is a
+  // box that stayed open, not a number pulled out of a division.
+  function drawRemainder(box, spec) {
+    const s = barsAndRemainder(spec.beats, spec.perBar);
+    if (!s) return false;
+    const row = node('div', 'g3-row');
+    row.dir = 'ltr';
+    for (let i = 0; i < s.bars; i++) row.appendChild(pads(s.perBar, 'on'));
+    if (s.remainder) row.appendChild(pads(s.remainder, 'left'));
+    box.appendChild(row);
+    addPlay(box, '▶ השמע את התיבות', function () { return remainderEvents(s.beats, s.perBar, spec.bpm); });
+    addNote(box, remainderNarration(s));
+    return true;
+  }
+
+  function drawPair(box, spec) {
+    // pairEvents is empty unless both values are positive numbers, so it is
+    // also the check for "is this pair drawable".
+    if (!pairEvents(spec).length) return false;
+    const label = node('p', 'g3-values', spec.a + ' → ' + spec.b + (spec.unit === 'bpm' ? ' BPM' : ' Hz'));
+    label.dir = 'ltr';
+    box.appendChild(label);
+    addPlay(box, '▶ השמע את שני הצלילים', function () { return pairEvents(spec); });
+    addNote(box, pairNarration(spec));
+    return true;
+  }
+
+  // The step sequencer is the rectangle: rows × cells. Cells stay ≥44px and
+  // wrap instead of scrolling sideways, which is what gridLayout works out.
+  function drawGrid(box, spec) {
+    if (gridCells(spec.rows, spec.steps) == null) return false;
+    const lay = gridLayout(spec.steps, box.clientWidth || spec.width || 284);
+    if (!lay) return false;
+    const wrap = node('div', 'g3-grid');
+    wrap.dir = 'ltr';
+    wrap.style.setProperty('--g3-cell', lay.cell + 'px');
+    wrap.style.setProperty('--g3-cols', String(lay.perRow));
+    wrap.style.setProperty('--g3-gap', lay.gap + 'px');
+    for (let r = 0; r < spec.rows; r++) {
+      const line = node('div', 'g3-grow');
+      for (let c = 0; c < lay.steps; c++) {
+        const cell = node('button', 'g3-cell');
+        cell.type = 'button';
+        cell.setAttribute('aria-pressed', 'false');
+        cell.setAttribute('aria-label', 'שורה ' + (r + 1) + ', תא ' + (c + 1));
+        cell.addEventListener('click', function () {
+          const on = cell.getAttribute('aria-pressed') !== 'true';
+          cell.setAttribute('aria-pressed', on ? 'true' : 'false');
+          cell.classList.toggle('on', on);
+          if (on) playEvents([{ at: 0, dur: 0.18, gain: 0.16, type: 'sine', hz: BEAT_HZ * Math.pow(2, (spec.rows - 1 - r) / 4) }]);
+        });
+        line.appendChild(cell);
+      }
+      wrap.appendChild(line);
+    }
+    box.appendChild(wrap);
+    addPlay(box, '▶ השמע את הרשת', function () { return gridEvents(spec.rows, spec.steps, spec.bpm); });
+    addNote(box, gridNarration(spec.rows, spec.steps));
+    return true;
+  }
+
+  const DRAW = { meter: drawMeter, remainder: drawRemainder, pair: drawPair, grid: drawGrid };
+
+  // Draws one grade-3 activity into `host`. The beat pads are a picture of the
+  // narration, so they are hidden from the screen reader and the narration is
+  // repeated once as sr-only text ahead of them. The grid stays visible to it,
+  // because its cells are the interactive part.
+  function bindGrade3(host, spec) {
+    if (typeof document === 'undefined' || !host || !spec || !DRAW[spec.kind]) return false;
+    const box = node('div', 'g3');
+    if (!DRAW[spec.kind](box, spec)) return false;
+    host.textContent = '';
+    host.appendChild(box);
+    const row = box.querySelector('.g3-row');
+    if (row) row.setAttribute('aria-hidden', 'true');
+    const note = box.querySelector('.g3-note');
+    if (note) {
+      box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      note.setAttribute('aria-hidden', 'true');
+    }
+    return true;
+  }
+
   return {
     METERS: METERS, MIN_CELL: MIN_CELL, CELL_GAP: CELL_GAP,
     meterForTable: meterForTable, meterBeats: meterBeats, meterEvents: meterEvents,
@@ -309,5 +453,6 @@
     gridCells: gridCells, gridLayout: gridLayout, gridEvents: gridEvents,
     gridNarration: gridNarration,
     tuneSeconds: tuneSeconds, tuneClock: tuneClock, higherHz: higherHz,
+    bindGrade3: bindGrade3,
   };
 });
