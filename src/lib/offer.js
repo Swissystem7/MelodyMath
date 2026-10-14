@@ -8,7 +8,13 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const PROJECT_MAIL = 'aviran2606@gmail.com';
+  // The address lives in contact.js (CONTACT.email). '' there = no project address here.
+  const contactApi = (typeof module === 'object' && module.exports && typeof require === 'function')
+    ? require('./contact')
+    : (typeof globalThis !== 'undefined' && typeof globalThis.projectEmail === 'function'
+      ? { projectEmail: globalThis.projectEmail }
+      : { projectEmail: function () { return ''; } });
+  const PROJECT_MAIL = contactApi.projectEmail();
   const DEMO_URL = 'https://swissystem7.github.io/MelodyMath/';
   const OFFER_URL = 'https://swissystem7.github.io/MelodyMath/offer.html';
   const TRIAL_WEEKS = 4;
