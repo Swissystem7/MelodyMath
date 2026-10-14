@@ -36,8 +36,9 @@
     { grade: 'א', strand: 'numbers', topic: 'סדרות דגמים צורניים + יצירת סדרה', status: PARTIAL, note: 'יש דילוג מספרי; אין דגם צורני' },
     { grade: 'א', strand: 'numbers', topic: 'מצבי חיבור/חיסור מחיי יום־יום (איסוף, הוספה, הפרדה, גריעה)', status: PARTIAL, note: 'חלק מהניסוחים מוזיקליים; אין טיפולוגיה מלאה' },
     { grade: 'א', strand: 'geometry', topic: 'מיון מצולעים, קודקוד וצלע, פירוק והרכבה', status: PARTIAL, note: 'מיון לפי צלעות וקודקודים וזווית ישרה; אין פירוק והרכבה' },
-    { grade: 'א', strand: 'measure', topic: 'מדידת אורך (מתווך, ס״מ, סרגל)', status: GAP, note: 'גל 2' },
-    { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: GAP, note: 'גל 2' },
+    { grade: 'א', strand: 'measure', topic: 'מדידת אורך (מתווך, ס״מ, סרגל)', status: COVERED, note: 'יחידות מתווכות ואז ס״מ על סרגל מצויר; אין מדידה בסרגל אמיתי ואין אומדן' },
+    { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: COVERED, note: 'שעון מצויר בשעות שלמות; חצאי שעות נמצאים בכיתה ב׳' },
+    { grade: 'א', strand: 'measure', topic: 'כסף — מטבעות וסכומים', status: COVERED, note: 'מטבעות של 1, 2, 5 ו־10 ₪, סכום ועודף עד 10 ₪; אין אגורות' },
     { grade: 'א', strand: 'data', topic: 'דיאגרמת עמודות ופיקטוגרם', status: GAP, note: 'גל 2' },
 
     { grade: 'ב', strand: 'numbers', topic: 'מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', status: GAP, note: 'גל 2' },
@@ -45,7 +46,8 @@
     { grade: 'ב', strand: 'numbers', topic: 'שליטה בכפולות 2, 4, 5, 10', status: COVERED, note: '3, 6, 7, 8, 9 חסומים עד שליטה בליבה' },
     { grade: 'ב', strand: 'numbers', topic: 'חילוק לחלקים ולהכלה על אותם מספרים', status: COVERED, note: 'בלי המונחים הפורמליים לתלמיד' },
     { grade: 'ב', strand: 'geometry', topic: 'פירוק והרכבה של מצולעים; זווית ישרה', status: PARTIAL, note: 'זווית ישרה ומיון מצולעים; אין פירוק והרכבה' },
-    { grade: 'ב', strand: 'measure', topic: 'ס״מ, היקף, נפח תיבות, חצאי שעות', status: GAP, note: 'גל 2' },
+    { grade: 'ב', strand: 'measure', topic: 'ס״מ, היקף, נפח תיבות, חצאי שעות', status: COVERED, note: 'ס״מ בסרגל, היקף מצולע, חצאי שעות ונפח תיבה במנייה של קוביות; אין מדידה בכלים אמיתיים' },
+    { grade: 'ב', strand: 'measure', topic: 'כסף — ₪ ואגורות, קנייה ועודף', status: COVERED, note: 'המרת ₪ לאגורות, מטבעות של 10 ו־50 אגורות ועודף עד 50 ₪' },
     { grade: 'ב', strand: 'data', topic: 'טבלה, עמודות, פיקטוגרם', status: GAP, note: 'גל 2' },
 
     { grade: 'ג', strand: 'numbers', topic: 'מספרים עד 10,000, מבנה עשרוני', status: GAP, note: 'גל 2' },
@@ -54,14 +56,16 @@
     { grade: 'ג', strand: 'numbers', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', status: GAP, note: 'יש חילוק שלם בסיסי בלבד' },
     { grade: 'ג', strand: 'numbers', topic: 'שאלות השוואה כפליות ודו־שלביות', status: GAP, note: 'גל 2' },
     { grade: 'ג', strand: 'geometry', topic: 'זווית שטוחה/קהה/ישרה/חדה; מיון משולשים', status: COVERED, note: 'סוגי זוויות במעלות ובשעון; משולשים לפי זוויות ולפי צלעות; בלי מדידה במד־זווית' },
-    { grade: 'ג', strand: 'measure', topic: 'שטח מלבן; שעות ודקות', status: GAP, note: 'גל 2' },
+    { grade: 'ג', strand: 'measure', topic: 'שטח מלבן; שעות ודקות', status: COVERED, note: 'שטח מלבן במשבצות ובסמ״ר, שעות ודקות ומשך זמן; אין מד־זמן אמיתי' },
+    { grade: 'ג', strand: 'measure', topic: 'יחידות משקל ונפח (ק״ג/גרם, ליטר/מ״ל); כסף', status: COVERED, note: 'המרות בסיסיות וקנייה בשקלים ואגורות; אין שקילה או מדידת נפח בפועל' },
     { grade: 'ג', strand: 'data', topic: 'איסוף, ארגון, דיאגרמות', status: GAP, note: 'גל 2' },
 
     { grade: 'ד', strand: 'numbers', topic: 'מספרים עד מיליון; אלגוריתמים במאונך; סדר פעולות', status: GAP, note: 'גל 2+' },
     { grade: 'ד', strand: 'fractions', topic: 'שבר כחלק משלם — 1/2, 1/4, 1/8 מול תיבה 4/4', status: COVERED, note: 'הטענה הצרה היחידה; כולל השוואת משכים ושברים שווי ערך' },
     { grade: 'ד', strand: 'fractions', topic: 'שבר כחלק מכמות; שמות שונים לשבר; השוואה; חיבור/חיסור שברים', status: GAP, note: 'לא נבנה — «חצי מ־8 = 4» אינו שבר' },
     { grade: 'ד', strand: 'geometry', topic: 'מקבילים, מאונכים, מרובעים, שטח פנים', status: PARTIAL, note: 'מקבילים, מאונכים, מיון מרובעים, פאות ומקצועות של תיבה; אין חישוב שטח פנים' },
-    { grade: 'ד', strand: 'measure', topic: 'יחידות אורך; זמן בלוח עברי/לועזי', status: GAP, note: 'גל 2' },
+    { grade: 'ד', strand: 'measure', topic: 'יחידות אורך; זמן בלוח עברי/לועזי', status: PARTIAL, note: 'המרות אורך, משקל ונפח, וזמן בלוח הלועזי; אין לוח עברי' },
+    { grade: 'ד', strand: 'measure', topic: 'כסף — חישובי קנייה ועודף', status: COVERED, note: 'המרת ₪/אגורות, מחיר כפול כמות ועודף מ־100 ו־200 ₪' },
     { grade: 'ד', strand: 'data', topic: 'טבלאות ודיאגרמות כולל שברים', status: GAP, note: 'גל 2' },
 
     // ה׳–ו׳: topic headings from Newprogramgrade5.pdf / Newprogramgrade6.pdf
