@@ -57,6 +57,28 @@ test('offer and landing pages mount the contact block and load contact.js', () =
   }
 });
 
+// index.html is the page that moves most, so a master→main sync is where its
+// contact block is most likely to be dropped. Every page that mounts a block
+// needs contact.js and the .mm-contact-links rule, or the block renders unstyled.
+test('every page with a contact block loads contact.js and styles it', () => {
+  for (const page of ['index.html', 'offer.html', 'landing.html']) {
+    const html = read(page);
+    assert.match(html, /data-mm-contact/, page);
+    assert.match(html, /src="src\/lib\/contact\.js"/, page);
+    assert.match(html, /\.mm-contact-links\{/, page + ' is missing the contact-block CSS');
+  }
+  // The week-4 question in the pilot kit points at the block right below it.
+  assert.match(read('index.html'), /data-mm-contact data-subject="MelodyMath · שאלת הסיום"/);
+});
+
+test('contact.js loads before offer.js, which reads the address from it', () => {
+  const html = read('offer.html');
+  const contactAt = html.indexOf('src="src/lib/contact.js"');
+  const offerAt = html.indexOf('src="src/lib/offer.js"');
+  assert.ok(contactAt > -1 && offerAt > -1, 'both scripts are on the page');
+  assert.ok(contactAt < offerAt, 'offer.js reads globalThis.projectEmail, so contact.js must run first');
+});
+
 // The owner decided on 28.9: the public contact channel for all his apps is his Google Form
 // "משוב על האפליקציות", with the app field pre-filled as MelodyMath (an exact option of the form).
 const OWNER_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdT8YduNx-VWKM3bWGUJdiSj4Sw9D-EA6R6c-oYVYCQmOVXxQ/viewform?usp=pp_url&entry.368039752=MelodyMath';
@@ -74,6 +96,25 @@ test('CONTACT.form is the owner\'s Google Form; the pages link to it instead of 
   const bad = contact.renderContactHtml({ email: '', form: 'javascript:alert(1)' });
   assert.match(bad, /issues\/new\?template=pilot\.yml/);
   assert.doesNotMatch(bad, /javascript:/);
+});
+
+// mountContactBlocks is the only part that runs in the browser, so the pages'
+// markup is checked above but the filling itself needs a stand-in document.
+test('mountContactBlocks fills every block on the page with its own subject', () => {
+  const made = [];
+  const fake = {
+    querySelectorAll: () => made,
+  };
+  for (const subject of ['MelodyMath · ניסוי כיתתי', 'MelodyMath · שאלת הסיום']) {
+    made.push({ innerHTML: '', getAttribute: (n) => (n === 'data-subject' ? subject : null) });
+  }
+  assert.equal(contact.mountContactBlocks(fake), 2);
+  assert.match(made[0].innerHTML, /mm-contact-links/);
+  assert.ok(made[0].innerHTML.includes(encodeURIComponent('MelodyMath · ניסוי כיתתי')), 'the offer block keeps its own subject');
+  assert.ok(made[1].innerHTML.includes(encodeURIComponent('MelodyMath · שאלת הסיום')), 'the week-4 block keeps its own subject');
+  // A document without blocks is not an error, and a non-document is ignored.
+  assert.equal(contact.mountContactBlocks({ querySelectorAll: () => [] }), 0);
+  assert.equal(contact.mountContactBlocks({}), 0);
 });
 
 test('contact.js changed, so the service worker cache moved to v9 or later', () => {
