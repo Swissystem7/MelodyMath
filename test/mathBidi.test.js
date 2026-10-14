@@ -25,6 +25,11 @@ test('Hebrew around an expression stays outside the LTR span', () => {
   assert.equal(mathHtml('השעון מראה 3:00. מה השעה?'), 'השעון מראה ' + LTR + '3:00</span>. מה השעה?');
 });
 
+test('mathRuns returns [] for null or undefined input', () => {
+  assert.deepEqual(mathRuns(null), []);
+  assert.deepEqual(mathRuns(undefined), []);
+});
+
 test('Hebrew-only text, plain numbers and labelled sequences are left alone', () => {
   assert.equal(mathHtml('כמה תופים? 🥁🥁🥁🥁'), 'כמה תופים? 🥁🥁🥁🥁');
   assert.equal(mathHtml(80), '80');
