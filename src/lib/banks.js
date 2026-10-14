@@ -154,6 +154,14 @@
     return hear;
   }
 
+  function hasRequiredTags(item) {
+    if (item == null || typeof item !== 'object') return false;
+    if (typeof item.grade !== 'string' || !item.grade.trim()) return false;
+    if (typeof item.strand !== 'string' || !item.strand.trim()) return false;
+    if (typeof item.standard !== 'string' || !item.standard.trim()) return false;
+    return true;
+  }
+
   function isShippable(it) {
     if (!it || typeof it !== 'object') return false;
     if (!it.grade || GRADES.indexOf(it.grade) === -1) return false;
@@ -1363,6 +1371,7 @@
     clampLevel: clampLevel,
     isGrade: isGrade,
     hearOf: hearOf,
+    hasRequiredTags: hasRequiredTags,
     isShippable: isShippable,
     allItems: allItems,
     itemsForGrade: itemsForGrade,
