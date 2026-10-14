@@ -24,6 +24,7 @@ const ASSETS = [
   './src/lib/banks.js',
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
+  './src/lib/grade1Music.js',
   './src/lib/bar44.js',
   './src/lib/vertical.js',
   './src/lib/measure.js',
