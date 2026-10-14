@@ -287,6 +287,38 @@
     return student.assignments.slice();
   }
 
+  function assignmentProgressRow(row) {
+    if (!row) return null;
+    return {
+      id: row.id,
+      title: row.title,
+      skill: row.skill || '',
+      completed: !!row.completed,
+      completedAt: row.completed ? row.completedAt : null,
+      assignedAt: row.assignedAt,
+    };
+  }
+
+  function listStudentProgress(classCode, name, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (!student) return null;
+    return cleanAssignments(student.assignments).map(assignmentProgressRow);
+  }
+
+  function listClassStudentsProgress(classCode, storage) {
+    return listClassStudents(classCode, storage).map(function (row) {
+      const tasks = listStudentProgress(classCode, row.name, storage) || [];
+      const done = tasks.filter(function (t) { return t.completed; }).length;
+      return {
+        name: row.name,
+        created: row.created,
+        tasks: tasks,
+        completedCount: done,
+        totalCount: tasks.length,
+      };
+    });
+  }
+
   function addNote(classCode, name, text, storage) {
     const label = studentLabel(name);
     const body = String(text == null ? '' : text).replace(/\s+/g, ' ').trim().slice(0, 280);
@@ -783,7 +815,7 @@
     PREFIX, WHO_KEY,
     normalizeCode, studentLabel, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, listClassStudents, upsertStudent, getStudent,
-    assignTask, listAssignments,
+    assignTask, listAssignments, listStudentProgress, listClassStudentsProgress,
     startSession, addItem, endSession, buildReport, allItems,
     addNote, listNotes, itemsSince, buildClassOverview, getDashboardData,
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
