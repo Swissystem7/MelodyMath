@@ -36,7 +36,7 @@ test('banks are split per grade — not one א–ד dump', () => {
   assert.ok(banks.skillsForGrade('ב').includes('division'));
   assert.ok(!banks.skillsForGrade('א').includes('multiplication'));
   assert.ok(!banks.skillsForGrade('ב').includes('basic_fractions'));
-  assert.deepEqual(banks.skillsForGrade('ד'), ['basic_fractions', 'geometry']);
+  assert.deepEqual(banks.skillsForGrade('ד'), ['basic_fractions', 'geometry', 'measurement']);
 });
 
 test('an untagged stub does not ship', () => {
