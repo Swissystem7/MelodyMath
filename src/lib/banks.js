@@ -8,7 +8,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const GRADES = ['א', 'ב', 'ג', 'ד'];
+  const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 
   const STRAND = {
     NUM: 'מספרים ופעולות',
@@ -66,6 +66,15 @@
     PICTOGRAM: 'קריאת פיקטוגרם',
     BARCHART: 'קריאת דיאגרמת עמודות',
     TABLE: 'קריאת טבלת נתונים',
+    FRAC_EQUIV: 'שברים שקולים — הרחבה, צמצום והשוואה',
+    FRAC_ADD: 'חיבור וחיסור שברים, גם במכנים שונים',
+    FRAC_OF: 'שבר מכמות',
+    DEC_PLACE: 'שברים עשרוניים — ערך המקום, השוואה ומעבר משבר פשוט',
+    DEC_ADD: 'חיבור וחיסור שברים עשרוניים',
+    FRAC_MUL: 'כפל שברים',
+    FRAC_DIV: 'חילוק שברים',
+    DEC_MUL: 'כפל וחילוק שברים עשרוניים',
+    PERCENT: 'אחוזים — אחוז מכמות, שבר כאחוז, שינוי באחוזים',
   };
 
   const SKILL_HE = {
@@ -81,6 +90,9 @@
     geometry: 'גאומטריה',
     measurement: 'מדידה',
     data: 'נתונים',
+    fractions: 'שברים',
+    decimals: 'שברים עשרוניים',
+    percent: 'אחוזים',
   };
 
   const GRADE_SKILLS = {
@@ -88,6 +100,8 @@
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
     'ג': ['multiplication', 'division', 'geometry', 'measurement'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
+    'ה': ['fractions', 'decimals'],
+    'ו': ['fractions', 'decimals', 'percent'],
   };
 
   const RM_SKILLS = [
@@ -103,6 +117,9 @@
     ['geometry', SKILL_HE.geometry],
     ['data', SKILL_HE.data],
     ['basic_fractions', SKILL_HE.basic_fractions],
+    ['fractions', SKILL_HE.fractions],
+    ['decimals', SKILL_HE.decimals],
+    ['percent', SKILL_HE.percent],
   ];
   const RM_ORDER = {};
   RM_SKILLS.forEach(function (s, i) { RM_ORDER[s[0]] = i; });
@@ -163,6 +180,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      music: extra.music,
     };
   }
 
@@ -808,6 +826,77 @@
     MEAS('ד', 'יום ההולדת בעוד 4 שבועות ו־3 ימים. בעוד כמה ימים?', 31, '4 פעמים 7, ועוד 3', 3, ST.CALENDAR)
   );
 
+  // ---------- ה׳–ו׳ — שברים, עשרוניים, אחוזים (#96) ----------
+  // Fraction answers are typed as a/b; adaptive.isCorrect accepts any
+  // equivalent fraction, so 2/4 counts for 1/2. Decimal answers are numbers.
+  // `music` names the music issue that reuses the item: lcm/bars/bpm for
+  // #106 (grade ה׳), dotted/tempo/mean for #107 (grade ו׳).
+  function G56(grade, skill, prompt, answer, hint, level, standard, music) {
+    const strand = skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
+    return I(grade, skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
+  }
+
+  // ---------- כיתה ה׳ · שברים ----------
+  RAW.push(
+    G56('ה', 'fractions', 'השלימו: 1/2 = ?/8. מה המונה?', 4, 'כופלים מונה ומכנה באותו מספר', 1, ST.FRAC_EQUIV),
+    G56('ה', 'fractions', 'צמצמו עד הסוף: 6/8', '3/4', 'מחלקים מונה ומכנה ב־2', 1, ST.FRAC_EQUIV),
+    G56('ה', 'fractions', 'כמה שמיניות יש ב־3/4?', 6, '3/4 = 6/8', 2, ST.FRAC_EQUIV, 'bars'),
+    G56('ה', 'fractions', 'מה גדול יותר, 2/3 או 3/5? כתבו את השבר הגדול.', '2/3', 'מכנה משותף 15: 10/15 מול 9/15', 3, ST.FRAC_EQUIV),
+    G56('ה', 'fractions', '1/4 + 2/4 = ?', '3/4', 'אותו מכנה — מחברים מונים', 1, ST.FRAC_ADD),
+    G56('ה', 'fractions', '1/2 + 1/4 = ?', '3/4', '1/2 = 2/4', 1, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', '1/2 + 1/3 = ?', '5/6', 'מכנה משותף 6: 3/6 + 2/6', 2, ST.FRAC_ADD, 'lcm'),
+    G56('ה', 'fractions', '3/4 − 1/8 = ?', '5/8', '3/4 = 6/8', 2, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', '2/3 + 1/4 = ?', '11/12', 'מכנה משותף 12: 8/12 + 3/12', 3, ST.FRAC_ADD, 'lcm'),
+    G56('ה', 'fractions', 'תיבה של 4/4 מכילה רבע, שמינית ושמינית. כמה חסר עד תיבה מלאה? (כשבר)', '1/2', '1/4 + 1/8 + 1/8 = 1/2', 3, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', 'כמה זה 1/3 מ־12?', 4, 'מחלקים ל־3 חלקים שווים', 1, ST.FRAC_OF),
+    G56('ה', 'fractions', 'כמה זה 3/4 מ־20?', 15, 'רבע מ־20 הוא 5, ושלושה רבעים', 2, ST.FRAC_OF),
+    G56('ה', 'fractions', 'בכיתה 30 ילדים, 2/5 מהם מנגנים. כמה ילדים מנגנים?', 12, 'חמישית מ־30 היא 6', 3, ST.FRAC_OF)
+  );
+
+  // ---------- כיתה ה׳ · שברים עשרוניים ----------
+  RAW.push(
+    G56('ה', 'decimals', 'כתבו כשבר עשרוני: 7/10', 0.7, 'עשיריות — ספרה אחת אחרי הנקודה', 1, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'במספר 3.46, איזו ספרה במקום המאיות?', 6, 'הספרה השנייה אחרי הנקודה', 1, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'מה גדול יותר, 0.5 או 0.45? כתבו את הגדול.', 0.5, '0.50 מול 0.45', 2, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'כתבו כשבר עשרוני: 1/4', 0.25, '1/4 = 25/100', 2, ST.DEC_PLACE),
+    G56('ה', 'decimals', 'פעימה ב־120 BPM נמשכת 60/120 שנייה. כמה שניות זה כשבר עשרוני?', 0.5, '60 חלקי 120', 3, ST.DEC_PLACE, 'bpm'),
+    G56('ה', 'decimals', '0.3 + 0.4 = ?', 0.7, 'שלוש עשיריות ועוד ארבע עשיריות', 1, ST.DEC_ADD),
+    G56('ה', 'decimals', '2.5 + 1.25 = ?', 3.75, 'מיישרים את הנקודות: 2.50 + 1.25', 2, ST.DEC_ADD),
+    G56('ה', 'decimals', '5 − 1.6 = ?', 3.4, '5.0 − 1.6', 2, ST.DEC_ADD),
+    G56('ה', 'decimals', 'מחברת עולה 4.90 ₪ ועט 2.35 ₪. כמה עודף מ־10 ₪?', 2.75, '4.90 + 2.35 = 7.25', 3, ST.DEC_ADD)
+  );
+
+  // ---------- כיתה ו׳ · כפל וחילוק שברים ----------
+  RAW.push(
+    G56('ו', 'fractions', '1/2 × 1/3 = ?', '1/6', 'מונה כפול מונה, מכנה כפול מכנה', 1, ST.FRAC_MUL),
+    G56('ו', 'fractions', '3 × 1/4 = ?', '3/4', 'שלושה רבעים', 1, ST.FRAC_MUL),
+    G56('ו', 'fractions', 'תו מנוקד ארוך פי 3/2 מהתו. כמה פעימות נמשך חצי מנוקד? (חצי = 2 פעימות)', 3, '2 × 3/2', 2, ST.FRAC_MUL, 'dotted'),
+    G56('ו', 'fractions', '2/3 × 3/4 = ?', '1/2', '6/12 ואז מצמצמים', 2, ST.FRAC_MUL),
+    G56('ו', 'fractions', '3 : 1/2 = ?', 6, 'כמה חצאים נכנסים ב־3?', 2, ST.FRAC_DIV),
+    G56('ו', 'fractions', '3/4 : 1/8 = ?', 6, 'כמה שמיניות ב־3/4? 3/4 = 6/8', 3, ST.FRAC_DIV, 'bars'),
+    G56('ו', 'fractions', '2/3 : 2 = ?', '1/3', 'חצי מ־2/3', 3, ST.FRAC_DIV)
+  );
+
+  // ---------- כיתה ו׳ · כפל וחילוק עשרוניים ----------
+  RAW.push(
+    G56('ו', 'decimals', '0.4 × 10 = ?', 4, 'כפל ב־10 מזיז את הנקודה ימינה', 1, ST.DEC_MUL),
+    G56('ו', 'decimals', '3.2 : 100 = ?', 0.032, 'חילוק ב־100 מזיז את הנקודה שני מקומות שמאלה', 1, ST.DEC_MUL),
+    G56('ו', 'decimals', '1.5 × 4 = ?', 6, '1.5 + 1.5 + 1.5 + 1.5', 2, ST.DEC_MUL),
+    G56('ו', 'decimals', '0.3 × 0.2 = ?', 0.06, '3 × 2 = 6, ושתי ספרות אחרי הנקודה', 2, ST.DEC_MUL),
+    G56('ו', 'decimals', '7.5 : 3 = ?', 2.5, '7.5 הם 75 עשיריות', 3, ST.DEC_MUL),
+    G56('ו', 'decimals', 'שלושה שירים: 3.5, 4 ו־4.5 דקות. מה האורך הממוצע בדקות?', 4, '12 חלקי 3', 3, ST.DEC_MUL, 'mean')
+  );
+
+  // ---------- כיתה ו׳ · אחוזים ----------
+  RAW.push(
+    G56('ו', 'percent', 'כמה זה 50% מ־80?', 40, '50% הם חצי', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה זה 10% מ־70?', 7, '10% הם עשירית', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה זה 25% מ־60?', 15, '25% הם רבע', 2, ST.PERCENT),
+    G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 3/4', 75, '3/4 = 75/100', 2, ST.PERCENT),
+    G56('ו', 'percent', 'קצב של 100 BPM עולה ב־20%. מה הקצב החדש?', 120, '20% מ־100 הם 20', 3, ST.PERCENT, 'tempo'),
+    G56('ו', 'percent', 'מחיר 40 ₪ ירד ב־25%. מה המחיר החדש?', 30, '25% מ־40 הם 10', 3, ST.PERCENT)
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -834,6 +923,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.music) it.music = raw.music;
     SHIPPED.push(it);
   });
 
