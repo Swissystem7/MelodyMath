@@ -37,14 +37,18 @@ test('every unit has parallel pre/post forms of 6-8 tagged items', () => {
   });
 });
 
-test('both forms have the same level profile', () => {
-  const levels = (form) => uc.formItems('frac-dur-4', form).map((it) => it.level).reduce((a, b) => a + b, 0);
-  assert.equal(levels('pre'), levels('post'));
+test('both forms have the same level profile for every unit', () => {
+  uc.listUnits().forEach((u) => {
+    const levels = (form) => uc.formItems(u.id, form).map((it) => it.level).reduce((a, b) => a + b, 0);
+    assert.equal(levels('pre'), levels('post'), u.id + ' level profile matches between pre and post');
+  });
 });
 
-test('the check carries no music and no efficacy wording', () => {
-  const text = JSON.stringify(['pre', 'post'].map((f) => uc.formItems('frac-dur-4', f)));
-  assert.doesNotMatch(text, /תו|צליל|מוזיק|קצב/);
+test('the check carries no music and no efficacy wording in any unit', () => {
+  uc.listUnits().forEach((u) => {
+    const text = JSON.stringify(['pre', 'post'].map((f) => uc.formItems(u.id, f)));
+    assert.doesNotMatch(text, /תו|צליל|מוזיק|קצב/, u.id + ' contains no music cues');
+  });
   assert.match(uc.UNIT_CHECK_DISCLAIMER, /לא מחקר מבוקר/);
 });
 
@@ -112,6 +116,23 @@ test('checkReport survives empty and malformed rosters', () => {
   assert.equal(uc.checkReport(null, 'frac-dur-4').n, 0);
   assert.equal(uc.checkReport({ a: null, b: 'x', c: { name: 'c', sessions: 'bad' } }, 'frac-dur-4').rows.length, 0);
   assert.equal(uc.checkReport([], 'frac-dur-4').meanPre, null);
+});
+
+test('checkReport works across all units from grade א to grade ו', () => {
+  uc.listUnits().forEach((u) => {
+    const storage = memoryStorage();
+    const s1 = store.startSession('c1', 'דן', uc.checkKind(u.id, 'pre'), storage);
+    store.addItem('c1', 'דן', s1.id, { skill: 'test', prompt: 'q', answer: 'a', given: 'a', correct: true }, storage);
+    store.endSession('c1', 'דן', s1.id, storage);
+
+    const s2 = store.startSession('c1', 'דן', uc.checkKind(u.id, 'post'), storage);
+    store.addItem('c1', 'דן', s2.id, { skill: 'test', prompt: 'q', answer: 'a', given: 'a', correct: true }, storage);
+    store.endSession('c1', 'דן', s2.id, storage);
+
+    const r = uc.checkReport(store.loadRoster('c1', storage).students, u.id);
+    assert.equal(r.n, 1, u.id + ' reports student with pre and post');
+    assert.equal(r.rows[0].change, 0);
+  });
 });
 
 test('check.html loads the module, shows the disclaimer and is precached', () => {
