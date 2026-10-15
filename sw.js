@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v10';
+const CACHE = 'melodymath-offline-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -13,22 +13,33 @@ const ASSETS = [
   './landing.html',
   './offer.html',
   './curriculum.html',
+  './frequency.html',
+  './check.html',
   './manifest.webmanifest',
   './src/lib/core.js',
-  './src/lib/sonify.js',
   './src/lib/musicEngine.js',
+  './src/lib/sonify.js',
   './src/lib/grade3Music.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
   './src/lib/banks.js',
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
+  './src/lib/grade1Music.js',
   './src/lib/bar44.js',
   './src/lib/vertical.js',
   './src/lib/measure.js',
   './src/lib/dataViz.js',
   './src/lib/geometryShapes.js',
+  './src/lib/pedagogy.js',
   './src/lib/curriculum.js',
+  './src/lib/remediation.js',
+  './src/lib/rhythmGame.js',
+  './src/lib/interactiveLessons.js',
+  './src/lib/polyrhythm.js',
+  './src/lib/circleOfFifths.js',
+  './src/lib/unitCheck.js',
+  './src/lib/prepost.js',
   './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
   './src/lib/metro.js',
@@ -36,12 +47,14 @@ const ASSETS = [
   './src/lib/graphListen.js',
   './src/lib/listenLessons.js',
   './src/lib/onboard.js',
+  './src/lib/contact.js',
   './src/lib/offer.js',
   './src/lib/tabs.js',
   './src/lib/print.css',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/qr-code.svg',
 ];
 
 self.addEventListener('install', function (event) {

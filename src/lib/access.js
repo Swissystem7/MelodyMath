@@ -70,6 +70,16 @@
     return saveAccess(prefs, storage);
   }
 
+  function setHighContrast(highContrast, storage) {
+    const prefs = loadAccess(storage);
+    prefs.contrast = !!highContrast;
+    const saved = saveAccess(prefs, storage);
+    return {
+      highContrast: saved.contrast,
+      bodyClass: saved.contrast ? 'mm-contrast' : '',
+    };
+  }
+
   function bodyClassList(prefs) {
     const p = normalizePrefs(prefs);
     const out = [];
@@ -286,13 +296,50 @@
     return '';
   }
 
+  // Class mode still ends after 8 minutes. Whether the child sees the countdown
+  // is the teacher's call, and the default is no clock (timer pressure is the
+  // top parent complaint about timed tables apps).
+  const CLASS_CLOCK_KEY = 'mm-class-clock-v1';
+
+  function classClockVisible(storage) {
+    const ls = storage || defaultStorage();
+    if (!ls) return false;
+    try {
+      return ls.getItem(CLASS_CLOCK_KEY) === 'show';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function setClassClockVisible(on, storage) {
+    const ls = storage || defaultStorage();
+    if (!ls) return !!on;
+    try {
+      ls.setItem(CLASS_CLOCK_KEY, on ? 'show' : 'hide');
+    } catch (e) { /* quota */ }
+    return !!on;
+  }
+
+  function classClockText(leftMs, show) {
+    if (!show) return 'מפגש פתוח · בלי שעון';
+    const left = Math.max(0, Number(leftMs) || 0);
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
   return {
+    CLASS_CLOCK_KEY: CLASS_CLOCK_KEY,
+    classClockVisible: classClockVisible,
+    setClassClockVisible: setClassClockVisible,
+    classClockText: classClockText,
     ACCESS_KEY: ACCESS_KEY,
     DEFAULTS: DEFAULTS,
     normalizePrefs: normalizePrefs,
     loadAccess: loadAccess,
     saveAccess: saveAccess,
     toggleAccess: toggleAccess,
+    setHighContrast: setHighContrast,
     bodyClassList: bodyClassList,
     applyAccessToDocument: applyAccessToDocument,
     speakHebrew: speakHebrew,

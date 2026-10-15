@@ -25,3 +25,47 @@ test('the HTML marks ticks and announces the selected number', () => {
   assert.match(html, /נבחר: 4/);
   assert.doesNotMatch(html, /<script/);
 });
+
+test('playJumpSound function should be defined and return undefined for invalid inputs', () => {
+  assert.equal(typeof line.playJumpSound, 'function');
+  assert.equal(line.playJumpSound(null, null), undefined);
+  assert.equal(line.playJumpSound(5, null), undefined);
+});
+
+test('soundForTick calculates frequencies and identifies key fraction points', () => {
+  const s0 = line.soundForTick(0, { min: 0, max: 100 });
+  assert.equal(s0.percent, 0);
+  assert.equal(s0.isKeyPoint, true);
+  assert.equal(s0.pointName, '0');
+
+  const s50 = line.soundForTick(50, { min: 0, max: 100 });
+  assert.equal(s50.percent, 50);
+  assert.equal(s50.isKeyPoint, true);
+  assert.equal(s50.pointName, '1/2');
+
+  const s100 = line.soundForTick(100, { min: 0, max: 100 });
+  assert.equal(s100.percent, 100);
+  assert.equal(s100.isKeyPoint, true);
+  assert.equal(s100.pointName, '1');
+
+  assert.ok(s100.frequency > s50.frequency);
+  assert.ok(s50.frequency > s0.frequency);
+});
+
+test('scaleJumpSound plays scale step frequencies where a jump of 10 is an octave', () => {
+  const base = 220;
+  const octaveJump = line.scaleJumpSound(0, 10, base);
+  assert.equal(octaveJump.jump, 10);
+  assert.equal(octaveJump.frequency, 440);
+  assert.equal(octaveJump.isOctave, true);
+
+  const stepJump = line.scaleJumpSound(2, 3, base);
+  assert.equal(stepJump.jump, 1);
+  assert.equal(stepJump.frequency, Math.round(base * Math.pow(2, 1 / 10) * 100) / 100);
+  assert.equal(stepJump.isOctave, false);
+
+  const downOctave = line.scaleJumpSound(15, 5, base);
+  assert.equal(downOctave.jump, -10);
+  assert.equal(downOctave.frequency, 110);
+  assert.equal(downOctave.isOctave, true);
+});

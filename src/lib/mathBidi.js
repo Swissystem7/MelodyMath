@@ -28,7 +28,8 @@
   }
 
   function mathRuns(text) {
-    return String(text == null ? '' : text).match(MATH_RUN) || [];
+    if (text == null) return [];
+    return String(text).match(MATH_RUN) || [];
   }
 
   function mathHtml(text) {
