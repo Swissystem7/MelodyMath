@@ -62,7 +62,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 .cert-who{color:var(--muted);font-weight:700}
 .g3{margin:4px 0 2px}
 .g3-row{display:flex;flex-wrap:wrap;gap:10px;direction:ltr;margin:0 0 12px}
-.g3-bar{display:flex;gap:4px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#faf8ff}
+.g3-bar{display:flex;flex-wrap:wrap;max-width:100%;gap:4px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#faf8ff}
 .g3-bar i{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#ece7f5;font:700 .8rem Arial,sans-serif;font-style:normal;color:var(--muted)}
 .g3-bar i.on{background:var(--purple);color:#fff}
 .g3-bar i.left{background:var(--yellow);color:var(--ink);border-radius:6px}
@@ -416,7 +416,6 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/polyrhythm.js"></script>
 <script src="src/lib/circleOfFifths.js"></script>
 <script src="src/lib/sonify.js"></script>
-<script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/grade3Music.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
@@ -428,6 +427,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/bar44.js"></script>
 <script src="src/lib/prepost.js"></script>
 <script src="src/lib/vertical.js"></script>
+<script src="src/lib/grade2Music.js"></script>
 <script src="src/lib/measure.js"></script>
 <script src="src/lib/dataViz.js"></script>
 <script src="src/lib/geometryShapes.js"></script>
@@ -681,6 +681,9 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='bar44' && typeof bindBar44==='function'){
     host.classList.remove('hidden');
     bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
+  } else if(item.widget==='g2' && item.g2 && typeof bindGrade2==='function'){
+    host.classList.remove('hidden');
+    bindGrade2(host, item.g2);
   } else if(item.widget==='g3' && item.g3 && typeof bindGrade3==='function'){
     host.classList.remove('hidden');
     bindGrade3(host, item.g3);
