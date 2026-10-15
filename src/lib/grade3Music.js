@@ -8,7 +8,8 @@
 //   שטח מלבן = שורות × תאים ברשת מקצב
 //   זמן: דקות ↔ שניות של מנגינה קצרה, ומספרים עד 10,000 כהשוואת Hz
 //
-// The widgets below need a document; in Node they are never reached.
+// Below that line sit the widgets (bindGrade3). They need a document, and
+// everything they draw is computed by the pure half above.
 (function (root, factory) {
   const IN_NODE = typeof module === 'object' && !!module.exports;
   const engine = IN_NODE ? require('./musicEngine') : root;
@@ -298,24 +299,23 @@
     return Math.max(x, y);
   }
 
-  // ---------- widgets ----------
-  function doc() {
-    return typeof document === 'undefined' ? null : document;
-  }
-
+  // ---------- the widgets ----------
+  // Quiet mode is a hard mute. Every narration below is on screen too, so a
+  // silenced tablet loses nothing (§4.3, §4.7).
   function isQuiet() {
-    const load = typeof loadAccess === 'function' ? loadAccess : null;
-    if (!load) return false;
-    try { return !!load().quiet; } catch (e) { return false; }
+    if (typeof loadAccess !== 'function') return false;
+    try { return !!loadAccess().quiet; } catch (e) { return false; }
   }
 
   function playEvents(events) {
-    if (isQuiet() || typeof engine.playSequence !== 'function') return [];
+    if (isQuiet() || !events || !events.length) return null;
+    if (typeof engine.playSequence !== 'function') return null;
     return engine.playSequence(events);
   }
 
+  // Only ever reached past the bindGrade3 guard, so a document is in scope.
   function node(tag, cls, text) {
-    const el = doc().createElement(tag);
+    const el = document.createElement(tag);
     if (cls) el.className = cls;
     if (text != null) el.textContent = text;
     return el;
@@ -329,56 +329,68 @@
     return b;
   }
 
+  function addNote(box, text) { box.appendChild(node('p', 'g3-note', text)); }
+
   function pads(count, cls) {
-    const group = node('span', 'g3-bar');
-    for (let i = 0; i < count; i++) group.appendChild(node('i', cls));
+    const group = node('span', cls === 'left' ? 'g3-bar g3-leftover' : 'g3-bar');
+    for (let i = 0; i < count; i++) group.appendChild(node('i', cls === 'left' ? 'left' : 'on'));
     return group;
   }
 
+  // One bordered box per bar, one pad per beat, the accented beat carrying the
+  // multiple it lands on — the picture of meterNarration.
   function drawMeter(box, spec) {
     const beats = meterBeats(spec.table, spec.bars);
-    if (!beats.length) return;
+    if (!beats.length) return false;
+    const per = meterForTable(spec.table).beatsPerBar;
     const row = node('div', 'g3-row');
     row.dir = 'ltr';
-    const per = meterForTable(spec.table).beatsPerBar;
     for (let bar = 1; bar * per <= beats.length; bar++) {
       const group = node('span', 'g3-bar');
       beats.filter(function (b) { return b.bar === bar; }).forEach(function (b) {
-        group.appendChild(node('i', b.accent ? 'g3-pad on' : 'g3-pad', b.accent ? String(b.count) : ''));
+        group.appendChild(node('i', b.accent ? 'on' : '', b.accent ? String(b.count) : ''));
       });
       row.appendChild(group);
     }
     box.appendChild(row);
-    addPlay(box, '▶ השמע שוב', function () { return meterEvents(spec.table, spec.bars, spec.bpm); });
-    box.appendChild(node('p', 'g3-note', meterNarration(spec.table, spec.bars)));
+    addPlay(box, '▶ השמע את המשקל', function () { return meterEvents(spec.table, spec.bars, spec.bpm); });
+    addNote(box, meterNarration(spec.table, spec.bars));
+    return true;
   }
 
+  // The full bars, then the beats that never filled one: the remainder is a
+  // box that stayed open, not a number pulled out of a division.
   function drawRemainder(box, spec) {
     const s = barsAndRemainder(spec.beats, spec.perBar);
-    if (!s) return;
+    if (!s) return false;
     const row = node('div', 'g3-row');
     row.dir = 'ltr';
-    for (let i = 0; i < s.bars; i++) row.appendChild(pads(s.perBar, 'g3-pad on'));
-    if (s.remainder) row.appendChild(pads(s.remainder, 'g3-pad left'));
+    for (let i = 0; i < s.bars; i++) row.appendChild(pads(s.perBar, 'on'));
+    if (s.remainder) row.appendChild(pads(s.remainder, 'left'));
     box.appendChild(row);
-    addPlay(box, '▶ השמע שוב', function () { return remainderEvents(s.beats, s.perBar, spec.bpm); });
-    box.appendChild(node('p', 'g3-note', remainderNarration(s)));
+    addPlay(box, '▶ השמע את התיבות', function () { return remainderEvents(s.beats, s.perBar, spec.bpm); });
+    addNote(box, remainderNarration(s));
+    return true;
   }
 
   function drawPair(box, spec) {
-    const label = node('p', 'g3-values');
+    // pairEvents is empty unless both values are positive numbers, so it is
+    // also the check for "is this pair drawable".
+    if (!pairEvents(spec).length) return false;
+    const label = node('p', 'g3-values', spec.a + ' → ' + spec.b + (spec.unit === 'bpm' ? ' BPM' : ' Hz'));
     label.dir = 'ltr';
-    label.textContent = spec.a + ' → ' + spec.b + (spec.unit === 'bpm' ? ' BPM' : ' Hz');
     box.appendChild(label);
-    addPlay(box, '▶ השמע שוב', function () { return pairEvents(spec); });
-    box.appendChild(node('p', 'g3-note', pairNarration(spec)));
+    addPlay(box, '▶ השמע את שני הצלילים', function () { return pairEvents(spec); });
+    addNote(box, pairNarration(spec));
+    return true;
   }
 
+  // The step sequencer is the rectangle: rows × cells. Cells stay ≥44px and
+  // wrap instead of scrolling sideways, which is what gridLayout works out.
   function drawGrid(box, spec) {
-    const cells = gridCells(spec.rows, spec.steps);
-    if (cells == null) return;
-    const width = box.clientWidth || spec.width || 284;
-    const lay = gridLayout(spec.steps, width);
+    if (gridCells(spec.rows, spec.steps) == null) return false;
+    const lay = gridLayout(spec.steps, box.clientWidth || spec.width || 284);
+    if (!lay) return false;
     const wrap = node('div', 'g3-grid');
     wrap.dir = 'ltr';
     wrap.style.setProperty('--g3-cell', lay.cell + 'px');
@@ -395,7 +407,7 @@
           const on = cell.getAttribute('aria-pressed') !== 'true';
           cell.setAttribute('aria-pressed', on ? 'true' : 'false');
           cell.classList.toggle('on', on);
-          if (on) playEvents([{ at: 0, dur: 0.18, gain: 0.16, hz: BEAT_HZ * Math.pow(2, (spec.rows - 1 - r) / 4), type: 'sine' }]);
+          if (on) playEvents([{ at: 0, dur: 0.18, gain: 0.16, type: 'sine', hz: BEAT_HZ * Math.pow(2, (spec.rows - 1 - r) / 4) }]);
         });
         line.appendChild(cell);
       }
@@ -403,27 +415,27 @@
     }
     box.appendChild(wrap);
     addPlay(box, '▶ השמע את הרשת', function () { return gridEvents(spec.rows, spec.steps, spec.bpm); });
-    box.appendChild(node('p', 'g3-note', gridNarration(spec.rows, spec.steps)));
+    addNote(box, gridNarration(spec.rows, spec.steps));
+    return true;
   }
 
   const DRAW = { meter: drawMeter, remainder: drawRemainder, pair: drawPair, grid: drawGrid };
 
-  // Every widget ships a screen-reader line and a visible .g3-note, so a muted
-  // tablet loses nothing (§4.3, §4.7).
+  // Draws one grade-3 activity into `host`. The beat pads are a picture of the
+  // narration, so they are hidden from the screen reader and the narration is
+  // repeated once as sr-only text ahead of them. The grid stays visible to it,
+  // because its cells are the interactive part.
   function bindGrade3(host, spec) {
-    if (!doc() || !host || !spec || !DRAW[spec.kind]) return false;
-    host.textContent = '';
+    if (typeof document === 'undefined' || !host || !spec || !DRAW[spec.kind]) return false;
     const box = node('div', 'g3');
+    if (!DRAW[spec.kind](box, spec)) return false;
+    host.textContent = '';
     host.appendChild(box);
-    DRAW[spec.kind](box, spec);
-    // The beat pads are a picture of the sr-only line, so they are not read
-    // twice. The grid is not hidden: its cells are the interactive part.
     const row = box.querySelector('.g3-row');
     if (row) row.setAttribute('aria-hidden', 'true');
     const note = box.querySelector('.g3-note');
     if (note) {
-      const sr = node('p', 'sr-only', note.textContent);
-      box.insertBefore(sr, box.firstChild);
+      box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
       note.setAttribute('aria-hidden', 'true');
     }
     return true;
