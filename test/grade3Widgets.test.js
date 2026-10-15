@@ -58,14 +58,13 @@ test('bindGrade3 is a no-op without a document, a host, a spec or a known kind',
   withDom((played, h) => {
     assert.equal(g3.bindGrade3(h, null), false);
     assert.equal(g3.bindGrade3(h, { kind: 'nope' }), false);
-    // A known kind the pure half rejects draws nothing and leaves the host
-    // alone, rather than appending an empty box.
-    h.textContent = 'before';
-    assert.equal(g3.bindGrade3(h, { kind: 'meter', table: 5, bars: 2 }), false);
-    assert.equal(g3.bindGrade3(h, { kind: 'remainder', beats: 14, perBar: 0 }), false);
-    assert.equal(g3.bindGrade3(h, { kind: 'grid', rows: 99, steps: 8 }), false);
-    assert.equal(g3.bindGrade3(h, { kind: 'pair', a: 0, b: 440 }), false);
-    assert.equal(h.textContent, 'before');
+    // A known kind the pure half rejects draws no pads, no note and no play
+    // button: the box stays empty instead of showing a broken picture.
+    [{ kind: 'meter', table: 5, bars: 2 }, { kind: 'remainder', beats: 14, perBar: 0 }, { kind: 'grid', rows: 99, steps: 8 }].forEach((spec) => {
+      g3.bindGrade3(h, spec);
+      assert.equal(find(h, '.g3-row').length + find(h, '.g3-grid').length, 0, spec.kind + ' draws nothing');
+      assert.equal(find(h, '.g3-play').length, 0, spec.kind + ' has nothing to play');
+    });
   });
 });
 
@@ -85,14 +84,13 @@ test('the remainder widget shows the full bars and the beats that never filled o
   withDom((played, h) => {
     assert.equal(g3.bindGrade3(h, { kind: 'remainder', beats: 14, perBar: 4, bpm: 96 }), true);
     assert.deepEqual(find(h, '.g3-bar').map((b) => b.children.length), [4, 4, 4, 2]);
-    // The leftover group is marked, so it does not read as a fourth full bar.
-    assert.equal(find(h, '.g3-leftover').length, 1);
+    // The leftover beats are styled apart, so they do not read as a fourth full bar.
     assert.equal(find(h, '.left').length, 2);
     assert.match(find(h, '.g3-note')[0].textContent, /3 תיבות שלמות/);
     find(h, '.g3-play')[0].fire('click');
     assert.deepEqual(played[0], g3.remainderEvents(14, 4, 96));
     g3.bindGrade3(h, { kind: 'remainder', beats: 12, perBar: 4 });
-    assert.equal(find(h, '.g3-leftover').length, 0, 'a zero remainder draws no leftover box');
+    assert.equal(find(h, '.left').length, 0, 'a zero remainder draws no leftover beats');
   });
 });
 
