@@ -19,6 +19,14 @@ test('a bare expression is one isolated LTR run (issue #93: "40 + 40 = ?")', () 
   assert.equal(mathHtml('10 : 2 = ?'), LTR + '10 : 2 = ?</span>');
 });
 
+test('Hebrew lead-ins like למשל do not pull "= ?" into the LTR span', () => {
+  assert.deepEqual(mathRuns('40 + 40 = ?'), ['40 + 40']);
+  assert.equal(
+    mathHtml('למשל 40 + 40 = ?'),
+    'למשל ' + LTR + '40 + 40</span> = ?'
+  );
+});
+
 test('Hebrew around an expression stays outside the LTR span', () => {
   assert.equal(mathHtml('4+4 עשרות. התשובה: 80'), LTR + '4+4</span> עשרות. התשובה: 80');
   assert.equal(mathHtml('חשבו במאונך: 47 + 25'), 'חשבו במאונך: ' + LTR + '47 + 25</span>');
