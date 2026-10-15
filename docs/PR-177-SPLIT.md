@@ -9,6 +9,20 @@ the `grade3Music.js` pure core landed in #176; the `musicEngine.js` provider and
 called from `index.html`; master's `curriculum.js` moved past the branch
 entirely. What is genuinely missing is the grade-3 **UI**, in two slices.
 
+> **Where this landed (issue #278).** The split never ran its course: `master`
+> took both slices at once in a741883 ("#104, part 2/3"), which is why this
+> branch then conflicted. Resolving that merge kept slice 1's half of the
+> overlap, because it is the half with a test behind it — `bindGrade3` and its
+> four `draw*` return a boolean, so a spec the pure half rejects leaves the host
+> untouched instead of showing an empty box, the leftover bar carries
+> `g3-leftover`, and each play button names what it plays. a741883 also landed
+> slice 2's `AREA_RECT`/`TIME_MIN_SEC` items without the
+> `measurementBank.test.js` line below, and wired `grade3Music.js` into a page
+> without taking it off the `reachability.test.js` unused list, so `npm test`
+> was red on two counts; both are fixed here. The duplicate
+> `musicEngine.js` entries a741883 added to `index.html` and `sw.js` are gone —
+> the one the page already had loads before `grade3Music.js` on its own.
+
 ## Slice 1 — the widgets (this PR, 399 changed lines)
 
 `bindGrade3` in `src/lib/grade3Music.js`, the `.g3-*` CSS and the `g3` branch in
