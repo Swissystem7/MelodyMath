@@ -58,13 +58,17 @@
     }
   ];
 
+  function isWithinTolerance(expectedTimeMs, tapTimeMs, toleranceMs) {
+    return Math.abs(tapTimeMs - expectedTimeMs) <= toleranceMs;
+  }
+
   function evaluateTap(expectedTimeMs, tapTimeMs, toleranceMs) {
     const tol = toleranceMs || 150;
     const diff = Math.abs(tapTimeMs - expectedTimeMs);
-    if (diff <= tol * 0.5) {
+    if (diff < tol * 0.5) {
       return { hit: true, rating: 'perfect', text: '🎯 בול בפעימה!', delta: Math.round(tapTimeMs - expectedTimeMs) };
     }
-    if (diff <= tol) {
+    if (isWithinTolerance(expectedTimeMs, tapTimeMs, tol)) {
       return { hit: true, rating: 'good', text: '🎵 קרוב מאוד!', delta: Math.round(tapTimeMs - expectedTimeMs) };
     }
     return { hit: false, rating: 'miss', text: 'פספוס קל', delta: Math.round(tapTimeMs - expectedTimeMs) };
@@ -85,6 +89,7 @@
   return {
     STAGES: STAGES,
     PATTERNS: PATTERNS,
+    isWithinTolerance: isWithinTolerance,
     stageForStreak: stageForStreak,
     evaluateTap: evaluateTap,
     bpmForStreak: bpmForStreak,
