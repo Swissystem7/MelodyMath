@@ -77,6 +77,40 @@ test('the vertical refuses what is not a grade-ב column', () => {
   assert.equal(g2.verticalVoices({ a: 70, b: 46, op: '-' }).total, 24);
 });
 
+test('a grade-ב column 14 + 6 resolves to 20 and regroups ten ones', () => {
+  const s = g2.verticalVoices({ a: 14, b: 6, op: '+' });
+  assert.ok(s);
+  assert.equal(s.total, 20);
+  assert.equal(s.regroup.kind, 'carry');
+  assert.deepEqual(s.phases.filter((p) => p.voice === 'drum').map((p) => p.hits), [4, 6]);
+});
+
+test('bars × beats counts accents per bar without naming the product', () => {
+  const s = g2.barsBeats(4, 4);
+  assert.equal(s.total, 16);
+  assert.equal(s.beats.filter((b) => b.accent).length, 4);
+  assert.doesNotMatch(g2.barsBeatsNarration(4, 4), /\b16\b/);
+  const long = g2.barsBeatsEvents(10, 4);
+  assert.equal(long.length, 10, 'long pieces sample downbeats only');
+  assert.equal(g2.barsBeatsEvents(3, 4).length, 12);
+});
+
+test('half a bar is strong then weak, like half an hour in a whole', () => {
+  assert.equal(g2.halfBarSpec(4).half, 2);
+  assert.equal(g2.halfBarEvents(4).length, 4);
+  assert.match(g2.halfBarNarration(4), /חצי/);
+  assert.doesNotMatch(g2.halfBarNarration(4), /\b2\b/);
+});
+
+test('three registers regroup 12 tens into 523 and 9/9/10 into 1,000', () => {
+  const mid = g2.registerVoices({ h: 4, t: 12, o: 3 });
+  assert.equal(mid.value, 523);
+  assert.ok(mid.phases.some((p) => p.he === g2.TENS_TO_HUNDRED_HE));
+  const top = g2.registerVoices({ h: 9, t: 9, o: 10 });
+  assert.equal(top.value, 1000);
+  assert.ok(top.phases.some((p) => p.he === g2.ONES_TO_TEN_HE));
+});
+
 test('every event the activities emit survives the engine unchanged', () => {
   const batches = [
     g2.evenOddEvents(11),
@@ -98,7 +132,10 @@ test('every event the activities emit survives the engine unchanged', () => {
 // §5 asks for at least 10 items per activity. All five already ship in the
 // bank; these two now carry the widget spec that makes them audible.
 test('the bank items carry a widget spec grade2Music can draw', () => {
-  const kinds = { evenOdd: 'evenOdd', twoInstruments: 'duo' };
+  const kinds = {
+    evenOdd: 'evenOdd', twoInstruments: 'duo',
+    beatsBars: 'beatsBars', halfBar: 'halfBar', registers: 'registers',
+  };
   Object.keys(kinds).forEach((name) => {
     const rows = music(name);
     assert.ok(rows.length >= 10, name + ' has only ' + rows.length + ' items');
@@ -107,12 +144,9 @@ test('the bank items carry a widget spec grade2Music can draw', () => {
       assert.equal(it.g2.kind, kinds[name], it.id);
     });
   });
-  ['beatsBars', 'halfBar', 'registers'].forEach((name) => {
-    assert.ok(music(name).length >= 10, name + ' lost items');
-  });
 });
 
-test('every spec resolves, and the drum+bass columns agree with the answers', () => {
+test('every spec resolves, and the pure logic agrees with the answers', () => {
   music('evenOdd').forEach((it) => {
     const s = g2.evenOddBeats(it.g2.beats);
     assert.ok(s, it.id);
@@ -122,6 +156,24 @@ test('every spec resolves, and the drum+bass columns agree with the answers', ()
     const s = g2.verticalVoices(it.g2);
     assert.ok(s, it.id);
     assert.equal(s.total, it.answer, it.id + ' ' + it.prompt);
+  });
+  music('beatsBars').forEach((it) => {
+    const s = g2.barsBeats(it.g2.bars, it.g2.perBar);
+    assert.ok(s, it.id);
+    assert.equal(String(s.total), String(it.answer), it.id);
+  });
+  const tenFour = music('beatsBars').find((it) => it.g2.bars === 10 && it.g2.table === 10);
+  assert.equal(tenFour.g2.perBar, 4, '10 bars of 4/4 is not the ×10 table');
+  music('halfBar').forEach((it) => {
+    assert.ok(g2.halfBarSpec(it.g2.beatsPerBar), it.id);
+  });
+  music('registers').forEach((it) => {
+    const s = g2.registerVoices(it.g2);
+    assert.ok(s, it.id);
+    const ans = Number(it.answer);
+    if (/במספר.*מאות/.test(it.prompt)) assert.equal(s.h, ans, it.id);
+    else if (/במספר.*עשרות/.test(it.prompt)) assert.equal(s.t, ans, it.id);
+    else assert.equal(s.value, ans, it.id);
   });
 });
 

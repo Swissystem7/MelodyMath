@@ -43,10 +43,9 @@ modelled no regrouping at all.
   marked `gap`. `נפח תיבות` becomes its own honest `gap` row instead of a note
   on an otherwise-covered measurement row.
 
-## Slice 2 — the remaining three activities
+## Slice 2 — the remaining three activities (landed with slice 1 in #103)
 
-Same module, same `g2` widget spec, same `.g3-*` CSS. Each needs the pure
-logic, the `banks.js` spec on its existing items, and tests:
+Same module, same `g2` widget spec, same `.g3-*` CSS:
 
 1. **כפולות: תיבות × פעמות** (`beatsBars`, 11 items) — `barsBeats(bars,
    perBar)`, accent on the first beat of each bar, and a sampled playback for

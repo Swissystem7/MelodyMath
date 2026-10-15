@@ -5,9 +5,8 @@
 //   זוגי או אי־זוגי בשמיעה: האם המקצב נגמר בזוג שלם
 //   מאונך כשני כלים: יחידות בתוף, עשרות בבס, ופריטה = 10 מכות ↔ צליל בס
 //
-// «תיבות × פעמות», «חצי שעה = חצי תיבה» and the three registers are the next
-// slice of #103 (docs/ISSUE-103-SLICES.md); they join this module and the same
-// `g2` widget spec.
+// «תיבות × פעמות», «חצי שעה = חצי תיבה» and the three registers share the same
+// `g2` widget spec (docs/ISSUE-103-SLICES.md slice 2).
 //
 // A narration never names the answer: the pads and the sound are the
 // scaffold, the child still types the number (§5 R4, R5).
@@ -37,6 +36,19 @@
   const PAIR_STRONG_HZ = 165;
   const PAIR_WEAK_HZ = 220;
   const ALONE_HZ = 587;
+  const BAR_ACCENT_HZ = 165;
+  const BAR_BEAT_HZ = 220;
+  const HALF_STRONG_HZ = 330;
+  const HALF_WEAK_HZ = 247;
+  const PLAY_CAP = 20;
+
+  const REG_VOICES = {
+    bass: { hz: 110, gain: 0.26, type: 'triangle', he: 'בס' },
+    piano: { hz: 262, gain: 0.22, type: 'sine', he: 'פסנתר' },
+    bell: { hz: 523, gain: 0.2, type: 'square', he: 'פעמון' },
+  };
+  const ONES_TO_TEN_HE = '10 צלילי פעמון מתקבצים לצליל פסנתר אחד';
+  const TENS_TO_HUNDRED_HE = '10 צלילי פסנתר מתקבצים לצליל בס אחד';
 
   // A missing count is a data bug, not a zero, so null and '' are rejected
   // rather than read through Number()'s 0.
@@ -52,7 +64,7 @@
   }
 
   function hit(voice, at, dur) {
-    const v = VOICES[voice] || VOICES.drum;
+    const v = VOICES[voice] || REG_VOICES[voice] || VOICES.drum;
     return { at: at, dur: dur, hz: v.hz, gain: v.gain, type: v.type };
   }
 
@@ -162,6 +174,120 @@
     return parts.length ? parts.join('. ') + '.' : '';
   }
 
+  // ---------- תיבות × פעמות ----------
+  function barsBeats(bars, perBar) {
+    const b = whole(bars, 1, 20);
+    const p = whole(perBar, 1, 12);
+    if (b == null || p == null) return null;
+    const beats = [];
+    for (let bar = 1; bar <= b; bar++) {
+      for (let i = 0; i < p; i++) beats.push({ bar: bar, indexInBar: i, accent: i === 0 });
+    }
+    return { bars: b, perBar: p, total: beats.length, beats: beats };
+  }
+
+  function barsBeatsEvents(bars, perBar, bpm) {
+    const s = barsBeats(bars, perBar);
+    if (!s || !s.beats.length) return [];
+    const step = beatLength(bpm);
+    const sample = s.total > PLAY_CAP;
+    const out = [];
+    s.beats.forEach(function (b, i) {
+      if (sample && !b.accent) return;
+      const at = sample ? (b.bar - 1) * step : i * step;
+      out.push({
+        at: at, dur: step * 0.65,
+        hz: b.accent ? BAR_ACCENT_HZ : BAR_BEAT_HZ,
+        gain: b.accent ? 0.26 : 0.14,
+        type: b.accent ? 'triangle' : 'sine',
+      });
+    });
+    return out;
+  }
+
+  function barsBeatsNarration(bars, perBar) {
+    const s = barsBeats(bars, perBar);
+    if (!s) return '';
+    const tail = s.total > PLAY_CAP
+      ? ' בשמיעה מוקדמת נשמעת רק הפעימה הראשונה בכל תיבה.'
+      : ' הפעימה הראשונה בכל תיבה חזקה.';
+    return s.bars + ' תיבות, בכל תיבה ' + s.perBar + ' פעמות.' + tail;
+  }
+
+  // ---------- חצי שעה = חצי תיבה ----------
+  function halfBarSpec(beatsPerBar) {
+    const n = whole(beatsPerBar, 2, 12);
+    if (n == null || n % 2 !== 0) return null;
+    return { beatsPerBar: n, half: n / 2 };
+  }
+
+  function halfBarEvents(beatsPerBar, bpm) {
+    const s = halfBarSpec(beatsPerBar);
+    if (!s) return [];
+    const step = beatLength(bpm);
+    const out = [];
+    for (let i = 0; i < s.beatsPerBar; i++) {
+      const strong = i < s.half;
+      out.push({
+        at: i * step, dur: step * 0.7,
+        hz: strong ? HALF_STRONG_HZ : HALF_WEAK_HZ,
+        gain: strong ? 0.24 : 0.14,
+        type: strong ? 'triangle' : 'sine',
+      });
+    }
+    return out;
+  }
+
+  function halfBarNarration(beatsPerBar) {
+    const s = halfBarSpec(beatsPerBar);
+    if (!s) return '';
+    return 'תיבה של ' + s.beatsPerBar + ' פעמות: החצי הראשון חזק והחצי השני חלש — כמו תו חצי מול חצי שעה.';
+  }
+
+  // ---------- שלושה רגיסטרים עד 1,000 ----------
+  function regCount(x, max) {
+    if (x == null || x === '') return 0;
+    const n = Math.round(Number(x));
+    if (!Number.isFinite(n) || n < 0 || n > max) return null;
+    return n;
+  }
+
+  function registerVoices(raw) {
+    const src = raw && typeof raw === 'object' ? raw : {};
+    let h = regCount(src.h, 20);
+    let t = regCount(src.t, 20);
+    let o = regCount(src.o, 20);
+    if (h == null || t == null || o == null) return null;
+    const phases = [];
+    function say(voice, hits) {
+      const name = REG_VOICES[voice].he;
+      if (!hits) return name + ' שותק';
+      return name + ' מנגן ' + hits + (hits === 1 ? ' צליל' : ' צלילים');
+    }
+    phases.push({ voice: 'bass', hits: h, he: say('bass', h) });
+    phases.push({ voice: 'piano', hits: t, he: say('piano', t) });
+    phases.push({ voice: 'bell', hits: o, he: say('bell', o) });
+    while (o >= TEN) {
+      phases.push({ kind: 'carry', from: 'bell', to: 'piano', hits: TEN, he: ONES_TO_TEN_HE });
+      o -= TEN;
+      t += 1;
+    }
+    while (t >= TEN) {
+      phases.push({ kind: 'carry', from: 'piano', to: 'bass', hits: TEN, he: TENS_TO_HUNDRED_HE });
+      t -= TEN;
+      h += 1;
+    }
+    const value = h * 100 + t * 10 + o;
+    if (value > 1000) return null;
+    return { h: h, t: t, o: o, value: value, phases: phases };
+  }
+
+  function registerNarration(raw) {
+    const s = registerVoices(raw);
+    if (!s) return '';
+    return 'בס הוא מאות, פסנתר עשרות, פעמון יחידות. ' + phaseNarration(s.phases);
+  }
+
   // ---------- widgets ----------
   function doc() {
     return typeof document === 'undefined' ? null : document;
@@ -210,10 +336,16 @@
   // grade-ג widget uses for beats outside the bar. A column that contributes
   // nothing (the 0 ones of 70) draws no group; the narration still says
   // "0 מכות תוף", so nothing is lost when the tablet is muted.
+  function padClass(voice) {
+    if (voice === 'bass') return 'on';
+    if (voice === 'bell') return 'left';
+    return '';
+  }
+
   function drawPhases(row, phases) {
     phases.forEach(function (p) {
       if (!p.kind && !p.hits) return;
-      row.appendChild(p.kind ? pads(p.hits, 'left') : pads(p.hits, p.voice === 'bass' ? 'on' : ''));
+      row.appendChild(p.kind ? pads(p.hits, 'left') : pads(p.hits, padClass(p.voice)));
     });
   }
 
@@ -238,7 +370,43 @@
     box.appendChild(node('p', 'g3-note', phaseNarration(s.phases)));
   }
 
-  const DRAW = { evenOdd: drawEvenOdd, duo: drawDuo };
+  function drawBeatsBars(box, spec) {
+    const s = barsBeats(spec.bars, spec.perBar);
+    if (!s) return;
+    const row = padRow(box);
+    for (let bar = 1; bar <= s.bars; bar++) {
+      const group = node('span', 'g3-bar');
+      s.beats.filter(function (b) { return b.bar === bar; }).forEach(function (b) {
+        group.appendChild(node('i', b.accent ? 'on' : ''));
+      });
+      row.appendChild(group);
+    }
+    addPlay(box, '▶ השמע את התיבות', function () { return barsBeatsEvents(spec.bars, spec.perBar, spec.bpm); });
+    box.appendChild(node('p', 'g3-note', barsBeatsNarration(spec.bars, spec.perBar)));
+  }
+
+  function drawHalfBar(box, spec) {
+    const s = halfBarSpec(spec.beatsPerBar);
+    if (!s) return;
+    const row = padRow(box);
+    row.appendChild(pads(s.half, 'on'));
+    row.appendChild(pads(s.half, ''));
+    addPlay(box, '▶ השמע חצי תיבה', function () { return halfBarEvents(spec.beatsPerBar, spec.bpm); });
+    box.appendChild(node('p', 'g3-note', halfBarNarration(spec.beatsPerBar)));
+  }
+
+  function drawRegisters(box, spec) {
+    const s = registerVoices(spec);
+    if (!s) return;
+    drawPhases(padRow(box), s.phases);
+    addPlay(box, '▶ השמע שלושה רגיסטרים', function () { return phaseEvents(s.phases, spec.bpm); });
+    box.appendChild(node('p', 'g3-note', registerNarration(spec)));
+  }
+
+  const DRAW = {
+    evenOdd: drawEvenOdd, duo: drawDuo,
+    beatsBars: drawBeatsBars, halfBar: drawHalfBar, registers: drawRegisters,
+  };
 
   // Every widget ships a screen-reader line and a visible .g3-note, so a muted
   // tablet loses nothing (§4.3, §4.7).
@@ -262,9 +430,14 @@
   }
 
   return {
-    VOICES: VOICES, CARRY_HE: CARRY_HE, BORROW_HE: BORROW_HE,
+    VOICES: VOICES, REG_VOICES: REG_VOICES,
+    CARRY_HE: CARRY_HE, BORROW_HE: BORROW_HE,
+    ONES_TO_TEN_HE: ONES_TO_TEN_HE, TENS_TO_HUNDRED_HE: TENS_TO_HUNDRED_HE,
     evenOddBeats: evenOddBeats, evenOddEvents: evenOddEvents, evenOddNarration: evenOddNarration,
     verticalVoices: verticalVoices, phaseEvents: phaseEvents, phaseNarration: phaseNarration,
+    barsBeats: barsBeats, barsBeatsEvents: barsBeatsEvents, barsBeatsNarration: barsBeatsNarration,
+    halfBarSpec: halfBarSpec, halfBarEvents: halfBarEvents, halfBarNarration: halfBarNarration,
+    registerVoices: registerVoices, registerNarration: registerNarration,
     bindGrade2: bindGrade2,
   };
 });
