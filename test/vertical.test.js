@@ -29,14 +29,13 @@ test('vertical normalize handles negative operands by setting them to 0', () => 
   });
 });
 
-test('vertical API includes grade ב׳ music activity functions', () => {
+// vertical.js draws the column and nothing else; the grade-ב music layer on
+// top of it is grade2Music.js (#103).
+test('vertical API is display-only', () => {
   assert.deepStrictEqual(Object.keys(vert).sort(), [
     'bindVertical',
     'normalizeVertical',
     'renderVerticalHtml',
-    'detectEvenOddBeat',
-    'mapVerticalToInstruments',
-    'mapHalfHourToNote',
     'MAX_OPERAND'
   ].sort());
 });
