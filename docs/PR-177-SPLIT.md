@@ -22,6 +22,18 @@ entirely. What is genuinely missing is the grade-3 **UI**, in two slices.
 > was red on two counts; both are fixed here. The duplicate
 > `musicEngine.js` entries a741883 added to `index.html` and `sw.js` are gone —
 > the one the page already had loads before `grade3Music.js` on its own.
+>
+> **Second merge (issue #285).** `master` then landed the test half of the same
+> slice on its own (512e0c1, PR #276) plus the grade-ג׳ core tests (9ce9a65,
+> PR #178), so this branch conflicted again on exactly the two files both sides
+> wrote: this document and `test/grade3Widgets.test.js`. Both resolve as a
+> union. The test file keeps all nine of `master`'s cases and the one this
+> branch adds (every `g3` spec in the banks is one `bindGrade3` draws), with the
+> two overlapping cases taking this branch's stricter form — they assert the
+> `false` return and the untouched host, which only this branch's
+> `grade3Music.js` delivers. `test/grade3Music.test.js` arrives untouched from
+> `master`. `npm test`: 528 tests, 0 fail, 1 skip — `master` alone was red on
+> the `measurementBank.test.js` count fixed below.
 
 ## Slice 1 — the widgets (this PR, 399 changed lines)
 
