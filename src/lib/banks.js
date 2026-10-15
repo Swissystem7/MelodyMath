@@ -70,6 +70,7 @@
     TABLE: 'קריאת טבלת נתונים',
     FRAC_EQUIV: 'שברים שקולים — הרחבה, צמצום והשוואה',
     FRAC_ADD: 'חיבור וחיסור שברים, גם במכנים שונים',
+    FRAC_MIXED: 'מספרים מעורבים — מעבר לשבר לא אמיתי וחזרה, חיבור וחיסור',
     FRAC_OF: 'שבר מכמות',
     DEC_PLACE: 'שברים עשרוניים — ערך המקום, השוואה ומעבר משבר פשוט',
     DEC_ADD: 'חיבור וחיסור שברים עשרוניים',
@@ -1355,6 +1356,49 @@
     G3('place_value', 'מה הספרה במקום העשרות במספר 3164?', 6, 'הספרה השנייה מימין', { standard: ST.NUM10K, level: 2 }),
     G3('place_value', 'איזה מספר קטן יותר: 7050 או 7500? כתבו את המספר.', 7050, 'אותן אלפים, ובמקום המאות 0 קטן מ־5', { standard: ST.NUM10K, level: 1 }),
     G3('place_value', 'כמה מאות שלמות יש במספר 2800?', 28, '2800 : 100', { standard: ST.NUM10K, level: 3 })
+  );
+
+  // ---------- כיתה ה׳ · מספרים מעורבים (#96) ----------
+  // Appended last on purpose: ids are RAW indexes, so every item above keeps
+  // the id a teacher report already holds.
+  //
+  // The answer is «שלם ו־מונה/מכנה», the form Israeli textbooks print and the
+  // one unitCheck.js already uses. adaptive.parseMixedNumber accepts it with
+  // or without the maqaf and with a bare space, and rejects the improper
+  // fraction — so «כתבו 7/4 כמספר מעורב» cannot be answered by copying 7/4.
+  //
+  // No prompt puts a mixed number next to +, − or =: in an RTL paragraph the
+  // connector «ו־» splits the expression into two numeric runs and mathBidi
+  // then isolates the wrong half («1 ו־[1/2 + 2] ו־1/4»). The sums are worded
+  // instead, which leaves each mixed number its own run and reads correctly.
+  function MIX(prompt, answer, hint, level) {
+    return I('ה', 'fractions', prompt, answer, hint, {
+      strand: STRAND.FRAC, standard: ST.FRAC_MIXED, level: level, typed: true,
+    });
+  }
+
+  RAW.push(
+    MIX('כתבו 3/2 כמספר מעורב (שלם ושבר)', '1 ו־1/2', 'שני חצאים הם שלם אחד, ונשאר חצי', 1),
+    MIX('כתבו 7/4 כמספר מעורב (שלם ושבר)', '1 ו־3/4', 'ארבעה רבעים הם שלם, ונשארו שלושה רבעים', 1),
+    MIX('כתבו 5/4 כמספר מעורב (שלם ושבר)', '1 ו־1/4', 'ארבעה רבעים הם שלם, ונשאר רבע', 1),
+    MIX('כמה שלמים יש ב־9/4? (מספר שלם בלבד)', 2, 'שמונה רבעים הם שני שלמים, ונשאר רבע', 1),
+    MIX('כתבו 9/4 כמספר מעורב (שלם ושבר)', '2 ו־1/4', 'שמונה רבעים הם שני שלמים, ונשאר רבע', 2),
+    MIX('כתבו 11/8 כמספר מעורב (שלם ושבר)', '1 ו־3/8', 'שמונה שמיניות הם שלם, ונשארו שלוש', 2),
+    MIX('כתבו את המספר המעורב 2 ו־1/3 כשבר לא אמיתי', '7/3', 'שני שלמים הם 6/3, ועוד שליש', 2),
+    MIX('כתבו את המספר המעורב 1 ו־5/8 כשבר לא אמיתי', '13/8', 'שלם אחד הוא 8/8, ועוד חמש שמיניות', 2),
+    MIX('מה גדול יותר, 1 ו־1/4 או 1 ו־3/8? כתבו את המספר הגדול.', '1 ו־3/8', 'אותו שלם; רבע הוא 2/8 ושלוש שמיניות גדולות ממנו', 3),
+    MIX('שיר אחד נמשך 2 ו־1/2 דקות ושיר שני 1 ו־1/4 דקות. מה האורך הכולל? (שלם ושבר)', '3 ו־3/4', 'שני שלמים ועוד שלם, וחצי ועוד רבע הם שלושה רבעים', 3),
+    MIX('מתוך הקלטה של 3 ו־1/2 דקות נמחקו 1 ו־1/4 דקות. כמה נשאר? (שלם ושבר)', '2 ו־1/4', 'חצי פחות רבע הוא רבע, ושלושה שלמים פחות שלם אחד', 3),
+    MIX('כמה זה 1 ו־3/4 ועוד 2 ו־1/2? (שלם ושבר)', '4 ו־1/4', 'שלושה שלמים, ושלושה רבעים ועוד חצי הם שלם ורבע', 3)
+  );
+
+  // ---------- כיתה ו׳ · משמעות האחוז (#96) ----------
+  // The bank had 10%/25%/50% of a quantity but never what a percent is. These
+  // three say it: one percent is one hundredth, and a half is 50 of them.
+  RAW.push(
+    G56('ו', 'percent', 'אחוז אחד הוא איזה חלק מהשלם? כתבו כשבר.', '1/100', 'אחוז = חלק אחד מתוך מאה', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה אחוזים הם כל השלם? (מספר בלבד)', 100, 'השלם הוא מאה חלקים מתוך מאה', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 1/2', 50, 'חצי הוא 50 מתוך 100', 2, ST.PERCENT)
   );
 
   const SHIPPED = [];

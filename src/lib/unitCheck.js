@@ -163,7 +163,10 @@
           { skill: 'primes', level: 1, prompt: 'איזה מהמספרים הבאים הוא מספר ראשוני?', answer: '7', choices: ['4', '6', '7', '9'] },
           { skill: 'primes', level: 2, prompt: 'האם המספר 9 הוא ראשוני או פריק?', answer: 'פריק', choices: ['ראשוני', 'פריק'] },
           { skill: 'mixed_fractions', level: 2, prompt: 'איך כותבים 7/4 כשבר מעורב?', answer: '1 ו־3/4', choices: ['1 ו־1/4', '1 ו־3/4', '2 ו־1/4', '3 ו־1/4'] },
-          { skill: 'mixed_fractions', level: 3, prompt: '1 ו־1/2 + 2 ו־1/4 = ?', answer: '3 ו־3/4', choices: ['3 ו־1/2', '3 ו־3/4', '4', '3 ו־2/6'] },
+          // A sum of mixed numbers is worded, not written as «1 ו־1/2 + 2 ו־1/4 = ?»:
+          // the connector «ו־» breaks that into two numeric runs and the RTL page
+          // then shows «1 ו־1/2 + 2» as one isolated expression (see #96).
+          { skill: 'mixed_fractions', level: 3, prompt: 'כמה זה 1 ו־1/2 ועוד 2 ו־1/4?', answer: '3 ו־3/4', choices: ['3 ו־1/2', '3 ו־3/4', '4', '3 ו־2/6'] },
         ],
         post: [
           { skill: 'lcm', level: 1, prompt: 'מהי הכפולה המשותפת המינימלית של 2 ו־5?', answer: '10', choices: ['5', '7', '10', '20'] },
@@ -173,7 +176,7 @@
           { skill: 'primes', level: 1, prompt: 'מבין המספרים הבאים, מי מהם הוא ראשוני?', answer: '11', choices: ['8', '9', '11', '12'] },
           { skill: 'primes', level: 2, prompt: 'האם המספר 15 הוא ראשוני או פריק?', answer: 'פריק', choices: ['ראשוני', 'פריק'] },
           { skill: 'mixed_fractions', level: 2, prompt: 'איך כותבים 9/4 כשבר מעורב?', answer: '2 ו־1/4', choices: ['1 ו־3/4', '2 ו־1/4', '2 ו־3/4', '3 ו־1/4'] },
-          { skill: 'mixed_fractions', level: 3, prompt: '2 ו־1/2 + 1 ו־1/4 = ?', answer: '3 ו־3/4', choices: ['3 ו־1/2', '3 ו־3/4', '4', '3 ו־2/6'] },
+          { skill: 'mixed_fractions', level: 3, prompt: 'כמה זה 2 ו־1/2 ועוד 1 ו־1/4?', answer: '3 ו־3/4', choices: ['3 ו־1/2', '3 ו־3/4', '4', '3 ו־2/6'] },
         ],
       },
     },

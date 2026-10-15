@@ -70,7 +70,7 @@
     // ה/ו bank holds now; a music-only item does not make a topic covered (R4).
     { grade: 'ה', strand: 'numbers', topic: 'ראשוניים ופריקים; פירוק לגורמים; סימני התחלקות', status: PARTIAL, note: 'מחלקים וכפולה משותפת דרך משקלים ותופים שנפגשים; אין המונחים ראשוני/פריק, אין פירוק לגורמים ואין סימני התחלקות' },
     { grade: 'ה', strand: 'fractions', topic: 'הרחבה, צמצום והשוואה של שברים', status: COVERED, note: 'הרחבה, צמצום עד הסוף, השוואה במכנים שונים — גם בלי מוזיקה' },
-    { grade: 'ה', strand: 'fractions', topic: 'חיבור וחיסור שברים במכנים שונים', status: COVERED, note: 'תרגילים בלי מוזיקה ותיבה מעורבת (1/4 + 1/8 + 1/16); אין מספרים מעורבים' },
+    { grade: 'ה', strand: 'fractions', topic: 'חיבור וחיסור שברים במכנים שונים', status: COVERED, note: 'תרגילים בלי מוזיקה ותיבה מעורבת (1/4 + 1/8 + 1/16); מספרים מעורבים — מעבר לשבר לא אמיתי וחזרה, השוואה וחיבור/חיסור בניסוח מילולי' },
     { grade: 'ה', strand: 'fractions', topic: 'שבר מכמות', status: COVERED, note: '3 פריטים בלבד, כולם בלי מוזיקה' },
     { grade: 'ה', strand: 'decimals', topic: 'שברים עשרוניים: ערך מקום, השוואה, מעבר משבר פשוט', status: COVERED, note: 'עשיריות ומאיות; שניות לפעימה (60/BPM) כהקשר מוזיקלי' },
     { grade: 'ה', strand: 'decimals', topic: 'חיבור וחיסור שברים עשרוניים', status: COVERED, note: 'כולל שאלת עודף בשקלים; אין חיבור במאונך' },
@@ -80,7 +80,7 @@
     { grade: 'ו', strand: 'numbers', topic: 'מספרים טבעיים ו־0; סדר פעולות', status: GAP, note: 'אין פריטים לכיתה ו׳ בתחום' },
     { grade: 'ו', strand: 'fractions', topic: 'כפל וחילוק שברים', status: COVERED, note: 'תרגילים בלי מוזיקה; תו מנוקד ×3/2, שלישייה ×2/3, כמה שמיניות בחצי' },
     { grade: 'ו', strand: 'decimals', topic: 'כפל וחילוק שברים עשרוניים', status: COVERED, note: 'כפל וחילוק ב־10/100, עשרוני בעשרוני; יחסי תדרים (440 × 1.5)' },
-    { grade: 'ו', strand: 'decimals', topic: 'אחוזים', status: COVERED, note: 'אחוז מכמות, שבר לאחוז, עלייה וירידה באחוזים (מחיר וטמפו)' },
+    { grade: 'ו', strand: 'decimals', topic: 'אחוזים', status: COVERED, note: 'משמעות האחוז (1% = 1/100, השלם = 100%), אחוז מכמות ב־10%/25%/50%, שבר לאחוז, עלייה וירידה באחוזים (מחיר וטמפו)' },
     { grade: 'ו', strand: 'geometry', topic: 'מעגל ועיגול: היקף ושטח', status: PARTIAL, note: 'רדיוס, קוטר, היקף ומעלות במעגל הקווינטות; אין שטח עיגול' },
     { grade: 'ו', strand: 'geometry', topic: 'מצולעים מורכבים', status: GAP, note: 'אין בבנק' },
     { grade: 'ו', strand: 'measure', topic: 'נפח', status: GAP, note: 'אין בבנק' },
