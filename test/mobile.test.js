@@ -29,3 +29,12 @@ test('the principal-letter preview wraps its URLs on a phone', () => {
 test('the 807 answer input can shrink inside its flex row', () => {
   assert.match(read('807.html'), /input\[type=text\]\{flex:1; min-width:0;/);
 });
+
+// The grade-ב regrouping group is 10 pads: 10x32px + 9x4px + 12px padding =
+// 368px, wider than the 284px of card content a 360px phone has. Without a
+// wrap the pad group pushes the whole page sideways (#103).
+test('a pad group wraps inside its card instead of widening the phone page', () => {
+  const css = read('index.html');
+  assert.match(css, /\.g3-bar\{[^}]*flex-wrap:wrap/);
+  assert.match(css, /\.g3-bar\{[^}]*max-width:100%/);
+});
