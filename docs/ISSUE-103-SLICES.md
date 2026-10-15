@@ -79,28 +79,37 @@ refuses to draw (`24 − 58` would go negative). Without the `g3` branch's
 by a fake-DOM test that runs the real `renderWidget` source against every `g2`
 item in the bank.
 
-## Still owed — slice 3, the remaining three activities
+## Slice 3 — the remaining three activities (this PR)
 
-Same module, same `g2` widget spec, same `.g3-*` CSS. Each needs the pure
+Same module, same `g2` widget spec, same `.g3-*` CSS. Each adds the pure
 logic, the `banks.js` spec on its existing items, and tests:
 
 1. **כפולות: תיבות × פעמות** (`beatsBars`, 11 items) — `barsBeats(bars,
    perBar)`, accent on the first beat of each bar, and a sampled playback for
-   long pieces (10 bars of 4/4 is 40 beats, too long to sit through). The
-   items are tagged with the multiplication fact, which for one item ("קטע של
-   10 תיבות 4/4") is not the meter, so `BARS` needs a `perBar` override.
-   Narration must not state the product — that is the answer.
+   long pieces (10 bars of 4/4 is 40 beats, too long to sit through; past
+   `PLAY_CAP` only the downbeats sound). The items are tagged with the
+   multiplication fact, which for one item ("קטע של 10 תיבות 4/4") is not the
+   meter, so `BARS` takes a `perBar` override — asserted by name in
+   `grade2Music.test.js`. The narration never states the product, because that
+   is the answer.
 2. **חצי שעה = חצי תיבה** (`halfBar`, 11 items) — the first half of the bar
-   plays strong and the second weak, linking תו חצי to חצי שעה. Narration
-   stays structural: several items answer `2` or `30`.
+   plays strong and the second weak, linking תו חצי to חצי שעה. `halfBarSpec`
+   refuses an odd meter, since half of it is not a whole number of beats.
+   Narration stays structural: several items answer `2` or `30`.
 3. **מספרים עד 1,000 בשלושה רגיסטרים** (`registers`, 11 items) — בס = מאות,
    פסנתר = עשרות, פעמון = יחידות. A register may be handed more than 9 on
-   purpose (`12` tens → 523, and `9/9/10` → 1,000), so it regroups and the
-   collapse is heard through `phaseEvents`.
+   purpose (`12` tens → 523, and `9/9/10` → 1,000), so `registerVoices`
+   regroups ones→tens then tens→hundreds and the collapse is heard through the
+   shared `phaseEvents`. `REG` accepts either `[h, t, o]` or `{h, t, o}`.
 
-Then `curriculum.js` can credit `grade2Music` on the כפולות and the חצאי שעות
-rows, which the landed slices deliberately do not claim yet — both notes say
-"עדיין בלי צליל".
+`curriculum.js` now credits `grade2Music` on the כפולות and the חצאי שעות
+rows: both notes drop "עדיין בלי צליל" and name what is heard instead.
+
+Three activities, one `DRAW` table: `bindGrade2` still refuses a spec it
+cannot resolve, so the `renderWidget` re-hide guard below covers the new kinds
+for free. `test/grade2MusicWidget.test.js` binds every `music`-tagged grade-ב
+item and presses its ▶, which is what proves all five activities are reachable
+and not just loaded.
 
 ## One hunk of #284 deliberately dropped
 
