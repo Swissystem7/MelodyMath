@@ -87,6 +87,61 @@
     return {};
   }
 
+  // ---- unit tables for the measurement bank (כיתות א׳–ד׳) ----
+  // One row per family, every unit written as a count of the family's base
+  // unit, so convert() stays a single rule instead of a pair per conversion.
+  // כסף is here because the programme files it under מדידות, and אגורות are
+  // its base unit. `year` is a plain non-leap year — the only one the bank
+  // asks about; months are not a fixed length, so there is no month unit.
+  const UNITS = {
+    length: { mm: 1, cm: 10, m: 1000, km: 1000000 },
+    mass: { g: 1, kg: 1000 },
+    volume: { ml: 1, l: 1000 },
+    time: { min: 1, hour: 60, day: 1440, week: 10080, year: 525600 },
+    money: { agora: 1, shekel: 100 },
+  };
+
+  function familyOf(unit) {
+    const names = Object.keys(UNITS);
+    for (let i = 0; i < names.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(UNITS[names[i]], unit)) return names[i];
+    }
+    return null;
+  }
+
+  // null, never a number, when the units are unknown or belong to different
+  // families: 3 ק״ג is not 3 ליטר, and a bank answer must not pretend it is.
+  function convert(value, from, to) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    const family = familyOf(from);
+    if (!family || familyOf(to) !== family) return null;
+    return (n * UNITS[family][from]) / UNITS[family][to];
+  }
+
+  // coins: [[value, count], ...] in one unit; the total comes back in it.
+  function coinsTotal(coins) {
+    if (!Array.isArray(coins) || !coins.length) return null;
+    let sum = 0;
+    for (let i = 0; i < coins.length; i++) {
+      const pair = Array.isArray(coins[i]) ? coins[i] : [];
+      const value = Number(pair[0]);
+      const count = Number(pair[1]);
+      if (!Number.isFinite(value) || !Number.isFinite(count)) return null;
+      if (value < 0 || count < 0) return null;
+      sum += value * count;
+    }
+    return sum;
+  }
+
+  // Change is only change when the payment covers the price.
+  function change(paid, cost) {
+    const p = Number(paid);
+    const c = Number(cost);
+    if (!Number.isFinite(p) || !Number.isFinite(c) || c > p) return null;
+    return p - c;
+  }
+
   // כיתה ב׳–ד׳: the unit changes a prompt names in Hebrew. Each unit is a
   // count of the smallest unit of its kind; length, weight, volume and time
   // never convert into each other, so a mixed pair is null, not a number.
@@ -124,6 +179,11 @@
   }
 
   return {
+    UNITS: UNITS,
+    familyOf: familyOf,
+    convert: convert,
+    coinsTotal: coinsTotal,
+    change: change,
     normalizeRuler: normalizeRuler,
     renderRulerHtml: renderRulerHtml,
     bindRuler: bindRuler,

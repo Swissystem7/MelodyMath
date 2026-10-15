@@ -38,6 +38,7 @@
     { grade: 'א', strand: 'geometry', topic: 'מיון מצולעים, קודקוד וצלע, פירוק והרכבה', status: PARTIAL, note: 'מיון לפי צלעות וקודקודים וזווית ישרה; אין פירוק והרכבה' },
     { grade: 'א', strand: 'measure', topic: 'מדידת אורך (מתווך, ס״מ, סרגל)', status: COVERED, note: 'קוביות אורך ואז ס״מ בסרגל מצויר' },
     { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: COVERED, note: 'שעון מצויר בשעות שלמות' },
+    { grade: 'א', strand: 'measure', topic: 'כסף — מטבעות וסכומים', status: COVERED, note: 'מטבעות של 1, 2, 5 ו־10 ₪, סכום ועודף עד 10 ₪; אין אגורות' },
     { grade: 'א', strand: 'data', topic: 'דיאגרמת עמודות ופיקטוגרם', status: GAP, note: 'גל 2' },
 
     { grade: 'ב', strand: 'numbers', topic: 'מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', status: COVERED, note: 'מאות/עשרות/יחידות, זוגי/אי־זוגי והשוואה; גם בלי מוזיקה. «זוגי או אי־זוגי בשמיעה» — האם המקצב נגמר בזוג שלם (grade2Music)' },
@@ -46,7 +47,8 @@
     { grade: 'ב', strand: 'numbers', topic: 'חילוק לחלקים ולהכלה על אותם מספרים', status: COVERED, note: 'בלי המונחים הפורמליים לתלמיד' },
     { grade: 'ב', strand: 'geometry', topic: 'פירוק והרכבה של מצולעים; זווית ישרה', status: PARTIAL, note: 'זווית ישרה ומיון מצולעים; אין פירוק והרכבה' },
     { grade: 'ב', strand: 'measure', topic: 'ס״מ, היקף, חצאי שעות', status: COVERED, note: 'ס״מ בסרגל, היקף מצולע, וחצאי שעות — «חצי שעה = חצי תיבה» עם חצי תיבה חזק וחצי חלש (grade2Music)' },
-    { grade: 'ב', strand: 'measure', topic: 'נפח תיבות — מנייה של קוביות', status: GAP, note: 'אין בבנק; לפי התוכנית (§5) הנושא הזה לא מקבל קישור מוזיקלי' },
+    { grade: 'ב', strand: 'measure', topic: 'כסף — ₪ ואגורות, קנייה ועודף', status: COVERED, note: 'המרת ₪ לאגורות, מטבעות של 10 ו־50 אגורות ועודף עד 50 ₪' },
+    { grade: 'ב', strand: 'measure', topic: 'נפח תיבות — מנייה של קוביות', status: GAP, note: 'אין מדידה בכלים אמיתיים; לפי התוכנית (§5) הנושא הזה לא מקבל קישור מוזיקלי' },
     { grade: 'ב', strand: 'data', topic: 'טבלה, עמודות, פיקטוגרם', status: PARTIAL, note: 'קריאת פיקטוגרם ודיאגרמת עמודות; אין טבלה' },
 
     { grade: 'ג', strand: 'numbers', topic: 'מספרים עד 10,000, מבנה עשרוני', status: PARTIAL, note: 'השוואת שני תדרים ארבע־ספרתיים ומקום האלפים; אין פריסה מלאה של המבנה העשרוני' },
@@ -56,6 +58,7 @@
     { grade: 'ג', strand: 'numbers', topic: 'שאלות השוואה כפליות ודו־שלביות', status: PARTIAL, note: '«פי כמה» בין שני טמפו ובין שני תדרים במרחק אוקטבה; אין שאלות דו־שלביות' },
     { grade: 'ג', strand: 'geometry', topic: 'זווית שטוחה/קהה/ישרה/חדה; מיון משולשים', status: COVERED, note: 'סוגי זוויות במעלות ובשעון; משולשים לפי זוויות ולפי צלעות; בלי מדידה במד־זווית' },
     { grade: 'ג', strand: 'measure', topic: 'שטח מלבן; שעות ודקות', status: COVERED, note: 'שטח במשבצות ובסמ״ר; דקות ומשך זמן — בכתב, בלי שעון דקות מצויר' },
+    { grade: 'ג', strand: 'measure', topic: 'יחידות משקל ונפח (ק״ג/גרם, ליטר/מ״ל); כסף', status: COVERED, note: 'המרות בסיסיות וקנייה בשקלים ואגורות; אין שקילה או מדידת נפח בפועל' },
     { grade: 'ג', strand: 'data', topic: 'איסוף, ארגון, דיאגרמות', status: GAP, note: 'גל 2' },
 
     { grade: 'ד', strand: 'numbers', topic: 'מספרים עד מיליון; אלגוריתמים במאונך; סדר פעולות', status: GAP, note: 'גל 2+' },
@@ -63,6 +66,7 @@
     { grade: 'ד', strand: 'fractions', topic: 'שבר כחלק מכמות; שמות שונים לשבר; השוואה; חיבור/חיסור שברים', status: GAP, note: 'לא נבנה — «חצי מ־8 = 4» אינו שבר' },
     { grade: 'ד', strand: 'geometry', topic: 'מקבילים, מאונכים, מרובעים, שטח פנים', status: PARTIAL, note: 'מקבילים, מאונכים, מיון מרובעים, פאות ומקצועות של תיבה; אין חישוב שטח פנים' },
     { grade: 'ד', strand: 'measure', topic: 'יחידות אורך; זמן בלוח עברי/לועזי', status: PARTIAL, note: 'מ״מ, ס״מ, מטר, ק״מ; גרם וק״ג; מ״ל וליטר; לוח לועזי; אין לוח עברי' },
+    { grade: 'ד', strand: 'measure', topic: 'כסף — חישובי קנייה ועודף', status: COVERED, note: 'המרת ₪/אגורות, מחיר כפול כמות ועודף מ־100 ו־200 ₪' },
     { grade: 'ד', strand: 'data', topic: 'טבלאות ודיאגרמות כולל שברים', status: GAP, note: 'גל 2' },
 
     // ה׳–ו׳: topic headings from Newprogramgrade5.pdf / Newprogramgrade6.pdf
