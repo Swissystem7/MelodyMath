@@ -81,6 +81,15 @@
     return { n: n, d: d };
   }
 
+  // Division with remainder, grade ג׳: "3 שארית 2". Also takes the short
+  // forms a child types — "3ש2", "3 ש׳ 2", "3, ושארית 2", "3 r 2".
+  function parseRemainderAnswer(raw) {
+    const s = String(raw == null ? '' : raw).trim().replace(/\s/g, '').replace(/,/g, '');
+    const m = /^(\d+)(?:ו?שארית|ש['׳]?|[rR])(\d+)$/.exec(s);
+    if (!m) return null;
+    return { q: Number(m[1]), r: Number(m[2]) };
+  }
+
   function isDecimalAnswer(raw) {
     if (raw == null) return false;
     const s = String(raw).trim().replace(/\s/g, '');
@@ -93,6 +102,13 @@
     if (g === '') return false;
     const e = normalizeAnswer(expected);
     if (g === e) return true;
+    const er = parseRemainderAnswer(expected);
+    if (er) {
+      const gr = parseRemainderAnswer(given);
+      if (gr) return gr.q === er.q && gr.r === er.r;
+      // No leftover at all: a bare quotient is a full answer.
+      return er.r === 0 && /^\d+$/.test(g) && Number(g) === er.q;
+    }
     if (
       /[\u0590-\u05FF]/.test(g) &&
       /[\u0590-\u05FF]/.test(e) &&
@@ -139,7 +155,7 @@
   return {
     nextLevel, normalizeAnswer, isCorrect, eligibleExercises,
     parseStudentNumber, countDecimals, closeEnough, parseSimpleFraction,
-    isDecimalAnswer,
+    isDecimalAnswer, parseRemainderAnswer,
     MIN_LEVEL, MAX_LEVEL,
   };
 });
