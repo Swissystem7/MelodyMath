@@ -100,9 +100,18 @@
   }
 
   function listStudents(classCode, storage) {
+    return listClassStudents(classCode, storage).map(function (row) {
+      return row.name;
+    });
+  }
+
+  function listClassStudents(classCode, storage) {
     const roster = loadRoster(classCode, storage);
     return Object.keys(roster.students).sort(function (a, b) {
       return a.localeCompare(b, 'he');
+    }).map(function (name) {
+      const student = roster.students[name];
+      return { name: student.name, created: student.created };
     });
   }
 
@@ -276,6 +285,38 @@
     }
     if (!student || !Array.isArray(student.assignments)) return [];
     return student.assignments.slice();
+  }
+
+  function assignmentProgressRow(row) {
+    if (!row) return null;
+    return {
+      id: row.id,
+      title: row.title,
+      skill: row.skill || '',
+      completed: !!row.completed,
+      completedAt: row.completed ? row.completedAt : null,
+      assignedAt: row.assignedAt,
+    };
+  }
+
+  function listStudentProgress(classCode, name, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (!student) return null;
+    return cleanAssignments(student.assignments).map(assignmentProgressRow);
+  }
+
+  function listClassStudentsProgress(classCode, storage) {
+    return listClassStudents(classCode, storage).map(function (row) {
+      const tasks = listStudentProgress(classCode, row.name, storage) || [];
+      const done = tasks.filter(function (t) { return t.completed; }).length;
+      return {
+        name: row.name,
+        created: row.created,
+        tasks: tasks,
+        completedCount: done,
+        totalCount: tasks.length,
+      };
+    });
   }
 
   function addNote(classCode, name, text, storage) {
@@ -773,8 +814,8 @@
   return {
     PREFIX, WHO_KEY,
     normalizeCode, studentLabel, storageKey, emptyRoster,
-    loadRoster, saveRoster, listStudents, upsertStudent, getStudent,
-    assignTask, listAssignments,
+    loadRoster, saveRoster, listStudents, listClassStudents, upsertStudent, getStudent,
+    assignTask, listAssignments, listStudentProgress, listClassStudentsProgress,
     startSession, addItem, endSession, buildReport, allItems,
     addNote, listNotes, itemsSince, buildClassOverview, getDashboardData,
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,

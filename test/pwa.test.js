@@ -47,6 +47,33 @@ test('the service-worker cache moved past v6, which holds the curriculum.html th
   assert.ok(Number(m[1]) > 6, 'CACHE is still v' + m[1]);
 });
 
+test('every script a page loads is precached, so the page still works offline', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));
+  for (const page of ['index.html', 'curriculum.html', 'offer.html', 'landing.html', 'functions.html', '807.html']) {
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    for (const m of html.matchAll(/<script src="([^"]+)"/g)) {
+      assert.ok(listed.has(m[1]), page + ' loads ' + m[1] + ' but sw.js does not precache it');
+    }
+  }
+});
+
+test('the cache name is not v7, which master (PR #34) ships with a different file set', () => {
+  // main never served v7. Master's #34 bumps to v7 with its own curriculum.html and without
+  // contact.js; one name for two different asset sets would pin whichever copy a tablet saw first.
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const m = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(m, 'CACHE constant not found');
+  assert.ok(Number(m[1]) >= 8, 'CACHE is v' + m[1]);
+});
+
+test('README says where the one contact value lives and that the lab tab is out', () => {
+  const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+  assert.match(readme, /src\/lib\/contact\.js/);
+  assert.match(readme, /CONTACT\.email/);
+  assert.match(readme, /שעון/);
+});
+
 test('the service-worker cache moved past v7, which pinned the files from before #65-#71', () => {
   // v7 was set in #64. The seven fixes that followed changed teacherStore.js, measure.js and
   // index.html without touching sw.js, so a tablet that had visited once never saw them: the old

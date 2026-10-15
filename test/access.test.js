@@ -75,3 +75,28 @@ test('currentPromptText reads the visible class-mode prompt first', () => {
   assert.equal(access.currentPromptText(doc), 'כמה תופים?');
   assert.equal(access.currentPromptText({ querySelector: () => null }), '');
 });
+
+test('class mode hides the countdown from the child unless the teacher asks for it', () => {
+  // TTRS parents' main complaint is the timer; the pitch here is «בלי טיימר».
+  assert.equal(access.classClockVisible(memory()), false);
+  const ls = memory();
+  access.setClassClockVisible(true, ls);
+  assert.equal(access.classClockVisible(ls), true);
+  access.setClassClockVisible(false, ls);
+  assert.equal(access.classClockVisible(ls), false);
+  assert.equal(access.classClockText(90500, true), '1:30');
+  assert.equal(access.classClockText(0, true), '0:00');
+  const hidden = access.classClockText(90500, false);
+  assert.doesNotMatch(hidden, /\d/);
+  assert.match(hidden, /בלי שעון/);
+});
+
+test('the class gate offers the clock as an opt-in, unticked by default', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const box = index.match(/<input[^>]*id="classClockShow"[^>]*>/);
+  assert.ok(box, 'missing #classClockShow');
+  assert.doesNotMatch(box[0], /checked/);
+  assert.match(index, /classClockText\(/);
+});
