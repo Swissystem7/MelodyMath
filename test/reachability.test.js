@@ -12,7 +12,6 @@ const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
-  'grade3Music.js': 'pure core logic for grade 3 music activities; wired into index.html in part 2 (#177)',
 };
 
 function loadedByPages() {
