@@ -9,7 +9,9 @@ const measurement = (grade) => banks.rowsOf('measurement', grade);
 const ST = banks.ST;
 const BY_GRADE = {
   'ב': [ST.LENGTH, ST.CLOCK, ST.HALF_HOUR, ST.PERIMETER],
-  'ג': [ST.MINUTES, ST.AREA],
+  // Grid cells are not square units and minutes→seconds is not a clock face,
+  // so the grade-ג׳ music items keep standards of their own (#177).
+  'ג': [ST.MINUTES, ST.AREA, ST.AREA_RECT, ST.TIME_MIN_SEC],
   'ד': [ST.UNITS, ST.CALENDAR],
 };
 // A few items answer with a clock reading ("2:30") rather than a count.
