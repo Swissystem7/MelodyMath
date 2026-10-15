@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v15';
+const CACHE = 'melodymath-offline-v18';
 const ASSETS = [
   './',
   './index.html',
@@ -17,15 +17,17 @@ const ASSETS = [
   './check.html',
   './manifest.webmanifest',
   './src/lib/core.js',
-  './src/lib/musicEngine.js',
   './src/lib/sonify.js',
+  './src/lib/grade3Music.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
   './src/lib/banks.js',
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
+  './src/lib/grade1Music.js',
   './src/lib/bar44.js',
   './src/lib/vertical.js',
+  './src/lib/grade2Music.js',
   './src/lib/measure.js',
   './src/lib/dataViz.js',
   './src/lib/geometryShapes.js',
@@ -34,7 +36,6 @@ const ASSETS = [
   './src/lib/remediation.js',
   './src/lib/rhythmGame.js',
   './src/lib/interactiveLessons.js',
-  './src/lib/musicEngine.js',
   './src/lib/polyrhythm.js',
   './src/lib/circleOfFifths.js',
   './src/lib/unitCheck.js',
@@ -47,6 +48,7 @@ const ASSETS = [
   './src/lib/graphListen.js',
   './src/lib/listenLessons.js',
   './src/lib/onboard.js',
+  './src/lib/contact.js',
   './src/lib/offer.js',
   './src/lib/tabs.js',
   './src/lib/print.css',

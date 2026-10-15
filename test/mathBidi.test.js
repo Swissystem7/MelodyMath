@@ -19,10 +19,23 @@ test('a bare expression is one isolated LTR run (issue #93: "40 + 40 = ?")', () 
   assert.equal(mathHtml('10 : 2 = ?'), LTR + '10 : 2 = ?</span>');
 });
 
+test('Hebrew lead-ins like למשל do not pull "= ?" into the LTR span', () => {
+  assert.deepEqual(mathRuns('40 + 40 = ?'), ['40 + 40']);
+  assert.equal(
+    mathHtml('למשל 40 + 40 = ?'),
+    'למשל ' + LTR + '40 + 40</span> = ?'
+  );
+});
+
 test('Hebrew around an expression stays outside the LTR span', () => {
   assert.equal(mathHtml('4+4 עשרות. התשובה: 80'), LTR + '4+4</span> עשרות. התשובה: 80');
   assert.equal(mathHtml('חשבו במאונך: 47 + 25'), 'חשבו במאונך: ' + LTR + '47 + 25</span>');
   assert.equal(mathHtml('השעון מראה 3:00. מה השעה?'), 'השעון מראה ' + LTR + '3:00</span>. מה השעה?');
+});
+
+test('mathRuns returns [] for null or undefined input', () => {
+  assert.deepEqual(mathRuns(null), []);
+  assert.deepEqual(mathRuns(undefined), []);
 });
 
 test('Hebrew-only text, plain numbers and labelled sequences are left alone', () => {
@@ -62,6 +75,17 @@ test('answer inputs and choice buttons are LTR', () => {
     assert.match(indexHtml, new RegExp('<input id="' + id + '" dir="ltr"'));
   }
   assert.equal((indexHtml.match(/b\.className='choice';\s*b\.dir='ltr';/g) || []).length, 2);
+});
+
+test('a division with remainder stays LTR, so "3 שארית 2" is never read as "2 שארית 3"', () => {
+  assert.deepEqual(mathRuns('3 שארית 2'), ['3 שארית 2']);
+  assert.equal(mathHtml('3 שארית 2'), LTR + '3 שארית 2</span>');
+  // The word is an operator only between two operands: plain Hebrew prose that
+  // happens to use it stays RTL.
+  assert.deepEqual(mathRuns('מה השארית של החלוקה?'), []);
+  assert.deepEqual(mathRuns('נשארה שארית'), []);
+  const sentence = mathHtml('14 פעמות בתיבות של 4: התשובה היא 3 שארית 2.');
+  assert.ok(sentence.includes(LTR + '3 שארית 2</span>'), sentence);
 });
 
 test('printed worksheets and the answer key keep expressions LTR', () => {

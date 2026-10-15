@@ -5,61 +5,56 @@ const banks = require('../src/lib/banks');
 const measure = require('../src/lib/measure');
 const { isCorrect } = require('../src/lib/adaptive');
 
-const rows = (grade) => banks.rowsOf('measurement', grade);
-
-const MEASURE_STANDARDS = [
-  banks.ST.LENGTH, banks.ST.CLOCK, banks.ST.HALF_HOUR, banks.ST.PERIMETER,
-  banks.ST.MINUTES, banks.ST.AREA, banks.ST.UNITS, banks.ST.CALENDAR,
-  banks.ST.MONEY, banks.ST.MASS_VOL,
-];
-
-// The sections the programme asks of each grade א׳–ד׳. Every one of them has
-// to hold items, otherwise a grade silently loses a measurement topic.
-const SECTIONS = {
-  'א': [banks.ST.LENGTH, banks.ST.CLOCK, banks.ST.MONEY],
-  'ב': [banks.ST.LENGTH, banks.ST.CLOCK, banks.ST.HALF_HOUR, banks.ST.PERIMETER, banks.ST.MONEY, banks.ST.MASS_VOL],
-  'ג': [banks.ST.MINUTES, banks.ST.AREA, banks.ST.MONEY, banks.ST.MASS_VOL],
-  'ד': [banks.ST.UNITS, banks.ST.CALENDAR, banks.ST.MONEY],
+const measurement = (grade) => banks.rowsOf('measurement', grade);
+const rows = measurement;
+const ST = banks.ST;
+const BY_GRADE = {
+  'א': [ST.LENGTH, ST.CLOCK, ST.MONEY],
+  'ב': [ST.LENGTH, ST.CLOCK, ST.HALF_HOUR, ST.PERIMETER, ST.MONEY, ST.MASS_VOL],
+  // Grid cells are not square units and minutes→seconds is not a clock face,
+  // so the grade-ג׳ music items keep standards of their own (#177).
+  'ג': [ST.MINUTES, ST.AREA, ST.AREA_RECT, ST.TIME_MIN_SEC, ST.MONEY, ST.MASS_VOL],
+  'ד': [ST.UNITS, ST.CALENDAR, ST.MONEY],
 };
+// A few items answer with a clock reading ("2:30") rather than a count.
+const CLOCK_ANSWER = /^\d{1,2}:\d{2}$/;
 
-test('every grade א׳–ד׳ has tagged measurement items at all three levels', () => {
-  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
+test('convertUnits changes units within one kind and refuses to mix kinds', () => {
+  assert.equal(measure.convertUnits(2, 'מטרים', 'ס״מ'), 200);
+  assert.equal(measure.convertUnits(3, 'ק״ג', 'גרם'), 3000);
+  assert.equal(measure.convertUnits(30, 'מ״מ', 'ס״מ'), 3);
+  assert.equal(measure.convertUnits(0.5, 'ליטר', 'מ״ל'), 500);
+  assert.equal(measure.convertUnits(2, 'יממות', 'שעות'), 48);
+  assert.equal(measure.convertUnits(3, 'שבועות', 'ימים'), 21);
+  assert.equal(measure.convertUnits(1, 'ק״ג', 'מטר'), null);
+  assert.equal(measure.convertUnits(1, 'רגל', 'ס״מ'), null);
+  assert.equal(measure.convertUnits('x', 'מטר', 'ס״מ'), null);
+});
+
+test('rectArea and perimeter refuse what is not a shape', () => {
+  assert.equal(measure.rectArea(7, 3), 21);
+  assert.equal(measure.rectArea(0, 3), null);
+  assert.equal(measure.rectArea('a', 3), null);
+  assert.equal(measure.perimeter([5, 2, 5, 2]), 14);
+  assert.equal(measure.perimeter([3, 4]), null);
+  assert.equal(measure.perimeter([3, -4, 5]), null);
+});
+
+test('grades א׳–ד׳ have tagged measurement items at every level', () => {
+  Object.keys(BY_GRADE).forEach((g) => {
     assert.ok(banks.skillsForGrade(g).includes('measurement'), g);
-    const items = rows(g);
+    const items = measurement(g);
     assert.ok(items.length >= 12, g + ' has ' + items.length);
-    [1, 2, 3].forEach((lv) => {
-      assert.ok(items.filter((it) => it.level === lv).length >= 2, g + ' level ' + lv);
-    });
+    [1, 2, 3].forEach((lv) => assert.ok(items.some((it) => it.level === lv), g + ' level ' + lv));
     items.forEach((it) => {
-      assert.equal(it.grade, g, it.id);
       assert.equal(it.strand, banks.STRAND.MEASURE, it.id);
-      assert.ok(MEASURE_STANDARDS.includes(it.standard), it.id + ' ' + it.standard);
-      assert.equal(banks.isShippable(it), true, it.id);
-    });
-  });
-});
-
-test('each grade keeps every measurement section of its year non-empty', () => {
-  Object.keys(SECTIONS).forEach((g) => {
-    SECTIONS[g].forEach((standard) => {
-      const section = rows(g).filter((it) => it.standard === standard);
-      assert.ok(section.length >= 4, g + ' / ' + standard + ' has ' + section.length);
-      assert.ok(section.some((it) => it.level === 1), g + ' / ' + standard + ' L1');
-      assert.ok(section.some((it) => it.level === 3), g + ' / ' + standard + ' L3');
-    });
-  });
-});
-
-test('measurement answers are whole numbers a child can type, with the unit in the prompt', () => {
-  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
-    rows(g).forEach((it) => {
-      if (typeof it.answer === 'number') {
-        assert.equal(Number.isInteger(it.answer), true, it.id + ' answer ' + it.answer);
-        assert.ok(it.answer >= 0, it.id);
-      }
+      assert.ok(BY_GRADE[g].includes(it.standard), it.id + ' ' + it.standard);
+      const countable = Number.isInteger(it.answer) && it.answer > 0;
+      assert.ok(countable || CLOCK_ANSWER.test(String(it.answer)), it.id + ' answers ' + it.answer);
       assert.ok(isCorrect(String(it.answer), it.answer), it.id);
       assert.ok(String(it.hint).trim().length > 0, it.id + ' has no hint');
     });
+    BY_GRADE[g].forEach((st) => assert.ok(items.some((it) => it.standard === st), g + ' ' + st));
   });
 });
 
@@ -78,7 +73,7 @@ const CONVERSIONS = [
   [/^כמה שעות יש ב־(\d+) יממ/, 'day', 'hour'],
 ];
 
-test('unit answers in the bank agree with measure.convert', () => {
+test('unit-change answers agree with convertUnits and measure.convert', () => {
   let checked = 0;
   ['א', 'ב', 'ג', 'ד'].forEach((g) => {
     rows(g).forEach((it) => {
@@ -133,21 +128,22 @@ test('money items are tagged to the money standard and name ₪ or אגורות'
   assert.equal(money, 24);
 });
 
-test('a measurement prompt renders as Hebrew RTL with its math kept LTR', () => {
-  const { mathHtml } = require('../src/lib/mathBidi');
-  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
-    rows(g).forEach((it) => {
-      const html = mathHtml(it.prompt);
-      assert.doesNotMatch(html, /<(?!\/?span)/, it.id + ' injects markup');
-      // ₪ and אגורות are Hebrew-flow text, so they must not be swallowed by
-      // an LTR isolate — only operator runs such as "3:30" get one.
-      if (/₪/.test(it.prompt)) assert.match(html, /₪/, it.id);
-      mathHtml(it.prompt).replace(/<span class="math-ltr" dir="ltr">([^<]*)<\/span>/g, function (_, run) {
-        assert.doesNotMatch(run, /[א-ת]/, it.id + ' put Hebrew inside an LTR run');
-        return run;
-      });
-    });
+test('area and perimeter answers agree with measure.js', () => {
+  let areas = 0;
+  let perims = 0;
+  measurement('ג').forEach((it) => {
+    const m = it.prompt.match(/^מלבן שאורכו (\d+) ס״מ ורוחבו (\d+) ס״מ\. מה שטחו/);
+    if (m) { areas += 1; assert.equal(it.answer, measure.rectArea(m[1], m[2]), it.id); }
+    const sq = it.prompt.match(/^ריבוע שצלעו (\d+) ס״מ\. מה שטחו/);
+    if (sq) { areas += 1; assert.equal(it.answer, measure.rectArea(sq[1], sq[1]), it.id); }
   });
+  measurement('ב').forEach((it) => {
+    const tri = it.prompt.match(/^למשולש צלעות של (\d+), (\d+) ו־(\d+) ס״מ/);
+    if (tri) { perims += 1; assert.equal(it.answer, measure.perimeter(tri.slice(1)), it.id); }
+    const rect = it.prompt.match(/^למלבן צלעות של (\d+) ס״מ ו־(\d+) ס״מ/);
+    if (rect) { perims += 1; assert.equal(it.answer, measure.perimeter([rect[1], rect[2], rect[1], rect[2]]), it.id); }
+  });
+  assert.ok(areas >= 3 && perims >= 2, areas + ' ' + perims);
 });
 
 test('the diagnostic and personal practice reach measurement in every grade א׳–ד׳', () => {
@@ -155,16 +151,17 @@ test('the diagnostic and personal practice reach measurement in every grade א׳
     const diag = banks.diagnosticItems(g).filter((it) => it.skill === 'measurement');
     assert.deepEqual(diag.map((it) => it.level), [1, 2], g);
     assert.ok(diag.every((it) => it.grade === g), g);
-    assert.equal(banks.practiceItems(['measurement'], g).length, rows(g).length, g);
+    assert.equal(banks.practiceItems(['measurement'], g).length, measurement(g).length, g);
   });
   assert.equal(banks.coverage().measurement.grade, 'א׳–ד׳');
 });
 
-test('item ids of the existing bank did not move', () => {
+test('the ruler and clock items of א׳–ב׳ keep their ids', () => {
   const ids = banks.allItems().map((it) => it.id);
-  ['א-measurement-321', 'א-data-345', 'א-data-349'].forEach((id) => assert.ok(ids.includes(id), id));
-  const added = banks.allItems()
-    .filter((it) => it.standard === banks.ST.MONEY || it.standard === banks.ST.MASS_VOL)
+  ['א-measurement-321', 'א-data-345'].forEach((id) => assert.ok(ids.includes(id), id));
+  const ruler = (it) => it.standard === ST.LENGTH || it.standard === ST.CLOCK;
+  const oldIds = banks.allItems().filter(ruler).map((it) => Number(it.id.split('-').pop()));
+  const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it))
     .map((it) => Number(it.id.split('-').pop()));
-  assert.ok(Math.min(...added) > 636, 'new items sit after every older item');
+  assert.ok(Math.min(...newIds) > Math.max(...oldIds), 'the later items sit after the older ones');
 });

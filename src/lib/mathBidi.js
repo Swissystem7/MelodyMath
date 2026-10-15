@@ -12,9 +12,29 @@
   // An operand: a number (3, 2.5, 3/4, 1,000), a blank (?, ☐, _) or a vulgar fraction.
   const OPERAND = '\\(?(?:\\d+(?:[.,/]\\d+)*|[?☐□_]+|[½⅓⅔¼¾⅕⅛])\\)?';
   // A colon followed by a space is a Hebrew label ("בדילוגי 2: 50, 48"), not
-  // division; "3:00" and "10 : 2" still count.
-  const OPERATOR = '(?:\\s*[+\\-−–×÷=<>≠≤≥·*]\\s*|:|\\s+:\\s+)';
+  // division; "3:00" and "10 : 2" still count. "שארית" is the word operator of
+  // a division with remainder: without it "3 שארית 2" reorders to "2 שארית 3"
+  // in the RTL page and reads as the wrong answer (see #93).
+  // "=" before a lone "?" is prompt punctuation, not part of the numeric run.
+  // Hyphen/colon are not operators inside Hebrew words (ו-5, למשל:).
+  const OPERATOR = '(?:'
+    + '\\s*[+×÷<>≠≤≥·*]\\s*'
+    + '|\\s*(?<![\\u0590-\\u05FF])[\\-−–]\\s*'
+    + '|\\s*=(?!\\s*\\?)\\s*'
+    + '|\\s*שארית\\s*'
+    + '|(?<!משל):'
+    + '|\\s+:\\s+'
+    + ')';
   const MATH_RUN = new RegExp(OPERAND + '(?:' + OPERATOR + OPERAND + ')+', 'g');
+  const HEBREW = /[\u0590-\u05FF]/;
+  const TRAILING_EQ_Q = /^ = \?$/;
+
+  function mathRunSpan(s, run, at) {
+    if (!HEBREW.test(s.slice(0, at)) && TRAILING_EQ_Q.test(s.slice(at + run.length))) {
+      return run + ' = ?';
+    }
+    return run;
+  }
 
   function escapeHtml(value) {
     return String(value == null ? '' : value)
@@ -26,7 +46,8 @@
   }
 
   function mathRuns(text) {
-    return String(text == null ? '' : text).match(MATH_RUN) || [];
+    if (text == null) return [];
+    return String(text).match(MATH_RUN) || [];
   }
 
   function mathHtml(text) {
@@ -34,9 +55,10 @@
     let out = '';
     let last = 0;
     s.replace(MATH_RUN, function (run, at) {
+      const span = mathRunSpan(s, run, at);
       out += escapeHtml(s.slice(last, at))
-        + '<span class="math-ltr" dir="ltr">' + escapeHtml(run) + '</span>';
-      last = at + run.length;
+        + '<span class="math-ltr" dir="ltr">' + escapeHtml(span) + '</span>';
+      last = at + span.length;
       return run;
     });
     return out + escapeHtml(s.slice(last));

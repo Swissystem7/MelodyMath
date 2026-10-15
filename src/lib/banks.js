@@ -44,6 +44,8 @@
     SUB2D: 'חיסור דו־ספרתי עד 100, עם וללא מעבר עשרות',
     VERT_ADD: 'חיבור דו־ספרתי במאונך',
     VERT_SUB: 'חיסור דו־ספרתי במאונך',
+    PATTERN: 'סדרות דגמים צורניים וצליליים',
+    CHART100: 'לוח המאה — עשרות ויחידות',
     PLACE_VALUE: 'מבנה עשרוני עד 1,000 — מאות/עשרות/יחידות, זוגי/אי־זוגי, השוואה',
     WORD_COLLECT: 'שאלת מילים — איסוף (צירוף שתי קבוצות)',
     WORD_REMOVE: 'שאלת מילים — הפרדה (הסרה מקבוצה)',
@@ -70,6 +72,7 @@
     TABLE: 'קריאת טבלת נתונים',
     FRAC_EQUIV: 'שברים שקולים — הרחבה, צמצום והשוואה',
     FRAC_ADD: 'חיבור וחיסור שברים, גם במכנים שונים',
+    FRAC_MIXED: 'מספרים מעורבים — מעבר לשבר לא אמיתי וחזרה, חיבור וחיסור',
     FRAC_OF: 'שבר מכמות',
     DEC_PLACE: 'שברים עשרוניים — ערך המקום, השוואה ומעבר משבר פשוט',
     DEC_ADD: 'חיבור וחיסור שברים עשרוניים',
@@ -84,6 +87,10 @@
     MEAN: 'ממוצע — סכום הערכים חלקי מספרם',
     LCM: 'כפולה משותפת קטנה ביותר',
     FACTORS: 'מחלקים, מספרים ראשוניים ופריקים',
+    NUM10K: 'מספרים עד 10,000 — קריאה, כתיבה והשוואה',
+    TIMES_MORE: 'שאלת השוואה כפלית — פי כמה',
+    AREA_RECT: 'שטח מלבן — שורות × עמודות',
+    TIME_MIN_SEC: 'זמן — המרה בין דקות לשניות',
   };
 
   const SKILL_HE = {
@@ -107,7 +114,10 @@
   const GRADE_SKILLS = {
     'א': ['counting', 'addition', 'subtraction', 'number_line', 'word_problems', 'measurement', 'geometry', 'data'],
     'ב': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
-    'ג': ['multiplication', 'division', 'geometry', 'measurement'],
+    // ג׳ and ד׳ carry measurement items (minutes and area; unit changes and
+    // the calendar). The skill has to be listed here too, or the diagnostic —
+    // and with it the personal practice plan it feeds — never reaches them.
+    'ג': ['multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
     'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
@@ -156,6 +166,14 @@
     return hear;
   }
 
+  function hasRequiredTags(item) {
+    if (item == null || typeof item !== 'object') return false;
+    if (typeof item.grade !== 'string' || !item.grade.trim()) return false;
+    if (typeof item.strand !== 'string' || !item.strand.trim()) return false;
+    if (typeof item.standard !== 'string' || !item.standard.trim()) return false;
+    return true;
+  }
+
   function isShippable(it) {
     if (!it || typeof it !== 'object') return false;
     if (!it.grade || GRADES.indexOf(it.grade) === -1) return false;
@@ -189,6 +207,9 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g2: extra.g2,
+      g3: extra.g3,
+      typed: extra.typed,
       music: extra.music,
       grid: extra.grid,
     };
@@ -917,27 +938,40 @@
     extra.music = music;
     return I('ב', skill, prompt, answer, hint, extra);
   }
+  // `g2` is the widget spec grade2Music.js draws and plays; the activity owns
+  // its audio through the ▶ button and needs no `hear` autoplay cue.
   function EVEN(n, level) {
     const even = n % 2 === 0;
     return MB('place_value', 'evenOdd', 'הקשיבו לפעימות: ' + '🥁'.repeat(n) + ' — לכל פעימה יש זוג? (כתבו זוגי או אי־זוגי)',
       even ? 'זוגי' : 'אי-זוגי',
       even ? 'מחלקים לזוגות — אף פעימה לא נשארת לבד' : 'בסוף נשארת פעימה אחת בלי זוג',
-      level, { standard: ST.PLACE_VALUE, hear: [n] });
+      level, { standard: ST.PLACE_VALUE, widget: 'g2', g2: { kind: 'evenOdd', beats: n } });
   }
   function DUO(op, a, b, answer, hint, level) {
     return MB(op === '+' ? 'addition' : 'subtraction', 'twoInstruments',
       'תוף מנגן את היחידות, בס מנגן את העשרות. חשבו במאונך: ' + a + ' ' + (op === '+' ? '+' : '−') + ' ' + b,
       answer, hint, level,
-      { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'vertical', vert: { a: a, b: b, op: op } });
+      { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'g2', g2: { kind: 'duo', a: a, b: b, op: op } });
   }
-  function BARS(prompt, answer, hint, table, level) {
-    return MB('multiplication', 'beatsBars', prompt, answer, hint, level, { standard: ST.MUL_B, table: table });
+  function BARS(prompt, answer, hint, table, level, bars, perBar) {
+    const p = perBar == null ? table : perBar;
+    return MB('multiplication', 'beatsBars', prompt, answer, hint, level, {
+      standard: ST.MUL_B, table: table,
+      widget: 'g2', g2: { kind: 'beatsBars', bars: bars, perBar: p, table: table },
+    });
   }
-  function HALF(prompt, answer, hint, level) {
-    return MB('measurement', 'halfBar', prompt, answer, hint, level, { strand: STRAND.MEASURE, standard: ST.HALF_HOUR });
+  function HALF(prompt, answer, hint, level, beatsPerBar) {
+    return MB('measurement', 'halfBar', prompt, answer, hint, level, {
+      strand: STRAND.MEASURE, standard: ST.HALF_HOUR,
+      widget: 'g2', g2: { kind: 'halfBar', beatsPerBar: beatsPerBar == null ? 4 : beatsPerBar },
+    });
   }
-  function REG(prompt, answer, hint, level, hear) {
-    return MB('place_value', 'registers', prompt, answer, hint, level, { standard: ST.PLACE_VALUE, hear: hear });
+  function REG(prompt, answer, hint, level, reg) {
+    const r = Array.isArray(reg) ? { h: reg[0], t: reg[1] || 0, o: reg[2] || 0 } : reg;
+    return MB('place_value', 'registers', prompt, answer, hint, level, {
+      standard: ST.PLACE_VALUE,
+      widget: 'g2', g2: { kind: 'registers', h: r.h, t: r.t, o: r.o },
+    });
   }
   const REGROUP = '10 מכות תוף מתקבצות לצליל בס אחד';
   const UNGROUP = 'אין מספיק מכות תוף — צליל בס אחד נפרט ל־10 מכות תוף';
@@ -957,17 +991,17 @@
     DUO('-', 70, 46, 24, 'אפס מכות תוף: ' + UNGROUP, 3),
     DUO('-', 85, 39, 46, '5 − 9 לא יוצא: ' + UNGROUP, 3),
 
-    BARS('2 תיבות של 5/4 — כמה פעימות בסך הכול?', 10, 'בכל תיבה 5 פעימות, פעמיים', 5, 1),
-    BARS('3 תיבות של 4/4 — כמה פעימות בסך הכול?', 12, '4, 8, 12', 4, 1),
-    BARS('4 תיבות של 4/4 — כמה פעימות בסך הכול?', 16, '4 פעמים 4', 4, 1),
-    BARS('6 תיבות של 2/4 — כמה פעימות בסך הכול?', 12, 'סופרים בדילוגים של 2', 2, 1),
-    BARS('5 תיבות של 4/4 — כמה פעימות בסך הכול?', 20, '5 פעמים 4', 4, 2),
-    BARS('9 תיבות של 2/4 — כמה פעימות בסך הכול?', 18, '9 פעמים 2', 2, 2),
-    BARS('3 תיבות של 5/4 — כמה פעימות בסך הכול?', 15, '5, 10, 15', 5, 2),
-    BARS('8 תיבות, ובכל תיבה 10 פעימות — כמה פעימות בסך הכול?', 80, 'סופרים בעשרות', 10, 2),
-    BARS('קטע של 10 תיבות 4/4 — כמה פעימות בסך הכול?', 40, '10 פעמים 4', 10, 3),
-    BARS('8 תיבות של 4/4 — כמה פעימות בסך הכול?', 32, '4 תיבות הן 16, ועוד 4 תיבות', 4, 3),
-    BARS('7 תיבות של 5/4 — כמה פעימות בסך הכול?', 35, '7 פעמים 5', 5, 3),
+    BARS('2 תיבות של 5/4 — כמה פעימות בסך הכול?', 10, 'בכל תיבה 5 פעימות, פעמיים', 5, 1, 2, 5),
+    BARS('3 תיבות של 4/4 — כמה פעימות בסך הכול?', 12, '4, 8, 12', 4, 1, 3, 4),
+    BARS('4 תיבות של 4/4 — כמה פעימות בסך הכול?', 16, '4 פעמים 4', 4, 1, 4, 4),
+    BARS('6 תיבות של 2/4 — כמה פעימות בסך הכול?', 12, 'סופרים בדילוגים של 2', 2, 1, 6, 2),
+    BARS('5 תיבות של 4/4 — כמה פעימות בסך הכול?', 20, '5 פעמים 4', 4, 2, 5, 4),
+    BARS('9 תיבות של 2/4 — כמה פעימות בסך הכול?', 18, '9 פעמים 2', 2, 2, 9, 2),
+    BARS('3 תיבות של 5/4 — כמה פעימות בסך הכול?', 15, '5, 10, 15', 5, 2, 3, 5),
+    BARS('8 תיבות, ובכל תיבה 10 פעימות — כמה פעימות בסך הכול?', 80, 'סופרים בעשרות', 10, 2, 8, 10),
+    BARS('קטע של 10 תיבות 4/4 — כמה פעימות בסך הכול?', 40, '10 פעמים 4', 10, 3, 10, 4),
+    BARS('8 תיבות של 4/4 — כמה פעימות בסך הכול?', 32, '4 תיבות הן 16, ועוד 4 תיבות', 4, 3, 8, 4),
+    BARS('7 תיבות של 5/4 — כמה פעימות בסך הכול?', 35, '7 פעמים 5', 5, 3, 7, 5),
 
     HALF('בתיבה 4/4 יש 4 פעימות. כמה פעימות בחצי תיבה?', 2, 'חצי מ־4', 1),
     HALF('תו חצי ממלא חצי תיבה 4/4. כמה פעימות הוא נמשך?', 2, 'חצי מ־4 פעימות', 1),
@@ -982,16 +1016,16 @@
     HALF('חצי שעה, ועוד חצי שעה, ועוד חצי שעה. כמה דקות בסך הכול?', 90, '30 + 30 + 30', 3),
 
     REG('בס = מאות, פסנתר = עשרות, פעמון = יחידות. הבס מנגן 3, הפסנתר 4, הפעמון 2. איזה מספר?', 342, 'בס, פסנתר, פעמון — מאות, עשרות, יחידות', 1, [3, 4, 2]),
-    REG('הבס מנגן 7 צלילים, הפסנתר והפעמון שותקים. איזה מספר?', 700, '7 מאות', 1),
-    REG('במספר 618 — כמה צלילי בס (מאות)?', 6, 'ספרת המאות', 1),
-    REG('במספר 618 — כמה צלילי פסנתר (עשרות)?', 1, 'ספרת העשרות', 1),
-    REG('במספר 480 — כמה צלילי בס (מאות)?', 4, 'ספרת המאות', 1),
-    REG('הבס מנגן 5, הפסנתר שותק, הפעמון מנגן 7. איזה מספר?', 507, 'אין עשרות — 0 באמצע', 2),
-    REG('הבס מנגן 2, הפסנתר 6, הפעמון שותק. איזה מספר?', 260, 'אין יחידות — 0 בסוף', 2),
-    REG('במספר 905 — כמה צלילי פסנתר (עשרות)?', 0, 'הפסנתר שותק', 2),
-    REG('10 צלילי פסנתר (עשרות) מתקבצים לצליל בס אחד. כמה הוא שווה?', 100, '10 עשרות הן מאה', 2),
+    REG('הבס מנגן 7 צלילים, הפסנתר והפעמון שותקים. איזה מספר?', 700, '7 מאות', 1, { h: 7, t: 0, o: 0 }),
+    REG('במספר 618 — כמה צלילי בס (מאות)?', 6, 'ספרת המאות', 1, { h: 6, t: 1, o: 8 }),
+    REG('במספר 618 — כמה צלילי פסנתר (עשרות)?', 1, 'ספרת העשרות', 1, { h: 6, t: 1, o: 8 }),
+    REG('במספר 480 — כמה צלילי בס (מאות)?', 4, 'ספרת המאות', 1, { h: 4, t: 8, o: 0 }),
+    REG('הבס מנגן 5, הפסנתר שותק, הפעמון מנגן 7. איזה מספר?', 507, 'אין עשרות — 0 באמצע', 2, { h: 5, t: 0, o: 7 }),
+    REG('הבס מנגן 2, הפסנתר 6, הפעמון שותק. איזה מספר?', 260, 'אין יחידות — 0 בסוף', 2, { h: 2, t: 6, o: 0 }),
+    REG('במספר 905 — כמה צלילי פסנתר (עשרות)?', 0, 'הפסנתר שותק', 2, { h: 9, t: 0, o: 5 }),
+    REG('10 צלילי פסנתר (עשרות) מתקבצים לצליל בס אחד. כמה הוא שווה?', 100, '10 עשרות הן מאה', 2, { h: 0, t: 10, o: 0 }),
     REG('הבס מנגן 4, הפסנתר 12, הפעמון 3. איזה מספר?', 523, '12 עשרות הן מאה ועוד 2 עשרות', 3, [4, 12, 3]),
-    REG('הבס מנגן 9, הפסנתר 9, הפעמון 10. איזה מספר?', 1000, '10 יחידות הן עשרה, ואז הכול מתקבץ', 3)
+    REG('הבס מנגן 9, הפסנתר 9, הפעמון 10. איזה מספר?', 1000, '10 יחידות הן עשרה, ואז הכול מתקבץ', 3, { h: 9, t: 9, o: 10 })
   );
 
   // ---------- כיתה ג׳ · פעילויות מוזיקה (תוכנית §5, #104) ----------
@@ -1184,6 +1218,148 @@
     M5('data', 'hzChart', 'דו הגבוה הוא 523 הרץ. כמה הרץ חסרים לסי שבדיאגרמה כדי להגיע אליו?', 29, '523 פחות 494', 3, ST.BARCHART, SOL_LA_SI)
   );
 
+  // ---------- כיתה א׳ · פעילויות מוזיקה (תוכנית §5, #102) ----------
+  // Appended at the end so existing RAW indexes stay identical.
+  // 1. Count the beats (metronome accents skip counting 2/5/10)
+  // 2. Touch 100-chart (tens low tone, ones clicks)
+  // 3. Patterns AB / AAB / ABC (melody & visual)
+  // 4. Number line as scale (steps & octave jumps)
+  RAW.push(
+    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1 }),
+    I('א', 'counting', 'מקצב דילוגי 2: 8, 10, 12, ?', 14, 'הפעימה הבאה היא עוד 2', { standard: ST.SKIP2, level: 1 }),
+    I('א', 'counting', 'מקצב דילוגי 2: 14, 16, 18, ?', 20, 'עוד 2 מגיעים ל־20', { standard: ST.SKIP2, level: 2 }),
+    I('א', 'counting', 'מקצב דילוגי 2 מ־50: 52, 54, 56, ?', 58, 'מוסיפים 2 לפעימה', { standard: ST.SKIP2, level: 2 }),
+    I('א', 'counting', 'מקצב דילוגי 5: 5, 10, 15, ?', 20, 'דילוג של 5 פעימות', { standard: ST.SKIP5, level: 1 }),
+    I('א', 'counting', 'מקצב דילוגי 5: 25, 30, 35, ?', 40, 'מוסיפים 5 לפעימה הבאה', { standard: ST.SKIP5, level: 2 }),
+    I('א', 'counting', 'מקצב דילוגי 5: 40, 45, 50, ?', 55, 'עוד 5 פעימות', { standard: ST.SKIP5, level: 2 }),
+    I('א', 'counting', 'מקצב דילוגי 5: 75, 80, 85, ?', 90, 'עוד 5 לפעימה', { standard: ST.SKIP5, level: 3 }),
+    I('א', 'counting', 'מקצב עשרות: 10, 20, 30, ?', 40, 'פעימת עשרת הבאה', { standard: ST.GROUP10, level: 1 }),
+    I('א', 'counting', 'מקצב עשרות: 50, 60, 70, ?', 80, 'קפיצה של עשרת שלמה', { standard: ST.GROUP10, level: 2 }),
+    I('א', 'counting', 'מקצב עשרות: 70, 80, 90, ?', 100, 'העשרת שמגיעה למאה', { standard: ST.GROUP10, level: 2 }),
+    I('א', 'counting', 'ספירה אחורה במקצב: 50, 48, 46, ?', 44, 'דילוג 2 אחורה', { standard: ST.SKIP2, level: 3 }),
+
+    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 2 עשרות ו־5 יחידות — איזה מספר נשמע?', 25, '20 ועוד 5', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 4 עשרות ו־2 יחידות — איזה מספר זה?', 42, '40 ועוד 2', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 5 עשרות ו־0 יחידות — איזה מספר נשמע?', 50, '5 עשרות שלמות ללא יחידות', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 1 עשרת ו־8 יחידות — איזה מספר זה?', 18, '10 ועוד 8', { standard: ST.CHART100, level: 2 }),
+    I('א', 'counting', 'בלוח המאה: 6 עשרות ו־3 יחידות — איזה מספר נשמע?', 63, '60 ועוד 3', { standard: ST.CHART100, level: 2 }),
+    I('א', 'counting', 'בלוח המאה: 7 עשרות ו־9 יחידות — איזה מספר זה?', 79, '70 ועוד 9', { standard: ST.CHART100, level: 2 }),
+    I('א', 'counting', 'בלוח המאה: 8 עשרות ו־5 יחידות — איזה מספר זה?', 85, '80 ועוד 5', { standard: ST.CHART100, level: 2 }),
+    I('א', 'counting', 'במספר 47 בלוח המאה: כמה עשרות נמוכות נשמעות?', 4, 'ב־47 יש 4 עשרות', { standard: ST.CHART100, level: 2 }),
+    I('א', 'counting', 'במספר 68 בלוח המאה: כמה נקישות יחידות נשמעות?', 8, 'ב־68 ספרת היחידות היא 8', { standard: ST.CHART100, level: 3 }),
+    I('א', 'counting', 'בלוח המאה: 9 עשרות ו־9 יחידות — איזה מספר זה?', 99, '90 ועוד 9', { standard: ST.CHART100, level: 3 }),
+    I('א', 'counting', 'בלוח המאה: 10 עשרות ו־0 יחידות — איזה מספר נשמע?', 100, '10 עשרות הן מאה שלמה', { standard: ST.CHART100, level: 3 }),
+
+    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1 }),
+    I('א', 'counting', 'סדרה צורנית AB: ⭐ 🌙 ⭐ 🌙 — מה הבא? (1=⭐, 2=🌙)', 1, 'הדגם חוזר לכוכב', { standard: ST.PATTERN, level: 1 }),
+    I('א', 'counting', 'דגם מוזיקלי AB: גבוה, נמוך, גבוה, נמוך — איזה צליל הבא? (1=גבוה, 2=נמוך)', 1, 'הצליל הבא הוא גבוה', { standard: ST.PATTERN, level: 1 }),
+    I('א', 'counting', 'דגם AAB: 🥁 🥁 🔔 🥁 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי שני תופים בא פעמון', { standard: ST.PATTERN, level: 2 }),
+    I('א', 'counting', 'סדרה צורנית AAB: 🔴 🔴 🔵 🔴 🔴 — מה הבא? (1=🔴, 2=🔵)', 2, 'אחרי שני אדומים בא כחול', { standard: ST.PATTERN, level: 2 }),
+    I('א', 'counting', 'דגם צלילי AAB: קצר, קצר, ארוך, קצר, קצר — מה הבא? (1=קצר, 2=ארוך)', 2, 'הצליל הבא הוא ארוך', { standard: ST.PATTERN, level: 2 }),
+    I('א', 'counting', 'דגם צורני ABB: 🔺 🟢 🟢 🔺 🟢 — מה הבא? (1=🔺, 2=🟢)', 2, 'אחרי עיגול בא עוד עיגול', { standard: ST.PATTERN, level: 2 }),
+    I('א', 'counting', 'דגם ABC: 🥁 🔔 🎺 🥁 🔔 — מה הבא בתור? (1=🥁, 2=🔔, 3=🎺)', 3, 'הכלי השלישי בדגם הוא חצוצרה', { standard: ST.PATTERN, level: 2 }),
+    I('א', 'counting', 'סדרה צורנית ABC: 🟥 🟩 🟦 🟥 🟩 — מה הצורה הבאה? (1=🟥, 2=🟩, 3=🟦)', 3, 'הצורה השלישית היא כחולה', { standard: ST.PATTERN, level: 3 }),
+    I('א', 'counting', 'דגם צלילי ABC: דו, רה, מי, דו, רה — איזה תו הבא? (1=דו, 2=רה, 3=מי)', 3, 'התו השלישי הוא מי', { standard: ST.PATTERN, level: 3 }),
+    I('א', 'counting', 'דגם AABB: 🥁 🥁 🔔 🔔 🥁 🥁 — מה הבא? (1=🥁, 2=🔔)', 2, 'שני פעמונים אחרי שני תופים', { standard: ST.PATTERN, level: 3 }),
+    I('א', 'counting', 'דגם מורכב ABC: נמוך, בינוני, גבוה, נמוך, בינוני — מה הבא? (1=נמוך, 2=בינוני, 3=גבוה)', 3, 'הצליל השלישי הוא גבוה', { standard: ST.PATTERN, level: 3 }),
+
+    NL('סולם על הישר: מ־0 קופצים 3 צלילים קדימה — לאן מגיעים?', 3, 'קפיצה של 3 צלילים', { min: 0, max: 10, start: 0 }, 1),
+    NL('על הישר מ־5 קופצים 2 צלילים ימינה — לאן מגיעים?', 7, '5 ועוד 2 צעדים', { min: 0, max: 10, start: 5 }, 1),
+    NL('מ־4 קופצים 4 צלילים קדימה — לאן מגיעים?', 8, '4 ועוד 4', { min: 0, max: 10, start: 4 }, 1),
+    NL('מ־2 קופצים 5 צעדים קדימה בסולם — לאן מגיעים?', 7, '2 ועוד 5 צעדים', { min: 0, max: 10, start: 2 }, 1),
+    NL('מ־0 קופצים אוקטבה של 10 צעדים קדימה — לאן מגיעים?', 10, 'קפיצה של 10 מ־0 מגיעה ל־10', { min: 0, max: 20, start: 0 }, 2),
+    NL('מ־10 קופצים אוקטבה (+10) קדימה — לאן מגיעים?', 20, '10 ועוד 10 זה 20', { min: 0, max: 20, start: 10 }, 2),
+    NL('על הישר מ־8 קופצים 3 צלילים שמאלה (אחורה) — לאן מגיעים?', 5, '8 פחות 3 צעדים', { min: 0, max: 20, start: 8 }, 2),
+    NL('על הישר מ־15 קופצים 5 צעדים אחורה — לאן מגיעים?', 10, '15 פחות 5 צעדים', { min: 0, max: 20, start: 15 }, 2),
+    NL('מ־30 קופצים אוקטבה של 10 צעדים קדימה — לאן מגיעים?', 40, '30 ועוד 10', { min: 0, max: 100, step: 5, start: 30 }, 2),
+    NL('מ־50 קופצים אוקטבה של 10 צעדים אחורה — לאן מגיעים?', 40, '50 פחות 10', { min: 0, max: 100, step: 5, start: 50 }, 3),
+    NL('על הישר מ־60 קופצים 20 צעדים קדימה (שתי אוקטבות) — לאן מגיעים?', 80, '60 ועוד 20', { min: 0, max: 100, step: 5, start: 60 }, 3),
+    NL('מ־90 יורדים אוקטבה של 10 צעדים — לאן מגיעים?', 80, '90 פחות 10', { min: 0, max: 100, step: 5, start: 90 }, 3)
+  );
+
+  // ---------- כיתה ג׳ · מוזיקה (issue #104, תוכנית §5) ----------
+  // כל פריט כאן מצמיד את המבנה המוזיקלי למבנה המתמטי: המשקל הוא לוח הכפל,
+  // התיבה היא המחלק, הרשת היא המלבן והאוקטבה היא "פי 2".
+  function G3(skill, prompt, answer, hint, extra) {
+    const e = extra || {};
+    return I('ג', skill, prompt, answer, hint, {
+      strand: e.strand || STRAND.NUM,
+      standard: e.standard,
+      widget: e.g3 ? 'g3' : undefined,
+      g3: e.g3,
+      table: e.table,
+      typed: e.typed,
+      level: e.level || 1,
+    });
+  }
+
+  // לוח הכפל כמשקל: לוח 3 ב־3/4, לוח 6 ב־6/8, הדגשה על כל כפולה.
+  // עדיין מתויג table=3/6, ולכן השער של mastery.js חל גם כאן.
+  RAW.push(
+    G3('multiplication', 'במשקל 3/4 שמעתם 2 תיבות מלאות. כמה פעמות שמעתם?', 6, '2 תיבות של 3 פעמות', { standard: ST.MUL_C, table: 3, level: 1, g3: { kind: 'meter', table: 3, bars: 2 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 4 תיבות. כל כפולה של 3 מודגשת. כמה פעמות בסך הכול?', 12, '4 × 3 — ההדגשה האחרונה היא התשובה', { standard: ST.MUL_C, table: 3, level: 2, g3: { kind: 'meter', table: 3, bars: 4 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 7 תיבות. על איזו פעמה נופלת ההדגשה האחרונה?', 21, '7 × 3', { standard: ST.MUL_C, table: 3, level: 3, g3: { kind: 'meter', table: 3, bars: 7 } }),
+    G3('multiplication', 'במשקל 6/8 שמעתם 3 תיבות של 6 פעמות. כמה פעמות בסך הכול?', 18, '3 × 6', { standard: ST.MUL_C, table: 6, level: 2, g3: { kind: 'meter', table: 6, bars: 3 } }),
+    G3('multiplication', 'במשקל 6/8, כמה תיבות שלמות נדרשות כדי להגיע ל־42 פעמות?', 7, '42 : 6', { standard: ST.MUL_C, table: 6, level: 3, g3: { kind: 'meter', table: 6, bars: 7 } })
+  );
+
+  // חילוק עם שארית: הפעמות שנשארו מתנגנות בצליל אחר, וזו השארית.
+  // בלי `table`: תשובה נכונה כאן אינה עובדה מלוח הכפל, ולכן היא לא נחשבת
+  // שליטה בליבה ולא פותחת את השער של 3/6/7/8/9.
+  function REM(beats, perBar, level) {
+    const bars = Math.floor(beats / perBar);
+    const rest = beats % perBar;
+    return G3('division',
+      beats + ' פעמות נכנסות לתיבות של ' + perBar + '. כמה תיבות שלמות וכמה פעמות נשארות? כתבו תיבות, המילה שארית, ואז הפעמות — למשל 2 שארית 1.',
+      bars + ' שארית ' + rest,
+      bars + ' × ' + perBar + ' = ' + bars * perBar + ', ונשארות ' + rest + ' פעמות',
+      {
+        standard: ST.DIV_REM, typed: true, level: level,
+        g3: { kind: 'remainder', beats: beats, perBar: perBar },
+      });
+  }
+  RAW.push(
+    REM(14, 4, 1), REM(17, 4, 2), REM(19, 4, 2), REM(23, 5, 3), REM(20, 4, 1)
+  );
+
+  // השוואה כפלית: אוקטבה = פי 2 בתדר, והכפלת BPM = פי 2 בטמפו.
+  RAW.push(
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. פי כמה גבוה התדר השני?', 2, 'אוקטבה היא יחס 2:1', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 220, b: 440, unit: 'hz' } }),
+    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. פי כמה מהיר הטמפו השני?', 2, '120 : 60', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 60, b: 120, unit: 'bpm' } }),
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 880 Hz. פי כמה גבוה התדר השני?', 4, 'שתי אוקטבות: 2 × 2', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 220, b: 880, unit: 'hz' } }),
+    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. פי כמה מהיר הטמפו השני?', 3, '150 : 50', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 50, b: 150, unit: 'bpm' } }),
+    G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. פי כמה יותר תיבות בשנייה?', 3, 'השוואה כפלית בלי צליל: 18 : 6', { standard: ST.TIMES_MORE, level: 3 }),
+    G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. פי כמה ארוכה השנייה?', 3, '12 : 4', { standard: ST.TIMES_MORE, level: 1 }),
+    G3('word_problems', 'הצליל הראשון 330 Hz והשני 660 Hz. פי כמה גבוה התדר השני?', 2, 'גם כאן אוקטבה: 660 : 330', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 330, b: 660, unit: 'hz' } }),
+    G3('word_problems', 'בלהקה 5 מתופפים, ובמקהלה פי 4 זמרים. כמה זמרים במקהלה?', 20, '«פי 4» הוא כפל: 5 × 4', { standard: ST.TIMES_MORE, level: 3 })
+  );
+
+  // שטח מלבן כרשת מקצב, וזמן כמשך מנגינה.
+  RAW.push(
+    G3('measurement', 'רשת מקצב של 3 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 24, '3 × 8 — שורות כפול תאים', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 1, g3: { kind: 'grid', rows: 3, steps: 8 } }),
+    G3('measurement', 'רשת מקצב של 4 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 32, '4 × 8', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 2, g3: { kind: 'grid', rows: 4, steps: 8 } }),
+    G3('measurement', 'ברשת 2 שורות ו־16 תאים בשורה. כמה תאים בסך הכול?', 32, '2 × 16 — אותו שטח, מלבן אחר', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 3, g3: { kind: 'grid', rows: 2, steps: 16 } }),
+    G3('measurement', 'המנגינה נמשכת 2 דקות ו־30 שניות. כמה שניות זה?', 150, 'בכל דקה 60 שניות: 2 × 60 + 30', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 1 }),
+    G3('measurement', 'שיר נמשך 180 שניות. כמה דקות זה?', 3, '180 : 60', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 2 }),
+    G3('measurement', 'מנגינה נמשכת 1 דקה ו־45 שניות. כמה שניות זה?', 105, '60 + 45', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 3 }),
+    G3('measurement', 'רשת מקצב של 4 שורות ו־4 תאים בשורה. כמה תאים יש ברשת?', 16, '4 × 4 — רשת ריבועית', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 1, g3: { kind: 'grid', rows: 4, steps: 4 } }),
+    G3('measurement', 'כמה שניות יש ב־4 דקות של מנגינה?', 240, '4 × 60', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 2 })
+  );
+
+  // מספרים עד 10,000: השוואת שני תדרים בשמיעה, ואז בלי צליל.
+  RAW.push(
+    G3('place_value', 'איזה תדר גבוה יותר: 1200 Hz או 1020 Hz? כתבו את המספר.', 1200, 'משווים ספרה־ספרה ממקום האלפים', { standard: ST.NUM10K, level: 1, g3: { kind: 'pair', a: 1200, b: 1020, unit: 'hz' } }),
+    G3('place_value', 'איזה תדר גבוה יותר: 1480 Hz או 1740 Hz? כתבו את המספר.', 1740, 'במקום המאות: 7 גדול מ־4', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1480, b: 1740, unit: 'hz' } }),
+    G3('place_value', 'איזה תדר נמוך יותר: 1320 Hz או 1230 Hz? כתבו את המספר.', 1230, 'במקום המאות: 2 קטן מ־3', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1320, b: 1230, unit: 'hz' } }),
+    G3('place_value', 'מה הספרה במקום האלפים במספר 4705?', 4, 'הספרה השמאלית במספר ארבע־ספרתי', { standard: ST.NUM10K, level: 1 }),
+    G3('place_value', 'איזה מספר גדול יותר: 3090 או 3900? כתבו את המספר.', 3900, 'אותן אלפים, ובמקום המאות 9 גדול מ־0', { standard: ST.NUM10K, level: 3 }),
+    G3('place_value', 'איזה תדר גבוה יותר: 1640 Hz או 1460 Hz? כתבו את המספר.', 1640, 'במקום המאות: 6 גדול מ־4', { standard: ST.NUM10K, level: 3, g3: { kind: 'pair', a: 1640, b: 1460, unit: 'hz' } }),
+    G3('place_value', 'מה הספרה במקום העשרות במספר 3164?', 6, 'הספרה השנייה מימין', { standard: ST.NUM10K, level: 2 }),
+    G3('place_value', 'איזה מספר קטן יותר: 7050 או 7500? כתבו את המספר.', 7050, 'אותן אלפים, ובמקום המאות 0 קטן מ־5', { standard: ST.NUM10K, level: 1 }),
+    G3('place_value', 'כמה מאות שלמות יש במספר 2800?', 28, '2800 : 100', { standard: ST.NUM10K, level: 3 })
+  );
+
   // ---------- כסף ומשקל/נפח א׳–ד׳ (#95) ----------
   // כסף is a measurement topic in the programme, so it ships under the same
   // skill. Answers are whole numbers and the unit (₪ / אגורות / ק״ג / קוביות)
@@ -1233,6 +1409,49 @@
     MEAS('ד', 'קנייה של 350 אגורות ועוד קנייה של 6 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 10, '350 אגורות הם 3 ₪ ו־50 אגורות', 3, ST.MONEY)
   );
 
+  // ---------- כיתה ה׳ · מספרים מעורבים (#96) ----------
+  // Appended last on purpose: ids are RAW indexes, so every item above keeps
+  // the id a teacher report already holds.
+  //
+  // The answer is «שלם ו־מונה/מכנה», the form Israeli textbooks print and the
+  // one unitCheck.js already uses. adaptive.parseMixedNumber accepts it with
+  // or without the maqaf and with a bare space, and rejects the improper
+  // fraction — so «כתבו 7/4 כמספר מעורב» cannot be answered by copying 7/4.
+  //
+  // No prompt puts a mixed number next to +, − or =: in an RTL paragraph the
+  // connector «ו־» splits the expression into two numeric runs and mathBidi
+  // then isolates the wrong half («1 ו־[1/2 + 2] ו־1/4»). The sums are worded
+  // instead, which leaves each mixed number its own run and reads correctly.
+  function MIX(prompt, answer, hint, level) {
+    return I('ה', 'fractions', prompt, answer, hint, {
+      strand: STRAND.FRAC, standard: ST.FRAC_MIXED, level: level, typed: true,
+    });
+  }
+
+  RAW.push(
+    MIX('כתבו 3/2 כמספר מעורב (שלם ושבר)', '1 ו־1/2', 'שני חצאים הם שלם אחד, ונשאר חצי', 1),
+    MIX('כתבו 7/4 כמספר מעורב (שלם ושבר)', '1 ו־3/4', 'ארבעה רבעים הם שלם, ונשארו שלושה רבעים', 1),
+    MIX('כתבו 5/4 כמספר מעורב (שלם ושבר)', '1 ו־1/4', 'ארבעה רבעים הם שלם, ונשאר רבע', 1),
+    MIX('כמה שלמים יש ב־9/4? (מספר שלם בלבד)', 2, 'שמונה רבעים הם שני שלמים, ונשאר רבע', 1),
+    MIX('כתבו 9/4 כמספר מעורב (שלם ושבר)', '2 ו־1/4', 'שמונה רבעים הם שני שלמים, ונשאר רבע', 2),
+    MIX('כתבו 11/8 כמספר מעורב (שלם ושבר)', '1 ו־3/8', 'שמונה שמיניות הם שלם, ונשארו שלוש', 2),
+    MIX('כתבו את המספר המעורב 2 ו־1/3 כשבר לא אמיתי', '7/3', 'שני שלמים הם 6/3, ועוד שליש', 2),
+    MIX('כתבו את המספר המעורב 1 ו־5/8 כשבר לא אמיתי', '13/8', 'שלם אחד הוא 8/8, ועוד חמש שמיניות', 2),
+    MIX('מה גדול יותר, 1 ו־1/4 או 1 ו־3/8? כתבו את המספר הגדול.', '1 ו־3/8', 'אותו שלם; רבע הוא 2/8 ושלוש שמיניות גדולות ממנו', 3),
+    MIX('שיר אחד נמשך 2 ו־1/2 דקות ושיר שני 1 ו־1/4 דקות. מה האורך הכולל? (שלם ושבר)', '3 ו־3/4', 'שני שלמים ועוד שלם, וחצי ועוד רבע הם שלושה רבעים', 3),
+    MIX('מתוך הקלטה של 3 ו־1/2 דקות נמחקו 1 ו־1/4 דקות. כמה נשאר? (שלם ושבר)', '2 ו־1/4', 'חצי פחות רבע הוא רבע, ושלושה שלמים פחות שלם אחד', 3),
+    MIX('כמה זה 1 ו־3/4 ועוד 2 ו־1/2? (שלם ושבר)', '4 ו־1/4', 'שלושה שלמים, ושלושה רבעים ועוד חצי הם שלם ורבע', 3)
+  );
+
+  // ---------- כיתה ו׳ · משמעות האחוז (#96) ----------
+  // The bank had 10%/25%/50% of a quantity but never what a percent is. These
+  // three say it: one percent is one hundredth, and a half is 50 of them.
+  RAW.push(
+    G56('ו', 'percent', 'אחוז אחד הוא איזה חלק מהשלם? כתבו כשבר.', '1/100', 'אחוז = חלק אחד מתוך מאה', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה אחוזים הם כל השלם? (מספר בלבד)', 100, 'השלם הוא מאה חלקים מתוך מאה', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 1/2', 50, 'חצי הוא 50 מתוך 100', 2, ST.PERCENT)
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -1259,6 +1478,9 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g2) it.g2 = raw.g2;
+    if (raw.g3) it.g3 = raw.g3;
+    if (raw.typed) it.typed = true;
     if (raw.music) it.music = raw.music;
     if (raw.grid) it.grid = raw.grid;
     SHIPPED.push(it);
@@ -1414,6 +1636,7 @@
     clampLevel: clampLevel,
     isGrade: isGrade,
     hearOf: hearOf,
+    hasRequiredTags: hasRequiredTags,
     isShippable: isShippable,
     allItems: allItems,
     itemsForGrade: itemsForGrade,
