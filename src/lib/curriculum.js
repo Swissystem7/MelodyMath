@@ -40,8 +40,8 @@
     { grade: 'א', strand: 'measure', topic: 'שעון אנלוגי בשעות שלמות', status: COVERED, note: 'שעון מצויר בשעות שלמות' },
     { grade: 'א', strand: 'data', topic: 'דיאגרמת עמודות ופיקטוגרם', status: GAP, note: 'גל 2' },
 
-    { grade: 'ב', strand: 'numbers', topic: 'מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', status: GAP, note: 'גל 2' },
-    { grade: 'ב', strand: 'numbers', topic: 'חיבור וחיסור דו־ספרתי במאוזן ובמאונך עד 100', status: GAP, note: 'גל 2 — עיקר שעות כיתה ב׳' },
+    { grade: 'ב', strand: 'numbers', topic: 'מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', status: PARTIAL, note: 'מאות/עשרות/יחידות כשלושה כלים, זוגי/אי־זוגי בשמיעה, השוואה; אין קריאה וכתיבה של שם־מספר' },
+    { grade: 'ב', strand: 'numbers', topic: 'חיבור וחיסור דו־ספרתי במאוזן ובמאונך עד 100', status: PARTIAL, note: 'מאוזן ומאונך, עם וללא מעבר עשרות (תוף = יחידות, בס = עשרות); אין אסטרטגיות חישוב בעל־פה' },
     { grade: 'ב', strand: 'numbers', topic: 'שליטה בכפולות 2, 4, 5, 10', status: COVERED, note: '3, 6, 7, 8, 9 חסומים עד שליטה בליבה' },
     { grade: 'ב', strand: 'numbers', topic: 'חילוק לחלקים ולהכלה על אותם מספרים', status: COVERED, note: 'בלי המונחים הפורמליים לתלמיד' },
     { grade: 'ב', strand: 'geometry', topic: 'פירוק והרכבה של מצולעים; זווית ישרה', status: PARTIAL, note: 'זווית ישרה ומיון מצולעים; אין פירוק והרכבה' },
