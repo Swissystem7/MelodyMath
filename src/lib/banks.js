@@ -937,7 +937,7 @@
   }
   // `g2` is the widget spec grade2Music.js draws and plays; the activity owns
   // its audio through the ▶ button and needs no `hear` autoplay cue. beatsBars,
-  // halfBar and registers get theirs in the next slice (#103).
+  // halfBar and registers get theirs in the next slice (docs/ISSUE-103-SLICES.md).
   function EVEN(n, level) {
     const even = n % 2 === 0;
     return MB('place_value', 'evenOdd', 'הקשיבו לפעימות: ' + '🥁'.repeat(n) + ' — לכל פעימה יש זוג? (כתבו זוגי או אי־זוגי)',

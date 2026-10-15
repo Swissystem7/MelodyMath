@@ -57,6 +57,47 @@ test('the widget draws a play button and a screen-reader copy of its note', (t) 
   assert.match(box.children.map((c) => c.innerHTML).join(''), /class="vert" dir="ltr"/);
 });
 
+// renderWidget in index.html is the only caller, so the branch that reaches
+// bindGrade2 runs here against the real bank items: a spec the activity
+// refuses must leave the host hidden instead of showing an empty box.
+test('renderWidget draws every g2 item in the bank and re-hides a refused spec', (t) => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const vm = require('node:vm');
+  const banks = require('../src/lib/banks');
+
+  global.document = { createElement: makeEl };
+  t.after(() => { delete global.document; });
+
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const src = html.match(/function renderWidget\(hostId, item, inputId\)\{[\s\S]*?\n\}/)[0];
+  const host = Object.assign(makeEl('div'), {
+    classList: {
+      names: ['hidden'],
+      add(c) { if (this.names.indexOf(c) === -1) this.names.push(c); },
+      remove(c) { this.names = this.names.filter((n) => n !== c); },
+    },
+  });
+  const ctx = { $: () => host, bindGrade2: g2.bindGrade2 };
+  vm.createContext(ctx);
+  const render = vm.runInContext(src + '\nrenderWidget;', ctx);
+
+  const items = banks.itemsForGrade('ב').filter((it) => it.widget === 'g2');
+  assert.ok(items.length >= 20, items.length + ' items carry a g2 spec');
+  items.forEach((it) => {
+    host.children = [];
+    host.classList.names = ['hidden'];
+    render('widgetHost', it, null);
+    assert.deepEqual(host.classList.names, [], it.id + ' left the widget hidden');
+    assert.equal(host.children.length, 1, it.id + ' drew nothing');
+  });
+
+  host.children = [];
+  host.classList.names = ['hidden'];
+  render('widgetHost', { widget: 'g2', g2: { kind: 'duo', a: 24, b: 58, op: '-' } }, null);
+  assert.deepEqual(host.classList.names, ['hidden'], 'an empty widget must stay hidden');
+});
+
 test('the widget refuses a spec it cannot draw', (t) => {
   global.document = { createElement: makeEl };
   t.after(() => { delete global.document; });
