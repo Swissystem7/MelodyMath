@@ -333,30 +333,7 @@
   let audioCtx = null;
   const live = [];
 
-  // A page may lend the engine an existing context instead of letting it open
-  // one (core.js passes sonify.js’s getAudioContext, plan §4.3). The provider is
-  // asked only while the engine has no context, and never re-entrantly:
-  // sonify’s accessor calls getSharedAudioContext() back, so without the guard
-  // the two would ping-pong forever.
-  let contextProvider = null;
-  let askingProvider = false;
-
-  function setAudioContextProvider(fn) {
-    contextProvider = typeof fn === 'function' ? fn : null;
-    return !!contextProvider;
-  }
-
-  function providedAudioContext() {
-    if (!contextProvider || askingProvider) return null;
-    askingProvider = true;
-    try { return contextProvider() || null; } catch (e) { return null; } finally { askingProvider = false; }
-  }
-
   function getSharedAudioContext() {
-    if (!audioCtx || audioCtx.state === 'closed') {
-      const lent = providedAudioContext();
-      if (lent) { audioCtx = lent; return audioCtx; }
-    }
     if (typeof window === 'undefined') return null;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -445,7 +422,7 @@
     ratioText, hzText, harmonicSeries, commonDifference, stringStops,
     monochordHz, monochordInterval, temperedRatio, ratioDriftPercent,
     parseRatio, ratioMatches,
-    setAudioContextProvider, getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence,
+    getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence,
     stopSequence, stopAll, audioReady,
     isAudioUnlocked: audioReady, playSequence: scheduleSequence,
   };

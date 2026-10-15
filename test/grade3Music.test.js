@@ -390,10 +390,10 @@ test('index.html draws the grade-ג widget, checks remainders and unlocks audio'
   assert.ok(indexHtml.includes('remainderMiss(given,s)'));
   // Tap-to-answer modes never serve an item that needs typing.
   assert.ok(indexHtml.includes('pool.filter(it=>!it.typed)'));
-  const core = fs.readFileSync(path.join(root, 'src/lib/core.js'), 'utf8');
-  assert.match(core, /setAudioContextProvider\(getAudioContext\)/);
-  assert.match(core, /addEventListener\('pointerdown'/);
-  assert.match(core, /unlockAudio\(\)/);
+  const engine = fs.readFileSync(path.join(root, 'src/lib/musicEngine.js'), 'utf8');
+  assert.ok(indexHtml.includes('installAudioUnlock(document)'), 'index.html installs the audio unlock');
+  assert.match(engine, /addEventListener\('pointerdown'/);
+  assert.match(engine, /unlockAudio\(\)/);
   const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   assert.ok(sw.includes("'./src/lib/grade3Music.js'"));
   assert.ok(sw.includes("'./src/lib/musicEngine.js'"));
