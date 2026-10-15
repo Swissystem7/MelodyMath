@@ -684,7 +684,7 @@ function renderWidget(hostId, item, inputId){
     bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
   } else if(item.widget==='g2' && item.g2 && typeof bindGrade2==='function'){
     host.classList.remove('hidden');
-    bindGrade2(host, item.g2);
+    if(!bindGrade2(host, item.g2)) host.classList.add('hidden');
   } else if(item.widget==='g3' && item.g3 && typeof bindGrade3==='function'){
     host.classList.remove('hidden');
     if(!bindGrade3(host, item.g3)) host.classList.add('hidden');

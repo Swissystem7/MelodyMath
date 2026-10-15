@@ -204,6 +204,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g2: extra.g2,
       g3: extra.g3,
       typed: extra.typed,
       music: extra.music,
@@ -934,18 +935,21 @@
     extra.music = music;
     return I('ב', skill, prompt, answer, hint, extra);
   }
+  // `g2` is the widget spec grade2Music.js draws and plays; the activity owns
+  // its audio through the ▶ button and needs no `hear` autoplay cue. beatsBars,
+  // halfBar and registers get theirs in the next slice (docs/ISSUE-103-SLICES.md).
   function EVEN(n, level) {
     const even = n % 2 === 0;
     return MB('place_value', 'evenOdd', 'הקשיבו לפעימות: ' + '🥁'.repeat(n) + ' — לכל פעימה יש זוג? (כתבו זוגי או אי־זוגי)',
       even ? 'זוגי' : 'אי-זוגי',
       even ? 'מחלקים לזוגות — אף פעימה לא נשארת לבד' : 'בסוף נשארת פעימה אחת בלי זוג',
-      level, { standard: ST.PLACE_VALUE, hear: [n] });
+      level, { standard: ST.PLACE_VALUE, widget: 'g2', g2: { kind: 'evenOdd', beats: n } });
   }
   function DUO(op, a, b, answer, hint, level) {
     return MB(op === '+' ? 'addition' : 'subtraction', 'twoInstruments',
       'תוף מנגן את היחידות, בס מנגן את העשרות. חשבו במאונך: ' + a + ' ' + (op === '+' ? '+' : '−') + ' ' + b,
       answer, hint, level,
-      { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'vertical', vert: { a: a, b: b, op: op } });
+      { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'g2', g2: { kind: 'duo', a: a, b: b, op: op } });
   }
   function BARS(prompt, answer, hint, table, level) {
     return MB('multiplication', 'beatsBars', prompt, answer, hint, level, { standard: ST.MUL_B, table: table });
@@ -1369,6 +1373,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;
     if (raw.music) it.music = raw.music;
