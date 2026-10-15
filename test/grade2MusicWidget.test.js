@@ -110,3 +110,18 @@ test('the widget refuses a spec it cannot draw', (t) => {
   assert.equal(g2.bindGrade2(host, { kind: 'duo', a: 24, b: 58, op: '-' }), false);
   assert.equal(host.children.length, 0);
 });
+
+test('every grade-ב music widget kind binds without throwing', (t) => {
+  const banks = require('../src/lib/banks');
+  global.document = { createElement: makeEl };
+  t.after(() => { delete global.document; });
+  const rows = banks.itemsForGrade('ב').filter((it) => it.music);
+  assert.ok(rows.length >= 50);
+  rows.forEach((it) => {
+    const host = makeEl('div');
+    assert.equal(g2.bindGrade2(host, it.g2), true, it.id + ' ' + JSON.stringify(it.g2));
+    const play = find(host.children[0], 'g3-play');
+    assert.ok(play, it.id);
+    play.clicks.forEach((fn) => fn());
+  });
+});
