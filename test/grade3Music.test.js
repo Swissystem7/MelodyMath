@@ -126,6 +126,16 @@ test('"פי כמה" is the whole-number ratio of two tempi or two frequencies', 
   });
 });
 
+// #330: an octave and a doubled tempo are both "פי 2".
+test('timesMore regression: octave, doubled tempo, zero and an off-by-one', () => {
+  assert.equal(g3.timesMore(440, 220), 2);
+  assert.equal(g3.timesMore(120, 60), 2);
+  // A zero side has no multiplier.
+  assert.equal(g3.timesMore(0, 220), null);
+  // 441/220 is 2.0045..., not within 1e-9 of a whole number.
+  assert.equal(g3.timesMore(441, 220), null);
+});
+
 test('a pair plays the two sides in the order the prompt names them', () => {
   const hz = g3.pairEvents({ a: 220, b: 440, unit: 'hz' });
   assert.equal(hz.length, 2);
