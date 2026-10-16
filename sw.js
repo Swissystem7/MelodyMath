@@ -19,7 +19,6 @@ const ASSETS = [
   './src/lib/core.js',
   './src/lib/musicEngine.js',
   './src/lib/sonify.js',
-  './src/lib/musicEngine.js',
   './src/lib/grade3Music.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
