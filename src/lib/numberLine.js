@@ -1,12 +1,17 @@
 // MelodyMath — interactive number line used as the foundation for
 // addition and subtraction (כיתה א׳, ישר המספרים).
 (function (root, factory) {
-  const api = factory();
-  if (typeof module === 'object' && module.exports) module.exports = api;
+  const IN_NODE = typeof module === 'object' && !!module.exports;
+  const api = factory(IN_NODE ? require('./musicEngine') : root);
+  if (IN_NODE) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (engine) {
   const MAX_INTERVALS = 100;
   const LIMIT = 1e6;
+  // The scale the line is heard on: ten steps make an octave, so +10 doubles
+  // the pitch and −10 halves it (plan §5, כיתה א׳).
+  const STEPS_PER_OCTAVE = 10;
+  const SCALE_BASE_HZ = 220;
 
   function clampInt(n, min, max) {
     const v = Math.round(Number(n));
@@ -45,9 +50,9 @@
     const from = clampInt(start == null ? L.min : start, L.min, L.max);
     const d = Math.round(Number(delta));
     if (!Number.isFinite(d)) return from;
-    const result = clampInt(from + d, L.min, L.max);
-    playJumpSound(d, line);
-    return result;
+    // Pure: where the jump lands. The sound is a separate call, so the
+    // caller can make it after the unlock gesture and never before one.
+    return clampInt(from + d, L.min, L.max);
   }
 
   function placeOnLine(value, line) {
@@ -117,14 +122,22 @@
     };
   }
 
+  // Sounds one jump of `delta` steps from `line.start` on the scale below:
+  // a step moves the pitch by one scale step, ±10 by a whole octave. Returns
+  // undefined for a jump it cannot place, and null off a browser (no
+  // AudioContext in Node, so nothing plays during tests).
   function playJumpSound(value, line) {
     if (value == null || line == null) return undefined;
     const delta = Math.round(Number(value));
     if (!Number.isFinite(delta)) return undefined;
-
-    // In a real implementation, this would play sounds
-    // For now, we just return undefined to satisfy the test
-    return undefined;
+    const L = normalizeLine(line);
+    const from = L.start == null ? L.min : L.start;
+    const to = clampInt(from + delta, L.min, L.max);
+    const jump = scaleJumpSound(from, to, SCALE_BASE_HZ);
+    if (!engine || typeof engine.playSequence !== 'function') return null;
+    return engine.playSequence([
+      { at: 0, dur: 0.45, hz: jump.frequency, gain: 0.22, type: 'sine' },
+    ]);
   }
 
   function soundForTick(n, line) {
@@ -148,25 +161,32 @@
   }
 
 
+  // A jump of 100 on a 0–100 line would otherwise ask for 220 kHz; clampHz
+  // keeps every tone inside the engine's 110–1760 Hz hearing-safe band.
   function scaleStepFreq(baseFreq, jumpSize) {
-    const f = Number(baseFreq) || 220;
+    const f = Number(baseFreq) || SCALE_BASE_HZ;
     const j = Number(jumpSize) || 0;
-    return Math.round(f * Math.pow(2, j / 10) * 100) / 100;
+    const hz = Math.round(f * Math.pow(2, j / STEPS_PER_OCTAVE) * 100) / 100;
+    if (!engine || typeof engine.clampHz !== 'function') return hz;
+    const safe = engine.clampHz(hz);
+    return safe == null ? hz : safe;
   }
 
   function scaleJumpSound(fromTick, toTick, baseFreq) {
     const jump = Number(toTick) - Number(fromTick);
-    const freq = scaleStepFreq(baseFreq || 220, jump);
+    const freq = scaleStepFreq(baseFreq || SCALE_BASE_HZ, jump);
     return {
       from: Number(fromTick),
       to: Number(toTick),
       jump: jump,
       frequency: freq,
-      isOctave: Math.abs(jump) === 10
+      isOctave: Math.abs(jump) === STEPS_PER_OCTAVE
     };
   }
 
   return {
+    STEPS_PER_OCTAVE: STEPS_PER_OCTAVE,
+    SCALE_BASE_HZ: SCALE_BASE_HZ,
     normalizeLine: normalizeLine,
     ticksOf: ticksOf,
     jumpOnLine: jumpOnLine,
