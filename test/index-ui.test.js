@@ -193,3 +193,17 @@ test('division lesson exposes an equal-groups rhythm explorer', () => {
   assert.match(indexHtml, /playGroupedBeats/);
   assert.match(indexHtml, /\{ id: 'ג', label: 'כיתה ג׳' \}/);
 });
+
+test('activateHomeTab isolates lifecycle: pauses rhythm game and cancels live speech/activities on tab switch', () => {
+  assert.match(indexHtml, /btn\.dataset\.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive/);
+  assert.match(indexHtml, /btn\.dataset\.tab!=='lessons'/);
+  assert.match(indexHtml, /btn\.dataset\.tab!=='classMode'/);
+  assert.match(indexHtml, /btn\.dataset\.tab!=='beatMode'/);
+});
+
+test('whoBar and teacherNote support Enter key submission', () => {
+  assert.match(indexHtml, /\$\('studentName'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveWhoFromForm\(\)\}/);
+  assert.match(indexHtml, /\$\('classCode'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveWhoFromForm\(\)\}/);
+  assert.match(indexHtml, /\$\('teacherNote'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveTeacherNote\(\)\}/);
+});
+
