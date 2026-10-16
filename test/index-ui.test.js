@@ -207,3 +207,24 @@ test('whoBar and teacherNote support Enter key submission', () => {
   assert.match(indexHtml, /\$\('teacherNote'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveTeacherNote\(\)\}/);
 });
 
+test('classChoices and beatChoices use accessible WAI-ARIA group semantics and autofocus choices', () => {
+  assert.match(indexHtml, /id="classChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /id="beatChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /nextClassQuestion[\s\S]*?firstChoice\.focus\(\)/);
+  assert.match(indexHtml, /nextBeatQuestion[\s\S]*?firstBeatChoice\.focus\(\)/);
+});
+
+test('quiz and remediation advance focus to next button upon checking answers', () => {
+  assert.match(indexHtml, /function check\(\)[\s\S]*?\('next'\)\.focus\(\)/);
+  assert.match(indexHtml, /function rmCheck\(\)[\s\S]*?\('rmNext'\)\.focus\(\)/);
+  assert.match(indexHtml, /function rpCheck\(\)[\s\S]*?\('rmPlanNext'\)\.focus\(\)/);
+});
+
+test('index.html provides reciprocal footer navigation and focus-visible styling', () => {
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="curriculum\.html"[\s\S]*כיסוי תוכנית[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="offer\.html"[\s\S]*ניסוי כיתתי[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="landing\.html"[\s\S]*אודות[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="frequency\.html"[\s\S]*מעבדת תדרים[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /footer a:focus-visible\{outline:3px solid var\(--purple\);outline-offset:2px\}/);
+});
+
