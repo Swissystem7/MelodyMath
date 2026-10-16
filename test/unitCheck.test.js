@@ -146,3 +146,17 @@ test('check.html loads the module, shows the disclaimer and is precached', () =>
   assert.match(sw, /'\.\/check\.html'/);
   assert.match(sw, /'\.\/src\/lib\/unitCheck\.js'/);
 });
+
+test('check.html provides cancel quiz action and reciprocal navigation with index.html', () => {
+  const root = path.join(__dirname, '..');
+  const checkHtml = fs.readFileSync(path.join(root, 'check.html'), 'utf8');
+  const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+
+  assert.match(checkHtml, /<a[^>]*href="index\.html"[^>]*>.*חזרה לתרגול.*<\/a>/);
+  assert.match(checkHtml, /id="quizCancel"/);
+  assert.match(checkHtml, /ביטול הבדיקה וחזרה/);
+  assert.match(checkHtml, /\$\('quizCancel'\)\.onclick\s*=\s*cancelQuiz;/);
+  assert.match(indexHtml, /<a class="navcard" href="check\.html">/);
+  assert.match(indexHtml, /בדיקה לפני ואחרי יחידה/);
+});
+
