@@ -48,3 +48,11 @@ test('offer.html and 807.html include overflow protections for narrow mobile vie
   const h807 = fs.readFileSync(path.join(root, '807.html'), 'utf8');
   assert.match(h807, /input\[type=text\]\{[^}]*min-width:0/);
 });
+
+test('index.html never sets an inline button height or width below the 44px touch target', () => {
+  const content = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const small = content.match(/min-height:(?:[0-9]|[1-3][0-9]|4[0-3])px/g) || [];
+  assert.deepEqual(small, [], 'every min-height on a tap target is at least 44px');
+  const narrow = content.match(/<button[^>]*style="(?:[^"]*;)?width:(?:[0-9]|[1-3][0-9]|4[0-3])px/g) || [];
+  assert.deepEqual(narrow, [], 'no button is fixed narrower than 44px');
+});
