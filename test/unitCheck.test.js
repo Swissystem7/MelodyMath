@@ -160,3 +160,12 @@ test('check.html provides cancel quiz action and reciprocal navigation with inde
   assert.match(indexHtml, /בדיקה לפני ואחרי יחידה/);
 });
 
+test('check.html a11y: choices group, live status, curriculum link, report table caption and scopes', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'check.html'), 'utf8');
+  assert.match(html, /id="quizChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(html, /id="setupStatus"[^>]*role="status"[^>]*aria-live="polite"/);
+  assert.match(html, /href="curriculum\.html"[^>]*>כיסוי התוכנית<\/a>/);
+  assert.match(html, /<caption class="sr-only">דוח תוצאות בדיקה לפי תלמיד<\/caption>/);
+  assert.match(html, /<th scope="col">תלמיד\/ה<\/th>/);
+  assert.match(html, /e\.key === 'Enter'/);
+});
