@@ -40,7 +40,7 @@
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
   <h1>בדיקה לפני ואחרי יחידה</h1>
-  <p class="note">8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
+  <p class="note"><a href="index.html">← חזרה לתרגול</a> · 8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
 
   <section class="card" id="setup" aria-labelledby="setupTitle">
     <h2 id="setupTitle">מי נבדק/ת</h2>
@@ -61,6 +61,9 @@
     <h2 id="quizProgress" aria-live="polite"></h2>
     <p class="prompt" id="quizPrompt"></p>
     <div class="choices" id="quizChoices"></div>
+    <div class="row" style="margin-top:16px">
+      <button type="button" id="quizCancel" class="secondary">ביטול הבדיקה וחזרה</button>
+    </div>
   </section>
 
   <section class="card" id="report" aria-labelledby="reportTitle">
@@ -99,6 +102,7 @@
     run = { classCode: classCode, name: name, session: session, items: formItems(unitId, form), at: 0, correct: 0 };
     $('setupStatus').textContent = '';
     $('setup').classList.add('hidden');
+    $('report').classList.add('hidden');
     $('quiz').classList.remove('hidden');
     showItem();
   }
@@ -129,9 +133,21 @@
     endSession(run.classCode, run.name, run.session.id);
     $('quiz').classList.add('hidden');
     $('setup').classList.remove('hidden');
+    $('report').classList.remove('hidden');
     $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.';
     run = null;
     renderReport();
+  }
+
+  function cancelQuiz() {
+    if (run && run.session) {
+      endSession(run.classCode, run.name, run.session.id);
+    }
+    $('quiz').classList.add('hidden');
+    $('setup').classList.remove('hidden');
+    $('report').classList.remove('hidden');
+    $('setupStatus').textContent = 'הבדיקה בוטלה.';
+    run = null;
   }
 
   function cell(check) {
@@ -160,6 +176,7 @@
 
   $('startPre').onclick = function () { start('pre'); };
   $('startPost').onclick = function () { start('post'); };
+  $('quizCancel').onclick = cancelQuiz;
   $('showReport').onclick = renderReport;
 })();
 </script>
