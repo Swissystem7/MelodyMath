@@ -92,7 +92,8 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 .quick-tools button{width:auto;min-height:44px}
 .modal-backdrop{position:fixed;inset:0;background:rgba(33,24,59,.72);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
 .modal-card{background:#fff;border-radius:24px;padding:26px;max-width:380px;width:100%;position:relative;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-.modal-close{position:absolute;top:12px;left:12px;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px;min-height:auto}
+.modal-close{position:absolute;top:10px;left:10px;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:0;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px}
+.modal-close:hover,.modal-close:focus-visible{color:var(--ink);background:rgba(0,0,0,.06);outline:3px solid var(--purple);outline-offset:2px}
 .qr-box{display:flex;justify-content:center;margin:14px 0;padding:12px;background:#fdfcff;border-radius:16px;border:1px solid var(--line)}
 .qr-img{max-width:220px;height:auto}
 .share-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
@@ -149,7 +150,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
   <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
-  <button type="button" id="qrShareBtn" class="secondary">📱 קוד QR ושיתוף מהיר</button>
+  <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
 </div>
 <div id="qrModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
   <div class="modal-card">
@@ -193,6 +194,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 </div>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
   <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב: שברים, שיפוע פונקציה ומענה מוזיקלי מותאם.</span></a>
+  <a class="navcard" href="check.html"><strong>בדיקה לפני ואחרי יחידה</strong><span>8 שאלות קצרות לפני ואחרי יחידה, נשמרות במכשיר. ללא מוזיקה.</span></a>
   <a class="navcard" href="offer.html"><strong>ניסוי כיתתי · 4 שבועות · חינם</strong><span>מכתב מוכן למנהל/ת ודף אחד להדפסה. בלי חשבונית ובלי טענת יעילות.</span></a>
   <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
 </nav>
@@ -458,7 +460,7 @@ function check(){if(answered||!normalizeAnswer($('answer').value))return;answere
 function finish(){endTeacherSession();show('quiz',false);show('summary',true);const good=history.filter(x=>x.correct).length;const level=Math.max(...history.map(x=>exercises.find(e=>e.id===x.id).level));$('stats').innerHTML=`<div class="stat"><strong>${good}/${history.length}</strong>נכונות</div><div class="stat"><strong>${Math.round(good/history.length*100)||0}%</strong>דיוק בסבב</div><div class="stat"><strong>${level}</strong>רמה מרבית בסבב</div>`;$('summaryText').textContent='ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.'}
 document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dataset.level;document.querySelectorAll('.level').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})});
 $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter')check()};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true)};
-function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
+function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
 // playRhythmClicks מגיע מ-src/lib/sonify.js (פעימות אחרי מיומנות). מעבדת התדר הוצאה מהדף (CUT, 28.9.2026).
 function generateRhythmExercise(level,accuracy){const sets=[[.25,.5],[.25,.5,.125],[.25,.5,.125,.375],[.25,.5,.125,.375,1/3,2/3],[.25,.5,.125,.375,1/3,2/3,.0625,.1875]];let bpmMin=50+level*10,bpmMax=70+level*10,bpm=Math.floor(Math.random()*(bpmMax-bpmMin+1))+bpmMin;if(accuracy<.5)bpm=Math.round(bpm*.9);else if(accuracy>.8)bpm=Math.round(bpm*1.1);let left=1,pattern=[];while(left>.001){const c=sets[level-1].filter(n=>n<=left+.001);const n=c.length?c[Math.floor(Math.random()*c.length)]:left;pattern.push(n);left-=n}return{pattern,fractionPattern:formatRhythmPattern(pattern),bpm,expectedDuration:+(240/bpm).toFixed(3)}}
@@ -771,6 +773,8 @@ function renderParentLetter(){const box=$('parentLetter');if(!box)return;if(!who
 function saveTeacherNote(){if(!who.name){$('noteMsg').textContent='בחרו תלמיד/ה קודם.';return}const text=$('teacherNote')?$('teacherNote').value:'';const note=addNote(who.classCode,who.name,text);$('noteMsg').textContent=note?'ההערה נשמרה במכשיר.':'צריך טקסט קצר.';if(note)$('teacherNote').value='';renderParentLetter()}
 who=loadWho();applyWhoToForm();
 if($('whoSave'))$('whoSave').onclick=saveWhoFromForm;
+if($('studentName'))$('studentName').onkeydown=e=>{if(e.key==='Enter')saveWhoFromForm()};
+if($('classCode'))$('classCode').onkeydown=e=>{if(e.key==='Enter')saveWhoFromForm()};
 if($('reportRefresh'))$('reportRefresh').onclick=renderTeacherReport;
 function printTeacherReport(){document.body.classList.remove('print-kit');renderTeacherReport();window.print()}
 if($('reportPrint'))$('reportPrint').onclick=printTeacherReport;
@@ -794,6 +798,7 @@ if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&t
 if($('boardRefresh'))$('boardRefresh').onclick=renderClassBoard;
 if($('boardPrint'))$('boardPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-parent');document.body.classList.add('print-class');renderClassBoard();window.print()};
 if($('noteSave'))$('noteSave').onclick=saveTeacherNote;
+if($('teacherNote'))$('teacherNote').onkeydown=e=>{if(e.key==='Enter')saveTeacherNote()};
 if($('parentMake'))$('parentMake').onclick=renderParentLetter;
 if($('parentPrint'))$('parentPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class');document.body.classList.add('print-parent');renderParentLetter();window.print()};
 function renderRamaReport(){const box=$('ramaSheet');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const rep=buildReport(student);const pts=typeof getRemediationPoints==='function'?getRemediationPoints():[];const when=(function(){try{return new Date().toLocaleDateString('he-IL')}catch(e){return ''}})();const weak=(rep.perSkill||[]).filter(s=>s.accuracy<.75||(s.total-s.correct)>=2).map(s=>s.skill);const errs=(rep.repeatingErrors||[]).map(e=>e.skill||e.prompt);const matched=pts.filter(p=>weak.some(w=>p.title.includes(w)||p.topic.includes(w))||errs.some(e=>p.title.includes(e)||p.topic.includes(e)));const list=matched.length?matched:pts.slice(0,3);box.innerHTML=`<div class="rama-card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px;"><h3 style="margin:0;">כרטיס אבחון ומיפוי מוקדי קושי (ראמ״ה / מיצ״ב)</h3><span class="tag">${escapeHtml(when)}</span></div><p><b>תלמיד/ה:</b> ${escapeHtml(who.name)} · <b>קוד כיתה:</b> ${escapeHtml(who.classCode||'ברירת מחדל')} · <b>תרגילים שנרשמו במכשיר:</b> ${rep.total} (דיוק: ${rep.total?Math.round(100*rep.correct/rep.total):0}%)</p><div style="margin:16px 0;"><h4 style="margin:0 0 8px;">מוקדי כשל שזוהו בבנקים ומענה פדגוגי מותאם:</h4>${list.map(p=>`<div class="rama-item"><strong>${escapeHtml(p.grade)} · ${escapeHtml(p.title)} (${escapeHtml(p.ramaSection)})</strong><div style="color:var(--bad);font-size:.9rem;margin:4px 0;"><b>נקודת כשל:</b> ${escapeHtml(p.failureReason)}</div><div style="color:var(--good);font-size:.9rem;"><b>מענה מוזיקלי מותאם:</b> ${escapeHtml(p.musicalRemediation)}</div><div style="color:var(--muted);font-size:.8rem;margin-top:4px;"><b>בסיס מחקרי:</b> ${escapeHtml(p.foundation)}</div></div>`).join('')}</div><p class="note" style="margin-top:12px;font-size:.8rem;">כרטיס פדגוגי מקומי לצוות ההוראה. הנתונים נשמרים במכשיר בלבד. אין כאן אבחון קליני ואין טענת שליטה.</p></div>`;box.classList.remove('hidden')}
@@ -909,9 +914,45 @@ renderRosterChips();
 renderClassBoard();
 function toggleSmartboard(){const on=document.body.classList.toggle('smartboard-mode');const btn=$('smartboardToggle');if(btn){btn.setAttribute('aria-pressed',on?'true':'false');btn.classList.toggle('active',on)}try{if(on&&!document.fullscreenElement&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>{})}else if(!on&&document.fullscreenElement&&document.exitFullscreen){document.exitFullscreen().catch(()=>{})}}catch(e){}}
 if($('smartboardToggle'))$('smartboardToggle').onclick=toggleSmartboard;
-if($('qrShareBtn'))$('qrShareBtn').onclick=()=>{show('qrModal',true);if($('copyMsg'))$('copyMsg').textContent=''};
-if($('qrCloseBtn'))$('qrCloseBtn').onclick=()=>show('qrModal',false);
-if($('qrModal'))$('qrModal').onclick=(e)=>{if(e.target===$('qrModal'))show('qrModal',false)};
+function openQrModal(){
+  show('qrModal',true);
+  const btn=$('qrShareBtn');
+  if(btn) btn.setAttribute('aria-expanded','true');
+  if($('copyMsg')) $('copyMsg').textContent='';
+  if($('qrCloseBtn')) $('qrCloseBtn').focus();
+}
+function closeQrModal(){
+  show('qrModal',false);
+  const btn=$('qrShareBtn');
+  if(btn){
+    btn.setAttribute('aria-expanded','false');
+    btn.focus();
+  }
+}
+if($('qrShareBtn')) $('qrShareBtn').onclick=openQrModal;
+if($('qrCloseBtn')) $('qrCloseBtn').onclick=closeQrModal;
+if($('qrModal')){
+  $('qrModal').onclick=(e)=>{if(e.target===$('qrModal'))closeQrModal()};
+  $('qrModal').addEventListener('keydown',(e)=>{
+    if(e.key==='Tab'){
+      const focusable=$('qrModal').querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if(!focusable.length) return;
+      const first=focusable[0], last=focusable[focusable.length-1];
+      if(e.shiftKey && document.activeElement===first){
+        e.preventDefault();
+        last.focus();
+      }else if(!e.shiftKey && document.activeElement===last){
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+}
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'&&$('qrModal')&&!$('qrModal').classList.contains('hidden')){
+    closeQrModal();
+  }
+});
 if($('copyLinkBtn'))$('copyLinkBtn').onclick=()=>{try{navigator.clipboard.writeText('https://swissystem7.github.io/MelodyMath/').then(()=>{if($('copyMsg'))$('copyMsg').textContent='הקישור הועתק ללוח! 📋'}).catch(()=>{if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'})}catch(e){if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'}};
 
 function renderFirstRun(){
