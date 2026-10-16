@@ -146,3 +146,17 @@ test('check.html loads the module, shows the disclaimer and is precached', () =>
   assert.match(sw, /'\.\/check\.html'/);
   assert.match(sw, /'\.\/src\/lib\/unitCheck\.js'/);
 });
+
+test('check.html provides cancel action, accessible choices group, navigation links and report table a11y', () => {
+  const root = path.join(__dirname, '..');
+  const html = fs.readFileSync(path.join(root, 'check.html'), 'utf8');
+  assert.match(html, /id="cancelQuiz"/);
+  assert.match(html, /ביטול בדיקה וחזרה/);
+  assert.match(html, /id="quizChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(html, /id="setupStatus"[^>]*role="status"[^>]*aria-live="polite"/);
+  assert.match(html, /href="index\.html"[^>]*>חזרה לתרגול<\/a>/);
+  assert.match(html, /href="curriculum\.html"[^>]*>כיסוי התוכנית<\/a>/);
+  assert.match(html, /<caption class="sr-only">דוח תוצאות בדיקה לפי תלמיד<\/caption>/);
+  assert.match(html, /<th scope="col">תלמיד\/ה<\/th>/);
+});
+
