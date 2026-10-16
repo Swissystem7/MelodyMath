@@ -28,6 +28,14 @@
     return null;
   }
 
+  function titleIdSuffix(title) {
+    const ascii = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (ascii) return ascii;
+    let h = 0;
+    for (let i = 0; i < title.length; i++) h = (Math.imul(31, h) + title.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36);
+  }
+
   function normalizeAssignment(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     const title = String(src.title == null ? (src.label == null ? '' : src.label) : src.title)
@@ -42,7 +50,7 @@
     const assignedAt = assignedRaw == null ? Date.now() : assignedRaw;
     const completedAt = completed ? timeOrNull(src.completedAt) : null;
     const id = idOrNull(src.id)
-      || ('a' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36));
+      || ('a' + String(assignedAt) + titleIdSuffix(title)).slice(0, 40);
     return {
       id: id,
       title: title,
