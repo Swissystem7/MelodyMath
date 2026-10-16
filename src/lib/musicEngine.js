@@ -424,5 +424,6 @@
     parseRatio, ratioMatches,
     getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence,
     stopSequence, stopAll, audioReady,
+    isAudioUnlocked: audioReady, playSequence: scheduleSequence,
   };
 });
