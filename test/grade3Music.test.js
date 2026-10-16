@@ -132,6 +132,8 @@ test('timesMore regression: octave, doubled tempo, zero and an off-by-one', () =
   assert.equal(g3.timesMore(120, 60), 2);
   // A zero side has no multiplier.
   assert.equal(g3.timesMore(0, 220), null);
+  // 441/220 is 2.0045..., not within 1e-9 of a whole number.
+  assert.equal(g3.timesMore(441, 220), null);
 });
 
 test('a pair plays the two sides in the order the prompt names them', () => {
