@@ -9,6 +9,7 @@ const libDir = path.join(root, 'src', 'lib');
 // Modules no page loads on purpose. Each needs a reason; a new module must
 // either be loaded by a page or be added here with one.
 const INTENTIONALLY_UNUSED = {
+  'syncStack.js': 'factory Dell validation helpers for the master→main sync stack (#329); no page loads them',
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
