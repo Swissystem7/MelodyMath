@@ -226,3 +226,61 @@ test('the כיתה א׳ mastery path is consistent with mastery.js — nothing h
   // כיתה א׳ bank is still reachable.
   assert.equal(mastery.gateItems(g1Items, [], g1Items).length, g1Items.length);
 });
+
+function makeEl(tag) {
+  return {
+    tag: tag, className: '', textContent: '', innerHTML: '',
+    children: [], attrs: {}, clicks: [],
+    appendChild(c) { this.children.push(c); return c; },
+    insertBefore(c) { this.children.unshift(c); return c; },
+    setAttribute(k, v) { this.attrs[k] = v; },
+    addEventListener(ev, fn) { if (ev === 'click') this.clicks.push(fn); },
+    querySelector(sel) { return findEl(this, sel.replace('.', '')); },
+  };
+}
+
+function findEl(root, cls) {
+  for (const c of root.children) {
+    if (String(c.className).split(' ').indexOf(cls) !== -1) return c;
+    const deep = findEl(c, cls);
+    if (deep) return deep;
+  }
+  return null;
+}
+
+test('bindGrade1 renders play button, visible note and screen-reader narration for all four kinds', (t) => {
+  global.document = { createElement: makeEl };
+  t.after(() => { delete global.document; });
+
+  const specs = [
+    { kind: 'beats', from: 0, step: 5, accents: 3 },
+    { kind: 'scale', from: 0, to: 10, baseFreq: 220 },
+    { kind: 'chart100', number: 34 },
+    { kind: 'pattern', type: 'ABC', length: 6 },
+  ];
+
+  specs.forEach((spec) => {
+    const host = makeEl('div');
+    assert.equal(g1.bindGrade1(host, spec), true, `bindGrade1 failed for ${spec.kind}`);
+    const box = host.children[0];
+    const play = findEl(box, 'g3-play');
+    assert.equal(play.tag, 'button');
+    assert.match(play.textContent, /^▶ השמע שוב/);
+    assert.equal(play.clicks.length, 1);
+    play.clicks.forEach((fn) => fn());
+
+    const note = box.querySelector('.g3-note');
+    assert.ok(note && note.textContent.length > 0);
+    assert.equal(note.attrs['aria-hidden'], 'true');
+
+    const sr = box.children[0];
+    assert.equal(sr.className, 'sr-only');
+    assert.equal(sr.textContent, note.textContent);
+  });
+
+  assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'unknown' }), false);
+  assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'beats', from: 0, step: 0, accents: 3 }), false);
+  assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'chart100', number: 0 }), false);
+  assert.equal(g1.bindGrade1(null, { kind: 'beats', from: 0, step: 2, accents: 3 }), false);
+});
+
