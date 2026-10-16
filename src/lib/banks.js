@@ -86,6 +86,8 @@
     FACTORS: 'מחלקים, מספרים ראשוניים ופריקים',
     NUM10K: 'מספרים עד 10,000 — קריאה, כתיבה והשוואה',
     TIMES_MORE: 'שאלת השוואה כפלית — פי כמה',
+    AREA_RECT: 'שטח מלבן — שורות × עמודות',
+    TIME_MIN_SEC: 'זמן — המרה בין דקות לשניות',
   };
 
   const SKILL_HE = {
@@ -935,7 +937,7 @@
   }
   // `g2` is the widget spec grade2Music.js draws and plays; the activity owns
   // its audio through the ▶ button and needs no `hear` autoplay cue. beatsBars,
-  // halfBar and registers get theirs in the next slice (#103).
+  // halfBar and registers get theirs in the next slice (docs/ISSUE-103-SLICES.md).
   function EVEN(n, level) {
     const even = n % 2 === 0;
     return MB('place_value', 'evenOdd', 'הקשיבו לפעימות: ' + '🥁'.repeat(n) + ' — לכל פעימה יש זוג? (כתבו זוגי או אי־זוגי)',
@@ -1322,14 +1324,14 @@
 
   // שטח מלבן כרשת מקצב, וזמן כמשך מנגינה.
   RAW.push(
-    G3('measurement', 'רשת מקצב של 3 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 24, '3 × 8 — שורות כפול תאים', { strand: STRAND.MEASURE, standard: ST.AREA, level: 1, g3: { kind: 'grid', rows: 3, steps: 8 } }),
-    G3('measurement', 'רשת מקצב של 4 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 32, '4 × 8', { strand: STRAND.MEASURE, standard: ST.AREA, level: 2, g3: { kind: 'grid', rows: 4, steps: 8 } }),
-    G3('measurement', 'ברשת 2 שורות ו־16 תאים בשורה. כמה תאים בסך הכול?', 32, '2 × 16 — אותו שטח, מלבן אחר', { strand: STRAND.MEASURE, standard: ST.AREA, level: 3, g3: { kind: 'grid', rows: 2, steps: 16 } }),
-    G3('measurement', 'המנגינה נמשכת 2 דקות ו־30 שניות. כמה שניות זה?', 150, 'בכל דקה 60 שניות: 2 × 60 + 30', { strand: STRAND.MEASURE, standard: ST.MINUTES, level: 1 }),
-    G3('measurement', 'שיר נמשך 180 שניות. כמה דקות זה?', 3, '180 : 60', { strand: STRAND.MEASURE, standard: ST.MINUTES, level: 2 }),
-    G3('measurement', 'מנגינה נמשכת 1 דקה ו־45 שניות. כמה שניות זה?', 105, '60 + 45', { strand: STRAND.MEASURE, standard: ST.MINUTES, level: 3 }),
-    G3('measurement', 'רשת מקצב של 4 שורות ו־4 תאים בשורה. כמה תאים יש ברשת?', 16, '4 × 4 — רשת ריבועית', { strand: STRAND.MEASURE, standard: ST.AREA, level: 1, g3: { kind: 'grid', rows: 4, steps: 4 } }),
-    G3('measurement', 'כמה שניות יש ב־4 דקות של מנגינה?', 240, '4 × 60', { strand: STRAND.MEASURE, standard: ST.MINUTES, level: 2 })
+    G3('measurement', 'רשת מקצב של 3 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 24, '3 × 8 — שורות כפול תאים', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 1, g3: { kind: 'grid', rows: 3, steps: 8 } }),
+    G3('measurement', 'רשת מקצב של 4 שורות ו־8 תאים בשורה. כמה תאים יש ברשת?', 32, '4 × 8', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 2, g3: { kind: 'grid', rows: 4, steps: 8 } }),
+    G3('measurement', 'ברשת 2 שורות ו־16 תאים בשורה. כמה תאים בסך הכול?', 32, '2 × 16 — אותו שטח, מלבן אחר', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 3, g3: { kind: 'grid', rows: 2, steps: 16 } }),
+    G3('measurement', 'המנגינה נמשכת 2 דקות ו־30 שניות. כמה שניות זה?', 150, 'בכל דקה 60 שניות: 2 × 60 + 30', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 1 }),
+    G3('measurement', 'שיר נמשך 180 שניות. כמה דקות זה?', 3, '180 : 60', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 2 }),
+    G3('measurement', 'מנגינה נמשכת 1 דקה ו־45 שניות. כמה שניות זה?', 105, '60 + 45', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 3 }),
+    G3('measurement', 'רשת מקצב של 4 שורות ו־4 תאים בשורה. כמה תאים יש ברשת?', 16, '4 × 4 — רשת ריבועית', { strand: STRAND.MEASURE, standard: ST.AREA_RECT, level: 1, g3: { kind: 'grid', rows: 4, steps: 4 } }),
+    G3('measurement', 'כמה שניות יש ב־4 דקות של מנגינה?', 240, '4 × 60', { strand: STRAND.MEASURE, standard: ST.TIME_MIN_SEC, level: 2 })
   );
 
   // מספרים עד 10,000: השוואת שני תדרים בשמיעה, ואז בלי צליל.
