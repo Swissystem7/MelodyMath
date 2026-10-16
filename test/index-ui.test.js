@@ -95,6 +95,20 @@ test('index.html provides Quick QR Code modal and WhatsApp share for classrooms'
   assert.match(indexHtml, /icons\/qr-code\.svg/);
 });
 
+test('qrModal conforms to WAI-ARIA dialog accessibility pattern and touch target guidelines', () => {
+  assert.match(indexHtml, /id="qrShareBtn"[^>]*aria-haspopup="dialog"/);
+  assert.match(indexHtml, /id="qrShareBtn"[^>]*aria-controls="qrModal"/);
+  assert.match(indexHtml, /id="qrShareBtn"[^>]*aria-expanded="false"/);
+  assert.match(indexHtml, /\.modal-close\s*\{[^}]*min-height:\s*44px/);
+  assert.match(indexHtml, /\.modal-close\s*\{[^}]*min-width:\s*44px/);
+  assert.match(indexHtml, /\.modal-close:focus-visible/);
+  assert.match(indexHtml, /function openQrModal\(\)/);
+  assert.match(indexHtml, /function closeQrModal\(\)/);
+  assert.match(indexHtml, /openQrModal[\s\S]*?qrCloseBtn[\s\S]*?focus\(\)/);
+  assert.match(indexHtml, /closeQrModal[\s\S]*?qrShareBtn[\s\S]*?focus\(\)/);
+  assert.match(indexHtml, /e\.key\s*===\s*'Escape'/);
+});
+
 test('teacher tab provides a printable RAMA failure-point diagnostic card', () => {
   assert.match(indexHtml, /id="ramaCard"/);
   assert.match(indexHtml, /id="ramaMake"/);
