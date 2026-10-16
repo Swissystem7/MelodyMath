@@ -92,7 +92,8 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 .quick-tools button{width:auto;min-height:44px}
 .modal-backdrop{position:fixed;inset:0;background:rgba(33,24,59,.72);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
 .modal-card{background:#fff;border-radius:24px;padding:26px;max-width:380px;width:100%;position:relative;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-.modal-close{position:absolute;top:12px;left:12px;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px;min-height:auto}
+.modal-close{position:absolute;top:10px;left:10px;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:0;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px}
+.modal-close:hover,.modal-close:focus-visible{color:var(--ink);background:rgba(0,0,0,.06);outline:3px solid var(--purple);outline-offset:2px}
 .qr-box{display:flex;justify-content:center;margin:14px 0;padding:12px;background:#fdfcff;border-radius:16px;border:1px solid var(--line)}
 .qr-img{max-width:220px;height:auto}
 .share-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
@@ -149,7 +150,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
   <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
-  <button type="button" id="qrShareBtn" class="secondary">📱 קוד QR ושיתוף מהיר</button>
+  <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
 </div>
 <div id="qrModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
   <div class="modal-card">
@@ -909,9 +910,45 @@ renderRosterChips();
 renderClassBoard();
 function toggleSmartboard(){const on=document.body.classList.toggle('smartboard-mode');const btn=$('smartboardToggle');if(btn){btn.setAttribute('aria-pressed',on?'true':'false');btn.classList.toggle('active',on)}try{if(on&&!document.fullscreenElement&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>{})}else if(!on&&document.fullscreenElement&&document.exitFullscreen){document.exitFullscreen().catch(()=>{})}}catch(e){}}
 if($('smartboardToggle'))$('smartboardToggle').onclick=toggleSmartboard;
-if($('qrShareBtn'))$('qrShareBtn').onclick=()=>{show('qrModal',true);if($('copyMsg'))$('copyMsg').textContent=''};
-if($('qrCloseBtn'))$('qrCloseBtn').onclick=()=>show('qrModal',false);
-if($('qrModal'))$('qrModal').onclick=(e)=>{if(e.target===$('qrModal'))show('qrModal',false)};
+function openQrModal(){
+  show('qrModal',true);
+  const btn=$('qrShareBtn');
+  if(btn) btn.setAttribute('aria-expanded','true');
+  if($('copyMsg')) $('copyMsg').textContent='';
+  if($('qrCloseBtn')) $('qrCloseBtn').focus();
+}
+function closeQrModal(){
+  show('qrModal',false);
+  const btn=$('qrShareBtn');
+  if(btn){
+    btn.setAttribute('aria-expanded','false');
+    btn.focus();
+  }
+}
+if($('qrShareBtn')) $('qrShareBtn').onclick=openQrModal;
+if($('qrCloseBtn')) $('qrCloseBtn').onclick=closeQrModal;
+if($('qrModal')){
+  $('qrModal').onclick=(e)=>{if(e.target===$('qrModal'))closeQrModal()};
+  $('qrModal').addEventListener('keydown',(e)=>{
+    if(e.key==='Tab'){
+      const focusable=$('qrModal').querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if(!focusable.length) return;
+      const first=focusable[0], last=focusable[focusable.length-1];
+      if(e.shiftKey && document.activeElement===first){
+        e.preventDefault();
+        last.focus();
+      }else if(!e.shiftKey && document.activeElement===last){
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+}
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'&&$('qrModal')&&!$('qrModal').classList.contains('hidden')){
+    closeQrModal();
+  }
+});
 if($('copyLinkBtn'))$('copyLinkBtn').onclick=()=>{try{navigator.clipboard.writeText('https://swissystem7.github.io/MelodyMath/').then(()=>{if($('copyMsg'))$('copyMsg').textContent='הקישור הועתק ללוח! 📋'}).catch(()=>{if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'})}catch(e){if($('copyMsg'))$('copyMsg').textContent='https://swissystem7.github.io/MelodyMath/'}};
 
 function renderFirstRun(){
