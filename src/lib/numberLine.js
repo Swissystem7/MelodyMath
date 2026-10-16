@@ -147,6 +147,25 @@
     };
   }
 
+
+  function scaleStepFreq(baseFreq, jumpSize) {
+    const f = Number(baseFreq) || 220;
+    const j = Number(jumpSize) || 0;
+    return Math.round(f * Math.pow(2, j / 10) * 100) / 100;
+  }
+
+  function scaleJumpSound(fromTick, toTick, baseFreq) {
+    const jump = Number(toTick) - Number(fromTick);
+    const freq = scaleStepFreq(baseFreq || 220, jump);
+    return {
+      from: Number(fromTick),
+      to: Number(toTick),
+      jump: jump,
+      frequency: freq,
+      isOctave: Math.abs(jump) === 10
+    };
+  }
+
   return {
     normalizeLine: normalizeLine,
     ticksOf: ticksOf,
@@ -157,6 +176,8 @@
     bindNumberLine: bindNumberLine,
     soundForTick: soundForTick,
     escapeHtml: escapeHtml,
+    scaleStepFreq: scaleStepFreq,
+    scaleJumpSound: scaleJumpSound,
     playJumpSound: playJumpSound,
   };
 });
