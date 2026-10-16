@@ -160,3 +160,17 @@ test('check.html provides cancel quiz action and reciprocal navigation with inde
   assert.match(indexHtml, /בדיקה לפני ואחרי יחידה/);
 });
 
+test('check.html provides accessible choices group, polite status, footer navigation and keyboard shortcuts', () => {
+  const root = path.join(__dirname, '..');
+  const html = fs.readFileSync(path.join(root, 'check.html'), 'utf8');
+  assert.match(html, /id="quizChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(html, /id="setupStatus"[^>]*role="status"[^>]*aria-live="polite"/);
+  assert.match(html, /<caption class="sr-only">דוח תוצאות בדיקה לפי תלמיד<\/caption>/);
+  assert.match(html, /<th scope="col">תלמיד\/ה<\/th>/);
+  assert.match(html, /<footer class="no-print">[\s\S]*href="index\.html"[\s\S]*href="curriculum\.html"[\s\S]*<\/footer>/);
+  assert.match(html, /footer a:focus-visible\{outline:3px solid var\(--purple\);outline-offset:2px\}/);
+  assert.match(html, /e\.key\s*===\s*'Escape'/);
+  assert.match(html, /e\.key\s*===\s*'Enter'/);
+  assert.match(html, /cancelQuiz[\s\S]*?studentName[\s\S]*?focus\(\)/);
+});
+
