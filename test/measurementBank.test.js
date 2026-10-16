@@ -6,13 +6,15 @@ const measure = require('../src/lib/measure');
 const { isCorrect } = require('../src/lib/adaptive');
 
 const measurement = (grade) => banks.rowsOf('measurement', grade);
+const rows = measurement;
 const ST = banks.ST;
 const BY_GRADE = {
-  'ב': [ST.LENGTH, ST.CLOCK, ST.HALF_HOUR, ST.PERIMETER],
+  'א': [ST.LENGTH, ST.CLOCK, ST.MONEY],
+  'ב': [ST.LENGTH, ST.CLOCK, ST.HALF_HOUR, ST.PERIMETER, ST.MONEY, ST.MASS_VOL],
   // Grid cells are not square units and minutes→seconds is not a clock face,
   // so the grade-ג׳ music items keep standards of their own (#177).
-  'ג': [ST.MINUTES, ST.AREA, ST.AREA_RECT, ST.TIME_MIN_SEC],
-  'ד': [ST.UNITS, ST.CALENDAR],
+  'ג': [ST.MINUTES, ST.AREA, ST.AREA_RECT, ST.TIME_MIN_SEC, ST.MONEY, ST.MASS_VOL],
+  'ד': [ST.UNITS, ST.CALENDAR, ST.MONEY],
 };
 // A few items answer with a clock reading ("2:30") rather than a count.
 const CLOCK_ANSWER = /^\d{1,2}:\d{2}$/;
@@ -38,32 +40,92 @@ test('rectArea and perimeter refuse what is not a shape', () => {
   assert.equal(measure.perimeter([3, -4, 5]), null);
 });
 
-test('grades ב׳–ד׳ have tagged measurement items at every level', () => {
+test('grades א׳–ד׳ have tagged measurement items at every level', () => {
   Object.keys(BY_GRADE).forEach((g) => {
     assert.ok(banks.skillsForGrade(g).includes('measurement'), g);
-    const rows = measurement(g);
-    assert.ok(rows.length >= 12, g + ' has ' + rows.length);
-    [1, 2, 3].forEach((lv) => assert.ok(rows.some((it) => it.level === lv), g + ' level ' + lv));
-    rows.forEach((it) => {
+    const items = measurement(g);
+    assert.ok(items.length >= 12, g + ' has ' + items.length);
+    [1, 2, 3].forEach((lv) => assert.ok(items.some((it) => it.level === lv), g + ' level ' + lv));
+    items.forEach((it) => {
       assert.equal(it.strand, banks.STRAND.MEASURE, it.id);
       assert.ok(BY_GRADE[g].includes(it.standard), it.id + ' ' + it.standard);
       const countable = Number.isInteger(it.answer) && it.answer > 0;
       assert.ok(countable || CLOCK_ANSWER.test(String(it.answer)), it.id + ' answers ' + it.answer);
       assert.ok(isCorrect(String(it.answer), it.answer), it.id);
+      assert.ok(String(it.hint).trim().length > 0, it.id + ' has no hint');
     });
-    BY_GRADE[g].forEach((st) => assert.ok(rows.some((it) => it.standard === st), g + ' ' + st));
+    BY_GRADE[g].forEach((st) => assert.ok(items.some((it) => it.standard === st), g + ' ' + st));
   });
 });
 
-test('unit-change answers agree with convertUnits', () => {
+// Unit questions are the ones measure.convert can check on its own: the
+// prompt names the amount and both units, so the answer is not a matter of
+// taste. [regexp, from, to] — a miss here is a wrong answer in the bank.
+const CONVERSIONS = [
+  [/^כמה ס״מ יש ב־(\d+) מטרים/, 'm', 'cm'],
+  [/^כמה מ״מ יש ב־(\d+) ס״מ/, 'cm', 'mm'],
+  [/^כמה מטרים יש ב־(\d+) ק״מ/, 'km', 'm'],
+  [/^כמה גרם יש ב־(\d+) ק״ג/, 'kg', 'g'],
+  [/^כמה מ״ל יש ב־(\d+) ליטר/, 'l', 'ml'],
+  [/^כמה אגורות יש ב־(\d+) ₪\?$/, 'shekel', 'agora'],
+  [/^כמה דקות יש ב־(\d+) שעות/, 'hour', 'min'],
+  [/^כמה ימים יש ב־(\d+) שבועות/, 'week', 'day'],
+  [/^כמה שעות יש ב־(\d+) יממ/, 'day', 'hour'],
+];
+
+test('unit-change answers agree with convertUnits and measure.convert', () => {
   let checked = 0;
-  ['ג', 'ד'].forEach((g) => measurement(g).forEach((it) => {
-    const m = it.prompt.match(/^כמה (\S+) יש ב־(\d+) (\S+)\?$/);
-    if (!m) return;
-    checked += 1;
-    assert.equal(it.answer, measure.convertUnits(Number(m[2]), m[3], m[1]), it.id);
-  }));
-  assert.ok(checked >= 7, 'checked ' + checked);
+  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
+    rows(g).forEach((it) => {
+      CONVERSIONS.forEach((rule) => {
+        const m = rule[0].exec(it.prompt);
+        if (!m) return;
+        checked += 1;
+        assert.equal(it.answer, measure.convert(m[1], rule[1], rule[2]), it.id + ' ' + it.prompt);
+      });
+    });
+  });
+  assert.ok(checked >= 10, 'only ' + checked + ' convertible prompts matched');
+});
+
+test('convert refuses an unknown unit and never crosses between families', () => {
+  assert.equal(measure.convert(1, 'kg', 'l'), null);
+  assert.equal(measure.convert(1, 'shekel', 'min'), null);
+  assert.equal(measure.convert(1, 'cm', 'parsec'), null);
+  assert.equal(measure.convert('abc', 'm', 'cm'), null);
+  assert.equal(measure.convert(1, 'base', 'cm'), null);
+  assert.equal(measure.familyOf('agora'), 'money');
+  assert.equal(measure.familyOf('nope'), null);
+  assert.equal(measure.convert(250, 'cm', 'm'), 2.5);
+  assert.equal(measure.convert(1, 'year', 'day'), 365);
+});
+
+test('coinsTotal and change back the money items, and change refuses an underpayment', () => {
+  assert.equal(measure.coinsTotal([[5, 1], [2, 1]]), 7);
+  assert.equal(measure.coinsTotal([[2, 3]]), 6);
+  assert.equal(measure.coinsTotal([[10, 1], [2, 2]]), 14);
+  assert.equal(measure.coinsTotal([[5, 1], [2, 1], [1, 2]]), 9);
+  assert.equal(measure.coinsTotal([[50, 4]]), measure.convert(2, 'shekel', 'agora'));
+  assert.equal(measure.change(10, 3), 7);
+  assert.equal(measure.change(50, 35), 15);
+  assert.equal(measure.change(100, 64), 36);
+  assert.equal(measure.change(200, measure.coinsTotal([[30, 6]])), 20);
+  assert.equal(measure.change(3, 10), null, 'paying less than the price is not change');
+  assert.equal(measure.coinsTotal([[1, -2]]), null);
+  assert.equal(measure.coinsTotal([]), null);
+  assert.equal(measure.coinsTotal('5'), null);
+});
+
+test('money items are tagged to the money standard and name ₪ or אגורות', () => {
+  let money = 0;
+  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
+    rows(g).filter((it) => it.standard === banks.ST.MONEY).forEach((it) => {
+      money += 1;
+      assert.match(it.prompt, /₪|אגורות/, it.id);
+      assert.equal(it.strand, banks.STRAND.MEASURE, it.id);
+    });
+  });
+  assert.equal(money, 24);
 });
 
 test('area and perimeter answers agree with measure.js', () => {
@@ -84,8 +146,8 @@ test('area and perimeter answers agree with measure.js', () => {
   assert.ok(areas >= 3 && perims >= 2, areas + ' ' + perims);
 });
 
-test('the diagnostic and personal practice for ג׳ and ד׳ reach the measurement items', () => {
-  ['ג', 'ד'].forEach((g) => {
+test('the diagnostic and personal practice reach measurement in every grade א׳–ד׳', () => {
+  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
     const diag = banks.diagnosticItems(g).filter((it) => it.skill === 'measurement');
     assert.deepEqual(diag.map((it) => it.level), [1, 2], g);
     assert.ok(diag.every((it) => it.grade === g), g);
