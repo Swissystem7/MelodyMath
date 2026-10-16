@@ -130,6 +130,8 @@ test('"פי כמה" is the whole-number ratio of two tempi or two frequencies', 
 test('timesMore regression: octave, doubled tempo, zero and an off-by-one', () => {
   assert.equal(g3.timesMore(440, 220), 2);
   assert.equal(g3.timesMore(120, 60), 2);
+  // A zero side has no multiplier.
+  assert.equal(g3.timesMore(0, 220), null);
 });
 
 test('a pair plays the two sides in the order the prompt names them', () => {
