@@ -117,7 +117,7 @@
     // ג׳ and ד׳ carry measurement items (minutes and area; unit changes and
     // the calendar). The skill has to be listed here too, or the diagnostic —
     // and with it the personal practice plan it feeds — never reaches them.
-    'ג': ['multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement'],
+    'ג': ['multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement', 'data'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
     'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
@@ -1450,6 +1450,21 @@
     G56('ו', 'percent', 'אחוז אחד הוא איזה חלק מהשלם? כתבו כשבר.', '1/100', 'אחוז = חלק אחד מתוך מאה', 1, ST.PERCENT),
     G56('ו', 'percent', 'כמה אחוזים הם כל השלם? (מספר בלבד)', 100, 'השלם הוא מאה חלקים מתוך מאה', 1, ST.PERCENT),
     G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 1/2', 50, 'חצי הוא 50 מתוך 100', 2, ST.PERCENT)
+  );
+
+  // Appended after #96 so earlier ids stay put (#409–#411).
+  RAW.push(
+    MEAS('ב', 'תיבה בנויה מ־4 שכבות של 4 קוביות. כמה קוביות יש בה?', 16, 'ארבע פעמים 4', 1, ST.MASS_VOL),
+    MEAS('ב', 'תיבה בנויה משכבה אחת של 3 שורות, ובכל שורה 3 קוביות. כמה קוביות יש בה?', 9, '3 כפול 3', 2, ST.MASS_VOL),
+    MEAS('ב', 'בתיבה 10 קוביות. הוצאנו 3. כמה קוביות נשארו?', 7, '10 פחות 3', 3, ST.MASS_VOL),
+    PICT('ג', 'כל תו מייצג שיר אחד. כמה שירי תופים נאספו?', 4, 'סופרים את הסמלים בשורת התופים', { icon: '🎵', key: 1, rows: [{ label: 'תופים', count: 4 }, { label: 'חלילים', count: 2 }] }, 1),
+    PICT('ג', 'כל תו מייצג 2 שירים. כמה שירי תופים נאספו בסך הכול?', 8, '4 סמלים, כל אחד שווה 2', { icon: '🎵', key: 2, rows: [{ label: 'תופים', count: 8 }, { label: 'חלילים', count: 4 }] }, 2),
+    PICT('ג', 'כל תו מייצג 2 שירים. בכמה שירים יש יותר תופים מחלילים?', 4, '8 פחות 4', { icon: '🎵', key: 2, rows: [{ label: 'תופים', count: 8 }, { label: 'חלילים', count: 4 }] }, 3),
+    BARC('ג', 'אספנו כמה ילדים בחרו כל כלי. כמה בחרו תופים?', 8, 'גובה עמודת התופים', { bars: [{ label: 'תופים', value: 8 }, { label: 'חלילים', value: 5 }, { label: 'משולשים', value: 3 }] }, 1),
+    BARC('ג', 'איזה כלי נבחר הכי הרבה? כתבו את המספר', 8, 'העמודה הגבוהה ביותר', { bars: [{ label: 'תופים', value: 8 }, { label: 'חלילים', value: 5 }, { label: 'משולשים', value: 3 }] }, 2),
+    BARC('ג', 'כמה ילדים השתתפו בסקר הכלים בסך הכול?', 16, '8 ועוד 5 ועוד 3', { bars: [{ label: 'תופים', value: 8 }, { label: 'חלילים', value: 5 }, { label: 'משולשים', value: 3 }] }, 3),
+    I('ג', 'data', 'בטבלה: תופים — 6, חלילים — 4. כמה תופים נאספו?', 6, 'קוראים את שורת התופים', { strand: STRAND.DATA, standard: ST.TABLE, level: 1 }),
+    I('ג', 'data', 'בטבלה: תופים — 6, חלילים — 4, משולשים — 2. כמה כלים נאספו בסך הכול?', 12, 'מחברים את שלוש השורות', { strand: STRAND.DATA, standard: ST.TABLE, level: 2 })
   );
 
   const SHIPPED = [];
