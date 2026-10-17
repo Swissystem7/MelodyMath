@@ -54,6 +54,8 @@ const ASSETS = [
   './src/lib/offer.js',
   './src/lib/tabs.js',
   './src/lib/print.css',
+  './src/lib/learnerPlanView.js',
+  './src/sefirot.css',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
