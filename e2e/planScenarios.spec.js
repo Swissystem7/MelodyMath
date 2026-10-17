@@ -3,17 +3,16 @@
 //   npx --yes playwright@1.49 test --config e2e/plan.config.js
 const { test, expect } = require('@playwright/test');
 
-const NOW = 1700000000000;
-
 function roster(name, skill, correct, total) {
   const items = [];
   for (let i = 0; i < total; i++) items.push({ skill: skill, correct: i < correct, prompt: 'q', answer: 1, given: 1 });
+  const started = Date.now() - 1000;
   return {
     classCode: 'דמו',
     students: {
       [name]: {
         name: name, created: 1, assignments: [],
-        sessions: [{ id: 's1', kind: 'diag', started: NOW - 1000, items: items }],
+        sessions: [{ id: 's1', kind: 'diag', started: started, items: items }],
       },
     },
   };
