@@ -684,6 +684,9 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='bar44' && typeof bindBar44==='function'){
     host.classList.remove('hidden');
     bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
+  } else if(item.widget==='g1' && item.g1 && typeof bindGrade1==='function'){
+    host.classList.remove('hidden');
+    if(!bindGrade1(host, item.g1)) host.classList.add('hidden');
   } else if(item.widget==='g2' && item.g2 && typeof bindGrade2==='function'){
     host.classList.remove('hidden');
     if(!bindGrade2(host, item.g2)) host.classList.add('hidden');

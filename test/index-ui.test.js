@@ -226,5 +226,8 @@ test('index.html provides reciprocal footer navigation and focus-visible styling
   assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="landing\.html"[\s\S]*אודות[\s\S]*<\/footer>/);
   assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="frequency\.html"[\s\S]*מעבדת תדרים[\s\S]*<\/footer>/);
   assert.match(indexHtml, /footer a:focus-visible\{outline:3px solid var\(--purple\);outline-offset:2px\}/);
+  assert.ok(indexHtml.includes("item.widget==='g1'"), 'renderWidget wires g1');
+  assert.ok(indexHtml.includes('bindGrade1(host, item.g1)'), 'renderWidget calls bindGrade1');
 });
+
 
