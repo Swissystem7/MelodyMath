@@ -28,6 +28,22 @@
     return null;
   }
 
+  function titleSlugForId(title) {
+    const folded = title.toLowerCase().replace(/\s+/g, '');
+    const ascii = folded.replace(/[^a-z0-9]/g, '');
+    if (ascii) return ascii;
+    let h = 2166136261;
+    for (let i = 0; i < folded.length; i++) {
+      h ^= folded.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0).toString(36);
+  }
+
+  function assignmentIdFromTitleAndTime(title, assignedAt) {
+    return ('a' + String(assignedAt) + titleSlugForId(title)).slice(0, 40);
+  }
+
   function normalizeAssignment(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     const title = String(src.title == null ? (src.label == null ? '' : src.label) : src.title)
@@ -41,8 +57,7 @@
     const assignedRaw = timeOrNull(src.assignedAt);
     const assignedAt = assignedRaw == null ? Date.now() : assignedRaw;
     const completedAt = completed ? timeOrNull(src.completedAt) : null;
-    const id = idOrNull(src.id)
-      || ('a' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36));
+    const id = idOrNull(src.id) || assignmentIdFromTitleAndTime(title, assignedAt);
     return {
       id: id,
       title: title,
