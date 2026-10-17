@@ -145,7 +145,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 @keyframes pulseHint{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(105,70,232,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,0)}}
 .pulse-hint{animation:pulseHint 2s infinite ease-in-out}
 @media (prefers-reduced-motion:reduce){.pulse-hint{animation:none}}
-</style></head><body>
+</style><link rel="stylesheet" href="src/sefirot.css"></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
@@ -2516,4 +2516,4 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
   const tabRem = $('tab-remediation');
   if (tabRem && typeof activateHomeTab === 'function') activateHomeTab(tabRem);
 };
-</script></body></html>
+</script><script src="src/lib/learnerPlanView.js"></script></body></html>
