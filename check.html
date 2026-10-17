@@ -34,6 +34,9 @@
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
+  footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px}
+  footer a{color:var(--purple);text-decoration:none;font-weight:700;margin:0 6px}
+  footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -60,7 +63,7 @@
   <section class="card hidden" id="quiz" aria-labelledby="quizProgress">
     <h2 id="quizProgress" aria-live="polite"></h2>
     <p class="prompt" id="quizPrompt"></p>
-    <div class="choices" id="quizChoices"></div>
+    <div class="choices" id="quizChoices" role="group" aria-label="אפשרויות תשובה"></div>
     <div class="row" style="margin-top:16px">
       <button type="button" id="quizCancel" class="secondary">ביטול הבדיקה וחזרה</button>
     </div>
@@ -73,6 +76,11 @@
     <p class="disclaimer" id="disclaimer"></p>
   </section>
 </main>
+<footer>
+  <div class="wrap">
+    MelodyMath · בדיקה לפני ואחרי יחידה · <a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a>
+  </div>
+</footer>
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/unitCheck.js"></script>
@@ -137,6 +145,7 @@
     $('setupStatus').textContent = run.name + ' סיים/ה: ' + run.correct + ' מתוך ' + run.items.length + '. נשמר במכשיר הזה.';
     run = null;
     renderReport();
+    if ($('showReport')) $('showReport').focus();
   }
 
   function cancelQuiz() {
@@ -148,6 +157,7 @@
     $('report').classList.remove('hidden');
     $('setupStatus').textContent = 'הבדיקה בוטלה.';
     run = null;
+    if ($('startPre')) $('startPre').focus();
   }
 
   function cell(check) {
