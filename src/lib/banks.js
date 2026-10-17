@@ -210,6 +210,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g1: extra.g1,
       g2: extra.g2,
       g3: extra.g3,
       typed: extra.typed,
@@ -1534,6 +1535,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;
