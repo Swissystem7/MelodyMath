@@ -25,6 +25,18 @@ test('assignTask adds a task to the student list and it appears in student data'
   assert.deepEqual(store.listAssignments('שילוב', 'נועה', ls), student.assignments);
 });
 
+test('createAssignment builds a stable id from title and assignedAt', () => {
+  assert.deepEqual(assignment.createAssignment({ title: 'Test', assignedAt: 1234567890 }), {
+    id: 'a1234567890test',
+    title: 'Test',
+    skill: '',
+    pack: '',
+    assignedAt: 1234567890,
+    completed: false,
+    completedAt: null,
+  });
+});
+
 test('assignTask refuses a missing student or an empty title', () => {
   const ls = memory();
   store.upsertStudent('כ', 'יוסי', ls);
