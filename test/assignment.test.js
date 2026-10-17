@@ -33,6 +33,18 @@ test('assignTask refuses a missing student or an empty title', () => {
   assert.equal(store.listAssignments('כ', 'יוסי', ls).length, 0);
 });
 
+test('createAssignment builds a stable id from title and assignedAt', () => {
+  assert.deepEqual(assignment.createAssignment({ title: 'Test', assignedAt: 1234567890 }), {
+    id: 'a1234567890test',
+    title: 'Test',
+    skill: '',
+    pack: '',
+    assignedAt: 1234567890,
+    completed: false,
+    completedAt: null,
+  });
+});
+
 test('assignments survive a roster reload from storage', () => {
   const ls = memory();
   store.upsertStudent('א', 'דנה', ls);
