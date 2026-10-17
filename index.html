@@ -394,16 +394,19 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
       <button type="button" id="ppStartPre" class="secondary">בדיקת פתיחה</button>
       <button type="button" id="ppStartPost" class="secondary">בדיקת סיום</button>
       <button type="button" id="ppRefresh" class="secondary">רענון</button>
-      <span id="ppMsg" class="who-status"></span>
+      <span id="ppMsg" class="who-status" role="status" aria-live="polite"></span>
     </div>
     <div id="ppRun" class="hidden no-print">
       <p class="topline"><span id="ppProgress"></span><span id="ppWhich"></span></p>
       <p class="prompt" id="ppPrompt"></p>
       <div id="ppBar"></div>
-      <div class="choices" id="ppChoices" role="group" aria-label="אפשרויות תשובה"></div>
+      <div class="choices" id="ppChoices" role="group" aria-label="אפשרויות תשובה לבדיקה"></div>
       <p class="note">אין משוב בזמן הבדיקה — הדוח מופיע בסוף.</p>
       <p class="sr-only" id="ppLive" aria-live="polite"></p>
-      <button type="button" id="ppStop" class="secondary">עצירת הבדיקה</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <button type="button" id="ppStop" class="secondary">סיום ושמירה</button>
+        <button type="button" id="ppCancel" class="secondary">ביטול וחזרה</button>
+      </div>
     </div>
     <div id="ppReport" aria-live="polite"></div>
   </div>
@@ -762,10 +765,11 @@ Object.assign(KIND_HE,kindLabels());
 let ppState=null;
 function ppUnitId(){const sel=$('ppUnit');const id=sel&&sel.value?sel.value:unitIds()[0];return unitById(id)?id:unitIds()[0]}
 function ppFillUnits(){const sel=$('ppUnit');if(!sel)return;sel.innerHTML=unitIds().map(id=>`<option value="${escapeHtml(id)}">${escapeHtml(unitById(id).title)} · כיתה ${escapeHtml(unitById(id).grade)}׳</option>`).join('')}
-function ppHalt(msg){if(ppState){endSession(who.classCode,who.name,ppState.sess.id);ppState=null}show('ppRun',false);if($('ppMsg'))$('ppMsg').textContent=msg||''}
-function ppStart(phase){const box=$('ppMsg');if(!who.name){if(box)box.textContent='בחרו קוד כיתה ושם תלמיד/ה בסרגל למעלה, ואז «שמירה במכשיר».';return}const unitId=ppUnitId();const items=itemsForPhase(unitId,phase);if(!items.length)return;ppHalt('');if(openSess)endTeacherSession();const sess=startSession(who.classCode,who.name,checkKind(unitId,phase));if(!sess){if(box)box.textContent='לא הצלחנו לפתוח רישום בטאבלט הזה.';return}ppState={unitId:unitId,phase:phase,items:items,i:0,sess:sess};if(box)box.textContent='';show('ppRun',true);ppRender()}
-function ppRender(){const s=ppState;if(!s||!$('ppPrompt')||!$('ppChoices'))return;const it=s.items[s.i];$('ppProgress').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}`;$('ppWhich').textContent=`${phaseLabel(s.phase)} · ${unitById(s.unitId).title}`;setMath($('ppPrompt'),it.prompt);$('ppBar').innerHTML=renderCheckBarHtml(it.eighths);$('ppChoices').innerHTML=it.choices.map((c,n)=>`<button type="button" class="choice" data-c="${n}"><bdi dir="ltr">${escapeHtml(String(c))}</bdi></button>`).join('');$('ppChoices').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ppPick(it.choices[Number(b.dataset.c)]));$('ppLive').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}: ${it.prompt}`}
-function ppPick(given){const s=ppState;if(!s)return;const it=s.items[s.i];addItem(who.classCode,who.name,s.sess.id,{skill:it.skill,prompt:it.prompt,answer:it.answer,given:given,correct:checkItemCorrect(it,given)});s.i+=1;if(s.i<s.items.length){ppRender();return}ppHalt('הבדיקה נרשמה בטאבלט הזה.');ppRenderReport();renderTeacherReport();renderClassBoard()}
+function ppHalt(msg,returnFocusBtn){if(ppState){endSession(who.classCode,who.name,ppState.sess.id);ppState=null}show('ppRun',false);if($('ppMsg'))$('ppMsg').textContent=msg||'';if(returnFocusBtn&&typeof returnFocusBtn.focus==='function')returnFocusBtn.focus()}
+function ppCancelTest(){if(ppState){endSession(who.classCode,who.name,ppState.sess.id);ppState=null}show('ppRun',false);if($('ppMsg'))$('ppMsg').textContent='הבדיקה בוטלה.';if($('ppStartPre')&&typeof $('ppStartPre').focus==='function')$('ppStartPre').focus()}
+function ppStart(phase){const box=$('ppMsg');if(!who.name){if(box)box.textContent='בחרו קוד כיתה ושם תלמיד/ה בסרגל למעלה, ואז «שמירה במכשיר».';return}const unitId=ppUnitId();const items=itemsForPhase(unitId,phase);if(!items||!items.length){if(box)box.textContent='אין שאלות זמינות ליחידה זו.';return}ppHalt('');if(openSess)endTeacherSession();const sess=startSession(who.classCode,who.name,checkKind(unitId,phase));if(!sess){if(box)box.textContent='לא הצלחנו לפתוח רישום בטאבלט הזה.';return}ppState={unitId:unitId,phase:phase,items:items,i:0,sess:sess};if(box)box.textContent='';show('ppRun',true);ppRender()}
+function ppRender(){const s=ppState;if(!s||!$('ppPrompt')||!$('ppChoices'))return;const it=s.items[s.i];$('ppProgress').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}`;$('ppWhich').textContent=`${phaseLabel(s.phase)} · ${unitById(s.unitId).title}`;setMath($('ppPrompt'),it.prompt);$('ppBar').innerHTML=renderCheckBarHtml(it.eighths);$('ppChoices').innerHTML=it.choices.map((c,n)=>`<button type="button" class="choice" data-c="${n}" aria-label="תשובה: ${escapeHtml(String(c))}"><bdi dir="ltr">${escapeHtml(String(c))}</bdi></button>`).join('');$('ppChoices').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ppPick(it.choices[Number(b.dataset.c)]));$('ppLive').textContent=`שאלה ${s.i+1} מתוך ${s.items.length}: ${it.prompt}`;const firstChoice=$('ppChoices').firstElementChild;if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus()}
+function ppPick(given){const s=ppState;if(!s)return;const it=s.items[s.i];addItem(who.classCode,who.name,s.sess.id,{skill:it.skill,prompt:it.prompt,answer:it.answer,given:given,correct:checkItemCorrect(it,given)});s.i+=1;if(s.i<s.items.length){ppRender();return}ppHalt('הבדיקה נרשמה בטאבלט הזה.',$('ppRefresh'));ppRenderReport();renderTeacherReport();renderClassBoard()}
 function ppRenderReport(){const box=$('ppReport');if(!box)return;box.innerHTML=renderPrePostHtml(classPrePost(loadRoster(who.classCode||''),ppUnitId()))}
 function renderParentLetter(){const box=$('parentLetter');if(!box)return;if(!who.name){box.innerHTML='<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';box.classList.remove('hidden');return}const student=getStudent(who.classCode,who.name);const letter=buildParentNote(student,{classCode:who.classCode,observation:$('teacherNote')?$('teacherNote').value:''});box.innerHTML=renderParentNoteHtml(letter);box.classList.remove('hidden')}
 function saveTeacherNote(){if(!who.name){$('noteMsg').textContent='בחרו תלמיד/ה קודם.';return}const text=$('teacherNote')?$('teacherNote').value:'';const note=addNote(who.classCode,who.name,text);$('noteMsg').textContent=note?'ההערה נשמרה במכשיר.':'צריך טקסט קצר.';if(note)$('teacherNote').value='';renderParentLetter()}
@@ -779,7 +783,8 @@ if($('ppUnit'))$('ppUnit').onchange=()=>{ppHalt('');ppRenderReport()};
 if($('ppStartPre'))$('ppStartPre').onclick=()=>ppStart('pre');
 if($('ppStartPost'))$('ppStartPost').onclick=()=>ppStart('post');
 if($('ppRefresh'))$('ppRefresh').onclick=ppRenderReport;
-if($('ppStop'))$('ppStop').onclick=()=>ppHalt('הבדיקה הופסקה. התשובות שנרשמו עד כאן נשמרו.');
+if($('ppStop'))$('ppStop').onclick=()=>ppHalt('הבדיקה הופסקה. התשובות שנרשמו עד כאן נשמרו.',$('ppStartPre'));
+if($('ppCancel'))$('ppCancel').onclick=ppCancelTest;
 // ---- מערכי שיעור (pedagogy.js) לפי כיתה ונושא מהתוכנית (curriculum.js) ----
 function paintLessonTopics(){const g=$('lessonGrade'),t=$('lessonTopic');if(!g||!t||typeof plansFor!=='function')return;const rows=typeof rowsForGrade==='function'?rowsForGrade(g.value):[];const has=new Set(plansFor(g.value,'').map(p=>p.curriculumTopic));t.innerHTML='<option value="">כל הנושאים שיש להם מערך</option>'+rows.map(r=>'<option value="'+escapeHtml(r.topic)+'">'+escapeHtml(r.topic)+(has.has(r.topic)?' · יש מערך':'')+'</option>').join('');renderLessonPlans()}
 function renderLessonPlans(){const g=$('lessonGrade'),t=$('lessonTopic'),box=$('lessonPlans');if(!g||!t||!box||typeof plansFor!=='function')return;box.innerHTML=renderLessonPlansHtml(plansFor(g.value,t.value))}
