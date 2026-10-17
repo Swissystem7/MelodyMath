@@ -59,4 +59,56 @@ const foundPlan = lessonPlanForTopic(testTopicId);
 assert.ok(foundPlan, 'lessonPlanForTopic should find a plan for the given topicId');
 assert.equal(foundPlan.id, testTopicId, 'The returned plan should match the requested topicId');
 
+test('buildStudentStudyPlan is one topic, and defers to buildLearnerPlan when it is loaded', () => {
+  ['א', 'ב', 'ג'].forEach((grade) => {
+    const plan = ped.buildStudentStudyPlan({ name: 'נועה' }, grade);
+    assert.equal(plan.source, 'curriculum');
+    assert.equal(plan.steps.length, 1, grade);
+    assert.equal(plan.steps[0].order, 1);
+    assert.equal(plan.grade, grade);
+    assert.equal(plan.studentName, 'נועה');
+    assert.match(plan.weeklyGoalHe, /3 מפגשים/);
+    const html = ped.renderStudentStudyPlanHtml(plan);
+    assert.match(html, /תוכנית אחת/);
+    assert.match(html, /dir="rtl"/);
+    assert.doesNotMatch(html, /שליטה|יעילות|טיפול/);
+  });
+  assert.match(ped.buildStudentStudyPlan({}, 'א').steps[0].curriculumTopic, /ספירה עד 100/);
+  const bad = ped.buildStudentStudyPlan({}, 'constructor');
+  assert.equal(bad.steps.length, 0);
+  assert.equal(bad.grade, '');
+
+  const seen = [];
+  globalThis.buildLearnerPlan = function (input) {
+    seen.push(input);
+    return {
+      ok: true, branch: 'weak', grade: input.grade, topic: 'לוח כפל',
+      adultLine: 'הקצב: 3 מפגשים של 8 דקות השבוע.', paceExpected: 3,
+      childLine: 'היום: לוח כפל.', disclaimer: 'ספירה במכשיר הזה בלבד.',
+    };
+  };
+  globalThis.renderLearnerPlanHtml = function (plan) {
+    return '<article class="mm-plan" data-topic="' + plan.topic + '" dir="rtl">תוכנית אחת</article>';
+  };
+  try {
+    const delegated = ped.buildStudentStudyPlan({
+      name: 'נועה',
+      perSkill: { multiplication: { total: 5, correct: 1 } },
+    }, 'ג');
+    assert.equal(delegated.source, 'learnerPlan');
+    assert.equal(delegated.steps.length, 1);
+    assert.equal(delegated.steps[0].curriculumTopic, 'לוח כפל');
+    assert.equal(delegated.steps[0].weeklyTargetItems, 3);
+    assert.ok(Array.isArray(seen[0].perSkill));
+    assert.equal(seen[0].perSkill[0].skill, 'multiplication');
+    assert.equal(seen[0].perSkill[0].total, 5);
+    const html = ped.renderStudentStudyPlanHtml(delegated);
+    assert.match(html, /data-topic="לוח כפל"/);
+    assert.doesNotMatch(html, /שליטה|יעילות/);
+  } finally {
+    delete globalThis.buildLearnerPlan;
+    delete globalThis.renderLearnerPlanHtml;
+  }
+});
+
 console.log('All pedagogy tests passed!');
