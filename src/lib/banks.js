@@ -207,6 +207,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g1: extra.g1,
       g2: extra.g2,
       g3: extra.g3,
       typed: extra.typed,
@@ -1225,7 +1226,7 @@
   // 3. Patterns AB / AAB / ABC (melody & visual)
   // 4. Number line as scale (steps & octave jumps)
   RAW.push(
-    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1 }),
+    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1, widget: 'g1', g1: { kind: 'beats', from: 2, step: 2, accents: 4 } }),
     I('א', 'counting', 'מקצב דילוגי 2: 8, 10, 12, ?', 14, 'הפעימה הבאה היא עוד 2', { standard: ST.SKIP2, level: 1 }),
     I('א', 'counting', 'מקצב דילוגי 2: 14, 16, 18, ?', 20, 'עוד 2 מגיעים ל־20', { standard: ST.SKIP2, level: 2 }),
     I('א', 'counting', 'מקצב דילוגי 2 מ־50: 52, 54, 56, ?', 58, 'מוסיפים 2 לפעימה', { standard: ST.SKIP2, level: 2 }),
@@ -1238,7 +1239,7 @@
     I('א', 'counting', 'מקצב עשרות: 70, 80, 90, ?', 100, 'העשרת שמגיעה למאה', { standard: ST.GROUP10, level: 2 }),
     I('א', 'counting', 'ספירה אחורה במקצב: 50, 48, 46, ?', 44, 'דילוג 2 אחורה', { standard: ST.SKIP2, level: 3 }),
 
-    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1, widget: 'g1', g1: { kind: 'chart100', number: 34 } }),
     I('א', 'counting', 'בלוח המאה: 2 עשרות ו־5 יחידות — איזה מספר נשמע?', 25, '20 ועוד 5', { standard: ST.CHART100, level: 1 }),
     I('א', 'counting', 'בלוח המאה: 4 עשרות ו־2 יחידות — איזה מספר זה?', 42, '40 ועוד 2', { standard: ST.CHART100, level: 1 }),
     I('א', 'counting', 'בלוח המאה: 5 עשרות ו־0 יחידות — איזה מספר נשמע?', 50, '5 עשרות שלמות ללא יחידות', { standard: ST.CHART100, level: 1 }),
@@ -1251,7 +1252,7 @@
     I('א', 'counting', 'בלוח המאה: 9 עשרות ו־9 יחידות — איזה מספר זה?', 99, '90 ועוד 9', { standard: ST.CHART100, level: 3 }),
     I('א', 'counting', 'בלוח המאה: 10 עשרות ו־0 יחידות — איזה מספר נשמע?', 100, '10 עשרות הן מאה שלמה', { standard: ST.CHART100, level: 3 }),
 
-    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1 }),
+    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1, widget: 'g1', g1: { kind: 'pattern', type: 'AB', length: 6 } }),
     I('א', 'counting', 'סדרה צורנית AB: ⭐ 🌙 ⭐ 🌙 — מה הבא? (1=⭐, 2=🌙)', 1, 'הדגם חוזר לכוכב', { standard: ST.PATTERN, level: 1 }),
     I('א', 'counting', 'דגם מוזיקלי AB: גבוה, נמוך, גבוה, נמוך — איזה צליל הבא? (1=גבוה, 2=נמוך)', 1, 'הצליל הבא הוא גבוה', { standard: ST.PATTERN, level: 1 }),
     I('א', 'counting', 'דגם AAB: 🥁 🥁 🔔 🥁 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי שני תופים בא פעמון', { standard: ST.PATTERN, level: 2 }),
@@ -1478,6 +1479,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;
