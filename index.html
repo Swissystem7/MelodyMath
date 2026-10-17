@@ -202,7 +202,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag"></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button></div>
 <div id="rmReport" class="card hidden"><span class="tag">דוח פערים להורה</span><h2>מה מצאנו</h2><div id="rmStats" class="session"></div><p id="rmSummary"></p><button type="button" id="rmPractice" class="primary hidden">מתחילים תרגול אישי</button><button type="button" id="rmRestart" class="secondary hidden">אבחון חדש</button></div>
 <div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag"></p><h2 id="rmPlanPrompt" class="prompt"></h2><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button></div></section>
-<section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" style="display:flex;gap:6px;flex-wrap:wrap;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:44px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;"><h4 id="stepTitle" style="margin:0;font-size:1.15rem;color:var(--purple);"></h4><button type="button" id="stepSpeakBtn" class="secondary" style="width:auto;min-height:44px;padding:4px 12px;font-size:0.85rem;" aria-label="הקראת השלב בקול">🔊 הקשב</button></div><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
+<section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" role="group" aria-label="סינון שיעורים לפי כיתה" style="display:flex;gap:6px;flex-wrap:wrap;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:44px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" role="navigation" aria-label="שלבי השיעור" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;"><h4 id="stepTitle" style="margin:0;font-size:1.15rem;color:var(--purple);"></h4><button type="button" id="stepSpeakBtn" class="secondary" style="width:auto;min-height:44px;padding:4px 12px;font-size:0.85rem;" aria-label="הקראת השלב בקול">🔊 הקשב</button></div><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" role="group" aria-label="אפשרויות תשובה" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
 <section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">לא תכנית א׳–ד׳ · מרווחים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחס מרווחים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
 <div id="quiz" class="card hidden"><div class="topline"><span id="counter"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button></div>
 <div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button type="button" id="again" class="primary">אימון חדש</button></div></section>
@@ -1115,6 +1115,8 @@ let fractionDivUnit = '1/8';
 function renderLessonsGradeFilter() {
   const box = $('lessonsGradeFilter');
   if (!box) return;
+  box.setAttribute('role', 'group');
+  box.setAttribute('aria-label', 'סינון שיעורים לפי כיתה');
   const filters = [
     { id: 'all', label: 'הכל' },
     { id: 'א', label: 'כיתה א׳' },
@@ -1126,7 +1128,7 @@ function renderLessonsGradeFilter() {
   ];
   box.innerHTML = filters.map(f => {
     const on = f.id === lessonGradeFilter;
-    return `<button type="button" class="tab ${on ? 'active' : ''}" data-lesson-filter="${f.id}" style="padding:4px 12px;font-size:0.85rem;min-height:44px;">${f.label}</button>`;
+    return `<button type="button" class="tab ${on ? 'active' : ''}" data-lesson-filter="${f.id}" aria-pressed="${on}" style="padding:4px 12px;font-size:0.85rem;min-height:44px;">${f.label}</button>`;
   }).join('');
   box.querySelectorAll('button').forEach(btn => {
     btn.onclick = () => {
@@ -1155,6 +1157,11 @@ function renderLessonsUI() {
   let list = getAllLessons();
   if (lessonGradeFilter !== 'all') {
     list = list.filter(l => l.grade === lessonGradeFilter);
+  }
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="note" role="status" style="grid-column:1/-1;text-align:center;padding:32px 16px;font-size:1.05rem;">אין עדיין שיעורים מודרכים לכיתה זו.</div>';
+    return;
   }
 
   grid.innerHTML = list.map(l => `
@@ -1203,27 +1210,36 @@ function openLesson(id) {
   $('lessonsGrid').classList.add('hidden');
   $('activeLessonCard').classList.remove('hidden');
   renderActiveStep();
+  const closeBtn = $('lessonCloseBtn');
+  if (closeBtn) closeBtn.focus();
 }
 
 function closeLesson() {
   if (typeof stopAllAudio === 'function') stopAllAudio();
   cancelStepSpeech();
   clearStepPulseHint();
+  const prevLessonId = activeLessonId;
   activeLessonId = null;
   activeStepIndex = 0;
   $('activeLessonCard').classList.add('hidden');
   $('lessonsGrid').classList.remove('hidden');
   renderLessonsUI();
+  if (prevLessonId) {
+    const prevCard = document.querySelector(`.lesson-card[data-lesson-id="${prevLessonId}"]`);
+    if (prevCard) prevCard.focus();
+  }
 }
 
 function renderStepperPills() {
   const stepper = $('lessonStepper');
   if (!stepper || !activeLessonId) return;
+  stepper.setAttribute('role', 'navigation');
+  stepper.setAttribute('aria-label', 'שלבי השיעור');
   const l = getLessonById(activeLessonId);
   if (!l) return;
   const stepNames = ['1. מושג', '2. הדגמה', '3. התנסות', '4. בדיקה'];
   stepper.innerHTML = l.steps.map((_, idx) => `
-    <button type="button" class="step-pill ${idx === activeStepIndex ? 'active' : ''} ${idx < activeStepIndex ? 'done' : ''}" data-step-idx="${idx}">
+    <button type="button" class="step-pill ${idx === activeStepIndex ? 'active' : ''} ${idx < activeStepIndex ? 'done' : ''}" data-step-idx="${idx}" aria-current="${idx === activeStepIndex ? 'step' : 'false'}" aria-label="${stepNames[idx] || ('שלב ' + (idx + 1))}">
       ${stepNames[idx] || ('שלב ' + (idx + 1))}
     </button>
   `).join('');
@@ -1314,6 +1330,9 @@ function renderStepQuiz(lesson, step) {
   const feed = $('stepQuizFeedback');
   if (!choicesBox || !feed) return;
   feed.classList.add('hidden');
+  feed.innerHTML = '';
+  choicesBox.setAttribute('role', 'group');
+  choicesBox.setAttribute('aria-label', 'אפשרויות תשובה');
 
   choicesBox.innerHTML = step.options.map((opt, idx) => `
     <button type="button" class="secondary quiz-choice" data-choice-idx="${idx}" style="padding:12px;font-size:1.05rem;font-weight:bold;text-align:center;">
@@ -1339,8 +1358,28 @@ function renderStepQuiz(lesson, step) {
       });
       feed.className = `feedback ${res.correct ? 'good' : 'bad'}`;
       feed.innerHTML = `<strong>${res.correct ? 'מעולה! תשובה מדויקת! 🎵' : 'לא בדיוק הפעם.'}</strong><div>${escapeHtml(res.explanation)}</div>`;
+      if (!res.correct) {
+        feed.innerHTML += `<div style="margin-top:10px;"><button type="button" id="stepQuizRetryBtn" class="secondary" style="width:auto;min-height:44px;padding:6px 16px;">🔄 נסו שוב</button></div>`;
+      }
       feed.classList.remove('hidden');
-      if (res.correct && typeof playHarmonicReward === 'function') playHarmonicReward();
+
+      if (res.correct) {
+        if (typeof playHarmonicReward === 'function') playHarmonicReward();
+        const nextActionBtn = $('stepPracticeBtn') && !$('stepPracticeBtn').classList.contains('hidden')
+          ? $('stepPracticeBtn')
+          : $('stepNextBtn');
+        if (nextActionBtn) nextActionBtn.focus();
+      } else {
+        const retryBtn = $('stepQuizRetryBtn');
+        if (retryBtn) {
+          retryBtn.onclick = () => {
+            renderStepQuiz(lesson, step);
+            const firstChoice = choicesBox.querySelector('.quiz-choice');
+            if (firstChoice) firstChoice.focus();
+          };
+          retryBtn.focus();
+        }
+      }
     };
   });
 }
