@@ -119,7 +119,7 @@
       if (bar) bar.appendChild(btn);
     }
     function hook(fnName) {
-      const fn = root[fnName];
+      const fn = globalThis[fnName];
       if (typeof fn !== 'function' || fn._mmPlan) return;
       function wrapped() {
         const out = fn.apply(this, arguments);
@@ -127,7 +127,7 @@
         return out;
       }
       wrapped._mmPlan = true;
-      root[fnName] = wrapped;
+      globalThis[fnName] = wrapped;
     }
     ['saveGrade', 'renderTeacherReport', 'renderClassBoard', 'saveWhoFromForm'].forEach(hook);
     const rem = document.getElementById('remediation');
