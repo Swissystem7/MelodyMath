@@ -47,7 +47,7 @@
   .modelabel{font-size:.82rem; color:var(--muted); margin:-6px 0 14px;}
   .modelabel b{color:var(--indigo-dark);}
   .answer{display:flex; gap:10px; align-items:stretch;}
-  input[type=text]{flex:1; min-width:0; padding:14px; font-size:1.2rem; border:1.5px solid var(--line);
+  input[type=text]{flex:1; min-width:0; min-height:44px; padding:14px; font-size:1.2rem; border:1.5px solid var(--line);
     border-radius:14px; text-align:center; font-family:inherit;}
   input[type=text]:focus{border-color:var(--indigo);}
   .feedback{margin-top:16px; padding:14px 16px; border-radius:14px; font-size:1rem; display:none;}
@@ -63,7 +63,7 @@
   footer{text-align:center; color:var(--muted); font-size:.9rem; padding:20px 0 8px;}
   footer a{color:var(--indigo); text-decoration:none; font-weight:600; margin:0 6px;}
   .hint{font-size:.85rem; color:var(--muted); margin-top:10px;}
-  .btn:focus-visible,.tab:focus-visible,input:focus-visible,.mm-skip:focus-visible{outline:3px solid var(--indigo);outline-offset:2px}
+  .btn:focus-visible,.tab:focus-visible,input:focus-visible,footer a:focus-visible,.mm-skip:focus-visible{outline:3px solid var(--indigo);outline-offset:2px}
   .tab{min-height:44px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#1e293b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
@@ -126,6 +126,7 @@
   </div>
 
   <footer>
+    <div><a href="index.html">חזרה לתרגול</a> · <a href="functions.html">שומעים פונקציה</a> · <a href="landing.html">אודות</a></div>
     <div style="margin-top:8px; font-size:.8rem;">שומעים פונקציה · MelodyMath</div>
   </footer>
 </main>
@@ -260,11 +261,15 @@ function check(){
   fb.className='feedback '+(ok?'ok':'bad');
   fb.innerHTML = (ok?'✅ נכון! ':`❌ לא מדויק. התשובה: <b>${fmt(prob.expected)}</b> `)
     + solution();
+  const nextBtn=document.getElementById('nextBtn');
+  if(nextBtn) nextBtn.focus();
 }
 
 function flash(msg){
   const fb=document.getElementById('feedback');
   fb.className='feedback bad'; fb.textContent=msg;
+  const ans=document.getElementById('ans');
+  if(ans) ans.focus();
 }
 
 function solution(){
@@ -336,10 +341,16 @@ document.getElementById('tabs').addEventListener('click',e=>{
   b.classList.add('on'); b.setAttribute('aria-selected','true'); b.tabIndex=0; mode=b.dataset.type;
   stopCurOsc();
   prob=gen(); render();
+  const ans=document.getElementById('ans');
+  if(ans) ans.focus();
 });
 document.getElementById('checkBtn').addEventListener('click',check);
 document.getElementById('ans').addEventListener('keydown',e=>{ if(e.key==='Enter')check(); });
-document.getElementById('nextBtn').addEventListener('click',()=>{ stopCurOsc(); prob=gen(); render(); });
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  stopCurOsc(); prob=gen(); render();
+  const ans=document.getElementById('ans');
+  if(ans) ans.focus();
+});
 document.getElementById('playBtn').addEventListener('click',playSweep);
 document.getElementById('linMode').addEventListener('change',updateModeLabel);
 document.getElementById('descBtn').addEventListener('click',announceModel);
