@@ -20,6 +20,7 @@
   .row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
   button{font:inherit;min-height:44px;min-width:44px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
   button.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+  button[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff}
   input[type=text]{font:inherit;min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);width:9rem}
   bdi,.num{unicode-bidi:isolate;direction:ltr}
   .hz{font-variant-numeric:tabular-nums;font-weight:700}
@@ -40,11 +41,15 @@
   .replay{position:sticky;bottom:8px;display:flex;gap:10px;flex-wrap:wrap;background:#f7f4ffe6;padding:8px 0}
   .live{margin:0;font-weight:700}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px}
+  footer a{color:var(--purple);text-decoration:none;font-weight:700;margin:0 6px}
+  footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+<link rel="stylesheet" href="src/sefirot.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
@@ -112,6 +117,11 @@
     <button type="button" id="again" class="primary">▶ השמע שוב</button>
     <p class="live" id="live" role="status" aria-live="polite">מה התנגן: עוד לא התנגן כלום.</p>
   </div>
+
+  <footer>
+    <div><a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">כיסוי התוכנית</a> · <a href="landing.html">אודות</a></div>
+    <div style="margin-top:8px;font-size:.85rem">מעבדת תדרים · MelodyMath</div>
+  </footer>
 </main>
 <script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/access.js"></script>
@@ -152,13 +162,24 @@
   $('octAb').addEventListener('click', function () {
     compare(BASE, BASE * 2, 'קודם ' + hzText(BASE) + ', אחר כך ' + hzText(BASE * 2) + ' — אוקטבה.');
   });
+  $('octAnswer').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('octCheck').click();
+    }
+  });
   $('octCheck').addEventListener('click', function () {
     const el = $('octFeedback');
-    const right = ratioMatches($('octAnswer').value, 2, 1);
+    const input = $('octAnswer');
+    const right = ratioMatches(input.value, 2, 1);
     el.className = 'feedback ' + (right ? 'ok' : 'no');
     el.textContent = right
       ? 'נכון. 440 חלקי 220 הוא 2, כלומר היחס 2:1 — אוקטבה.'
       : 'לא. חלקו 440 ב־220 וכתבו את התוצאה (אפשר גם בצורת יחס).';
+    if (!right && input) {
+      if (typeof input.focus === 'function') input.focus();
+      if (typeof input.select === 'function') input.select();
+    }
   });
 
   // ---- 2. fifth and fourth ----
