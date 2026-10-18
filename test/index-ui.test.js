@@ -95,6 +95,20 @@ test('index.html provides Quick QR Code modal and WhatsApp share for classrooms'
   assert.match(indexHtml, /icons\/qr-code\.svg/);
 });
 
+test('qrModal conforms to WAI-ARIA dialog accessibility pattern and touch target guidelines', () => {
+  assert.match(indexHtml, /id="qrShareBtn"[^>]*aria-haspopup="dialog"/);
+  assert.match(indexHtml, /id="qrShareBtn"[^>]*aria-controls="qrModal"/);
+  assert.match(indexHtml, /id="qrShareBtn"[^>]*aria-expanded="false"/);
+  assert.match(indexHtml, /\.modal-close\s*\{[^}]*min-height:\s*44px/);
+  assert.match(indexHtml, /\.modal-close\s*\{[^}]*min-width:\s*44px/);
+  assert.match(indexHtml, /\.modal-close:focus-visible/);
+  assert.match(indexHtml, /function openQrModal\(\)/);
+  assert.match(indexHtml, /function closeQrModal\(\)/);
+  assert.match(indexHtml, /openQrModal[\s\S]*?qrCloseBtn[\s\S]*?focus\(\)/);
+  assert.match(indexHtml, /closeQrModal[\s\S]*?qrShareBtn[\s\S]*?focus\(\)/);
+  assert.match(indexHtml, /e\.key\s*===\s*'Escape'/);
+});
+
 test('teacher tab provides a printable RAMA failure-point diagnostic card', () => {
   assert.match(indexHtml, /id="ramaCard"/);
   assert.match(indexHtml, /id="ramaMake"/);
@@ -179,3 +193,41 @@ test('division lesson exposes an equal-groups rhythm explorer', () => {
   assert.match(indexHtml, /playGroupedBeats/);
   assert.match(indexHtml, /\{ id: 'ג', label: 'כיתה ג׳' \}/);
 });
+
+test('activateHomeTab isolates lifecycle: pauses rhythm game and cancels live speech/activities on tab switch', () => {
+  assert.match(indexHtml, /btn\.dataset\.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive/);
+  assert.match(indexHtml, /btn\.dataset\.tab!=='lessons'/);
+  assert.match(indexHtml, /btn\.dataset\.tab!=='classMode'/);
+  assert.match(indexHtml, /btn\.dataset\.tab!=='beatMode'/);
+});
+
+test('whoBar and teacherNote support Enter key submission', () => {
+  assert.match(indexHtml, /\$\('studentName'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveWhoFromForm\(\)\}/);
+  assert.match(indexHtml, /\$\('classCode'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveWhoFromForm\(\)\}/);
+  assert.match(indexHtml, /\$\('teacherNote'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)saveTeacherNote\(\)\}/);
+});
+
+test('classChoices and beatChoices use accessible WAI-ARIA group semantics and autofocus choices', () => {
+  assert.match(indexHtml, /id="classChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /id="beatChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /nextClassQuestion[\s\S]*?firstChoice\.focus\(\)/);
+  assert.match(indexHtml, /nextBeatQuestion[\s\S]*?firstBeatChoice\.focus\(\)/);
+});
+
+test('quiz and remediation advance focus to next button upon checking answers', () => {
+  assert.match(indexHtml, /function check\(\)[\s\S]*?\('next'\)\.focus\(\)/);
+  assert.match(indexHtml, /function rmCheck\(\)[\s\S]*?\('rmNext'\)\.focus\(\)/);
+  assert.match(indexHtml, /function rpCheck\(\)[\s\S]*?\('rmPlanNext'\)\.focus\(\)/);
+});
+
+test('index.html provides reciprocal footer navigation and focus-visible styling', () => {
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="curriculum\.html"[\s\S]*כיסוי תוכנית[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="offer\.html"[\s\S]*ניסוי כיתתי[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="landing\.html"[\s\S]*אודות[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /<footer class="no-print">[\s\S]*href="frequency\.html"[\s\S]*מעבדת תדרים[\s\S]*<\/footer>/);
+  assert.match(indexHtml, /footer a:focus-visible\{outline:3px solid var\(--purple\);outline-offset:2px\}/);
+  assert.ok(indexHtml.includes("item.widget==='g1'"), 'renderWidget wires g1');
+  assert.ok(indexHtml.includes('bindGrade1(host, item.g1)'), 'renderWidget calls bindGrade1');
+});
+
+
