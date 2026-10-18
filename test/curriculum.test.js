@@ -43,3 +43,20 @@ test('strandHe should return Hebrew translation for numbers when given null', ()
   const result = cur.strandHe(null);
   assert.strictEqual(result, 'מספרים ופעולות');
 });
+
+test('grade א-ג demo completion covers 10,000 addition/subtraction, tables, ×÷ 10/100/1000 and two-step problems (#356)', () => {
+  const banks = require('../src/lib/banks');
+  const rows = cur.coverageMatrix();
+  assert.ok(rows.some((r) => r.grade === 'א' && /מצבי חיבור\/חיסור/.test(r.topic) && r.status === 'covered'));
+  assert.ok(rows.some((r) => r.grade === 'ב' && /טבלה, עמודות, פיקטוגרם/.test(r.topic) && r.status === 'covered'));
+  assert.ok(rows.some((r) => r.grade === 'ג' && /מספרים עד 10,000/.test(r.topic) && r.status === 'covered'));
+  assert.ok(rows.some((r) => r.grade === 'ג' && /חיבור\/חיסור במאוזן ובמאונך עד רבבה/.test(r.topic) && r.status === 'covered'));
+  assert.ok(rows.some((r) => r.grade === 'ג' && /כפל\/חילוק ב־10, 100, 1,000/.test(r.topic) && r.status === 'covered'));
+  assert.ok(rows.some((r) => r.grade === 'ג' && /ודו־שלביות/.test(r.topic) && r.status === 'covered'));
+  assert.equal(banks.rowsOf('addition', 'ג').length, 9);
+  assert.equal(banks.rowsOf('subtraction', 'ג').length, 9);
+  assert.ok(banks.rowsOf('data', 'ב').some((it) => it.standard === banks.ST.TABLE));
+  assert.ok(banks.rowsOf('division', 'ג').some((it) => it.standard === banks.ST.MUL_DIV_10));
+  assert.ok(banks.rowsOf('word_problems', 'ג').some((it) => it.standard === banks.ST.WORD_TWO_STEP));
+});
+
