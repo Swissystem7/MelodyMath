@@ -11,9 +11,15 @@
 // שקובע אם צריך פיצול אמיתי:
 //
 //   node tools/pr-size.js origin/factory/laptop-claude-263-sync-9
-//   node tools/pr-size.js <branch> [base] [limit]
+//   node tools/pr-size.js <branch> [base] [limit] [forkBase]
 //
-// אין תלויות ואין רשת — רק `git diff --shortstat`, שתי קריאות קריאה בלבד.
+// מלכודת שנייה: ענף שנחתך מענף אינטגרציה אחר — למשל נוצר מעל `master` אבל ה-PR
+// פתוח מול `main` — גורר איתו את כל הפער שבין השניים, גם אם הקומיט שלו עצמו
+// קטנטן. שם גם דיף שתי-הנקודות גדול, והוא עדיין לא מצדיק פיצול: צריך להפנות את
+// ה-PR לבסיס הנכון. מעבירים את בסיס החיתוך כארגומנט רביעי כדי לראות את זה
+// (`docs/PR-342-SPLIT.md`).
+//
+// אין תלויות ואין רשת — רק `git diff --shortstat`, קריאות קריאה בלבד.
 'use strict';
 
 const LIMIT = 400;
@@ -33,9 +39,20 @@ function parseShortstat(text) {
   return out;
 }
 
-// displayed = מה ש-GitHub/auto_merger מודדים, real = מה שבאמת חסר ביעד.
-function verdict(displayed, real, limit) {
+// displayed = מה ש-GitHub/auto_merger מודדים, real = מה שבאמת חסר ביעד,
+// own = מה שהענף עצמו הוסיף מעל בסיס החיתוך שלו (אופציונלי).
+function verdict(displayed, real, limit, own) {
   const max = Number(limit) || LIMIT;
+  if (own != null && own <= max && real > max) {
+    return {
+      kind: 'wrong-base',
+      ok: false,
+      message:
+        'אין מה לפצל — ה-PR פתוח מול הבסיס הלא נכון: הענף עצמו מוסיף ' + own +
+        ' שורות, אבל הוא גורר עוד ' + (real - own) + ' שורות של פער בין ענפי האינטגרציה. ' +
+        'להפנות אותו לבסיס שממנו נחתך, ולסנכרן את הפער בנפרד.',
+    };
+  }
   if (real > max) {
     return {
       kind: 'split',
@@ -67,16 +84,20 @@ function shortstat(base, branch, dots) {
   return parseShortstat(out);
 }
 
-function sizes(branch, base, limit) {
+function sizes(branch, base, limit, forkBase) {
   const target = base || 'origin/main';
   const displayed = shortstat(target, branch, '...');
   const real = shortstat(target, branch, '..');
+  // שלוש נקודות: מה שהענף הוסיף מאז שנחתך, בלי מה שהבסיס שלו צבר מאז.
+  const own = forkBase ? shortstat(forkBase, branch, '...') : null;
   return {
     branch: branch,
     base: target,
+    forkBase: forkBase || null,
     displayed: displayed,
     real: real,
-    verdict: verdict(displayed.changed, real.changed, limit),
+    own: own,
+    verdict: verdict(displayed.changed, real.changed, limit, own ? own.changed : null),
   };
 }
 
@@ -87,18 +108,24 @@ function report(r) {
       r.displayed.files + ' קבצים',
     'אמיתי (' + r.base + '..' + r.branch + '):  ' + r.real.changed + ' שורות ב-' +
       r.real.files + ' קבצים',
-    r.verdict.message,
   ];
+  if (r.own) {
+    lines.push('של הענף (' + r.forkBase + '...' + r.branch + '): ' + r.own.changed + ' שורות ב-' +
+      r.own.files + ' קבצים');
+  }
+  lines.push(r.verdict.message);
   return lines.join('\n');
 }
 
 if (require.main === module) {
-  const [branch, base, limit] = process.argv.slice(2);
+  const [branch, base, limit, forkBase] = process.argv.slice(2);
   if (!branch) {
-    console.error('usage: node tools/pr-size.js <branch> [base=origin/main] [limit=400]');
+    console.error(
+      'usage: node tools/pr-size.js <branch> [base=origin/main] [limit=400] [forkBase]'
+    );
     process.exit(2);
   }
-  const r = sizes(branch, base, limit);
+  const r = sizes(branch, base, limit, forkBase);
   console.log(report(r));
   process.exit(r.verdict.ok ? 0 : 1);
 }
