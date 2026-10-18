@@ -82,5 +82,5 @@ test('classAgain and endClassSession advance focus without dead-end states', () 
 
 test('nextClassQuestion sets descriptive aria-label on choice buttons and advances focus', () => {
   assert.match(indexHtml, /b\.setAttribute\('aria-label','תשובה: '\+String\(v\)\)/);
-  assert.match(indexHtml, /if\(box\.firstElementChild&&typeof box\.firstElementChild\.focus==='function'\)box\.firstElementChild\.focus\(\)/);
+  assert.match(indexHtml, /if\(firstChoice&&typeof firstChoice\.focus==='function'\)firstChoice\.focus\(\)/);
 });

@@ -12,6 +12,21 @@ function memory() {
   };
 }
 
+test('createAssignment derives a stable id from title and assignedAt', () => {
+  assert.deepEqual(
+    assignment.createAssignment({ title: 'Test', assignedAt: 1234567890 }),
+    {
+      id: 'a1234567890test',
+      title: 'Test',
+      skill: '',
+      pack: '',
+      assignedAt: 1234567890,
+      completed: false,
+      completedAt: null,
+    },
+  );
+});
+
 test('assignTask adds a task to the student list and it appears in student data', () => {
   const ls = memory();
   store.upsertStudent('שילוב', 'נועה', ls);
