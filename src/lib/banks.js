@@ -65,11 +65,14 @@
     AREA: 'שטח מלבן ביחידות ריבועיות',
     UNITS: 'המרת יחידות — אורך, משקל ונפח',
     CALENDAR: 'זמן — יממות, שבועות, חודשים ושנים',
+    MONEY: 'כסף — שקלים ואגורות, קנייה ועודף',
+    MASS_VOL: 'משקל ונפח — ק״ג וגרם, ליטר ומ״ל, נפח תיבה בקוביות',
     PICTOGRAM: 'קריאת פיקטוגרם',
     BARCHART: 'קריאת דיאגרמת עמודות',
     TABLE: 'קריאת טבלת נתונים',
     FRAC_EQUIV: 'שברים שקולים — הרחבה, צמצום והשוואה',
     FRAC_ADD: 'חיבור וחיסור שברים, גם במכנים שונים',
+    FRAC_MIXED: 'מספרים מעורבים — מעבר לשבר לא אמיתי וחזרה, חיבור וחיסור',
     FRAC_OF: 'שבר מכמות',
     DEC_PLACE: 'שברים עשרוניים — ערך המקום, השוואה ומעבר משבר פשוט',
     DEC_ADD: 'חיבור וחיסור שברים עשרוניים',
@@ -88,6 +91,9 @@
     TIMES_MORE: 'שאלת השוואה כפלית — פי כמה',
     AREA_RECT: 'שטח מלבן — שורות × עמודות',
     TIME_MIN_SEC: 'זמן — המרה בין דקות לשניות',
+    ADD_SUB_10K: 'חיבור וחיסור במאוזן ובמאונך עד רבבה',
+    MUL_DIV_10: 'כפל וחילוק ב־10, 100 ו־1,000',
+    WORD_TWO_STEP: 'שאלות מילוליות דו־שלביות',
   };
 
   const SKILL_HE = {
@@ -114,7 +120,7 @@
     // ג׳ and ד׳ carry measurement items (minutes and area; unit changes and
     // the calendar). The skill has to be listed here too, or the diagnostic —
     // and with it the personal practice plan it feeds — never reaches them.
-    'ג': ['multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement'],
+    'ג': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
     'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
@@ -204,6 +210,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g1: extra.g1,
       g2: extra.g2,
       g3: extra.g3,
       typed: extra.typed,
@@ -1222,7 +1229,7 @@
   // 3. Patterns AB / AAB / ABC (melody & visual)
   // 4. Number line as scale (steps & octave jumps)
   RAW.push(
-    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1 }),
+    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1, widget: 'g1', g1: { kind: 'beats', from: 2, step: 2, accents: 4 } }),
     I('א', 'counting', 'מקצב דילוגי 2: 8, 10, 12, ?', 14, 'הפעימה הבאה היא עוד 2', { standard: ST.SKIP2, level: 1 }),
     I('א', 'counting', 'מקצב דילוגי 2: 14, 16, 18, ?', 20, 'עוד 2 מגיעים ל־20', { standard: ST.SKIP2, level: 2 }),
     I('א', 'counting', 'מקצב דילוגי 2 מ־50: 52, 54, 56, ?', 58, 'מוסיפים 2 לפעימה', { standard: ST.SKIP2, level: 2 }),
@@ -1235,7 +1242,7 @@
     I('א', 'counting', 'מקצב עשרות: 70, 80, 90, ?', 100, 'העשרת שמגיעה למאה', { standard: ST.GROUP10, level: 2 }),
     I('א', 'counting', 'ספירה אחורה במקצב: 50, 48, 46, ?', 44, 'דילוג 2 אחורה', { standard: ST.SKIP2, level: 3 }),
 
-    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1, widget: 'g1', g1: { kind: 'chart100', number: 34 } }),
     I('א', 'counting', 'בלוח המאה: 2 עשרות ו־5 יחידות — איזה מספר נשמע?', 25, '20 ועוד 5', { standard: ST.CHART100, level: 1 }),
     I('א', 'counting', 'בלוח המאה: 4 עשרות ו־2 יחידות — איזה מספר זה?', 42, '40 ועוד 2', { standard: ST.CHART100, level: 1 }),
     I('א', 'counting', 'בלוח המאה: 5 עשרות ו־0 יחידות — איזה מספר נשמע?', 50, '5 עשרות שלמות ללא יחידות', { standard: ST.CHART100, level: 1 }),
@@ -1248,7 +1255,7 @@
     I('א', 'counting', 'בלוח המאה: 9 עשרות ו־9 יחידות — איזה מספר זה?', 99, '90 ועוד 9', { standard: ST.CHART100, level: 3 }),
     I('א', 'counting', 'בלוח המאה: 10 עשרות ו־0 יחידות — איזה מספר נשמע?', 100, '10 עשרות הן מאה שלמה', { standard: ST.CHART100, level: 3 }),
 
-    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1 }),
+    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1, widget: 'g1', g1: { kind: 'pattern', type: 'AB', length: 6 } }),
     I('א', 'counting', 'סדרה צורנית AB: ⭐ 🌙 ⭐ 🌙 — מה הבא? (1=⭐, 2=🌙)', 1, 'הדגם חוזר לכוכב', { standard: ST.PATTERN, level: 1 }),
     I('א', 'counting', 'דגם מוזיקלי AB: גבוה, נמוך, גבוה, נמוך — איזה צליל הבא? (1=גבוה, 2=נמוך)', 1, 'הצליל הבא הוא גבוה', { standard: ST.PATTERN, level: 1 }),
     I('א', 'counting', 'דגם AAB: 🥁 🥁 🔔 🥁 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי שני תופים בא פעמון', { standard: ST.PATTERN, level: 2 }),
@@ -1357,6 +1364,151 @@
     G3('place_value', 'כמה מאות שלמות יש במספר 2800?', 28, '2800 : 100', { standard: ST.NUM10K, level: 3 })
   );
 
+  // ---------- כסף ומשקל/נפח א׳–ד׳ (#95) ----------
+  // כסף is a measurement topic in the programme, so it ships under the same
+  // skill. Answers are whole numbers and the unit (₪ / אגורות / ק״ג / קוביות)
+  // stays in the prompt; test/measurementBank.test.js checks the conversions
+  // and the change calculations against measure.js.
+  RAW.push(
+    MEAS('א', 'מטבע של 5 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 7, '5 ועוד 2', 1, ST.MONEY),
+    MEAS('א', 'שלושה מטבעות של 2 ₪. כמה ₪ ביחד?', 6, '2 ועוד 2 ועוד 2', 1, ST.MONEY),
+    MEAS('א', 'מטבע של 10 ₪ ושני מטבעות של 2 ₪. כמה ₪ ביחד?', 14, '10 ועוד 4', 2, ST.MONEY),
+    MEAS('א', 'כמה מטבעות של 2 ₪ שווים 10 ₪?', 5, 'כמה פעמים 2 ב־10', 2, ST.MONEY),
+    MEAS('א', 'קנינו מחק ב־3 ₪ ושילמנו במטבע של 10 ₪. כמה ₪ עודף?', 7, '10 פחות 3', 3, ST.MONEY),
+    MEAS('א', 'מטבע של 5 ₪, מטבע של 2 ₪ ושני מטבעות של 1 ₪. כמה ₪ ביחד?', 9, '5 ועוד 2 ועוד 2', 3, ST.MONEY),
+
+    MEAS('ב', 'כמה אגורות יש ב־1 ₪?', 100, 'שקל אחד הוא 100 אגורות', 1, ST.MONEY),
+    MEAS('ב', 'כמה אגורות יש ב־2 ₪?', 200, 'פעמיים 100 אגורות', 1, ST.MONEY),
+    MEAS('ב', 'כמה מטבעות של 10 אגורות שווים 1 ₪?', 10, 'כמה פעמים 10 ב־100', 2, ST.MONEY),
+    MEAS('ב', 'ארבעה מטבעות של 50 אגורות. כמה ₪ ביחד?', 2, 'שני מטבעות של 50 אגורות הם שקל', 2, ST.MONEY),
+    MEAS('ב', 'קנינו ספר ב־35 ₪ ושילמנו ב־50 ₪. כמה ₪ עודף?', 15, '50 פחות 35', 3, ST.MONEY),
+    MEAS('ב', 'קנינו שתי מחברות ב־12 ₪ כל אחת ושילמנו ב־30 ₪. כמה ₪ עודף?', 6, 'קודם 12 ועוד 12', 3, ST.MONEY),
+
+    MEAS('ב', 'תיבה בנויה מ־2 שכבות של 6 קוביות. כמה קוביות יש בה?', 12, 'פעמיים 6', 1, ST.MASS_VOL),
+    MEAS('ב', 'שק אחד שוקל 3 ק״ג ושק שני 5 ק״ג. בכמה ק״ג השני כבד יותר?', 2, '5 פחות 3', 1, ST.MASS_VOL),
+    MEAS('ב', 'תיבה בנויה מ־3 שכבות של 5 קוביות. כמה קוביות יש בה?', 15, 'שלוש פעמים 5', 2, ST.MASS_VOL),
+    MEAS('ב', 'בקבוק מחזיק 1 ליטר. כמה כוסות של חצי ליטר ממלאות אותו?', 2, 'שני חצאים הם שלם', 2, ST.MASS_VOL),
+    MEAS('ב', 'תיבה בנויה מ־2 שכבות, ובכל שכבה 3 שורות של 4 קוביות. כמה קוביות יש בה?', 24, 'בכל שכבה 12 קוביות', 3, ST.MASS_VOL),
+    MEAS('ב', 'מזגנו 2 ליטר מים לכוסות של חצי ליטר. כמה כוסות מילאנו?', 4, 'בכל ליטר שני חצאים', 3, ST.MASS_VOL),
+
+    MEAS('ג', 'כמה אגורות יש ב־5 ₪?', 500, 'בכל שקל 100 אגורות', 1, ST.MONEY),
+    MEAS('ג', 'שלוש מחברות ב־7 ₪ כל אחת. כמה ₪ בסך הכול?', 21, 'שלוש פעמים 7', 1, ST.MONEY),
+    MEAS('ג', 'כמה מטבעות של 10 אגורות שווים 3 ₪?', 30, '300 אגורות חלקי 10', 2, ST.MONEY),
+    MEAS('ג', 'קנינו 4 עטים ב־6 ₪ כל אחד ושילמנו ב־50 ₪. כמה ₪ עודף?', 26, 'הקנייה היא 24 ₪', 2, ST.MONEY),
+    MEAS('ג', 'חילקנו 60 ₪ שווה בשווה בין 4 ילדים. כמה ₪ לכל אחד?', 15, '60 חלקי 4', 3, ST.MONEY),
+    MEAS('ג', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 40, 'שני חצאי שקל משלימים שקל', 3, ST.MONEY),
+
+    MEAS('ג', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.MASS_VOL),
+    MEAS('ג', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.MASS_VOL),
+    MEAS('ג', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.MASS_VOL),
+    MEAS('ג', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.MASS_VOL),
+    MEAS('ג', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.MASS_VOL),
+    MEAS('ג', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.MASS_VOL),
+
+    MEAS('ד', 'כמה אגורות יש ב־8 ₪?', 800, 'בכל שקל 100 אגורות', 1, ST.MONEY),
+    MEAS('ד', 'שילמנו 100 ₪ על קנייה של 64 ₪. כמה ₪ עודף?', 36, '100 פחות 64', 1, ST.MONEY),
+    MEAS('ד', 'חולצה עולה 45 ₪. כמה ₪ יעלו 3 חולצות?', 135, 'שלוש פעמים 45', 2, ST.MONEY),
+    MEAS('ד', 'כמה אגורות יש ב־12 ₪ ועוד 30 אגורות?', 1230, '1,200 אגורות ועוד 30', 2, ST.MONEY),
+    MEAS('ד', 'שילמנו 200 ₪ על 6 כרטיסים ב־30 ₪ כל אחד. כמה ₪ עודף?', 20, 'הקנייה היא 180 ₪', 3, ST.MONEY),
+    MEAS('ד', 'קנייה של 350 אגורות ועוד קנייה של 6 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 10, '350 אגורות הם 3 ₪ ו־50 אגורות', 3, ST.MONEY)
+  );
+
+  // ---------- השלמת כיסוי א׳–ב׳–ג׳ לדמו ברנקו וייס (#356) ----------
+  RAW.push(
+    // כיתה א׳ — מצבי חיבור/חיסור מחיי יום־יום (איסוף, הוספה, הפרדה, גריעה, השוואה)
+    I('א', 'word_problems', 'על המדף היו 5 ספרים, והוספנו עוד 3 ספרים. כמה ספרים על המדף עכשיו?', 8, 'הוספה: 5 ועוד 3', { standard: ST.WORD_COLLECT, wordType: 'collect', level: 1 }),
+    I('א', 'word_problems', 'בסלסילה היו 9 תפוחים, ואכלנו 4 מהם. כמה תפוחים נשארו?', 5, 'גריעה: 9 פחות 4', { standard: ST.WORD_REMOVE, wordType: 'remove', level: 2 }),
+    I('א', 'word_problems', 'לנועה 12 מדבקות ולרועי 7 מדבקות. בכמה מדבקות יש לנועה יותר מלרועי?', 5, 'השוואה: 12 פחות 7', { standard: ST.WORD_COMPARE, wordType: 'compare', level: 3 }),
+
+    // כיתה ב׳ — קריאת טבלת נתונים
+    I('ב', 'data', 'בטבלת החוגים רשומים: כדורגל — 12 תלמידים, מוזיקה — 8 תלמידים, ציור — 5 תלמידים. כמה תלמידים בחוג המוזיקה?', 8, 'קוראים את השורה של מוזיקה בטבלה', { strand: STRAND.DATA, standard: ST.TABLE, level: 1 }),
+    I('ב', 'data', 'בטבלת השאלת ספרים: יום א׳ — 10, יום ב׳ — 14, יום ג׳ — 6. כמה ספרים הושאלו בימים א׳ ו־ג׳ יחד?', 16, '10 ועוד 6', { strand: STRAND.DATA, standard: ST.TABLE, level: 2 }),
+    I('ב', 'data', 'בטבלת נקודות: קבוצה א׳ — 25, קבוצה ב׳ — 18. בכמה נקודות מובילה קבוצה א׳?', 7, '25 פחות 18', { strand: STRAND.DATA, standard: ST.TABLE, level: 3 }),
+
+    // כיתה ג׳ — פריסה עשרונית מלאה עד 10,000
+    G3('place_value', '3,000 + 400 + 20 + 5 = ?' + NO_COMMA, 3425, '3 אלפים, 4 מאות, 2 עשרות ו־5 יחידות', { standard: ST.NUM10K, level: 1 }),
+    G3('place_value', '6,000 + 80 + 9 = ?' + NO_COMMA, 6089, 'אין מאות — כותבים 0 במקום המאות', { standard: ST.NUM10K, level: 2 }),
+    G3('place_value', '4 אלפים ועוד 15 מאות שווים לאיזה מספר?' + NO_COMMA, 5500, '15 מאות הן 1,500, ועוד 4,000', { standard: ST.NUM10K, level: 3 }),
+
+    // כיתה ג׳ — חיבור במאוזן ובמאונך עד רבבה (10,000)
+    I('ג', 'addition', '1,200 + 500 = ?' + NO_COMMA, 1700, 'מחברים מאות: 200 ועוד 500', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'addition', '2,340 + 1,250 = ?' + NO_COMMA, 3590, 'אלפים עם אלפים, מאות עם מאות, עשרות עם עשרות', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'addition', 'חשבו במאונך: 1,423 + 2,354' + NO_COMMA, 3777, 'מחברים טור־טור מימין לשמאל ללא המרה', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 1423, b: 2354, op: '+' }, level: 1 }),
+    I('ג', 'addition', '3,680 + 450 = ?' + NO_COMMA, 4130, '680 ועוד 450 עוברים אלף', { standard: ST.ADD_SUB_10K, level: 2 }),
+    I('ג', 'addition', 'חשבו במאונך: 2,475 + 1,368' + NO_COMMA, 3843, 'עם המרה בעשרות ובמאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 2475, b: 1368, op: '+' }, level: 2 }),
+    I('ג', 'addition', 'חשבו במאונך: 4,560 + 2,740' + NO_COMMA, 7300, '60+40=100, 500+700+100=1,300', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 4560, b: 2740, op: '+' }, level: 2 }),
+    I('ג', 'addition', '6,450 + 3,550 = ?' + NO_COMMA, 10000, '450 ועוד 550 משלימים ל־1,000, וביחד 10,000', { standard: ST.ADD_SUB_10K, level: 3 }),
+    I('ג', 'addition', 'חשבו במאונך: 5,847 + 3,695' + NO_COMMA, 9542, 'המרה ביחידות, בעשרות ובמאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 5847, b: 3695, op: '+' }, level: 3 }),
+    I('ג', 'addition', 'חשבו במאונך: 4,999 + 1,001' + NO_COMMA, 6000, '999 ועוד 1 הם 1,000', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 4999, b: 1001, op: '+' }, level: 3 }),
+
+    // כיתה ג׳ — חיסור במאוזן ובמאונך עד רבבה (10,000)
+    I('ג', 'subtraction', '3,800 − 600 = ?' + NO_COMMA, 3200, '800 פחות 600 הם 200', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'subtraction', '4,750 − 1,230 = ?' + NO_COMMA, 3520, 'מחסרים אלפים, מאות ועשרות ללא פריטה', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 5,864 − 2,341' + NO_COMMA, 3523, 'מחסרים טור־טור ללא פריטה', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 5864, b: 2341, op: '-' }, level: 1 }),
+    I('ג', 'subtraction', '5,200 − 450 = ?' + NO_COMMA, 4750, 'פורטים אלף אחד ל־10 מאות', { standard: ST.ADD_SUB_10K, level: 2 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 6,420 − 2,185' + NO_COMMA, 4235, 'פריטה מעשרות וממאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 6420, b: 2185, op: '-' }, level: 2 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 7,315 − 3,640' + NO_COMMA, 3675, 'פריטה מאלפים למאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 7315, b: 3640, op: '-' }, level: 2 }),
+    I('ג', 'subtraction', '10,000 − 2,400 = ?' + NO_COMMA, 7600, '10 אלפים פחות 2 אלפים ו־400', { standard: ST.ADD_SUB_10K, level: 3 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 8,004 − 3,527' + NO_COMMA, 4477, 'פריטה רצופה על פני אפסים', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 8004, b: 3527, op: '-' }, level: 3 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 9,000 − 4,635' + NO_COMMA, 4365, 'משלימים ל־9,000', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 9000, b: 4635, op: '-' }, level: 3 }),
+
+    // כיתה ג׳ — כפל וחילוק ב־10, 100, 1,000
+    G3('division', '45 × 10 = ?', 450, 'כפל ב־10 מוסיף אפס מימין (עשרות)', { standard: ST.MUL_DIV_10, level: 1 }),
+    G3('division', '700 : 10 = ?', 70, 'חילוק ב־10 מוריד עשרה אחת', { standard: ST.MUL_DIV_10, level: 1 }),
+    G3('division', '36 × 100 = ?' + NO_COMMA, 3600, '36 מאות הן 3,600', { standard: ST.MUL_DIV_10, level: 2 }),
+    G3('division', '4,800 : 100 = ?', 48, 'כמה מאות יש ב־4,800?', { standard: ST.MUL_DIV_10, level: 2 }),
+    G3('division', '9 × 1,000 = ?' + NO_COMMA, 9000, '9 אלפים', { standard: ST.MUL_DIV_10, level: 3 }),
+    G3('division', '8,000 : 1,000 = ?', 8, 'כמה אלפים יש ב־8,000?', { standard: ST.MUL_DIV_10, level: 3 }),
+
+    // כיתה ג׳ — שאלות מילוליות דו־שלביות
+    G3('word_problems', 'במופע 4 שורות של 6 נגנים, ועל הבמה עוד 5 זמרים. כמה מופיעים בסך הכול?', 29, 'שלב א׳: 4 × 6 = 24; שלב ב׳: 24 + 5 = 29', { standard: ST.WORD_TWO_STEP, table: 6, level: 1 }),
+    G3('word_problems', 'לכיתה היו 50 כרטיסים. חילקו 3 קבוצות של 8 כרטיסים. כמה כרטיסים נשארו?', 26, 'שלב א׳: 3 × 8 = 24; שלב ב׳: 50 − 24 = 26', { standard: ST.WORD_TWO_STEP, table: 8, level: 2 }),
+    G3('word_problems', 'קנינו 4 חוברות תווים ב־9 ₪ כל אחת, ושילמנו בשטר של 50 ₪. כמה עודף קיבלנו?', 14, 'שלב א׳: 4 × 9 = 36; שלב ב׳: 50 − 36 = 14', { standard: ST.WORD_TWO_STEP, table: 9, level: 3 })
+  );
+
+  // ---------- כיתה ה׳ · מספרים מעורבים (#96) ----------
+  // Appended last on purpose: ids are RAW indexes, so every item above keeps
+  // the id a teacher report already holds.
+  //
+  // The answer is «שלם ו־מונה/מכנה», the form Israeli textbooks print and the
+  // one unitCheck.js already uses. adaptive.parseMixedNumber accepts it with
+  // or without the maqaf and with a bare space, and rejects the improper
+  // fraction — so «כתבו 7/4 כמספר מעורב» cannot be answered by copying 7/4.
+  //
+  // No prompt puts a mixed number next to +, − or =: in an RTL paragraph the
+  // connector «ו־» splits the expression into two numeric runs and mathBidi
+  // then isolates the wrong half («1 ו־[1/2 + 2] ו־1/4»). The sums are worded
+  // instead, which leaves each mixed number its own run and reads correctly.
+  function MIX(prompt, answer, hint, level) {
+    return I('ה', 'fractions', prompt, answer, hint, {
+      strand: STRAND.FRAC, standard: ST.FRAC_MIXED, level: level, typed: true,
+    });
+  }
+
+  RAW.push(
+    MIX('כתבו 3/2 כמספר מעורב (שלם ושבר)', '1 ו־1/2', 'שני חצאים הם שלם אחד, ונשאר חצי', 1),
+    MIX('כתבו 7/4 כמספר מעורב (שלם ושבר)', '1 ו־3/4', 'ארבעה רבעים הם שלם, ונשארו שלושה רבעים', 1),
+    MIX('כתבו 5/4 כמספר מעורב (שלם ושבר)', '1 ו־1/4', 'ארבעה רבעים הם שלם, ונשאר רבע', 1),
+    MIX('כמה שלמים יש ב־9/4? (מספר שלם בלבד)', 2, 'שמונה רבעים הם שני שלמים, ונשאר רבע', 1),
+    MIX('כתבו 9/4 כמספר מעורב (שלם ושבר)', '2 ו־1/4', 'שמונה רבעים הם שני שלמים, ונשאר רבע', 2),
+    MIX('כתבו 11/8 כמספר מעורב (שלם ושבר)', '1 ו־3/8', 'שמונה שמיניות הם שלם, ונשארו שלוש', 2),
+    MIX('כתבו את המספר המעורב 2 ו־1/3 כשבר לא אמיתי', '7/3', 'שני שלמים הם 6/3, ועוד שליש', 2),
+    MIX('כתבו את המספר המעורב 1 ו־5/8 כשבר לא אמיתי', '13/8', 'שלם אחד הוא 8/8, ועוד חמש שמיניות', 2),
+    MIX('מה גדול יותר, 1 ו־1/4 או 1 ו־3/8? כתבו את המספר הגדול.', '1 ו־3/8', 'אותו שלם; רבע הוא 2/8 ושלוש שמיניות גדולות ממנו', 3),
+    MIX('שיר אחד נמשך 2 ו־1/2 דקות ושיר שני 1 ו־1/4 דקות. מה האורך הכולל? (שלם ושבר)', '3 ו־3/4', 'שני שלמים ועוד שלם, וחצי ועוד רבע הם שלושה רבעים', 3),
+    MIX('מתוך הקלטה של 3 ו־1/2 דקות נמחקו 1 ו־1/4 דקות. כמה נשאר? (שלם ושבר)', '2 ו־1/4', 'חצי פחות רבע הוא רבע, ושלושה שלמים פחות שלם אחד', 3),
+    MIX('כמה זה 1 ו־3/4 ועוד 2 ו־1/2? (שלם ושבר)', '4 ו־1/4', 'שלושה שלמים, ושלושה רבעים ועוד חצי הם שלם ורבע', 3)
+  );
+
+  // ---------- כיתה ו׳ · משמעות האחוז (#96) ----------
+  // The bank had 10%/25%/50% of a quantity but never what a percent is. These
+  // three say it: one percent is one hundredth, and a half is 50 of them.
+  RAW.push(
+    G56('ו', 'percent', 'אחוז אחד הוא איזה חלק מהשלם? כתבו כשבר.', '1/100', 'אחוז = חלק אחד מתוך מאה', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כמה אחוזים הם כל השלם? (מספר בלבד)', 100, 'השלם הוא מאה חלקים מתוך מאה', 1, ST.PERCENT),
+    G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 1/2', 50, 'חצי הוא 50 מתוך 100', 2, ST.PERCENT)
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -1383,6 +1535,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;
