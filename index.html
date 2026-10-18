@@ -261,7 +261,10 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <div id="beatWidget" class="hidden"></div>
   <div class="choices" id="beatChoices" role="group" aria-label="אפשרויות תשובה"></div>
   <div id="beatFeedback" class="feedback hidden" role="status" aria-live="polite"></div>
-  <button type="button" id="beatStop" class="secondary no-print">סיום התרגול</button>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+    <button type="button" id="beatStop" class="secondary no-print">סיום התרגול</button>
+    <button type="button" id="beatCancel" class="secondary no-print">ביטול וחזרה</button>
+  </div>
 </div>
 <div class="card hidden" id="beatDone">
   <span class="tag">התרגול על הפעימה נגמר</span>
@@ -1038,6 +1041,11 @@ function paintBeatWindow(){
 function nextBeatQuestion(){
   beatAnswered=false;
   const pool=eligibleExercises(beatPool(), beatHist, beatLastId, beatLevel);
+  if(!pool || pool.length===0){
+    if($('beatPrompt')) $('beatPrompt').textContent='אין פריטים זמינים בחבילה שנבחרה.';
+    if($('beatChoices')) $('beatChoices').innerHTML='';
+    return;
+  }
   const random=rng(beatSeed++);
   const q=pool[Math.floor(random()*pool.length)];
   beatCurrent=q;
@@ -1049,7 +1057,8 @@ function nextBeatQuestion(){
   show('beatFeedback',false);
   const opts=makeChoices(q.answer, random);
   const box=$('beatChoices'); box.innerHTML='';
-  opts.forEach(v=>{ const b=document.createElement('button'); b.type='button'; b.className='choice'; b.dir='ltr'; b.textContent=String(v); b.onclick=()=>pickBeat(v,b); box.appendChild(b); });const firstBeatChoice=box.querySelector('button');if(firstBeatChoice&&typeof firstBeatChoice.focus==='function')firstBeatChoice.focus();
+  opts.forEach(v=>{ const b=document.createElement('button'); b.type='button'; b.className='choice'; b.dir='ltr'; b.textContent=String(v); b.setAttribute('aria-label','תשובה: '+String(v)); b.onclick=()=>pickBeat(v,b); box.appendChild(b); });const firstBeatChoice=box.querySelector('button');if(firstBeatChoice&&typeof firstBeatChoice.focus==='function')firstBeatChoice.focus();
+  if(box.firstElementChild && typeof box.firstElementChild.focus==='function') box.firstElementChild.focus();
   maybeHear(q); maybeSpeak(q.prompt);
   beatOpenedAt=Date.now();
   stopBeatTimer();
@@ -1102,10 +1111,20 @@ function endBeatSession(){
   const ok=beatHist.filter(x=>x.correct).length;
   $('beatDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות בזמן</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק בסבב</div><div class="stat"><strong>${metroBpmNow()}</strong>BPM בסיום</div>`;
   showBeatCard('beatDone');
+  if($('beatAgain')&&typeof $('beatAgain').focus==='function') $('beatAgain').focus();
 }
 if($('beatStart'))$('beatStart').onclick=startBeatSession;
 if($('beatStop'))$('beatStop').onclick=endBeatSession;
-if($('beatAgain'))$('beatAgain').onclick=function(){ showBeatCard('beatGate'); };
+if($('beatCancel'))$('beatCancel').onclick=function(){
+  stopBeatTimer();
+  endTeacherSession();
+  showBeatCard('beatGate');
+  if($('beatStart')&&typeof $('beatStart').focus==='function') $('beatStart').focus();
+};
+if($('beatAgain'))$('beatAgain').onclick=function(){
+  showBeatCard('beatGate');
+  if($('beatStart')&&typeof $('beatStart').focus==='function') $('beatStart').focus();
+};
 
 // ---- שיעורים מודרכים ואינטראקטיביים (interactiveLessons) ----
 let activeLessonId = null;
