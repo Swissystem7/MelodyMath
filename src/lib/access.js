@@ -282,6 +282,7 @@
       '#lessonPlay:not(.hidden) #lessonPrompt',
       '#rmPlan:not(.hidden) #rmPlanPrompt',
       '#rmQuiz:not(.hidden) #rmPrompt',
+      '#quiz:not(.hidden) #quizPrompt',
       '#quiz:not(.hidden) #prompt',
       '.panel.active h2.prompt',
       '#prompt',
