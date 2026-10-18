@@ -25,6 +25,7 @@
   button{font:inherit;cursor:pointer;border:1px solid var(--indigo);background:var(--indigo);
     color:#fff;border-radius:10px;padding:12px 16px;min-height:48px;min-width:48px}
   button.ghost{background:#fff;color:var(--indigo)}
+  button[aria-pressed="true"],button.ghost[aria-pressed="true"]{background:var(--indigo-d);border-color:var(--indigo-d);color:#fff}
   button:disabled{opacity:.5;cursor:default}
   button:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
   select,input[type=range]{font:inherit}
@@ -38,8 +39,12 @@
   .legend{font-size:13px;color:var(--muted)}
   .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .opts button{direction:ltr;font-weight:600}
+  #lessonOpts button{direction:rtl;text-align:center}
   .opts button.correct{background:var(--good);border-color:var(--good)}
   .opts button.wrong{background:var(--bad);border-color:var(--bad)}
+  footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px}
+  footer a{color:var(--indigo);text-decoration:none;font-weight:700;margin:0 6px}
+  footer a:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
   .score{font-weight:700}
   .fb{min-height:22px;font-weight:600}
   .fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
@@ -55,6 +60,7 @@
   #main:focus{outline:none}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<link rel="stylesheet" href="src/sefirot.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
@@ -122,7 +128,7 @@
       <button id="lessonPlayB" class="ghost" type="button" hidden>▶︎ השמע ב׳</button>
     </div>
     <div class="opts" id="lessonOpts" style="margin-top:12px"></div>
-    <div class="fb" id="lessonFb" aria-live="polite"></div>
+    <div class="fb" id="lessonFb" role="status" aria-live="polite"></div>
     <p class="legend" id="lessonTeach"></p>
     <div class="row">
       <button id="lessonNext" class="ghost" type="button">לשיעור הבא</button>
@@ -142,12 +148,17 @@
       <button id="gNew" class="ghost" type="button">חידה חדשה</button>
     </div>
     <div class="opts" id="gOpts" style="margin-top:12px"></div>
-    <div class="fb" id="gFb" aria-live="polite"></div>
+    <div class="fb" id="gFb" role="status" aria-live="polite"></div>
   </div>
 
   <div class="card legend">
     <b style="color:var(--ink)">מקרא צליל:</b> צליל גבוה = f(x) גבוה · צליל נמוך = f(x) נמוך/שלילי · שקט = הפונקציה לא מוגדרת שם (למשל √ מתחת ל‑0, או 1/x באפס). קליק קצר = חצייה של ציר ה‑x (שורש).
   </div>
+
+  <footer>
+    <div><a href="index.html">חזרה לתרגול</a> · <a href="807.html">גדילה ודעיכה (807)</a> · <a href="landing.html">אודות</a></div>
+    <div style="margin-top:8px;font-size:.85rem">מוצר סוניפיקציה · חט״ב ותיכון · MelodyMath</div>
+  </footer>
 </main>
 
 <script src="src/lib/sonify.js"></script>
@@ -478,7 +489,10 @@ function guess(k,btn){
   document.querySelectorAll("#gOpts button").forEach(b=>{ if(b.dataset.k===gAnswer)b.classList.add("correct"); else if(b===btn)b.classList.add("wrong"); });
   if(right){ gScore++; gStreak++; if(gStreak>(gstate.best||0)){gstate.best=gStreak;saveJson(LS,gstate);$("best").textContent=gstate.best;}
     $("gFb").textContent="✓ נכון! זו "+FUNCS[gAnswer].name+". "+FUNCS[gAnswer].desc; $("gFb").className="fb ok";
-  } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+"). לחצו «השוו» כדי לשמוע את הניחוש ואז את התשובה."; $("gFb").className="fb no"; }
+    if($("gNew")) $("gNew").focus();
+  } else { gStreak=0; $("gFb").textContent="✗ זו הייתה "+FUNCS[gAnswer].name+" ("+FUNCS[gAnswer].tex+"). לחצו «השוו» כדי לשמוע את הניחוש ואז את התשובה."; $("gFb").className="fb no";
+    if($("gCompare")) $("gCompare").focus();
+  }
   $("score").textContent=gScore; $("streak").textContent=gStreak;
   if($("gCompare")) $("gCompare").disabled=false;
 }
@@ -540,6 +554,7 @@ function pickLesson(id, btn){
   if($("lessonTeach")) $("lessonTeach").textContent=lesson.teachHe||"";
   const live=$("live"); if(live) live.textContent=$("lessonFb").textContent+" "+(lesson.teachHe||"");
   if(typeof speakHebrew==="function") speakHebrew($("lessonFb").textContent);
+  if(right && $("lessonNext")) $("lessonNext").focus();
 }
 if($("lessonPlayA")) $("lessonPlayA").addEventListener("click", function(){ playLessonSide("A"); });
 if($("lessonPlayB")) $("lessonPlayB").addEventListener("click", function(){ playLessonSide("B"); });

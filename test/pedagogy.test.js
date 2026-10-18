@@ -59,4 +59,32 @@ const foundPlan = lessonPlanForTopic(testTopicId);
 assert.ok(foundPlan, 'lessonPlanForTopic should find a plan for the given topicId');
 assert.equal(foundPlan.id, testTopicId, 'The returned plan should match the requested topicId');
 
+test('buildStudentStudyPlan orders weak strands first, links bank items across א-ג and refuses mastery language', () => {
+  ['א', 'ב', 'ג'].forEach((grade) => {
+    const plan = ped.buildStudentStudyPlan({
+      name: 'נועה',
+      perSkill: {
+        counting: { total: 6, correct: 6, accuracy: 1 },
+        addition: { total: 6, correct: 6, accuracy: 1 },
+        measurement: { total: 5, correct: 1, accuracy: 0.2 },
+      },
+    }, grade);
+
+    assert.equal(plan.studentName, 'נועה');
+    assert.equal(plan.grade, grade);
+    assert.ok(plan.steps.length >= 3, `grade ${grade} should have at least 3 ordered steps`);
+    // Weakest practiced strand (measurement at 20%) is prioritized first.
+    assert.equal(plan.steps[0].strand, 'measure');
+    assert.equal(plan.steps[0].weeklyTargetItems, 8);
+    assert.ok(plan.steps[0].bankItemIds.length >= 1, `grade ${grade} measure step should link bank items`);
+
+    const html = ped.renderStudentStudyPlanHtml(plan);
+    assert.match(html, /תוכנית תרגול אישית/);
+    assert.match(html, /נועה/);
+    assert.match(html, /אינה אבחון או הצהרה על שליטה/);
+    assert.doesNotMatch(html, /שליטה מלאה|שולט\/ת|מוכח מדעית/);
+  });
+});
+
 console.log('All pedagogy tests passed!');
+

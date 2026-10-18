@@ -65,3 +65,34 @@ test('when localStorage is unavailable, shouldShowOnboard must return false', ()
 test('escapeHtml should escape the Euro sign Unicode character to its HTML entity', () => {
   assert.equal(onboard.escapeHtml('Price: €100'), 'Price: &euro;100');
 });
+
+test('demo video walkthrough has 4 Hebrew scenes, צפו בסרטון link, and demo.html page (#355)', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const scenes = onboard.demoVideoScenes();
+  assert.equal(scenes.length, 4);
+  assert.deepEqual(scenes.map((s) => s.id), ['intro', 'diagnostic', 'adaptive', 'teacher']);
+  const onboardHtml = onboard.renderOnboardHtml({ step: 0, dismissed: false });
+  assert.match(onboardHtml, /href="demo\.html"[^>]*>צפו בסרטון<\/a>/);
+  const playerHtml = onboard.renderDemoVideoHtml(1);
+  assert.match(playerHtml, /id="demoVideoPlayer"/);
+  assert.match(playerHtml, /אבחון קצר לפי שכבה/);
+  assert.doesNotMatch(playerHtml, /טיפול|משפר מתמטיקה|סוגר פערים/);
+
+  const appended = [];
+  const fakeDoc = {
+    querySelector: (sel) => (sel === 'a[href="demo.html"]' ? null : { appendChild: (el) => appended.push(el) }),
+    createElement: (tag) => ({ tagName: tag, href: '', className: '', textContent: '' }),
+  };
+  assert.equal(onboard.injectDemoVideoHeaderLink(fakeDoc), true);
+  assert.equal(appended.length, 1);
+  assert.equal(appended[0].href, 'demo.html');
+  assert.equal(appended[0].textContent, 'צפו בסרטון');
+
+  const demoPage = fs.readFileSync(path.join(__dirname, '..', 'demo.html'), 'utf8');
+  assert.match(demoPage, /lang="he"/);
+  assert.match(demoPage, /dir="rtl"/);
+  assert.match(demoPage, /צפו בסרטון ההדגמה/);
+  assert.doesNotMatch(demoPage, /סוגרים פערים במתמטיקה|ADHD|דיסקלקול/i);
+});
+
