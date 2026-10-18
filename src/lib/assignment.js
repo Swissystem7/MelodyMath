@@ -28,6 +28,17 @@
     return null;
   }
 
+  function titleSlugForId(title) {
+    const compact = title.toLowerCase().replace(/\s/g, '');
+    let out = '';
+    for (let i = 0; i < compact.length; i++) {
+      const ch = compact.charAt(i);
+      if ((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) out += ch;
+      else out += compact.charCodeAt(i).toString(36);
+    }
+    return out;
+  }
+
   function normalizeAssignment(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     const title = String(src.title == null ? (src.label == null ? '' : src.label) : src.title)
@@ -42,7 +53,7 @@
     const assignedAt = assignedRaw == null ? Date.now() : assignedRaw;
     const completedAt = completed ? timeOrNull(src.completedAt) : null;
     const id = idOrNull(src.id)
-      || ('a' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36));
+      || ('a' + String(assignedAt) + titleSlugForId(title)).slice(0, 40);
     return {
       id: id,
       title: title,

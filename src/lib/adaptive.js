@@ -7,7 +7,9 @@
 //               anything else holds. Level never leaves 1..3.
 //   isCorrect   answers are compared after normalisation, so "3 : 2", "3:2"
 //               and " 3:2 " all count, and a decimal comma is accepted the way
-//               a Hebrew-keyboard child actually types it.
+//               a Hebrew-keyboard child actually types it. A mixed number is
+//               compared by value inside its own form: "1 3/4" counts for
+//               "1 ו־3/4", but the improper "7/4" does not.
 //   eligibleExercises
 //               only mastered (correct) ids drop out. Misses stay in the pool
 //               and are preferred on the next turn so errors return sooner.
@@ -81,6 +83,24 @@
     return { n: n, d: d };
   }
 
+  // A mixed number the way Hebrew textbooks print it: a whole part, the
+  // connector "ו" (with or without a maqaf), then a fraction — "1 ו־3/4",
+  // "1 ו 3/4", "1ו3/4". A bare space also separates ("1 3/4"), but a separator
+  // is required: "123/4" is the fraction one hundred twenty three quarters and
+  // must not read as 12 ו־3/4. Digits only, so 0x10 and 1e1 stay out (#88).
+  const MIXED = /^(\d+)(?:\s*ו[־\-–]?\s*|\s+)(\d+)\s*\/\s*(\d+)$/;
+
+  function parseMixedNumber(raw) {
+    const m = MIXED.exec(String(raw == null ? '' : raw).trim());
+    if (!m) return null;
+    const whole = Number(m[1]);
+    const n = Number(m[2]);
+    const d = Number(m[3]);
+    if (!Number.isFinite(whole) || !Number.isFinite(n) || !Number.isFinite(d)) return null;
+    if (d === 0) return null;
+    return { n: whole * d + n, d: d };
+  }
+
   function isDecimalAnswer(raw) {
     if (raw == null) return false;
     const s = String(raw).trim().replace(/\s/g, '');
@@ -101,6 +121,13 @@
     const gf = parseSimpleFraction(given);
     const ef = parseSimpleFraction(expected);
     if (gf && ef && gf.n * ef.d === ef.n * gf.d) return true;
+    // Mixed numbers compare by value, so "1 3/4" counts for "1 ו־3/4". Only
+    // the mixed form parses, so the two conversion directions keep their
+    // point: "7/4" is not accepted for "1 ו־3/4", and "1 ו־3/4" is not
+    // accepted for an item that asked for the improper fraction.
+    const gm = parseMixedNumber(given);
+    const em = parseMixedNumber(expected);
+    if (gm && em && gm.n * em.d === em.n * gm.d) return true;
     // Numeric compare: 3.5 == 3.50, .75 == 0.75, 1,25 == 1.25 (comma already
     // folded by normalizeAnswer). Ratios like 3:2 stay on the string path.
     // Only plain decimals reach Number(): it would also read 0x10, 1e1 and
@@ -139,7 +166,7 @@
   return {
     nextLevel, normalizeAnswer, isCorrect, eligibleExercises,
     parseStudentNumber, countDecimals, closeEnough, parseSimpleFraction,
-    isDecimalAnswer,
+    parseMixedNumber, isDecimalAnswer,
     MIN_LEVEL, MAX_LEVEL,
   };
 });
