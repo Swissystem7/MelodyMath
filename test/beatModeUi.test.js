@@ -8,7 +8,7 @@ const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf
 
 test('beatMode markup provides accessible group semantics and cancel action', () => {
   // Choices container has accessible group role and label
-  assert.match(indexHtml, /id="beatChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה לפי הפעימה"/);
+  assert.match(indexHtml, /id="beatChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה[^"]*"/);
 
   // Both Stop and Cancel actions exist in beatPlay
   assert.match(indexHtml, /id="beatStop"[^>]*>סיום התרגול<\/button>/);

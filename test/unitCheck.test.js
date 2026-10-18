@@ -160,3 +160,37 @@ test('check.html provides cancel quiz action and reciprocal navigation with inde
   assert.match(indexHtml, /בדיקה לפני ואחרי יחידה/);
 });
 
+test('check.html announces status, groups the answer buttons and labels the report table', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'check.html'), 'utf8');
+
+  // קורא מסך צריך לשמוע את הודעת הסטטוס בלי להחזיר אליה פוקוס.
+  assert.match(html, /id="setupStatus"[^>]*role="status"[^>]*aria-live="polite"/);
+  // ארבע־חמש תשובות בלי שם קבוצה נקראות כרשימת כפתורים מנותקת מהשאלה.
+  assert.match(html, /id="quizChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(html, /<caption class="sr-only">דוח תוצאות בדיקה לפי תלמיד<\/caption>/);
+  assert.match(html, /<th scope="col">תלמיד\/ה<\/th>/);
+  assert.match(html, /\.sr-only\{position:absolute/);
+});
+
+test('check.html returns focus to the form after a run ends or is cancelled', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'check.html'), 'utf8');
+
+  // סיום וביטול מסתירים את כרטיס הבדיקה, והפוקוס היה נופל ל-body בלי זה.
+  const after = html.slice(html.indexOf('function cancelQuiz'));
+  assert.match(after, /\$\('studentName'\)\.focus\(\);/);
+  assert.equal(html.match(/\$\('studentName'\)\.focus\(\);/g).length, 2);
+  // ביטול בלי ריצה פעילה לא אמור לדרוס את הסטטוס של הריצה הקודמת.
+  assert.match(html, /function cancelQuiz\(\) \{\s*if \(!run\) return;/);
+});
+
+test('check.html links on to the coverage page, keeps the report live and submits on Enter', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'check.html'), 'utf8');
+
+  assert.match(html, /<a href="curriculum\.html">כיסוי התוכנית<\/a>/);
+  // הדוח נגזר מקוד הכיתה ומהיחידה, אז הוא חייב להתרענן כששניהם משתנים.
+  assert.match(html, /\$\('unit'\)\.onchange = renderReport;/);
+  assert.match(html, /\$\('classCode'\)\.onchange = renderReport;/);
+  assert.match(html, /\$\('classCode'\)\.onkeydown = function \(e\) \{ if \(e\.key === 'Enter'\) start\('pre'\); \};/);
+  assert.match(html, /\$\('studentName'\)\.onkeydown = function \(e\) \{ if \(e\.key === 'Enter'\) start\('pre'\); \};/);
+});
+

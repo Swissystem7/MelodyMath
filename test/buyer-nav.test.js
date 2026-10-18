@@ -12,17 +12,19 @@ test('the nav a teacher sees on elementary and offer pages carries only the elem
     assert.match(html, /href="index\.html"/, here);
     assert.match(html, /href="curriculum\.html"/, here);
     assert.match(html, /href="offer\.html"/, here);
-    assert.doesNotMatch(html, /functions\.html|807\.html/, here);
+    assert.doesNotMatch(html, /functions\.html|807\.html|frequency\.html/, here);
   }
 });
 
 test('the sonification pages keep their own nav and a way back', () => {
-  for (const here of ['functions.html', '807.html']) {
+  for (const here of ['functions.html', '807.html', 'frequency.html']) {
     const html = core.siteNavHtml(here);
     assert.match(html, /href="functions\.html"/);
     assert.match(html, /href="807\.html"/);
+    assert.match(html, /href="frequency\.html"/);
     assert.match(html, /href="index\.html"/);
     assert.match(html, /aria-current="page"/);
+    assert.match(html, /מעבדת תדרים/);
   }
 });
 

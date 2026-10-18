@@ -38,10 +38,12 @@
   .rem-box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.92rem}
   .rem-box strong{display:block;color:var(--purple);margin-bottom:6px;font-size:.95rem}
   .rem-box.music-box strong{color:#059669}
-  .sound-btn{margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem}
+  .sound-btn{margin-top:10px;padding:10px 16px;min-height:44px;min-width:44px;border-radius:10px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center}
   .sound-btn:hover{background:#4f46e5}
+  .sound-btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
   .status-sound{margin-top:6px;font-size:.85rem;color:var(--muted);min-height:1.2em}
 </style>
+<link rel="stylesheet" href="src/sefirot.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
@@ -74,8 +76,12 @@
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
+<script src="src/lib/learnerPlanView.js"></script>
 <script>
 (function () {
+  function escapeHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
   const gradeList = grades();
   const sum = document.getElementById('sum');
   const tables = document.getElementById('tables');
@@ -120,8 +126,8 @@
         + '<div class="rem-box music-box"><strong>המנגנון המוזיקלי המתקן:</strong>' + p.musicalMechanism + '</div>'
         + '</div>'
         + '<p class="note" style="margin-top:8px;">סילבוס רשמי: ' + p.syllabusRef + '</p>'
-        + '<button type="button" class="sound-btn" data-action="' + p.exerciseRef + '">השמעת המחשה מוזיקלית</button>'
-        + '<div class="status-sound" id="status-' + p.exerciseRef + '"></div>'
+        + '<button type="button" class="sound-btn" data-action="' + p.exerciseRef + '" aria-label="השמעת המחשה מוזיקלית: ' + escapeHtml(p.topicHe) + '" aria-describedby="status-' + p.exerciseRef + '">השמעת המחשה מוזיקלית</button>'
+        + '<div class="status-sound" id="status-' + p.exerciseRef + '" role="status" aria-live="polite"></div>'
         + '</div>';
     }).join('');
 
@@ -181,6 +187,13 @@
         playTone(440, 0.20, 0.6); // eighth
         playTone(440, 0.20, 0.9); // eighth
         setTimeout(function () { if (status) status.textContent = 'שמינית נשמעת ונמשכת בדיוק חצי מרבע.'; }, 1400);
+      } else if (action === 'metroLoop') {
+        if (status) status.textContent = 'משמיע: לולאת מקצב קבועה לשינון כפולות — 4 פעימות טמפו מדויקות';
+        playTone(330, 0.12, 0, 'triangle');
+        playTone(330, 0.12, 0.35, 'triangle');
+        playTone(330, 0.12, 0.70, 'triangle');
+        playTone(440, 0.22, 1.05, 'sine');
+        setTimeout(function () { if (status) status.textContent = 'הקצב והדפוס השמיעתי מקבעים את סדרת הדילוגים.'; }, 1600);
       } else if (action === 'functionsSlope') {
         if (status) status.textContent = 'משמיע: שיפוע חיובי (צליל נוסק) מול שיפוע שלילי (צליל צונח)';
         playSweep(220, 660, 0.8, 0); // positive slope

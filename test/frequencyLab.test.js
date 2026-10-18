@@ -26,7 +26,10 @@ function runPage() {
       addEventListener(ev, fn) { (this.handlers[ev] = this.handlers[ev] || []).push(fn); },
       appendChild(child) { this.children.push(child); return child; },
       querySelector() { return null; },
-      fire(ev) { (this.handlers[ev] || []).forEach((fn) => fn({ target: this })); },
+      focus() { this.focused = true; },
+      select() { this.selected = true; },
+      click() { this.fire('click'); },
+      fire(ev, payload) { (this.handlers[ev] || []).forEach((fn) => fn(Object.assign({ target: this }, payload))); },
     };
     // Setting an id registers the element, the way the document would.
     Object.defineProperty(el, 'id', {
@@ -143,7 +146,7 @@ test('"play again" repeats the last sound, and every sound stays inside the safe
   assert.ok(out.gains.some((g) => g > 0), 'something actually sounded');
 });
 
-test('checking the octave answer says why, right or wrong', () => {
+test('checking the octave answer says why, right or wrong, and refocuses on error', () => {
   const out = runPage();
   out.get('octAnswer').value = '2:1';
   out.get('octCheck').fire('click');
@@ -152,6 +155,26 @@ test('checking the octave answer says why, right or wrong', () => {
   out.get('octAnswer').value = '3';
   out.get('octCheck').fire('click');
   assert.match(out.get('octFeedback').className, /\bno\b/);
+  assert.equal(out.get('octAnswer').focused, true);
+  assert.equal(out.get('octAnswer').selected, true);
+});
+
+test('typing Enter on octAnswer triggers octave check', () => {
+  const out = runPage();
+  out.get('octAnswer').value = '2:1';
+  out.get('octAnswer').fire('keydown', { key: 'Enter', preventDefault() {} });
+  assert.match(out.get('octFeedback').className, /\bok\b/);
+  assert.match(out.get('octFeedback').textContent, /440/);
+});
+
+test('frequency.html styles aria-pressed buttons and provides semantic footer navigation', () => {
+  const latestPage = fs.readFileSync(path.join(root, 'frequency.html'), 'utf8');
+  assert.match(latestPage, /button\[aria-pressed="true"\]\{background:var\(--purple\);border-color:var\(--purple\);color:#fff\}/);
+  assert.match(latestPage, /footer\{text-align:center/);
+  assert.match(latestPage, /footer a:focus-visible/);
+  assert.match(latestPage, /<footer>[\s\S]*href="index\.html"[\s\S]*חזרה לתרגול[\s\S]*<\/footer>/);
+  assert.match(latestPage, /<footer>[\s\S]*href="curriculum\.html"[\s\S]*כיסוי התוכנית[\s\S]*<\/footer>/);
+  assert.match(latestPage, /<footer>[\s\S]*href="landing\.html"[\s\S]*אודות[\s\S]*<\/footer>/);
 });
 
 // ---------- mobile, RTL and offline guards ----------
