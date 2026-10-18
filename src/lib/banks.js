@@ -91,6 +91,9 @@
     TIMES_MORE: 'שאלת השוואה כפלית — פי כמה',
     AREA_RECT: 'שטח מלבן — שורות × עמודות',
     TIME_MIN_SEC: 'זמן — המרה בין דקות לשניות',
+    ADD_SUB_10K: 'חיבור וחיסור במאוזן ובמאונך עד רבבה',
+    MUL_DIV_10: 'כפל וחילוק ב־10, 100 ו־1,000',
+    WORD_TWO_STEP: 'שאלות מילוליות דו־שלביות',
   };
 
   const SKILL_HE = {
@@ -117,7 +120,7 @@
     // ג׳ and ד׳ carry measurement items (minutes and area; unit changes and
     // the calendar). The skill has to be listed here too, or the diagnostic —
     // and with it the personal practice plan it feeds — never reaches them.
-    'ג': ['multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement'],
+    'ג': ['addition', 'subtraction', 'multiplication', 'division', 'place_value', 'word_problems', 'geometry', 'measurement'],
     'ד': ['basic_fractions', 'geometry', 'measurement'],
     'ה': ['fractions', 'decimals', 'data'],
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
@@ -207,6 +210,7 @@
       clock: extra.clock,
       chart: extra.chart,
       vert: extra.vert,
+      g1: extra.g1,
       g2: extra.g2,
       g3: extra.g3,
       typed: extra.typed,
@@ -1225,7 +1229,7 @@
   // 3. Patterns AB / AAB / ABC (melody & visual)
   // 4. Number line as scale (steps & octave jumps)
   RAW.push(
-    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1 }),
+    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1, widget: 'g1', g1: { kind: 'beats', from: 2, step: 2, accents: 4 } }),
     I('א', 'counting', 'מקצב דילוגי 2: 8, 10, 12, ?', 14, 'הפעימה הבאה היא עוד 2', { standard: ST.SKIP2, level: 1 }),
     I('א', 'counting', 'מקצב דילוגי 2: 14, 16, 18, ?', 20, 'עוד 2 מגיעים ל־20', { standard: ST.SKIP2, level: 2 }),
     I('א', 'counting', 'מקצב דילוגי 2 מ־50: 52, 54, 56, ?', 58, 'מוסיפים 2 לפעימה', { standard: ST.SKIP2, level: 2 }),
@@ -1238,7 +1242,7 @@
     I('א', 'counting', 'מקצב עשרות: 70, 80, 90, ?', 100, 'העשרת שמגיעה למאה', { standard: ST.GROUP10, level: 2 }),
     I('א', 'counting', 'ספירה אחורה במקצב: 50, 48, 46, ?', 44, 'דילוג 2 אחורה', { standard: ST.SKIP2, level: 3 }),
 
-    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1 }),
+    I('א', 'counting', 'בלוח המאה: 3 צלילי עשרות נמוכים ועוד 4 נקישות יחידות — איזה מספר זה?', 34, '3 עשרות (30) ועוד 4 יחידות', { standard: ST.CHART100, level: 1, widget: 'g1', g1: { kind: 'chart100', number: 34 } }),
     I('א', 'counting', 'בלוח המאה: 2 עשרות ו־5 יחידות — איזה מספר נשמע?', 25, '20 ועוד 5', { standard: ST.CHART100, level: 1 }),
     I('א', 'counting', 'בלוח המאה: 4 עשרות ו־2 יחידות — איזה מספר זה?', 42, '40 ועוד 2', { standard: ST.CHART100, level: 1 }),
     I('א', 'counting', 'בלוח המאה: 5 עשרות ו־0 יחידות — איזה מספר נשמע?', 50, '5 עשרות שלמות ללא יחידות', { standard: ST.CHART100, level: 1 }),
@@ -1251,7 +1255,7 @@
     I('א', 'counting', 'בלוח המאה: 9 עשרות ו־9 יחידות — איזה מספר זה?', 99, '90 ועוד 9', { standard: ST.CHART100, level: 3 }),
     I('א', 'counting', 'בלוח המאה: 10 עשרות ו־0 יחידות — איזה מספר נשמע?', 100, '10 עשרות הן מאה שלמה', { standard: ST.CHART100, level: 3 }),
 
-    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1 }),
+    I('א', 'counting', 'דגם צלילי וצורני AB: 🥁 🔔 🥁 🔔 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי תוף בא פעמון', { standard: ST.PATTERN, level: 1, widget: 'g1', g1: { kind: 'pattern', type: 'AB', length: 6 } }),
     I('א', 'counting', 'סדרה צורנית AB: ⭐ 🌙 ⭐ 🌙 — מה הבא? (1=⭐, 2=🌙)', 1, 'הדגם חוזר לכוכב', { standard: ST.PATTERN, level: 1 }),
     I('א', 'counting', 'דגם מוזיקלי AB: גבוה, נמוך, גבוה, נמוך — איזה צליל הבא? (1=גבוה, 2=נמוך)', 1, 'הצליל הבא הוא גבוה', { standard: ST.PATTERN, level: 1 }),
     I('א', 'counting', 'דגם AAB: 🥁 🥁 🔔 🥁 🥁 — מה הבא בתור? (1=🥁, 2=🔔)', 2, 'אחרי שני תופים בא פעמון', { standard: ST.PATTERN, level: 2 }),
@@ -1409,6 +1413,59 @@
     MEAS('ד', 'קנייה של 350 אגורות ועוד קנייה של 6 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 10, '350 אגורות הם 3 ₪ ו־50 אגורות', 3, ST.MONEY)
   );
 
+  // ---------- השלמת כיסוי א׳–ב׳–ג׳ לדמו ברנקו וייס (#356) ----------
+  RAW.push(
+    // כיתה א׳ — מצבי חיבור/חיסור מחיי יום־יום (איסוף, הוספה, הפרדה, גריעה, השוואה)
+    I('א', 'word_problems', 'על המדף היו 5 ספרים, והוספנו עוד 3 ספרים. כמה ספרים על המדף עכשיו?', 8, 'הוספה: 5 ועוד 3', { standard: ST.WORD_COLLECT, wordType: 'collect', level: 1 }),
+    I('א', 'word_problems', 'בסלסילה היו 9 תפוחים, ואכלנו 4 מהם. כמה תפוחים נשארו?', 5, 'גריעה: 9 פחות 4', { standard: ST.WORD_REMOVE, wordType: 'remove', level: 2 }),
+    I('א', 'word_problems', 'לנועה 12 מדבקות ולרועי 7 מדבקות. בכמה מדבקות יש לנועה יותר מלרועי?', 5, 'השוואה: 12 פחות 7', { standard: ST.WORD_COMPARE, wordType: 'compare', level: 3 }),
+
+    // כיתה ב׳ — קריאת טבלת נתונים
+    I('ב', 'data', 'בטבלת החוגים רשומים: כדורגל — 12 תלמידים, מוזיקה — 8 תלמידים, ציור — 5 תלמידים. כמה תלמידים בחוג המוזיקה?', 8, 'קוראים את השורה של מוזיקה בטבלה', { strand: STRAND.DATA, standard: ST.TABLE, level: 1 }),
+    I('ב', 'data', 'בטבלת השאלת ספרים: יום א׳ — 10, יום ב׳ — 14, יום ג׳ — 6. כמה ספרים הושאלו בימים א׳ ו־ג׳ יחד?', 16, '10 ועוד 6', { strand: STRAND.DATA, standard: ST.TABLE, level: 2 }),
+    I('ב', 'data', 'בטבלת נקודות: קבוצה א׳ — 25, קבוצה ב׳ — 18. בכמה נקודות מובילה קבוצה א׳?', 7, '25 פחות 18', { strand: STRAND.DATA, standard: ST.TABLE, level: 3 }),
+
+    // כיתה ג׳ — פריסה עשרונית מלאה עד 10,000
+    G3('place_value', '3,000 + 400 + 20 + 5 = ?' + NO_COMMA, 3425, '3 אלפים, 4 מאות, 2 עשרות ו־5 יחידות', { standard: ST.NUM10K, level: 1 }),
+    G3('place_value', '6,000 + 80 + 9 = ?' + NO_COMMA, 6089, 'אין מאות — כותבים 0 במקום המאות', { standard: ST.NUM10K, level: 2 }),
+    G3('place_value', '4 אלפים ועוד 15 מאות שווים לאיזה מספר?' + NO_COMMA, 5500, '15 מאות הן 1,500, ועוד 4,000', { standard: ST.NUM10K, level: 3 }),
+
+    // כיתה ג׳ — חיבור במאוזן ובמאונך עד רבבה (10,000)
+    I('ג', 'addition', '1,200 + 500 = ?' + NO_COMMA, 1700, 'מחברים מאות: 200 ועוד 500', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'addition', '2,340 + 1,250 = ?' + NO_COMMA, 3590, 'אלפים עם אלפים, מאות עם מאות, עשרות עם עשרות', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'addition', 'חשבו במאונך: 1,423 + 2,354' + NO_COMMA, 3777, 'מחברים טור־טור מימין לשמאל ללא המרה', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 1423, b: 2354, op: '+' }, level: 1 }),
+    I('ג', 'addition', '3,680 + 450 = ?' + NO_COMMA, 4130, '680 ועוד 450 עוברים אלף', { standard: ST.ADD_SUB_10K, level: 2 }),
+    I('ג', 'addition', 'חשבו במאונך: 2,475 + 1,368' + NO_COMMA, 3843, 'עם המרה בעשרות ובמאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 2475, b: 1368, op: '+' }, level: 2 }),
+    I('ג', 'addition', 'חשבו במאונך: 4,560 + 2,740' + NO_COMMA, 7300, '60+40=100, 500+700+100=1,300', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 4560, b: 2740, op: '+' }, level: 2 }),
+    I('ג', 'addition', '6,450 + 3,550 = ?' + NO_COMMA, 10000, '450 ועוד 550 משלימים ל־1,000, וביחד 10,000', { standard: ST.ADD_SUB_10K, level: 3 }),
+    I('ג', 'addition', 'חשבו במאונך: 5,847 + 3,695' + NO_COMMA, 9542, 'המרה ביחידות, בעשרות ובמאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 5847, b: 3695, op: '+' }, level: 3 }),
+    I('ג', 'addition', 'חשבו במאונך: 4,999 + 1,001' + NO_COMMA, 6000, '999 ועוד 1 הם 1,000', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 4999, b: 1001, op: '+' }, level: 3 }),
+
+    // כיתה ג׳ — חיסור במאוזן ובמאונך עד רבבה (10,000)
+    I('ג', 'subtraction', '3,800 − 600 = ?' + NO_COMMA, 3200, '800 פחות 600 הם 200', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'subtraction', '4,750 − 1,230 = ?' + NO_COMMA, 3520, 'מחסרים אלפים, מאות ועשרות ללא פריטה', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 5,864 − 2,341' + NO_COMMA, 3523, 'מחסרים טור־טור ללא פריטה', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 5864, b: 2341, op: '-' }, level: 1 }),
+    I('ג', 'subtraction', '5,200 − 450 = ?' + NO_COMMA, 4750, 'פורטים אלף אחד ל־10 מאות', { standard: ST.ADD_SUB_10K, level: 2 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 6,420 − 2,185' + NO_COMMA, 4235, 'פריטה מעשרות וממאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 6420, b: 2185, op: '-' }, level: 2 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 7,315 − 3,640' + NO_COMMA, 3675, 'פריטה מאלפים למאות', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 7315, b: 3640, op: '-' }, level: 2 }),
+    I('ג', 'subtraction', '10,000 − 2,400 = ?' + NO_COMMA, 7600, '10 אלפים פחות 2 אלפים ו־400', { standard: ST.ADD_SUB_10K, level: 3 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 8,004 − 3,527' + NO_COMMA, 4477, 'פריטה רצופה על פני אפסים', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 8004, b: 3527, op: '-' }, level: 3 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 9,000 − 4,635' + NO_COMMA, 4365, 'משלימים ל־9,000', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 9000, b: 4635, op: '-' }, level: 3 }),
+
+    // כיתה ג׳ — כפל וחילוק ב־10, 100, 1,000
+    G3('division', '45 × 10 = ?', 450, 'כפל ב־10 מוסיף אפס מימין (עשרות)', { standard: ST.MUL_DIV_10, level: 1 }),
+    G3('division', '700 : 10 = ?', 70, 'חילוק ב־10 מוריד עשרה אחת', { standard: ST.MUL_DIV_10, level: 1 }),
+    G3('division', '36 × 100 = ?' + NO_COMMA, 3600, '36 מאות הן 3,600', { standard: ST.MUL_DIV_10, level: 2 }),
+    G3('division', '4,800 : 100 = ?', 48, 'כמה מאות יש ב־4,800?', { standard: ST.MUL_DIV_10, level: 2 }),
+    G3('division', '9 × 1,000 = ?' + NO_COMMA, 9000, '9 אלפים', { standard: ST.MUL_DIV_10, level: 3 }),
+    G3('division', '8,000 : 1,000 = ?', 8, 'כמה אלפים יש ב־8,000?', { standard: ST.MUL_DIV_10, level: 3 }),
+
+    // כיתה ג׳ — שאלות מילוליות דו־שלביות
+    G3('word_problems', 'במופע 4 שורות של 6 נגנים, ועל הבמה עוד 5 זמרים. כמה מופיעים בסך הכול?', 29, 'שלב א׳: 4 × 6 = 24; שלב ב׳: 24 + 5 = 29', { standard: ST.WORD_TWO_STEP, table: 6, level: 1 }),
+    G3('word_problems', 'לכיתה היו 50 כרטיסים. חילקו 3 קבוצות של 8 כרטיסים. כמה כרטיסים נשארו?', 26, 'שלב א׳: 3 × 8 = 24; שלב ב׳: 50 − 24 = 26', { standard: ST.WORD_TWO_STEP, table: 8, level: 2 }),
+    G3('word_problems', 'קנינו 4 חוברות תווים ב־9 ₪ כל אחת, ושילמנו בשטר של 50 ₪. כמה עודף קיבלנו?', 14, 'שלב א׳: 4 × 9 = 36; שלב ב׳: 50 − 36 = 14', { standard: ST.WORD_TWO_STEP, table: 9, level: 3 })
+  );
+
   // ---------- כיתה ה׳ · מספרים מעורבים (#96) ----------
   // Appended last on purpose: ids are RAW indexes, so every item above keeps
   // the id a teacher report already holds.
@@ -1478,6 +1535,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.vert) it.vert = raw.vert;
+    if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;

@@ -73,7 +73,7 @@
   }
 
   function isSonifyPage(here) {
-    return here === 'functions.html' || here === '807.html';
+    return here === 'functions.html' || here === '807.html' || here === 'frequency.html';
   }
 
   // The teacher who opens the demo, the coverage page or the offer sees one
@@ -93,7 +93,8 @@
       ? '<span class="mm-prod-split" aria-hidden="true">|</span>'
         + '<span class="mm-prod on"><span class="mm-prod-label">סוניפיקציה · חט״ב/תיכון</span>'
         + link('functions.html', 'שומעים פונקציה') + ' · '
-        + link('807.html', 'גדילה ודעיכה') + '</span>'
+        + link('807.html', 'גדילה ודעיכה') + ' · '
+        + link('frequency.html', 'מעבדת תדרים') + '</span>'
       : '';
     return '<span class="mm-brand">♫ MelodyMath</span>'
       + elementary
@@ -238,7 +239,7 @@
       const on = !!prefs[pair[0]];
       html += '<button type="button" data-acc="' + pair[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + pair[1] + '</button>';
     });
-    html += '<button type="button" id="mm-speak-now">השמע תרגיל</button>';
+    html += '<button type="button" id="mm-speak-now" hidden disabled>השמע תרגיל</button>';
     html += '<button type="button" id="mm-hear" hidden disabled>השמע פעימות</button>';
     bar.innerHTML = html;
     const nav = document.getElementById('mm-site-nav');

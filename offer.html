@@ -33,16 +33,18 @@
   label{display:block;font-weight:700;font-size:.88rem;margin:12px 0 0}
   label.check{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:16px}
   label.check input{width:auto;margin-top:5px}
-  input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px}
+  input,select{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-  button,.btn{border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}
+  button,.btn{border:0;border-radius:12px;padding:12px 18px;min-height:44px;min-width:44px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
   .primary{background:var(--green);color:#fff}
-  .primary:hover{background:var(--green-d)}
+  .primary:hover:not(:disabled){background:var(--green-d)}
   .ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  button:disabled,.btn:disabled{opacity:.5;cursor:not-allowed}
   .status{min-height:1.4em;margin:10px 0 0;font-weight:700;color:var(--green-d)}
   .status.err{color:#9b1c1c}
   #letterPreview{white-space:pre-wrap;overflow-wrap:anywhere;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:.95rem;min-height:8em}
+  #letterPreview:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
   .onepager{border:1px solid var(--line);border-radius:12px;padding:22px 24px;background:#fff}
   .onepager .kicker{font-weight:800;color:var(--teal);margin:0 0 8px}
   .onepager h1{font-size:1.45rem}
@@ -52,6 +54,8 @@
   .mm-contact-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
   .mm-contact-note{color:var(--muted);font-size:.92rem;margin:12px 0 0}
   footer{padding:24px 0 40px;color:var(--muted);font-size:.86rem;text-align:center;border-top:1px solid var(--line)}
+  footer a{color:var(--green-d);font-weight:700;text-decoration:none;margin:0 4px}
+  footer a:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#132a26;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
@@ -67,6 +71,7 @@
     .onepager{border:0;padding:0}
   }
 </style>
+<link rel="stylesheet" href="src/sefirot.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
@@ -155,7 +160,7 @@
   <div id="letterBox" class="card" style="margin-top:20px;background:#fff">
     <h3>המכתב שיוצא</h3>
     <p id="letterHint" class="lead" style="margin:0 0 10px;font-size:.95rem">מלאו שם, בית ספר ושכבה — ואז «הצגת המכתב».</p>
-    <pre id="letterPreview" aria-live="polite"></pre>
+    <pre id="letterPreview" tabindex="0" role="region" aria-label="תצוגה מקדימה של המכתב" aria-live="polite"></pre>
   </div>
 </div></section>
 
@@ -173,7 +178,7 @@
 </div></section>
 
 </main>
-<footer><div class="wrap">MelodyMath · ניסוי כיתתי חינם · <a href="./">לדמו</a> · <a href="landing.html">אודות</a></div></footer>
+<footer><div class="wrap">MelodyMath · ניסוי כיתתי חינם · <a href="./">תרגול יסודי</a> · <a href="curriculum.html">כיסוי תוכנית</a> · <a href="functions.html">שומעים פונקציה</a> · <a href="807.html">שאלון 807</a> · <a href="landing.html">אודות</a></div></footer>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/contact.js"></script>
 <script src="src/lib/offer.js"></script>
@@ -235,9 +240,16 @@
     e.preventDefault();
     const mail = paint(readForm());
     $('formStatus').className = 'status' + (mail.ok ? '' : ' err');
-    $('formStatus').textContent = mail.ok
-      ? 'המכתב מוכן. בדקו אותו לפני השליחה — הוא לא נשלח מעצמו.'
-      : 'מלאו שם, בית ספר ושכבה.';
+    if (mail.ok) {
+      $('formStatus').textContent = 'המכתב מוכן. בדקו אותו לפני השליחה — הוא לא נשלח מעצמו.';
+      if ($('openMail')) $('openMail').focus();
+    } else {
+      $('formStatus').textContent = 'מלאו שם, בית ספר ושכבה.';
+      if (mail.missing && mail.missing.length > 0) {
+        const firstMissing = $(mail.missing[0]);
+        if (firstMissing) firstMissing.focus();
+      }
+    }
   });
 
   if (!PROJECT_MAIL) {
