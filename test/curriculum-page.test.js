@@ -27,17 +27,22 @@ function scriptTags(html) {
 }
 
 // Run curriculum.html's scripts the way the browser does: every <script src> in
-// order, then the inline script, against a document that only has #sum and #tables.
+// order, then the inline script, against a document that has the relevant containers.
 // readyState 'loading' keeps core.js from installing the site chrome.
 function runPage() {
-  const els = { sum: { innerHTML: '' }, tables: { innerHTML: '' } };
+  const els = {
+    sum: { innerHTML: '' },
+    tables: { innerHTML: '' },
+    'remediation-tables': { innerHTML: '', addEventListener: function () {} },
+    'research-cards': { innerHTML: '' },
+  };
   const document = {
     readyState: 'loading',
     addEventListener: function () {},
     getElementById: function (id) { return els[id] || null; },
   };
   const ctx = vm.createContext({ document: document });
-  const scripts = scriptTags(page);
+  const scripts = scriptTags(fs.readFileSync(path.join(root, 'curriculum.html'), 'utf8'));
   assert.ok(scripts.some((m) => !m[1] && m[2].trim()), 'the page has an inline script');
   scripts.forEach(function (m) {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
@@ -54,4 +59,30 @@ test('curriculum.html page script runs without throwing and renders every matrix
   assert.equal((els.tables.innerHTML.match(/<tr><td>/g) || []).length, cur.coverageMatrix().length);
   assert.match(els.tables.innerHTML, /class="st-gap"/);
   assert.match(els.tables.innerHTML, /class="st-covered"/);
+});
+
+test('curriculum.html enforces minimum 44px touch targets and high-contrast focus outline on sound buttons', () => {
+  const freshPage = fs.readFileSync(path.join(root, 'curriculum.html'), 'utf8');
+  assert.match(freshPage, /\.sound-btn\s*\{[^}]*min-height:\s*44px/);
+  assert.match(freshPage, /\.sound-btn\s*\{[^}]*min-width:\s*44px/);
+  assert.match(freshPage, /\.sound-btn:focus-visible\s*\{[^}]*outline:\s*3px\s+solid\s+var\(--ink\)/);
+});
+
+test('curriculum.html remediation cards provide accessible sound buttons with topic labels and live status', () => {
+  const rem = require('../src/lib/remediation');
+  const els = runPage();
+  const html = els['remediation-tables'].innerHTML;
+  assert.ok(html, 'remediation cards rendered');
+  const count = rem.getAllFailurePoints().length;
+  const btnMatches = html.match(/<button[^>]*class="sound-btn"/g) || [];
+  assert.equal(btnMatches.length, count);
+  assert.match(html, /aria-label="השמעת המחשה מוזיקלית:/);
+  assert.match(html, /aria-describedby="status-bar44"/);
+  assert.match(html, /id="status-bar44"[^>]*role="status"[^>]*aria-live="polite"/);
+});
+
+test('curriculum.html wires metroLoop action for multiplication fluency remediation', () => {
+  const freshPage = fs.readFileSync(path.join(root, 'curriculum.html'), 'utf8');
+  assert.match(freshPage, /action\s*===\s*'metroLoop'/);
+  assert.match(freshPage, /לולאת מקצב קבועה לשינון כפולות/);
 });

@@ -76,6 +76,16 @@ test('currentPromptText reads the visible class-mode prompt first', () => {
   assert.equal(access.currentPromptText({ querySelector: () => null }), '');
 });
 
+test('currentPromptText reads the unit-check quiz prompt', () => {
+  const nodes = {
+    '#quiz:not(.hidden) #quizPrompt': { textContent: ' 3 + 4 = ? ' },
+  };
+  const doc = {
+    querySelector: (sel) => nodes[sel] || null,
+  };
+  assert.equal(access.currentPromptText(doc), '3 + 4 = ?');
+});
+
 test('class mode hides the countdown from the child unless the teacher asks for it', () => {
   // TTRS parents' main complaint is the timer; the pitch here is «בלי טיימר».
   assert.equal(access.classClockVisible(memory()), false);

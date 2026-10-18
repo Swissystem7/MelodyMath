@@ -163,21 +163,21 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
   body{background:#fff!important;color:#000!important}
   .card{box-shadow:none!important;border:0!important}
   .print-only{display:block!important}
-  #trialKit{display:none!important}
+  #trialKit,#worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard,#ramaCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
-  body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard{display:none!important}
-  #worksheetCard{display:none!important}
+  body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard,body.print-kit #lessonCard,body.print-kit #ramaCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
-  body.print-sheet #trialKit,body.print-sheet #reportCard,body.print-sheet #classBoardCard,body.print-sheet #parentCard,body.print-sheet #certCard{display:none!important}
-  #classBoardCard,#parentCard{display:none!important}
+  body.print-sheet #trialKit,body.print-sheet #reportCard,body.print-sheet #classBoardCard,body.print-sheet #parentCard,body.print-sheet #certCard,body.print-sheet #lessonCard,body.print-sheet #ramaCard{display:none!important}
   body.print-class #classBoardCard{display:block!important}
-  body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard,body.print-class #certCard{display:none!important}
+  body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard,body.print-class #certCard,body.print-class #lessonCard,body.print-class #ramaCard{display:none!important}
   body.print-parent #parentCard,body.print-parent #parentLetter{display:block!important}
-  body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard,body.print-parent #certCard{display:none!important}
+  body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard,body.print-parent #certCard,body.print-parent #lessonCard,body.print-parent #ramaCard{display:none!important}
   body.print-cert #certCard,body.print-cert #certSheet{display:block!important}
-  body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard{display:none!important}
-  #certCard{display:none!important}
-  body.print-cert #certCard{display:block!important}
+  body.print-cert #trialKit,body.print-cert #reportCard,body.print-cert #classBoardCard,body.print-cert #parentCard,body.print-cert #worksheetCard,body.print-cert #lessonCard,body.print-cert #ramaCard{display:none!important}
+  body.print-lesson #lessonCard,body.print-lesson #lessonPlans{display:block!important}
+  body.print-lesson #trialKit,body.print-lesson #reportCard,body.print-lesson #classBoardCard,body.print-lesson #parentCard,body.print-lesson #worksheetCard,body.print-lesson #certCard,body.print-lesson #ramaCard{display:none!important}
+  body.print-rama #ramaCard,body.print-rama #ramaSheet{display:block!important}
+  body.print-rama #trialKit,body.print-rama #reportCard,body.print-rama #classBoardCard,body.print-rama #parentCard,body.print-rama #worksheetCard,body.print-rama #certCard,body.print-rama #lessonCard{display:none!important}
   #teacherReport.panel{display:block!important}
   #firstRun,.first-run{display:none!important}
   .sheet-item{border-color:#999}
