@@ -28,6 +28,12 @@ test('the path runs א׳ through ו׳ and a finished grade opens the next one', 
   assert.match(plan.bridgeSentence(), /א׳ עד ו׳/);
   assert.match(plan.bridgeSentence(), /פער נשאר פער/);
 });
+test('paceFor correctly looks up the pace and source', () => {
+  const pace = plan.paceFor('לוח כפל');
+  assert.equal(pace[3], '4–8');
+  assert.equal(pace[4], 'הערכה');
+  plan.PACE.forEach((p) => assert.ok(p[4]));
+});
 test('each grade א׳–ג׳ starts on one music reinforcement, with a real source', () => {
   ['א', 'ב', 'ג'].forEach((g) => {
     const p = plan.buildLearnerPlan({ grade: g, now: NOW });
@@ -43,6 +49,7 @@ test('each grade א׳–ג׳ starts on one music reinforcement, with a real sour
     assert.match(html, /data-branch="fresh"/);
     assert.match(html, /dir="rtl"/);
     assert.match(html, /role="progressbar"/);
+    assert.match(html, /טווח טיפוסי/);
     assert.doesNotMatch(html, /שולט|יעילות|טיפול|משפר מתמטיקה ב/);
     assert.match(html, /אין טענה שהקצב משפר מתמטיקה/);
   });

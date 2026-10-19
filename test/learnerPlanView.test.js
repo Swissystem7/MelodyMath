@@ -16,6 +16,15 @@ test('csv is a local nickname sheet', () => {
   assert.match(quoted, /"א,ב"/);
 });
 
+test('each slot contains .mm-plan-why', () => {
+  const root = path.join(__dirname, '..');
+  const src = fs.readFileSync(path.join(root, 'src/lib/learnerPlanView.js'), 'utf8');
+  assert.match(src, /class="mm-plan-why"/);
+  view.SLOTS.forEach(id => {
+    assert.match(src, new RegExp(id));
+  });
+});
+
 test('the plan card is wired on every practice surface and the palette file is cached', () => {
   const root = path.join(__dirname, '..');
   const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');

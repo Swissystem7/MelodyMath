@@ -1,0 +1,44 @@
+> ## PRECISE SPEC (rewritten by lead-qa, 18.10 — supersedes the text below; #422 is a duplicate of this issue)
+>
+> **Already on master:** `src/lib/learnerPlan.js` builds a one-topic plan with a fixed pace (3 sessions × 8 min/week), an adult sentence (`adultNote`) and a progress count; `learnerPlanView.js` mounts the card on all 7 tabs and in the class board. **Missing:** (1) a per-topic *expected pace range with a source* instead of the single fixed 3×8; (2) one plain-Hebrew sentence per tab.
+>
+> **Task 1 — pace ranges (1 file + 1 test, ≤ 120 lines).** In `src/lib/learnerPlan.js`, next to `HOOKS` (line 14), add:
+> ```js
+> // [topic fragment, sessions/week, minutes/session, weeks-range, source-label]
+> const PACE = [
+>   ['ספירה עד 100', 3, 8, '2–4', 'הערכה'],
+>   ['מנייה עד 100', 3, 8, '2–4', 'הערכה'],
+>   ['ישר המספרים', 3, 8, '2–3', 'הערכה'],
+>   ['בתחום 10', 3, 8, '3–5', 'הערכה'],
+>   ['דו־ספרתי', 3, 8, '3–5', 'הערכה'],
+>   ['כפולות 2', 3, 8, '2–3', 'הערכה'],
+>   ['לוח כפל', 3, 8, '4–8', 'הערכה'],
+>   ['שארית', 3, 8, '2–4', 'הערכה'],
+>   ['1/2, 1/4, 1/8', 3, 8, '4–6', 'Azaryahu et al. 2020 (12 מפגשים)'],
+> ];
+> ```
+> and a function `paceFor(topic)` (same lookup style as `hookFor`), defaulting to `[3, 8, '—', 'הערכה']`. Thread `weeksRange` + `paceSource` into the object returned by `buildLearnerPlan` (keep `paceExpected = sessions/week` so the existing progress bar is unchanged). Any value without a published source **must** be labeled `הערכה` — no invented numbers.
+>
+> **Task 2 — card text (1 file).** In `renderLearnerPlanHtml` (`src/lib/learnerPlan.js`), append to the adult sentence: `'טווח טיפוסי: ' + weeksRange + ' שבועות (' + paceSource + ').'` and keep the existing disclaimer `NOTE` line untouched.
+>
+> **Task 3 — one sentence per tab (1 file, 7 strings).** In `src/lib/learnerPlanView.js` add `const TAB_WHY = { remediation: 'כאן בודקים מה חסר ומתרגלים את זה.', lessons: 'שיעור קצר עם צליל לפני התרגול.', practice: 'תרגול קצב ושברים.', playground: 'משחק חופשי בצליל — לא נמדד.', classMode: 'מפגש 8 דקות לקבוצה.', beatMode: 'תשובה בקצב הפעימה.', teacherReport: 'מה נרשם במכשיר, בלי ציון.' }` and render it as a `<p class="mm-plan-why">` under the card in each slot.
+>
+> **Tests:** `test/learnerPlan.test.js` — `paceFor('לוח כפל')` → weeks `'4–8'`, source `'הערכה'`; every PACE row has a non-empty source; `renderLearnerPlanHtml` output contains `טווח טיפוסי`. `test/learnerPlanView*.test.js` — each slot contains `.mm-plan-why`.
+>
+> **Design:** only tokens from `src/sefirot.css` (`--muted` for the why-line, `--confidence` for the progress bar, no new colors).
+>
+> Effort S · labels: factory:lenovo kind:small priority:top
+
+---
+חלק מ-docs/WORKPLAN.md (PR #420). דדליין: 20.10.
+
+בקשת הבעלים: כל תוכנית וכל פיצ'ר מסבירים להורים ולמורים על מה הילד עובד ומה קצב ההתקדמות הצפוי, עם מד התקדמות מול הקצב הצפוי.
+
+לעשות (PRs עד 400 שורות):
+1. `src/lib/pace.js`: לכל נושא ב-curriculum.js קצב צפוי (שבועות/מפגשים עד שליטה) עם מקור. בלי מקור = 'הערכה' במפורש.
+2. מד התקדמות בתוכנית האישית (#357/#383) ובדוח המורה (#418): 'בקצב / מעל / צריך תמיכה'.
+3. משפט אחד בעברית פשוטה לכל פיצ'ר ותוכנית: 'על מה הילד עובד ולמה', להורים ולמורים.
+4. מינימלי: שורה אחת ומד אחד, בלי גרפים מעמיסים. כנות: בלי הבטחות תוצאה.
+5. בדיקות unit.
+
+מקור מחקר: פרומפטי Perplexity `A1-MelodyMath-AdaptivePlan` ו-`A0-MelodyMath-Meitzav-Music`. תיאום עם Cursor bc-e3037224.

@@ -55,6 +55,23 @@
     'ה': { fractions: 'הרחבה, צמצום', dec: 'עשרוניים' },
     'ו': { fractions: 'כפל וחילוק שברים', percent: 'אחוזים', dec: 'עשרוניים', data: 'ממוצע' },
   };
+  // [topic fragment, sessions/week, minutes/session, weeks-range, source-label]
+  const PACE = [
+    ['ספירה עד 100', 3, 8, '2–4', 'הערכה'],
+    ['מנייה עד 100', 3, 8, '2–4', 'הערכה'],
+    ['ישר המספרים', 3, 8, '2–3', 'הערכה'],
+    ['בתחום 10', 3, 8, '3–5', 'הערכה'],
+    ['דו־ספרתי', 3, 8, '3–5', 'הערכה'],
+    ['כפולות 2', 3, 8, '2–3', 'הערכה'],
+    ['לוח כפל', 3, 8, '4–8', 'הערכה'],
+    ['שארית', 3, 8, '2–4', 'הערכה'],
+    ['1/2, 1/4, 1/8', 3, 8, '4–6', 'Azaryahu et al. 2020 (12 מפגשים)'],
+  ];
+  function paceFor(topic) {
+    const text = String(topic || '');
+    for (let i = 0; i < PACE.length; i++) if (text.indexOf(PACE[i][0]) !== -1) return PACE[i];
+    return [3, 8, '—', 'הערכה'];
+  }
   function hookFor(topic) {
     const text = String(topic || '');
     for (let i = 0; i < HOOKS.length; i++) if (text.indexOf(HOOKS[i][0]) !== -1) return HOOKS[i][1];
@@ -174,12 +191,14 @@
   function pack(s) {
     const who = s.name ? s.name + ' · ' : '';
     const moved = s.advanced ? ' הנושא הקודם מולא. עכשיו נושא אחד חדש.' : '';
+    const pace = paceFor(s.topic);
     return {
       ok: true, branch: s.branch, grade: s.grade, topic: s.topic, hook: s.hook, name: s.name || '',
       childLine: 'היום: ' + s.topic + '. ' + s.hook + '.',
       adultLine: who + s.topic + '. ' + s.why + moved + ' הקצב: ' + s.expected + ' מפגשים של 8 דקות השבוע. התקדמות: ' + s.done + ' מתוך ' + s.expected + '.',
       boardLine: s.topic + ' · ' + s.done + '/' + s.expected,
       paceExpected: s.expected, paceDone: s.done, minutes: 8,
+      weeksRange: pace[3], paceSource: pace[4],
       sourceTitle: s.sourceTitle || '', sourceUrl: s.sourceUrl || '', why: s.why,
       nextGrade: s.nextGrade || '', nextTopic: s.nextTopic || '', disclaimer: NOTE,
       gaps: s.gaps || [], diagPercent: s.diagPercent == null ? '' : s.diagPercent,
@@ -248,9 +267,10 @@
     const max = p.paceExpected || 0;
     const width = max ? Math.min(100, Math.round(100 * p.paceDone / max)) : 0;
     const source = p.sourceUrl ? '<a class="mm-plan-source" href="' + esc(p.sourceUrl) + '">' + esc(p.sourceTitle) + '</a>' : '';
+    const adultLineWithPace = p.adultLine + ' טווח טיפוסי: ' + p.weeksRange + ' שבועות (' + p.paceSource + ').';
     return '<article class="mm-plan" data-branch="' + esc(p.branch) + '" data-grade="' + esc(p.grade) + '" data-topic="' + esc(p.topic) + '" dir="rtl">'
       + '<p class="mm-plan-kicker">תוכנית אחת</p><h2 class="mm-plan-topic">' + esc(p.childLine) + '</h2>'
-      + '<p class="mm-plan-adult">' + esc(p.adultLine) + '</p><p class="mm-plan-pace">' + (max ? esc(p.paceDone + ' מתוך ' + max + ' מפגשים השבוע') : '') + '</p>'
+      + '<p class="mm-plan-adult">' + esc(adultLineWithPace) + '</p><p class="mm-plan-pace">' + (max ? esc(p.paceDone + ' מתוך ' + max + ' מפגשים השבוע') : '') + '</p>'
       + '<div class="mm-plan-track" role="progressbar" aria-valuemin="0" aria-valuemax="' + max + '" aria-valuenow="' + p.paceDone + '" aria-valuetext="' + esc(p.paceDone + ' מתוך ' + max) + '"><span style="width:' + width + '%"></span></div>'
       + source + '<p class="mm-plan-note">' + esc(p.disclaimer) + '</p></article>';
   }
@@ -258,6 +278,8 @@
     return 'המסלול רציף: הנושא האחרון שיש לו תרגיל בכיתה נפתח אל הנושא הראשון בכיתה הבאה, מא׳ עד ו׳. פער נשאר פער.';
   }
   return {
+    PACE: PACE,
+    paceFor: paceFor,
     learningPath: learningPath,
     buildLearnerPlan: buildLearnerPlan,
     renderLearnerPlanHtml: renderLearnerPlanHtml,
