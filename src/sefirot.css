@@ -34,4 +34,13 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 .mm-plan-track { height: 8px; background: #efe6d6; border-radius: 99px; overflow: hidden; margin: 6px 0 8px; }
 .mm-plan-track > span { display: block; height: 100%; background: var(--confidence); }
 .mm-plan-slot.hidden { display: none; }
+/* The pace meter borrows the plan card. Its accent carries the one status
+   word, so colour and text always say the same thing. */
+.mm-pace { border-inline-start-color: var(--confidence); }
+.mm-pace[data-status="ahead"] { border-inline-start-color: var(--good); }
+.mm-pace[data-status="behind"] { border-inline-start-color: var(--joy); }
+.mm-pace-status { margin: 0 0 6px; font-size: .92rem; }
+.mm-pace-status b { color: var(--confidence); }
+.mm-pace[data-status="ahead"] .mm-pace-status b { color: var(--good); }
+.mm-pace[data-status="behind"] .mm-pace-status b { color: var(--focus); }
 @media print { .mm-plan { break-inside: avoid; } }

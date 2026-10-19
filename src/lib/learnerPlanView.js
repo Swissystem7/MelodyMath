@@ -5,17 +5,18 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const PACE = (typeof module === 'object' && module.exports)
+    ? require('./pace')
+    : (typeof globalThis !== 'undefined' ? globalThis : {});
   const SLOTS = ['remediation', 'lessons', 'practice', 'playground', 'classMode', 'beatMode', 'teacherReport'];
   const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
-  const TAB_WHY = {
-    remediation: 'כאן בודקים מה חסר ומתרגלים את זה.',
-    lessons: 'שיעור קצר עם צליל לפני התרגול.',
-    practice: 'תרגול קצב ושברים.',
-    playground: 'משחק חופשי בצליל — לא נמדד.',
-    classMode: 'מפגש 8 דקות לקבוצה.',
-    beatMode: 'תשובה בקצב הפעימה.',
-    teacherReport: 'מה נרשם במכשיר, בלי ציון.',
-  };
+  // One line per tab: what is practised here and why. pace.js owns the text so
+  // the tabs and the printable cards cannot drift apart; without it, no line.
+  const TAB_WHY = {};
+  SLOTS.forEach(function (id) {
+    const text = typeof PACE.featureIntro === 'function' ? PACE.featureIntro(id) : '';
+    if (text) TAB_WHY[id] = text;
+  });
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) {
