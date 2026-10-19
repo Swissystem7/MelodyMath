@@ -72,6 +72,8 @@
     for (let i = 0; i < HOOKS.length; i++) if (text.indexOf(HOOKS[i][0]) !== -1) return HOOKS[i][1];
     return 'תרגיל קצר אחד מהבנק';
   }
+  // Returns the row without its topic fragment: [sessions/week, minutes/session, weeks-range, source-label].
+  // Index from 0 here, not with the PACE column numbers.
   function paceFor(topic) {
     const text = String(topic || '');
     for (let i = 0; i < PACE.length; i++) if (text.indexOf(PACE[i][0]) !== -1) return [PACE[i][1], PACE[i][2], PACE[i][3], PACE[i][4]];
@@ -266,7 +268,10 @@
     const max = p.paceExpected || 0;
     const width = max ? Math.min(100, Math.round(100 * p.paceDone / max)) : 0;
     const source = p.sourceUrl ? '<a class="mm-plan-source" href="' + esc(p.sourceUrl) + '">' + esc(p.sourceTitle) + '</a>' : '';
-    const adult = esc(p.adultLine) + ' טווח טיפוסי: ' + esc(p.weeksRange || '—') + ' שבועות (' + esc(p.paceSource || 'הערכה') + ').';
+    // A typical range belongs to a topic. The error card has no topic, so it borrows no range.
+    const range = p.ok === false || !p.topic ? ''
+      : ' טווח טיפוסי: ' + esc(p.weeksRange || '—') + ' שבועות (' + esc(p.paceSource || 'הערכה') + ').';
+    const adult = esc(p.adultLine) + range;
     return '<article class="mm-plan" data-branch="' + esc(p.branch) + '" data-grade="' + esc(p.grade) + '" data-topic="' + esc(p.topic) + '" dir="rtl">'
       + '<p class="mm-plan-kicker">תוכנית אחת</p><h2 class="mm-plan-topic">' + esc(p.childLine) + '</h2>'
       + '<p class="mm-plan-adult">' + adult + '</p><p class="mm-plan-pace">' + (max ? esc(p.paceDone + ' מתוך ' + max + ' מפגשים השבוע') : '') + '</p>'
