@@ -110,6 +110,21 @@ test('pace counts only sessions from the last seven days', () => {
   assert.match(html, /aria-valuenow="1"/);
   assert.match(html, /width:33%/);
 });
+test('paceFor looks up ranges and sources, and renderLearnerPlanHtml contains typical range', () => {
+  const mult = plan.paceFor('לוח כפל');
+  assert.equal(mult[2], '4–8');
+  assert.equal(mult[3], 'הערכה');
+
+  assert.ok(plan.PACE.length > 0);
+  plan.PACE.forEach((row) => {
+    assert.ok(typeof row[4] === 'string' && row[4].trim().length > 0, 'non-empty source for ' + row[0]);
+  });
+
+  const p = plan.buildLearnerPlan({ grade: 'ג', now: NOW });
+  const html = plan.renderLearnerPlanHtml(p);
+  assert.match(html, /טווח טיפוסי/);
+});
+
 test('invalid grade and broken rows do not throw and do not look like a plan', () => {
   ['ז', 'constructor', 0, null].forEach((g) => {
     const p = plan.buildLearnerPlan({ grade: g, now: NOW });
@@ -123,4 +138,16 @@ test('invalid grade and broken rows do not throw and do not look like a plan', (
   assert.equal(plan.buildLearnerPlan({ grade: 'א', perSkill: [{ total: NaN, correct: 1, skill: 'מנייה' }] }).branch, 'invalid');
   assert.doesNotThrow(() => plan.buildLearnerPlan(null));
   assert.equal(plan.buildLearnerPlan(null).branch, 'invalid');
+});
+
+test('the error card asks for a grade and claims no typical range', () => {
+  [plan.renderLearnerPlanHtml(plan.buildLearnerPlan({ grade: 'ז', now: NOW })),
+    plan.renderLearnerPlanHtml(null)].forEach((html) => {
+    assert.match(html, /data-branch="invalid"/);
+    assert.match(html, /בחרו כיתה א׳ עד ו׳/);
+    assert.doesNotMatch(html, /טווח טיפוסי/);
+    assert.doesNotMatch(html, /הערכה/);
+  });
+  const real = plan.renderLearnerPlanHtml(plan.buildLearnerPlan({ grade: 'ג', now: NOW }));
+  assert.match(real, /טווח טיפוסי: [^<]*שבועות/);
 });

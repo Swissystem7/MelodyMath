@@ -66,6 +66,48 @@ test('verdict separates a branch cut from the wrong integration branch from a re
   assert.equal(prSize.verdict(292, 292, 400, 292).kind, 'ok');
 });
 
+test('verdict calls a PR whose every file already matches the target superseded', () => {
+  // כל הקבצים זהים ביעד: המיזוג לא יוסיף שורה אחת, ואין מה לפצל.
+  const done = prSize.verdict(537, 0, 400, null, { changed: 537, files: 7 });
+  assert.equal(done.kind, 'superseded');
+  assert.equal(done.ok, false);
+  assert.match(done.message, /537/);
+  assert.match(done.message, /לסגור את ה-PR/);
+
+  // גם מתחת לתקרה זה עדיין PR ריק, ולא «עומד בתקרה».
+  assert.equal(prSize.verdict(120, 0, 400, null, { changed: 120, files: 2 }).kind, 'superseded');
+});
+
+test('verdict separates a partly-landed PR from a real split', () => {
+  // PR #370: 358 מתוך 537 השורות הן ארבעה מסמכים שה-main כבר מחזיק בדיוק,
+  // ולכן נותרו 179 שורות בלבד — מתחת לתקרה (docs/PR-370-SUPERSEDED.md).
+  const partly = prSize.verdict(537, 83, 400, null, { changed: 358, files: 4 });
+  assert.equal(partly.kind, 'partly-landed');
+  assert.equal(partly.ok, false);
+  assert.match(partly.message, /358/);
+  assert.match(partly.message, /179/);
+
+  // כשגם מה שנותר מעל התקרה, הקבצים הזהים לא מצילים אותו — זה פיצול אמיתי.
+  const stillBig = prSize.verdict(1163, 904, 400, null, { changed: 100, files: 3 });
+  assert.equal(stillBig.kind, 'split');
+
+  // בלי מידע על קבצים זהים ההתנהגות לא משתנה בכלל.
+  assert.equal(prSize.verdict(537, 83).kind, 'stale-base');
+  assert.equal(prSize.verdict(537, 83, 400, null, { changed: 0, files: 0 }).kind, 'stale-base');
+});
+
+test('verdict never asks to split a PR whose displayed size is under the ceiling', () => {
+  // auto_merger מודד את המוצג, ומיזוג מחיל רק את דיף שלוש-הנקודות. ענף שנשאר
+  // מאחור מראה דיף שתי-נקודות עצום, וזו לא סיבה לפצל PR של 331 שורות.
+  const behind = prSize.verdict(331, 1226, 400);
+  assert.equal(behind.kind, 'ok');
+  assert.equal(behind.ok, true);
+  assert.match(behind.message, /331 שורות מתוך 400/);
+
+  // גם בסיס חיתוך שגוי לא הופך PR קטן לבעיה.
+  assert.equal(prSize.verdict(331, 1226, 400, 50).kind, 'ok');
+});
+
 test('verdict puts exactly 400 lines inside the ceiling and honours a custom limit', () => {
   assert.equal(prSize.verdict(400, 400).kind, 'ok');
   assert.equal(prSize.verdict(401, 401).kind, 'split');
@@ -103,4 +145,37 @@ test('report adds the branch-only count only when a fork base was given', () => 
   });
   assert.match(text, /של הענף \(origin\/master\.\.\.origin\/factory\/laptop-agy-unitcheck-cancel-a11y\): 50 שורות ב-2 קבצים/);
   assert.match(text, /הבסיס הלא נכון/);
+  assert.doesNotMatch(text, /כבר ביעד/, 'בלי קבצים זהים אין שורת «כבר ביעד»');
+});
+
+test('report names the lines that already sit in the target', () => {
+  const landed = prSize.parseShortstat(' 4 files changed, 358 insertions(+)');
+  const text = prSize.report({
+    branch: 'origin/factory/agy-358-sync-2',
+    base: 'origin/main',
+    displayed: prSize.parseShortstat(' 7 files changed, 537 insertions(+)'),
+    real: prSize.parseShortstat(' 3 files changed, 11 insertions(+), 72 deletions(-)'),
+    landed: landed,
+    verdict: prSize.verdict(537, 83, 400, null, landed),
+  });
+  assert.match(text, /כבר ביעד \(תוכן זהה\): 358 שורות ב-4 קבצים/);
+  assert.match(text, /179/);
+
+  // קבצים זהים שאין בהם שורות הם לא שורה בדוח.
+  const none = prSize.report({
+    branch: 'b',
+    base: 'origin/main',
+    displayed: prSize.parseShortstat(' 2 files changed, 20 insertions(+)'),
+    real: prSize.parseShortstat(' 2 files changed, 20 insertions(+)'),
+    landed: prSize.parseShortstat(''),
+    verdict: prSize.verdict(20, 20),
+  });
+  assert.doesNotMatch(none, /כבר ביעד/);
+});
+
+test('sameBlob and changedFiles read the tree without writing to it', () => {
+  // אותו רוויזיה מול עצמה: כל נתיב זהה, ואין קבצים שהשתנו.
+  assert.equal(prSize.sameBlob('HEAD', 'HEAD', 'tools/pr-size.js'), true);
+  assert.equal(prSize.sameBlob('HEAD', 'HEAD', 'אין/כזה/קובץ.js'), false);
+  assert.deepEqual(prSize.changedFiles('HEAD', 'HEAD'), []);
 });

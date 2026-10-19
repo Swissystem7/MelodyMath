@@ -29,8 +29,18 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 .mm-plan-kicker { margin: 0; color: var(--focus); font-size: .78rem; font-weight: 800; }
 .mm-plan-topic { margin: 4px 0 6px; font-size: 1.15rem; line-height: 1.35; }
 .mm-plan-adult, .mm-plan-pace, .mm-plan-note { margin: 0 0 6px; color: var(--muted); font-size: .92rem; }
+.mm-plan-why { margin: 4px 0 10px; color: var(--muted); font-size: .9rem; }
 .mm-plan-source { color: var(--confidence); font-size: .85rem; }
-.mm-plan-track { height: 8px; background: #efe6d6; border-radius: 99px; overflow: hidden; margin: 6px 0 8px; }
-.mm-plan-track > span { display: block; height: 100%; background: var(--joy); }
+.mm-plan-track { height: 8px; background: color-mix(in srgb, var(--confidence) 10%, var(--card)); border-radius: 99px; overflow: hidden; margin: 6px 0 8px; }
+.mm-plan-track > span { display: block; height: 100%; background: var(--confidence); }
 .mm-plan-slot.hidden { display: none; }
+/* The pace meter borrows the plan card. Its accent carries the one status
+   word, so colour and text always say the same thing. */
+.mm-pace { border-inline-start-color: var(--confidence); }
+.mm-pace[data-status="ahead"] { border-inline-start-color: var(--good); }
+.mm-pace[data-status="behind"] { border-inline-start-color: var(--joy); }
+.mm-pace-status { margin: 0 0 6px; font-size: .92rem; }
+.mm-pace-status b { color: var(--confidence); }
+.mm-pace[data-status="ahead"] .mm-pace-status b { color: var(--good); }
+.mm-pace[data-status="behind"] .mm-pace-status b { color: var(--focus); }
 @media print { .mm-plan { break-inside: avoid; } }
