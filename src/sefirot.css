@@ -34,4 +34,14 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 .mm-plan-track { height: 8px; background: color-mix(in srgb, var(--confidence) 10%, var(--card)); border-radius: 99px; overflow: hidden; margin: 6px 0 8px; }
 .mm-plan-track > span { display: block; height: 100%; background: var(--confidence); }
 .mm-plan-slot.hidden { display: none; }
-@media print { .mm-plan { break-inside: avoid; } }
+/* #418 class picture: one row per child, the open plan under the table. */
+#classPicture { overflow-x: auto; }
+.class-picture th[scope="row"] { font-weight: 400; }
+.class-picture .cp-open, .class-picture .cp-grade-pick { width: auto; min-height: 44px; }
+.class-picture .cp-grade { display: inline-block; margin-inline-end: 6px; white-space: nowrap; }
+.class-picture .cp-topic { display: block; color: var(--muted); font-size: .85rem; }
+.class-picture .cp-gaps { margin: 0; padding-inline-start: 1.1rem; font-size: .88rem; }
+.class-picture td, .class-picture th { vertical-align: top; }
+.cp-sheet { max-width: 40rem; margin-top: 14px; }
+#classPlanSheet:focus { outline: 3px solid var(--focus); outline-offset: 3px; }
+@media print { .mm-plan, .cp-sheet { break-inside: avoid; } }

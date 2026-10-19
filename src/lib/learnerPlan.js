@@ -263,6 +263,28 @@
       nextGrade: step.nextGrade, nextTopic: step.nextTopic, diagPercent: diag,
     });
   }
+  // The leading gaps a teacher board names for one child: every practised
+  // skill that lands on a topic and is still under 80%, weakest first, at most
+  // three. Two skills can land on the same topic (in grade א׳ both חיבור and
+  // חיסור are «בתחום 10»), so a topic is named once. An unknown grade or a
+  // child with no usable rows has no gaps — not a made-up one.
+  function topGaps(input) {
+    const src = input && typeof input === 'object' && !Array.isArray(input) ? input : null;
+    const grade = src ? knownGrade(src.grade) : null;
+    if (!grade) return [];
+    if (src.perSkill != null && !Array.isArray(src.perSkill)) return [];
+    const rows = Array.isArray(src.perSkill) ? skillRows(grade, src.perSkill) : fromStudent(grade, src.student);
+    const seen = Object.create(null);
+    const out = [];
+    rows.filter(function (r) { return r.total >= 1 && r.accuracy < 0.8; })
+      .sort(function (a, b) { return a.accuracy - b.accuracy || a.step.index - b.step.index; })
+      .forEach(function (r) {
+        if (out.length >= 3 || seen[r.step.topic]) return;
+        seen[r.step.topic] = true;
+        out.push(r.step.topic);
+      });
+    return out;
+  }
   function renderLearnerPlanHtml(plan) {
     const p = plan || bad('בחרו כיתה א׳ עד ו׳.');
     const max = p.paceExpected || 0;
@@ -284,6 +306,7 @@
   return {
     learningPath: learningPath,
     buildLearnerPlan: buildLearnerPlan,
+    topGaps: topGaps,
     renderLearnerPlanHtml: renderLearnerPlanHtml,
     bridgeSentence: bridgeSentence,
     hookFor: hookFor,

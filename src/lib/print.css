@@ -178,6 +178,13 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
   body.print-lesson #trialKit,body.print-lesson #reportCard,body.print-lesson #classBoardCard,body.print-lesson #parentCard,body.print-lesson #worksheetCard,body.print-lesson #certCard,body.print-lesson #ramaCard{display:none!important}
   body.print-rama #ramaCard,body.print-rama #ramaSheet{display:block!important}
   body.print-rama #trialKit,body.print-rama #reportCard,body.print-rama #classBoardCard,body.print-rama #parentCard,body.print-rama #worksheetCard,body.print-rama #certCard,body.print-rama #lessonCard{display:none!important}
+  /* #418 — the class picture is chrome in every other print mode, and
+     print-plan prints the one open personal plan without the table. */
+  #classPictureCard{display:none!important}
+  body.print-kit #classPictureCard,body.print-sheet #classPictureCard,body.print-class #classPictureCard,body.print-parent #classPictureCard,body.print-cert #classPictureCard,body.print-lesson #classPictureCard,body.print-rama #classPictureCard{display:none!important}
+  body.print-plan #classPictureCard,body.print-plan #classPlanSheet{display:block!important}
+  body.print-plan #classPicture,body.print-plan #classPictureEmpty{display:none!important}
+  body.print-plan #trialKit,body.print-plan #reportCard,body.print-plan #classBoardCard,body.print-plan #parentCard,body.print-plan #worksheetCard,body.print-plan #certCard,body.print-plan #lessonCard,body.print-plan #ramaCard{display:none!important}
   #teacherReport.panel{display:block!important}
   #firstRun,.first-run{display:none!important}
   .sheet-item{border-color:#999}

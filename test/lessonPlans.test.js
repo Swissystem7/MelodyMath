@@ -44,5 +44,7 @@ test('the teacher tab has a printable lesson-plan card', () => {
   assert.match(html, /id="lessonGrade"/);
   assert.match(html, /id="lessonTopic"/);
   assert.match(html, /body\.print-lesson #lessonCard\{display:block!important\}/);
-  assert.match(html, /'print-lesson'\)\}\);/);
+  // The print handlers go through printMode(), which clears every other mode
+  // first so two print classes can never be active at once.
+  assert.match(html, /printMode\('print-lesson'\);renderLessonPlans\(\);window\.print\(\)/);
 });

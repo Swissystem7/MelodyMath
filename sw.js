@@ -34,6 +34,7 @@ const ASSETS = [
   './src/lib/geometryShapes.js',
   './src/lib/pedagogy.js',
   './src/lib/learnerPlan.js',
+  './src/lib/classPicture.js',
   './src/lib/curriculum.js',
   './src/lib/remediation.js',
   './src/lib/rhythmGame.js',
