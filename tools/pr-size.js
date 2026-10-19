@@ -19,7 +19,16 @@
 // ה-PR לבסיס הנכון. מעבירים את בסיס החיתוך כארגומנט רביעי כדי לראות את זה
 // (`docs/PR-342-SPLIT.md`).
 //
-// אין תלויות ואין רשת — רק `git diff --shortstat`, קריאות קריאה בלבד.
+// מלכודת שלישית: חלק מקבצי ה-PR כבר נחתו ביעד בדיוק — אותו תוכן בדיוק, בדרך
+// אחרת (סלייס אחר, סנכרון אחר). השורות שלהם נספרות ב-GitHub אבל המיזוג לא יוסיף
+// בהם דבר. לכן הכלי משווה blob מול blob: קובץ שתוכנו ביעד זהה לתוכנו בענף נספר
+// כ«נחת», ומה שנותר הוא מה שבאמת שוקלים לפצל (`docs/PR-370-SUPERSEDED.md`).
+//
+// שימו לב שדיף שתי-הנקודות מצומצם לקבצים שה-PR נוגע בהם: בלי הצמצום הוא סופר גם
+// את כל מה שהיעד עצמו צבר מאז בקבצים אחרים, וענף שפשוט נשאר מאחור נראה כאילו
+// חסרות ממנו אלפי שורות.
+//
+// אין תלויות ואין רשת — רק `git diff` ו-`git rev-parse`, קריאות קריאה בלבד.
 'use strict';
 
 const LIMIT = 400;
@@ -40,9 +49,42 @@ function parseShortstat(text) {
 }
 
 // displayed = מה ש-GitHub/auto_merger מודדים, real = מה שבאמת חסר ביעד,
-// own = מה שהענף עצמו הוסיף מעל בסיס החיתוך שלו (אופציונלי).
-function verdict(displayed, real, limit, own) {
+// own = מה שהענף עצמו הוסיף מעל בסיס החיתוך שלו (אופציונלי),
+// landed = {changed, files} של הקבצים שתוכנם ביעד כבר זהה לתוכנם בענף (אופציונלי).
+function verdict(displayed, real, limit, own, landed) {
   const max = Number(limit) || LIMIT;
+  // קבצים זהים הם ההוכחה החזקה ביותר שאין מה למזג, ולכן הם נבדקים ראשונים.
+  if (landed && landed.changed > 0) {
+    const remaining = Math.max(0, displayed - landed.changed);
+    if (remaining === 0) {
+      return {
+        kind: 'superseded',
+        ok: false,
+        message:
+          'אין מה לפצל — כל ' + displayed + ' השורות כבר נמצאות ביעד, ב-' + landed.files +
+          ' קבצים שתוכנם זהה. המיזוג לא יוסיף דבר: לסגור את ה-PR.',
+      };
+    }
+    if (displayed > max && remaining <= max) {
+      return {
+        kind: 'partly-landed',
+        ok: false,
+        message:
+          'אין מה לפצל — ' + landed.changed + ' מתוך ' + displayed + ' השורות כבר נמצאות ביעד ' +
+          'ב-' + landed.files + ' קבצים שתוכנם זהה, ונותרו ' + remaining + ' שורות בלבד. למזג ' +
+          'את היעד לענף ולמדוד שוב; אם מה שנותר רק מחזיר את היעד אחורה, לסגור את ה-PR.',
+      };
+    }
+  }
+  // התקרה של auto_merger היא על המספר המוצג. כשהוא מתחת לתקרה אין על מה לדון,
+  // גם אם היעד התקדם מאז בקבצים האלה — מיזוג מחיל את דיף שלוש-הנקודות בלבד.
+  if (displayed <= max) {
+    return {
+      kind: 'ok',
+      ok: true,
+      message: 'עומד בתקרה: ' + displayed + ' שורות מתוך ' + max + '.',
+    };
+  }
   if (own != null && own <= max && real > max) {
     return {
       kind: 'wrong-base',
@@ -60,34 +102,60 @@ function verdict(displayed, real, limit, own) {
       message: 'צריך פיצול אמיתי: ' + real + ' שורות חסרות ביעד, מעל ' + max + '.',
     };
   }
-  if (displayed > max) {
-    return {
-      kind: 'stale-base',
-      ok: false,
-      message:
-        'אין מה לפצל — נקודת הפיצול מיושנת: מוצגות ' + displayed + ' שורות אבל חסרות רק ' +
-        real + '. למזג את היעד לענף ולמדוד שוב.',
-    };
-  }
+  // נותר רק המקרה שבו המוצג מעל התקרה אבל מה שחסר ביעד מתחתיה.
   return {
-    kind: 'ok',
-    ok: true,
-    message: 'עומד בתקרה: ' + real + ' שורות מתוך ' + max + '.',
+    kind: 'stale-base',
+    ok: false,
+    message:
+      'אין מה לפצל — נקודת הפיצול מיושנת: מוצגות ' + displayed + ' שורות אבל חסרות רק ' +
+      real + '. למזג את היעד לענף ולמדוד שוב.',
   };
 }
 
-function shortstat(base, branch, dots) {
+function git(args) {
   const { execFileSync } = require('node:child_process');
-  const out = execFileSync('git', ['diff', '--shortstat', base + dots + branch], {
-    encoding: 'utf8',
-  });
-  return parseShortstat(out);
+  return execFileSync('git', args, { encoding: 'utf8' });
 }
+
+function shortstat(base, branch, dots, paths) {
+  const args = ['diff', '--shortstat', base + dots + branch];
+  if (paths && paths.length) args.push('--', ...paths);
+  return parseShortstat(git(args));
+}
+
+// הקבצים שה-PR נוגע בהם, כפי ש-GitHub מציג אותם.
+function changedFiles(base, branch) {
+  return git(['diff', '--name-only', base + '...' + branch])
+    .split('\n')
+    .filter(Boolean);
+}
+
+// האם אותו נתיב מצביע על אותו blob בדיוק בשני הצדדים? נתיב שחסר בצד אחד הוא לא.
+function sameBlob(base, branch, path) {
+  const id = (rev) => {
+    try {
+      return git(['rev-parse', '--verify', '--quiet', rev + ':' + path]).trim();
+    } catch (err) {
+      return '';
+    }
+  };
+  const left = id(base);
+  return left !== '' && left === id(branch);
+}
+
+const NOTHING = { files: 0, insertions: 0, deletions: 0, changed: 0 };
 
 function sizes(branch, base, limit, forkBase) {
   const target = base || 'origin/main';
   const displayed = shortstat(target, branch, '...');
-  const real = shortstat(target, branch, '..');
+  const touched = changedFiles(target, branch);
+  const settled = touched.filter((path) => sameBlob(target, branch, path));
+  const same = new Set(settled);
+  const live = touched.filter((path) => !same.has(path));
+  // מה שכבר נחת ביעד בדיוק: נספר אצל auto_merger, אבל המיזוג לא ישנה בו דבר.
+  const landed = settled.length ? shortstat(target, branch, '...', settled) : NOTHING;
+  // שתי נקודות על הקבצים שעוד לא זהים: מה שבאמת חסר ביעד, בלי רעש מקבצים אחרים.
+  const real = live.length ? shortstat(target, branch, '..', live) : NOTHING;
   // שלוש נקודות: מה שהענף הוסיף מאז שנחתך, בלי מה שהבסיס שלו צבר מאז.
   const own = forkBase ? shortstat(forkBase, branch, '...') : null;
   return {
@@ -96,8 +164,9 @@ function sizes(branch, base, limit, forkBase) {
     forkBase: forkBase || null,
     displayed: displayed,
     real: real,
+    landed: landed,
     own: own,
-    verdict: verdict(displayed.changed, real.changed, limit, own ? own.changed : null),
+    verdict: verdict(displayed.changed, real.changed, limit, own ? own.changed : null, landed),
   };
 }
 
@@ -106,9 +175,13 @@ function report(r) {
     r.branch + ' → ' + r.base,
     'מוצג (' + r.base + '...' + r.branch + '): ' + r.displayed.changed + ' שורות ב-' +
       r.displayed.files + ' קבצים',
-    'אמיתי (' + r.base + '..' + r.branch + '):  ' + r.real.changed + ' שורות ב-' +
+    'אמיתי (' + r.base + '..' + r.branch + ', בקבצי ה-PR): ' + r.real.changed + ' שורות ב-' +
       r.real.files + ' קבצים',
   ];
+  if (r.landed && r.landed.changed > 0) {
+    lines.push('כבר ביעד (תוכן זהה): ' + r.landed.changed + ' שורות ב-' + r.landed.files +
+      ' קבצים');
+  }
   if (r.own) {
     lines.push('של הענף (' + r.forkBase + '...' + r.branch + '): ' + r.own.changed + ' שורות ב-' +
       r.own.files + ' קבצים');
@@ -130,4 +203,4 @@ if (require.main === module) {
   process.exit(r.verdict.ok ? 0 : 1);
 }
 
-module.exports = { LIMIT, parseShortstat, verdict, sizes, report };
+module.exports = { LIMIT, parseShortstat, verdict, sizes, report, changedFiles, sameBlob };
