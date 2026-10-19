@@ -93,9 +93,15 @@ const contrast = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a),
 // color-mix(in srgb, a pct%, b)
 const mix = (a, b, pct) => a.map((v, i) => Math.round((v * pct + b[i] * (100 - pct)) / 100));
 
+// Scoped to the light «:root» block on purpose. src/sefirot.css also carries a
+// dark block (#421), and reading the whole file would let the last hex win —
+// these cases would then silently measure dark. Dark is checked in
+// test/designSpec.test.js against the same floors.
 function palette() {
+  const css = read('src/sefirot.css');
+  const light = css.slice(css.indexOf(':root {'), css.indexOf('@media'));
   const out = {};
-  for (const [, name, hex] of read('src/sefirot.css').matchAll(/(--[a-z]+):\s*(#[0-9a-fA-F]{6})/g)) {
+  for (const [, name, hex] of light.matchAll(/(--[a-z]+):\s*(#[0-9a-fA-F]{6})/g)) {
     out[name] = rgb(hex);
   }
   return out;

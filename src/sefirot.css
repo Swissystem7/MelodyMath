@@ -1,28 +1,116 @@
-/* Quiet palette. Chesed blue = confidence, Gevurah garnet = the one focus,
-   Tiferet gold = the week's progress. See docs/DESIGN.md. */
+/* MelodyMath design tokens. The palette is inspired by traditional sefirot
+   color symbolism and mapped to learning goals: concentration, confidence,
+   joy, calm, persistence. Sources disagree on the attributions, so these are
+   interface choices, not a quotation of one table. See docs/DESIGN.md.
+
+   This file is the ONLY place in the repo allowed to name a color. It loads
+   after each page's inline <style> and replaces the old palette's variables.
+   Every pair documented in docs/DESIGN.md is asserted in
+   test/designTokens.test.js and test/designSpec.test.js. */
+
 :root {
-  --ink: #1c2430;
-  --muted: #5c6570;
-  --purple: #1f4b7a;
-  --pink: #7a2e3a;
-  --yellow: #c4a15a;
-  --bg: #f6f1e8;
-  --card: #fffdf8;
-  --line: #e4d9c8;
-  --good: #2f6f4e;
-  --bad: #7a2e3a;
-  --focus: #7a2e3a;
-  --joy: #b8893a;
-  --confidence: #1f4b7a;
+  color-scheme: light;
+
+  /* --- the palette: 8 colors, one per role ------------------------------ */
+  --bg: #f6f1e8;          /* Malkhut   · calm        · page, warm paper     */
+  --card: #fffdf8;        /* Yesod     · steadiness  · card surface         */
+  --ink: #1c2430;         /* Chokhmah  · clarity     · body text            */
+  --confidence: #1f4b7a;  /* Chesed    · confidence  · primary action, bar  */
+  --focus: #7a2e3a;       /* Gevurah   · concentration · one-topic accent, ring */
+  --joy: #a8792c;         /* Tiferet   · joy         · milestone mark       */
+  --good: #2f6f4e;        /* Netzach   · persistence · correct answer       */
+  --bad: #9a4a2f;         /* Hod       · gentle error · wrong answer, soft  */
+
+  /* --- neutrals --------------------------------------------------------- */
+  --muted: #5c6570;       /* secondary text, 4.5:1 on --card and --bg       */
+  --line: #e4d9c8;        /* decorative hairline between surfaces           */
+  --line-strong: #8a8172; /* control borders (input, select, inactive tab)  */
+
+  /* --- aliases kept for the pages still on the old variable names ------- */
+  --purple: #1f4b7a;      /* = --confidence */
+  --pink: #7a2e3a;        /* = --focus      */
+  --yellow: #a8792c;      /* = --joy        */
+  --ring: #7a2e3a;        /* = --focus: attention is a single idea          */
+
+  /* --- Hebrew type ------------------------------------------------------ */
+  /* Local-first on purpose: the app is an offline-capable PWA (sw.js) and
+     must not depend on a third-party font request. If Assistant / Rubik /
+     Heebo are installed they are used; otherwise the platform Hebrew UI
+     font is already a good one. */
+  --font: "Assistant", "Rubik", "Heebo", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+
+  /* --- spacing scale, 4px base ------------------------------------------ */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* --- radii ------------------------------------------------------------ */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 99px;
+
+  /* --- motion: short, and only on state changes ------------------------- */
+  --motion-fast: 120ms;
+  --motion: 200ms;
+  --motion-ease: cubic-bezier(.2, .6, .2, 1);
 }
-body { background: var(--bg); color: var(--ink); }
+
+/* Dark version. Same roles, same sefirot, lifted for a dark surface; every
+   pair is re-checked at AA in test/designSpec.test.js. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #141a22;
+    --card: #1b222c;
+    --ink: #ebe6dc;
+    --confidence: #7fb2e6;
+    --focus: #e3909c;
+    --joy: #d8ae62;
+    --good: #6fc99b;
+    --bad: #e8a183;
+    --muted: #a9b2bd;
+    --line: #2d3845;
+    --line-strong: #6f7b8a;
+    --purple: #7fb2e6;
+    --pink: #e3909c;
+    --yellow: #d8ae62;
+    --ring: #e3909c;
+  }
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--font); }
 h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 .card { box-shadow: none; }
+
+/* One ring, one meaning. 3px at 2px offset keeps the gap on --card / --bg,
+   so the garnet clears 3:1 even on a filled primary button. */
+:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Controls need a 3:1 border of their own; --line is too soft for that. */
+input, select { border-color: var(--line-strong); }
+
+/* No gradient anywhere: the session bar is one flat confidence blue on a
+   tinted track, same as the weekly bar below. */
+.progress span { background: var(--confidence); transition: width var(--motion) var(--motion-ease); }
+
 .mm-plan {
   background: var(--card);
   border: 1px solid var(--line);
   border-inline-start: 4px solid var(--focus);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 14px 16px;
   margin: 0 0 14px;
 }
@@ -31,7 +119,11 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 .mm-plan-adult, .mm-plan-pace, .mm-plan-note { margin: 0 0 6px; color: var(--muted); font-size: .92rem; }
 .mm-plan-why { margin: 4px 0 10px; color: var(--muted); font-size: .9rem; }
 .mm-plan-source { color: var(--confidence); font-size: .85rem; }
-.mm-plan-track { height: 8px; background: color-mix(in srgb, var(--confidence) 10%, var(--card)); border-radius: 99px; overflow: hidden; margin: 6px 0 8px; }
+.mm-plan-track { height: 8px; background: color-mix(in srgb, var(--confidence) 10%, var(--card)); border-radius: var(--r-pill); overflow: hidden; margin: 6px 0 8px; }
 .mm-plan-track > span { display: block; height: 100%; background: var(--confidence); }
 .mm-plan-slot.hidden { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-fast: 0ms; --motion: 0ms; }
+}
 @media print { .mm-plan { break-inside: avoid; } }
