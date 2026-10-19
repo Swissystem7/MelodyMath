@@ -7,6 +7,21 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const SLOTS = ['remediation', 'lessons', 'practice', 'playground', 'classMode', 'beatMode', 'teacherReport'];
   const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
+  const TAB_WHY = {
+    remediation: 'כאן בודקים מה חסר ומתרגלים את זה.',
+    lessons: 'שיעור קצר עם צליל לפני התרגול.',
+    practice: 'תרגול קצב ושברים.',
+    playground: 'משחק חופשי בצליל — לא נמדד.',
+    classMode: 'מפגש 8 דקות לקבוצה.',
+    beatMode: 'תשובה בקצב הפעימה.',
+    teacherReport: 'מה נרשם במכשיר, בלי ציון.',
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+    });
+  }
 
   function classPlanCsv(plans) {
     const lines = ['כינוי,כיתה,ענף,נושא,מפגשים,יעד,דיוק אבחון'];
@@ -57,7 +72,9 @@
             slot.className = 'mm-plan-slot';
             panel.insertBefore(slot, panel.firstChild);
           }
-          if (slot.innerHTML !== html) slot.innerHTML = html;
+          const whyText = TAB_WHY[id] || '';
+          const fullHtml = html + (whyText ? '<p class="mm-plan-why">' + esc(whyText) + '</p>' : '');
+          if (slot.innerHTML !== fullHtml) slot.innerHTML = fullHtml;
           const hide = id === 'remediation' && !!hideRem;
           if (slot.classList.contains('hidden') !== hide) slot.classList.toggle('hidden', hide);
         });
@@ -141,5 +158,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountLearnerPlans);
     else mountLearnerPlans();
   }
-  return { classPlanCsv: classPlanCsv, mountLearnerPlans: mountLearnerPlans, SLOTS: SLOTS };
+  return { classPlanCsv: classPlanCsv, mountLearnerPlans: mountLearnerPlans, SLOTS: SLOTS, TAB_WHY: TAB_WHY };
 });
