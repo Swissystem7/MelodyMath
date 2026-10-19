@@ -55,6 +55,8 @@ const ASSETS = [
   './src/lib/tabs.js',
   './src/lib/print.css',
   './src/lib/learnerPlanView.js',
+  './src/data/struggleTopics.js',
+  './src/lib/struggleTopics.js',
   './src/sefirot.css',
   './icons/icon.svg',
   './icons/icon-192.png',

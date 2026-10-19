@@ -281,6 +281,7 @@
     buildLearnerPlan: buildLearnerPlan,
     renderLearnerPlanHtml: renderLearnerPlanHtml,
     bridgeSentence: bridgeSentence,
+    hookFor: hookFor,
     paceFor: paceFor,
     PACE: PACE,
   };
