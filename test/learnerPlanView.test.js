@@ -30,3 +30,97 @@ test('the plan card is wired on every practice surface and the palette file is c
   assert.match(curriculum, /learnerPlanView\.js/);
   assert.match(curriculum, /sefirot\.css/);
 });
+
+test('each slot contains .mm-plan-why', () => {
+  const learnerPlan = require('../src/lib/learnerPlan');
+  const slotsMap = new Map();
+  view.SLOTS.forEach((id) => {
+    const el = {
+      id: id,
+      children: [],
+      querySelector(sel) {
+        if (sel === '.mm-plan-slot') {
+          return this.children.find((c) => c.className === 'mm-plan-slot') || null;
+        }
+        return null;
+      },
+      insertBefore(child) {
+        child.parentNode = this;
+        this.children.unshift(child);
+        return child;
+      },
+    };
+    slotsMap.set(id, el);
+  });
+
+  function createEl() {
+    const el = {
+      className: '',
+      innerHTML: '',
+      children: [],
+      querySelector(sel) {
+        if (sel === '.mm-plan-slot') {
+          return this.children.find((c) => (c.className || '').indexOf('mm-plan-slot') !== -1) || null;
+        }
+        return null;
+      },
+      insertBefore(child) {
+        child.parentNode = this;
+        this.children.unshift(child);
+        return child;
+      },
+    };
+    el.classList = {
+      contains(c) {
+        return (el.className || '').split(/\s+/).indexOf(c) !== -1;
+      },
+      toggle(c, force) {
+        const list = (el.className || '').split(/\s+/).filter(Boolean);
+        const idx = list.indexOf(c);
+        if (force && idx === -1) list.push(c);
+        else if (!force && idx !== -1) list.splice(idx, 1);
+        el.className = list.join(' ');
+      },
+    };
+    return el;
+  }
+
+  view.SLOTS.forEach((id) => {
+    const el = createEl();
+    el.id = id;
+    slotsMap.set(id, el);
+  });
+
+  const mockDocument = {
+    readyState: 'complete',
+    getElementById(id) {
+      return slotsMap.get(id) || null;
+    },
+    createElement() {
+      return createEl();
+    },
+    addEventListener() {},
+  };
+
+  const origDoc = global.document;
+  const origBuild = global.buildLearnerPlan;
+  const origRender = global.renderLearnerPlanHtml;
+  try {
+    global.document = mockDocument;
+    global.buildLearnerPlan = learnerPlan.buildLearnerPlan;
+    global.renderLearnerPlanHtml = learnerPlan.renderLearnerPlanHtml;
+
+    view.mountLearnerPlans();
+
+    view.SLOTS.forEach((id) => {
+      const slotEl = slotsMap.get(id).children.find((c) => c.className.indexOf('mm-plan-slot') !== -1);
+      assert.ok(slotEl, 'slot element exists for ' + id);
+      assert.match(slotEl.innerHTML, /class="mm-plan-why"/, 'slot ' + id + ' contains .mm-plan-why');
+      assert.match(slotEl.innerHTML, new RegExp(view.TAB_WHY[id]), 'slot ' + id + ' contains correct TAB_WHY text');
+    });
+  } finally {
+    global.document = origDoc;
+    global.buildLearnerPlan = origBuild;
+    global.renderLearnerPlanHtml = origRender;
+  }
+});
