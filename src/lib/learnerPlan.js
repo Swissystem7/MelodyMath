@@ -262,5 +262,6 @@
     buildLearnerPlan: buildLearnerPlan,
     renderLearnerPlanHtml: renderLearnerPlanHtml,
     bridgeSentence: bridgeSentence,
+    hookFor: hookFor,
   };
 });
