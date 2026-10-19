@@ -139,3 +139,15 @@ test('invalid grade and broken rows do not throw and do not look like a plan', (
   assert.doesNotThrow(() => plan.buildLearnerPlan(null));
   assert.equal(plan.buildLearnerPlan(null).branch, 'invalid');
 });
+
+test('the error card asks for a grade and claims no typical range', () => {
+  [plan.renderLearnerPlanHtml(plan.buildLearnerPlan({ grade: 'ז', now: NOW })),
+    plan.renderLearnerPlanHtml(null)].forEach((html) => {
+    assert.match(html, /data-branch="invalid"/);
+    assert.match(html, /בחרו כיתה א׳ עד ו׳/);
+    assert.doesNotMatch(html, /טווח טיפוסי/);
+    assert.doesNotMatch(html, /הערכה/);
+  });
+  const real = plan.renderLearnerPlanHtml(plan.buildLearnerPlan({ grade: 'ג', now: NOW }));
+  assert.match(real, /טווח טיפוסי: [^<]*שבועות/);
+});
