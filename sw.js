@@ -16,6 +16,7 @@ const ASSETS = [
   './curriculum.html',
   './frequency.html',
   './check.html',
+  './privacy.html',
   './manifest.webmanifest',
   './src/lib/core.js',
   './src/lib/sonify.js',
