@@ -175,3 +175,23 @@ test('the leading gaps are the weakest mapped topics, at most three and never th
   assert.deepEqual(plan.topGaps({ grade: 'א', perSkill: 'לא רשימה' }), []);
   assert.deepEqual(plan.topGaps(null), []);
 });
+
+// #503 — a diagnostic answer that lands on no topic drops out of the plan.
+// The anonymous demo path passes bank keys, a saved child passes Hebrew labels.
+test('every skill the diagnostic asks lands on a topic of its own grade', () => {
+  const banks = require('../src/lib/banks');
+  Object.keys(banks.GRADE_SKILLS).forEach((g) => {
+    banks.GRADE_SKILLS[g].forEach((skill) => {
+      [skill, banks.skillHe(skill)].forEach((name) => {
+        const p = plan.buildLearnerPlan({ grade: g, perSkill: [{ skill: name, total: 2, correct: 0 }], now: NOW });
+        assert.equal(p.branch, 'weak', g + ' ' + name);
+        const step = plan.learningPath().find((s) => s.topic === p.gaps[0]);
+        assert.equal(step.grade, g, g + ' ' + name + ' → ' + p.gaps[0]);
+      });
+    });
+  });
+  assert.match(plan.buildLearnerPlan({ grade: 'ד', student: student('גאומטריה', 0, 2), now: NOW }).topic, /מקבילים/);
+  assert.match(plan.buildLearnerPlan({ grade: 'ה', perSkill: [{ skill: 'data', total: 2, correct: 0 }], now: NOW }).topic, /דיאגרמות/);
+  assert.match(plan.buildLearnerPlan({ grade: 'ו', perSkill: [{ skill: 'geometry', total: 2, correct: 1 }], now: NOW }).topic, /מעגל/);
+  assert.match(plan.buildLearnerPlan({ grade: 'ג', perSkill: [{ skill: 'addition', total: 2, correct: 0 }], now: NOW }).topic, /עד רבבה/);
+});

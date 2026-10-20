@@ -62,10 +62,12 @@
   const FRAG = {
     'א': { counting: 'ספירה עד 100', addition: 'בתחום 10', subtraction: 'בתחום 10', number_line: 'ישר המספרים', words: 'מצבי חיבור', geo: 'מצולעים', measure: 'מדידת אורך', data: 'דיאגרמת' },
     'ב': { place: '1,000', addition: 'דו־ספרתי', subtraction: 'דו־ספרתי', multiplication: 'כפולות 2', division: 'חילוק לחלקים', geo: 'מצולעים', measure: 'ס״מ', data: 'טבלה', words: 'דו־ספרתי' },
-    'ג': { multiplication: 'לוח כפל', division: 'שארית', place: '10,000', words: 'השוואה כפליות', geo: 'זווית', measure: 'שטח מלבן' },
-    'ד': { fractions: '1/2, 1/4, 1/8' },
-    'ה': { fractions: 'הרחבה, צמצום', dec: 'עשרוניים' },
-    'ו': { fractions: 'כפל וחילוק שברים', percent: 'אחוזים', dec: 'עשרוניים', data: 'ממוצע' },
+    'ג': { addition: 'עד רבבה', subtraction: 'עד רבבה', multiplication: 'לוח כפל', division: 'שארית', place: '10,000', words: 'השוואה כפליות', geo: 'זווית', measure: 'שטח מלבן' },
+    // ד׳–ו׳ diagnose geometry, measurement and data too (banks.GRADE_SKILLS).
+    // Without a row here those answers landed on no topic and fell out of the plan.
+    'ד': { fractions: '1/2, 1/4, 1/8', geo: 'מקבילים', measure: 'יחידות אורך' },
+    'ה': { fractions: 'הרחבה, צמצום', dec: 'עשרוניים', data: 'דיאגרמות' },
+    'ו': { fractions: 'כפל וחילוק שברים', percent: 'אחוזים', dec: 'עשרוניים', data: 'ממוצע', geo: 'מעגל' },
   };
   function hookFor(topic) {
     const text = String(topic || '');
