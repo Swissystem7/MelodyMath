@@ -85,6 +85,14 @@ test('sefirot.css is the single source of the palette', () => {
   assert.ok(indexHtml.includes('src/sefirot.css'), 'index.html must link the palette');
 });
 
+test('theme.css (#497) is linked after the palette and names no colors', () => {
+  const theme = read('src/theme.css');
+  assert.deepEqual(literals(theme), [], 'theme.css should paint from tokens only');
+  assert.ok(indexHtml.indexOf('src/theme.css') > indexHtml.indexOf('src/sefirot.css'),
+    'theme.css must load after sefirot.css');
+  assert.match(read('sw.js'), /'\.\/src\/theme\.css'/, 'the offline cache must carry theme.css');
+});
+
 // --- WCAG AA for the mixes this PR introduces (#424 acceptance) ---------------
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.substr(i, 2), 16));
 const chan = (c) => (c / 255 <= 0.04045 ? c / 255 / 12.92 : (((c / 255) + 0.055) / 1.055) ** 2.4);
@@ -111,6 +119,14 @@ test('token mixes keep text at 4.5:1 or better', () => {
     ['--card label on a --purple button', t['--card'], t['--purple']],
     ['--ink on --card', t['--ink'], t['--card']],
     ['--muted on --card', t['--muted'], t['--card']],
+    // theme.css (#497)
+    ['--card label on a picked-good choice', t['--card'], t['--good']],
+    ['--card label on a picked-bad choice', t['--card'], t['--bad']],
+    ['--confidence tab label on --card', t['--confidence'], t['--card']],
+    ['--ink on the sky-tinted prompt', t['--ink'], mix(t['--sky'], t['--card'], 8)],
+    ['--ink on a sunshine tag', t['--ink'], mix(t['--yellow'], t['--card'], 30)],
+    ['--confidence on the brand pill', t['--confidence'], mix(t['--confidence'], t['--card'], 10)],
+    ['--muted on --bg', t['--muted'], t['--bg']],
   ];
   for (const [name, fg, bg] of cases) {
     const ratio = contrast(fg, bg);

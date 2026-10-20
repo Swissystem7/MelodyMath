@@ -1,0 +1,268 @@
+/* Kid-friendly design layer (#497). Loaded after sefirot.css and names no
+   colors: every paint is a token from sefirot.css or a color-mix of tokens.
+   Mobile first; logical properties so RTL needs no mirrored rules. */
+:root {
+  --font: "Rubik", "Varela Round", "Assistant", "Segoe UI", "Arial Hebrew", system-ui, sans-serif;
+  --r-sm: 14px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --lift: 0 4px 0 color-mix(in srgb, var(--confidence) 35%, var(--ink));
+  --soft: 0 14px 36px color-mix(in srgb, var(--confidence) 14%, transparent);
+  --ease-pop: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+body {
+  font-family: var(--font);
+  background:
+    radial-gradient(circle at 92% -4%, color-mix(in srgb, var(--yellow) 38%, transparent), transparent 32%),
+    radial-gradient(circle at 4% 12%, color-mix(in srgb, var(--pink) 12%, transparent), transparent 30%),
+    radial-gradient(circle at 50% 110%, color-mix(in srgb, var(--mint) 14%, transparent), transparent 40%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* Floating music notes behind the content. Decorative only. */
+body::before,
+body::after {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  font-size: clamp(2.4rem, 8vw, 4.5rem);
+  opacity: .14;
+  animation: mm-float 9s ease-in-out infinite;
+}
+body::before { content: "♪"; color: var(--confidence); inset-block-start: 58vh; inset-inline-start: 2vw; }
+body::after { content: "♫"; color: var(--pink); inset-block-end: 12vh; inset-inline-end: 5vw; animation-delay: -4s; }
+@keyframes mm-float {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-18px) rotate(6deg); }
+}
+
+/* Header */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--confidence) 10%, var(--card));
+  color: var(--confidence);
+  font-size: .95rem;
+  letter-spacing: .02em;
+}
+h1 { font-size: clamp(1.6rem, 5.5vw, 2.6rem); line-height: 1.2; font-weight: 800; }
+h2, h3 { line-height: 1.3; }
+
+/* Cards */
+.card,
+.who-bar,
+.metro-bar,
+.first-run,
+.rama-card,
+.lesson-card,
+.mm-plan {
+  border-radius: var(--r-lg);
+  border-color: var(--line);
+}
+.card {
+  background: var(--card);
+  box-shadow: var(--soft);
+}
+.who-bar, .metro-bar { box-shadow: 0 6px 18px color-mix(in srgb, var(--confidence) 8%, transparent); }
+.panel.active { animation: mm-rise .35s ease-out both; }
+@keyframes mm-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Buttons: chunky, rounded, pressable */
+button, .primary, .mm-contact-links a {
+  border-radius: var(--r-sm);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease;
+}
+.primary, button:not(.secondary):not(.tab):not(.modal-close):not(.choice):not(.drum-pad):not(.xylo-key) {
+  box-shadow: var(--lift);
+}
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+button:disabled { opacity: .6; cursor: default; }
+.primary { font-size: 1.1rem; padding-block: 15px; }
+
+/* Tabs: pill segmented control */
+.tabs { gap: 8px; }
+.tab, .secondary {
+  border-radius: 99px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--confidence);
+  font-weight: 700;
+  padding-inline: 18px;
+}
+.tab.active {
+  background: var(--confidence);
+  border-color: var(--confidence);
+  color: var(--card);
+  box-shadow: var(--lift);
+}
+
+/* Level picker */
+.level {
+  border-radius: var(--r-md);
+  border: 2px solid var(--line);
+  background: var(--card);
+  transition: transform .18s var(--ease-pop), border-color .2s ease, background-color .2s ease;
+}
+.level:hover { transform: translateY(-3px) rotate(-1deg); }
+.level.selected {
+  border-color: var(--confidence);
+  background: color-mix(in srgb, var(--confidence) 10%, var(--card));
+  box-shadow: var(--lift);
+}
+
+/* Exercise screen */
+.topline { font-weight: 700; }
+.tag {
+  background: color-mix(in srgb, var(--yellow) 30%, var(--card));
+  color: var(--ink);
+  padding: 6px 12px;
+}
+.progress { height: 14px; border-radius: 99px; }
+.progress span {
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--joy), var(--pink));
+  transition: width .45s var(--ease-pop);
+}
+.prompt {
+  font-weight: 800;
+  padding: 18px 20px;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--sky) 8%, var(--card));
+  border: 2px dashed color-mix(in srgb, var(--sky) 35%, var(--card));
+}
+input, select {
+  border: 2px solid var(--line);
+  border-radius: var(--r-sm);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.answer-row input { font-size: 1.3rem; font-weight: 700; }
+input:focus, select:focus {
+  border-color: var(--confidence);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--confidence) 18%, transparent);
+}
+.choice {
+  border-radius: var(--r-md);
+  background: var(--card);
+  color: var(--confidence);
+  border: 3px solid var(--line);
+  box-shadow: 0 5px 0 var(--line);
+  font-weight: 800;
+}
+.choice:hover:not(:disabled) { border-color: var(--confidence); }
+.choice.picked-good { color: var(--card); border-color: var(--good); animation: mm-pop .45s var(--ease-pop); }
+.choice.picked-bad { color: var(--card); border-color: var(--bad); animation: mm-shake .35s ease; }
+
+/* Feedback: a correct answer celebrates with rising notes */
+.feedback { border-radius: var(--r-md); position: relative; overflow: hidden; font-size: 1.05rem; }
+.feedback.good {
+  border: 2px solid color-mix(in srgb, var(--good) 40%, var(--card));
+  animation: mm-pop .5s var(--ease-pop);
+}
+.feedback.good::before,
+.feedback.good::after {
+  position: absolute;
+  inset-block-start: 6px;
+  font-size: 1.5rem;
+  color: var(--good);
+  animation: mm-note-up 1.4s ease-out both;
+  pointer-events: none;
+}
+.feedback.good::before { content: "♪"; inset-inline-end: 14px; }
+.feedback.good::after { content: "♫ ★"; inset-inline-end: 44px; animation-delay: .15s; color: var(--joy); }
+.feedback.bad {
+  border: 2px solid color-mix(in srgb, var(--bad) 30%, var(--card));
+  animation: mm-shake .35s ease;
+}
+@keyframes mm-pop {
+  0% { transform: scale(.92); }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+@keyframes mm-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+@keyframes mm-note-up {
+  from { opacity: 0; transform: translateY(18px) scale(.6); }
+  30% { opacity: 1; }
+  to { opacity: 0; transform: translateY(-26px) scale(1.2); }
+}
+
+/* Progress / rewards */
+.stat {
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--confidence) 7%, var(--card));
+  border: 2px solid var(--line);
+}
+.session .stat:nth-child(2) { background: color-mix(in srgb, var(--mint) 12%, var(--card)); }
+.session .stat:nth-child(3) { background: color-mix(in srgb, var(--yellow) 22%, var(--card)); }
+.stat strong { color: var(--confidence); font-size: 2rem; }
+.result {
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--yellow) 28%, var(--card));
+}
+.cert { border-radius: var(--r-lg); background: color-mix(in srgb, var(--yellow) 10%, var(--card)); }
+.mm-plan-track { height: 12px; }
+.mm-plan-track > span { background: linear-gradient(90deg, var(--confidence), var(--sky)); border-radius: 99px; }
+
+/* More-pages cards */
+.navcard {
+  border-radius: var(--r-md);
+  border: 2px solid var(--line);
+  transition: transform .18s var(--ease-pop), border-color .2s ease;
+}
+.navcard:hover, .navcard:focus-visible { transform: translateY(-3px); }
+
+/* Teacher / class dashboard */
+.report-table, .class-board {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+.report-table th {
+  background: color-mix(in srgb, var(--confidence) 8%, var(--card));
+  color: var(--ink);
+  font-weight: 800;
+  padding: 10px 8px;
+}
+.report-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--confidence) 4%, var(--card)); }
+.report-table tbody tr:hover td { background: color-mix(in srgb, var(--yellow) 16%, var(--card)); }
+.report-table td { padding: 10px 8px; }
+.class-timer {
+  display: inline-block;
+  padding: 8px 22px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--confidence) 10%, var(--card));
+}
+.class-kids button { border-radius: 99px; }
+
+/* Tablet and up: more air */
+@media (min-width: 681px) {
+  .wrap { padding-block-start: 36px; }
+  .prompt { padding: 24px 28px; }
+}
+/* Phone: thumb-sized controls, prompt first */
+@media (max-width: 480px) {
+  .card { border-radius: var(--r-md); }
+  .tab, .secondary { padding-inline: 12px; font-size: .95rem; }
+  .choice { min-height: 72px; }
+  .prompt { padding: 14px 16px; }
+}
+
+@media print {
+  body { background: none; font-family: var(--font); }
+  body::before, body::after, .feedback.good::before, .feedback.good::after { display: none; }
+  .report-table, .class-board { border-radius: 0; }
+}
