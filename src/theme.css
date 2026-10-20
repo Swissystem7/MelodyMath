@@ -261,6 +261,111 @@ input:focus, select:focus {
   .prompt { padding: 14px 16px; }
 }
 
+/* #504: a button's colour says what we want the child to do next (design
+   agent, #88). Violet = go on; green = you earned it, go on; quiet ink =
+   step back. Raspberry only marks where the keyboard is. Still no literals. */
+:root {
+  --go-deep: color-mix(in srgb, var(--confidence) 75%, var(--ink));
+  --press: inset 0 -3px 0 color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.primary,
+.answer-row button {
+  box-shadow: var(--press), var(--lift);
+  letter-spacing: .01em;
+}
+.primary:hover:not(:disabled),
+.answer-row button:hover:not(:disabled) {
+  box-shadow: var(--press), 0 6px 0 var(--go-deep);
+}
+/* «הבא» right after a correct answer turns green: the reward is moving on. */
+.feedback.good:not(.hidden) ~ .primary:not(.hidden) {
+  background: var(--good);
+  box-shadow: var(--press), 0 4px 0 color-mix(in srgb, var(--good) 60%, var(--ink));
+}
+.feedback:not(.hidden) ~ .primary:not(.hidden) { animation: mm-rise .3s ease-out both; }
+
+/* Stepping back is never the loud choice. Toggles that are on stay violet. */
+.secondary {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--muted) 30%, var(--card));
+}
+.secondary:hover:not(:disabled) { border-color: var(--confidence); color: var(--confidence); }
+.secondary.selected,
+.secondary[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--confidence) 10%, var(--card));
+  border-color: var(--confidence);
+  color: var(--confidence);
+}
+
+/* Focus: a raspberry ring with a card-coloured gap, visible on violet too. */
+:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline-color: var(--focus);
+  outline-offset: 3px;
+}
+.primary:focus-visible,
+.tab.active:focus-visible { box-shadow: 0 0 0 3px var(--card), var(--lift); }
+
+/* Numbers that tick should not make the line jump. */
+.topline,
+.stat strong,
+.class-timer,
+.mm-plan-pace { font-variant-numeric: tabular-nums; }
+
+/* Tags read as small labels, not as buttons. */
+.tag {
+  border-radius: 99px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+/* More-pages cards point the way they open (RTL: forward is ←). */
+.navcard strong::after {
+  content: "←" / "";
+  display: inline-block;
+  margin-inline-start: 6px;
+  transition: transform .18s var(--ease-pop);
+}
+.navcard:hover strong::after,
+.navcard:focus-visible strong::after { transform: translateX(-4px); }
+.navcard:focus-visible { box-shadow: 0 0 0 3px var(--card), 0 0 0 6px var(--focus); }
+
+/* Phone first: the tab row scrolls sideways in one line instead of stacking
+   into three, and the edges fade so the child sees there is more. */
+@media (max-width: 680px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    margin-inline: -18px;
+    padding: 8px 18px 10px;
+    scroll-padding-inline: 18px;
+    -webkit-mask-image: linear-gradient(to left, transparent, var(--ink) 18px, var(--ink) calc(100% - 18px), transparent);
+    mask-image: linear-gradient(to left, transparent, var(--ink) 18px, var(--ink) calc(100% - 18px), transparent);
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; scroll-snap-align: start; }
+  .card { padding: 18px 16px; }
+}
+/* Fingers, not mice: every control at least 48px tall. */
+@media (pointer: coarse) {
+  button, .primary, .tab, .secondary, input, select { min-height: 48px; }
+}
+
+/* index.html's reduced-motion rule uses «*», which does not reach the
+   floating notes and the celebration notes; stop them here too. */
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+  .feedback.good::before, .feedback.good::after { display: none; }
+  button:hover:not(:disabled), .level:hover, .navcard:hover,
+  .navcard:hover strong::after, .navcard:focus-visible strong::after { transform: none; }
+}
+
 @media print {
   body { background: none; font-family: var(--font); }
   body::before, body::after, .feedback.good::before, .feedback.good::after { display: none; }
