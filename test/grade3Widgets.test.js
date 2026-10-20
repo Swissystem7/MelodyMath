@@ -74,9 +74,14 @@ test('the meter widget draws one box per bar, the accent carrying the multiple',
   withDom((played, h) => {
     assert.equal(g3.bindGrade3(h, { kind: 'meter', table: 3, bars: 4, bpm: 96 }), true);
     assert.deepEqual(find(h, '.g3-bar').map((b) => b.children.length), [3, 3, 3, 3]);
-    // Only the last beat of each bar is accented, and it shows 3, 6, 9, 12.
-    assert.deepEqual(find(h, '.on').map((i) => i.textContent), ['3', '6', '9', '12']);
-    assert.equal(find(h, '.g3-note')[0].textContent, g3.meterNarration(3, 4));
+    // Only the last beat of each bar is accented, and it shows 3, 6, 9 — the
+    // last one, 12, is the beat total and waits for the answer (#457).
+    assert.deepEqual(find(h, '.on').map((i) => i.textContent), ['3', '6', '9', '']);
+    assert.equal(find(h, '.on')[3].getAttribute('data-reveal'), '12');
+    const note = find(h, '.g3-note')[0];
+    assert.equal(note.textContent, g3.meterCue(3));
+    assert.equal(note.getAttribute('data-reveal'), g3.meterNarration(3, 4));
+    assert.equal(find(h, '.sr-only')[0].getAttribute('data-reveal'), g3.meterNarration(3, 4));
     find(h, '.g3-play')[0].fire('click');
     assert.deepEqual(played[0], g3.meterEvents(3, 4, 96), 'the button sounds what the pure half planned');
   });

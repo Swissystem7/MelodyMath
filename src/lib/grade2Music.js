@@ -51,6 +51,7 @@
   };
   const ONES_TO_TEN_HE = '10 צלילי פעמון מתקבצים לצליל פסנתר אחד';
   const TENS_TO_HUNDRED_HE = '10 צלילי פסנתר מתקבצים לצליל בס אחד';
+  const REG_INTRO_HE = 'בס הוא מאות, פסנתר עשרות, פעמון יחידות. ';
 
   // A missing count is a data bug, not a zero, so null and '' are rejected
   // rather than read through Number()'s 0.
@@ -287,7 +288,18 @@
   function registerNarration(raw) {
     const s = registerVoices(raw);
     if (!s) return '';
-    return 'בס הוא מאות, פסנתר עשרות, פעמון יחידות. ' + phaseNarration(s.phases);
+    return REG_INTRO_HE + phaseNarration(s.phases);
+  }
+
+  // The note on screen while the question is open: how many sounds each voice
+  // plays is the digit a place-value item asks for, so the counts wait for the
+  // answer (#457). The carries stay — they are the method, not the result.
+  function registerCue(raw) {
+    const s = registerVoices(raw);
+    if (!s) return '';
+    const carries = s.phases.filter(function (p) { return p.kind; });
+    return REG_INTRO_HE + phaseNarration(carries) + (carries.length ? ' ' : '')
+      + 'ספרו כמה צלילים מנגן כל כלי.';
   }
 
   // ---------- widgets ----------
@@ -402,7 +414,9 @@
     if (!s) return;
     drawPhases(padRow(box), s.phases);
     addPlay(box, '▶ השמע שלושה רגיסטרים', function () { return phaseEvents(s.phases, spec.bpm); });
-    box.appendChild(node('p', 'g3-note', registerNarration(spec)));
+    const note = node('p', 'g3-note', registerCue(spec));
+    note.setAttribute('data-reveal', registerNarration(spec));
+    box.appendChild(note);
   }
 
   const DRAW = {
@@ -425,7 +439,11 @@
     if (row) row.setAttribute('aria-hidden', 'true');
     const note = box.querySelector('.g3-note');
     if (note) {
-      box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      const sr = box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      // A note that names the answer keeps it in data-reveal until the child
+      // answers; the screen-reader copy waits with it.
+      const full = note.getAttribute && note.getAttribute('data-reveal');
+      if (full) sr.setAttribute('data-reveal', full);
       note.setAttribute('aria-hidden', 'true');
     }
     return true;
@@ -439,7 +457,7 @@
     verticalVoices: verticalVoices, phaseEvents: phaseEvents, phaseNarration: phaseNarration,
     barsBeats: barsBeats, barsBeatsEvents: barsBeatsEvents, barsBeatsNarration: barsBeatsNarration,
     halfBarSpec: halfBarSpec, halfBarEvents: halfBarEvents, halfBarNarration: halfBarNarration,
-    registerVoices: registerVoices, registerNarration: registerNarration,
+    registerVoices: registerVoices, registerNarration: registerNarration, registerCue: registerCue,
     bindGrade2: bindGrade2,
   };
 });
