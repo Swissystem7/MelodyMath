@@ -151,3 +151,27 @@ test('the error card asks for a grade and claims no typical range', () => {
   const real = plan.renderLearnerPlanHtml(plan.buildLearnerPlan({ grade: 'ג', now: NOW }));
   assert.match(real, /טווח טיפוסי: [^<]*שבועות/);
 });
+
+// #418 — the class picture names up to three leading gaps per child.
+test('the leading gaps are the weakest mapped topics, at most three and never the same topic twice', () => {
+  // In grade א׳ both חיבור and חיסור land on «בתחום 10»: one gap, not two.
+  assert.deepEqual(
+    plan.topGaps({ grade: 'א', perSkill: [{ skill: 'חיבור', total: 4, correct: 1 }, { skill: 'חיסור', total: 4, correct: 0 }] }).length,
+    1,
+  );
+  const three = plan.topGaps({
+    grade: 'ג',
+    perSkill: [{ skill: 'כפל', total: 4, correct: 1 }, { skill: 'חילוק', total: 4, correct: 0 },
+      { skill: 'מבנה עשרוני', total: 4, correct: 2 }, { skill: 'שאלות מילוליות', total: 4, correct: 1 }],
+  });
+  assert.equal(three.length, 3);
+  // Weakest first.
+  assert.match(three[0], /שארית/);
+  // A child's own sessions give the same answer as a per-skill summary.
+  assert.equal(plan.topGaps({ grade: 'ג', student: student('חילוק', 0, 4) })[0], three[0]);
+  // 80% and up is not a gap, and neither is an unusable input.
+  assert.deepEqual(plan.topGaps({ grade: 'א', perSkill: [{ skill: 'מנייה', total: 5, correct: 4 }] }), []);
+  assert.deepEqual(plan.topGaps({ grade: 'ז', perSkill: [{ skill: 'כפל', total: 4, correct: 0 }] }), []);
+  assert.deepEqual(plan.topGaps({ grade: 'א', perSkill: 'לא רשימה' }), []);
+  assert.deepEqual(plan.topGaps(null), []);
+});

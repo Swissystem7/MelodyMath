@@ -30,6 +30,20 @@
     return label;
   }
 
+  // A roster row may carry the grade the teacher picked for that child. The
+  // class picture needs it per child, because one tablet is shared by a
+  // מחנכת שילוב whose group spans grades — the grade showing on screen is not
+  // every child's grade. Anything that is not א׳–ו׳ stays unknown, never a
+  // guess: a wrong grade would build a plan from the wrong topic path.
+  function gradeLabel(value) {
+    const first = String(value == null ? '' : value).trim().slice(0, 1);
+    return ['א', 'ב', 'ג', 'ד', 'ה', 'ו'].indexOf(first) >= 0 ? first : '';
+  }
+
+  function studentGrade(student) {
+    return gradeLabel(student && student.grade);
+  }
+
   function ownStudent(roster, label) {
     const students = roster && roster.students;
     if (!students || !label || !Object.prototype.hasOwnProperty.call(students, label)) return null;
@@ -111,8 +125,24 @@
       return a.localeCompare(b, 'he');
     }).map(function (name) {
       const student = roster.students[name];
-      return { name: student.name, created: student.created };
+      return { name: student.name, created: student.created, grade: studentGrade(student) };
     });
+  }
+
+  // Returns the grade now on the row: '' when the teacher cleared it (the class
+  // picture then falls back to the tablet's grade), or null when nothing was
+  // written — no such student, or a value that is not א׳–ו׳.
+  function setStudentGrade(classCode, name, grade, storage) {
+    const raw = String(grade == null ? '' : grade).trim();
+    const g = gradeLabel(raw);
+    if (raw && !g) return null;
+    const roster = loadRoster(classCode, storage);
+    const student = ownStudent(roster, studentLabel(name));
+    if (!student) return null;
+    if (g) student.grade = g;
+    else delete student.grade;
+    saveRoster(classCode, roster, storage);
+    return g;
   }
 
   // A hand-edited or partially imported roster may carry a student row with
@@ -451,6 +481,7 @@
       const last = latestSession(sessions);
       return {
         name: name,
+        grade: studentGrade(student),
         total: report.total,
         totalPractices: report.total,
         correct: report.correct,
@@ -648,6 +679,7 @@
         roster.students[name] = {
           name: name,
           created: incoming.created || Date.now(),
+          grade: gradeLabel(incoming.grade),
           sessions: sessions,
           assignments: incomingAssignments,
           notes: incomingNotes,
@@ -656,6 +688,12 @@
         notes += incomingNotes.length;
         assignments += incomingAssignments.length;
         return;
+      }
+      // A grade set on this tablet wins: the teacher typed it here, and the
+      // other tablet's export may be weeks old. An unset grade is filled in.
+      if (!studentGrade(roster.students[name])) {
+        const incomingGrade = gradeLabel(incoming.grade);
+        if (incomingGrade) roster.students[name].grade = incomingGrade;
       }
       const have = {};
       ensureSessions(roster.students[name]);
@@ -813,7 +851,7 @@
 
   return {
     PREFIX, WHO_KEY,
-    normalizeCode, studentLabel, storageKey, emptyRoster,
+    normalizeCode, studentLabel, gradeLabel, studentGrade, setStudentGrade, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, listClassStudents, upsertStudent, getStudent,
     assignTask, listAssignments, listStudentProgress, listClassStudentsProgress,
     startSession, addItem, endSession, buildReport, allItems,

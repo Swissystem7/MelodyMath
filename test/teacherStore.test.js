@@ -265,3 +265,65 @@ test('loadRoster drops a prototype-key row that an older build may have stored',
   assert.equal(store.getStudent('שילוב', '__proto__', ls), null);
   assert.equal(({}).sessions, undefined);
 });
+
+// #413 / #418 — the roster row carries the grade the teacher picked for that
+// child. One shared tablet serves a group that spans grades, so the class
+// picture cannot assume every child is in the grade showing on screen.
+test('a grade is stored per student, and only א׳–ו׳ is ever written', () => {
+  const ls = memory();
+  store.upsertStudent('שילוב', 'נועה', ls);
+  assert.equal(store.studentGrade(store.getStudent('שילוב', 'נועה', ls)), '');
+  assert.equal(store.setStudentGrade('שילוב', 'נועה', 'ג', ls), 'ג');
+  assert.equal(store.studentGrade(store.getStudent('שילוב', 'נועה', ls)), 'ג');
+  // A geresh is how the UI writes a grade; the stored value is the letter.
+  assert.equal(store.setStudentGrade('שילוב', 'נועה', 'ד׳', ls), 'ד');
+  assert.equal(store.getStudent('שילוב', 'נועה', ls).grade, 'ד');
+  // Anything outside א׳–ו׳ leaves the stored grade alone instead of guessing.
+  assert.equal(store.setStudentGrade('שילוב', 'נועה', 'ז', ls), null);
+  assert.equal(store.setStudentGrade('שילוב', 'נועה', '7', ls), null);
+  assert.equal(store.getStudent('שילוב', 'נועה', ls).grade, 'ד');
+  // There is no such student, and no row is created by asking.
+  assert.equal(store.setStudentGrade('שילוב', 'מי שלא קיים', 'ב', ls), null);
+  assert.equal(store.setStudentGrade('שילוב', '__proto__', 'ב', ls), null);
+  assert.deepEqual(store.listStudents('שילוב', ls), ['נועה']);
+  assert.equal(({}).grade, undefined);
+  // Clearing goes back to «unknown», which is not the same as a grade of א׳.
+  assert.equal(store.setStudentGrade('שילוב', 'נועה', '', ls), '');
+  assert.equal('grade' in store.getStudent('שילוב', 'נועה', ls), false);
+});
+
+test('listClassStudents and buildClassOverview name each student grade', () => {
+  const ls = memory();
+  store.upsertStudent('שילוב', 'נועה', ls);
+  store.upsertStudent('שילוב', 'דני', ls);
+  store.setStudentGrade('שילוב', 'נועה', 'ג', ls);
+  const listed = store.listClassStudents('שילוב', ls);
+  assert.deepEqual(listed.map((r) => [r.name, r.grade]), [['דני', ''], ['נועה', 'ג']]);
+  const board = store.buildClassOverview('שילוב', ls);
+  assert.deepEqual(board.map((r) => r.grade), ['', 'ג']);
+});
+
+test('an imported grade fills an unknown one and never overwrites the grade typed here', () => {
+  const dest = memory();
+  store.upsertStudent('שילוב', 'נועה', dest);
+  store.upsertStudent('שילוב', 'דני', dest);
+  store.setStudentGrade('שילוב', 'נועה', 'ג', dest);
+  // The other tablet says ו׳ for נועה; the ג׳ typed here, in front of the
+  // child, wins. ז׳ is not a grade this product has, so it is not stored.
+  const raw = JSON.stringify({
+    v: 1,
+    students: {
+      'נועה': { name: 'נועה', grade: 'ו', sessions: [] },
+      'דני': { name: 'דני', grade: 'ב', sessions: [] },
+      'רון': { name: 'רון', grade: 'ד', sessions: [] },
+      'שרה': { name: 'שרה', grade: 'ז', sessions: [] },
+    },
+  });
+  assert.equal(store.importRoster('שילוב', raw, dest).ok, true);
+  assert.equal(store.studentGrade(store.getStudent('שילוב', 'נועה', dest)), 'ג');
+  assert.equal(store.studentGrade(store.getStudent('שילוב', 'דני', dest)), 'ב');
+  assert.equal(store.studentGrade(store.getStudent('שילוב', 'רון', dest)), 'ד');
+  assert.equal(store.studentGrade(store.getStudent('שילוב', 'שרה', dest)), '');
+  // The backup carries the grade out again.
+  assert.match(store.exportRoster('שילוב', dest), /"grade":"ג"/);
+});
