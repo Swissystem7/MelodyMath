@@ -16,6 +16,41 @@ test('csv is a local nickname sheet', () => {
   assert.match(quoted, /"א,ב"/);
 });
 
+// #503 — with no child saved, the diagnostic that just ended still picks the topic.
+test('an anonymous diagnostic feeds the plan, only for its own grade', () => {
+  const learnerPlan = require('../src/lib/learnerPlan');
+  const diag = { grade: 'ב', perSkill: [{ skill: 'multiplication', total: 2, correct: 0 }, { skill: 'addition', total: 2, correct: 2 }] };
+  const p = learnerPlan.buildLearnerPlan(view.planInput('ב', '', null, diag));
+  assert.equal(p.branch, 'weak');
+  assert.match(p.topic, /כפולות 2/);
+  assert.equal(view.planInput('ג', '', null, diag).perSkill, undefined);
+  const saved = { name: 'נ', sessions: [{ kind: 'class', started: 1, items: [] }] };
+  assert.equal(view.planInput('ב', 'נ', saved, diag).perSkill, undefined);
+  assert.equal(learnerPlan.buildLearnerPlan(view.planInput('ב', '', null, null)).branch, 'fresh');
+});
+
+test('the card hides during a question and returns on the drill\'s last screen', () => {
+  function docWith(openIds) {
+    return {
+      getElementById(id) {
+        return { classList: { contains: (c) => c === 'hidden' && openIds.indexOf(id) === -1 } };
+      },
+    };
+  }
+  assert.equal(view.hideOnRemediation(docWith([])), false);
+  assert.equal(view.hideOnRemediation(docWith(['rmQuiz'])), true);
+  assert.equal(view.hideOnRemediation(docWith(['rmPlan'])), true);
+  assert.equal(view.hideOnRemediation(docWith(['rmPlan', 'rmPlanDoneActions'])), false);
+  assert.equal(view.hideOnRemediation({ getElementById: () => null }), false);
+});
+
+test('the plan repaints when any logged session ends', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'learnerPlanView.js'), 'utf8');
+  assert.match(src, /'endTeacherSession'\]\.forEach\(hook\)/);
+  const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(index, /window\.mmLastDiag=\{grade:selectedGrade/);
+});
+
 test('the plan card is wired on every practice surface and the palette file is cached', () => {
   const root = path.join(__dirname, '..');
   const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');

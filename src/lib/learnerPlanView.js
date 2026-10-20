@@ -35,6 +35,29 @@
     return lines.join('\n');
   }
 
+  // A saved child plans from what the device logged. With no child saved (a
+  // demo tablet), the diagnostic that just ended still picks the topic, but
+  // only for the grade it was taken in.
+  function planInput(grade, name, student, lastDiag) {
+    const input = { grade: grade, student: student, name: name, now: Date.now() };
+    const own = student && Array.isArray(student.sessions) && student.sessions.length;
+    if (!own && lastDiag && lastDiag.grade === grade && Array.isArray(lastDiag.perSkill) && lastDiag.perSkill.length) {
+      input.perSkill = lastDiag.perSkill;
+    }
+    return input;
+  }
+
+  // The card hides while a question is on screen, and comes back on the
+  // drill's last screen, where the path ends.
+  function hideOnRemediation(doc) {
+    function open(id) {
+      const el = doc.getElementById(id);
+      return !!el && !el.classList.contains('hidden');
+    }
+    if (open('rmQuiz')) return true;
+    return open('rmPlan') && !open('rmPlanDoneActions');
+  }
+
   function mountLearnerPlans() {
     if (typeof document === 'undefined' || typeof buildLearnerPlan !== 'function' || typeof renderLearnerPlanHtml !== 'function') return;
     function gradeNow() {
@@ -59,10 +82,8 @@
       try {
         const grade = gradeNow();
         const name = nameNow();
-        const html = renderLearnerPlanHtml(buildLearnerPlan({ grade: grade, student: studentOf(name), name: name, now: Date.now() }));
-        const quiz = document.getElementById('rmQuiz');
-        const drill = document.getElementById('rmPlan');
-        const hideRem = (quiz && !quiz.classList.contains('hidden')) || (drill && !drill.classList.contains('hidden'));
+        const html = renderLearnerPlanHtml(buildLearnerPlan(planInput(grade, name, studentOf(name), globalThis.mmLastDiag)));
+        const hideRem = hideOnRemediation(document);
         SLOTS.forEach(function (id) {
           const panel = document.getElementById(id);
           if (!panel) return;
@@ -146,7 +167,9 @@
       wrapped._mmPlan = true;
       globalThis[fnName] = wrapped;
     }
-    ['saveGrade', 'renderTeacherReport', 'renderClassBoard', 'saveWhoFromForm'].forEach(hook);
+    // endTeacherSession closes every logged path (diagnostic, drill, class
+    // round, beat), so the card shows the new count as soon as one ends.
+    ['saveGrade', 'renderTeacherReport', 'renderClassBoard', 'saveWhoFromForm', 'endTeacherSession'].forEach(hook);
     const rem = document.getElementById('remediation');
     if (rem && typeof MutationObserver === 'function') {
       new MutationObserver(function () { paint(); }).observe(rem, { subtree: true, attributes: true, attributeFilter: ['class'] });
@@ -158,5 +181,8 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountLearnerPlans);
     else mountLearnerPlans();
   }
-  return { classPlanCsv: classPlanCsv, mountLearnerPlans: mountLearnerPlans, SLOTS: SLOTS, TAB_WHY: TAB_WHY };
+  return {
+    classPlanCsv: classPlanCsv, mountLearnerPlans: mountLearnerPlans, planInput: planInput,
+    hideOnRemediation: hideOnRemediation, SLOTS: SLOTS, TAB_WHY: TAB_WHY,
+  };
 });
