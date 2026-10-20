@@ -1,15 +1,16 @@
-/* Cheerful palette (#497). Same three roles as before: violet = confidence
+/* Palette (#497, calmed in #507). Same three roles: violet = confidence
    (buttons, links), raspberry = the one focus, sunshine = the week's progress
-   (fills only, never text). Every text pair is AA; see docs/DESIGN.md. */
+   (fills only, never text). Neutral ink and paper so the one accent leads.
+   Every text pair is AA; see docs/DESIGN.md. */
 :root {
-  --ink: #23194a;
-  --muted: #564f72;
+  --ink: #1b1830;
+  --muted: #55526b;
   --purple: #5b3fd1;
   --pink: #c2185b;
   --yellow: #ffc83d;
-  --bg: #fff8ec;
+  --bg: #f6f6fa;
   --card: #ffffff;
-  --line: #e7defa;
+  --line: #e5e4ee;
   --good: #137a43;
   --bad: #b3261e;
   --focus: #c2185b;
@@ -25,9 +26,10 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
   background: var(--card);
   border: 1px solid var(--line);
   border-inline-start: 4px solid var(--focus);
-  border-radius: 16px;
-  padding: 14px 16px;
-  margin: 0 0 14px;
+  border-radius: var(--r-lg, 16px);
+  box-shadow: var(--e-1, none);
+  padding: 16px 18px;
+  margin: 0 0 16px;
 }
 .mm-plan-kicker { margin: 0; color: var(--focus); font-size: .78rem; font-weight: 800; }
 .mm-plan-topic { margin: 4px 0 6px; font-size: 1.15rem; line-height: 1.35; }

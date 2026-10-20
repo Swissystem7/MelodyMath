@@ -29,8 +29,9 @@ test('phone tab row is one scrolling line', () => {
   assert.match(phone, /\.tab \{ flex: none;/);
 });
 
-test('reduced motion stops the floating and celebration notes', () => {
+test('#507: no floating notes; reduced motion stops the sheen and the answer pop', () => {
+  assert.doesNotMatch(theme, /body::(before|after)/);
   const calm = theme.slice(theme.indexOf('@media (prefers-reduced-motion: reduce)'));
-  assert.match(calm, /body::before, body::after \{ animation: none; \}/);
-  assert.match(calm, /\.feedback\.good::before, \.feedback\.good::after \{ display: none; \}/);
+  assert.match(calm, /\.progress span::after \{ animation: none;/);
+  assert.match(calm, /\.feedback\.good, \.feedback\.bad, \.choice\.picked-good, \.choice\.picked-bad \{ animation: none; \}/);
 });
