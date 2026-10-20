@@ -194,17 +194,20 @@
       tensFreq: tensFreq,
       clickCount: clickCount,
       label: label,
+      // The sounds alone, without the number they make: the note shown while
+      // the question is still open (#457).
+      cue: chart100Cue(tens, ones),
       // What a screen reader says for the sound the tap just made.
-      speech: chart100Speech(n, tens, ones, label),
+      speech: n + ': ' + label + '. ' + chart100Cue(tens, ones),
     };
   }
 
-  function chart100Speech(n, tens, ones, label) {
+  function chart100Cue(tens, ones) {
     const parts = [];
     if (tens > 0) parts.push(tens === 1 ? 'צליל נמוך אחד לעשרת' : tens + ' צלילים נמוכים לעשרות');
     if (ones > 0) parts.push(ones === 1 ? 'נקישה אחת ליחידה' : ones + ' נקישות ליחידות');
     if (!parts.length) parts.push('בלי צליל');
-    return n + ': ' + label + '. ' + parts.join(', ') + '.';
+    return parts.join(', ') + '.';
   }
 
   // The tens are a low tone per ten; the ones are short clicks after them, so
@@ -310,6 +313,15 @@
     return b;
   }
 
+  // `pending` is on screen while the question is open; `full` may name the
+  // answer, so it waits in data-reveal until revealWidget (index.html) runs
+  // after the child answers.
+  function addNote(box, pending, full) {
+    const p = node('p', 'g3-note', pending);
+    if (full && full !== pending) p.setAttribute('data-reveal', full);
+    box.appendChild(p);
+  }
+
   function drawBeats(box, spec) {
     const track = metronomeBeats(spec.from, spec.step, spec.accents);
     if (!track) return;
@@ -347,7 +359,7 @@
     addPlay(box, '▶ השמע שוב', function () {
       return chart100Events(num, spec.baseTensFreq, spec.bpm);
     });
-    box.appendChild(node('p', 'g3-note', s.speech));
+    addNote(box, s.cue, s.speech);
   }
 
   function drawPattern(box, spec) {
@@ -384,7 +396,9 @@
     if (row) row.setAttribute('aria-hidden', 'true');
     const note = box.querySelector('.g3-note');
     if (note) {
-      box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      const sr = box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      const full = note.getAttribute && note.getAttribute('data-reveal');
+      if (full) sr.setAttribute('data-reveal', full);
       note.setAttribute('aria-hidden', 'true');
     }
     return true;

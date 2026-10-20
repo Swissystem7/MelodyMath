@@ -78,6 +78,15 @@
       + ' תיבות, והדגשה על ' + hits.join(', ') + '.';
   }
 
+  // The note on screen while the question is open. Every meter item asks for
+  // the beat total, the last accent or the bar count, and meterNarration says
+  // all three, so this one says only how a bar is built (#457).
+  function meterCue(table) {
+    const m = meterForTable(table);
+    if (!m) return '';
+    return 'משקל ' + m.timeSig + ': ' + m.beatsPerBar + ' פעמות בכל תיבה, וההדגשה על הפעמה הראשונה בכל תיבה.';
+  }
+
   // ---------- חילוק עם שארית ----------
   function barsAndRemainder(beats, perBar) {
     const b = whole(beats, 0, 200);
@@ -275,6 +284,12 @@
       + ' תאים בסך הכול. הרשת מתנגנת עמודה אחר עמודה.';
   }
 
+  // The grid items ask for the cell total, so the open-question note leaves it out.
+  function gridCue(rows, steps) {
+    if (gridCells(rows, steps) == null) return '';
+    return 'רשת של ' + rows + ' שורות ו־' + steps + ' תאים בשורה. הרשת מתנגנת עמודה אחר עמודה.';
+  }
+
   // ---------- זמן ומספרים עד 10,000 ----------
   function tuneSeconds(minutes, seconds) {
     const m = whole(minutes, 0, 60);
@@ -329,7 +344,13 @@
     return b;
   }
 
-  function addNote(box, text) { box.appendChild(node('p', 'g3-note', text)); }
+  // `full` may name the answer, so it waits in data-reveal until revealWidget
+  // (index.html) runs after the child answers.
+  function addNote(box, text, full) {
+    const p = node('p', 'g3-note', text);
+    if (full && full !== text) p.setAttribute('data-reveal', full);
+    box.appendChild(p);
+  }
 
   function pads(count, cls) {
     const group = node('span', cls === 'left' ? 'g3-bar g3-leftover' : 'g3-bar');
@@ -348,13 +369,17 @@
     for (let bar = 1; bar * per <= beats.length; bar++) {
       const group = node('span', 'g3-bar');
       beats.filter(function (b) { return b.bar === bar; }).forEach(function (b) {
-        group.appendChild(node('i', b.accent ? 'on' : '', b.accent ? String(b.count) : ''));
+        // The last accent is the beat total, so its label waits for the answer.
+        const last = b.count === beats.length;
+        const pad = node('i', b.accent ? 'on' : '', b.accent && !last ? String(b.count) : '');
+        if (b.accent && last) pad.setAttribute('data-reveal', String(b.count));
+        group.appendChild(pad);
       });
       row.appendChild(group);
     }
     box.appendChild(row);
     addPlay(box, '▶ השמע את המשקל', function () { return meterEvents(spec.table, spec.bars, spec.bpm); });
-    addNote(box, meterNarration(spec.table, spec.bars));
+    addNote(box, meterCue(spec.table), meterNarration(spec.table, spec.bars));
     return true;
   }
 
@@ -415,7 +440,7 @@
     }
     box.appendChild(wrap);
     addPlay(box, '▶ השמע את הרשת', function () { return gridEvents(spec.rows, spec.steps, spec.bpm); });
-    addNote(box, gridNarration(spec.rows, spec.steps));
+    addNote(box, gridCue(spec.rows, spec.steps), gridNarration(spec.rows, spec.steps));
     return true;
   }
 
@@ -435,7 +460,9 @@
     if (row) row.setAttribute('aria-hidden', 'true');
     const note = box.querySelector('.g3-note');
     if (note) {
-      box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      const sr = box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      const full = note.getAttribute && note.getAttribute('data-reveal');
+      if (full) sr.setAttribute('data-reveal', full);
       note.setAttribute('aria-hidden', 'true');
     }
     return true;
@@ -444,14 +471,14 @@
   return {
     METERS: METERS, MIN_CELL: MIN_CELL, CELL_GAP: CELL_GAP,
     meterForTable: meterForTable, meterBeats: meterBeats, meterEvents: meterEvents,
-    meterNarration: meterNarration,
+    meterNarration: meterNarration, meterCue: meterCue,
     barsAndRemainder: barsAndRemainder, remainderText: remainderText,
     parseRemainder: parseRemainder, isRemainderAnswer: isRemainderAnswer,
     remainderMiss: remainderMiss, remainderEvents: remainderEvents,
     remainderNarration: remainderNarration,
     timesMore: timesMore, pairEvents: pairEvents, pairNarration: pairNarration,
     gridCells: gridCells, gridLayout: gridLayout, gridEvents: gridEvents,
-    gridNarration: gridNarration,
+    gridNarration: gridNarration, gridCue: gridCue,
     tuneSeconds: tuneSeconds, tuneClock: tuneClock, higherHz: higherHz,
     bindGrade3: bindGrade3,
   };

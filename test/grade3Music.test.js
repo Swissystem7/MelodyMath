@@ -285,7 +285,9 @@ test('the rendered sequencer grid keeps 44px cells and a screen-reader line', ()
     });
     assert.equal(dom.all(box, 'sr-only').length, 1);
     assert.equal(box.firstChild.className, 'sr-only');
-    assert.match(box.firstChild.textContent, /32 תאים/);
+    // The total is the answer, so it waits in data-reveal until feedback (#457).
+    assert.doesNotMatch(box.firstChild.textContent, /32/);
+    assert.match(box.firstChild.getAttribute('data-reveal'), /32 תאים/);
     assert.equal(dom.all(box, 'g3-note')[0].getAttribute('aria-hidden'), 'true');
     assert.equal(dom.all(box, 'g3-play').length, 1, 'a visible play-again button');
   } finally {
@@ -301,7 +303,8 @@ test('the meter, remainder and pair widgets render without a real browser', () =
     g3.bindGrade3(meter, { kind: 'meter', table: 3, bars: 4 });
     assert.equal(dom.all(meter, 'g3-bar').length, 4, 'one group per bar');
     assert.equal(dom.all(meter, 'on').length, 4, 'one accent per multiple of 3');
-    assert.deepEqual(dom.all(meter, 'on').map((p) => p.textContent), ['3', '6', '9', '12']);
+    assert.deepEqual(dom.all(meter, 'on').map((p) => p.textContent), ['3', '6', '9', '']);
+    assert.equal(dom.all(meter, 'on')[3].getAttribute('data-reveal'), '12');
     // The pads picture the sr-only line, so a reader does not hear it twice.
     assert.equal(dom.all(meter, 'g3-row')[0].getAttribute('aria-hidden'), 'true');
 

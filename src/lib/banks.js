@@ -1229,7 +1229,7 @@
   // 3. Patterns AB / AAB / ABC (melody & visual)
   // 4. Number line as scale (steps & octave jumps)
   RAW.push(
-    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1, widget: 'g1', g1: { kind: 'beats', from: 2, step: 2, accents: 4 } }),
+    I('א', 'counting', 'ספירת דילוגי 2 לפי מקצב: 2, 4, 6, ?', 8, 'הוסיפו 2 לפעימה', { standard: ST.SKIP2, level: 1, widget: 'g1', g1: { kind: 'beats', from: 2, step: 2, accents: 3 } }),
     I('א', 'counting', 'מקצב דילוגי 2: 8, 10, 12, ?', 14, 'הפעימה הבאה היא עוד 2', { standard: ST.SKIP2, level: 1 }),
     I('א', 'counting', 'מקצב דילוגי 2: 14, 16, 18, ?', 20, 'עוד 2 מגיעים ל־20', { standard: ST.SKIP2, level: 2 }),
     I('א', 'counting', 'מקצב דילוגי 2 מ־50: 52, 54, 56, ?', 58, 'מוסיפים 2 לפעימה', { standard: ST.SKIP2, level: 2 }),
