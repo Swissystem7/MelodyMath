@@ -77,3 +77,50 @@ test('grade א diagrams, grade ב cube volume and grade ג charts exist before t
   assert.deepEqual(banks.diagnosticItems('ג').filter((it) => it.skill === 'data').map((it) => it.level), [1, 2]);
 });
 
+test('grade ג has no partial topic left, and the multiplication table row is backed by every 10×10 fact (#412)', () => {
+  const banks = require('../src/lib/banks');
+  assert.deepEqual(cur.summaryForGrade('ג'), { grade: 'ג', total: 9, covered: 9, partial: 0, gap: 0 });
+  assert.ok(cur.rowsForGrade('ג').some((r) => /לוח כפל 10×10/.test(r.topic) && r.status === cur.COVERED));
+
+  const facts = new Set();
+  ['ב', 'ג'].forEach((g) => banks.rowsOf('multiplication', g).forEach((it) => {
+    const m = /^(\d+) × (\d+) = \?$/.exec(it.prompt);
+    if (!m) return;
+    const a = +m[1];
+    const b = +m[2];
+    assert.equal(Number(it.answer), a * b, it.prompt);
+    facts.add(Math.min(a, b) + '×' + Math.max(a, b));
+  }));
+  const missing = [];
+  for (let a = 1; a <= 10; a++) for (let b = a; b <= 10; b++) if (!facts.has(a + '×' + b)) missing.push(a + '×' + b);
+  assert.deepEqual(missing, []);
+
+  const g3 = banks.rowsOf('multiplication', 'ג');
+  assert.ok(g3.every((it) => it.standard === banks.ST.MUL_C));
+  assert.ok(g3.some((it) => /חוק החילוף/.test(it.hint)));
+  assert.ok(g3.some((it) => /חוק הפילוג/.test(it.hint)));
+  assert.ok(g3.filter((it) => /^☐ × |× ☐ =/.test(it.prompt)).length >= 2);
+  [1, 2, 3].forEach((level) => assert.ok(g3.some((it) => it.level === level), level));
+});
+
+test('every covered grade ג numbers topic has real bank items behind it (#412)', () => {
+  const banks = require('../src/lib/banks');
+  const ST = banks.ST;
+  const backing = [
+    [/מספרים עד 10,000/, 'place_value', null],
+    [/עד רבבה/, 'addition', null],
+    [/עד רבבה/, 'subtraction', null],
+    [/לוח כפל/, 'multiplication', ST.MUL_C],
+    [/חילוק עם שארית/, 'division', ST.MUL_DIV_10],
+    [/דו־שלביות/, 'word_problems', ST.WORD_TWO_STEP],
+  ];
+  backing.forEach(([topic, skill, standard]) => {
+    const row = cur.rowsForGrade('ג').find((r) => r.strand === 'numbers' && topic.test(r.topic));
+    assert.ok(row && row.status === cur.COVERED, String(topic));
+    const items = banks.rowsOf(skill, 'ג').filter((it) => !standard || it.standard === standard);
+    assert.ok(items.length >= 2, skill + ' ' + String(topic));
+  });
+  assert.ok(banks.rowsOf('division', 'ג').some((it) => /שארית/.test(String(it.prompt) + String(it.answer))));
+  assert.ok(banks.rowsOf('place_value', 'ג').some((it) => Number(String(it.answer).replace(/,/g, '')) >= 1000));
+});
+
