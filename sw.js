@@ -24,6 +24,7 @@ const ASSETS = [
   './src/lib/grade3Music.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
+  './src/lib/curriculum/grade6.js',
   './src/lib/banks.js',
   './src/lib/mastery.js',
   './src/lib/numberLine.js',

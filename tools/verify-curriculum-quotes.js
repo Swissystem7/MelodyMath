@@ -4,7 +4,7 @@
 //   node tools/verify-curriculum-quotes.js
 // Exit 1 if a quote is not in its PDF; rows without a quote are listed as
 // 'לא אומת'. Whitespace and bidi marks are ignored on both sides. Also checks
-// OFFICIAL_ORDER: each א׳–ד׳ row sits on the page where its quote first
+// OFFICIAL_ORDER: each row sits on the page where its quote first
 // appears, and the rows are listed in the order of those first appearances.
 const fs = require('node:fs');
 const os = require('node:os');
@@ -32,6 +32,12 @@ const norm = (s) => s.replace(/[‎‏‪-‮]/g, '').replace(/\s+/g, '');
   for (const r of cur.coverageMatrix()) {
     if (!r.verified) { console.log('לא אומת  ' + r.grade + '׳ ' + r.topic); continue; }
     if (!text[r.grade].includes(norm(r.quote))) { bad += 1; console.log('MISSING  ' + r.grade + '׳ ' + r.quote); }
+  }
+  // A row kept in a per-grade file also lists its sub-items verbatim.
+  for (const r of cur.MATRIX) {
+    for (const b of r.bullets || []) {
+      if (!text[r.grade].includes(norm(b))) { bad += 1; console.log('MISSING  ' + r.grade + '׳ ' + b); }
+    }
   }
   for (const g of Object.keys(cur.OFFICIAL_ORDER)) {
     let last = -1;
