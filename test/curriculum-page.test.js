@@ -86,3 +86,16 @@ test('curriculum.html wires metroLoop action for multiplication fluency remediat
   assert.match(freshPage, /action\s*===\s*'metroLoop'/);
   assert.match(freshPage, /לולאת מקצב קבועה לשינון כפולות/);
 });
+
+test('curriculum.html shows % covered per grade and an official source link on every row (#525)', () => {
+  const els = runPage();
+  cur.grades().forEach(function (g) {
+    const p = cur.coveragePercent(g);
+    assert.ok(els.sum.innerHTML.includes(p.covered + '% מכוסה'), 'grade ' + g + ' percent');
+    assert.ok(els.tables.innerHTML.includes('כיתה ' + g + '׳ · ' + p.covered + '% מכוסה'));
+  });
+  const links = els.tables.innerHTML.match(/href="https:\/\/meyda\.education\.gov\.il\/[^"]+"/g) || [];
+  assert.equal(links.length, cur.coverageMatrix().length);
+  const unverified = cur.coverageMatrix().filter((r) => !r.verified).length;
+  assert.equal((els.tables.innerHTML.match(/class="unverified">לא אומת</g) || []).length, unverified);
+});
