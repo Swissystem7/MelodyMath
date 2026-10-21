@@ -1658,9 +1658,14 @@
     });
   }
 
-  function classItems() {
+  // Class mode follows the grade picked in the header; no argument keeps the
+  // grade-1 bank that beat mode and the worksheets rely on. Class mode answers
+  // by tapping a choice, so typed items («3 שארית 2») stay out.
+  function classItems(grade) {
+    const g = isGrade(grade) ? grade : 'א';
+    const skills = g === 'א' ? ['counting', 'addition', 'subtraction', 'number_line'] : skillsForGrade(g);
     return SHIPPED.filter(function (it) {
-      return it.grade === 'א' && ['counting', 'addition', 'subtraction', 'number_line'].indexOf(it.skill) !== -1;
+      return it.grade === g && skills.indexOf(it.skill) !== -1 && !it.typed;
     });
   }
 

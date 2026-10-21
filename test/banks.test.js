@@ -171,3 +171,13 @@ test('a prototype-key grade falls back instead of crashing', () => {
   });
   banks.GRADES.forEach((g) => assert.equal(banks.isGrade(g), true, g));
 });
+
+test('classItems follows the selected grade and keeps the grade-1 default', () => {
+  assert.deepEqual(banks.classItems(), banks.classItems('א'));
+  assert.deepEqual(banks.classItems('constructor'), banks.classItems('א'));
+  const g3 = banks.classItems('ג');
+  assert.ok(g3.length > 0);
+  assert.ok(g3.every((i) => i.grade === 'ג'));
+  assert.ok(banks.classItems('ב').every((i) => i.grade === 'ב'));
+  banks.GRADES.forEach((g) => assert.ok(banks.classItems(g).every((i) => !i.typed), g + ' has typed items'));
+});
