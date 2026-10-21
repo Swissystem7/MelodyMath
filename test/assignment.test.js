@@ -25,6 +25,10 @@ test('createAssignment derives a stable id from title and assignedAt', () => {
       completedAt: null,
     },
   );
+  assert.equal(
+    assignment.createAssignment({ title: 'Test', assignedAt: 1234567890 }).id,
+    assignment.createAssignment({ title: 'Test', assignedAt: 1234567890 }).id,
+  );
 });
 
 test('assignTask adds a task to the student list and it appears in student data', () => {
