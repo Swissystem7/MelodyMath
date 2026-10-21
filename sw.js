@@ -14,6 +14,7 @@ const ASSETS = [
   './landing.html',
   './offer.html',
   './curriculum.html',
+  './program.html',
   './frequency.html',
   './check.html',
   './privacy.html',

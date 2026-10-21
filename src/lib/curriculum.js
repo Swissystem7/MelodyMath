@@ -157,6 +157,57 @@
     'ממוצע': 'משמעות המושג ממוצע',
   };
 
+  // א׳–ד׳ rows in the order of the official document: sorted by where the
+  // row's quote first appears in Newprogramgrade<n>.pdf, with that PDF page
+  // (pdftotext, 21.10.2026; re-checked by tools/verify-curriculum-quotes.js).
+  // A row with no quote has no verified place and is listed last as 'לא אומת'.
+  const OFFICIAL_ORDER = {
+    'א': [
+      ['ספירה עד 100 קדימה ואחורה ממספר כלשהו', 1],
+      ['מנייה עד 100, קיבוץ ל־10', 2],
+      ['כסף — מטבעות וסכומים', 3],
+      ['ישר המספרים — מיקום מדויק ומקורב עד 100', 3],
+      ['קריאה וכתיבה של מספרים, לוח מאה, שם־מספר', 3],
+      ['סדרות דגמים צורניים + יצירת סדרה', 3],
+      ['מצבי חיבור/חיסור מחיי יום־יום (איסוף, הוספה, הפרדה, גריעה)', 6],
+      ['חיבור וחיסור בתחום 10 ואז 20; פירוקי 10; = משמאל; יותר משני מחוברים', 6],
+      ['חיבור וחיסור בעשרות שלמות עד 100', 8],
+      ['מיון מצולעים, קודקוד וצלע, פירוק והרכבה', 8],
+      ['מדידת אורך (מתווך, ס״מ, סרגל)', 11],
+      ['שעון אנלוגי בשעות שלמות', 12],
+      ['דיאגרמת עמודות ופיקטוגרם', 13],
+    ],
+    'ב': [
+      ['מספרים עד 1,000, מבנה עשרוני, זוגי/אי־זוגי', 1],
+      ['שליטה בכפולות 2, 4, 5, 10', 5],
+      ['חיבור וחיסור דו־ספרתי במאוזן ובמאונך עד 100', 6],
+      ['חילוק לחלקים ולהכלה על אותם מספרים', 10],
+      ['פירוק והרכבה של מצולעים; זווית ישרה', 14],
+      ['נפח תיבות — מנייה של קוביות', 17],
+      ['ס״מ, היקף, חצאי שעות', 17],
+      ['טבלה, עמודות, פיקטוגרם', 18],
+    ],
+    'ג': [
+      ['מספרים עד 10,000, מבנה עשרוני', 1],
+      ['חיבור/חיסור במאוזן ובמאונך עד רבבה', 5],
+      ['לוח כפל 10×10 (אחרי 2/4/5/10)', 7],
+      ['שאלות השוואה כפליות ודו־שלביות', 8],
+      ['חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', 9],
+      ['זווית שטוחה/קהה/ישרה/חדה; מיון משולשים', 13],
+      ['שטח מלבן; שעות ודקות', 19],
+      ['איסוף, ארגון, דיאגרמות', 19],
+    ],
+    'ד': [
+      ['מספרים עד מיליון; אלגוריתמים במאונך; סדר פעולות', 1],
+      ['כסף — חישובי קנייה ועודף', 10],
+      ['שבר כחלק מכמות; שמות שונים לשבר; השוואה; חיבור/חיסור שברים', 11],
+      ['שבר כחלק משלם — 1/2, 1/4, 1/8 מול תיבה 4/4', 11],
+      ['מקבילים, מאונכים, מרובעים, שטח פנים', 16],
+      ['יחידות אורך; זמן בלוח עברי/לועזי', 19],
+      ['טבלאות ודיאגרמות כולל שברים', 21],
+    ],
+  };
+
   // Bank standard (banks.js ST text) → start of the row topic, per grade. A
   // pair that is not here gets 'לא אומת' on its tag rather than a guess.
   const STANDARD_TOPIC = {
@@ -311,6 +362,63 @@
     };
   }
 
+  function programGrades() {
+    return Object.keys(OFFICIAL_ORDER);
+  }
+
+  // The grade's rows in the official order, each with a link to its page in
+  // the official PDF and the bank items whose tag names that row. Items are
+  // passed in (banks.js itemsForGrade) so this file keeps no bank dependency.
+  function programForGrade(grade, items) {
+    const order = OFFICIAL_ORDER[grade] || [];
+    const placed = order.map(function (o) {
+      return MATRIX.find(function (r) { return r.grade === grade && r.topic === o[0] && r.verified; });
+    });
+    const rest = rowsForGrade(grade).filter(function (r) { return placed.indexOf(r) < 0; });
+    const list = Array.isArray(items) ? items : [];
+    const tagged = list.map(function (it) { return { it: it, s: sectionForItem(it) }; });
+    function entry(row, page) {
+      const mine = tagged.filter(function (t) { return t.s && t.s.verified && t.s.topic === row.topic; });
+      const skills = [];
+      mine.forEach(function (t) {
+        let g = skills.find(function (x) { return x.skill === t.it.skill; });
+        if (!g) skills.push(g = { skill: t.it.skill, count: 0 });
+        g.count += 1;
+      });
+      return {
+        topicId: row.topicId,
+        topic: row.topic,
+        strandHe: strandHe(row.strand),
+        status: row.status,
+        statusHe: statusHe(row.status),
+        quote: row.quote,
+        verified: page > 0,
+        page: page || null,
+        sourceUrl: page > 0 ? row.sourceUrl + '#page=' + page : row.sourceUrl,
+        skills: skills,
+        exerciseCount: mine.length,
+      };
+    }
+    const rows = placed.map(function (r, i) { return r ? entry(r, order[i][1]) : null; }).filter(Boolean)
+      .concat(rest.map(function (r) { return entry(r, 0); }));
+    return {
+      grade: grade,
+      pdfUrl: officialPdf(grade),
+      rows: rows,
+      untagged: tagged.filter(function (t) { return !(t.s && t.s.verified); }).length,
+    };
+  }
+
+  // Bank items of one row's grade whose tag names that row (for index.html?topic=).
+  function itemsForTopic(id, items) {
+    const row = topicById(id);
+    if (!row) return [];
+    return (Array.isArray(items) ? items : []).filter(function (it) {
+      const s = sectionForItem(it);
+      return s && s.verified && it.grade === row.grade && s.topic === row.topic;
+    });
+  }
+
   function isValidTopicId(id) {
     if (typeof id !== 'string' || !id) return false;
     return MATRIX.some(function (r) { return r.topicId === id; });
@@ -389,5 +497,9 @@
     officialPdf: officialPdf,
     sectionForItem: sectionForItem,
     coveragePercent: coveragePercent,
+    OFFICIAL_ORDER: OFFICIAL_ORDER,
+    programGrades: programGrades,
+    programForGrade: programForGrade,
+    itemsForTopic: itemsForTopic,
   };
 });
