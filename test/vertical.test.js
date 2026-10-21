@@ -46,10 +46,12 @@ test('vertical normalize caps huge operands so the column never shows exponent f
   assert.equal(V.b, 0);
   const html = vert.renderVerticalHtml({ a: 1e21, b: 123456, op: '-' });
   assert.doesNotMatch(html, /e\+/);
-  assert.match(html, /9999 פחות 9999/);
+  assert.match(html, /10000 פחות 10000/);
 });
 
-test('vertical normalize keeps a four-digit operand as is', () => {
+test('vertical normalize keeps a four-digit operand and 10,000 as is', () => {
   assert.equal(vert.normalizeVertical({ a: 9999, b: 1000 }).a, 9999);
   assert.equal(vert.normalizeVertical({ a: 9999, b: 1000 }).b, 1000);
+  assert.equal(vert.normalizeVertical({ a: 10000, b: 3648, op: '-' }).a, 10000);
+  assert.match(vert.renderVerticalHtml({ a: 10000, b: 3648, op: '-' }), /10000 פחות 3648/);
 });

@@ -6,10 +6,11 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  // Imported items (banks.js keeps raw.vert as-is) may carry any number; past
-  // four digits String() can switch to exponent form (1e+21) and the column
-  // stops lining up, so operands are capped like the ruler length in measure.js.
-  const MAX_OPERAND = 9999;
+  // Imported items (banks.js keeps raw.vert as-is) may carry any number; huge
+  // ones switch String() to exponent form (1e+21) and the column stops lining
+  // up, so operands are capped like the ruler length in measure.js. The cap is
+  // רבבה itself: grade ג׳ subtracts from 10,000 (#411).
+  const MAX_OPERAND = 10000;
 
   function normalizeVertical(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
