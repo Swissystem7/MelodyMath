@@ -3,6 +3,20 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const { eligibleExercises } = require('../src/lib/adaptive');
 
+test('grade א has 8 approximate number-line items with tolerance 4 (#466)', () => {
+  const approx = banks.allItems().filter((it) => it.tolerance === 4);
+  assert.deepEqual(approx.map((it) => it.answer), [17, 23, 37, 48, 62, 71, 86, 94]);
+  approx.forEach((it) => {
+    assert.equal(banks.isShippable(it), true, it.id);
+    assert.equal(it.grade, 'א');
+    assert.equal(it.standard, banks.ST.NUMBER_LINE_APPROX);
+    assert.equal(it.level, 2);
+    assert.equal(it.widget, 'numberLine');
+    assert.equal(it.line.mark, undefined, it.id + ' must not mark the answer');
+  });
+  assert.equal(banks.diagnosticItems('א').length, 16);
+});
+
 test('every shipped item is tagged with grade, strand and a specific standard', () => {
   const all = banks.allItems();
   assert.ok(all.length >= 80, 'bank too thin: ' + all.length);

@@ -35,6 +35,7 @@
     SUB10: 'חיסור בתחום העשר',
     SUB20: 'חיסור בתחום העשרים',
     NLINE: 'ישר המספרים — מיקום מדויק ומקורב; תשתית לחיבור/חיסור',
+    NUMBER_LINE_APPROX: 'ישר המספרים — מיקום מקורב (הערכה) בין 0 ל־100',
     MUL_B: 'כפולות 2, 4, 5 ו־10 עד סוף כיתה ב׳',
     MUL_C: 'לוח כפל 10×10 אחרי שליטה ב־2/4/5/10',
     DIV_PART: 'חילוק לחלקים',
@@ -216,6 +217,7 @@
       typed: extra.typed,
       music: extra.music,
       grid: extra.grid,
+      tolerance: extra.tolerance,
     };
   }
 
@@ -1567,6 +1569,16 @@
     MEAS('ב', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
   );
 
+  // ---------- כיתה א׳ · ישר מספרים — מיקום מקורב (#466) ----------
+  // No mark on the line: the child estimates, and within 4 counts. Appended
+  // last because ids are RAW indices and existing ids must not move.
+  [17, 23, 37, 48, 62, 71, 86, 94].forEach(function (n) {
+    const lo = Math.floor(n / 10) * 10;
+    RAW.push(I('א', 'number_line', 'איפה בערך ' + n + ' על הישר 0–100? (סמנו קרוב)', n, 'בין ' + lo + ' ל-' + (lo + 10), {
+      standard: ST.NUMBER_LINE_APPROX, level: 2, widget: 'numberLine', line: { min: 0, max: 100 }, tolerance: 4,
+    }));
+  });
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -1597,6 +1609,7 @@
     if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;
+    if (raw.tolerance != null) it.tolerance = raw.tolerance;
     if (raw.music) it.music = raw.music;
     if (raw.grid) it.grid = raw.grid;
     SHIPPED.push(it);
