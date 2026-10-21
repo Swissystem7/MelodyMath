@@ -411,3 +411,17 @@ test('index.html draws the grade-ג widget, checks remainders and unlocks audio'
   assert.ok(sw.includes("'./src/lib/grade3Music.js'"));
   assert.ok(sw.includes("'./src/lib/musicEngine.js'"));
 });
+
+// #458: the diagnostic samples tables the practice gate still keeps closed, so
+// the start-card note must say the gate is about personal practice only.
+test('the gate note states its scope, since the diagnostic samples locked tables', () => {
+  const diag = banks.diagnosticItems('ג');
+  assert.ok(diag.some((it) => mastery.isBlockedItem(it)), 'diagnostic no longer samples gated tables — reword the note');
+  // Grade ב shows the same gate note but its diagnostic stays on open tables,
+  // so the diagnostic sentence is toggled from the data rather than per grade.
+  assert.ok(!banks.diagnosticItems('ב').some((it) => mastery.isBlockedItem(it)));
+  const note = (indexHtml.match(/<div id="gateNote"[^>]*>(.*?)<\/div>/) || [])[1] || '';
+  assert.match(note, /^בתרגול האישי/);
+  assert.match(note, /<span id="gateNoteDiag" class="hidden"> האבחון[^.]*לוחות שעוד לא נפתחו/);
+  assert.ok(indexHtml.includes('diagnosticItems(selectedGrade).some(isBlockedItem)'));
+});
