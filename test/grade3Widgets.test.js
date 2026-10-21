@@ -195,7 +195,7 @@ test('every g3 spec in the question banks is one bindGrade3 draws', () => {
     // All four kinds are actually in use; a typo in one would otherwise hide here.
     assert.deepEqual(
       Array.from(new Set(items.map((it) => it.g3.kind))).sort(),
-      ['grid', 'meter', 'pair', 'remainder'],
+      ['chant', 'grid', 'meter', 'pair', 'remainder'],
     );
   });
 });
