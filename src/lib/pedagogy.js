@@ -175,26 +175,6 @@
     data: ['data'],
   };
 
-  const STUDY_PLAN_DISCLAIMER = 'תוכנית זו מסדרת סדר תרגול מומלץ מתוך סעיפי משרד החינוך לפי התשובות שנרשמו בטאבלט זה, ואינה אבחון או הצהרה על שליטה בחומר.';
-
-  function extractPerSkill(reportOrStudent) {
-    const src = reportOrStudent && typeof reportOrStudent === 'object' ? reportOrStudent : {};
-    if (src.perSkill && typeof src.perSkill === 'object') return src.perSkill;
-    const map = {};
-    const sessions = Array.isArray(src.sessions) ? src.sessions : [];
-    sessions.forEach(function (s) {
-      if (!s || !Array.isArray(s.items)) return;
-      s.items.forEach(function (it) {
-        if (!it || !it.skill) return;
-        if (!map[it.skill]) map[it.skill] = { total: 0, correct: 0, accuracy: 0 };
-        map[it.skill].total += 1;
-        if (it.correct) map[it.skill].correct += 1;
-        map[it.skill].accuracy = map[it.skill].correct / map[it.skill].total;
-      });
-    });
-    return map;
-  }
-
   function bankIdsForRow(grade, strand) {
     if (typeof BANKS.itemsForGrade !== 'function') return [];
     const skills = STRAND_TO_SKILLS[strand] || [];
@@ -204,92 +184,85 @@
       .map(function (it) { return it.id; });
   }
 
-  // Builds a personalized study plan for one student and grade (א׳–ו׳) from
-  // diagnostic / pre-post / practice history, prioritizing curriculum rows in
-  // strands where accuracy is below 80% or not yet practiced (#357).
-  function buildStudentStudyPlan(reportOrStudent, grade) {
-    const src = reportOrStudent && typeof reportOrStudent === 'object' ? reportOrStudent : {};
-    const validGrades = typeof CUR.grades === 'function' ? CUR.grades() : ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
-    const g = validGrades.indexOf(grade) !== -1 ? grade : (validGrades.indexOf(src.grade) !== -1 ? src.grade : 'א');
-    const perSkill = extractPerSkill(src);
-    const rows = (typeof CUR.rowsForGrade === 'function' ? CUR.rowsForGrade(g) : [])
-      .filter(function (r) { return r.status === CUR.COVERED || r.status === CUR.PARTIAL; });
-
-    const scored = rows.map(function (row, idx) {
-      const skills = STRAND_TO_SKILLS[row.strand] || [];
-      let total = 0;
-      let correct = 0;
-      skills.forEach(function (sk) {
-        const st = perSkill[sk];
-        if (st && st.total > 0) {
-          total += Number(st.total) || 0;
-          correct += Number(st.correct) || 0;
-        }
-      });
-      const accuracy = total > 0 ? correct / total : null;
-      const priority = accuracy == null ? 0.5 : accuracy;
-      return {
-        row: row,
-        idx: idx,
-        accuracy: accuracy,
-        priority: priority,
-        needsFocus: accuracy == null || accuracy < 0.8,
-      };
+  // One topic, the same decision as buildLearnerPlan (#428). The four-step
+  // list in #383 is this function's name with a different answer; callers
+  // here get the card's topic, or the first playable row until that module loads.
+  function learnerApi() {
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    if (typeof g.buildLearnerPlan === 'function') return g;
+    if (typeof module === 'object' && module.exports) {
+      try { return require('./learnerPlan'); } catch (e) { return null; }
+    }
+    return null;
+  }
+  function gradeOf(value) {
+    const grades = typeof CUR.grades === 'function' ? CUR.grades() : [];
+    const s = value == null ? '' : String(value).trim();
+    return grades.indexOf(s) === -1 ? '' : s;
+  }
+  function perSkillArray(src) {
+    const raw = src && src.perSkill;
+    if (Array.isArray(raw)) return raw;
+    if (!raw || typeof raw !== 'object') return null;
+    return Object.keys(raw).map(function (skill) {
+      const row = raw[skill] || {};
+      return { skill: skill, total: row.total, correct: row.correct };
     });
-
-    scored.sort(function (a, b) {
-      if (a.needsFocus !== b.needsFocus) return a.needsFocus ? -1 : 1;
-      if (a.priority !== b.priority) return a.priority - b.priority;
-      return a.idx - b.idx;
-    });
-
-    const steps = scored.slice(0, 4).map(function (entry, i) {
-      const r = entry.row;
-      const ids = bankIdsForRow(g, r.strand);
-      return {
-        order: i + 1,
-        topicId: r.topicId,
-        curriculumTopic: r.topic,
-        strand: r.strand,
-        strandHe: CUR.strandHe(r.strand),
-        status: r.status,
-        statusHe: CUR.statusHe(r.status),
-        accuracy: entry.accuracy,
-        weeklyTargetItems: entry.accuracy != null && entry.accuracy < 0.6 ? 8 : 6,
-        bankItemIds: ids,
-        reasonHe: entry.accuracy == null
-          ? 'טרם תורגל בטאבלט זה — מומלץ לפתוח באבחון קצר וב־6 פריטי בסיס'
-          : ('דיוק נוכחי בתחום: ' + Math.round(entry.accuracy * 100) + '% — מומלץ תרגול מדורג עם רמז קולי/חזותי'),
-      };
-    });
-
+  }
+  function stepFrom(plan, row) {
+    const topicRow = row || (CUR.MATRIX || []).filter(function (r) {
+      return r.grade === plan.grade && r.topic === plan.topic;
+    })[0] || null;
     return {
-      studentName: src.name ? String(src.name).trim() : '',
-      grade: g,
-      weeklyGoalHe: 'יעד שבועי מומלץ: 2–3 מפגשי תרגול קצרים (8–10 דקות) לפי הסדר שלהלן.',
-      steps: steps,
-      disclaimerHe: STUDY_PLAN_DISCLAIMER,
+      order: 1,
+      topicId: topicRow ? topicRow.topicId : '',
+      curriculumTopic: plan ? plan.topic : (topicRow ? topicRow.topic : ''),
+      strand: topicRow ? topicRow.strand : '',
+      strandHe: topicRow && CUR.strandHe ? CUR.strandHe(topicRow.strand) : '',
+      status: topicRow ? topicRow.status : '',
+      statusHe: topicRow && CUR.statusHe ? CUR.statusHe(topicRow.status) : '',
+      weeklyTargetItems: plan && plan.paceExpected ? plan.paceExpected : 3,
+      bankItemIds: topicRow ? bankIdsForRow(topicRow.grade, topicRow.strand) : [],
+      reasonHe: plan && (plan.adultLine || plan.childLine) ? (plan.adultLine || plan.childLine) : '',
     };
   }
-
+  function buildStudentStudyPlan(reportOrStudent, grade) {
+    const src = reportOrStudent && typeof reportOrStudent === 'object' && !Array.isArray(reportOrStudent) ? reportOrStudent : {};
+    const name = src.name ? String(src.name).trim() : '';
+    const api = learnerApi();
+    if (api && typeof api.buildLearnerPlan === 'function') {
+      const requested = grade != null && String(grade).trim() !== '' ? grade : src.grade;
+      const plan = api.buildLearnerPlan({
+        grade: requested, name: name, perSkill: perSkillArray(src),
+        student: src.sessions ? src : src.student, sessions: src.sessions, now: src.now,
+      });
+      return {
+        studentName: name, grade: plan.grade || '', weeklyGoalHe: plan.adultLine || '',
+        steps: plan.ok && plan.topic ? [stepFrom(plan)] : [],
+        disclaimerHe: plan.disclaimer || '', learner: plan, source: 'learnerPlan',
+      };
+    }
+    const g = gradeOf(grade) || gradeOf(src.grade);
+    const note = 'ספירה במכשיר הזה בלבד. לא ציון ולא אבחון.';
+    if (!g) {
+      return { studentName: name, grade: '', weeklyGoalHe: '', steps: [], disclaimerHe: note, learner: null, source: 'curriculum' };
+    }
+    const row = (CUR.rowsForGrade(g) || []).filter(function (r) { return r.status !== CUR.GAP; })[0] || null;
+    return {
+      studentName: name, grade: g,
+      weeklyGoalHe: 'הקצב: 3 מפגשים של 8 דקות השבוע.',
+      steps: row ? [stepFrom(null, row)] : [],
+      disclaimerHe: note, learner: null, source: 'curriculum',
+    };
+  }
   function renderStudentStudyPlanHtml(plan) {
     const p = plan && typeof plan === 'object' ? plan : buildStudentStudyPlan({}, 'א');
-    const who = p.studentName ? ('עבור ' + escapeHtml(p.studentName) + ' · ') : '';
-    const items = (p.steps || []).map(function (st) {
-      return '<li>'
-        + '<strong>שלב ' + Number(st.order || 1) + ' — ' + escapeHtml(st.curriculumTopic) + '</strong> '
-        + '<span class="tag">(' + escapeHtml(st.strandHe) + ' · ' + escapeHtml(st.statusHe) + ')</span>'
-        + '<div>' + escapeHtml(st.reasonHe) + ' · יעד שבועי: ' + Number(st.weeklyTargetItems || 6) + ' פריטים'
-        + (st.bankItemIds && st.bankItemIds.length ? ' · דוגמאות בבנק: <bdi dir="ltr">' + escapeHtml(st.bankItemIds.slice(0, 3).join(', ')) + '</bdi>' : '')
-        + '</div>'
-        + '</li>';
-    }).join('');
-    return '<section class="study-plan" dir="rtl">'
-      + '<h3>תוכנית תרגול אישית · ' + who + 'כיתה ' + escapeHtml(p.grade) + '׳</h3>'
-      + '<p class="study-plan-goal">' + escapeHtml(p.weeklyGoalHe || '') + '</p>'
-      + (items ? '<ol class="study-plan-steps">' + items + '</ol>' : '<p class="note">אין סעיפים זמינים לכיתה זו.</p>')
-      + '<p class="sheet-note">' + escapeHtml(p.disclaimerHe || STUDY_PLAN_DISCLAIMER) + '</p>'
-      + '</section>';
+    const api = learnerApi();
+    if (p.learner && api && typeof api.renderLearnerPlanHtml === 'function') return api.renderLearnerPlanHtml(p.learner);
+    const step = (p.steps || [])[0];
+    return '<article class="mm-plan" dir="rtl"><p class="mm-plan-kicker">תוכנית אחת</p><h2>'
+      + escapeHtml(step ? step.curriculumTopic : '') + '</h2><p>' + escapeHtml(p.weeklyGoalHe || '')
+      + '</p><p>' + escapeHtml(p.disclaimerHe || '') + '</p></article>';
   }
 
   return {

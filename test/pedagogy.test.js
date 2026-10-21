@@ -59,31 +59,91 @@ const foundPlan = lessonPlanForTopic(testTopicId);
 assert.ok(foundPlan, 'lessonPlanForTopic should find a plan for the given topicId');
 assert.equal(foundPlan.id, testTopicId, 'The returned plan should match the requested topicId');
 
-test('buildStudentStudyPlan orders weak strands first, links bank items across א-ג and refuses mastery language', () => {
+test('buildStudentStudyPlan gives the same one topic as buildLearnerPlan, with bank items, across א-ג', () => {
+  const learner = require('../src/lib/learnerPlan');
+  const perSkill = {
+    counting: { total: 6, correct: 6, accuracy: 1 },
+    addition: { total: 6, correct: 6, accuracy: 1 },
+    measurement: { total: 5, correct: 1, accuracy: 0.2 },
+  };
   ['א', 'ב', 'ג'].forEach((grade) => {
-    const plan = ped.buildStudentStudyPlan({
-      name: 'נועה',
-      perSkill: {
-        counting: { total: 6, correct: 6, accuracy: 1 },
-        addition: { total: 6, correct: 6, accuracy: 1 },
-        measurement: { total: 5, correct: 1, accuracy: 0.2 },
-      },
-    }, grade);
-
+    const plan = ped.buildStudentStudyPlan({ name: 'נועה', perSkill, now: 0 }, grade);
+    const card = learner.buildLearnerPlan({
+      grade, name: 'נועה', now: 0,
+      perSkill: Object.keys(perSkill).map((skill) => ({ skill, total: perSkill[skill].total, correct: perSkill[skill].correct })),
+    });
+    assert.equal(plan.source, 'learnerPlan');
     assert.equal(plan.studentName, 'נועה');
-    assert.equal(plan.grade, grade);
-    assert.ok(plan.steps.length >= 3, `grade ${grade} should have at least 3 ordered steps`);
-    // Weakest practiced strand (measurement at 20%) is prioritized first.
-    assert.equal(plan.steps[0].strand, 'measure');
-    assert.equal(plan.steps[0].weeklyTargetItems, 8);
-    assert.ok(plan.steps[0].bankItemIds.length >= 1, `grade ${grade} measure step should link bank items`);
-
+    assert.equal(plan.steps.length, 1, grade);
+    assert.equal(plan.steps[0].curriculumTopic, card.topic, grade);
+    assert.ok(Array.isArray(plan.steps[0].bankItemIds));
     const html = ped.renderStudentStudyPlanHtml(plan);
-    assert.match(html, /תוכנית תרגול אישית/);
-    assert.match(html, /נועה/);
-    assert.match(html, /אינה אבחון או הצהרה על שליטה/);
+    assert.match(html, /תוכנית אחת/);
+    assert.match(html, /dir="rtl"/);
     assert.doesNotMatch(html, /שליטה מלאה|שולט\/ת|מוכח מדעית/);
   });
+});
+
+test('buildStudentStudyPlan falls back to the first playable curriculum row when learnerPlan is missing', () => {
+  const cached = require.cache[require.resolve('../src/lib/learnerPlan')];
+  const saved = cached.exports;
+  cached.exports = {};
+  try {
+    ['א', 'ב', 'ג'].forEach((grade) => {
+      const plan = ped.buildStudentStudyPlan({ name: 'נועה' }, grade);
+      assert.equal(plan.source, 'curriculum');
+      assert.equal(plan.steps.length, 1, grade);
+      assert.equal(plan.steps[0].order, 1);
+      assert.equal(plan.grade, grade);
+      assert.equal(plan.studentName, 'נועה');
+      assert.match(plan.weeklyGoalHe, /3 מפגשים/);
+      assert.ok(plan.steps[0].bankItemIds.length >= 1, `grade ${grade} step should link bank items`);
+      const html = ped.renderStudentStudyPlanHtml(plan);
+      assert.match(html, /תוכנית אחת/);
+      assert.match(html, /dir="rtl"/);
+      assert.doesNotMatch(html, /שליטה|יעילות|טיפול/);
+    });
+    assert.match(ped.buildStudentStudyPlan({}, 'א').steps[0].curriculumTopic, /ספירה עד 100/);
+    const bad = ped.buildStudentStudyPlan({}, 'constructor');
+    assert.equal(bad.steps.length, 0);
+    assert.equal(bad.grade, '');
+  } finally {
+    cached.exports = saved;
+  }
+});
+
+test('buildStudentStudyPlan defers to a loaded buildLearnerPlan global', () => {
+  const seen = [];
+  globalThis.buildLearnerPlan = function (input) {
+    seen.push(input);
+    return {
+      ok: true, branch: 'weak', grade: input.grade, topic: 'לוח כפל',
+      adultLine: 'הקצב: 3 מפגשים של 8 דקות השבוע.', paceExpected: 3,
+      childLine: 'היום: לוח כפל.', disclaimer: 'ספירה במכשיר הזה בלבד.',
+    };
+  };
+  globalThis.renderLearnerPlanHtml = function (plan) {
+    return '<article class="mm-plan" data-topic="' + plan.topic + '" dir="rtl">תוכנית אחת</article>';
+  };
+  try {
+    const delegated = ped.buildStudentStudyPlan({
+      name: 'נועה',
+      perSkill: { multiplication: { total: 5, correct: 1 } },
+    }, 'ג');
+    assert.equal(delegated.source, 'learnerPlan');
+    assert.equal(delegated.steps.length, 1);
+    assert.equal(delegated.steps[0].curriculumTopic, 'לוח כפל');
+    assert.equal(delegated.steps[0].weeklyTargetItems, 3);
+    assert.ok(Array.isArray(seen[0].perSkill));
+    assert.equal(seen[0].perSkill[0].skill, 'multiplication');
+    assert.equal(seen[0].perSkill[0].total, 5);
+    const html = ped.renderStudentStudyPlanHtml(delegated);
+    assert.match(html, /data-topic="לוח כפל"/);
+    assert.doesNotMatch(html, /שליטה|יעילות/);
+  } finally {
+    delete globalThis.buildLearnerPlan;
+    delete globalThis.renderLearnerPlanHtml;
+  }
 });
 
 console.log('All pedagogy tests passed!');
