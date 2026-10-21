@@ -171,3 +171,17 @@ test('a prototype-key grade falls back instead of crashing', () => {
   });
   banks.GRADES.forEach((g) => assert.equal(banks.isGrade(g), true, g));
 });
+
+test('regroupItems is a whole beat-mode session of grade-ב carry/borrow duos', () => {
+  const rows = banks.regroupItems();
+  assert.ok(rows.length >= 12, 'only ' + rows.length + ' regrouping items');
+  rows.forEach((it) => {
+    assert.equal(it.grade, 'ב', it.id);
+    assert.equal(banks.isShippable(it), true, it.id);
+    assert.ok(!it.typed, it.id);
+    assert.equal(it.g2.kind, 'duo', it.id);
+    const a = it.g2.a % 10, b = it.g2.b % 10;
+    assert.ok(it.g2.op === '+' ? a + b >= 10 : a < b, it.id + ' does not cross a ten');
+  });
+  assert.ok(!rows.some((it) => it.g2.a === 23 && it.g2.b === 14), 'no-regrouping warm-up leaked in');
+});
