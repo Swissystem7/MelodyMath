@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · תוכנית הלימודים א׳–ד׳</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<meta name="description" content="נושאי תוכנית הלימודים במתמטיקה של משרד החינוך לכיתות א׳–ד׳, בסדר של התוכנית, עם קישור לסעיף הרשמי ולתרגולים המתאימים ב־MelodyMath.">
+<style>
+  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:940px;margin:auto;padding:24px 16px 60px}
+  h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:8px 0}
+  .lead,.note{color:var(--muted)}
+  .lead{max-width:60ch}
+  .note{font-size:.9rem}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
+  .grade-pick{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+  .grade-pick button{min-width:56px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:800;font-size:1.05rem;cursor:pointer}
+  .grade-pick button[aria-pressed="true"]{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0}
+  .topics{list-style:none;margin:0;padding:0;counter-reset:t}
+  .topic{border-bottom:1px solid var(--line);padding:12px 0;overflow-wrap:anywhere}
+  .topic:last-child{border-bottom:0}
+  .topic h3{margin:0 0 4px;font-size:1.05rem}
+  .topic h3::before{counter-increment:t;content:counter(t) ". ";color:var(--purple)}
+  .meta{font-size:.85rem;color:var(--muted)}
+  .st-covered{color:#059669;font-weight:700}
+  .st-partial{color:#d97706;font-weight:700}
+  .st-gap{color:#dc2626;font-weight:700}
+  .unverified{color:#b23a52;font-weight:700}
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .links a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);color:var(--purple);font-weight:700;text-decoration:none;background:#faf8ff}
+  .links a.go{background:var(--purple);color:#fff;border-color:var(--purple)}
+</style>
+<link rel="stylesheet" href="src/sefirot.css">
+<link rel="stylesheet" href="src/theme.css">
+</head>
+<body>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
+<main class="wrap" id="main" tabindex="-1">
+  <h1>תוכנית הלימודים — כיתות א׳–ד׳</h1>
+  <p class="lead">הנושאים של תוכנית הלימודים במתמטיקה של משרד החינוך, בסדר שבו הם מופיעים במסמך הרשמי של כל כיתה. ליד כל נושא: קישור לעמוד שלו במסמך הרשמי, וקישור שפותח באפליקציה את התרגילים שמתויגים לנושא.</p>
+  <div class="grade-pick" id="programGrades" role="group" aria-label="בחירת כיתה"></div>
+  <section class="grade-block" id="programGrade" aria-live="polite"></section>
+  <p class="note">מקור: <a href="https://pop.education.gov.il/tchumey_daat/matmatika/yesodi/oraat-math/new-curriculum/" target="_blank" rel="noopener">תוכנית הלימודים החדשה במתמטיקה ליסודי — אתר משרד החינוך</a> וקובצי Newprogramgrade1–4.pdf שהדף מקשר אליהם (נבדק 21.10.2026). הסדר והעמוד נקבעו לפי המקום שבו הציטוט של הנושא מופיע לראשונה בקובץ. נושא שלא נמצא לו ציטוט במסמך של אותה כיתה מסומן «לא אומת» ומופיע בסוף. הניסוח של שם הנושא הוא שלנו; הציטוט הוא מהמסמך. אין כאן אישור של משרד החינוך ואין טענת יעילות. <a href="curriculum.html">טבלת הכיסוי המלאה</a>.</p>
+</main>
+<script src="src/lib/curriculum.js"></script>
+<script src="src/lib/banks.js"></script>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
+<script>
+(function () {
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  const list = programGrades();
+  const pick = document.getElementById('programGrades');
+  const box = document.getElementById('programGrade');
+  let grade = list[0];
+  try { const g = localStorage.getItem('mm-grade'); if (list.indexOf(g) >= 0) grade = g; } catch (e) {}
+
+  function topicHtml(r) {
+    const place = r.verified
+      ? '«' + esc(r.quote) + '» · עמוד ' + r.page + ' במסמך'
+      : '<span class="unverified">' + UNVERIFIED_HE + '</span> — לא נמצא ציטוט במסמך של הכיתה, ולכן גם המקום בסדר לא אומת';
+    const practice = r.skills.map(function (s) {
+      return '<a class="go" href="index.html?topic=' + encodeURIComponent(r.topicId) + '&amp;skill=' + encodeURIComponent(s.skill) + '">'
+        + 'תרגול: ' + esc(skillHe(s.skill) || s.skill) + ' (' + s.count + ')</a>';
+    }).join('');
+    return '<li class="topic"><h3>' + esc(r.topic) + '</h3>'
+      + '<div class="meta">' + esc(r.strandHe) + ' · <span class="st-' + r.status + '">' + esc(r.statusHe) + '</span></div>'
+      + '<div class="meta">לפי תוכנית משרד החינוך: ' + place + '</div>'
+      + '<div class="links"><a href="' + esc(r.sourceUrl) + '" target="_blank" rel="noopener">לסעיף בתוכנית הרשמית ↗</a>'
+      + (practice || '<span class="meta">אין עדיין תרגילים באפליקציה לנושא הזה.</span>') + '</div></li>';
+  }
+
+  function paint() {
+    if (pick) {
+      pick.innerHTML = list.map(function (g) {
+        return '<button type="button" data-grade="' + g + '" aria-pressed="' + (g === grade) + '">' + g + '׳</button>';
+      }).join('');
+      Array.prototype.forEach.call(pick.querySelectorAll('button'), function (b) {
+        b.onclick = function () { grade = b.getAttribute('data-grade'); paint(); };
+      });
+    }
+    if (!box) return;
+    const p = programForGrade(grade, itemsForGrade(grade));
+    box.innerHTML = '<h2>כיתה ' + grade + '׳</h2>'
+      + '<p class="note"><a href="' + esc(p.pdfUrl) + '" target="_blank" rel="noopener">המסמך הרשמי של כיתה ' + grade + '׳ (PDF) ↗</a>'
+      + (p.untagged ? ' · ' + p.untagged + ' תרגילים בבנק של הכיתה לא שויכו לנושא מאומת ולכן לא מופיעים כאן' : '') + '</p>'
+      + '<ol class="topics">' + p.rows.map(topicHtml).join('') + '</ol>';
+  }
+  paint();
+})();
+</script>
+</body>
+</html>

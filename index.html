@@ -200,6 +200,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <p class="note" id="gradeNote">כיתה א׳: מנייה עד 100, חיבור/חיסור, ישר מספרים.</p>
 </div>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
+  <a class="navcard" href="program.html"><strong>תוכנית הלימודים א׳–ד׳</strong><span>כל נושא בסדר של תוכנית משרד החינוך: קישור לסעיף הרשמי ולתרגולים באפליקציה.</span></a>
   <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב: שברים, שיפוע פונקציה ומענה מוזיקלי מותאם.</span></a>
   <a class="navcard" href="check.html"><strong>בדיקה לפני ואחרי יחידה</strong><span>8 שאלות קצרות לפני ואחרי יחידה, נשמרות במכשיר. ללא מוזיקה.</span></a>
   <a class="navcard" href="offer.html"><strong>ניסוי כיתתי · 4 שבועות · חינם</strong><span>מכתב מוכן למנהל/ת ודף אחד להדפסה. בלי חשבונית ובלי טענת יעילות.</span></a>
@@ -1068,6 +1069,22 @@ function renderFirstRun(){
 }
 paintGrade();
 renderFirstRun();
+// program.html opens a curriculum row with ?topic=<id>[&skill=<k>]: the row's
+// tagged items run in the same plan loop as startStrugglePractice. Navigation
+// only — picking, levels and scoring are unchanged.
+function startTopicPractice(id,skill){
+  const row=typeof topicById==='function'?topicById(id):null;
+  if(!row||!isGrade(row.grade)||typeof itemsForTopic!=='function') return false;
+  const items=itemsForTopic(id,itemsForGrade(row.grade)).filter(it=>!skill||it.skill===skill);
+  if(!items.length) return false;
+  saveGrade(row.grade);
+  rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:rmHe(k)||k,items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
+  rpStep=0; rpItem=0;
+  show('rmStart',false); show('rmReport',false); show('rmPlanDoneActions',false); show('rmPlan',true);
+  rpRender();
+  return true;
+}
+try{const q=new URLSearchParams(location.search);if(q.get('topic'))startTopicPractice(q.get('topic'),q.get('skill'));}catch(e){}
 
 function renderCertificate(){
   const box=$('certSheet'); if(!box) return;
