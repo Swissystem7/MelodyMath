@@ -29,6 +29,11 @@
   .st-covered{color:#059669;font-weight:700}
   .st-partial{color:#d97706;font-weight:700}
   .st-gap{color:#dc2626;font-weight:700}
+  .pct{display:block;font-size:1.1rem;font-weight:800;color:var(--purple)}
+  .src-q{font-size:.85rem}
+  .cov-table td[class^="st-"],.cov-table th{white-space:nowrap}
+  .src-q a{color:var(--purple);font-weight:700}
+  .unverified{color:#b23a52;font-weight:700}
   .rem-card{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
   .rem-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:.8rem;font-weight:700;background:var(--purple);color:#fff;margin-bottom:8px}
   .rem-badge.mid{background:#3730a3}
@@ -54,7 +59,7 @@
   <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
   <div class="sum" id="sum"></div>
   <div id="tables"></div>
-  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. גאומטריה ומדידה מכוסות בחלקן (ראו בטבלה מה חסר); חקר נתונים — פער, לא «בקרוב» ממותג.</p>
+  <p class="note">מקור המיפוי: <a href="https://pop.education.gov.il/tchumey_daat/matmatika/yesodi/oraat-math/new-curriculum/" target="_blank" rel="noopener">תוכנית הלימודים החדשה במתמטיקה ליסודי — אתר משרד החינוך</a> (Newprogramgrade1–6.pdf). כל ציטוט בעמודה «לפי תוכנית משרד החינוך» נבדק מול קובץ הכיתה ב־21.10.2026; שורה שלא נמצא לה ציטוט מסומנת «לא אומת». האחוז = שורות מכוסות מתוך שורות הכיתה בטבלה, לא מתוך כל תת־סעיף במסמך. גאומטריה ומדידה מכוסות בחלקן (ראו בטבלה מה חסר); חקר נתונים — פער, לא «בקרוב» ממותג.</p>
 
   <section class="grade-block" id="remediation-section" style="border: 2px solid var(--purple); background: #ffffff; margin-top: 36px;">
     <h2 style="color: var(--purple); margin-top: 0;">מוקדי כשל לאומיים (ראמ״ה / מיצ״ב) ומנגנוני תיקון מוזיקליים</h2>
@@ -89,8 +94,12 @@
   if (sum) {
     sum.innerHTML = gradeList.map(function (g) {
       const s = summaryForGrade(g);
+      const p = coveragePercent(g);
       return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
-        + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
+        + '<span class="pct">' + p.covered + '% מכוסה</span>'
+        + p.partial + '% חלקי · ' + p.gap + '% לא מכוסה<br>'
+        + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה'
+        + '<br>אומתו מול המקור: ' + p.verified + '/' + p.total + '</div>';
     }).join('');
   }
   if (tables) {
@@ -99,16 +108,21 @@
       const body = rows.map(function (r) {
         return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
           + '<td class="st-' + r.status + '">' + r.statusHe + '</td>'
-          + '<td>' + r.note + '</td></tr>';
+          + '<td>' + r.note + '</td>'
+          + '<td class="src-q">' + (r.verified
+            ? '«' + escapeHtml(r.quote) + '» '
+            : '<span class="unverified">' + UNVERIFIED_HE + '</span> ')
+          + '<a href="' + r.sourceUrl + '" target="_blank" rel="noopener">לתוכנית הרשמית ↗</a></td></tr>';
       }).join('');
       const bank = (typeof coverageByGrade === 'function' ? coverageByGrade()[g] : {}) || {};
       const bankNote = Object.keys(bank).map(function (sk) {
         return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
       }).join(' · ');
-      return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
+      const pc = coveragePercent(g);
+      return '<section class="grade-block"><h2>כיתה ' + g + '׳ · ' + pc.covered + '% מכוסה</h2>'
         + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
         + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
-        + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
+        + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th><th scope="col">לפי תוכנית משרד החינוך</th></tr></thead>'
         + '<tbody>' + body + '</tbody></table></section>';
     }).join('');
   }
