@@ -2,7 +2,16 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { localRefs, youtubeEmbeds, sizeVerdict } = require('../tools/live-check');
+const {
+  PAGES,
+  SIZE_FILES,
+  localRefs,
+  youtubeEmbeds,
+  sizeVerdict,
+  demoVideoLinkedFromOnboard,
+} = require('../tools/live-check');
+
+const root = path.join(__dirname, '..');
 
 test('localRefs keeps same-origin paths and drops outside links, anchors and query strings', () => {
   const html = '<link rel="stylesheet" href="src/theme.css?v=2">'
@@ -19,12 +28,34 @@ test('localRefs resolves relative to the page folder', () => {
     ['docs/a.png', 'index.html']);
 });
 
+test('localRefs normalizes Windows-style page paths', () => {
+  assert.deepEqual(localRefs('<img src="a.png">', 'docs\\x.html'), ['docs/a.png']);
+});
+
 test('every local script and stylesheet index.html references exists in the repo', () => {
-  const root = path.join(__dirname, '..');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const refs = localRefs(html, 'index.html');
   assert.ok(refs.includes('src/lib/grade1Music.js'));
   for (const r of refs) assert.ok(fs.existsSync(path.join(root, r)), r + ' is referenced but missing');
+});
+
+test('demo smoke pages and size-sync files exist and their local refs are on disk', () => {
+  for (const p of PAGES) {
+    const htmlPath = path.join(root, p);
+    assert.ok(fs.existsSync(htmlPath), p);
+    const html = fs.readFileSync(htmlPath, 'utf8');
+    for (const r of localRefs(html, p)) {
+      assert.ok(fs.existsSync(path.join(root, r)), p + ' references missing ' + r);
+    }
+  }
+  for (const f of SIZE_FILES) assert.ok(fs.existsSync(path.join(root, f)), f);
+});
+
+test('demoVideoLinkedFromOnboard finds demo.html in onboard.js markup', () => {
+  const onboard = fs.readFileSync(path.join(root, 'src/lib/onboard.js'), 'utf8');
+  assert.equal(demoVideoLinkedFromOnboard(onboard), true);
+  assert.equal(demoVideoLinkedFromOnboard(''), false);
+  assert.equal(demoVideoLinkedFromOnboard("href='demo.html'"), true);
 });
 
 test('youtubeEmbeds finds embed iframes only', () => {

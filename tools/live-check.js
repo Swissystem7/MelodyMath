@@ -28,7 +28,8 @@ const SIZE_FILES = ['src/lib/grade1Music.js', 'src/lib/banks.js', 'src/lib/curri
 // resolved against the page's own path. Outside URLs, anchors, mailto: and
 // data: are left out.
 function localRefs(html, pagePath) {
-  const dir = path.posix.dirname('/' + (pagePath || 'index.html'));
+  const norm = String(pagePath || 'index.html').replace(/\\/g, '/');
+  const dir = path.posix.dirname('/' + norm);
   const out = new Set();
   const re = /\s(?:src|href)\s*=\s*["']([^"']*)["']/gi;
   let m;
@@ -41,6 +42,10 @@ function localRefs(html, pagePath) {
     out.add(abs.replace(/^\/+/, '') || 'index.html');
   }
   return [...out].sort();
+}
+
+function demoVideoLinkedFromOnboard(onboardJs) {
+  return typeof onboardJs === 'string' && /href=["']demo\.html["']/.test(onboardJs);
 }
 
 function youtubeEmbeds(html) {
@@ -131,11 +136,12 @@ async function main(argv) {
   // The «צפו בסרטון» link is added at runtime by onboard.js, not in index.html.
   const index = pages['index.html'] || '';
   const onboard = await get(base + 'src/lib/onboard.js');
+  const onboardJs = onboard.status === 200 ? onboard.body.toString('utf8') : '';
   const linked = localRefs(index, 'index.html').includes('demo.html')
-    || (onboard.status === 200 && onboard.body.toString('utf8').includes('href="demo.html"'));
+    || demoVideoLinkedFromOnboard(onboardJs);
   check('סרטון הדגמה', 'קישור «צפו בסרטון» ל־demo.html', linked && pages['demo.html'] != null,
     (linked ? 'יש קישור' : 'אין קישור ב־index/onboard.js') + ', demo.html ' + (pages['demo.html'] == null ? 'לא נטען' : 'נטען'));
-  for (const url of youtubeEmbeds((pages['demo.html'] || '') + index)) {
+  for (const url of youtubeEmbeds(pages['demo.html'] || '')) {
     const r = await get(url);
     check('סרטון הדגמה', url, r.status === 200, r.status);
   }
@@ -160,4 +166,11 @@ async function main(argv) {
 
 if (require.main === module) main(process.argv.slice(2)).then((c) => { process.exitCode = c; });
 
-module.exports = { localRefs, youtubeEmbeds, sizeVerdict };
+module.exports = {
+  PAGES,
+  SIZE_FILES,
+  localRefs,
+  youtubeEmbeds,
+  sizeVerdict,
+  demoVideoLinkedFromOnboard,
+};
