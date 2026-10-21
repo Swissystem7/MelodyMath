@@ -10,7 +10,7 @@ test('the coverage matrix lists every grade and leaves gaps visible', () => {
   cur.grades().forEach((g) => {
     const sum = cur.summaryForGrade(g);
     assert.ok(sum.total >= 4, g);
-    if (g === 'א' || g === 'ב' || g === 'ג' || g === 'ד') assert.equal(sum.gap, 0, g + ' gaps are closed');
+    if (g !== 'ו') assert.equal(sum.gap, 0, g + ' gaps are closed');
     else assert.ok(sum.gap >= 1, 'grade ' + g + ' must show at least one honest gap');
   });
   assert.ok(rows.some((r) => r.grade === 'א' && r.status === 'covered' && /ספירה עד 100/.test(r.topic)));
