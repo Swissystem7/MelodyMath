@@ -21,10 +21,20 @@ test('a row is verified only when it carries a quote from the official PDF', () 
   cur.coverageMatrix().forEach(function (r) {
     assert.equal(r.verified, typeof r.quote === 'string' && r.quote.length > 0, r.topic);
   });
-  // Not found in the grade's PDF on 21.10.2026 — must stay unverified.
-  const ids = cur.coverageMatrix().filter((r) => !r.verified).map((r) => r.grade + ':' + r.topic);
-  assert.ok(ids.includes('ב:כסף — ₪ ואגורות, קנייה ועודף'));
-  assert.ok(ids.some((id) => id.startsWith('ג:יחידות משקל ונפח')));
+  // #559: every א׳–ד׳ row now carries a quote from its grade's PDF.
+  ['א', 'ב', 'ג', 'ד'].forEach(function (g) {
+    assert.equal(cur.coveragePercent(g).verified, cur.rowsForGrade(g).length, g);
+  });
+});
+
+test('ב׳ money is שקלים only and ג׳ has no ק״ג/ליטר row — as in the PDFs (#559)', () => {
+  const money = (g) => cur.rowsForGrade(g).find((r) => r.topic.indexOf('כסף') === 0);
+  assert.doesNotMatch(money('ב').topic, /אגורות/);
+  assert.match(money('ג').topic, /אגורות/);
+  assert.ok(cur.rowsForGrade('ג').every((r) => !/ק״ג|ליטר/.test(r.topic)));
+  const massVol = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
+  assert.ok(massVol.length > 0);
+  massVol.forEach((it) => assert.equal(cur.sectionForItem(it).label, cur.UNVERIFIED_HE, it.prompt));
 });
 
 test('every bank item gets an official tag; unmapped or unverified says לא אומת', () => {

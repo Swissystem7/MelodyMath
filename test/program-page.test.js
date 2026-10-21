@@ -39,7 +39,8 @@ test('programForGrade keeps every row, puts unverified rows last and links only 
     });
   }
   const b = cur.programForGrade('ב', banks.itemsForGrade('ב'));
-  assert.equal(b.rows[b.rows.length - 1].topic, 'כסף — ₪ ואגורות, קנייה ועודף');
+  assert.ok(b.rows.every((r) => r.verified));
+  assert.equal(b.rows.find((r) => r.topic === 'כסף — קנייה ומכירה בשקלים').page, 7);
 });
 
 test('a practice link opens exactly the bank items tagged with that row', () => {
@@ -72,7 +73,9 @@ test('program.html renders the chosen grade in order with official and in-app li
   rows.forEach((r) => { const k = out.indexOf(r.topic); assert.ok(k > at, r.topic); at = k; });
   assert.match(out, /Newprogramgrade3\.pdf#page=\d+/);
   assert.match(out, /href="index\.html\?topic=mm-cur-\d+&amp;skill=/);
-  assert.match(out, /לא אומת/);
+  // Every ג׳ row is verified now (#559); the ק״ג/ליטר items are counted as untagged.
+  assert.doesNotMatch(out, /לא אומת/);
+  assert.match(out, /\d+ תרגילים בבנק של הכיתה לא שויכו לנושא מאומת/);
   assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 4);
 });
 
