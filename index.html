@@ -781,6 +781,9 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='barchart' && item.chart && typeof renderBarChartHtml==='function'){
     host.classList.remove('hidden');
     host.innerHTML=renderBarChartHtml(item.chart);
+  } else if(item.widget==='pie' && item.chart && typeof renderPieChartHtml==='function'){
+    host.classList.remove('hidden');
+    host.innerHTML=renderPieChartHtml(item.chart);
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
