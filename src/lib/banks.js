@@ -26,6 +26,7 @@
     GROUP10: 'קיבוץ לעשרות; התאמת כמות למספר עד 100',
     NEXTPREV: 'סדר המספרים — הבא והקודם',
     COUNT_OBJ: 'מנייה — התאמת כמות למספר',
+    COUNT_ON: 'ספירה הלאה ממספר נתון — לא מתחילים מ־1',
     DECOMP10: 'פירוקי 10',
     EQ_LEFT: 'סימן השוויון כשוויון בין שני ביטויים',
     MULTIADD: 'חיבור עם יותר משני מחוברים',
@@ -1566,6 +1567,16 @@
     MEAS('ב', 'תיבה בנויה מ־3 שכבות, ובכל שכבה 2 שורות של 3 קוביות. כמה קוביות יש בה?', 18, 'בכל שכבה 6 קוביות', 3, ST.MASS_VOL),
     MEAS('ב', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
   );
+
+  // ---------- כיתה א׳ · ספירה הלאה (#462) ----------
+  // Appended last so older ids stay put. The child taps a pad on each beat,
+  // counting on from `from` instead of from 1, and types where the count landed.
+  [[4, 2, 1], [7, 3, 1], [12, 4, 1], [18, 5, 2], [23, 3, 2], [36, 4, 2], [48, 5, 2], [57, 2, 2]].forEach(function (r) {
+    const from = r[0], steps = r[1];
+    RAW.push(I('א', 'counting', 'מתחילים ב־' + from + ' ושומעים ' + steps + ' פעימות — לאן הגענו?', from + steps,
+      from + ' ואז ' + steps + ' קדימה',
+      { standard: ST.COUNT_ON, level: r[2], widget: 'g1', g1: { kind: 'countOn', from: from, steps: steps } }));
+  });
 
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {

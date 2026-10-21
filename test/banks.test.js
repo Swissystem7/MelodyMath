@@ -171,3 +171,17 @@ test('a prototype-key grade falls back instead of crashing', () => {
   });
   banks.GRADES.forEach((g) => assert.equal(banks.isGrade(g), true, g));
 });
+
+test('count-on (#462): 8 shippable grade-א items, none naming its answer', () => {
+  const g1 = require('../src/lib/grade1Music');
+  const items = banks.allItems().filter((it) => it.g1 && it.g1.kind === 'countOn');
+  assert.equal(items.length, 8);
+  items.forEach((it) => {
+    assert.equal(banks.isShippable(it), true, it.id);
+    assert.equal(it.grade, 'א');
+    assert.equal(it.standard, banks.ST.COUNT_ON);
+    assert.equal(Number(it.answer), it.g1.from + it.g1.steps);
+    assert.ok(!it.prompt.includes(String(it.answer)), it.id + ' prompt names the answer');
+    assert.ok(!g1.countOnNarration(it.g1.from, it.g1.steps).includes(String(it.answer)), it.id);
+  });
+});

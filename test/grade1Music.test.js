@@ -257,6 +257,7 @@ test('bindGrade1 renders play button, visible note and screen-reader narration f
     { kind: 'scale', from: 0, to: 10, baseFreq: 220 },
     { kind: 'chart100', number: 34 },
     { kind: 'pattern', type: 'ABC', length: 6 },
+    { kind: 'countOn', from: 7, steps: 3 },
   ];
 
   specs.forEach((spec) => {
@@ -282,5 +283,32 @@ test('bindGrade1 renders play button, visible note and screen-reader narration f
   assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'beats', from: 0, step: 0, accents: 3 }), false);
   assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'chart100', number: 0 }), false);
   assert.equal(g1.bindGrade1(null, { kind: 'beats', from: 0, step: 2, accents: 3 }), false);
+  assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'countOn', from: 7, steps: 0 }), false);
+});
+
+test('count-on (#462): beats run on from the start, the last one is accented', () => {
+  const beats = g1.countOnBeats(7, 3);
+  assert.deepEqual(beats.map(b => b.count), [8, 9, 10]);
+  assert.deepEqual(beats.map(b => b.accent), [false, false, true]);
+  assert.deepEqual(g1.countOnBeats(7, 0), []);
+
+  const ev = g1.countOnEvents(7, 3, 96);
+  assert.equal(ev.length, 3);
+  ev.forEach((e, i) => { if (i) assert.ok(e.at >= ev[i - 1].at); });
+  assert.deepEqual(ev.map(e => e.hz), [330, 330, 660]);
+
+  assert.doesNotMatch(g1.countOnNarration(7, 3), /10/);
+  assert.match(g1.countOnNarration(7, 3), /7/);
+});
+
+test('count-on (#462): one tappable pad per beat, the accent last', (t) => {
+  global.document = { createElement: makeEl };
+  t.after(() => { delete global.document; });
+  const host = makeEl('div');
+  assert.equal(g1.bindGrade1(host, { kind: 'countOn', from: 18, steps: 5 }), true);
+  const bar = findEl(host, 'g3-bar');
+  assert.deepEqual(bar.children.map(p => p.className), ['left', 'left', 'left', 'left', 'on']);
+  bar.children.forEach((p) => { assert.equal(p.clicks.length, 1); p.clicks[0](); });
+  assert.doesNotMatch(findEl(host, 'g3-note').textContent, /23/);
 });
 

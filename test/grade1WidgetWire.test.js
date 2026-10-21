@@ -20,8 +20,9 @@ function makeEl(tag) {
 
 test('grade א music items keep a g1 spec through the shipped bank', () => {
   const items = banks.itemsForGrade('א').filter((it) => it.widget === 'g1');
-  const kinds = items.map((it) => it.g1 && it.g1.kind).sort();
-  assert.deepEqual(kinds, ['beats', 'chart100', 'pattern']);
+  const kinds = [...new Set(items.map((it) => it.g1 && it.g1.kind))].sort();
+  assert.deepEqual(kinds, ['beats', 'chart100', 'countOn', 'pattern']);
+  assert.equal(items.filter((it) => it.g1.kind === 'countOn').length, 8);
   const beats = items.find((it) => it.g1.kind === 'beats');
   assert.equal(beats.g1.step, 2);
   assert.equal(items.find((it) => it.g1.kind === 'chart100').g1.number, 34);
