@@ -177,6 +177,13 @@ test('frequency.html styles aria-pressed buttons and provides semantic footer na
   assert.match(latestPage, /<footer>[\s\S]*href="landing\.html"[\s\S]*אודות[\s\S]*<\/footer>/);
 });
 
+test('the sticky replay bar reserves its height at the bottom and the top chips wrap', () => {
+  assert.match(page, /\.wrap\{[^}]*calc\(var\(--replay-h\) \+ 24px\)/);
+  assert.match(page, /scroll-padding-bottom:calc\(var\(--replay-h\)/);
+  assert.match(page, /setProperty\('--replay-h', replayBar\.offsetHeight \+ 'px'\)/);
+  assert.match(page, /body #mm-site-nav,body #mm-site-nav \.mm-prod,body #mm-access\{flex-wrap:wrap;gap:8px 10px\}/);
+});
+
 // ---------- mobile, RTL and offline guards ----------
 
 test('the lab is Hebrew RTL with its maths isolated LTR, and no efficacy claim', () => {

@@ -789,7 +789,7 @@ function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null
 function remSpec(it){const s=it&&it.g3;return s&&s.kind==='remainder'&&typeof isRemainderAnswer==='function'?s:null}
 function answerOk(it,given){const s=remSpec(it);if(!s)return isCorrect(given,it.answer);return isRemainderAnswer(given,barsAndRemainder(s.beats,s.perBar))}
 function answerHint(it,given,correct){const s=remSpec(it);if(correct||!s||typeof remainderMiss!=='function')return it.hint;return remainderMiss(given,s)}
-function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').textContent=`שאלה ${rmIdx+1}/${RM_DIAG.length}`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;if($('rmItemTag'))$('rmItemTag').textContent=itemTagText(q);setMath($('rmPrompt'),q.prompt);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
+function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').innerHTML=`שאלה <bdi dir="ltr" style="white-space:nowrap">${rmIdx+1}/${RM_DIAG.length}</bdi>`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;if($('rmItemTag'))$('rmItemTag').textContent=itemTagText(q);setMath($('rmPrompt'),q.prompt);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
 function rmCheck(){if(rmAnswered||!normalizeAnswer($('rmAnswer').value))return;rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>`;show('rmFeedback',true);revealWidget('rmWidget');$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים';if($('rmNext')&&typeof $('rmNext').focus==='function')$('rmNext').focus();}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
@@ -1249,7 +1249,7 @@ function renderLessonsUI() {
   }
 
   grid.innerHTML = list.map(l => `
-    <div class="lesson-card" tabindex="0" role="button" aria-label="שיעור: ${escapeHtml(l.title)}" data-lesson-id="${l.id}">
+    <div class="lesson-card" data-lesson-id="${l.id}">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <span style="font-size:2rem;">${l.icon || '📖'}</span>
@@ -1258,13 +1258,14 @@ function renderLessonsUI() {
         <h3 style="margin:4px 0 8px;font-size:1.15rem;color:var(--ink);">${escapeHtml(l.title)}</h3>
         <p style="font-size:0.9rem;color:var(--muted);line-height:1.45;margin:0 0 12px;">${escapeHtml(l.summary)}</p>
       </div>
-      <button type="button" class="primary" style="margin-top:10px;pointer-events:none;">התחלת שיעור ←</button>
+      <button type="button" class="primary lesson-start" aria-label="התחלת שיעור: ${escapeHtml(l.title)}" style="margin-top:10px;">התחלת שיעור ←</button>
     </div>
   `).join('');
 
+  // הכרטיס עצמו אינו פקד; הכפתור הוא הפקד היחיד (מקלדת וקוראי מסך).
+  // לחיצה בעכבר על שאר הכרטיס עדיין פותחת את השיעור.
   grid.querySelectorAll('.lesson-card').forEach(card => {
     card.onclick = () => openLesson(card.dataset.lessonId);
-    card.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLesson(card.dataset.lessonId); } };
   });
 }
 
@@ -1309,7 +1310,7 @@ function closeLesson() {
   $('lessonsGrid').classList.remove('hidden');
   renderLessonsUI();
   if (prevLessonId) {
-    const prevCard = document.querySelector(`.lesson-card[data-lesson-id="${prevLessonId}"]`);
+    const prevCard = document.querySelector(`.lesson-card[data-lesson-id="${prevLessonId}"] .lesson-start`);
     if (prevCard) prevCard.focus();
   }
 }
@@ -1395,6 +1396,8 @@ function renderActiveStep() {
   const isLast = activeStepIndex === l.steps.length - 1;
   $('stepNextBtn').classList.toggle('hidden', isLast);
   $('stepPracticeBtn').classList.toggle('hidden', !isLast);
+  // בשלב חידון — המעבר לבנק נפתח רק אחרי שעונים
+  $('stepPracticeBtn').disabled = isLast && Array.isArray(step.options);
 
   renderStepperPills();
 
@@ -1440,10 +1443,11 @@ function renderStepQuiz(lesson, step) {
           b.style.color = 'var(--bad)';
         }
       });
+      if ($('stepPracticeBtn')) $('stepPracticeBtn').disabled = false;
       feed.className = `feedback ${res.correct ? 'good' : 'bad'}`;
       feed.innerHTML = `<strong>${res.correct ? 'מעולה! תשובה מדויקת! 🎵' : 'לא בדיוק הפעם.'}</strong><div>${escapeHtml(res.explanation)}</div>`;
       if (!res.correct) {
-        feed.innerHTML += `<div style="margin-top:10px;"><button type="button" id="stepQuizRetryBtn" class="secondary" style="width:auto;min-height:44px;padding:6px 16px;">🔄 נסו שוב</button></div>`;
+        feed.innerHTML += `<div style="margin-top:12px;"><p style="margin:0 0 8px;font-weight:700;">התשובות נעולות — לחצו «נסו שוב» כדי לבחור תשובה חדשה.</p><button type="button" id="stepQuizRetryBtn" class="primary" style="width:auto;min-height:48px;padding:10px 24px;font-size:1.1rem;">🔄 נסו שוב</button></div>`;
       }
       feed.classList.remove('hidden');
 

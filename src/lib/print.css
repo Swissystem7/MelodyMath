@@ -107,6 +107,7 @@ body.mm-contrast .tab,body.mm-contrast .secondary,body.mm-contrast .roster-chips
 body.mm-contrast a{color:#000!important;text-decoration:underline!important}
 body.mm-contrast .feedback.good{background:#fff!important;color:#000!important;border:3px solid #000!important}
 body.mm-contrast .feedback.bad{background:#000!important;color:#fff!important}
+body.mm-contrast .feedback.bad button{background:#fff!important;color:#000!important;border-color:#fff!important}
 body.mm-contrast #mm-access{background:#fff;border-bottom:3px solid #000}
 body.mm-contrast #mm-site-nav{background:#000;color:#fff}
 body.mm-contrast .first-run,body.mm-contrast .cert,body.mm-contrast .btn,
