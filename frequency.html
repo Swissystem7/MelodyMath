@@ -7,10 +7,11 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <meta name="description" content="אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד — יחסים שומעים ומחשבים. העשרה לכיתות ה׳–ו׳, בלי טענת יעילות.">
 <style>
-  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0;--replay-h:64px}
   *{box-sizing:border-box}
+  html{scroll-padding-bottom:calc(var(--replay-h) + 16px)}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
-  .wrap{max-width:900px;margin:auto;padding:16px 12px 96px}
+  .wrap{max-width:900px;margin:auto;padding:16px 12px calc(var(--replay-h) + 24px)}
   h1{font-size:clamp(1.5rem,5vw,2.3rem);margin:8px 0}
   h2{font-size:clamp(1.1rem,3.6vw,1.4rem);margin:0 0 6px}
   .lead,.note{color:var(--muted)}
@@ -38,7 +39,12 @@
   input[type=range]::-moz-range-track{height:8px;background:#efe9ff;border-radius:999px}
   input[type=range]::-moz-range-thumb{width:44px;height:44px;border-radius:50%;background:var(--purple);border:3px solid #fff}
   summary{min-height:44px;padding:10px 0;cursor:pointer}
-  .replay{position:sticky;bottom:8px;display:flex;gap:10px;flex-wrap:wrap;background:#f7f4ffe6;padding:8px 0}
+  .replay{position:sticky;bottom:0;z-index:5;display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#f7f4fff2;padding:8px 0;margin-top:14px;border-top:1px solid var(--line)}
+  body.mm-contrast .replay{background:#fff;border-top:3px solid #000}
+  /* Top nav and access chips wrap onto new rows instead of squeezing together. */
+  body #mm-site-nav,body #mm-site-nav .mm-prod,body #mm-access{flex-wrap:wrap;gap:8px 10px}
+  body #mm-site-nav a{display:inline-flex;align-items:center;min-height:40px;padding:4px 8px;border-radius:8px}
+  body.mm-large #mm-site-nav,body.mm-large #mm-access{gap:10px 12px}
   .live{margin:0;font-weight:700}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px}
@@ -293,6 +299,18 @@
   });
 
   // ---- play again ----
+  // The sticky bar grows when large text wraps it, so the page's bottom
+  // padding follows its real height instead of a guess.
+  const replayBar = $('again').parentNode;
+  const rootStyle = document.documentElement && document.documentElement.style;
+  function syncReplayHeight() {
+    if (replayBar && replayBar.offsetHeight && rootStyle && rootStyle.setProperty) {
+      rootStyle.setProperty('--replay-h', replayBar.offsetHeight + 'px');
+    }
+  }
+  syncReplayHeight();
+  if (typeof ResizeObserver === 'function' && replayBar) new ResizeObserver(syncReplayHeight).observe(replayBar);
+  else if (typeof window.addEventListener === 'function') window.addEventListener('resize', syncReplayHeight);
   $('again').addEventListener('click', function () {
     if (lastPlay) lastPlay();
     else compare(BASE, BASE * 2, 'קודם ' + hzText(BASE) + ', אחר כך ' + hzText(BASE * 2) + ' — אוקטבה.');

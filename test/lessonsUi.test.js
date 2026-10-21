@@ -42,6 +42,23 @@ test('guided lesson quiz advances focus on correct answer and focuses retry butt
   assert.match(indexHtml, /firstChoice\.focus\(\);/);
 });
 
+test('lesson card is not a role=button wrapping its own clickable start button', () => {
+  assert.doesNotMatch(indexHtml, /class="lesson-card"[^>]*role="button"/);
+  assert.doesNotMatch(indexHtml, /pointer-events:none;">התחלת שיעור/);
+  assert.match(indexHtml, /class="primary lesson-start"/);
+});
+
+test('the bank-practice button waits for a quiz answer and the retry cue is a prominent primary button', () => {
+  assert.match(indexHtml, /\$\('stepPracticeBtn'\)\.disabled = isLast && Array\.isArray\(step\.options\);/);
+  assert.match(indexHtml, /\$\('stepPracticeBtn'\)\.disabled = false;/);
+  assert.match(indexHtml, /id="stepQuizRetryBtn" class="primary"/);
+  assert.match(indexHtml, /לחצו «נסו שוב» כדי לבחור תשובה חדשה/);
+});
+
+test('the diagnostic counter is an isolated LTR integer N/total', () => {
+  assert.match(indexHtml, /שאלה <bdi dir="ltr"[^>]*>\$\{rmIdx\+1\}\/\$\{RM_DIAG\.length\}<\/bdi>/);
+});
+
 test('opening and closing a lesson manages keyboard focus properly', () => {
   assert.match(indexHtml, /const closeBtn = \$\('lessonCloseBtn'\);\s*\n\s*if\s*\(closeBtn\)\s*closeBtn\.focus\(\);/);
   assert.match(indexHtml, /const prevLessonId = activeLessonId;/);
