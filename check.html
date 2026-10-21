@@ -23,7 +23,9 @@
   .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .row button{flex:1 1 9rem}
   .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:8px;margin-top:14px}
-  .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line)}
+  .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line);transition:background-color .15s ease,border-color .15s ease}
+  .choices button:hover{background:#ede6ff;border-color:var(--purple)}
+  .choices button:active{background:var(--purple);color:#fff}
   .prompt{font-size:clamp(1.25rem,5vw,1.6rem);margin:8px 0}
   .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
   table{width:100%;border-collapse:collapse;font-size:.95rem}
@@ -35,6 +37,9 @@
   .disclaimer{background:#fff7e0;border:1px solid #f0d58a;border-radius:12px;padding:10px 12px;margin:12px 0 0}
   .hidden{display:none}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 16px;border-top:1px solid var(--line);margin-top:20px}
+  footer a{color:var(--purple);text-decoration:none;font-weight:600;margin:0 6px}
+  footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
@@ -78,6 +83,10 @@
     <div id="reportBody"></div>
     <p class="disclaimer" id="disclaimer"></p>
   </section>
+
+  <footer>
+    <div>MelodyMath · בדיקה לפני ואחרי יחידה · <a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">תוכנית לימודים</a> · <a href="landing.html">אודות</a></div>
+  </footer>
 </main>
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/mathBidi.js"></script>
@@ -100,7 +109,11 @@
   function start(form) {
     const classCode = normalizeCode($('classCode').value);
     const name = studentLabel($('studentName').value);
-    if (!name) { $('setupStatus').textContent = 'צריך שם או קוד תלמיד/ה.'; return; }
+    if (!name) {
+      $('setupStatus').textContent = 'צריך שם או קוד תלמיד/ה.';
+      $('studentName').focus();
+      return;
+    }
     const unitId = $('unit').value;
     const session = startSession(classCode, name, checkKind(unitId, form));
     if (!session) { $('setupStatus').textContent = 'לא הצלחנו לפתוח בדיקה במכשיר הזה.'; return; }
@@ -117,13 +130,14 @@
     const item = run.items[run.at];
     $('quizProgress').textContent = 'שאלה ' + (run.at + 1) + ' מתוך ' + run.items.length;
     setMath($('quizPrompt'), item.prompt);
-    $('quizChoices').innerHTML = shuffledChoices(item.choices).map(function (c) {
-      return '<button type="button" data-choice="' + escapeHtml(c) + '"><bdi dir="ltr">' + escapeHtml(c) + '</bdi></button>';
+    $('quizChoices').innerHTML = shuffledChoices(item.choices).map(function (c, idx) {
+      return '<button type="button" data-choice="' + escapeHtml(c) + '" aria-label="תשובה ' + (idx + 1) + ': ' + escapeHtml(c) + '"><bdi dir="ltr">' + escapeHtml(c) + '</bdi></button>';
     }).join('');
     $('quizChoices').querySelectorAll('button').forEach(function (b) {
       b.onclick = function () { answer(b.dataset.choice); };
     });
-    $('quizChoices').querySelector('button').focus();
+    const firstChoice = $('quizChoices').querySelector('button');
+    if (firstChoice) firstChoice.focus();
   }
 
   function answer(given) {
@@ -167,20 +181,20 @@
     const classCode = normalizeCode($('classCode').value);
     const r = checkReport(loadRoster(classCode).students, $('unit').value);
     if (!r.rows.length) {
-      $('reportBody').innerHTML = '<p class="note">אין עדיין בדיקות בקוד הכיתה הזה במכשיר הזה.</p>';
+      $('reportBody').innerHTML = '<p class="note" id="reportEmpty">אין עדיין בדיקות בקוד הכיתה הזה במכשיר הזה.</p>';
       return;
     }
     const fmt = function (x) { return x == null ? '—' : (Math.round(x * 10) / 10) + '/' + r.total; };
     const rows = r.rows.map(function (row) {
       const change = row.change == null ? '—' : (row.change > 0 ? '+' : '') + row.change;
-      return '<tr><td>' + escapeHtml(row.name) + '</td><td><bdi dir="ltr">' + cell(row.pre) + '</bdi></td><td><bdi dir="ltr">'
+      return '<tr><th scope="row">' + escapeHtml(row.name) + '</th><td><bdi dir="ltr">' + cell(row.pre) + '</bdi></td><td><bdi dir="ltr">'
         + cell(row.post) + '</bdi></td><td><bdi dir="ltr">' + change + '</bdi></td></tr>';
     }).join('');
     $('reportBody').innerHTML = '<p>כיתה <b>' + escapeHtml(classCode || 'ברירת מחדל') + '</b> · n = ' + r.n
       + ' תלמידים עם שתי הבדיקות. ממוצע לפני <bdi dir="ltr">' + fmt(r.meanPre) + '</bdi>, ממוצע אחרי <bdi dir="ltr">'
       + fmt(r.meanPost) + '</bdi>.' + (r.preOnly ? ' ' + r.preOnly + ' עשו רק את הבדיקה שלפני.' : '')
       + (r.postOnly ? ' ' + r.postOnly + ' עשו רק את הבדיקה שאחרי.' : '') + '</p>'
-      + '<table><caption class="sr-only">דוח תוצאות בדיקה לפי תלמיד</caption><thead><tr><th scope="col">תלמיד/ה</th>'
+      + '<table aria-describedby="reportTitle"><caption class="sr-only">דוח תוצאות בדיקה לפי תלמיד</caption><thead><tr><th scope="col">תלמיד/ה</th>'
       + '<th scope="col">לפני</th><th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
@@ -194,6 +208,9 @@
   // Enter בשדות הטופס מפעיל את הכפתור הראשי, כמו בסרגל המורה ב-index.html.
   $('classCode').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
   $('studentName').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
+
+  // דוח קיים לקוד הכיתה השמור מוצג מיד, בלי לחכות ללחיצה על "הצגת הדוח".
+  renderReport();
 })();
 </script>
 </body>

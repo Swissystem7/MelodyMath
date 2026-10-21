@@ -178,7 +178,8 @@ test('check.html returns focus to the form after a run ends or is cancelled', ()
   // סיום וביטול מסתירים את כרטיס הבדיקה, והפוקוס היה נופל ל-body בלי זה.
   const after = html.slice(html.indexOf('function cancelQuiz'));
   assert.match(after, /\$\('studentName'\)\.focus\(\);/);
-  assert.equal(html.match(/\$\('studentName'\)\.focus\(\);/g).length, 2);
+  // שלוש פעמים: שם חסר, סיום ריצה וביטול.
+  assert.equal(html.match(/\$\('studentName'\)\.focus\(\);/g).length, 3);
   // ביטול בלי ריצה פעילה לא אמור לדרוס את הסטטוס של הריצה הקודמת.
   assert.match(html, /function cancelQuiz\(\) \{\s*if \(!run\) return;/);
 });
