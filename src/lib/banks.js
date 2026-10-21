@@ -52,6 +52,7 @@
     WORD_REMOVE: 'שאלת מילים — הפרדה (הסרה מקבוצה)',
     WORD_COMPARE: 'שאלת מילים — השוואה בין שתי כמויות',
     GEO_SORT: 'מיון מצולעים לפי מספר צלעות וקודקודים',
+    POLY_CUT_A: 'פירוק מצולע בגזירה והרכבת מצולעים ממצולעים נתונים',
     RIGHT_ANGLE: 'זיהוי זווית ישרה',
     ANGLE_KINDS: 'זווית חדה, ישרה, קהה ושטוחה',
     TRI_SORT: 'מיון משולשים לפי זוויות ולפי צלעות',
@@ -1578,6 +1579,20 @@
       standard: ST.NUMBER_LINE_APPROX, level: 2, widget: 'numberLine', line: { min: 0, max: 100 }, tolerance: 4,
     }));
   });
+
+  // ---------- כיתה א׳ · פירוק והרכבה של מצולעים (#559) ----------
+  // Newprogramgrade1.pdf: cut a polygon into others, build polygons from
+  // given ones, find polygons inside a compound shape (מגן דוד), and ask what
+  // is kept — e.g. do the two parts of a cut rectangle still have 4 corners?
+  // Appended last so existing ids stay put.
+  RAW.push(
+    GEOA('א', 'גוזרים ריבוע בקו ישר מפינה לפינה. כמה משולשים מתקבלים?', 2, 'הקו חוצה את הריבוע לשני חלקים', 1, ST.POLY_CUT_A),
+    GEOA('א', 'מצמידים שני ריבועים זהים זה לזה ומקבלים מלבן. כמה קודקודים יש למלבן?', 4, 'ארבע פינות', 1, ST.POLY_CUT_A),
+    GEOA('א', 'במגן דוד מסתתרים משולשים גדולים. כמה משולשים גדולים יש בו?', 2, 'אחד מצביע למעלה ואחד למטה', 2, ST.POLY_CUT_A),
+    GEOA('א', 'גוזרים מלבן לשני מלבנים קטנים. כמה מרובעים מתקבלים?', 2, 'כל מלבן הוא מרובע', 2, ST.POLY_CUT_A),
+    GEOA('א', 'גוזרים מלבן לשני מלבנים קטנים. כמה קודקודים יש לשני החלקים יחד?', 8, 'לכל חלק 4 קודקודים', 3, ST.POLY_CUT_A),
+    GEOA('א', 'גוזרים מלבן מפינה לפינה לשני משולשים. כמה צלעות יש לשני החלקים יחד?', 6, 'לכל משולש 3 צלעות', 3, ST.POLY_CUT_A)
+  );
 
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
