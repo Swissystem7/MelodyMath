@@ -51,6 +51,48 @@ test('the plan repaints when any logged session ends', () => {
   assert.match(index, /window\.mmLastDiag=\{grade:selectedGrade/);
 });
 
+// #460 — the card repaints from a MutationObserver on #remediation, so the new
+// weekly pace shows one microtask after rpAdvance(), not in the same tick.
+test('the remediation card repaints when a class toggles under #remediation', () => {
+  function el() {
+    const node = { className: '', innerHTML: '', children: [] };
+    node.classList = {
+      contains: (c) => node.className.split(/\s+/).indexOf(c) !== -1,
+      toggle(c, force) {
+        const list = node.className.split(/\s+/).filter((x) => x && x !== c);
+        if (force) list.push(c);
+        node.className = list.join(' ');
+      },
+    };
+    node.querySelector = () => node.children[0] || null;
+    node.insertBefore = (child) => { child.parentNode = node; node.children.unshift(child); return child; };
+    return node;
+  }
+  const rem = el();
+  const observed = [];
+  const saved = { document: global.document, MutationObserver: global.MutationObserver, build: global.buildLearnerPlan, render: global.renderLearnerPlanHtml };
+  let done = 0;
+  try {
+    global.document = { readyState: 'complete', getElementById: (id) => (id === 'remediation' ? rem : null), createElement: el, addEventListener() {} };
+    global.MutationObserver = function (cb) { this.observe = (target, opts) => observed.push({ target, opts, cb }); };
+    global.buildLearnerPlan = () => ({ paceDone: done });
+    global.renderLearnerPlanHtml = (p) => p.paceDone + ' מתוך 3 מפגשים השבוע';
+    view.mountLearnerPlans();
+    assert.equal(observed.length, 1);
+    assert.equal(observed[0].target, rem);
+    assert.deepEqual(observed[0].opts, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    assert.match(rem.children[0].innerHTML, /^0 מתוך 3/);
+    done = 1;
+    observed[0].cb();
+    assert.match(rem.children[0].innerHTML, /^1 מתוך 3/);
+  } finally {
+    global.document = saved.document;
+    global.MutationObserver = saved.MutationObserver;
+    global.buildLearnerPlan = saved.build;
+    global.renderLearnerPlanHtml = saved.render;
+  }
+});
+
 test('the plan card is wired on every practice surface and the palette file is cached', () => {
   const root = path.join(__dirname, '..');
   const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
