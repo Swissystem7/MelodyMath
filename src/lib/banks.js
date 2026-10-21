@@ -95,6 +95,15 @@
     ADD_SUB_10K: 'חיבור וחיסור במאוזן ובמאונך עד רבבה',
     MUL_DIV_10: 'כפל וחילוק ב־10, 100 ו־1,000',
     WORD_TWO_STEP: 'שאלות מילוליות דו־שלביות',
+    NUM_MILLION: 'מספרים עד מיליון — מבנה עשרוני, השוואה ועיגול',
+    ADD_SUB_MILLION: 'חיבור וחיסור בתחום המיליון, גם במאונך',
+    MUL_DIV_VERT: 'כפל וחילוק במספר חד־ספרתי, גם במאונך; סימני התחלקות',
+    ORDER_OPS: 'סדר פעולות החשבון, כולל סוגריים',
+    FRAC_OF_QTY: 'שבר כחלק מכמות — מציאת הכמות החלקית',
+    FRAC_NAMES: 'שמות שונים לשבר והשוואה בין שברים',
+    FRAC_ADD_D: 'חיבור וחיסור שברים במכנים שווים או כשמכנה אחד כפולה של השני',
+    BOX_AREA: 'שטח פנים של תיבה',
+    PIE: 'קריאת דיאגרמת עוגה',
   };
 
   const SKILL_HE = {
@@ -1578,6 +1587,117 @@
       standard: ST.NUMBER_LINE_APPROX, level: 2, widget: 'numberLine', line: { min: 0, max: 100 }, tolerance: 4,
     }));
   });
+
+  // ---------- כיתה ד׳ · השלמת התוכנית הרשמית (#559) ----------
+  // One item per line, read against Newprogramgrade4.pdf: numbers to a
+  // million, vertical algorithms and order of operations; a fraction as part
+  // of a quantity, other names for a fraction, comparing, adding; surface
+  // area of a box; the Hebrew calendar and decimetres; tables and diagrams
+  // with fractions. Appended last so existing ids stay put.
+  function G4(skill, prompt, answer, hint, level, standard, extra) {
+    const e = extra || {};
+    const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
+      : skill === 'measurement' ? STRAND.MEASURE : skill === 'data' ? STRAND.DATA : STRAND.NUM;
+    return I('ד', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, widget: e.widget, vert: e.vert, chart: e.chart });
+  }
+  const KIOSK = { bars: [{ label: 'א׳', value: 40 }, { label: 'ב׳', value: 25 }, { label: 'ג׳', value: 50 }, { label: 'ד׳', value: 30 }, { label: 'ה׳', value: 20 }] };
+  const VOTES = { bars: [{ label: 'חן', value: 10 }, { label: 'אוהד', value: 10 }, { label: 'נטע', value: 20 }] };
+  const POLL = { parts: 4, slices: [{ label: 'בעד', parts: 3 }, { label: 'נגד', parts: 1 }] };
+  const ROUTE = { parts: 4, slices: [{ label: 'ברגל', parts: 2 }, { label: 'באופניים', parts: 1 }, { label: 'ברכב', parts: 1 }] };
+  const BAND = { parts: 8, slices: [{ label: 'תופים', parts: 3 }, { label: 'חליל', parts: 1 }, { label: 'פסנתר', parts: 4 }] };
+  const V = function (a, b, op) { return { widget: 'vertical', vert: { a: a, b: b, op: op } }; };
+  RAW.push(
+    G4('place_value', 'במספר 472,315, מהי ספרת מאות האלפים?', 4, 'הספרה השישית מימין', 1, ST.NUM_MILLION),
+    G4('place_value', 'במספר 472,315, מהי ספרת עשרות האלפים?', 7, 'הספרה החמישית מימין', 1, ST.NUM_MILLION),
+    G4('place_value', '300,000 + 40,000 + 5,000 + 200 + 6 = ?' + NO_COMMA, 345206, 'אין עשרות — כותבים 0 במקום העשרות', 1, ST.NUM_MILLION),
+    G4('place_value', 'איזה מספר גדול יותר: 254,129 או 245,929? כתבו את המספר.' + NO_COMMA, 254129, 'במקום עשרות האלפים: 5 גדול מ־4', 2, ST.NUM_MILLION),
+    G4('place_value', 'עגלו את 318,460 לאלפים.' + NO_COMMA, 318000, '460 קטן מ־500, לכן מעגלים למטה', 2, ST.NUM_MILLION),
+    G4('place_value', '3,450 × 100 = ?' + NO_COMMA, 345000, 'הגדלה פי 100 — מוסיפים שני אפסים', 2, ST.NUM_MILLION),
+    G4('place_value', 'עגלו את 649,500 למאות אלפים.' + NO_COMMA, 600000, '49,500 קטן מ־50,000, לכן מעגלים למטה', 3, ST.NUM_MILLION),
+    G4('place_value', 'השלימו: 257,324 = 250,024 + ☐' + NO_COMMA, 7300, '257,324 פחות 250,024', 3, ST.NUM_MILLION),
+    G4('place_value', 'מה המספר שבא אחרי 999,999?' + NO_COMMA, 1000000, 'מיליון — אחד ושישה אפסים', 3, ST.NUM_MILLION),
+    G4('addition', '250,000 + 120,000 = ?' + NO_COMMA, 370000, 'מאות אלפים עם מאות אלפים, עשרות אלפים עם עשרות אלפים', 1, ST.ADD_SUB_MILLION),
+    G4('addition', 'חשבו במאונך: 123,456 + 214,321' + NO_COMMA, 337777, 'מחברים טור־טור מימין לשמאל, בלי המרה', 1, ST.ADD_SUB_MILLION, V(123456, 214321, '+')),
+    G4('addition', 'חשבו במאונך: 245,318 + 132,694' + NO_COMMA, 378012, 'המרה ביחידות, בעשרות ובמאות', 2, ST.ADD_SUB_MILLION, V(245318, 132694, '+')),
+    G4('addition', '506 + 6,814 = ?' + NO_COMMA, 7320, '6 ועוד 4 הם 10 — ספרת היחידות היא 0', 2, ST.ADD_SUB_MILLION),
+    G4('addition', 'חשבו במאונך: 486,750 + 513,250' + NO_COMMA, 1000000, 'כל טור משלים ל־10 עם ההמרה', 3, ST.ADD_SUB_MILLION, V(486750, 513250, '+')),
+    G4('addition', 'השלימו: 3,215 + ☐ = 6,216' + NO_COMMA, 3001, 'פעולה הפוכה: 6,216 פחות 3,215', 3, ST.ADD_SUB_MILLION),
+    G4('subtraction', '500,000 − 200,000 = ?' + NO_COMMA, 300000, '5 מאות אלפים פחות 2 מאות אלפים', 1, ST.ADD_SUB_MILLION),
+    G4('subtraction', 'חשבו במאונך: 658,947 − 324,615' + NO_COMMA, 334332, 'מחסרים טור־טור מימין לשמאל, בלי פריטה', 1, ST.ADD_SUB_MILLION, V(658947, 324615, '-')),
+    G4('subtraction', 'חשבו במאונך: 403,520 − 158,370' + NO_COMMA, 245150, 'פורטים מהמאות ומהאלפים', 2, ST.ADD_SUB_MILLION, V(403520, 158370, '-')),
+    G4('subtraction', 'השלימו: 3,514 − ☐ = 3,000', 514, 'מה מורידים מ־3,514 כדי להגיע ל־3,000', 2, ST.ADD_SUB_MILLION),
+    G4('subtraction', 'חשבו במאונך: 700,000 − 286,435' + NO_COMMA, 413565, 'פורטים מאחת ממאות האלפים', 3, ST.ADD_SUB_MILLION, V(700000, 286435, '-')),
+    G4('subtraction', 'השלימו: ☐ − 4,000 = 2,357' + NO_COMMA, 6357, 'פעולה הפוכה: 2,357 ועוד 4,000', 3, ST.ADD_SUB_MILLION),
+    G4('multiplication', '300 × 4 = ?' + NO_COMMA, 1200, '3 מאות כפול 4 הם 12 מאות', 1, ST.MUL_DIV_VERT),
+    G4('multiplication', '24 × 3 = ?', 72, '20 × 3 ועוד 4 × 3', 1, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 237 × 4', 948, 'כופלים יחידות, עשרות ומאות ומעבירים', 2, ST.MUL_DIV_VERT),
+    G4('multiplication', '32 × 19 = ?', 608, 'חוק הפילוג: 32 × 20 פחות 32', 2, ST.MUL_DIV_VERT),
+    G4('multiplication', '25 × 36 = ?', 900, '25 × 4 × 9 = 100 × 9', 3, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 586 × 7' + NO_COMMA, 4102, '6 × 7 = 42 — כותבים 2 ומעבירים 4', 3, ST.MUL_DIV_VERT),
+    G4('division', '84 : 4 = ?', 21, '80 : 4 ועוד 4 : 4', 1, ST.MUL_DIV_VERT),
+    G4('division', '2,400 : 100 = ?', 24, 'הקטנה פי 100 — מורידים שני אפסים', 1, ST.MUL_DIV_VERT),
+    G4('division', 'חשבו במאונך: 856 : 4', 214, 'מחלקים מאות, עשרות ויחידות', 2, ST.MUL_DIV_VERT),
+    G4('division', '1,536 : 3 = ?', 512, '1,500 : 3 ועוד 30 : 3 ועוד 6 : 3', 2, ST.MUL_DIV_VERT),
+    G4('division', '307 תלמידים חוזרים באוטובוסים של 50 מקומות. מה מספר האוטובוסים הקטן ביותר שיש להזמין?', 7, '6 אוטובוסים הם 300 מקומות — ונשארו 7 תלמידים', 3, ST.MUL_DIV_VERT),
+    G4('division', 'האם 1,827 מתחלק ב־9 בלי שארית? (כן/לא)', 'כן', 'סכום הספרות 1 + 8 + 2 + 7 הוא 18', 3, ST.MUL_DIV_VERT),
+    G4('division', 'מהי השארית כשמחלקים 346 ב־3?', 1, 'סכום הספרות הוא 13; 12 מתחלק ב־3', 3, ST.MUL_DIV_VERT),
+    G4('multiplication', '2 + 3 × 4 = ?', 14, 'כפל לפני חיבור', 1, ST.ORDER_OPS),
+    G4('multiplication', '(2 + 3) × 4 = ?', 20, 'קודם מה שבסוגריים', 1, ST.ORDER_OPS),
+    G4('multiplication', '100 + 20 × 50 = ?' + NO_COMMA, 1100, 'קודם 20 × 50', 2, ST.ORDER_OPS),
+    G4('multiplication', '(100 + 20) × 50 = ?' + NO_COMMA, 6000, 'קודם 100 + 20', 2, ST.ORDER_OPS),
+    G4('division', '48 : 6 : 2 = ?', 4, 'כפל וחילוק בלבד — לפי סדר הכתיבה', 2, ST.ORDER_OPS),
+    G4('multiplication', '36 − 12 : 4 + 2 = ?', 35, 'קודם 12 : 4, ואחר כך משמאל לימין', 3, ST.ORDER_OPS),
+    G4('multiplication', 'תמר קוראת 36 עמודים בכל יום. אחרי 3 שבועות נשארו לה 127 עמודים. כמה עמודים יש בספר?', 883, '36 × 21 ועוד 127', 3, ST.ORDER_OPS),
+
+    G4('fractions', 'כמה זה 1/2 מ־10 תפוחים?', 5, 'מחלקים ל־2 חלקים שווים', 1, ST.FRAC_OF_QTY),
+    G4('fractions', 'כמה זה 1/4 מ־12 עפרונות?', 3, 'מחלקים ל־4 חלקים שווים', 1, ST.FRAC_OF_QTY),
+    G4('fractions', 'כמה זה 3/4 מ־8 ספרים?', 6, 'רבע מ־8 הוא 2, ושלושה רבעים', 2, ST.FRAC_OF_QTY),
+    G4('fractions', 'בכיתה 24 תלמידים, ו־1/3 מהם מנגנים. כמה תלמידים מנגנים?', 8, 'מחלקים את 24 ל־3 חלקים שווים', 2, ST.FRAC_OF_QTY),
+    G4('fractions', 'חצי מ־20 תפוחים וחצי מ־10 תפוחים — בכמה תפוחים הראשון גדול יותר?', 5, '10 פחות 5', 3, ST.FRAC_OF_QTY),
+    G4('fractions', 'כמה ילדים הם 2/5 מ־30 ילדים?', 12, 'חמישית מ־30 היא 6', 3, ST.FRAC_OF_QTY),
+    G4('fractions', 'השלימו: 1/2 = ?/4. מה המונה?', 2, 'חצי הוא שני רבעים', 1, ST.FRAC_NAMES),
+    G4('fractions', 'איזה שבר גדול יותר: 1/3 או 1/5? כתבו את השבר.', '1/3', 'ככל שמחלקים ליותר חלקים, כל חלק קטן יותר', 1, ST.FRAC_NAMES),
+    G4('fractions', 'השלימו: 3/4 = ?/8. מה המונה?', 6, 'כל רבע הוא שתי שמיניות', 2, ST.FRAC_NAMES),
+    G4('fractions', 'איזה שבר גדול יותר: 3/8 או 5/8? כתבו את השבר.', '5/8', 'אותו מכנה — משווים את המונים', 2, ST.FRAC_NAMES),
+    G4('fractions', 'איזה שבר גדול יותר: 2/3 או 3/4? כתבו את השבר.', '3/4', 'ל־2/3 חסר שליש עד השלם, ל־3/4 חסר רק רבע', 3, ST.FRAC_NAMES),
+    G4('fractions', 'נועה אומרת ש־1/3 מעוגה קטן מ־1/4 מאותה עוגה, כי 3 קטן מ־4. האם היא צודקת? (כן/לא)', 'לא', 'שליש הוא חלק מתוך 3 — גדול מחלק מתוך 4', 3, ST.FRAC_NAMES),
+    G4('fractions', '1/5 + 2/5 = ?', '3/5', 'אותו מכנה — מחברים את המונים', 1, ST.FRAC_ADD_D),
+    G4('fractions', '5/6 − 2/6 = ?', '3/6', 'אותו מכנה — מחסרים את המונים', 1, ST.FRAC_ADD_D),
+    G4('fractions', '1/2 + 1/4 = ?', '3/4', 'חצי הוא שני רבעים', 2, ST.FRAC_ADD_D),
+    G4('fractions', '1 ו־1/3 + 1/3 = ? (שלם ושבר)', '1 ו־2/3', 'השלם נשאר, ושליש ועוד שליש', 2, ST.FRAC_ADD_D),
+    G4('fractions', '3/4 − 1/8 = ?', '5/8', 'שלושה רבעים הם שש שמיניות', 3, ST.FRAC_ADD_D),
+    G4('fractions', 'חגית צריכה 1/2 מדלי הצבע, ורחלי צריכה 3/8 ממנו. איזה חלק מהדלי הן צריכות יחד?', '7/8', 'חצי הוא ארבע שמיניות', 3, ST.FRAC_ADD_D),
+
+    G4('geometry', 'פאה של תיבה היא מלבן של 3 ס״מ על 2 ס״מ. מה שטח הפאה בסמ״ר?', 6, '3 כפול 2', 1, ST.BOX_AREA),
+    G4('geometry', 'לקובייה 6 פאות, ושטח כל פאה 4 סמ״ר. מה שטח הפנים של הקובייה בסמ״ר?', 24, '6 פעמים 4', 1, ST.BOX_AREA),
+    G4('geometry', 'המקצוע של קובייה הוא 3 ס״מ. מה שטח הפנים שלה בסמ״ר?', 54, 'כל פאה 9 סמ״ר, ויש 6 פאות', 2, ST.BOX_AREA),
+    G4('geometry', 'לתיבה מידות של 3, 2 ו־1 ס״מ. מה שטח הפנים שלה בסמ״ר?', 22, 'שלושה זוגות פאות: 6, 3 ו־2 — כל אחד פעמיים', 2, ST.BOX_AREA),
+    G4('geometry', 'לתיבה מידות של 5, 4 ו־2 ס״מ. מה שטח הפנים שלה בסמ״ר?', 76, '2 × (20 + 10 + 8)', 3, ST.BOX_AREA),
+    G4('geometry', 'המקצוע של קובייה גדל מ־1 ס״מ ל־2 ס״מ. פי כמה גדל שטח הפנים?', 4, 'מ־6 סמ״ר ל־24 סמ״ר', 3, ST.BOX_AREA),
+
+    G4('measurement', 'כמה חודשים יש בשנה עברית פשוטה, לא מעוברת?', 12, 'מתשרי עד אלול', 1, ST.CALENDAR),
+    G4('measurement', 'בלוח העברי, כ׳ בחשוון — מה מספר היום בחודש?', 20, 'האות כ׳ היא 20', 1, ST.CALENDAR),
+    G4('measurement', 'כמה חודשים יש בשנה עברית מעוברת?', 13, 'בשנה מעוברת יש אדר א׳ ואדר ב׳', 2, ST.CALENDAR),
+    G4('measurement', 'ט״ו בשבט — מה מספר היום בחודש שבט?', 15, 'ט׳ היא 9 ו־ו׳ היא 6', 2, ST.CALENDAR),
+    G4('measurement', 'ל״ג בעומר — איזה מספר הוא ל״ג?', 33, 'ל׳ היא 30 ו־ג׳ היא 3', 3, ST.CALENDAR),
+    G4('measurement', 'חנוכה מתחיל בכ״ה בכסלו ונמשך 8 ימים. השנה יש בכסלו 30 ימים. באיזה יום בטבת חל היום השמיני?', 2, 'מכ״ה עד ל׳ בכסלו יש 6 ימים', 3, ST.CALENDAR),
+    G4('measurement', 'כמה ס״מ יש ב־4 דצ״מ?', 40, 'בדצימטר אחד 10 ס״מ', 1, ST.UNITS),
+    G4('measurement', 'כמה דצ״מ יש במטר אחד?', 10, 'מטר הוא 100 ס״מ, ודצימטר 10 ס״מ', 2, ST.UNITS),
+
+    G4('data', 'בטבלת המכירות בקיוסק: יום א׳ — 45 בקבוקים, יום ב׳ — 30, יום ג׳ — 60. כמה בקבוקים נמכרו ביום ג׳?', 60, 'קוראים את השורה של יום ג׳', 1, ST.TABLE),
+    G4('data', 'בטבלת המכירות בקיוסק: יום א׳ — 45 בקבוקים, יום ב׳ — 30, יום ג׳ — 60. כמה בקבוקים נמכרו בשלושת הימים?', 135, '45 ועוד 30 ועוד 60', 2, ST.TABLE),
+    G4('data', 'בטבלת המבקרים בתערוכה: 2024 — 125,400 מבקרים, 2025 — 131,900 מבקרים. בכמה מבקרים יותר היו ב־2025?' + NO_COMMA, 6500, '131,900 פחות 125,400', 3, ST.TABLE),
+    G4('data', 'הדיאגרמה מראה כמה בקבוקי מים נמכרו בקיוסק בכל יום. כמה נמכרו ביום ג׳?', 50, 'גובה העמודה של ג׳', 1, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'ביום ג׳ נמכרו 20 בקבוקים יותר מביום ד׳. נכון או לא נכון?', 'נכון', '50 פחות 30', 2, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'פי כמה גדול מספר הבקבוקים שנמכרו ביום א׳ ממספרם ביום ה׳?', 2, '40 לעומת 20', 2, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'כמה בקבוקים נמכרו בכל חמשת הימים יחד?', 165, 'מחברים את כל העמודות', 3, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'הדיאגרמה מראה את קולות הבחירות לנציג הכיתה. איזה חלק מכל הקולות קיבלה נטע? כתבו שבר.', '1/2', '20 מתוך 40', 3, ST.BARCHART, { widget: 'barchart', chart: VOTES }),
+    G4('data', 'איזה חלק מכל הקולות קיבלה חן? כתבו שבר.', '1/4', '10 מתוך 40', 3, ST.BARCHART, { widget: 'barchart', chart: VOTES }),
+    G4('data', 'דיאגרמת העוגה מראה איך מגיעים התלמידים לבית הספר. איזה חלק מהם מגיע ברגל? כתבו שבר.', '1/2', 'כמה חלקים מתוך 4 צבועים בצבע של ברגל', 1, ST.PIE, { widget: 'pie', chart: ROUTE }),
+    G4('data', 'בסקר השתתפו 24 תלמידים. כמה מהם מגיעים באופניים?', 6, 'רבע מ־24', 2, ST.PIE, { widget: 'pie', chart: ROUTE }),
+    G4('data', 'דיאגרמת העוגה מראה איזה כלי בחרו הילדים. איזה כלי בחרו בדיוק חצי מהילדים?', 'פסנתר', '4 חלקים מתוך 8', 2, ST.PIE, { widget: 'pie', chart: BAND }),
+    G4('data', 'דיאגרמת העוגה מראה את תוצאות המשאל על גינת הירקות. 60 תלמידים הצביעו בעד. כמה הצביעו נגד?', 20, '3 חלקים הם 60, אז חלק אחד הוא 20', 3, ST.PIE, { widget: 'pie', chart: POLL })
+  );
 
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {

@@ -73,6 +73,47 @@
       + '</div>';
   }
 
+  // A pie of `parts` equal wedges (כיתה ד׳): each slice colours a run of
+  // wedges, and the thin borders let the child count parts of the whole. The
+  // legend names the slices only, so a "what part" question is still read
+  // off the picture.
+  const PIE_COLORS = ['#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#b07aa1', '#76b7b2'];
+
+  function normalizePie(raw) {
+    const src = raw && typeof raw === 'object' ? raw : {};
+    const slices = (Array.isArray(src.slices) ? src.slices : []).filter(isRow).map(function (s) {
+      return { label: String(s.label == null ? '' : s.label), parts: Math.max(0, Math.round(Number(s.parts)) || 0) };
+    }).filter(function (s) { return s.parts > 0; });
+    const used = slices.reduce(function (n, s) { return n + s.parts; }, 0);
+    const parts = Math.min(24, Math.max(used, 1, Math.round(Number(src.parts)) || 1));
+    return { parts: parts, slices: slices };
+  }
+
+  function renderPieChartHtml(spec) {
+    const P = normalizePie(spec);
+    const pt = function (k) {
+      const a = 2 * Math.PI * k / P.parts - Math.PI / 2;
+      return (50 + 45 * Math.cos(a)).toFixed(2) + ' ' + (50 + 45 * Math.sin(a)).toFixed(2);
+    };
+    const fill = [];
+    P.slices.forEach(function (s, i) { for (let j = 0; j < s.parts; j++) fill.push(PIE_COLORS[i % PIE_COLORS.length]); });
+    let wedges = '';
+    for (let k = 0; k < P.parts; k++) {
+      const color = fill[k] || '#ffffff';
+      wedges += P.parts === 1
+        ? '<circle cx="50" cy="50" r="45" fill="' + color + '" stroke="#333"/>'
+        : '<path d="M50 50 L' + pt(k) + ' A45 45 0 0 1 ' + pt(k + 1) + ' Z" fill="' + color + '" stroke="#333" stroke-width="0.8"/>';
+    }
+    const legend = P.slices.map(function (s, i) {
+      return '<li><span aria-hidden="true" style="display:inline-block;width:1em;height:1em;background:'
+        + PIE_COLORS[i % PIE_COLORS.length] + '"></span> ' + escapeHtml(s.label) + '</li>';
+    }).join('');
+    return '<div class="piechart" role="img" aria-label="דיאגרמת עוגה מחולקת ל־' + P.parts + ' חלקים שווים">'
+      + '<svg viewBox="0 0 100 100" width="160" height="160" aria-hidden="true">' + wedges + '</svg>'
+      + '<ul class="piechart-legend" style="list-style:none;padding:0">' + legend + '</ul>'
+      + '</div>';
+  }
+
   function normalizeTable(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     const headers = (Array.isArray(src.headers) ? src.headers : []).map(String);
@@ -97,6 +138,8 @@
     renderPictogramHtml: renderPictogramHtml,
     normalizeBars: normalizeBars,
     renderBarChartHtml: renderBarChartHtml,
+    normalizePie: normalizePie,
+    renderPieChartHtml: renderPieChartHtml,
     normalizeTable: normalizeTable,
     renderTableHtml: renderTableHtml,
     escapeHtml: escapeHtml,
