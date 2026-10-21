@@ -216,6 +216,7 @@
       typed: extra.typed,
       music: extra.music,
       grid: extra.grid,
+      tags: extra.tags,
     };
   }
 
@@ -1297,6 +1298,7 @@
       g3: e.g3,
       table: e.table,
       typed: e.typed,
+      tags: e.tags,
       level: e.level || 1,
     });
   }
@@ -1567,6 +1569,23 @@
     MEAS('ב', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
   );
 
+  // ---------- כיתה ג׳ · שאלות מילוליות: דו־שלביות ו«בכמה» מול «פי כמה» (#467) ----------
+  // Appended last so older ids stay put. Each 'contrast' item reuses the two
+  // numbers of a one-step «פי כמה» item above and asks «בכמה» instead, so a
+  // child who answers the ratio sees the hint that names both questions.
+  RAW.push(
+    G3('word_problems', 'תוף מנגן 4 פעימות בתיבה. ניגנו 3 תיבות, ועוד 2 פעימות בסוף. כמה פעימות בסך הכול?', 14, 'שלב א׳: 3 × 4 = 12; שלב ב׳: 12 + 2 = 14', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'במשקל 3/4 ניגנו 5 תיבות, ואחריהן עוד 4 פעמות. כמה פעמות ניגנו?', 19, 'שלב א׳: 5 × 3 = 15; שלב ב׳: 15 + 4 = 19', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'במקהלה 3 שורות של 7 זמרים. 5 זמרים יצאו להפסקה. כמה זמרים נשארו?', 16, 'שלב א׳: 3 × 7 = 21; שלב ב׳: 21 − 5 = 16', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'לנגן היו 40 ₪. הוא קנה 4 מיתרים ב־6 ₪ כל אחד. כמה כסף נשאר לו?', 16, 'שלב א׳: 4 × 6 = 24; שלב ב׳: 40 − 24 = 16', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
+    G3('word_problems', 'הבית הראשון בשיר הוא 6 תיבות של 4 פעמות. הבית השני ארוך פי 2. כמה פעמות בבית השני?', 48, 'שלב א׳: 6 × 4 = 24; שלב ב׳: 24 × 2 = 48', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
+    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. בכמה BPM מהיר הטמפו השני?', 60, '«בכמה» הוא הפרש: 120 − 60 = 60. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. בכמה Hz גבוה התדר השני?', 220, '«בכמה» הוא הפרש: 440 − 220 = 220. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. בכמה תיבות יש יותר בשנייה?', 12, '«בכמה» הוא הפרש: 18 − 6 = 12. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. בכמה BPM מהיר הטמפו השני?', 100, '«בכמה» הוא הפרש: 150 − 50 = 100. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] }),
+    G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. בכמה תיבות ארוכה השנייה?', 8, '«בכמה» הוא הפרש: 12 − 4 = 8. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] })
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -1599,6 +1618,7 @@
     if (raw.typed) it.typed = true;
     if (raw.music) it.music = raw.music;
     if (raw.grid) it.grid = raw.grid;
+    if (raw.tags) it.tags = raw.tags.slice();
     SHIPPED.push(it);
   });
 
