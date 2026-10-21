@@ -1579,6 +1579,13 @@
     }));
   });
 
+  // ---------- כיתה ג׳ · אגורות במאות שלמות לשקלים (#559) ----------
+  // Newprogramgrade3.pdf names this direction too. Appended last so ids stay.
+  RAW.push(
+    MEAS('ג', '700 אגורות הם כמה ₪?', 7, 'בכל שקל 100 אגורות', 1, ST.MONEY),
+    MEAS('ג', 'בקופה 2,300 אגורות. כמה ₪ זה?', 23, '23 מאות אגורות', 2, ST.MONEY)
+  );
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;

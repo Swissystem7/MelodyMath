@@ -72,7 +72,8 @@ test('program.html renders the chosen grade in order with official and in-app li
   rows.forEach((r) => { const k = out.indexOf(r.topic); assert.ok(k > at, r.topic); at = k; });
   assert.match(out, /Newprogramgrade3\.pdf#page=\d+/);
   assert.match(out, /href="index\.html\?topic=mm-cur-\d+&amp;skill=/);
-  assert.match(out, /לא אומת/);
+  // Every ג׳ row has a quote now (#559); an unverified row would say so.
+  assert.equal(/לא אומת/.test(out), rows.some((r) => !r.verified));
   assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 4);
 });
 
