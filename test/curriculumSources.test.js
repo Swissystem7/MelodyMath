@@ -27,7 +27,10 @@ test('a row is verified only when it carries a quote from the official PDF', () 
   // אגורות are not in the ב׳ PDF, so those items keep the 'לא אומת' tag.
   const agorot = banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MONEY);
   assert.ok(agorot.length > 0 && agorot.every((it) => cur.sectionForItem(it).label === cur.UNVERIFIED_HE));
-  assert.ok(ids.some((id) => id.startsWith('ג:יחידות משקל ונפח')));
+  assert.ok(!ids.some((id) => id.startsWith('ג:')), 'every ג׳ row has a quote');
+  // ק״ג/ליטר are not in the ג׳ PDF, so those items keep the 'לא אומת' tag.
+  const kg = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
+  assert.ok(kg.length > 0 && kg.every((it) => cur.sectionForItem(it).label === cur.UNVERIFIED_HE));
 });
 
 test('every bank item gets an official tag; unmapped or unverified says לא אומת', () => {

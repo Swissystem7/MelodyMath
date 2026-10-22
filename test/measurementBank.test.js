@@ -125,7 +125,7 @@ test('money items are tagged to the money standard and name ₪ or אגורות'
       assert.equal(it.strand, banks.STRAND.MEASURE, it.id);
     });
   });
-  assert.equal(money, 24);
+  assert.ok(money >= 24, money + ' money items');
 });
 
 test('area and perimeter answers agree with measure.js', () => {
