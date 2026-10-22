@@ -14,7 +14,7 @@ test('the coverage matrix lists every grade and leaves gaps visible', () => {
     else assert.ok(sum.gap >= 1, 'grade ' + g + ' must show at least one honest gap');
   });
   assert.ok(rows.some((r) => r.grade === 'א' && r.status === 'covered' && /ספירה עד 100/.test(r.topic)));
-  assert.ok(rows.some((r) => r.grade === 'א' && r.strand === 'geometry' && r.status === 'partial' && /אין פירוק/.test(r.note)));
+  assert.ok(rows.some((r) => r.grade === 'א' && r.strand === 'geometry' && r.status === 'covered' && /מגן דוד/.test(r.note)));
   assert.ok(rows.some((r) => r.grade === 'ג' && r.strand === 'geometry' && r.status === 'covered'));
   assert.ok(rows.some((r) => r.grade === 'ד' && r.strand === 'geometry' && r.status === 'covered' && /שטח פנים של קובייה ושל תיבה/.test(r.note)));
   assert.ok(rows.some((r) => r.grade === 'א' && r.strand === 'measure' && r.status === 'covered' && /סרגל מצויר/.test(r.note)));
