@@ -58,6 +58,27 @@ for (const grade of ['א', 'ב', 'ג']) {
   });
 }
 
+// #469: the same rule over the whole widget, not just the note and its twin —
+// pad labels, captions and any kind added later (countOn, chant, duo, …).
+// The stub's textContent is per node, so the host's text is every node's text.
+const hostText = (host) => all(host).map((c) => c.textContent).join(' ');
+
+test('every g1/g2/g3 widget kind in grades א–ג keeps the answer out of the host text', (t) => {
+  global.document = { createElement: makeEl };
+  t.after(() => { delete global.document; });
+  const kinds = new Set();
+  for (const grade of ['א', 'ב', 'ג']) {
+    widgetItems(grade).forEach((it) => {
+      const host = makeEl('div');
+      assert.ok(BIND[it.widget](host, it[it.widget]), `${it.id}: ${it.widget} ${it[it.widget].kind} refused to bind`);
+      kinds.add(it.widget + ':' + it[it.widget].kind);
+      if (leaks(it.prompt, it.answer)) return;
+      assert.ok(!leaks(hostText(host), it.answer), `${it.id} (${it[it.widget].kind}) shows ${it.answer}: ${hostText(host)}`);
+    });
+  }
+  assert.ok(kinds.size >= 12,'widget kinds covered: ' + [...kinds].join(', '));
+});
+
 test('the pending narration functions themselves leave the predicted number out', () => {
   // Grade 1: the next accent and the chart number.
   assert.ok(!leaks(g1.metronomeNarration(0, 5, 3), 20));
