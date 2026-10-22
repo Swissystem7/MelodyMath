@@ -1879,6 +1879,22 @@
     GEOA('א', 'גוזרים מלבן מפינה לפינה לשני משולשים. כמה צלעות יש לשני החלקים יחד?', 6, 'לכל משולש 3 צלעות', 3, ST.POLY_CUT_A)
   );
 
+  // A grade kept in its own file (src/lib/curriculum/grade<n>.js), appended
+  // last so existing ids stay put. Pages load it before this file.
+  const GRADE_FILES = (typeof module === 'object' && module.exports)
+    ? [require('./curriculum/grade6')]
+    : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6];
+  GRADE_FILES.forEach(function (f) {
+    if (!f || !Array.isArray(f.items)) return;
+    Object.keys(f.ST).forEach(function (k) { ST[k] = f.ST[k][0]; });
+    f.items.forEach(function (x) {
+      const e = x[6] || {};
+      const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
+        : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
+      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart }));
+    });
+  });
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;

@@ -11,8 +11,9 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const OFFICIAL = /^https:\/\/(pop|meyda)\.education\.gov\.il\//;
 
-test('the official order lists every verified א׳–ה׳ row once, by page, and only rows with a quote', () => {
-  assert.deepEqual(cur.programGrades(), ['א', 'ב', 'ג', 'ד', 'ה']);
+test('the official order lists every verified א׳–ו׳ row once, by page, and only rows with a quote', () => {
+  assert.deepEqual(cur.programGrades(), ['א', 'ב', 'ג', 'ד', 'ה', 'ו']);
+  assert.deepEqual(cur.programGrades(), cur.grades().filter((g) => cur.OFFICIAL_ORDER[g]));
   for (const g of cur.programGrades()) {
     const order = cur.OFFICIAL_ORDER[g];
     const verified = cur.rowsForGrade(g).filter((r) => r.verified).map((r) => r.topic);
@@ -75,7 +76,7 @@ test('program.html renders the chosen grade in order with official and in-app li
   assert.match(out, /href="index\.html\?topic=mm-cur-\d+&amp;skill=/);
   // Every ג׳ row has a quote now (#559); an unverified row would say so.
   assert.equal(/לא אומת/.test(out), rows.some((r) => !r.verified));
-  assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 5);
+  assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 6);
 });
 
 test('the screen is in the app navigation and index.html opens ?topic= in the plan loop', () => {

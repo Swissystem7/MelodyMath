@@ -86,17 +86,6 @@
     { grade: 'ה', strand: 'geometry', topic: 'גופים: פירמידות ישרות ומנסרות ישרות — תכונות ופריסות', status: COVERED, note: 'פאות, מקצועות וקודקודים של מנסרות ופירמידות, וכמה מלבנים או משולשים יש בפריסה. בלי גזירה וקיפול' },
     { grade: 'ה', strand: 'data', topic: 'קריאה ופרשנות של דיאגרמות; שכיחות ושכיח', status: COVERED, note: 'שכיחות וטבלת שכיחויות, שכיח, דיאגרמת עמודות, דיאגרמת עוגה ופיקטוגרם שבו סמל שווה 9. קריאה בלבד — אין בנייה של דיאגרמה' },
 
-    // ו׳: topic headings from Newprogramgrade6.pdf (read 7.10.2026,
-    // docs/CURRICULUM-MUSIC-PLAN.md §2). Status is what the ו bank holds now;
-    // a music-only item does not make a topic covered (R4).
-    { grade: 'ו', strand: 'numbers', topic: 'מספרים טבעיים ו־0; סדר פעולות', status: GAP, note: 'אין פריטים לכיתה ו׳ בתחום' },
-    { grade: 'ו', strand: 'fractions', topic: 'כפל וחילוק שברים', status: COVERED, note: 'תרגילים בלי מוזיקה; תו מנוקד ×3/2, שלישייה ×2/3, כמה שמיניות בחצי' },
-    { grade: 'ו', strand: 'decimals', topic: 'כפל וחילוק שברים עשרוניים', status: COVERED, note: 'כפל וחילוק ב־10/100, עשרוני בעשרוני; יחסי תדרים (440 × 1.5)' },
-    { grade: 'ו', strand: 'decimals', topic: 'אחוזים', status: COVERED, note: 'משמעות האחוז (1% = 1/100, השלם = 100%), אחוז מכמות ב־10%/25%/50%, שבר לאחוז, עלייה וירידה באחוזים (מחיר וטמפו)' },
-    { grade: 'ו', strand: 'geometry', topic: 'מעגל ועיגול: היקף ושטח', status: PARTIAL, note: 'רדיוס, קוטר, היקף ומעלות במעגל הקווינטות; אין שטח עיגול' },
-    { grade: 'ו', strand: 'geometry', topic: 'מצולעים מורכבים', status: GAP, note: 'אין בבנק' },
-    { grade: 'ו', strand: 'measure', topic: 'נפח', status: GAP, note: 'אין בבנק' },
-    { grade: 'ו', strand: 'data', topic: 'ממוצע', status: PARTIAL, note: '4 פריטים בלבד: BPM ממוצע מהקשות ואורך ממוצע של שירים' },
   ];
 
   // Official Ministry of Education pages only. Both URLs answered 200 on
@@ -162,14 +151,6 @@
     'משולשים, גובה, שטח משולש ומקבילית': 'חישוב של שטח משולש',
     'גופים: פירמידות ישרות ומנסרות ישרות — תכונות ופריסות': 'פירמידות ישרות: תכונות ופריסות',
     'קריאה ופרשנות של דיאגרמות; שכיחות ושכיח': 'שכיחות וטבלת שכיחויות',
-    'מספרים טבעיים ו־0; סדר פעולות': 'סדר פעולות החשבון',
-    'כפל וחילוק שברים': 'כפל שברים וכפל מספרים מעורבים',
-    'כפל וחילוק שברים עשרוניים': 'כפל שברים עשרוניים',
-    'אחוזים': 'אחוז אחד ממספר כלשהו הוא מאית מהמספר',
-    'מעגל ועיגול: היקף ושטח': 'היקף מעגל ושטח עיגול',
-    'מצולעים מורכבים': 'חישובי שטחים של מצולעים מורכבים',
-    'נפח': 'חישובי נפח',
-    'ממוצע': 'משמעות המושג ממוצע',
   };
 
   // א׳–ד׳ rows in the order of the official document: sorted by where the
@@ -358,15 +339,26 @@
       'קריאת דיאגרמת עוגה': 'קריאה ופרשנות',
       'קריאת פיקטוגרם': 'קריאה ופרשנות',
     },
-    'ו': {
-      'כפל שברים': 'כפל וחילוק שברים',
-      'חילוק שברים': 'כפל וחילוק שברים',
-      'כפל וחילוק שברים עשרוניים': 'כפל וחילוק שברים עשרוניים',
-      'אחוזים — אחוז מכמות, שבר כאחוז, שינוי באחוזים': 'אחוזים',
-      'מעגל — רדיוס, קוטר, היקף וזווית מרכזית': 'מעגל ועיגול',
-      'ממוצע — סכום הערכים חלקי מספרם': 'ממוצע',
-    },
   };
+
+  // A grade kept in its own file (src/lib/curriculum/grade<n>.js) brings its
+  // rows, quotes, official order and bank standards; pages load it first.
+  const GRADE_FILES = (typeof module === 'object' && module.exports)
+    ? [require('./curriculum/grade6')]
+    : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6];
+  GRADE_FILES.forEach(function (f) {
+    if (!f || !Array.isArray(f.rows)) return;
+    f.rows.forEach(function (r) {
+      const bullets = r.bullets.map(function (b) { return b[0]; });
+      MATRIX.push({ grade: f.grade, strand: r.strand, topic: r.topic, status: r.status, note: r.note, bullets: bullets });
+      OFFICIAL_QUOTE[r.topic] = r.quote;
+    });
+    OFFICIAL_ORDER[f.grade] = f.order.map(function (t) {
+      return [t, f.rows.find(function (r) { return r.topic === t; }).page];
+    });
+    STANDARD_TOPIC[f.grade] = Object.assign({}, f.standards);
+    Object.keys(f.ST).forEach(function (k) { STANDARD_TOPIC[f.grade][f.ST[k][0]] = f.ST[k][1]; });
+  });
 
   function gradeNumber(grade) {
     return ['א', 'ב', 'ג', 'ד', 'ה', 'ו'].indexOf(grade) + 1;
@@ -417,7 +409,7 @@
   }
 
   function programGrades() {
-    return Object.keys(OFFICIAL_ORDER);
+    return grades().filter(function (g) { return OFFICIAL_ORDER[g]; });
   }
 
   // The grade's rows in the official order, each with a link to its page in
