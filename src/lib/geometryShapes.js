@@ -64,7 +64,10 @@
   }
 
   function isStraightAngle(deg) {
-    return Math.round(Number(deg)) === 180;
+    if (typeof deg !== 'number' || !Number.isFinite(deg)) {
+      throw new TypeError();
+    }
+    return Math.round(deg) === 180;
   }
 
   // כיתה ג׳ names all four kinds. Outside (0, 180] there is no answer a
