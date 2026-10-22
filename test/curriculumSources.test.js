@@ -24,7 +24,10 @@ test('a row is verified only when it carries a quote from the official PDF', () 
   // Not found in the grade's PDF on 21.10.2026 — must stay unverified.
   const ids = cur.coverageMatrix().filter((r) => !r.verified).map((r) => r.grade + ':' + r.topic);
   assert.ok(ids.includes('ב:כסף — ₪ ואגורות, קנייה ועודף'));
-  assert.ok(ids.some((id) => id.startsWith('ג:יחידות משקל ונפח')));
+  assert.ok(!ids.some((id) => id.startsWith('ג:')), 'every ג׳ row has a quote');
+  // ק״ג/ליטר are not in the ג׳ PDF, so those items keep the 'לא אומת' tag.
+  const kg = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
+  assert.ok(kg.length > 0 && kg.every((it) => cur.sectionForItem(it).label === cur.UNVERIFIED_HE));
 });
 
 test('every bank item gets an official tag; unmapped or unverified says לא אומת', () => {
