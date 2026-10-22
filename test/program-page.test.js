@@ -39,8 +39,9 @@ test('programForGrade keeps every row, puts unverified rows last and links only 
       assert.equal(r.exerciseCount, r.skills.reduce((n, s) => n + s.count, 0));
     });
   }
+  // Every ב׳ row has a quote now (#559), so all of them are placed.
   const b = cur.programForGrade('ב', banks.itemsForGrade('ב'));
-  assert.equal(b.rows[b.rows.length - 1].topic, 'כסף — ₪ ואגורות, קנייה ועודף');
+  assert.ok(b.rows.every((r) => r.verified && r.exerciseCount >= 4));
 });
 
 test('a practice link opens exactly the bank items tagged with that row', () => {
