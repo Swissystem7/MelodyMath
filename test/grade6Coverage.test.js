@@ -27,8 +27,8 @@ test('all nine grade ו׳ topics are covered, verified, in the document order, w
     assert.ok(cur.MATRIX.find((m) => m.topic === r.topic && m.grade === 'ו').bullets.length >= 2, r.topic);
   });
   // Topic ids stay where they were; the new data row is the last one.
-  assert.equal(cur.topicById('mm-cur-47').topic, 'כפל וחילוק שברים');
-  assert.equal(cur.topicById('mm-cur-54').topic, 'קריאה והצגה של נתונים');
+  assert.equal(cur.topicById('mm-cur-51').topic, 'כפל וחילוק שברים');
+  assert.equal(cur.topicById('mm-cur-58').topic, 'קריאה והצגה של נתונים');
 });
 
 test('every official sub-item has at least three tagged exercises under its own topic', () => {

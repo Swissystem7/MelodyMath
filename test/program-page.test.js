@@ -11,9 +11,9 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const OFFICIAL = /^https:\/\/(pop|meyda)\.education\.gov\.il\//;
 
-test('the official order lists every verified א׳–ד׳ row once, by page, and only rows with a quote', () => {
+test('the official order lists every verified א׳–ו׳ row once, by page, and only rows with a quote', () => {
+  assert.deepEqual(cur.programGrades(), ['א', 'ב', 'ג', 'ד', 'ה', 'ו']);
   assert.deepEqual(cur.programGrades(), cur.grades().filter((g) => cur.OFFICIAL_ORDER[g]));
-  assert.ok(['א', 'ב', 'ג', 'ד', 'ו'].every((g) => cur.programGrades().includes(g)));
   for (const g of cur.programGrades()) {
     const order = cur.OFFICIAL_ORDER[g];
     const verified = cur.rowsForGrade(g).filter((r) => r.verified).map((r) => r.topic);
@@ -74,7 +74,7 @@ test('program.html renders the chosen grade in order with official and in-app li
   assert.match(out, /Newprogramgrade3\.pdf#page=\d+/);
   assert.match(out, /href="index\.html\?topic=mm-cur-\d+&amp;skill=/);
   assert.match(out, /לא אומת/);
-  assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, cur.programGrades().length);
+  assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 6);
 });
 
 test('the screen is in the app navigation and index.html opens ?topic= in the plan loop', () => {
