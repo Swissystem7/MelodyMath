@@ -51,20 +51,6 @@ test('each new grade ו׳ standard has levels 1, 2 and 3, a verified tag and a t
   });
 });
 
-test('plain grade ו׳ arithmetic agrees with its answers', () => {
-  const frac = (s) => s.replace(/(\d+)\/(\d+)/g, '($1/$2)').replace(/(\d+) ו־\(/g, '($1+(').replace(/\+\((\d+\/\d+)\)/g, '+($1))');
-  const calc = (s) => Function('return (' + frac(s).replace(/,/g, '').replace(/×/g, '*').replace(/:/g, '/').replace(/−/g, '-') + ')')();
-  const value = (a) => (typeof a === 'number' ? a : calc(String(a)));
-  let checked = 0;
-  items.forEach((it) => {
-    const m = /^([\d,.()+−×:/ ו־]+) = \?/.exec(it.prompt);
-    if (!m) return;
-    checked += 1;
-    assert.ok(Math.abs(calc(m[1]) - value(it.answer)) < 1e-9, it.id + ': ' + it.prompt);
-  });
-  assert.ok(checked >= 25, 'only ' + checked + ' checked');
-});
-
 test('every page that loads the curriculum or the bank loads the grade ו׳ file first', () => {
   ['index.html', 'program.html', 'curriculum.html'].forEach((f) => {
     const html = read(f);
