@@ -1836,6 +1836,13 @@
     G5('data', 'דיאגרמת העוגה מראה איך חולקה עוגת יום ההולדת. איזה חלק מהעוגה קיבלו איתמר ורחל יחד? כתבו שבר.', '1/2', '3 ועוד 1 הם 4 חלקים מתוך 8', 3, ST.PIE, { widget: 'pie', chart: CAKE })
   );
 
+  // ---------- כיתה ג׳ · אגורות במאות שלמות לשקלים (#559) ----------
+  // Newprogramgrade3.pdf names this direction too. Appended last so ids stay.
+  RAW.push(
+    MEAS('ג', '700 אגורות הם כמה ₪?', 7, 'בכל שקל 100 אגורות', 1, ST.MONEY),
+    MEAS('ג', 'בקופה 2,300 אגורות. כמה ₪ זה?', 23, '23 מאות אגורות', 2, ST.MONEY)
+  );
+
   // ---------- כיתה א׳ · פירוק והרכבה של מצולעים (#559) ----------
   // Newprogramgrade1.pdf: cut a polygon into others, build polygons from
   // given ones, find polygons inside a compound shape (מגן דוד), and ask what
