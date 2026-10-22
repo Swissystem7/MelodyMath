@@ -7,7 +7,7 @@ const { isCorrect } = require('../src/lib/adaptive');
 
 const geometry = (grade) => banks.rowsOf('geometry', grade);
 const GEO_STANDARDS = [banks.ST.GEO_SORT, banks.ST.RIGHT_ANGLE, banks.ST.ANGLE_KINDS, banks.ST.TRI_SORT,
-  banks.ST.PARALLEL, banks.ST.QUAD_SORT, banks.ST.BOX, banks.ST.POLY_CUT_A];
+  banks.ST.PARALLEL, banks.ST.QUAD_SORT, banks.ST.BOX, banks.ST.BOX_AREA, banks.ST.POLY_CUT_A];
 
 test('angleKind names the four angle kinds and refuses what is not an angle', () => {
   assert.equal(geo.angleKind(30), 'חדה');
