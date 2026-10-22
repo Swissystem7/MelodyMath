@@ -10,7 +10,7 @@ const rows = measurement;
 const ST = banks.ST;
 const BY_GRADE = {
   'א': [ST.LENGTH, ST.CLOCK, ST.MONEY],
-  'ב': [ST.LENGTH, ST.CLOCK, ST.HALF_HOUR, ST.PERIMETER, ST.MONEY, ST.MASS_VOL],
+  'ב': [ST.LENGTH, ST.CLOCK, ST.HALF_HOUR, ST.PERIMETER, ST.MONEY, ST.MASS_VOL, ST.MONEY_BILLS],
   // Grid cells are not square units and minutes→seconds is not a clock face,
   // so the grade-ג׳ music items keep standards of their own (#177).
   'ג': [ST.MINUTES, ST.AREA, ST.AREA_RECT, ST.TIME_MIN_SEC, ST.MONEY, ST.MASS_VOL],

@@ -23,7 +23,10 @@ test('a row is verified only when it carries a quote from the official PDF', () 
   });
   // Not found in the grade's PDF on 21.10.2026 — must stay unverified.
   const ids = cur.coverageMatrix().filter((r) => !r.verified).map((r) => r.grade + ':' + r.topic);
-  assert.ok(ids.includes('ב:כסף — ₪ ואגורות, קנייה ועודף'));
+  assert.ok(!ids.some((id) => id.startsWith('ב:')), 'every ב׳ row has a quote');
+  // אגורות are not in the ב׳ PDF, so those items keep the 'לא אומת' tag.
+  const agorot = banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MONEY);
+  assert.ok(agorot.length > 0 && agorot.every((it) => cur.sectionForItem(it).label === cur.UNVERIFIED_HE));
   assert.ok(!ids.some((id) => id.startsWith('ג:')), 'every ג׳ row has a quote');
   // ק״ג/ליטר are not in the ג׳ PDF, so those items keep the 'לא אומת' tag.
   const kg = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
