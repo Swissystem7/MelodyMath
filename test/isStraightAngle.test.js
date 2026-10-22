@@ -7,3 +7,7 @@ test('isStraightAngle asserts that isStraightAngle(180) returns true and isStrai
   assert.strictEqual(isStraightAngle(180), true);
   assert.strictEqual(isStraightAngle(90), false);
 });
+
+test('isStraightAngle throws TypeError when given null input', () => {
+  assert.throws(() => isStraightAngle(null), TypeError);
+});
