@@ -65,7 +65,7 @@ Object.keys(FILES).forEach((grade) => {
       assert.match(tag, /^[a-z][A-Za-z0-9]+$/);
       assert.match(note, /[א-ת]/);
       assert.ok(note.length < 140, note.length + ' ' + note);
-      assert.ok(file.sources[src], grade + ' ' + tag + ' → ' + src);
+      assert.ok(file.sources[src] || banks.MUSIC_SOURCES[src], grade + ' ' + tag + ' → ' + src);
       assert.ok(['D', 'R', 'A'].includes(ev), tag + ' ' + ev);
     }));
     Object.keys(file.sources).forEach((id) => {

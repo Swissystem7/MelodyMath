@@ -6,6 +6,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
+const banks = require('../src/lib/banks');
 const g4 = require('../src/lib/curriculum/grade4');
 const g5 = require('../src/lib/curriculum/grade5');
 const g6 = require('../src/lib/curriculum/grade6');
@@ -19,6 +20,6 @@ const tags = (ways) => ways.map((w) => w[0]);
   test('grade ו׳ uses new mechanisms for ' + name, () => {
     assert.ok(before.length && after.length, name);
     assert.deepEqual(tags(after).filter((t) => tags(before).includes(t)), []);
-    after.forEach((w) => assert.ok(g6.sources[w[2]], w[0] + ' ' + w[2]));
+    after.forEach((w) => assert.ok(g6.sources[w[2]] || banks.MUSIC_SOURCES[w[2]], w[0] + ' ' + w[2]));
   });
 });
