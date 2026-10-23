@@ -1931,22 +1931,94 @@
     });
   });
 
+  // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
+  // way and music activity uses one of 14 mechanisms; the peer-reviewed
+  // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:
+  // their ways are being replaced by ways from an evidenced mechanism.
+  // azaryahu2020 (MusiMath and Academic Music, M3) is in the grade files.
+  const EVIDENCE_SOURCES = {
+    mcdonel2015: ['McDonel 2015 — Exploring learning connections between music and mathematics in early childhood (Bull. Counc. Res. Music Educ. 203)', 'https://doi.org/10.5406/bulcouresmusedu.203.0045'],
+    akin2023: ['Akın 2023 — Let me make mathematics and music together: a meta-analysis of music interventions on mathematics achievement (Educational Studies)', 'https://doi.org/10.1080/03055698.2023.2216826'],
+    das2023: ['Das 2023 — Multiplication table learning through music and rhythm in the elementary stage (J. Teacher Educ. Res.)', 'https://doi.org/10.36268/jter/18203'],
+    ribeiro2020: ['Ribeiro & Santos 2020 — Persistent effects of musical training on mathematical skills of children with developmental dyscalculia (Front. Psychol.)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/'],
+    courey2012: ['Courey et al. 2012 — Academic Music: music instruction to engage third-grade students in learning basic fraction concepts (Educ. Stud. Math.)', 'https://doi.org/10.1007/s10649-012-9395-9'],
+    rissman2005: ['Rissman 2005 — Cycling through polyrhythms (J. Music Theory Pedagogy)', 'https://doi.org/10.71156/2994-7073.1141'],
+    stevens2001: ['Stevens, Sharp & Nelson 2001 — The intersection of two unlikely worlds: ratios and drums (Teaching Children Mathematics)', 'https://doi.org/10.5951/tcm.7.6.0376'],
+    rusconi2005: ['Rusconi et al. 2005 — The mental space of pitch height (Ann. N. Y. Acad. Sci.)', 'https://doi.org/10.1196/annals.1360.056'],
+    mohring2016: ['Möhring et al. 2016 — Where music meets space: pitch intervals and spatial transformation in children (Cognition)', 'https://doi.org/10.1016/j.cognition.2016.02.016'],
+    azaryahuPatterns: ['Azaryahu & Adi-Japha — MusiMath: a music-based intervention for learning patterns and symmetry (J. Exp. Educ.)', 'https://doi.org/10.1080/00220973.2020.1799316'],
+    shoval2011: ['Shoval 2011 — Using mindful movement in cooperative learning while learning about angles (Instructional Science)', 'https://doi.org/10.1007/s11251-010-9137-2'],
+    smith2014: ['Smith, King & Hoyte 2014 — Learning angles through movement (J. Math. Behav.)', 'https://doi.org/10.1016/j.jmathb.2014.09.001'],
+    moore2012: ['Moore & Linder 2012 — Using dance to deepen student understanding of geometry (J. Dance Educ.)', 'https://doi.org/10.1080/15290824.2012.701175'],
+  };
+  Object.keys(EVIDENCE_SOURCES).forEach(function (k) { MUSIC_SOURCES[k] = EVIDENCE_SOURCES[k]; });
+
+  // Mechanism → its Hebrew name, the studies behind it (none for M8-M14), the
+  // one-line finding, and the way and activity tags that use it.
+  const MUSIC_MECHANISMS = {
+    M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
+      finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
+      tags: ['oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
+    M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
+      finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
+      tags: ['accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers',
+        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid'] },
+    M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
+      finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
+      tags: ['fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap',
+        'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
+    M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
+      finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
+      tags: ['lcmDrums', 'stepCycle', 'drumsMeet'] },
+    M5: { he: 'גובה צליל — ישר המספרים וסדר', sources: ['rusconi2005', 'mohring2016'],
+      finding: 'Partial: low pitches map to down or left and high pitches to up or right even when pitch is irrelevant (SMARC, Rusconi et al. 2005); children map pitch onto space, but their pitch skill was not related to number-line skill (Möhring et al. 2016).',
+      tags: ['scaleSteps', 'scaleJump', 'tenAsOctave', 'pitchBound', 'pitchMean'] },
+    M6: { he: 'דגמים מלודיים וקצביים — דגמים וסימטריה', sources: ['azaryahuPatterns'],
+      finding: 'Third graders who wrote and played musical patterns gained more on pattern and symmetry tests than comparison classes, kept six months later (Azaryahu & Adi-Japha, MusiMath).',
+      tags: ['melodyAb', 'mirrorPattern', 'composePattern', 'g1Pattern'] },
+    M7: { he: 'הליכה ופנייה בקצב — זוויות, היקף ומצולעים', sources: ['shoval2011', 'smith2014', 'moore2012'],
+      finding: 'Movement-based, not music alone: pupils learned angles through mindful body movement in cooperative groups (Shoval 2011) and body-scale angle actions (Smith et al. 2014); a third-grade dance and geometry unit (Moore & Linder 2012, practice report).',
+      tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps'] },
+    M8: { he: 'טמפו ו־BPM — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
+      tags: ['sixtyBeats', 'tempoPercent', 'tapTempo', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
+        'howManyTimes', 'tuneTime', 'bpm', 'secPerBeat', 'mean', 'meanBpm', 'tempo'] },
+    M9: { he: 'יחסי תדרים — עשרוניים ואחוזים', sources: [], finding: null,
+      tags: ['intervalRatio', 'pitchPercent', 'hzCompare', 'g3Pair', 'hzChart', 'ratioHz'] },
+    M10: { he: 'ערך המקום בכלי נגינה', sources: [], finding: null,
+      tags: ['tenExchange', 'placeScore', 'baseTenDrums', 'noteNames', 'g1Chart100', 'twoInstruments', 'registers'] },
+    M11: { he: 'נתוני כלים ופיקטוגרמות', sources: [], finding: null,
+      tags: ['instrumentSurvey', 'rowRhythm', 'pictoBeats', 'barDifference', 'pipePlot'] },
+    M12: { he: 'אורך צינורות וכוסות מים — אורך ונפח', sources: [], finding: null,
+      tags: ['pipeLengths', 'unitSteps', 'comparePipes', 'pipeDecimals', 'waterGlasses', 'shakerCubes', 'cubeMl', 'unitChoice', 'speakerBox'] },
+    M13: { he: 'מבנה שיר וסימני חזרה — חלקים, עוגה וסדר פעולות', sources: [], finding: null,
+      tags: ['songForm', 'songFormPie', 'songParts', 'songRecipe', 'repeatSign', 'nestedRepeat', 'roadMap', 'loopPositions', 'sectorDegrees'] },
+    M14: { he: 'פעמונים בקודקודים, מקצבי צורות ומעגל הקווינטות — צורות וגופים', sources: [], finding: null,
+      tags: ['vertexBells', 'shapeRhythm', 'sideMelody', 'instrumentShape', 'drumHead', 'circleTerms', 'staffLines', 'stagePlan', 'circleFifths'] },
+  };
+  const MECH_OF = {};
+  Object.keys(MUSIC_MECHANISMS).forEach(function (m) {
+    MUSIC_MECHANISMS[m].tags.forEach(function (t) { MECH_OF[t] = m; });
+  });
+  // Mechanism id of a way or activity tag (M1-M14), or null when unmapped.
+  function mechanismOf(tag) { return MECH_OF[tag] || null; }
+
   // A music activity (the prompt itself plays or reads music) cites the same
   // source and label as the way that uses the same relationship (#591 audit,
   // item 2). Azaryahu 2020 keeps D only on fraction items, where MusiMath
-  // was evaluated. Activity tag → [source id, evidence].
+  // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
+  // that mechanism's study. Activity tag → [source id, evidence].
   const ACTIVITY_SOURCES = {
-    hearBeats: ['kcConnections', 'R'], g1Beats: ['kcLessons', 'R'],
-    g1Chart100: ['interplay2024', 'A'], g1Pattern: ['kcConnections', 'A'],
-    evenOdd: ['kcConnections', 'A'], twoInstruments: ['interplay2024', 'A'],
-    beatsBars: ['kcMath', 'R'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
-    meters: ['kcConnections', 'A'], g3Meter: ['kcConnections', 'A'],
-    leftoverBeats: ['azaryahu2020', 'A'], g3Remainder: ['azaryahu2020', 'A'],
+    hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
+    g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
+    evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
+    beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
+    meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'],
+    leftoverBeats: ['das2023', 'A'], g3Remainder: ['das2023', 'A'],
     howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
-    stepGrid: ['kcMath', 'A'], g3Grid: ['kcMath', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
+    stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
     bar44Notes: ['azaryahu2020', 'D'], bars: ['azaryahu2020', 'D'], lcm: ['azaryahu2020', 'D'],
     mixedBar: ['azaryahu2020', 'D'], bpm: ['wnetMathInMusic', 'A'], secPerBeat: ['wnetMathInMusic', 'A'],
-    drumsMeet: ['makingMusicCount', 'R'], hzChart: ['interplay2024', 'A'],
+    drumsMeet: ['rissman2005', 'R'], hzChart: ['interplay2024', 'A'],
     dotted: ['azaryahu2020', 'D'], triplet: ['azaryahu2020', 'A'], durationDiv: ['azaryahu2020', 'D'],
     mean: ['wnetMathInMusic', 'A'], meanBpm: ['wnetMathInMusic', 'A'], tempo: ['wnetMathInMusic', 'A'],
     ratioHz: ['interplay2024', 'R'], circleFifths: ['interplay2024', 'A'],
@@ -2144,6 +2216,8 @@
     SKILL_GRADE: SKILL_GRADE,
     LEVEL_HE: LEVEL_HE,
     MUSIC_SOURCES: MUSIC_SOURCES,
+    MUSIC_MECHANISMS: MUSIC_MECHANISMS,
+    mechanismOf: mechanismOf,
     skillHe: skillHe,
     skillGrade: skillGrade,
     levelHe: levelHe,
