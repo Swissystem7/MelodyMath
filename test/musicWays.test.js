@@ -9,7 +9,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const banks = require('../src/lib/banks');
 
-const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('../src/lib/curriculum/grade1'), 'ד': require('../src/lib/curriculum/grade4'), 'ה': require('../src/lib/curriculum/grade5'), 'ג': require('../src/lib/curriculum/grade3') };
+const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('../src/lib/curriculum/grade1'), 'ד': require('../src/lib/curriculum/grade4'), 'ה': require('../src/lib/curriculum/grade5'), 'ג': require('../src/lib/curriculum/grade3'), 'ב': require('../src/lib/curriculum/grade2') };
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
@@ -115,14 +115,24 @@ test('grade ג׳: the #105 activities keep their tag and the g3 widgets become a
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('grades without a ways file are untouched', () => {
-  ['ב'].forEach((g) => {
-    banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
-  });
+test('grade ב׳: the #103 activities keep their tag and take no way', () => {
+  const items = banks.itemsForGrade('ב');
+  const acts = items.filter((it) => !it.musicNote);
+  assert.ok(acts.length >= 50);
+  acts.forEach((it) => assert.ok(['beatsBars', 'twoInstruments', 'evenOdd', 'registers', 'halfBar'].includes(it.music), it.id + ' ' + it.music));
+  assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
+});
+
+test('every item of every grade has a music side: 1193/1193', () => {
+  const all = banks.allItems();
+  assert.equal(all.length, 1193);
+  assert.equal(all.filter((it) => it.music).length, all.length);
+  assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
+  assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
 });
 
 test('a music-side file adds no curriculum rows, loads before banks.js on every page, and is cached offline', () => {
-  [['א', 'grade1'], ['ד', 'grade4'], ['ה', 'grade5'], ['ג', 'grade3']].forEach(([grade, name]) => {
+  [['א', 'grade1'], ['ד', 'grade4'], ['ה', 'grade5'], ['ג', 'grade3'], ['ב', 'grade2']].forEach(([grade, name]) => {
     const file = FILES[grade];
     assert.equal(file.rows, undefined, name);
     assert.deepEqual(file.items, [], name);
@@ -134,5 +144,5 @@ test('a music-side file adds no curriculum rows, loads before banks.js on every 
     });
     assert.ok(read('sw.js').includes('curriculum/' + name + '.js'), name);
   });
-  assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 26, 'a new asset, so CACHE moves');
+  assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 27, 'a new asset, so CACHE moves');
 });

@@ -78,12 +78,6 @@ test('an item takes the way of its level, with its source and label', () => {
   six.filter((it) => !it.musicNote).forEach((it) => assert.equal(it.musicSrc, undefined, it.id));
 });
 
-test('grades without a ways file are untouched', () => {
-  ['ב'].forEach((g) => {
-    banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
-  });
-});
-
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const fn = (name) => html.split('\n').find((l) => l.startsWith('function ' + name + '('));
 
