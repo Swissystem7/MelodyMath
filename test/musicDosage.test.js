@@ -14,7 +14,7 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 
 const FILES = [1, 2, 3, 4, 5, 6].map((n) => require('../src/lib/curriculum/grade' + n));
-const DOSED = ['א', 'ב', 'ג', 'ד', 'ה'];
+const DOSED = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 const { primary: STRONG, optionalOnly: WEAK } = banks.MUSIC_DOSAGE;
 const dosed = FILES.filter((f) => DOSED.includes(f.grade));
 const each = (fn) => dosed.forEach((f) => Object.keys(f.music).forEach((key) => fn(f, key, f.music[key])));
