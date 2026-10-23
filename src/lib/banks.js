@@ -1929,6 +1929,31 @@
     });
   });
 
+  // A music activity (the prompt itself plays or reads music) cites the same
+  // source and label as the way that uses the same relationship (#591 audit,
+  // item 2). Azaryahu 2020 keeps D only on fraction items, where MusiMath
+  // was evaluated. Activity tag → [source id, evidence].
+  const ACTIVITY_SOURCES = {
+    hearBeats: ['kcConnections', 'R'], g1Beats: ['kcLessons', 'R'],
+    g1Chart100: ['interplay2024', 'A'], g1Pattern: ['kcConnections', 'A'],
+    evenOdd: ['kcConnections', 'A'], twoInstruments: ['interplay2024', 'A'],
+    beatsBars: ['kcMath', 'R'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
+    meters: ['kcConnections', 'A'], g3Meter: ['kcConnections', 'A'],
+    leftoverBeats: ['azaryahu2020', 'A'], g3Remainder: ['azaryahu2020', 'A'],
+    howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
+    stepGrid: ['kcMath', 'A'], g3Grid: ['kcMath', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
+    bar44Notes: ['azaryahu2020', 'D'], bars: ['azaryahu2020', 'D'], lcm: ['azaryahu2020', 'D'],
+    mixedBar: ['azaryahu2020', 'D'], bpm: ['wnetMathInMusic', 'A'], secPerBeat: ['wnetMathInMusic', 'A'],
+    drumsMeet: ['makingMusicCount', 'R'], hzChart: ['interplay2024', 'A'],
+    dotted: ['azaryahu2020', 'D'], triplet: ['azaryahu2020', 'A'], durationDiv: ['azaryahu2020', 'D'],
+    mean: ['wnetMathInMusic', 'A'], meanBpm: ['wnetMathInMusic', 'A'], tempo: ['wnetMathInMusic', 'A'],
+    ratioHz: ['interplay2024', 'R'], circleFifths: ['interplay2024', 'A'],
+  };
+  RAW.forEach(function (raw) {
+    const s = raw.music && !raw.musicSrc && ACTIVITY_SOURCES[raw.music];
+    if (s) { raw.musicSrc = s[0]; raw.musicEv = s[1]; }
+  });
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
