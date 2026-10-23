@@ -78,7 +78,7 @@ test('an item takes the way of its level, with its source and label', () => {
   six.filter((it) => !it.musicNote).forEach((it) => assert.equal(it.musicSrc, undefined, it.id));
 });
 
-test('grades without ways are untouched', () => {
+test('grades without a ways file are untouched', () => {
   ['ב', 'ג', 'ד', 'ה'].forEach((g) => {
     banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
   });
