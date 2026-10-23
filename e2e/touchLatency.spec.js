@@ -57,6 +57,42 @@ test('pointerdown on a xylophone bar or a drum pad starts the sound in under 50 
   expect(errors).toEqual([]);
 });
 
+// #591 goal A.3: every exercise has an instrument strip the child can play
+// freely before answering. Playing it neither answers nor scores.
+test('the exercise strip plays in under 50 ms before answering, with two fingers', async ({ page, browserName }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto('/index.html');
+  await page.waitForFunction(() => typeof window.mountFreePad === 'function');
+  await page.locator('#rmBegin').click();
+  await expect(page.locator('#rmQuiz')).toBeVisible();
+  const keys = page.locator('#rmQuiz .mm-pad .mm-pad-key');
+  await expect(keys.first()).toBeVisible();
+  expect(await keys.count()).toBeGreaterThanOrEqual(4);
+  await keys.first().tap(); // first gesture: unlocks the AudioContext
+  await expect.poll(() => page.evaluate(() => window.audioState())).toBe('running');
+  for (const i of [1, 2, 3]) {
+    const before = (await latency(page)).taps;
+    await keys.nth(i).tap();
+    const r = await latency(page);
+    expect(r.taps, 'key ' + i + ' sounded once').toBe(before + 1);
+    expect(r.ms, 'key ' + i + ' latency').toBeLessThan(BUDGET_MS);
+  }
+  await expect(page.locator('#rmFeedback')).toBeHidden();
+  await expect(page.locator('#rmCheck')).toBeEnabled();
+  if (browserName === 'chromium') {
+    const a = await keys.nth(0).boundingBox();
+    const b = await keys.nth(1).boundingBox();
+    const before = (await latency(page)).taps;
+    const cdp = await page.context().newCDPSession(page);
+    const pt = (box, id) => ({ x: box.x + box.width / 2, y: box.y + box.height / 2, id });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [pt(a, 1), pt(b, 2)] });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect.poll(async () => (await latency(page)).taps).toBe(before + 2);
+  }
+  expect(errors).toEqual([]);
+});
+
 test('the tapped bar gets the press/glow class', async ({ page }) => {
   await openPlayground(page);
   const bar = page.locator('#xk_3');
