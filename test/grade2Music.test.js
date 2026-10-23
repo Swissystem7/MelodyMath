@@ -5,7 +5,7 @@ const g2 = require('../src/lib/grade2Music');
 const engine = require('../src/lib/musicEngine');
 const banks = require('../src/lib/banks');
 
-const music = (name) => banks.itemsForGrade('ב').filter((it) => it.music === name);
+const music = (name) => banks.itemsForGrade('ב').filter((it) => (it.musicStory || it.music) === name);
 
 test('even or odd by ear: a full pair at the end, or one beat left alone', () => {
   assert.deepEqual(g2.evenOddBeats(4), { count: 4, pairs: 2, leftover: 0, even: true });
