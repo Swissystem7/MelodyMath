@@ -53,7 +53,7 @@
     <label for="classCode">קוד כיתה</label>
     <input id="classCode" autocomplete="off">
     <label for="studentName">שם או קוד תלמיד/ה</label>
-    <input id="studentName" autocomplete="off">
+    <input id="studentName" autocomplete="off" aria-describedby="setupStatus">
     <label for="unit">יחידה</label>
     <select id="unit"></select>
     <div class="row">
@@ -100,7 +100,15 @@
   function start(form) {
     const classCode = normalizeCode($('classCode').value);
     const name = studentLabel($('studentName').value);
-    if (!name) { $('setupStatus').textContent = 'צריך שם או קוד תלמיד/ה.'; return; }
+    const nameField = $('studentName');
+    if (!name) {
+      // השדה מסומן כשגוי ומקושר להודעה, והפוקוס עובר אליו כדי שקורא מסך ומקלדת יגיעו ישר לתיקון.
+      $('setupStatus').textContent = 'צריך שם או קוד תלמיד/ה.';
+      nameField.setAttribute('aria-invalid', 'true');
+      nameField.focus();
+      return;
+    }
+    nameField.removeAttribute('aria-invalid');
     const unitId = $('unit').value;
     const session = startSession(classCode, name, checkKind(unitId, form));
     if (!session) { $('setupStatus').textContent = 'לא הצלחנו לפתוח בדיקה במכשיר הזה.'; return; }
@@ -194,6 +202,10 @@
   // Enter בשדות הטופס מפעיל את הכפתור הראשי, כמו בסרגל המורה ב-index.html.
   $('classCode').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
   $('studentName').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
+  // ברגע שמקלידים שם, השדה כבר לא מסומן כשגוי.
+  $('studentName').oninput = function () {
+    if ($('studentName').value.trim()) $('studentName').removeAttribute('aria-invalid');
+  };
 })();
 </script>
 </body>
