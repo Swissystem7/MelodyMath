@@ -52,7 +52,7 @@ test('an item takes the way of its level, and its note never states the answer',
     const ways = g1.music[keyOf(it)];
     const [tag, note, src, ev] = ways[Math.min(it.level, ways.length) - 1];
     assert.deepEqual([it.music, it.musicNote, it.musicSrc, it.musicEv], [tag, note, src, ev], it.id);
-    assert.doesNotMatch(note, new RegExp('(^|\D)' + it.answer + '(\D|$)'), it.id + ' ' + it.prompt);
+    assert.doesNotMatch(note, new RegExp('(^|\\D)' + it.answer + '(\\D|$)'), it.id + ' ' + it.prompt);
   });
 });
 
