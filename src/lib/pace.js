@@ -217,7 +217,7 @@
       + '<p class="mm-plan-pace">טווח טיפוסי: ' + esc(p.weeksRange) + ' שבועות, ' + esc(p.sessionsRange)
       + ' מפגשים של ' + p.minutes + ' דקות. מקור: ' + esc(p.source) + '.</p>'
       + '<div class="mm-plan-track" role="progressbar" aria-valuemin="0" aria-valuemax="' + max + '"'
-      + ' aria-valuenow="' + now + '" aria-valuetext="' + esc(text) + '"><span style="width:' + p.percent + '%"></span></div>'
+      + ' aria-valuenow="' + now + '" aria-label="התקדמות בקצב הלמידה" aria-valuetext="' + esc(text) + '"><span style="width:' + p.percent + '%"></span></div>'
       + '<p class="mm-pace-status"><b>' + esc(p.statusHe) + '</b> · ' + esc(p.parentLine) + '</p>'
       + '<p class="mm-plan-note">' + esc(p.note) + '</p></section>';
   }
