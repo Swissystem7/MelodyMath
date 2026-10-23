@@ -26,3 +26,15 @@
 .fbp-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:76px;min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem}
 .fbp-tile span{font-size:.85rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+.db-cols{display:flex;align-items:flex-end;gap:10px;min-height:150px;padding:8px;border-bottom:3px solid var(--ink);direction:ltr}
+.db-col{display:flex;flex-direction:column-reverse;align-items:center;gap:3px;flex:1 1 0;min-width:0}
+.db-col b{order:-1;font-size:.9rem;color:var(--muted)}
+.db-dot{width:16px;height:9px;border-radius:4px;background:color-mix(in srgb, var(--yellow) 70%, var(--card));border:1px solid var(--ink)}
+.db-col.lit .db-dot{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 55%, var(--card))}
+.db-bar{display:flex;height:56px;border:3px solid var(--ink);border-radius:12px;overflow:hidden;direction:ltr;background:repeating-linear-gradient(90deg,var(--card) 0 calc(25% - 2px),var(--line) calc(25% - 2px) 25%)}
+.db-bar.done{border-color:var(--good)}
+.db-seg{display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--yellow) 60%, var(--card));border-inline-end:2px solid var(--ink);font-weight:bold;min-width:0;overflow:hidden}
+.db-seg.lit{animation:mmTap .25s ease-out}
+.db-note{font-size:.85rem;color:var(--muted)}
+.db-wait{font-weight:bold}
+@media (prefers-reduced-motion:reduce){.db-col.lit .db-dot,.db-seg.lit{animation:none}}
