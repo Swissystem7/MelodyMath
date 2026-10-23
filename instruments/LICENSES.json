@@ -1,0 +1,155 @@
+{
+  "note": "MelodyMath ships no audio samples. Every instrument voice is synthesised in the browser with the Web Audio API from the recipes in src/lib/instrumentVoices.js. See SOUNDS-LICENSES.md.",
+  "voices": {
+    "drumLow": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.drumLow",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "drumHigh": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.drumHigh",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "frameDrum": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.frameDrum",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "jingle": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.jingle",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "woodClick": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.woodClick",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "metalBell": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.metalBell",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "gong": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.gong",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "woodBar": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.woodBar",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "tine": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.tine",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "steelPan": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.steelPan",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "pluck": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.pluck",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "bowed": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.bowed",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "breathy": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.breathy",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "reed": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.reed",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "horn": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.horn",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "drone": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.drone",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "keys": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.keys",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "organ": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.organ",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "tablaBol": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.tablaBol",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "taiko": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.taiko",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "xylo": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.xylo",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "sitar": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.sitar",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "koto": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.koto",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "nylon": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.nylon",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "harp": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.harp",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "qanun": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.qanun",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "flute": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.flute",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "recorderPipe": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.recorderPipe",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "trumpet": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.trumpet",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    },
+    "clarinet": {
+      "source": "synthesised in code: src/lib/instrumentVoices.js VOICES.clarinet",
+      "author": "MelodyMath project",
+      "license": "project code (repository LICENSE), no third-party sample"
+    }
+  }
+}

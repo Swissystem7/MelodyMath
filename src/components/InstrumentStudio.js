@@ -24,7 +24,7 @@
   const e = JAM.esc;
 
   const MOMENT_HE = { topicStart: 'מתחילים נושא: איזה כלי מנגן הפעם?', streak: 'רצף של 5 תשובות נכונות! רוצים להחליף כלי?', unlock: 'נפתח כלי חדש!' };
-  const NOTE_HE = { 262: 'דו', 294: 'רה', 330: 'מי', 349: 'פה', 392: 'סול', 440: 'לה', 494: 'סי', 523: 'דו׳', 587: 'רה׳', 659: 'מי׳' };
+  const NOTE_HE = { 147: 'רה', 165: 'מי', 196: 'סול', 220: 'לה', 233: 'סי♭', 262: 'דו', 294: 'רה', 330: 'מי', 349: 'פה', 370: 'פה♯', 392: 'סול', 440: 'לה', 494: 'סי', 523: 'דו׳', 587: 'רה׳', 659: 'מי׳', 698: 'פה׳', 784: 'סול׳', 880: 'לה׳' };
 
   function noteBtn(cls, voice, hz, label, face, style) {
     return '<button type="button" class="st-note ' + cls + '" data-note="' + voice + '"' + (hz ? ' data-hz="' + hz + '"' : '') +
@@ -51,6 +51,18 @@
       inner = noteBtn('st-zone', prof.samples[0], 0, he + ': לחיצה (נא)', 'נא') +
         '<div class="st-slide" role="group" aria-label="' + e(he) + ': מחליקים אצבע לאורך הרצועה">' +
         f.slide.map(function (hz, i) { return noteBtn('st-step', prof.samples[1], hz, he + ': גלישה, שלב ' + (i + 1), '·'); }).join('') + '</div>';
+    } else if (prof.mechanic === 'tapPads') {
+      inner = f.pads.map(function (pd) { return noteBtn('st-zone st-pad', prof.voice, pd[1], he + ': ' + pd[0], pd[0]); }).join('');
+    } else if (prof.mechanic === 'strum') {
+      // Strings across the surface: tap one, or swipe over several.
+      inner = '<div class="st-strings" role="group" aria-label="' + e(he) + ': נוגעים במיתר או מחליקים אצבע על כמה מיתרים">' +
+        f.strings.map(function (hz, i) { return noteBtn('st-string', prof.voice, hz, he + ' מיתר ' + (i + 1), '', 'border-width:' + (2 + Math.round((f.strings.length - i) / 3)) + 'px'); }).join('') + '</div>';
+    } else if (prof.mechanic === 'hold') {
+      // Holes of a wind instrument: the note lasts while the finger stays down.
+      inner = f.notes.map(function (hz, i) {
+        const name = NOTE_HE[hz] || String(i + 1);
+        return noteBtn('st-hole', prof.voice, hz, he + ' ' + name + ', מחזיקים כדי לנשוף', name);
+      }).join('');
     } else if (prof.mechanic === 'strikeDamp') {
       inner = f.notes.map(function (hz, i) { return noteBtn('st-bar st-gong', prof.voice, hz, he + ' קורה ' + (i + 1), String(i + 1)); }).join('') +
         '<button type="button" class="secondary st-damp" data-act="damp">✋ עמעום</button>';
@@ -105,11 +117,63 @@
     return { jsPathMs: ms > 0 ? ms : 0 };
   }
 
+  // Pointer wiring shared by the studio and the library: every note starts on
+  // pointerdown (one per finger), a swipe over a slide strip or strings plays
+  // each one it enters, and a wind note ends when its finger lifts, so the
+  // hold is the note length. getProfile() returns the instrument on screen.
+  function wirePlay(el, getProfile) {
+    let ringing = null;
+    const held = {};
+    function release(bus) {
+      if (bus) { try { bus.gain.setTargetAtTime(0.0001, bus.context.currentTime, 0.04); } catch (err) { /* already gone */ } }
+    }
+    function damp() {
+      release(ringing);
+      ringing = null;
+    }
+    function strike(btn, ev) {
+      const me = root.musicEngine;
+      const ac = me && me.getSharedAudioContext ? me.getSharedAudioContext() : null;
+      if (!ac || typeof root.playVoice !== 'function' || (me.audioState && me.audioState.muted)) return;
+      if (ac.state === 'suspended') { try { ac.resume(); } catch (err) { /* autoplay */ } }
+      if (getProfile().mechanic === 'strikeDamp') damp();
+      const bus = ac.createGain();
+      bus.connect(ac.destination);
+      root.playVoice(ac, btn.getAttribute('data-note'), Number(btn.getAttribute('data-hz')) || 0, ac.currentTime, bus);
+      ringing = bus;
+      if (ev && ev.pointerId != null) held[ev.pointerId] = bus;
+      const a = me.audioState;
+      if (a) { a.lastStart = performance.now(); a.lastEventTime = ev && ev.timeStamp > 0 ? ev.timeStamp : a.lastStart; a.lastVoice = btn.getAttribute('data-note'); a.taps += 1; }
+      btn.classList.remove('mm-tap'); void btn.offsetWidth; btn.classList.add('mm-tap');
+      if (root.navigator && typeof root.navigator.vibrate === 'function') { try { root.navigator.vibrate(10); } catch (err) { /* not allowed */ } }
+    }
+    const down = {};
+    el.addEventListener('pointerdown', function (ev) {
+      const b = ev.target.closest && ev.target.closest('[data-note]');
+      if (!b) return;
+      down[ev.pointerId] = b;
+      if (b.releasePointerCapture) { try { b.releasePointerCapture(ev.pointerId); } catch (err) { /* none */ } }
+      strike(b, ev);
+    });
+    el.addEventListener('pointerover', function (ev) {
+      const b = ev.target.closest && ev.target.closest('.st-step,.st-string');
+      const was = down[ev.pointerId];
+      if (b && was && was !== b && was.className === b.className) { down[ev.pointerId] = b; strike(b, ev); }
+    });
+    ['pointerup', 'pointercancel'].forEach(function (t) {
+      el.addEventListener(t, function (ev) {
+        delete down[ev.pointerId];
+        if (getProfile().mechanic === 'hold') release(held[ev.pointerId]);
+        delete held[ev.pointerId];
+      });
+    });
+    return { strike: strike, damp: damp };
+  }
+
   function mount(el) {
     const store = root.localStorage;
     let state = S.load(store);
     let view = { topic: S.topics()[0], message: '' };
-    let ringing = null;
     function draw(focusSel) {
       view.device = device();
       el.innerHTML = renderHtml(state, view);
@@ -122,48 +186,16 @@
       view.message = msg || '';
       draw(state.moment ? '#stChoiceHead' : null);
     }
-    function damp() {
-      if (ringing) { try { ringing.gain.setTargetAtTime(0.0001, ringing.context.currentTime, 0.03); } catch (err) { /* already gone */ } }
-      ringing = null;
-    }
-    function strike(btn, ev) {
-      const me = root.musicEngine;
-      const ac = me && me.getSharedAudioContext ? me.getSharedAudioContext() : null;
-      if (!ac || typeof root.playVoice !== 'function' || (me.audioState && me.audioState.muted)) return;
-      if (ac.state === 'suspended') { try { ac.resume(); } catch (err) { /* autoplay */ } }
-      if (S.profile(state.current).mechanic === 'strikeDamp') damp();
-      const bus = ac.createGain();
-      bus.connect(ac.destination);
-      root.playVoice(ac, btn.getAttribute('data-note'), Number(btn.getAttribute('data-hz')) || 0, ac.currentTime, bus);
-      ringing = bus;
-      const a = me.audioState;
-      if (a) { a.lastStart = performance.now(); a.lastEventTime = ev && ev.timeStamp > 0 ? ev.timeStamp : a.lastStart; a.lastVoice = btn.getAttribute('data-note'); a.taps += 1; }
-      btn.classList.remove('mm-tap'); void btn.offsetWidth; btn.classList.add('mm-tap');
-      if (root.navigator && typeof root.navigator.vibrate === 'function') { try { root.navigator.vibrate(10); } catch (err) { /* not allowed */ } }
-    }
-    // pointerdown per finger; a slide across the strip plays each step it enters.
-    const down = {};
-    el.addEventListener('pointerdown', function (ev) {
-      const b = ev.target.closest && ev.target.closest('[data-note]');
-      if (!b) return;
-      down[ev.pointerId] = b;
-      if (b.releasePointerCapture) { try { b.releasePointerCapture(ev.pointerId); } catch (err) { /* none */ } }
-      strike(b, ev);
-    });
-    el.addEventListener('pointerover', function (ev) {
-      const b = ev.target.closest && ev.target.closest('.st-step');
-      if (b && down[ev.pointerId] && down[ev.pointerId] !== b && down[ev.pointerId].classList.contains('st-step')) { down[ev.pointerId] = b; strike(b, ev); }
-    });
-    ['pointerup', 'pointercancel'].forEach(function (t) { el.addEventListener(t, function (ev) { delete down[ev.pointerId]; }); });
+    const play = wirePlay(el, function () { return S.profile(state.current); });
     el.addEventListener('click', function (ev) {
       const n = ev.target.closest && ev.target.closest('[data-note]');
-      if (n && ev.detail === 0) return strike(n, ev); // Enter/Space: the same sound for keyboard players
+      if (n && ev.detail === 0) return play.strike(n, ev); // Enter/Space: the same sound for keyboard players
       const b = ev.target.closest && ev.target.closest('[data-act]');
       if (!b) return;
       const act = b.getAttribute('data-act');
       if (act === 'start') commit(S.onEvent(state, { type: 'topicStart' }, device()), S.choiceOptions(state, device()) ? '' : 'עוד אין שני כלים פתוחים לבחירה.');
       else if (act === 'choose') { commit(S.choose(state, b.getAttribute('data-id')), 'בחרתם ' + S.profile(b.getAttribute('data-id')).he + '. התרגיל נשאר אותו תרגיל.'); const s = el.querySelector('.st-note'); if (s) s.focus(); }
-      else if (act === 'damp') damp();
+      else if (act === 'damp') play.damp();
     });
     el.addEventListener('change', function (ev) {
       if (ev.target && ev.target.id === 'stTopic') { view.topic = ev.target.value; draw('#stTopic'); }
@@ -179,5 +211,5 @@
     return { get state() { return state; }, onEvent: function (ev) { commit(S.onEvent(state, ev, device())); } };
   }
 
-  return { renderHtml: renderHtml, surfaceHtml: surfaceHtml, momentHtml: momentHtml, mount: mount };
+  return { renderHtml: renderHtml, surfaceHtml: surfaceHtml, momentHtml: momentHtml, wirePlay: wirePlay, device: device, mount: mount };
 });

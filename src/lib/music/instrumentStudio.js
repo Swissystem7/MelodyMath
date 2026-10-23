@@ -23,6 +23,7 @@
   'use strict';
 
   const DATA = root && typeof root.instrumentById === 'function' ? root : require('../instruments.js');
+  const LIB = (root && root.MM_LIBRARY) || require('./instrumentLibrary.js');
 
   const STREAK = 5;
   const MASTERY = 5;
@@ -41,23 +42,14 @@
     pressSlide: { he: 'לוחצים ומחליקים: הצליל עולה ויורד', inputDelayMs: 0 },
     strikeDamp: { he: 'מכה ועמעום: כל מכה משתיקה את הקודמת', inputDelayMs: 0 },
     keys: { he: 'קלידים, גם כמה אצבעות יחד', inputDelayMs: 0 },
+    tapPads: { he: 'הקשה על אזורים, לכל אזור צליל משלו', inputDelayMs: 0 },
+    strum: { he: 'פורטים על מיתר או מחליקים על כמה מיתרים', inputDelayMs: 0 },
+    hold: { he: 'מחזיקים כדי לנשוף: כמה שמחזיקים, כך הצליל נמשך', inputDelayMs: 0 },
   };
 
-  // p(id, mechanic, samples, feel, icon, color, mastered-topics-to-open)
-  function p(id, mechanic, samples, feel, icon, color, opensAt) {
-    const x = DATA.instrumentById(id);
-    return { id: id, he: x ? x.instrument.he : id, family: x ? x.family : null, mechanic: mechanic, samples: samples,
-      voice: samples[0], feel: feel, theme: { icon: icon, color: color }, opensAt: opensAt };
-  }
-
-  const PROFILES = [
-    p('darbuka', 'tapZones', ['drumLow', 'drumHigh'], { decay: 'short', zones: ['דום', 'טק'] }, '🪘', 'yellow', 0),
-    p('marimba', 'barsByPitch', ['woodBar'], { decay: 'warm', notes: [262, 294, 330, 392, 440, 523, 587, 659] }, '🪵', 'pink', 0),
-    p('piano', 'keys', ['keys'], { decay: 'long', notes: [262, 294, 330, 349, 392, 440, 494, 523] }, '🎹', 'ink', 0),
-    p('kalimba', 'thumbPluck', ['tine'], { decay: 'ring', notes: [523, 587, 659, 784, 880, 1047, 1175] }, '🎐', 'mint', 1),
-    p('tabla', 'pressSlide', ['drumHigh', 'frameDrum'], { decay: 'short', slide: [110, 130, 150, 175, 200] }, '🥁', 'purple', 2),
-    p('gamelan', 'strikeDamp', ['gong'], { decay: 'long', notes: [262, 294, 349, 392, 440] }, '🔔', 'good', 3),
-  ];
+  // The profiles are the WorldInstrumentLibrary registry (24 instruments,
+  // the six starting ones open from the first visit).
+  const PROFILES = LIB.LIBRARY;
 
   function profile(id) {
     for (let i = 0; i < PROFILES.length; i++) if (PROFILES[i].id === id) return PROFILES[i];
@@ -88,7 +80,7 @@
   }
 
   function initialState() {
-    return { correct: {}, streak: 0, current: 'darbuka', moment: null, choices: 0, opened: ['darbuka', 'marimba', 'piano'] };
+    return { correct: {}, streak: 0, current: 'darbuka', moment: null, choices: 0, opened: LIB.basicIds() };
   }
 
   function masteredCount(state) {
@@ -96,8 +88,7 @@
     return Object.keys(c).filter(function (t) { return c[t] >= MASTERY; }).length;
   }
   function unlockedIds(state) {
-    const n = masteredCount(state);
-    return PROFILES.filter(function (x) { return x.opensAt <= n; }).map(function (x) { return x.id; });
+    return LIB.unlockedIds(masteredCount(state));
   }
 
   // 2-4 open, available instruments, the current one and a fresh one first;
@@ -144,7 +135,10 @@
   function load(storage, key) {
     try {
       const v = JSON.parse(storage.getItem(key || STORAGE_KEY));
-      if (v && v.correct && Array.isArray(v.opened) && profile(v.current)) return Object.assign(initialState(), v, { moment: null });
+      if (v && v.correct && Array.isArray(v.opened) && profile(v.current)) {
+        const opened = LIB.basicIds().concat(v.opened.filter(function (id) { return profile(id) && LIB.basicIds().indexOf(id) < 0; }));
+        return Object.assign(initialState(), v, { moment: null, opened: opened });
+      }
     } catch (e) { /* unreadable storage -> start fresh */ }
     return initialState();
   }

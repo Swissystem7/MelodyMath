@@ -18,7 +18,7 @@ test('choose an instrument at the defined moments; the method never changes', as
   await card.locator('#stTopic').selectOption('fractions');
   const method = await card.locator('.st-method').innerText();
   await card.locator('[data-act="start"]').click();
-  await expect(card.locator('.st-choice [data-act="choose"]')).toHaveCount(3);
+  await expect(card.locator('.st-choice [data-act="choose"]')).toHaveCount(4);
   await card.locator('[data-act="choose"][data-id="marimba"]').click();
   await expect(card.locator('.st-now')).toContainText('מרימבה');
   await expect(card.locator('.st-choice')).toHaveCount(0);
@@ -53,9 +53,9 @@ test('every instrument sounds on pointerdown within 50 ms', async ({ page }) => 
   await page.waitForFunction(() => window.MM_STUDIO && typeof window.audioState === 'function');
   const ids = await page.evaluate(() => window.MM_STUDIO.PROFILES.map((x) => x.id));
   for (const id of ids) {
-    // Progress that opened all six, with this instrument chosen.
+    // Progress that opened all 24, with this instrument chosen.
     await page.evaluate((cur) => localStorage.setItem('mm.studio', JSON.stringify({
-      correct: { a: 5, b: 5, c: 5 }, streak: 0, current: cur, choices: 0,
+      correct: Object.fromEntries(Array.from({ length: 18 }, (_, i) => ['t' + i, 5])), streak: 0, current: cur, choices: 0,
       opened: window.MM_STUDIO.PROFILES.map((x) => x.id) })), id);
     await page.reload();
     await page.locator('#tab-musicGames').click();

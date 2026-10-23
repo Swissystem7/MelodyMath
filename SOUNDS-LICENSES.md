@@ -33,6 +33,22 @@ in the repository is missing from this file.
 | `drone` | drones (didgeridoo) | synthesised | project code |
 | `keys` | piano and keyboards | synthesised | project code |
 | `organ` | organ, harmonium, accordion | synthesised, additive | project code |
+| `tablaBol` | tabla (library) | synthesised, ringing pitched drum | project code |
+| `taiko` | taiko (library) | synthesised, very low drum | project code |
+| `xylo` | xylophone (library) | synthesised, bright short bar | project code |
+| `sitar` | sitar (library) | synthesised, buzzy sawtooth | project code |
+| `koto` | koto (library) | synthesised, triangle pluck | project code |
+| `nylon` | guitar (library) | synthesised, soft triangle pluck | project code |
+| `harp` | harp (library) | synthesised, long sine pluck | project code |
+| `qanun` | qanun (library) | synthesised, bright plucked sawtooth | project code |
+| `flute` | transverse flute (library) | synthesised, sine + breath | project code |
+| `recorderPipe` | recorder (library) | synthesised, pure triangle pipe | project code |
+| `trumpet` | trumpet (library) | synthesised, brassy sawtooth | project code |
+| `clarinet` | clarinet (library) | synthesised, odd-harmonic square | project code |
+
+`instruments/LICENSES.json` repeats this table as data: one record per voice
+(source, author, licence), and `test/instrumentLibrary.test.js` fails when a
+library instrument uses a voice without a record.
 
 ## Audio files
 
