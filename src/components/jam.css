@@ -14,3 +14,15 @@
 .jam-msg.good{color:var(--good)}
 .jam-msg.soft{color:var(--purple)}
 .jam-lit{background:color-mix(in srgb, var(--mint) 45%, var(--card))!important}
+.fbp-bar{display:flex;height:64px;border:3px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--card)}
+.fbp-bar.done{border-color:var(--good);box-shadow:0 0 0 4px color-mix(in srgb, var(--good) 25%, transparent)}
+.fbp-seg{display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--yellow) 60%, var(--card));color:var(--ink);border-inline-start:2px solid var(--ink);font-weight:bold;min-width:0;overflow:hidden}
+.fbp-seg:nth-child(even){background:color-mix(in srgb, var(--pink) 22%, var(--card))}
+.fbp-seg.lit{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 45%, var(--card))}
+.fbp-out{margin-inline-start:auto;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-size:.8rem}
+.fbp-over{display:flex;align-items:center;gap:8px;margin:6px 0;color:var(--purple);font-weight:bold}
+.fbp-overbar{display:inline-block;height:20px;max-width:60%;background:color-mix(in srgb, var(--purple) 25%, var(--card));border:2px dashed var(--purple);border-radius:6px}
+.fbp-sum{margin:6px 0}
+.fbp-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:76px;min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem}
+.fbp-tile span{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
