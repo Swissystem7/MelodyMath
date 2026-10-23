@@ -26,3 +26,12 @@
 .fbp-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:76px;min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem}
 .fbp-tile span{font-size:.85rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+/* RhythmPolygon: the rhythm clock */
+.rp-clock{display:block;width:100%;max-width:240px;margin:8px auto}
+.rp-ring{fill:none;stroke:var(--line);stroke-width:.03}
+.rp-poly{fill:color-mix(in srgb, var(--yellow) 35%, transparent);stroke:var(--ink);stroke-width:.04}
+.rp-poly2{fill:none;stroke:var(--purple);stroke-width:.04;stroke-dasharray:.08 .06}
+.rp-beat{fill:var(--muted)}
+.rp-corner{fill:var(--ink)}
+.rp-corner.lit,.rp-beat.lit{fill:var(--good)}
+.rp-report{font-weight:bold;margin:8px 0}
