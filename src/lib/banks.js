@@ -1881,11 +1881,12 @@
 
   // A grade kept in its own file (src/lib/curriculum/grade<n>.js), appended
   // last so existing ids stay put. Pages load it before this file. A file
-  // may carry only the music side of a grade whose items live here (grade1).
+  // may carry only the music side of a grade whose items live here (grade1,
+  // grade4).
   const G = typeof globalThis !== 'undefined' ? globalThis : {};
   const GRADE_FILES = (typeof module === 'object' && module.exports)
-    ? [require('./curriculum/grade6'), require('./curriculum/grade1')]
-    : [G.MM_GRADE6, G.MM_GRADE1];
+    ? [require('./curriculum/grade6'), require('./curriculum/grade1'), require('./curriculum/grade4')]
+    : [G.MM_GRADE6, G.MM_GRADE1, G.MM_GRADE4];
   // Research behind the music ways of the grade files (#591): id → [label, URL].
   const MUSIC_SOURCES = {};
   GRADE_FILES.forEach(function (f) {
@@ -1904,12 +1905,14 @@
     // older builders (G56, MV) included. A way is [tag, note, source, evidence].
     const link = {};
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
-    // A prompt that already plays sound is a music activity: counted beats
-    // (hear) and the grade א׳ widgets (g1: beats, chart100, pattern).
+    // A prompt that already plays sound or reads music notation is a music
+    // activity: counted beats (hear), the grade א׳ widgets (g1: beats,
+    // chart100, pattern) and the 4/4 bar of the fraction items (bar44).
     RAW.forEach(function (raw) {
       if (raw.grade !== f.grade || raw.music) return;
       if (raw.g1 && raw.g1.kind) raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
       else if (hearOf(raw.hear)) raw.music = 'hearBeats';
+      else if (raw.widget === 'bar44') raw.music = 'bar44Notes';
     });
     RAW.forEach(function (raw) {
       const ways = raw.grade === f.grade && !raw.music && link[raw.standard];

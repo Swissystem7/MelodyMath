@@ -9,7 +9,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const banks = require('../src/lib/banks');
 
-const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('../src/lib/curriculum/grade1') };
+const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('../src/lib/curriculum/grade1'), 'ד': require('../src/lib/curriculum/grade4') };
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
@@ -88,23 +88,33 @@ test('grade א׳: a prompt that plays sound is a music activity, not a way', () 
   assert.equal(items.filter((it) => it.musicNote).length, items.length - hear.length - g1.length);
 });
 
+test('grade ד׳: a 4/4-bar fraction item is music notation already, an activity and not a way', () => {
+  const items = banks.itemsForGrade('ד');
+  const bars = items.filter((it) => it.widget === 'bar44');
+  assert.ok(bars.length >= 10);
+  bars.forEach((it) => assert.equal(it.music, 'bar44Notes', it.id));
+  bars.forEach((it) => assert.equal(it.musicNote, undefined, it.id));
+  assert.equal(items.filter((it) => it.musicNote).length, items.length - bars.length);
+});
+
 test('grades without a ways file are untouched', () => {
-  ['ב', 'ג', 'ד', 'ה'].forEach((g) => {
+  ['ב', 'ג', 'ה'].forEach((g) => {
     banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
   });
 });
 
-test('grade1.js adds no curriculum rows, loads before banks.js on every page, and is cached offline', () => {
-  const g1 = FILES['א'];
-  assert.equal(g1.rows, undefined);
-  assert.deepEqual(g1.items, []);
-  ['index.html', 'program.html', 'curriculum.html'].forEach((f) => {
-    const html = read(f);
-    const at = html.indexOf('<script src="src/lib/banks.js">');
-    const g1at = html.indexOf('<script src="src/lib/curriculum/grade1.js">');
-    assert.ok(at > 0 && g1at >= 0 && g1at < at, f);
+test('a music-side file adds no curriculum rows, loads before banks.js on every page, and is cached offline', () => {
+  [['א', 'grade1'], ['ד', 'grade4']].forEach(([grade, name]) => {
+    const file = FILES[grade];
+    assert.equal(file.rows, undefined, name);
+    assert.deepEqual(file.items, [], name);
+    ['index.html', 'program.html', 'curriculum.html'].forEach((f) => {
+      const html = read(f);
+      const at = html.indexOf('<script src="src/lib/banks.js">');
+      const fat = html.indexOf('<script src="src/lib/curriculum/' + name + '.js">');
+      assert.ok(at > 0 && fat >= 0 && fat < at, f + ' ' + name);
+    });
+    assert.ok(read('sw.js').includes('curriculum/' + name + '.js'), name);
   });
-  const sw = read('sw.js');
-  assert.match(sw, /curriculum\/grade1\.js/);
-  assert.ok(Number(sw.match(/melodymath-offline-v(\d+)/)[1]) >= 23, 'a new asset, so CACHE moves');
+  assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 24, 'a new asset, so CACHE moves');
 });
