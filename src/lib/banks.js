@@ -1880,17 +1880,19 @@
   );
 
   // A grade kept in its own file (src/lib/curriculum/grade<n>.js), appended
-  // last so existing ids stay put. Pages load it before this file.
+  // last so existing ids stay put. Pages load it before this file. A grade
+  // whose items stay in this file may still bring its music ways in a file of
+  // its own (grade4Music.js): no rows, no items, only `music` and `sources`.
   const GRADE_FILES = (typeof module === 'object' && module.exports)
-    ? [require('./curriculum/grade6')]
-    : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6];
+    ? [require('./curriculum/grade6'), require('./curriculum/grade4Music')]
+    : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6, typeof globalThis !== 'undefined' && globalThis.MM_GRADE4_MUSIC];
   // Research behind the music ways of the grade files (#591): id → [label, URL].
   const MUSIC_SOURCES = {};
   GRADE_FILES.forEach(function (f) {
-    if (!f || !Array.isArray(f.items)) return;
-    Object.keys(f.ST).forEach(function (k) { ST[k] = f.ST[k][0]; });
+    if (!f || !f.grade) return;
+    Object.keys(f.ST || {}).forEach(function (k) { ST[k] = f.ST[k][0]; });
     Object.keys(f.sources || {}).forEach(function (k) { MUSIC_SOURCES[k] = f.sources[k]; });
-    f.items.forEach(function (x) {
+    (f.items || []).forEach(function (x) {
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;

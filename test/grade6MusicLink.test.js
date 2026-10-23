@@ -78,8 +78,8 @@ test('an item takes the way of its level, with its source and label', () => {
   six.filter((it) => !it.musicNote).forEach((it) => assert.equal(it.musicSrc, undefined, it.id));
 });
 
-test('other grades are untouched', () => {
-  ['א', 'ב', 'ג', 'ד', 'ה'].forEach((g) => {
+test('grades without ways yet are untouched', () => {
+  ['א', 'ב', 'ג', 'ה'].forEach((g) => {
     banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
   });
 });
