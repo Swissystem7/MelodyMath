@@ -75,7 +75,7 @@ test('an item takes the way of its level, with its source and label', () => {
     assert.equal(it.musicSrc, src, it.id);
     assert.equal(it.musicEv, ev, it.id);
   });
-  six.filter((it) => !it.musicNote).forEach((it) => assert.equal(it.musicSrc, undefined, it.id));
+  six.filter((it) => !it.musicNote).forEach((it) => assert.ok(banks.MUSIC_SOURCES[it.musicSrc] && it.musicEv, it.id));
 });
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
@@ -127,7 +127,7 @@ test('the way and source helpers render the note, the source link and the eviden
   assert.ok(src.includes('href="' + url + '"') && src.includes('rel="noopener"'), src);
   assert.ok(src.includes(label.replace(/&/g, '&amp;')), src);
   assert.ok(src.includes(ctx.musicEvHe(way.musicEv)), src);
-  assert.equal(ctx.musicSourceHtml(activity), '');
+  assert.ok(ctx.musicSourceHtml(activity).includes(banks.MUSIC_SOURCES[activity.musicSrc][1]), 'an activity shows its source too (#591)');
   assert.equal(ctx.musicSourceHtml(null), '');
   assert.notEqual(ctx.musicEvHe('D'), ctx.musicEvHe('A'));
   assert.match(ctx.musicEvHe('R'), /[א-ת]/);

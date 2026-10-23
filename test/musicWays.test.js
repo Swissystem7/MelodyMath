@@ -33,7 +33,7 @@ Object.keys(FILES).forEach((grade) => {
         assert.ok(way, it.id + ' has no way for ' + it.standard + ' level ' + it.level);
         assert.deepEqual([it.music, it.musicNote, it.musicSrc, it.musicEv], way, it.id);
       } else {
-        assert.equal(it.musicSrc, undefined, it.id);
+        assert.ok(banks.MUSIC_SOURCES[it.musicSrc] && it.musicEv, it.id + ' activity ' + it.music);
       }
     });
   });
