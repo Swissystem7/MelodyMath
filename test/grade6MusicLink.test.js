@@ -84,12 +84,57 @@ test('other grades are untouched', () => {
   });
 });
 
-test('the feedback shows the way only after answering, in the diagnostic and the plan', () => {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  const fn = (name) => html.split('\n').find((l) => l.startsWith('function ' + name + '('));
-  assert.ok(fn('musicNoteHtml').includes('mathHtml(it.musicNote)'));
-  assert.ok(fn('rmCheck').includes('${musicNoteHtml(q)}'));
-  assert.ok(fn('rpCheck').includes('${musicNoteHtml(it)}'));
-  assert.ok(!fn('rmRender').includes('musicNote'));
-  assert.ok(!fn('rpRender').includes('musicNote'));
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const fn = (name) => html.split('\n').find((l) => l.startsWith('function ' + name + '('));
+
+test('the way is shown with the prompt in the diagnostic, the plan and class mode; its source only after answering', () => {
+  assert.ok(fn('musicWayHtml').includes('mathHtml(it.musicNote)'));
+  assert.ok(fn('rmRender').includes("setMusicWay('rmWay',q)"));
+  assert.ok(fn('rpRender').includes("setMusicWay('rmPlanWay',it)"));
+  assert.ok(fn('nextClassQuestion').includes("setMusicWay('classWay',q)"));
+  ['rmWay', 'rmPlanWay', 'classWay'].forEach((id) => assert.ok(html.includes('id="' + id + '" class="music-way hidden"'), id));
+  assert.ok(fn('rmCheck').includes('${musicSourceHtml(q)}'));
+  assert.ok(fn('rpCheck').includes('${musicSourceHtml(it)}'));
+  assert.ok(!fn('rmRender').includes('musicSrc') && !fn('rpRender').includes('musicSrc'));
+  assert.ok(!html.includes('musicNoteHtml'));
+  const sw = fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8');
+  assert.ok(Number(sw.match(/melodymath-offline-v(\d+)/)[1]) >= 22, 'index.html changed, so CACHE moves');
+});
+
+test('the way and source helpers render the note, the source link and the evidence label, and hide when absent', () => {
+  const vm = require('node:vm');
+  const el = { innerHTML: '', hidden: null };
+  const escAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  const escText = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const ctx = {
+    mathHtml: (s) => '[' + s + ']',
+    MUSIC_SOURCES: banks.MUSIC_SOURCES,
+    $: (id) => (id === 'rmWay' ? el : null),
+    show: (id, on) => { el.hidden = !on; },
+    document: {
+      createElement: () => ({
+        get outerHTML() { return '<a href="' + escAttr(this.href) + '" target="' + this.target + '" rel="' + this.rel + '">' + escText(this.textContent) + '</a>'; },
+      }),
+    },
+  };
+  vm.createContext(ctx);
+  vm.runInContext(['musicWayHtml', 'setMusicWay', 'musicEvHe', 'musicSourceHtml'].map(fn).join('\n'), ctx);
+  const way = six.find((it) => it.musicNote);
+  const activity = six.find((it) => !it.musicNote);
+  ctx.setMusicWay('rmWay', way);
+  assert.equal(el.innerHTML, '<b>🎵 דרך מוזיקלית:</b> [' + way.musicNote + ']');
+  assert.equal(el.hidden, false);
+  ctx.setMusicWay('rmWay', activity);
+  assert.equal(el.innerHTML, '');
+  assert.equal(el.hidden, true);
+  ctx.setMusicWay('classWay', way); // no such element in this page: nothing thrown
+  const src = ctx.musicSourceHtml(way);
+  const [label, url] = banks.MUSIC_SOURCES[way.musicSrc];
+  assert.ok(src.includes('href="' + url + '"') && src.includes('rel="noopener"'), src);
+  assert.ok(src.includes(label.replace(/&/g, '&amp;')), src);
+  assert.ok(src.includes(ctx.musicEvHe(way.musicEv)), src);
+  assert.equal(ctx.musicSourceHtml(activity), '');
+  assert.equal(ctx.musicSourceHtml(null), '');
+  assert.notEqual(ctx.musicEvHe('D'), ctx.musicEvHe('A'));
+  assert.match(ctx.musicEvHe('R'), /[א-ת]/);
 });
