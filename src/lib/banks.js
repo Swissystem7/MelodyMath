@@ -1882,8 +1882,8 @@
   // A grade kept in its own file (src/lib/curriculum/grade<n>.js), appended
   // last so existing ids stay put. Pages load it before this file.
   const GRADE_FILES = (typeof module === 'object' && module.exports)
-    ? [require('./curriculum/grade6')]
-    : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6];
+    ? [require('./curriculum/grade6'), require('./curriculum/grade1')]
+    : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6, typeof globalThis !== 'undefined' && globalThis.MM_GRADE1];
   // Research behind the music ways of the grade files (#591): id → [label, URL].
   const MUSIC_SOURCES = {};
   GRADE_FILES.forEach(function (f) {
