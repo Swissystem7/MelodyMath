@@ -1900,15 +1900,28 @@
     // through music (#591): the grade file lists research-backed ways per
     // standard, one per level, and the item takes the way of its level —
     // older builders (G56, MV) included. A way is [tag, note, source, evidence].
+    giveWays([f.grade], f.music);
+  });
+  // Grades whose items live in this file take their ways from
+  // curriculum/musicWays.js, keyed by standard the same way (#597).
+  const WAYS = (typeof module === 'object' && module.exports)
+    ? require('./curriculum/musicWays')
+    : typeof globalThis !== 'undefined' && globalThis.MM_MUSIC_WAYS;
+  if (WAYS && WAYS.music) {
+    Object.keys(WAYS.sources || {}).forEach(function (k) { MUSIC_SOURCES[k] = WAYS.sources[k]; });
+    giveWays(WAYS.grades, WAYS.music);
+  }
+
+  function giveWays(grades, music) {
     const link = {};
-    Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
+    Object.keys(music || {}).forEach(function (k) { link[ST[k]] = music[k]; });
     RAW.forEach(function (raw) {
-      const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+      const ways = grades.indexOf(raw.grade) >= 0 && !raw.music && link[raw.standard];
       if (!ways) return;
       const m = ways[Math.min(clampLevel(raw.level), ways.length) - 1];
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
     });
-  });
+  }
 
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
