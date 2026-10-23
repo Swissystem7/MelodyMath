@@ -9,7 +9,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const banks = require('../src/lib/banks');
 
-const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('../src/lib/curriculum/grade1'), 'ד': require('../src/lib/curriculum/grade4') };
+const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('../src/lib/curriculum/grade1'), 'ד': require('../src/lib/curriculum/grade4'), 'ה': require('../src/lib/curriculum/grade5') };
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
@@ -97,14 +97,22 @@ test('grade ד׳: a 4/4-bar fraction item is music notation already, an activity
   assert.equal(items.filter((it) => it.musicNote).length, items.length - bars.length);
 });
 
+test('grade ה׳: the music activities of #106 keep their tag and take no way', () => {
+  const items = banks.itemsForGrade('ה');
+  const acts = items.filter((it) => !it.musicNote);
+  assert.ok(acts.length >= 30);
+  acts.forEach((it) => assert.ok(['bars', 'lcm', 'mixedBar', 'bpm', 'secPerBeat', 'drumsMeet', 'meters', 'hzChart'].includes(it.music), it.id + ' ' + it.music));
+  assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
+});
+
 test('grades without a ways file are untouched', () => {
-  ['ב', 'ג', 'ה'].forEach((g) => {
+  ['ב', 'ג'].forEach((g) => {
     banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
   });
 });
 
 test('a music-side file adds no curriculum rows, loads before banks.js on every page, and is cached offline', () => {
-  [['א', 'grade1'], ['ד', 'grade4']].forEach(([grade, name]) => {
+  [['א', 'grade1'], ['ד', 'grade4'], ['ה', 'grade5']].forEach(([grade, name]) => {
     const file = FILES[grade];
     assert.equal(file.rows, undefined, name);
     assert.deepEqual(file.items, [], name);
@@ -116,5 +124,5 @@ test('a music-side file adds no curriculum rows, loads before banks.js on every 
     });
     assert.ok(read('sw.js').includes('curriculum/' + name + '.js'), name);
   });
-  assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 24, 'a new asset, so CACHE moves');
+  assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 25, 'a new asset, so CACHE moves');
 });
