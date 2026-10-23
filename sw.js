@@ -70,6 +70,8 @@ const ASSETS = [
   './src/components/jam.css',
   './src/lib/music/fractionBar.js',
   './src/components/FractionBarPad.js',
+  './src/lib/music/tempoRuler.js',
+  './src/components/TempoRuler.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/sefirot.css',

@@ -26,3 +26,10 @@
 .fbp-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:76px;min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem}
 .fbp-tile span{font-size:.85rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+.tr-stick{display:flex;flex-direction:column;align-items:center;gap:6px}
+.tr-rod{display:block;height:12px;max-width:100%;border-radius:6px;background:color-mix(in srgb, var(--yellow) 70%, var(--ink))}
+.tr-line{display:flex;height:40px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--card);margin:8px 0}
+.tr-seg{background:color-mix(in srgb, var(--yellow) 55%, var(--card));border-inline-start:2px solid var(--ink)}
+.tr-seg.lit{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 45%, var(--card))}
+.tr-result{margin:6px 0;padding-inline-start:20px}
+@media (prefers-reduced-motion:reduce){.tr-seg.lit{animation:none}}

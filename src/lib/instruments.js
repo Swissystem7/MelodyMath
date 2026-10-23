@@ -36,6 +36,8 @@
     symmetry: { he: 'סימטריה', mechanism: 'M6' },
     lcm: { he: 'כפולה משותפת', mechanism: 'M4' },
     numberLine: { he: 'ישר המספרים וסדר', mechanism: 'M5' },
+    // TempoRuler (#591): time and length measured in note lengths = M3.
+    measurement: { he: 'מדידה (זמן ואורך בפעמות)', mechanism: 'M3' },
   };
 
   // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
@@ -47,7 +49,7 @@
 
   const INSTRUMENTS = [
     // ---------- percussion ----------
-    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals'], 'drumLow',
+    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals', 'measurement'], 'drumLow',
       'Two basic strokes, a low dum in the centre of the head and a high tek on the rim; long and short strokes filling one bar voice note lengths as fractions (M3).',
       'https://eefc.org/wp-content/uploads/Doumbek-strokes-1.pdf'),
     e('djembe', 'ג׳מבה', 'Djembe (jembe)', 'Mande, West Africa (Mali, Guinea)', 'percussion', 'M2', ['multiplication', 'skipCounting'], 'drumHigh',
@@ -129,7 +131,7 @@
     e('guzheng', 'גוּצֶ׳נג', 'Guzheng', 'China', 'strings', 'M6', ['patterns'], 'pluck',
       'A zither with a movable bridge per string, tuned to a five-note (anhemitonic pentatonic) scale, so the same five notes repeat in every octave: a pattern of five (M6).',
       'https://collections.ed.ac.uk/mimed/record/14698'),
-    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals'], 'bowed',
+    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals', 'measurement'], 'bowed',
       'A two-string bowed spike fiddle; a bowed note lasts exactly as long as the bow keeps moving, which makes it a clear voice for held note lengths in a bar (M3).',
       'https://www.horniman.ac.uk/object/1975.40/json'),
     e('guitar', 'גיטרה', 'Guitar', 'Spain, Europe', 'strings', 'M5', ['numberLine'], 'pluck',
@@ -166,7 +168,7 @@
     e('ney', 'נאי', 'Ney', 'Iran', 'winds', 'M3', ['fractions', 'decimals'], 'breathy',
       'An open end-blown reed flute with finger holes; its long breathy notes are a gentle voice for held note lengths in a bar (M3).',
       'https://horniman.ac.uk/object/M24.8.56/159'),
-    e('recorder', 'חלילית', 'Recorder', 'Europe (Nuremberg)', 'winds', 'M3', ['fractions', 'decimals'], 'breathy',
+    e('recorder', 'חלילית', 'Recorder', 'Europe (Nuremberg)', 'winds', 'M3', ['fractions', 'decimals', 'measurement'], 'breathy',
       'A duct flute with seven finger holes and one thumb hole, the usual first school wind instrument; whole, half and quarter notes on it voice the parts of a bar (M3).',
       'https://www.horniman.ac.uk/object/14.5.47/273'),
     e('bagpipes', 'חמת חלילים', 'Highland bagpipes', 'Scotland', 'winds', 'M6', ['patterns'], 'reed',
