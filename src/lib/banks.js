@@ -147,13 +147,16 @@
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
 
+  // Teaching order of the gaps (RM_ORDER): place value comes before addition
+  // and subtraction, because two-digit work with regrouping needs tens and
+  // ones first (#591 audit, 23.10.2026).
   const RM_SKILLS = [
     ['counting', SKILL_HE.counting],
+    ['place_value', SKILL_HE.place_value],
     ['addition', SKILL_HE.addition],
     ['subtraction', SKILL_HE.subtraction],
     ['number_line', SKILL_HE.number_line],
     ['word_problems', SKILL_HE.word_problems],
-    ['place_value', SKILL_HE.place_value],
     ['multiplication', SKILL_HE.multiplication],
     ['division', SKILL_HE.division],
     ['measurement', SKILL_HE.measurement],
