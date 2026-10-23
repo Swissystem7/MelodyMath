@@ -106,9 +106,11 @@ Object.keys(FILES).forEach((grade) => {
     Object.keys(file.music).forEach((key) => {
       const levels = levelsByStd[banks.ST[key]];
       if (!levels) return;
-      const ways = file.music[key];
+      const ways = banks.primaryWays(file.music[key]);
       const seen = new Map();
       levels.forEach((level) => {
+        // Past the last primary way the level keeps it (dosage rule 4).
+        if (level > ways.length) return;
         const way = ways[Math.min(level, ways.length) - 1];
         const previous = seen.get(way[0]);
         assert.equal(

@@ -240,6 +240,7 @@
       typed: extra.typed,
       music: extra.music,
       grid: extra.grid,
+      tags: extra.tags,
       tolerance: extra.tolerance,
     };
   }
@@ -1322,6 +1323,7 @@
       g3: e.g3,
       table: e.table,
       typed: e.typed,
+      tags: e.tags,
       level: e.level || 1,
     });
   }
@@ -1923,13 +1925,38 @@
       else if (hearOf(raw.hear)) raw.music = 'hearBeats';
       else if (raw.widget === 'bar44') raw.music = 'bar44Notes';
     });
+    // Dosage rules (#591, 23.10 15:54): the item is solved with a primary way;
+    // optional ways (extra practice, weak evidence marked) ride along.
     RAW.forEach(function (raw) {
       const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
       if (!ways) return;
-      const m = ways[Math.min(clampLevel(raw.level), ways.length) - 1];
+      const primary = primaryWays(ways);
+      if (!primary.length) return;
+      const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+      const extra = ways.filter(isOptionalWay).map(function (w) {
+        return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
+      });
+      if (extra.length) raw.musicExtra = extra;
     });
   });
+
+  // ---------- כיתה ג׳ · שאלות מילוליות: דו־שלביות ו«בכמה» מול «פי כמה» (#467) ----------
+  // Appended last so older ids stay put. Each 'contrast' item reuses the two
+  // numbers of a one-step «פי כמה» item above and asks «בכמה» instead, so a
+  // child who answers the ratio sees the hint that names both questions.
+  RAW.push(
+    G3('word_problems', 'תוף מנגן 4 פעימות בתיבה. ניגנו 3 תיבות, ועוד 2 פעימות בסוף. כמה פעימות בסך הכול?', 14, 'שלב א׳: 3 × 4 = 12; שלב ב׳: 12 + 2 = 14', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'במשקל 3/4 ניגנו 5 תיבות, ואחריהן עוד 4 פעמות. כמה פעמות ניגנו?', 19, 'שלב א׳: 5 × 3 = 15; שלב ב׳: 15 + 4 = 19', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'במקהלה 3 שורות של 7 זמרים. 5 זמרים יצאו להפסקה. כמה זמרים נשארו?', 16, 'שלב א׳: 3 × 7 = 21; שלב ב׳: 21 − 5 = 16', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'לנגן היו 40 ₪. הוא קנה 4 מיתרים ב־6 ₪ כל אחד. כמה כסף נשאר לו?', 16, 'שלב א׳: 4 × 6 = 24; שלב ב׳: 40 − 24 = 16', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
+    G3('word_problems', 'הבית הראשון בשיר הוא 6 תיבות של 4 פעמות. הבית השני ארוך פי 2. כמה פעמות בבית השני?', 48, 'שלב א׳: 6 × 4 = 24; שלב ב׳: 24 × 2 = 48', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
+    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. בכמה BPM מהיר הטמפו השני?', 60, '«בכמה» הוא הפרש: 120 − 60 = 60. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. בכמה Hz גבוה התדר השני?', 220, '«בכמה» הוא הפרש: 440 − 220 = 220. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. בכמה תיבות יש יותר בשנייה?', 12, '«בכמה» הוא הפרש: 18 − 6 = 12. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. בכמה BPM מהיר הטמפו השני?', 100, '«בכמה» הוא הפרש: 150 − 50 = 100. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] }),
+    G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. בכמה תיבות ארוכה השנייה?', 8, '«בכמה» הוא הפרש: 12 − 4 = 8. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] })
+  );
 
   // ---------- כיתה ב׳ · קנייה ומכירה בשקלים (#559, PR #569) ----------
   // Newprogramgrade2.pdf p. 7: «רצוי לשלב שאלות העוסקות בקנייה ובמכירה».
@@ -1948,7 +1975,8 @@
       RAW.forEach(function (raw) {
         const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
         if (!ways) return;
-        const m = ways[Math.min(clampLevel(raw.level), ways.length) - 1];
+        const primary = primaryWays(ways); // dosage rule: weak ways stay optional
+        const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
       });
     });
@@ -1982,15 +2010,15 @@
   const MUSIC_MECHANISMS = {
     M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
       finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
-      tags: ['oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
+      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
-      tags: ['accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
+      tags: ['tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
         'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
-      tags: ['fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
+      tags: ['quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
         'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar',
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
     M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
@@ -2029,6 +2057,15 @@
   });
   // Mechanism id of a way or activity tag (M1-M14), or null when unmapped.
   function mechanismOf(tag) { return MECH_OF[tag] || null; }
+
+  // Dosage rules (#591, owner 23.10 15:54). Only strongly evidenced
+  // mechanisms may be the way an item is solved with; weak ones are optional
+  // extra practice and always say so. A way may end with an options object:
+  // [tag, note, src, ev, { optional: true, evidence: 'weak' }]. A way without
+  // it is primary; the primary ways of a standard share one mechanism.
+  const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
+  function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
+  function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
 
   // A music activity (the prompt itself plays or reads music) cites the same
   // source and label as the way that uses the same relationship (#591 audit,
@@ -2090,7 +2127,9 @@
     if (raw.music) it.music = raw.music;
     if (raw.musicNote) it.musicNote = raw.musicNote;
     if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
+    if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
+    if (raw.tags) it.tags = raw.tags.slice();
     SHIPPED.push(it);
   });
 
@@ -2246,6 +2285,9 @@
     MUSIC_SOURCES: MUSIC_SOURCES,
     MUSIC_MECHANISMS: MUSIC_MECHANISMS,
     mechanismOf: mechanismOf,
+    MUSIC_DOSAGE: MUSIC_DOSAGE,
+    isOptionalWay: isOptionalWay,
+    primaryWays: primaryWays,
     skillHe: skillHe,
     skillGrade: skillGrade,
     levelHe: levelHe,
