@@ -11,6 +11,7 @@ const libDir = path.join(root, 'src', 'lib');
 const INTENTIONALLY_UNUSED = {
   'assignment.js': 'teacher assignment logic with no UI yet; the teacher tab keeps its rows through teacherStore.js',
   'dashboardLogic.js': 'class-dashboard aggregation with no UI yet; the class board renders from teacherStore.js',
+  'instrumentVoices.js': 'synthesised world-instrument voices (#591 goal B); index.html is owned by the touch work, which wires them in',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
 };
 

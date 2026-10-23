@@ -115,7 +115,7 @@ test('every grade-ב music widget kind binds without throwing', (t) => {
   const banks = require('../src/lib/banks');
   global.document = { createElement: makeEl };
   t.after(() => { delete global.document; });
-  const rows = banks.itemsForGrade('ב').filter((it) => it.music);
+  const rows = banks.itemsForGrade('ב').filter((it) => it.g2);
   assert.ok(rows.length >= 50);
   rows.forEach((it) => {
     const host = makeEl('div');

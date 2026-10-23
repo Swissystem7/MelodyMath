@@ -143,6 +143,17 @@
     return false;
   }
 
+  // Approximate placement (מיקום מקורב): close enough counts. Same plain-decimal
+  // gate as isCorrect, so "abc", "" and 0x10 are never within any band.
+  function isWithinTolerance(given, expected, tol) {
+    const g = normalizeAnswer(given);
+    const e = normalizeAnswer(expected);
+    const t = Number(tol);
+    const num = /^[+-]?(?:\d+\.?\d*|\.\d+)$/;
+    if (!num.test(g) || !num.test(e) || !Number.isFinite(t) || t < 0) return false;
+    return Math.abs(Number(g) - Number(e)) <= t + 1e-9;
+  }
+
   function eligibleExercises(items, history, lastId, chosenLevel) {
     const list = Array.isArray(items) ? items : [];
     const log = Array.isArray(history) ? history : [];
@@ -164,7 +175,7 @@
   }
 
   return {
-    nextLevel, normalizeAnswer, isCorrect, eligibleExercises,
+    nextLevel, normalizeAnswer, isCorrect, isWithinTolerance, eligibleExercises,
     parseStudentNumber, countDecimals, closeEnough, parseSimpleFraction,
     parseMixedNumber, isDecimalAnswer,
     MIN_LEVEL, MAX_LEVEL,

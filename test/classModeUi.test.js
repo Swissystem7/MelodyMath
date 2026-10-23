@@ -84,3 +84,45 @@ test('nextClassQuestion sets descriptive aria-label on choice buttons and advanc
   assert.match(indexHtml, /b\.setAttribute\('aria-label','תשובה: '\+String\(v\)\)/);
   assert.match(indexHtml, /if\(firstChoice&&typeof firstChoice\.focus==='function'\)firstChoice\.focus\(\)/);
 });
+
+function classSandbox(grade) {
+  const banks = require('../src/lib/banks');
+  const mastery = require('../src/lib/mastery');
+  const pick = (re) => { const m = indexHtml.match(re); assert.ok(m, String(re)); return m[0]; };
+  const code = [
+    pick(/function itemTagText\(it\)\{[\s\S]*?\n\}/),
+    pick(/function classPool\(\)\{.*\}/),
+    pick(/function nextClassQuestion\(\)\{.*\}/),
+  ].join('\n');
+  const el = () => ({ textContent: '', innerHTML: '', appendChild() {}, querySelector() { return null; } });
+  const elements = { classItemTag: el(), classPrompt: el(), classWho: el(), classChoices: el() };
+  const sandbox = {
+    selectedGrade: grade, classHist: [], classSeed: 7, classAnswered: false, classCurrent: null, who: { name: 'דנה' },
+    classItems: banks.classItems, allItems: banks.allItems, gateItems: mastery.gateItems,
+    rng: (s) => { let x = s; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; },
+    $: (id) => elements[id] || el(),
+    setItemTag: (e, it) => { e.textContent = sandbox.itemTagText(it); },
+    setMath: () => {}, renderWidget: () => {}, show: () => {}, maybeHear: () => {}, maybeSpeak: () => {},
+    makeChoices: (a) => [a], pickClass: () => {},
+    document: { createElement: () => ({ setAttribute() {} }) },
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(code, sandbox);
+  return { sandbox, elements, mastery };
+}
+
+test('class mode serves the grade selected in the header', () => {
+  const { sandbox, elements } = classSandbox('ב');
+  sandbox.nextClassQuestion();
+  assert.match(elements.classItemTag.textContent, /^כיתה ב׳/);
+});
+
+test('class mode at grade ג׳ keeps tables 3/6/7/8/9 behind the gate', () => {
+  const { sandbox, elements, mastery } = classSandbox('ג');
+  const pool = sandbox.classPool();
+  assert.ok(pool.length > 0);
+  assert.ok(pool.every((it) => it.grade === 'ג' && !mastery.isBlockedItem(it)));
+  assert.ok(sandbox.classItems('ג').some((it) => mastery.isBlockedItem(it)), 'grade ג bank has gated tables');
+  sandbox.nextClassQuestion();
+  assert.match(elements.classItemTag.textContent, /^כיתה ג׳ · /);
+});

@@ -14,6 +14,7 @@
   const HOOKS = [
     ['ספירה עד 100', 'פעימה במטרונום, וסופרים'],
     ['מנייה עד 100', 'עשר פעימות, ואז בס לעשרת'],
+    ['מיקום מקורב', 'קרוב מספיק — כל 10 הוא אוקטבה'],
     ['ישר המספרים', 'כל קפיצה היא צעד בסולם'],
     ['בתחום 10', 'תרגיל אחד לפעימה איטית'],
     ['דגמים', 'דגם צלילי שחוזר'],
@@ -301,7 +302,7 @@
     return '<article class="mm-plan" data-branch="' + esc(p.branch) + '" data-grade="' + esc(p.grade) + '" data-topic="' + esc(p.topic) + '" dir="rtl">'
       + '<p class="mm-plan-kicker">תוכנית אחת</p><h2 class="mm-plan-topic">' + esc(p.childLine) + '</h2>'
       + '<p class="mm-plan-adult">' + adult + '</p><p class="mm-plan-pace">' + (max ? esc(p.paceDone + ' מתוך ' + max + ' מפגשים השבוע') : '') + '</p>'
-      + '<div class="mm-plan-track" role="progressbar" aria-valuemin="0" aria-valuemax="' + max + '" aria-valuenow="' + p.paceDone + '" aria-valuetext="' + esc(p.paceDone + ' מתוך ' + max) + '"><span style="width:' + width + '%"></span></div>'
+      + '<div class="mm-plan-track" role="progressbar" aria-valuemin="0" aria-valuemax="' + max + '" aria-valuenow="' + p.paceDone + '" aria-label="התקדמות בנושא" aria-valuetext="' + esc(p.paceDone + ' מתוך ' + max) + '"><span style="width:' + width + '%"></span></div>'
       + source + '<p class="mm-plan-note">' + esc(p.disclaimer) + '</p></article>';
   }
   function bridgeSentence() {
