@@ -1958,6 +1958,13 @@
     G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. בכמה תיבות ארוכה השנייה?', 8, '«בכמה» הוא הפרש: 12 − 4 = 8. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] })
   );
 
+  // ---------- כיתה ב׳ · קנייה ומכירה בשקלים (#559, PR #569) ----------
+  // Newprogramgrade2.pdf p. 7: «רצוי לשלב שאלות העוסקות בקנייה ובמכירה».
+  // Appended after the grade files so no existing id moves.
+  RAW.push(
+    MEAS('ב', 'מוכר קנה 10 מוצרים ב־4 ₪ כל אחד, ומכר כל אחד מהם ב־5 ₪. כמה ₪ הרוויח?', 10, 'על כל מוצר הוא הרוויח 1 ₪', 3, ST.MONEY_BILLS)
+  );
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -1968,7 +1975,8 @@
       RAW.forEach(function (raw) {
         const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
         if (!ways) return;
-        const m = ways[Math.min(clampLevel(raw.level), ways.length) - 1];
+        const primary = primaryWays(ways); // dosage rule: weak ways stay optional
+        const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
       });
     });
