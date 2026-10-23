@@ -1,185 +1,182 @@
-// MelodyMath — learning every grade א׳ standard THROUGH music (#591, #595).
-// The א׳ items themselves live in banks.js; this file only adds the music
-// side, the same way curriculum/grade6.js does for ו׳: banks.js gives every
-// א׳ item without a music activity the way of its level. Pages load this file
-// before banks.js.
+// MelodyMath — grade א׳: learning every bank standard THROUGH music (#591).
+//
+// The grade א׳ items themselves still live in banks.js (ids are RAW indexes,
+// so they stay there); this file only adds the music side, in the shape
+// banks.js already reads for grade ו׳ (curriculum/grade6.js): `sources` =
+// the research behind the ways, `music` = ways per bank standard, one per
+// level. It has no `rows`, so curriculum.js leaves the official matrix of
+// grade א׳ alone. Pages load it before banks.js.
+//
+// Evidence labels follow the research map pasted on #591 (23.10.2026):
+// D = part of an evaluated maths-learning intervention (a package of
+// activities, not this one alone), R = a reputable instructional source
+// supports the connection, A = an adaptation of a documented music–maths
+// relationship whose effect on this topic was not tested on its own.
+// Nothing here claims more than its label. Items whose prompt already plays
+// sound (counted beats, the g1 widgets) are music activities and take no way.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_GRADE1 = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  // The research behind the ways: id → [label, URL], from the research map
-  // pasted in #591 (23.10.2026) — the same entries grade6.js cites. Labels as
-  // there: D = part of an evaluated maths-learning intervention, R = a
-  // reputable instructional source supports the connection, A = an adaptation
-  // of a documented music–maths relationship, not tested on this topic alone.
-  // No א׳ way claims D: the evaluated programmes in the map taught fractions.
+  // Same ids and values as in grade6.js, so one id means one source everywhere.
   const sources = {
+    azaryahu2020: ['Azaryahu et al. 2020 — MusiMath and Academic Music', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/'],
     interplay2024: ['Interplay between music and mathematics (Humanit. Soc. Sci. Commun., 2024)', 'https://www.nature.com/articles/s41599-024-03631-z'],
     kcConnections: ['Kennedy Center — Connections: Math and Music', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/media-and-interactives/media/music/connections/connections/math--music/'],
     kcMath: ['Kennedy Center — math collection', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/collections/collections/math/'],
     kcPractice: ['Kennedy Center — Arts Integration in Practice: Math', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/articles-and-how-tos/articles/collections/arts-integration-resources/arts-integration-in-practice-math/'],
     kcLessons: ['Kennedy Center — lessons and activities', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/lessons-and-activities/'],
     wnetMathInMusic: ['WNET/THIRTEEN — Get the Math: Math in Music', 'https://www.thirteen.org/get-the-math/teachers/teachers-math-in-music-activities/76/'],
-    makingMusicCount: ['Making Music Count', 'https://makingmusiccount.org/'],
     palmPipes: ['Exploratorium — Palm Pipes', 'https://www.exploratorium.edu/snacks/palm-pipes'],
+    ncssm: ['NCSSM — mathematics and musical composition', 'https://www.ncssm.edu/stories/hands-on-activities-illustrate-connection-between-mathematics-and-music'],
     preshall: ['Preservation Hall Foundation — Music and Math', 'https://lessons.preshallfoundation.org/lesson/music-and-math/'],
   };
 
-  // Bank standard key → ways, one per level (1, 2, 3), so every topic is met
-  // through at least two different musical models. A way is [music tag, how
-  // to solve it with music (Hebrew; never the answer of an item), source id,
-  // evidence label].
+  // Bank standard key (banks.js ST) → ways, one per level (1, 2, 3). A way is
+  // [music tag, how to solve it with music (Hebrew; never the numbers of an
+  // item), source id, evidence label]. banks.js gives each plain item the way
+  // of its level, so a topic is met through at least two musical models.
   const music = {
     COUNT_OBJ: [
-      ['oneTapEach', 'הקישו על השולחן נקישה אחת לכל פעימה או תו, והצביעו עליו בזמן ההקשה. ההקשה האחרונה היא כמה יש.', 'kcLessons', 'R'],
-      ['drumCount', 'הכו בתוף פעם אחת לכל עצם ואמרו בקול את המספר. בסוף נגנו שוב לאט ובדקו שלא דילגתם.', 'kcConnections', 'A'],
-      ['echoCount', 'המורה מנגן כמה צלילים, ואתם מחזירים בהד את אותה כמות. מנו את ההד בקול — כמה צלילים שמעתם?', 'interplay2024', 'A'],
+      ['oneSoundOneThing', 'לכל נקישת תוף מזיזים חפץ אחד. בסוף שואלים: כמה יש? נגנו שוב מהר יותר — המספר לא משתנה.', 'kcConnections', 'R'],
+      ['beatsAndRests', 'בשמונה פעימות רק חלק נשמעות: ספרו את כל הפעימות עם אסימונים, ואז רק את הצלילים — שני מספרים שונים.', 'kcConnections', 'A'],
     ],
     NEXTPREV: [
-      ['scaleStep', 'כל מספר הוא מדרגה בסולם צלילים: הבא הוא צעד אחד למעלה, הקודם צעד אחד למטה. שירו ותגיעו.', 'kcConnections', 'A'],
-      ['beatAfter', 'מחאו כפיים וספרו פעימות. עצרו במספר הנתון — הפעימה שאחריו היא הבא, וזו שלפניו היא הקודם.', 'kcLessons', 'R'],
-      ['xyloSteps', 'על קסילופון ממוספר, נגנו את הלוח של המספר ואז את השכן מימין או משמאל. השכנים הם הבא והקודם.', 'kcMath', 'A'],
+      ['nextBeat', 'ספרו פעימות בקול עם המטרונום ועצרו: איזה מספר תגידו בפעימה הבאה? ואיזה אמרתם לפניה?', 'kcConnections', 'R'],
+      ['accentNext', 'הדגישו כל פעימה שנייה: אחרי מספר מודגש בא מספר שקט — הבא אחריו. ספרו קדימה ואחורה עם הנקישות.', 'kcLessons', 'R'],
     ],
     COUNT_FWD: [
-      ['countSong', 'שירו את המספרים בשיר ספירה: כשמגיעים לסוף עשרת, המנגינה עולה ומתחילה עשרת חדשה.', 'makingMusicCount', 'R'],
-      ['marchCount', 'צעדו במקום, צעד לכל מספר, והתחילו מהמספר הנתון. מה תגידו בצעד הבא?', 'kcLessons', 'R'],
-      ['tensBell', 'פעמון מצלצל בכל מספר שנגמר ב־0. ספרו קדימה ושימו לב: אחרי הפעמון מתחילה עשרת חדשה.', 'kcConnections', 'A'],
+      ['countOnBeats', 'התחילו לספור מהמספר שניתן, פעימה לכל מספר, בקצב קבוע. הקצב לא נותן לדלג על מספר.', 'kcConnections', 'R'],
+      ['tenAsOctave', 'כל עשרה מספרים הם אוקטבה: כשעוברים עשרת, הצליל «עולה קומה». ספרו קדימה ושמעו את המעבר.', 'interplay2024', 'A'],
     ],
     COUNT_BACK: [
-      ['scaleDown', 'ספירה אחורה היא ירידה בסולם: שירו את המספרים כשהצליל יורד צעד בכל פעם.', 'kcConnections', 'A'],
-      ['rocketCountdown', 'ספירה לאחור כמו לפני שיגור: תוף לכל מספר, והקצב קבוע. מה המספר שלפני?', 'kcLessons', 'R'],
-      ['softerCount', 'ספרו אחורה וכל מספר קצת יותר בשקט. כשמגיעים לעשרת עגולה — הקישו חזק ובדקו שהמשכתם נכון.', 'interplay2024', 'A'],
+      ['countDownBeats', 'ספרו אחורה פעימה לכל מספר, כמו ספירה לאחור לפני שהשיר מתחיל. הקצב שומר שלא מדלגים.', 'kcConnections', 'R'],
+      ['tenAsOctave', 'ספירה אחורה: כשיורדים מתחת לעשרת, הצליל «יורד קומה» (אוקטבה). שמעו את המעבר ואמרו את המספר.', 'interplay2024', 'A'],
+      ['restCount', 'ספרו אחורה בלב ונקשו רק במספרים הזוגיים — ספירה אחורה עם שקטים בין הצלילים.', 'kcConnections', 'A'],
     ],
     SKIP2: [
-      ['loudSoft', 'ספרו בקצב: חלש, חזק, חלש, חזק. אמרו בקול רק את המספרים החזקים — זו ספירה בדילוגים של 2.', 'makingMusicCount', 'R'],
-      ['twoStepDance', 'צעד ימינה, צעד שמאלה ומחיאה: כל זוג צעדים הוא דילוג של 2. ספרו את המחיאות בקפיצות של שתיים.', 'kcLessons', 'R'],
-      ['pairsBack', 'לספירה אחורה בשתיים: שתי נקישות שקטות לכל דילוג, ואומרים רק את המספר שאחרי הזוג.', 'kcConnections', 'A'],
+      ['accentSkip', 'שמרו פעימה קבועה והדגישו כל פעימה שנייה. אמרו בקול רק את המודגשות: 2, 4, 6…', 'kcLessons', 'R'],
+      ['twoDrums', 'תוף גדול בכל פעימה זוגית, תוף קטן באי־זוגית. ספרו רק את התוף הגדול — דילוגי 2 קדימה ואחורה.', 'kcLessons', 'R'],
+      ['composeSkips', 'הרכיבו תיפוף שבו כל קבוצה היא 2 פעימות, וספרו קבוצות: כמה פעימות יש ב־5 קבוצות? ואחורה מ־50?', 'kcLessons', 'R'],
     ],
     SKIP5: [
-      ['fiveAccent', 'ספרו פעימות והדגישו כל פעימה חמישית. אמרו רק את ההדגשות — כך שומעים את הכפולות של 5.', 'makingMusicCount', 'R'],
-      ['handClap', 'יד אחת היא 5 אצבעות: מחיאה לכל יד, ומוסיפים 5 בכל מחיאה. שירו את המספרים בקצב.', 'kcLessons', 'R'],
-      ['fiveBar', 'תיבה של 5 פעימות: בסוף כל תיבה מכים במצילה ואומרים כמה פעימות עברו. כך ממשיכים מכל כפולה של 5.', 'kcConnections', 'A'],
+      ['accentSkip', 'הדגישו כל פעימה חמישית ואמרו רק את המודגשות: 5, 10, 15… המספרים האלה מסתיימים ב־5 או ב־0.', 'kcLessons', 'R'],
+      ['handClap', 'כף יד = 5 אצבעות: מחיאת כף לכל חמישייה. התחילו מכפולה של 5 והמשיכו — מחיאה, מספר.', 'kcConnections', 'A'],
+      ['composeSkips', 'הרכיבו ריקוד של קבוצות בנות 5 צעדים וספרו קבוצות: 5 קבוצות הן כמה צעדים? התחילו מ־25.', 'kcLessons', 'R'],
     ],
     GROUP10: [
-      ['tenBeatBar', 'אספו 10 נקישות לתיבה אחת וסמנו אותה בצליל נמוך. כמה תיבות מלאות? כל תיבה היא עשרת.', 'kcConnections', 'A'],
-      ['bassAndClicks', 'בס נמוך לכל עשרת ונקישה לכל יחידה: נגנו את הכמות, וספרו קודם בסים ואחר כך נקישות.', 'interplay2024', 'A'],
-      ['tensSong', 'שירו בעשרות: «עשר, עשרים, שלושים» — צליל אחד לכל קבוצה של עשר. כמה צלילים שרתם?', 'makingMusicCount', 'R'],
+      ['tenExchange', 'כל נקישת שייקר היא יחידה. אחרי עשר — מחליפים עשר אסימונים באסימון «עשרת» ומכים בתוף. ספרו תופים ושייקרים.', 'kcConnections', 'A'],
+      ['placeScore', 'שתי שורות תווים: תופים (עשרות) ושייקרים (יחידות). נגנו מספר ופענחו — כמה עשרות וכמה יחידות?', 'interplay2024', 'A'],
+      ['drumPerTen', 'מנו קבוצה גדולה בקצב: בכל עשר נקישות — תוף. מספר התופים הוא ספרת העשרות, ומה שנשאר — היחידות.', 'kcConnections', 'A'],
     ],
     ADD10: [
-      ['beatsJoin', 'נגנו את הקבוצה הראשונה על תוף, המשיכו בלי לעצור לקבוצה השנייה וספרו את כל ההקשות יחד.', 'kcLessons', 'R'],
-      ['countOn', 'שמרו את המספר הגדול בראש, ונקשו רק את הקטן תוך כדי ספירה הלאה. הנקישה האחרונה היא הסכום.', 'kcConnections', 'A'],
-      ['twoInstruments', 'כלי אחד מנגן את המחובר הראשון וכלי שני את השני. מנו את כל הצלילים — שני כלים, סכום אחד.', 'interplay2024', 'A'],
+      ['callResponse', 'המורה מתופף 3 פעימות, הילד עונה 4. כולם מנגנים את הרצף המחובר — כמה פעימות יחד? כתבו תרגיל.', 'kcConnections', 'A'],
+      ['fillBar', 'תיבה של 10 פעימות: נגנו את הפעימות הראשונות, והשלימו עד 10 — החלק שהשלמתם הוא התשובה.', 'azaryahu2020', 'D'],
     ],
     DECOMP10: [
-      ['tenBeatSplit', 'תיבה של עשר פעימות: חלק מהפעימות בתוף וחלק במשולש. כמה במשולש כדי שהתיבה תהיה מלאה?', 'kcConnections', 'A'],
-      ['fingerPiano', '10 אצבעות הן 10 קלידים: לחצו בכמה אצבעות, והאצבעות שנשארו באוויר הן החלק החסר עד 10.', 'kcLessons', 'R'],
-      ['restFill', 'בתיבה יש צלילים ושתיקות, ויחד הם 10 פעימות. ספרו את השתיקות — זה המספר שמשלים ל־10.', 'interplay2024', 'A'],
+      ['fillBar', 'תיבה של 10 פעימות: תוף גבוה ואז תוף נמוך. כמה נמוכות צריך כדי להשלים ל־10? זה הפירוק.', 'azaryahu2020', 'D'],
+      ['twoDrums', 'עשרה חברים, שני כלים: חלקו — כמה בתוף וכמה בשייקר? נגנו כל פירוק ושמעו שתמיד יוצא 10.', 'kcConnections', 'A'],
     ],
     ADD20: [
-      ['makeTenBar', 'מלאו קודם תיבה של 10 פעימות, ואת מה שנשאר נגנו בתיבה הבאה. עשר ועוד הנותר — קל לחבר.', 'kcConnections', 'A'],
-      ['countOn', 'שמרו את המספר הגדול בראש, ונקשו רק את הקטן תוך כדי ספירה הלאה. הנקישה האחרונה היא הסכום.', 'kcConnections', 'A'],
-      ['doublesDrum', 'כפולים נשמעים כהד: נגנו קבוצה ואז אותה קבוצה שוב. כמעט־כפולים הם הד ועוד נקישה אחת.', 'makingMusicCount', 'A'],
+      ['callResponse', 'קריאה ותשובה: משפט של פעימות ומשפט תשובה. מחברים את שני המשפטים — אפשר להתחיל מהגדול ולהוסיף.', 'kcConnections', 'A'],
+      ['tenThenMore', 'נגנו עד 10 בתוף, והמשיכו בשייקר: קודם משלימים לעשר, ואז מוסיפים את השאר.', 'azaryahu2020', 'A'],
     ],
     EQ_LEFT: [
-      ['balanceBars', 'סימן השוויון אומר: שני הצדדים נמשכים אותו זמן. נגנו את הצד השני והשלימו נקישות עד שהם שווים.', 'kcConnections', 'A'],
-      ['sameLength', 'שתי קבוצות מנגנות יחד: אחת את הצד השמאלי ואחת את הימני. אם אחת מסיימת קודם — חסרות פעימות.', 'interplay2024', 'A'],
-      ['echoMatch', 'צד אחד הוא קריאה והצד השני הוא הד. ההד חייב להיות באורך הקריאה — כמה פעימות חסרות בהד?', 'kcLessons', 'R'],
+      ['sameLength', 'שני משפטי תיפוף נמשכים אותו זמן גם אם מחולקים אחרת: 3 ו־4 מול 5 ו־2. סימן השוויון אומר «אותו אורך».', 'azaryahu2020', 'D'],
+      ['fillBar', 'שני צדדים של שוויון הם שתי תיבות באותו אורך. מלאו את הפעימה החסרה כך ששתי התיבות יהיו שוות.', 'azaryahu2020', 'D'],
+      ['callResponse', 'הפכו את שני המשפטים — קודם התשובה ואז הקריאה. האורך הכולל לא משתנה: זה חוק החילוף.', 'kcConnections', 'A'],
     ],
     MULTIADD: [
-      ['threeDrums', 'שלושה כלים מנגנים בתורם. מנו בלי לעצור מכלי לכלי — הספירה ממשיכה, לא מתחילה מחדש.', 'kcLessons', 'R'],
-      ['tenFirst', 'חפשו שני מחוברים שיחד ממלאים תיבה של עשר פעימות, נגנו אותם קודם, ואז הוסיפו את השאר.', 'kcConnections', 'A'],
-      ['songSections', 'שיר עם פתיחה, בית ופזמון: ספרו פעימות בכל חלק וחברו את כל החלקים — זה אורך השיר.', 'interplay2024', 'A'],
+      ['callResponse', 'שלושה כלים זה אחרי זה: תוף, שייקר, פעמון. ספרו את כל הפעימות — ונסו לחבר קודם זוג שנותן 10.', 'kcConnections', 'A'],
+      ['fillBar', 'תיבה אחת, כמה תווים: חברו את האורכים בכל סדר — התיבה נשארת שלמה. חפשו את הזוג שמשלים לעשר.', 'azaryahu2020', 'D'],
+      ['tenThenMore', 'שלושה מחוברים: נגנו קודם את השניים שמשלימים לעשר — תוף עד עשר — ואז את השלישי בשייקר והמשיכו לספור.', 'azaryahu2020', 'A'],
     ],
     TENS: [
-      ['tensSong', 'שירו בעשרות: «עשר, עשרים, שלושים» — צליל אחד לכל קבוצה של עשר. כמה צלילים שרתם?', 'makingMusicCount', 'R'],
-      ['bassTens', 'כל צליל בס הוא עשרת. נגנו בסים לעשרות הראשונות, ואז הוסיפו או הורידו בסים — ספרו בעשרות.', 'interplay2024', 'A'],
-      ['tenStepJump', 'בסולם המספרים קפיצה של 10 היא קפיצה גדולה אחת למעלה או למטה. כמה קפיצות גדולות?', 'kcConnections', 'A'],
+      ['tenExchange', 'כל תוף הוא עשרת: 30 ועוד 20 הם 3 תופים ועוד 2 תופים. ספרו תופים, ואז כתבו את המספר.', 'kcConnections', 'A'],
+      ['tenAsOctave', 'קפיצה של עשר בישר המספרים היא אוקטבה: כל קפיצה — צליל, וסופרים קפיצות קדימה או אחורה.', 'interplay2024', 'A'],
     ],
     SUB10: [
-      ['silentBeats', 'נגנו את כל הפעימות, ואז השתיקו את אלה שהוסרו. ספרו רק את מה שעדיין נשמע.', 'kcLessons', 'R'],
-      ['countBackDrum', 'התחילו מהמספר הגדול וספרו אחורה, נקישה אחת לכל מה שהורד. איפה עצרתם?', 'kcConnections', 'A'],
-      ['tenBeatSplit', 'בתיבה של 10 פעימות, כמה חסר מהקטן כדי להגיע לגדול? מלאו בנקישות וספרו אותן — גם זה חיסור.', 'interplay2024', 'A'],
+      ['takeAwayBeats', 'נגנו משפט פעימות, ואז הסירו ממנו פעימות (שקט במקומן). כמה פעימות נשארו נשמעות?', 'azaryahu2020', 'D'],
+      ['fillBar', 'חיסור כהשלמה: כמה פעימות חסרות מהמשפט הקצר כדי להגיע למשפט הארוך? נגנו את ההשלמה.', 'azaryahu2020', 'D'],
     ],
     SUB20: [
-      ['backToTen', 'ירדו קודם עד 10 — עד סוף התיבה — ואז המשיכו להוריד את מה שנשאר. שתי ירידות קלות.', 'kcConnections', 'A'],
-      ['silentBeats', 'נגנו את כל הפעימות, ואז השתיקו את אלה שהוסרו. ספרו רק את מה שעדיין נשמע.', 'kcLessons', 'R'],
-      ['climbUp', 'חיסור כמו טיפוס בסולם: מהמספר הקטן עלו צעד־צעד עד הגדול, ומנו כמה צעדים עשיתם.', 'interplay2024', 'A'],
+      ['takeAwayBeats', 'משפט של פעימות ארוך יותר מעשר: הסירו קודם את מה שמעל עשר, ואז את השאר — הקשיבו לכמה שנשאר.', 'azaryahu2020', 'D'],
+      ['fillBar', 'השלמה במקום חיסור: מהמספר הקטן נגנו פעימות עד הגדול וספרו כמה הוספתם.', 'azaryahu2020', 'D'],
+      ['timelineEdit', 'קטע מוזיקה של 15 שניות; חותכים ממנו 8 שניות. חזו כמה יישאר ובדקו בשעון עצר.', 'wnetMathInMusic', 'A'],
     ],
     NLINE: [
-      ['lineScale', 'ישר המספרים הוא סולם: כל שנתה היא צליל אחד גבוה יותר. שירו מההתחלה עד המספר ועצרו שם.', 'kcConnections', 'A'],
-      ['jumpTune', 'קפיצה ימינה היא חיבור והצליל עולה; קפיצה שמאלה היא חיסור והצליל יורד. הקשיבו לאן הלכתם.', 'interplay2024', 'A'],
-      ['middleNote', 'האמצע של הישר הוא נקודת המנוחה של המנגינה. האם המספר לפני האמצע או אחריו? התחילו משם.', 'kcMath', 'A'],
-    ],
-    WORD_COLLECT: [
-      ['storyDrum', 'הפכו את הסיפור לנגינה: תוף לכל אחד מהקבוצה הראשונה, משולש לכל אחד מהשנייה. ספרו את כולם.', 'kcPractice', 'R'],
-      ['storySong', 'שירו את הסיפור בשתי שורות — שורה לכל קבוצה — והקישו לכל פריט. כמה הקשות בשיר כולו?', 'kcPractice', 'R'],
-      ['joinBand', 'נגנים מצטרפים ללהקה: נגנו צליל לכל מי שהיה, והוסיפו צליל לכל מי שהצטרף. מנו את הלהקה.', 'interplay2024', 'A'],
-    ],
-    WORD_REMOVE: [
-      ['storyMute', 'נגנו צליל לכל פריט שהיה בהתחלה, ואז השתיקו צליל לכל מה שהלך. מה עוד נשמע?', 'kcPractice', 'R'],
-      ['leaveBand', 'נגנים עוזבים את הבמה אחד־אחד: ספרו אחורה בכל יציאה, ומה שנשאר על הבמה הוא התשובה.', 'interplay2024', 'A'],
-      ['storyBack', 'שירו את הסיפור וספרו אחורה בקול, נקישה לכל פריט שהוסר. איפה הסתיימה הספירה?', 'kcPractice', 'R'],
-    ],
-    WORD_COMPARE: [
-      ['twoLines', 'שתי שורות קצב, אחת לכל ילד, מנגנות יחד. כשאחת נגמרת, השנייה ממשיכה — ספרו כמה עוד.', 'kcPractice', 'R'],
-      ['matchPairs', 'התאימו צליל מכאן לצליל משם, זוג אחרי זוג. הצלילים שנשארו בלי זוג הם ההפרש.', 'interplay2024', 'A'],
-      ['longerSong', 'שני שירים — כמה פעימות ארוך יותר אחד מהשני? נגנו יחד ומנו רק את הפעימות של הסוף הנוסף.', 'kcMath', 'A'],
-    ],
-    GEO_SORT: [
-      ['cornerTap', 'עברו עם האצבע על הצורה ונקשו בכל פינה. מספר הנקישות הוא מספר הקודקודים — וגם מספר הצלעות.', 'kcMath', 'A'],
-      ['sideSong', 'שירו צליל אחד לכל צלע בזמן שמציירים אותה. כמה צלילים שרתם עד שחזרתם להתחלה?', 'kcLessons', 'R'],
-      ['shapeRhythm', 'לכל צורה מקצב משלה: משולש — שלוש מחיאות, ריבוע — ארבע. מחאו את הצורה ומיינו לפי המקצב.', 'kcConnections', 'A'],
-    ],
-    RIGHT_ANGLE: [
-      ['armsCorner', 'יד אחת למעלה ויד אחת הצידה, כמו מנצח בתחילת שיר — זו פינה ישרה. השוו אליה את הפינה בציור.', 'kcPractice', 'R'],
-      ['quarterTurn', 'מסתובבים בריקוד רבע סיבוב בכל פעימה. רבע סיבוב הוא זווית ישרה; ארבעה כאלה מחזירים להתחלה.', 'kcLessons', 'R'],
-      ['staffCorner', 'במקל המנצח ובשולי דף התווים יש פינות ישרות. בדקו בפינה של דף: מתאים? זו זווית ישרה.', 'kcMath', 'A'],
-    ],
-    LENGTH: [
-      ['palmPipes', 'צינורות באורכים שונים נשמעים אחרת: הארוך נמוך והקצר גבוה. מדדו כל צינור בקוביות והשוו.', 'palmPipes', 'R'],
-      ['stepBeats', 'מדדו את החדר בצעדים, צעד לכל פעימה בקצב קבוע. צעדים שווים הם יחידה שווה — כמו קוביות.', 'kcLessons', 'R'],
-      ['xyloBars', 'בקסילופון כל לוחית קצרה מהקודמת. מדדו לוחיות בס״מ וסדרו מהארוכה לקצרה — מהנמוך לגבוה.', 'preshall', 'R'],
-    ],
-    CLOCK: [
-      ['hourBell', 'פעמון שעון מצלצל פעם אחת לכל שעה. כשהמחוג הארוך על 12, הקשיבו לצלצולים וספרו אותם.', 'kcMath', 'A'],
-      ['clockCircle', 'שבו במעגל כמו מספרי השעון, וכל ילד שר את המספר שלו. המחוג הקצר מצביע על מי שר עכשיו.', 'kcLessons', 'R'],
-      ['songTime', 'השיר מתחיל בשעה עגולה: המחוג הארוך תמיד על 12, והקצר מראה איזו שעה. קראו קודם את הקצר.', 'kcMath', 'A'],
-    ],
-    PICTOGRAM: [
-      ['pictoTap', 'נקשו פעם אחת על כל סמל בשורה, ואמרו את המספר בקול. כל סמל הוא נקישה אחת.', 'kcMath', 'A'],
-      ['rowInstrument', 'לכל שורה כלי משלה: תוף לתפוחים, משולש לבננות. נגנו שורה־שורה — איזה כלי ניגן הכי הרבה?', 'kcConnections', 'A'],
-      ['countSong', 'שירו שיר ספירה לאורך כל שורה, צליל לכל סמל. השורה עם השיר הארוך ביותר היא הגדולה.', 'makingMusicCount', 'R'],
-    ],
-    BARCHART: [
-      ['barPitch', 'כל עמודה היא צליל: עמודה גבוהה — צליל גבוה. נגנו את העמודות ושמעו מי הכי גבוה.', 'interplay2024', 'A'],
-      ['instrumentSurvey', 'ספרו כמה ילדים בחרו בכל כלי ובנו עמודות. קוראים עמודה לפי הקו שבו היא נגמרת.', 'kcMath', 'A'],
-      ['stepUpBar', 'עלו בסולם צעד לכל משבצת בעמודה. כמה צעדים עד ראש העמודה? זה הערך שלה.', 'kcConnections', 'A'],
-    ],
-    CHART100: [
-      ['lowTensClicks', 'בלוח המאה: צליל נמוך לכל עשרת ונקישה לכל יחידה. שמעו את הנמוכים קודם — הם הספרה השמאלית.', 'interplay2024', 'A'],
-      ['rowBeat', 'כל שורה בלוח היא תיבה של 10 פעימות. ירידה שורה היא עוד תיבה — עוד עשרת שלמה.', 'kcConnections', 'A'],
-      ['columnTune', 'כל המספרים בעמודה אחת נגמרים באותה ספרה, כמו פזמון שחוזר. מצאו את העמודה ואז את השורה.', 'kcMath', 'A'],
-    ],
-    PATTERN: [
-      ['abRhythm', 'אמרו את הדגם בקול כמקצב — «תוף, פעמון, תוף, פעמון» — והמשיכו לנגן. מה מגיע אחרי?', 'kcConnections', 'A'],
-      ['bodyPattern', 'הפכו את הדגם לתנועות: מחיאה, ברכיים, מחיאה, ברכיים. חזרו על היחידה החוזרת ומצאו את הבא.', 'makingMusicCount', 'R'],
-      ['patternUnit', 'מצאו את היחידה שחוזרת — AB, AAB או ABC — ונגנו אותה שלוש פעמים. כמה איברים ביחידה?', 'kcLessons', 'R'],
-    ],
-    MONEY: [
-      ['coinSounds', 'לכל מטבע צליל: 1 ₪ נקישה, 2 ₪ שתי נקישות, 5 ₪ מחיאה של יד שלמה. נגנו את המטבעות וספרו.', 'kcConnections', 'A'],
-      ['shopSong', 'שירו את הקנייה: כמה שילמתי, כמה עלה, ונקשו מהמחיר עד הסכום ששילמתם — אלה העודף.', 'kcPractice', 'R'],
-      ['bigCoinFirst', 'נגנו קודם את המטבע הגדול וספרו הלאה מהערך שלו — כמו ספירה הלאה בחיבור.', 'interplay2024', 'A'],
+      ['scaleSteps', 'ישר המספרים הוא סולם: כל מספר צליל, כל צעד ימינה — צליל גבוה יותר. מצאו את המקום לפי הצליל.', 'interplay2024', 'A'],
+      ['scaleJump', 'קפיצה על הישר היא קפיצה בסולם: שמעו את הצליל של ההתחלה ושל הסוף — כמה צעדים ביניהם?', 'interplay2024', 'A'],
+      ['tenAsOctave', 'עשרת שלמה היא אוקטבה — אותו צליל, קומה למעלה. כך מוצאים מהר בין אילו עשרות מספר נמצא.', 'interplay2024', 'A'],
     ],
     NUMBER_LINE_APPROX: [
-      ['middleNote', 'האמצע של הישר הוא נקודת המנוחה של המנגינה. האם המספר לפני האמצע או אחריו? התחילו משם.', 'kcMath', 'A'],
-      ['tensLandmarks', 'כל עשרת על הישר היא צליל של פעמון. מצאו בין אילו שני פעמונים המספר, וקרוב לאיזה מהם.', 'interplay2024', 'A'],
-      ['octaveJump', 'בישר 0–100 קפיצה של 10 היא קפיצה גדולה בסולם. קפצו בעשרות עד שעברתם, ואז חזרו מעט.', 'kcConnections', 'A'],
+      ['scaleJump', 'הערכה באוזן: צליל נמוך — קרוב ל־0, גבוה — קרוב ל־100, באמצע — בערך 50. ואז מדייקים.', 'interplay2024', 'A'],
+      ['tenAsOctave', 'ספרו אוקטבות מ־0: כל אוקטבה היא עשרת. המספר נמצא בין שתי אוקטבות — איזו קרובה יותר?', 'interplay2024', 'A'],
+    ],
+    WORD_COLLECT: [
+      ['callResponse', 'כל קבוצה בסיפור היא משפט פעימות. נגנו את שתי הקבוצות ברצף וספרו הכול יחד.', 'kcConnections', 'A'],
+      ['twoDrums', 'קבוצה אחת בתוף, השנייה בשייקר. מנגנים זו אחרי זו — כמה צלילים בסך הכול?', 'kcConnections', 'A'],
+      ['fillBar', 'כתבו את הסיפור כתיבה: החלק הראשון, החלק השני, והשלם. ואז את התרגיל שמתאים.', 'azaryahu2020', 'A'],
+    ],
+    WORD_REMOVE: [
+      ['takeAwayBeats', 'הקבוצה כולה — משפט פעימות. מה שהלך — פעימות שהופכות לשקט. כמה צלילים נשארו?', 'azaryahu2020', 'A'],
+      ['twoDrums', 'הכול בתוף; מה שיוצא מהקבוצה עובר לשייקר. ספרו רק את התופים שנשארו.', 'kcConnections', 'A'],
+      ['fillBar', 'כתבו את הסיפור כתיבה: השלם, מה שהוסר, ומה שנשאר — ואז את תרגיל החיסור.', 'azaryahu2020', 'A'],
+    ],
+    WORD_COMPARE: [
+      ['twoDrums', 'קבוצה אחת בתוף וקבוצה שנייה בשייקר, פעימה מול פעימה. כשכלי אחד משתתק — כמה פעימות המשיך השני לבד?', 'kcConnections', 'A'],
+      ['sameLength', 'שני משפטים באורכים שונים: השלימו את הקצר עד שיהיה כמו הארוך — ההשלמה היא ההפרש.', 'azaryahu2020', 'A'],
+      ['fillBar', 'כתבו את ההשוואה כשתי תיבות זו מעל זו: הארוכה, הקצרה, והחלק שבולט — זה ההפרש ותרגיל החיסור.', 'azaryahu2020', 'A'],
+    ],
+    GEO_SORT: [
+      ['vertexBells', 'הניחו פעמון בכל קודקוד והקיפו את הצורה, צלצול בכל פינה: מספר הצלצולים הוא מספר הקודקודים.', 'interplay2024', 'A'],
+      ['edgeSteps', 'צעד לכל צלע ופעמון בכל קודקוד: למשולש 3 ו־3, לריבוע 4 ו־4 — תמיד אותו מספר צלעות וקודקודים.', 'interplay2024', 'A'],
+      ['shapeRhythm', 'כל צורה היא תבנית מקצב: משולש — 3 פעימות, מרובע — 4. שמעו תבנית ונחשו את הצורה.', 'ncssm', 'R'],
+    ],
+    RIGHT_ANGLE: [
+      ['musicalTurns', 'צעדו לפי התיפוף: ישר, פנייה של רבע סיבוב, ישר. פנייה כזו היא זווית ישרה — כמו פינת דף.', 'kcPractice', 'A'],
+      ['beatClock', 'על שעון מקצב של 12 עמדות: מ־12 ל־3 זה רבע סיבוב — זווית ישרה. חצי סיבוב — שטוחה, פחות מרבע — חדה.', 'interplay2024', 'A'],
     ],
     POLY_CUT_A: [
-      ['cornerTap', 'נקשו בכל פינה של כל חלק אחרי הגזירה. כמה נקישות לכל חלק? כך יודעים איזו צורה קיבלתם.', 'kcMath', 'A'],
-      ['shapeChord', 'שתי צורות שמצמידים הן כמו שני צלילים שנשמעים יחד בצליל אחד חדש. ספרו את הפינות של הצורה החדשה.', 'kcConnections', 'A'],
-      ['drumPieces', 'עור תוף מחולק לחלקים: הקישו על כל חלק בתורו וספרו כמה חלקים יש, ואז הרכיבו אותם בחזרה.', 'kcLessons', 'R'],
+      ['vertexBells', 'מצמידים שתי צורות: הקיפו את הצורה החדשה עם פעמון בכל פינה. כמה צלצולים? חלק מהפינות נעלמו.', 'interplay2024', 'A'],
+      ['shapeRhythm', 'מקצב של כל צורה לחוד (3 פעימות למשולש), ואז המקצב של הצורה המורכבת — כמה פעימות?', 'ncssm', 'R'],
+      ['mirrorPattern', 'גזרו לאורך קו וצרו שני חלקים: נגנו את המקצב של כל חלק. חלקים זהים נשמעים אותו דבר.', 'interplay2024', 'A'],
+    ],
+    LENGTH: [
+      ['pipeLengths', 'צינורות של כלי נגינה: ארוך — צליל נמוך, קצר — גבוה. סדרו לפי צליל ובדקו עם סרגל.', 'palmPipes', 'R'],
+      ['unitSteps', 'מדדו באטבים או בקוביות, נקישה לכל יחידה: מספר הנקישות הוא האורך. ואז אותו דבר בס״מ.', 'palmPipes', 'R'],
+      ['comparePipes', 'מדדו שני צינורות בס״מ והשוו: בכמה ס״מ הארוך ארוך יותר? נגנו ושמעו את ההבדל.', 'palmPipes', 'R'],
+    ],
+    CLOCK: [
+      ['beatClock', 'השעון הוא שעון מקצב של 12 עמדות: המחוג הקטן מצביע על השעה. נקישה לכל עמדה מ־12 עד המחוג.', 'interplay2024', 'A'],
+      ['sixtyBeats', 'דקה היא 60 פעימות ב־60 BPM: ספרו עם המטרונום כמה זמן המחוג הגדול זז. שעה שלמה — הוא חוזר ל־12.', 'wnetMathInMusic', 'R'],
+      ['hoursOnClock', 'כמה שעות עברו? ספרו עמדות על השעון כמו צעדים על מעגל המקצב, מהשעה הראשונה לשנייה.', 'interplay2024', 'A'],
+    ],
+    MONEY: [
+      ['tenExchange', 'כל אגורה (או שקל) נקישה; עשר נקישות — החלפה למטבע גדול ותוף. כך סופרים כסף בקבוצות.', 'kcConnections', 'A'],
+      ['takeAwayBeats', 'עודף הוא חיסור: נגנו את מה ששילמתם, השתיקו את המחיר — הפעימות שנשארו נשמעות הן העודף.', 'azaryahu2020', 'A'],
+      ['fillBar', 'עודף כהשלמה: מהמחיר נגנו פעימות עד הסכום ששילמתם וספרו כמה הוספתם.', 'azaryahu2020', 'A'],
+    ],
+    PICTOGRAM: [
+      ['instrumentSurvey', 'כל סמל בפיקטוגרם הוא כלי נגינה שנשמע: ספרו סמלים בשורה — כמה פעמים ניגן הכלי?', 'kcMath', 'A'],
+      ['rowRhythm', 'נגנו שורה כמקצב: נקישה לכל סמל. השורה הארוכה ביותר — הכלי שנשמע הכי הרבה.', 'kcMath', 'A'],
+      ['pictoBeats', 'כשסמל אחד שווה 2 צלילים, נקשו פעמיים לכל סמל וספרו — כך קוראים מפתח.', 'kcMath', 'A'],
+    ],
+    BARCHART: [
+      ['instrumentSurvey', 'ספרו כמה פעמים נשמע כל כלי בקטע וציירו עמודה לכל כלי — העמודה הגבוהה היא הכלי שנשמע הכי הרבה.', 'kcMath', 'A'],
+      ['pipePlot', 'מדדו כלי נגינה או צינורות וסמנו כל מדידה בדיאגרמה: קראו איזה הכי ארוך ובכמה.', 'preshall', 'R'],
+      ['barDifference', 'השוו שתי עמודות בנקישות: נקשו את הגבוהה, ואז את הנמוכה — ההפרש הוא כמה נקישות נשארו לבד.', 'kcMath', 'A'],
+    ],
+    CHART100: [
+      ['tensLowOnesHigh', 'בלוח המאה כל עשרת היא צליל נמוך וכל יחידה נקישה גבוהה: שמעו 3 נמוכים ו־4 נקישות — איזה מספר?', 'interplay2024', 'A'],
+      ['placeScore', 'מספר בלוח הוא פרטיטורה של שתי שורות: עשרות למטה, יחידות למעלה. שורה ריקה — אפס.', 'interplay2024', 'A'],
+      ['tenAsOctave', 'ירידה שורה בלוח המאה היא עשר יותר — אוקטבה. צעד ימינה או שמאלה — יחידה. נגנו את המסלול.', 'interplay2024', 'A'],
+    ],
+    PATTERN: [
+      ['melodyAb', 'דגם AB בצליל: גבוה, נמוך, גבוה, נמוך… שירו אותו והמשיכו — הצליל הבא הוא מה שהדגם מכתיב.', 'interplay2024', 'A'],
+      ['mirrorPattern', 'סדרו 8 פעימות בשורה וצרו דגם סימטרי; הפכו אותו ובדקו אם המוזיקה משתנה.', 'interplay2024', 'A'],
+      ['composePattern', 'הרכיבו דגם AAB או ABC בצלילים ובצורות: אותו דגם, פעם בצליל ופעם בצורה — מה חוזר ואיפה?', 'ncssm', 'R'],
     ],
   };
 
