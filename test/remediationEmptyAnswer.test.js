@@ -58,6 +58,7 @@ function boot() {
     line('function askForAnswer('),
     line('let rmIdx=0,rmAns=[]'),
     line('function rmRender(){'),
+    line('function musicNoteHtml('),
     line('function rmCheck(){'),
     line("$('rmBegin').onclick="),
     line("$('rmCheck').onclick=rmCheck;"),

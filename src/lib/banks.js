@@ -1893,6 +1893,14 @@
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
       RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart }));
     });
+    // Every item of the grade without a music activity gets the music link
+    // of its standard, older builders (G56, MV) included.
+    const link = {};
+    Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
+    RAW.forEach(function (raw) {
+      const m = raw.grade === f.grade && !raw.music && link[raw.standard];
+      if (m) { raw.music = m[0]; raw.musicNote = m[1]; }
+    });
   });
 
   const SHIPPED = [];
@@ -1927,6 +1935,7 @@
     if (raw.typed) it.typed = true;
     if (raw.tolerance != null) it.tolerance = raw.tolerance;
     if (raw.music) it.music = raw.music;
+    if (raw.musicNote) it.musicNote = raw.musicNote;
     if (raw.grid) it.grid = raw.grid;
     SHIPPED.push(it);
   });

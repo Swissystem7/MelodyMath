@@ -23,10 +23,17 @@ const norm = (s) => s.replace(/[‎‏‪-‮]/g, '').replace(/\s+/g, '');
     const res = await fetch(url);
     if (!res.ok) throw new Error(url + ' → HTTP ' + res.status);
     const pdf = path.join(dir, g.charCodeAt(0) + '.pdf');
-    fs.writeFileSync(pdf, Buffer.from(await res.arrayBuffer()));
+    const body = Buffer.from(await res.arrayBuffer());
+    // A blocked or redirected download can still answer 200 with an HTML
+    // page; every quote of that grade would then show as MISSING (#591).
+    if (body.subarray(0, 5).toString('latin1') !== '%PDF-') {
+      throw new Error(url + ' → not a PDF (' + body.length + ' bytes): the download failed, no quote was checked');
+    }
+    fs.writeFileSync(pdf, body);
     execFileSync('pdftotext', ['-enc', 'UTF-8', pdf, pdf + '.txt']);
     pages[g] = fs.readFileSync(pdf + '.txt', 'utf8').split('').map(norm);
     text[g] = pages[g].join('');
+    if (text[g].length < 1000) throw new Error(url + ' → pdftotext gave ' + text[g].length + ' characters, no quote was checked');
   }
   let bad = 0;
   for (const r of cur.coverageMatrix()) {
