@@ -56,7 +56,7 @@ test('each way is Hebrew, short, and carries a real source with an evidence labe
     assert.match(tag, /^[a-z][A-Za-z]+$/);
     assert.match(note, /[א-ת]/);
     assert.ok(note.length < 140, note.length + ' ' + note);
-    assert.ok(g6.sources[src], tag + ' → ' + src);
+    assert.ok(g6.sources[src] || banks.MUSIC_SOURCES[src], tag + ' → ' + src);
     assert.ok(['D', 'R', 'A'].includes(ev), tag + ' ' + ev);
   }));
   Object.keys(g6.sources).forEach((id) => {

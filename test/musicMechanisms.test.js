@@ -56,3 +56,12 @@ test('a music activity of an evidenced mechanism other than M5 and M7 cites that
     if (['M1', 'M2', 'M3', 'M4', 'M6'].includes(id)) assert.ok(M[id].sources.includes(it.musicSrc), it.id + ' ' + it.music + ' ' + it.musicSrc);
   });
 });
+
+test('every way of an evidenced mechanism cites one of its studies', () => {
+  const wrong = [];
+  FILES.forEach((file) => Object.keys(file.music).forEach((key) => file.music[key].forEach(([tag, , src]) => {
+    const id = banks.mechanismOf(tag);
+    if (EVIDENCED.includes(id) && !M[id].sources.includes(src)) wrong.push(file.grade + ' ' + key + ' ' + tag + ' ' + src);
+  })));
+  assert.deepEqual(wrong, []);
+});
