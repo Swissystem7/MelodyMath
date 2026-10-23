@@ -1882,11 +1882,11 @@
   // A grade kept in its own file (src/lib/curriculum/grade<n>.js), appended
   // last so existing ids stay put. Pages load it before this file. A file
   // may carry only the music side of a grade whose items live here (grade1,
-  // grade4, grade5).
+  // grade3, grade4, grade5).
   const G = typeof globalThis !== 'undefined' ? globalThis : {};
   const GRADE_FILES = (typeof module === 'object' && module.exports)
-    ? [require('./curriculum/grade6'), require('./curriculum/grade1'), require('./curriculum/grade4'), require('./curriculum/grade5')]
-    : [G.MM_GRADE6, G.MM_GRADE1, G.MM_GRADE4, G.MM_GRADE5];
+    ? [require('./curriculum/grade6'), require('./curriculum/grade1'), require('./curriculum/grade4'), require('./curriculum/grade5'), require('./curriculum/grade3')]
+    : [G.MM_GRADE6, G.MM_GRADE1, G.MM_GRADE4, G.MM_GRADE5, G.MM_GRADE3];
   // Research behind the music ways of the grade files (#591): id → [label, URL].
   const MUSIC_SOURCES = {};
   GRADE_FILES.forEach(function (f) {
@@ -1906,11 +1906,15 @@
     const link = {};
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
-    // activity: counted beats (hear), the grade א׳ widgets (g1: beats,
-    // chart100, pattern) and the 4/4 bar of the fraction items (bar44).
+    // activity: counted beats (hear), the playing widgets of grades א׳-ג׳
+    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid)
+    // and the 4/4 bar of the fraction items (bar44).
+    const cap = function (k) { return k.charAt(0).toUpperCase() + k.slice(1); };
     RAW.forEach(function (raw) {
       if (raw.grade !== f.grade || raw.music) return;
-      if (raw.g1 && raw.g1.kind) raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
+      if (raw.g1 && raw.g1.kind) raw.music = 'g1' + cap(raw.g1.kind);
+      else if (raw.g2 && raw.g2.kind) raw.music = 'g2' + cap(raw.g2.kind);
+      else if (raw.g3 && raw.g3.kind) raw.music = 'g3' + cap(raw.g3.kind);
       else if (hearOf(raw.hear)) raw.music = 'hearBeats';
       else if (raw.widget === 'bar44') raw.music = 'bar44Notes';
     });

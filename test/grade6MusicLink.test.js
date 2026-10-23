@@ -79,7 +79,7 @@ test('an item takes the way of its level, with its source and label', () => {
 });
 
 test('grades without a ways file are untouched', () => {
-  ['ב', 'ג'].forEach((g) => {
+  ['ב'].forEach((g) => {
     banks.itemsForGrade(g).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
   });
 });
