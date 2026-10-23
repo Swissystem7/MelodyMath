@@ -351,13 +351,15 @@
 
   // The parts a voice plays. `step` picks the pitch of a pitched voice (xylo,
   // bell) on a C pentatonic ladder, so any two bars sound well together.
-  function tapPlan(voice, step) {
+  // An explicit `hz` (a xylophone bar that already has its own pitch) wins.
+  function tapPlan(voice, step, hz) {
     const parts = TAP_VOICES[voice];
     if (!parts) return [];
     const s = Math.max(0, Math.min(PENTA.length - 1, Math.round(Number(step) || 0)));
+    const base = positive(hz) ? clampHz(hz) : PENTA[s];
     return parts.map(function (p) {
       const out = Object.assign({}, p);
-      if (!p.noise && !p.hz) out.hz = PENTA[s] * (p.mul || 1);
+      if (!p.noise && !p.hz) out.hz = base * (p.mul || 1);
       delete out.mul;
       out.gain = clampGain(p.gain);
       return out;
@@ -403,7 +405,7 @@
   // the next audio quantum after the pointerdown that asked for it.
   function playTap(voice, opts) {
     const o = opts || {};
-    const parts = tapPlan(voice, o.step);
+    const parts = tapPlan(voice, o.step, o.hz);
     if (!parts.length || audioState.muted) return null;
     const ac = getSharedAudioContext();
     if (!ac) return null;
@@ -434,6 +436,48 @@
     audioState.lastVoice = voice;
     audioState.taps += 1;
     return { startTime: t0, parts: parts.length };
+  }
+
+  // ---------- tap feedback (#591 goal A.2) ----------
+  // Any element with data-tap="<voice>" (plus data-hz or data-step) sounds on
+  // pointerdown, gets the .mm-tap press/bounce/glow and a 10 ms buzz where the
+  // device supports it. pointerdown fires once per finger, so chords and
+  // two-hand play work. The CSS turns the bounce into a still glow under
+  // prefers-reduced-motion.
+  function tapFeedback(el, ev) {
+    if (!el || typeof el.getAttribute !== 'function') return null;
+    const voice = el.getAttribute('data-tap');
+    if (!voice || el.disabled) return null;
+    const r = playTap(voice, {
+      step: Number(el.getAttribute('data-step')) || 0,
+      hz: Number(el.getAttribute('data-hz')) || null,
+      eventTime: ev && typeof ev.timeStamp === 'number' && ev.timeStamp > 0 ? ev.timeStamp : undefined,
+    });
+    if (el.classList) {
+      el.classList.remove('mm-tap');
+      void el.offsetWidth; // restart the animation on a quick second tap
+      el.classList.add('mm-tap');
+      setTimeout(function () { el.classList.remove('mm-tap'); }, 220);
+    }
+    const nav = typeof navigator !== 'undefined' ? navigator : null;
+    if (nav && typeof nav.vibrate === 'function') { try { nav.vibrate(10); } catch (e) { /* not allowed */ } }
+    return r;
+  }
+
+  function tapTargetOf(ev) {
+    const t = ev && ev.target;
+    return t && typeof t.closest === 'function' ? t.closest('[data-tap]') : null;
+  }
+
+  function installTapFeedback(target) {
+    const t = target || (typeof document !== 'undefined' ? document : null);
+    if (!t || typeof t.addEventListener !== 'function') return false;
+    // Capture phase: the sound starts before any game logic on the element.
+    t.addEventListener('pointerdown', function (e) { tapFeedback(tapTargetOf(e), e); }, { capture: true, passive: true });
+    // Enter/Space on a focused element fires a click with detail 0 and no
+    // pointerdown: keyboard players hear the same sound.
+    t.addEventListener('click', function (e) { if (e.detail === 0) tapFeedback(tapTargetOf(e), e); });
+    return true;
   }
 
   // ---------- the shared AudioContext ----------
@@ -554,6 +598,7 @@
     stopSequence, stopAll, audioReady,
     isAudioUnlocked: audioReady, playSequence: scheduleSequence,
     canReplay, replaySequence, TAP_VOICES, tapPlan, playTap, audioState, setMuted,
+    tapFeedback, installTapFeedback,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.

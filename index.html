@@ -147,6 +147,12 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 @keyframes pulseHint{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(105,70,232,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(105,70,232,0)}}
 .pulse-hint{animation:pulseHint 2s infinite ease-in-out}
 @media (prefers-reduced-motion:reduce){.pulse-hint{animation:none}}
+/* #591 goal A: every musical tap gets press + bounce + glow (musicEngine.installTapFeedback).
+   touch-action:none: two fingers on two bars are two notes, never a pinch-zoom. */
+[data-tap]{touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.mm-tap{animation:mmTap .2s ease-out;box-shadow:0 0 0 5px rgba(255,214,0,.6)}
+@keyframes mmTap{0%{transform:scale(.9)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.mm-tap{animation:none!important;transform:none!important;outline:3px solid #ffd600}}
 .nl-control{margin:10px 0}
 .nl-control input[type=range]{min-height:48px}
 .nl-keys{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
@@ -558,7 +564,8 @@ function rgTick(){
     slot.classList.toggle('highlight',isNow);
   });
 }
-function handleDrumTap(soundType){
+// sounded: the pad already played on pointerdown (data-tap), so only score the hit here.
+function handleDrumTap(soundType,sounded){
   const snd=soundType||'kick';
   const now=Date.now();
   const p=currentRgPattern();
@@ -580,7 +587,7 @@ function handleDrumTap(soundType){
     updateRgStage();
     paintRgPattern();
     const stage=typeof stageForStreak==='function'?stageForStreak(rgStreak):{level:1};
-    if(typeof playDrumSound==='function')playDrumSound(snd);
+    if(!sounded&&typeof playDrumSound==='function')playDrumSound(snd);
     if(typeof playMusicalAccompaniment==='function')playMusicalAccompaniment(stage.level,rgBeatIdx);
     showSpark(`${evalRes.text} 💥`,true);
     const cardIds=['bandDrums','bandBass','bandChords','bandMelody'];
@@ -592,7 +599,7 @@ function handleDrumTap(soundType){
   }else{
     rgStreak=Math.max(0,rgStreak-1);
     updateRgStage();
-    if(typeof playDrumSound==='function')playDrumSound('hihat');
+    if(!sounded&&typeof playDrumSound==='function')playDrumSound('hihat');
     showSpark('פספוס 🪙',false);
   }
 }
@@ -619,11 +626,16 @@ const drumPads=[
 drumPads.forEach(dp=>{
   const btn=$(dp.id);
   if(!btn)return;
-  btn.onclick=()=>{
+  // pointerdown, not click: the pad sounds (data-tap) and scores the moment the finger lands.
+  btn.dataset.tap=dp.sound;
+  btn.onpointerdown=()=>{
     if(!rgActive)toggleRgPlay();
-    btn.classList.add('hit-active');
-    setTimeout(()=>btn.classList.remove('hit-active'),100);
-    handleDrumTap(dp.sound);
+    handleDrumTap(dp.sound,true);
+  };
+  btn.onclick=e=>{
+    if(e.detail)return; // keyboard Enter/Space only; touch and mouse scored on pointerdown
+    if(!rgActive)toggleRgPlay();
+    handleDrumTap(dp.sound,true);
   };
 });
 if($('rhythmStartBtn'))$('rhythmStartBtn').onclick=toggleRgPlay;
@@ -644,7 +656,7 @@ function initXylophone(){
   const box=$('xyloKeys');
   if(!box)return;
   box.innerHTML=XYLO_KEYS_DEF.map((k,idx)=>`
-    <button type="button" class="xylo-key" id="xk_${idx}" style="background:${k.color};height:${k.h}%;color:${k.tc||'var(--card)'};" data-idx="${idx}" aria-label="צליל ${k.note} דרגה ${k.deg} שבר ${k.frac}">
+    <button type="button" class="xylo-key" id="xk_${idx}" data-tap="xylo" data-hz="${typeof XYLO_FREQS!=='undefined'?XYLO_FREQS[idx]:''}" data-step="${idx}" style="background:${k.color};height:${k.h}%;color:${k.tc||'var(--card)'};" data-idx="${idx}" aria-label="צליל ${k.note} דרגה ${k.deg} שבר ${k.frac}">
       <span class="k-shortcut">[${k.key}]</span>
       <span class="k-degree">${k.deg}</span>
       <span class="k-note">${k.note}</span>
@@ -652,13 +664,14 @@ function initXylophone(){
     </button>
   `).join('');
   box.querySelectorAll('.xylo-key').forEach(b=>{
-    b.onclick=()=>triggerXyloKey(+b.dataset.idx);
+    b.onclick=()=>triggerXyloKey(+b.dataset.idx,true);
   });
 }
-function triggerXyloKey(idx){
+// sounded: the bar already rang on pointerdown or Enter (data-tap); the A..K keys still ring here.
+function triggerXyloKey(idx,sounded){
   const k=XYLO_KEYS_DEF[idx];
   if(!k)return;
-  if(typeof playXylophoneNote==='function')playXylophoneNote(idx);
+  if(!sounded&&typeof playXylophoneNote==='function')playXylophoneNote(idx);
   const btn=$(`xk_${idx}`);
   if(btn){
     btn.classList.add('active-key');
@@ -1011,7 +1024,9 @@ function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
 // restarting on every answer put an off-beat click right after each pick.
 function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
 function noteMetro(correct){
-  if(typeof playHarmonicReward==='function'){
+  // A wrong answer gets its own soft falling step; a right one climbs with the streak.
+  if(!correct && typeof playTap==='function') playTap('wrong');
+  else if(typeof playHarmonicReward==='function'){
     playHarmonicReward(correct ? metroStreak + 1 : 0);
   }
   if(!correct){ metroStreak=0; return; }
@@ -1027,6 +1042,8 @@ if($('metroBpm'))$('metroBpm').onchange=function(){ this.value=clampBpm(this.val
 document.addEventListener('visibilitychange',function(){ if(document.hidden) stopMetro(); });
 // One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
 if(typeof installAudioUnlock==='function') installAudioUnlock(document);
+// Every [data-tap] element sounds on pointerdown with animation and a short buzz (#591).
+if(typeof installTapFeedback==='function') installTapFeedback(document);
 paintMetro();
 renderRosterChips();
 renderClassBoard();
