@@ -12,8 +12,10 @@
 // activities, not this one alone), R = a reputable instructional source
 // supports the connection, A = an adaptation of a documented music–maths
 // relationship whose effect on this topic was not tested on its own.
-// Nothing here claims more than its label. Items whose prompt already plays
-// sound (counted beats, the g1 widgets) are music activities and take no way.
+// Nothing here claims more than its label. Azaryahu 2020 evaluated MusiMath
+// on fractions, so in grade א׳ (no fractions) every way citing it is A. Items
+// whose prompt already plays sound (counted beats, the g1 widgets) are music
+// activities and take no way.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -72,10 +74,10 @@
     ],
     ADD10: [
       ['callResponse', 'המורה מתופף 3 פעימות, הילד עונה 4. כולם מנגנים את הרצף המחובר — כמה פעימות יחד? כתבו תרגיל.', 'kcConnections', 'A'],
-      ['fillBar', 'תיבה של 10 פעימות: נגנו את הפעימות הראשונות, והשלימו עד 10 — החלק שהשלמתם הוא התשובה.', 'azaryahu2020', 'D'],
+      ['fillBar', 'תיבה של 10 פעימות: נגנו את הפעימות הראשונות, והשלימו עד 10 — החלק שהשלמתם הוא התשובה.', 'azaryahu2020', 'A'],
     ],
     DECOMP10: [
-      ['fillBar', 'תיבה של 10 פעימות: תוף גבוה ואז תוף נמוך. כמה נמוכות צריך כדי להשלים ל־10? זה הפירוק.', 'azaryahu2020', 'D'],
+      ['fillBar', 'תיבה של 10 פעימות: תוף גבוה ואז תוף נמוך. כמה נמוכות צריך כדי להשלים ל־10? זה הפירוק.', 'azaryahu2020', 'A'],
       ['twoDrums', 'עשרה חברים, שני כלים: חלקו — כמה בתוף וכמה בשייקר? נגנו כל פירוק ושמעו שתמיד יוצא 10.', 'kcConnections', 'A'],
     ],
     ADD20: [
@@ -83,13 +85,13 @@
       ['tenThenMore', 'נגנו עד 10 בתוף, והמשיכו בשייקר: קודם משלימים לעשר, ואז מוסיפים את השאר.', 'azaryahu2020', 'A'],
     ],
     EQ_LEFT: [
-      ['sameLength', 'שני משפטי תיפוף נמשכים אותו זמן גם אם מחולקים אחרת: 3 ו־4 מול 5 ו־2. סימן השוויון אומר «אותו אורך».', 'azaryahu2020', 'D'],
-      ['fillBar', 'שני צדדים של שוויון הם שתי תיבות באותו אורך. מלאו את הפעימה החסרה כך ששתי התיבות יהיו שוות.', 'azaryahu2020', 'D'],
+      ['sameLength', 'שני משפטי תיפוף נמשכים אותו זמן גם אם מחולקים אחרת: 3 ו־4 מול 5 ו־2. סימן השוויון אומר «אותו אורך».', 'azaryahu2020', 'A'],
+      ['fillBar', 'שני צדדים של שוויון הם שתי תיבות באותו אורך. מלאו את הפעימה החסרה כך ששתי התיבות יהיו שוות.', 'azaryahu2020', 'A'],
       ['callResponse', 'הפכו את שני המשפטים — קודם התשובה ואז הקריאה. האורך הכולל לא משתנה: זה חוק החילוף.', 'kcConnections', 'A'],
     ],
     MULTIADD: [
       ['callResponse', 'שלושה כלים זה אחרי זה: תוף, שייקר, פעמון. ספרו את כל הפעימות — ונסו לחבר קודם זוג שנותן 10.', 'kcConnections', 'A'],
-      ['fillBar', 'תיבה אחת, כמה תווים: חברו את האורכים בכל סדר — התיבה נשארת שלמה. חפשו את הזוג שמשלים לעשר.', 'azaryahu2020', 'D'],
+      ['fillBar', 'תיבה אחת, כמה תווים: חברו את האורכים בכל סדר — התיבה נשארת שלמה. חפשו את הזוג שמשלים לעשר.', 'azaryahu2020', 'A'],
       ['tenThenMore', 'שלושה מחוברים: נגנו קודם את השניים שמשלימים לעשר — תוף עד עשר — ואז את השלישי בשייקר והמשיכו לספור.', 'azaryahu2020', 'A'],
     ],
     TENS: [
@@ -97,12 +99,12 @@
       ['tenAsOctave', 'קפיצה של עשר בישר המספרים היא אוקטבה: כל קפיצה — צליל, וסופרים קפיצות קדימה או אחורה.', 'interplay2024', 'A'],
     ],
     SUB10: [
-      ['takeAwayBeats', 'נגנו משפט פעימות, ואז הסירו ממנו פעימות (שקט במקומן). כמה פעימות נשארו נשמעות?', 'azaryahu2020', 'D'],
-      ['fillBar', 'חיסור כהשלמה: כמה פעימות חסרות מהמשפט הקצר כדי להגיע למשפט הארוך? נגנו את ההשלמה.', 'azaryahu2020', 'D'],
+      ['takeAwayBeats', 'נגנו משפט פעימות, ואז הסירו ממנו פעימות (שקט במקומן). כמה פעימות נשארו נשמעות?', 'azaryahu2020', 'A'],
+      ['fillBar', 'חיסור כהשלמה: כמה פעימות חסרות מהמשפט הקצר כדי להגיע למשפט הארוך? נגנו את ההשלמה.', 'azaryahu2020', 'A'],
     ],
     SUB20: [
-      ['takeAwayBeats', 'משפט של פעימות ארוך יותר מעשר: הסירו קודם את מה שמעל עשר, ואז את השאר — הקשיבו לכמה שנשאר.', 'azaryahu2020', 'D'],
-      ['fillBar', 'השלמה במקום חיסור: מהמספר הקטן נגנו פעימות עד הגדול וספרו כמה הוספתם.', 'azaryahu2020', 'D'],
+      ['takeAwayBeats', 'משפט של פעימות ארוך יותר מעשר: הסירו קודם את מה שמעל עשר, ואז את השאר — הקשיבו לכמה שנשאר.', 'azaryahu2020', 'A'],
+      ['fillBar', 'השלמה במקום חיסור: מהמספר הקטן נגנו פעימות עד הגדול וספרו כמה הוספתם.', 'azaryahu2020', 'A'],
       ['timelineEdit', 'קטע מוזיקה של 15 שניות; חותכים ממנו 8 שניות. חזו כמה יישאר ובדקו בשעון עצר.', 'wnetMathInMusic', 'A'],
     ],
     NLINE: [
