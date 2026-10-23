@@ -26,3 +26,19 @@
 .fbp-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:76px;min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem}
 .fbp-tile span{font-size:.85rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+.st-method,.st-now{margin:6px 0}
+.st-choice{border:3px solid var(--purple);border-radius:16px;padding:8px 12px;margin:10px 0;background:color-mix(in srgb, var(--purple) 8%, var(--card))}
+.st-choice h4{margin:4px 0}
+.st-option{display:flex;flex-direction:column;align-items:center;min-width:120px;min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.1rem}
+.st-option[aria-pressed="true"]{border-color:var(--good)}
+.st-option small{color:var(--muted);font-size:.8rem}
+.st-surface{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:6px;margin:10px 0;padding:10px;border-radius:16px;border:2px solid var(--line);touch-action:none;user-select:none}
+.st-note{min-width:48px;min-height:48px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:bold}
+.st-zone{min-width:96px;min-height:96px;border-radius:50%}
+.st-bar{width:48px;background:color-mix(in srgb, var(--pink) 30%, var(--card))}
+.st-gong{background:color-mix(in srgb, var(--yellow) 45%, var(--card))}
+.st-tine{width:36px;min-width:36px;border-radius:0 0 18px 18px;background:color-mix(in srgb, var(--mint) 40%, var(--card))}
+.st-key{width:44px;min-height:120px;border-radius:0 0 8px 8px}
+.st-slide{display:flex;gap:0;flex:1 1 100%}.st-step{flex:1;border-radius:0}
+.st-damp{width:auto;min-height:48px}
+.st-shelf{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}.st-shelf li{border:1px solid var(--line);border-radius:12px;padding:4px 10px}.st-shelf li.locked{color:var(--muted)}
