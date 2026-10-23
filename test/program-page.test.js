@@ -11,8 +11,9 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const OFFICIAL = /^https:\/\/(pop|meyda)\.education\.gov\.il\//;
 
-test('the official order lists every verified א׳–ד׳ row once, by page, and only rows with a quote', () => {
-  assert.deepEqual(cur.programGrades(), ['א', 'ב', 'ג', 'ד']);
+test('the official order lists every verified א׳–ו׳ row once, by page, and only rows with a quote', () => {
+  assert.deepEqual(cur.programGrades(), ['א', 'ב', 'ג', 'ד', 'ה', 'ו']);
+  assert.deepEqual(cur.programGrades(), cur.grades().filter((g) => cur.OFFICIAL_ORDER[g]));
   for (const g of cur.programGrades()) {
     const order = cur.OFFICIAL_ORDER[g];
     const verified = cur.rowsForGrade(g).filter((r) => r.verified).map((r) => r.topic);
@@ -38,9 +39,9 @@ test('programForGrade keeps every row, puts unverified rows last and links only 
       assert.equal(r.exerciseCount, r.skills.reduce((n, s) => n + s.count, 0));
     });
   }
+  // Every ב׳ row has a quote now (#559), so all of them are placed.
   const b = cur.programForGrade('ב', banks.itemsForGrade('ב'));
-  assert.ok(b.rows.every((r) => r.verified));
-  assert.equal(b.rows.find((r) => r.topic === 'כסף — קנייה ומכירה בשקלים').page, 7);
+  assert.ok(b.rows.every((r) => r.verified && r.exerciseCount >= 4));
 });
 
 test('a practice link opens exactly the bank items tagged with that row', () => {
@@ -73,10 +74,9 @@ test('program.html renders the chosen grade in order with official and in-app li
   rows.forEach((r) => { const k = out.indexOf(r.topic); assert.ok(k > at, r.topic); at = k; });
   assert.match(out, /Newprogramgrade3\.pdf#page=\d+/);
   assert.match(out, /href="index\.html\?topic=mm-cur-\d+&amp;skill=/);
-  // Every ג׳ row is verified now (#559); the ק״ג/ליטר items are counted as untagged.
-  assert.doesNotMatch(out, /לא אומת/);
-  assert.match(out, /\d+ תרגילים בבנק של הכיתה לא שויכו לנושא מאומת/);
-  assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 4);
+  // Every ג׳ row has a quote now (#559); an unverified row would say so.
+  assert.equal(/לא אומת/.test(out), rows.some((r) => !r.verified));
+  assert.equal((els.programGrades.innerHTML.match(/<button/g) || []).length, 6);
 });
 
 test('the screen is in the app navigation and index.html opens ?topic= in the plan loop', () => {

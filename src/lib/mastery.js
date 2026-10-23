@@ -175,6 +175,14 @@
     return list.filter(function (it) { return !isBlockedItem(it); });
   }
 
+  // A direct topic link (?topic=) must always show a question: if the gate
+  // would hide every exercise of the topic, fall back to all of them.
+  function gateItemsOrAll(items, history, catalog) {
+    const list = Array.isArray(items) ? items : [];
+    const gated = gateItems(list, history, catalog);
+    return gated.length ? gated : list.slice();
+  }
+
   function withCoreIfNeeded(items, extraCore) {
     const list = Array.isArray(items) ? items.slice() : [];
     const extra = Array.isArray(extraCore) ? extraCore : [];
@@ -202,6 +210,7 @@
     missingCoreTables: missingCoreTables,
     isTableMastered: isTableMastered,
     gateItems: gateItems,
+    gateItemsOrAll: gateItemsOrAll,
     withCoreIfNeeded: withCoreIfNeeded,
   };
 });

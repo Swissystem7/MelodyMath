@@ -57,7 +57,9 @@ test('curriculum.html page script runs without throwing and renders every matrix
   assert.equal((els.sum.innerHTML.match(/class="stat"/g) || []).length, cur.grades().length);
   assert.equal((els.tables.innerHTML.match(/<section class="grade-block">/g) || []).length, cur.grades().length);
   assert.equal((els.tables.innerHTML.match(/<tr><td>/g) || []).length, cur.coverageMatrix().length);
-  assert.match(els.tables.innerHTML, /class="st-gap"/);
+  // A gap row renders as st-gap; with every grade covered there is none to show.
+  const hasGap = cur.coverageMatrix().some((r) => r.status === cur.GAP);
+  assert.equal(/class="st-gap"/.test(els.tables.innerHTML), hasGap);
   assert.match(els.tables.innerHTML, /class="st-covered"/);
 });
 

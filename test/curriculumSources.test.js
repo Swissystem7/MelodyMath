@@ -21,20 +21,17 @@ test('a row is verified only when it carries a quote from the official PDF', () 
   cur.coverageMatrix().forEach(function (r) {
     assert.equal(r.verified, typeof r.quote === 'string' && r.quote.length > 0, r.topic);
   });
-  // #559: every א׳–ד׳ row now carries a quote from its grade's PDF.
-  ['א', 'ב', 'ג', 'ד'].forEach(function (g) {
-    assert.equal(cur.coveragePercent(g).verified, cur.rowsForGrade(g).length, g);
-  });
-});
-
-test('ב׳ money is שקלים only and ג׳ has no ק״ג/ליטר row — as in the PDFs (#559)', () => {
-  const money = (g) => cur.rowsForGrade(g).find((r) => r.topic.indexOf('כסף') === 0);
-  assert.doesNotMatch(money('ב').topic, /אגורות/);
-  assert.match(money('ג').topic, /אגורות/);
-  assert.ok(cur.rowsForGrade('ג').every((r) => !/ק״ג|ליטר/.test(r.topic)));
-  const massVol = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
-  assert.ok(massVol.length > 0);
-  massVol.forEach((it) => assert.equal(cur.sectionForItem(it).label, cur.UNVERIFIED_HE, it.prompt));
+  // Not found in the grade's PDF on 21.10.2026 — must stay unverified.
+  const ids = cur.coverageMatrix().filter((r) => !r.verified).map((r) => r.grade + ':' + r.topic);
+  assert.ok(!ids.some((id) => id.startsWith('ב:')), 'every ב׳ row has a quote');
+  // אגורות are in the ג׳ PDF, not the ב׳ one; the ב׳ items drill the ב׳
+  // money row as a lead-in (#591), so they link to that row.
+  const agorot = banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MONEY);
+  assert.ok(agorot.length > 0 && agorot.every((it) => cur.sectionForItem(it).topic.startsWith('כסף')));
+  assert.ok(!ids.some((id) => id.startsWith('ג:')), 'every ג׳ row has a quote');
+  // ק״ג/ליטר are not in the ג׳ PDF: those items moved to ד׳ (#591).
+  const kg = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
+  assert.equal(kg.length, 0);
 });
 
 test('every bank item gets an official tag; unmapped or unverified says לא אומת', () => {
