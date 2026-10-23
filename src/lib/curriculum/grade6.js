@@ -221,36 +221,161 @@
     ['data', 'בטבלת שכיחויות: 6 משפחות עם 2 ילדים ו־4 משפחות עם 3 ילדים. כמה ילדים יש בכל המשפחות האלה?', 24, '6 × 2 ועוד 4 × 3', 3, 'G6_DATA_SHOW'],
   ];
 
-  // The music side of every ו׳ item whose prompt is not already a music
-  // activity (#591): bank standard key → [music tag, one line shown after the
-  // child answers, so it never gives the answer away].
-  const music = {
-    FRAC_MUL: ['noteLength', 'נקודה ליד תו מאריכה אותו פי 3/2, ובשלישייה כל תו מתנגן 2/3 מאורכו — כפל שברים.'],
-    FRAC_DIV: ['noteLength', 'כמה שמיניות נכנסות בחצי, או כמה רבעים בתיבה — חילוק של אורך תו באורך תו.'],
-    DEC_MUL: ['intervalRatio', 'צליל שגבוה בקווינטה רוטט פי 1.5, ובאוקטבה פי 2 — כפל במספר עשרוני.'],
-    PERCENT: ['tempoPercent', 'מטרונום שמאיץ ב־10% מוסיף עשירית לפעימות בדקה — אחוז מכמות.'],
-    G6_DECIMAL_SYS: ['noteNames', 'גם לצלילים יש כמה שיטות שמות: דו־רה־מי, ו־C, D, E — כמו שיטות שונות לכתוב אותו מספר.'],
-    G6_NAT_PROPS: ['meterGroups', 'תיבה של 6 פעימות נחלקת לזוגות או לשלשות; תיבה של 7 — מספר ראשוני — נחלקת רק לקבוצות לא שוות, כמו 2 + 2 + 3.'],
-    G6_NAT_OPS: ['barCount', 'כמה פעימות בשיר? כופלים תיבות בפעימות שבכל תיבה, ורק אחר כך מוסיפים את פעימות הפתיחה — כפל לפני חיבור.'],
-    G6_NAT_EST: ['playlistTime', 'כדי לדעת אם רשימת שירים נכנסת בשיעור, מעגלים כל שיר לדקות שלמות ומחברים — אומדן.'],
-    G6_MIXED: ['noteLength', 'רבע מנוקד נמשך 1 ו־1/2 פעימות; כמה רבעים מנוקדים ברצף הם כפל של מספר מעורב.'],
-    G6_FRAC_LAWS: ['noteLength', 'אורכי התווים בתיבה מתחברים לשלם — רבע, שמינית וחצי — וכמו בכל תרגיל, כפל לפני חיבור.'],
-    G6_FRAC_PART: ['songParts', 'כשיודעים כמה תיבות יש בפזמון ואיזה חלק מהשיר הוא, מוצאים כמה תיבות בשיר כולו.'],
-    G6_FRAC_EST: ['noteLength', 'תו שמתנגן רק חלק מאורכו (כפל בשבר קטן מ־1) נעשה קצר יותר — כך מעריכים בלי לחשב.'],
-    G6_DEC_EST: ['playlistTime', 'שיר של 3.9 דקות הוא בערך 4 דקות — כך מעריכים כמה זמן נמשכת רשימת שירים.'],
-    G6_DEC_LAWS: ['beatSeconds', 'פעימה ב־120 BPM נמשכת 0.5 שנייה; מספר הפעימות כפול 0.5 נותן את הזמן בשניות.'],
-    G6_PCT_WHOLE: ['tempoPercent', 'אם 10% מהקצב הם 9 פעימות בדקה, הקצב כולו (100%) גדול פי 10 — 90 BPM.'],
-    G6_PCT_CHANGE: ['tempoPercent', 'האטה של 20% מקצב של 100 BPM היא כמו הנחה במחיר: מורידים 20 ומגיעים ל־80 BPM.'],
-    G6_CIRCLE_TERMS: ['circleTerms', 'במעגל הקווינטות, הקטע ממרכז המעגל לדו הוא רדיוס, והקטע מדו לפה דיאז דרך המרכז הוא קוטר.'],
-    G6_CIRCLE_CALC: ['drumHead', 'עור התוף הוא עיגול: את גודל התוף מודדים בקוטר, ותוף גדול יותר נשמע נמוך יותר.'],
-    G6_COMP_RECT: ['stagePlan', 'במה בצורת L מחלקים לשני מלבנים כדי לדעת כמה מקום יש לתזמורת.'],
-    G6_COMP_TRI: ['instrumentShape', 'גוף הבללייקה הוא משולש; את צורות הכלים מפרקים למשולשים ולמקביליות כדי למדוד את שטחן.'],
-    G6_BOX_VOL: ['speakerBox', 'תיבת רמקול היא תיבה, ונפח האוויר שבתוכה משפיע על הבס.'],
-    G6_VOL_UNITS: ['waterGlasses', 'בכוסות מוזיקליות, כמות המים במ״ל קובעת את גובה הצליל: יותר מים — צליל נמוך יותר.'],
-    G6_MEAN: ['tapTempo', 'מקישים כמה פעמים על הקצב ומחשבים את הממוצע ב־BPM — כך מטרונום מוצא את הקצב שלכם.'],
-    G6_DATA_READ: ['instrumentSurvey', 'דיאגרמה של כמה ילדים מנגנים בכל כלי נקראת כמו כל דיאגרמה: משווים את גובה העמודות.'],
-    G6_DATA_SHOW: ['instrumentSurvey', 'את אותם נתונים על כלי הנגינה בכיתה אפשר להציג בטבלה, בדיאגרמת עמודות או בעוגה.'],
+  // Learning each ו׳ standard THROUGH music (#591). `sources` are the
+  // research behind the ways: id → [label, URL], taken from the research map
+  // pasted in #591 (23.10.2026). Each way carries that map's evidence label:
+  // D = part of an evaluated maths-learning intervention (the study tested a
+  // package of activities, not this one alone), R = a reputable instructional
+  // source supports the connection, A = an adaptation of a documented
+  // music–maths relationship whose effect on this topic was not tested on its
+  // own. Nothing here claims more than its label.
+  const sources = {
+    azaryahu2020: ['Azaryahu et al. 2020 — MusiMath and Academic Music', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/'],
+    interplay2024: ['Interplay between music and mathematics (Humanit. Soc. Sci. Commun., 2024)', 'https://www.nature.com/articles/s41599-024-03631-z'],
+    kcConnections: ['Kennedy Center — Connections: Math and Music', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/media-and-interactives/media/music/connections/connections/math--music/'],
+    kcMath: ['Kennedy Center — math collection', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/collections/collections/math/'],
+    kcPractice: ['Kennedy Center — Arts Integration in Practice: Math', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/articles-and-how-tos/articles/collections/arts-integration-resources/arts-integration-in-practice-math/'],
+    kcLessons: ['Kennedy Center — lessons and activities', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/lessons-and-activities/'],
+    wnetMathInMusic: ['WNET/THIRTEEN — Get the Math: Math in Music', 'https://www.thirteen.org/get-the-math/teachers/teachers-math-in-music-activities/76/'],
+    makingMusicCount: ['Making Music Count', 'https://makingmusiccount.org/'],
+    palmPipes: ['Exploratorium — Palm Pipes', 'https://www.exploratorium.edu/snacks/palm-pipes'],
+    whitehead: ['Exploratorium — instrument builder Peter Whitehead', 'https://annex.exploratorium.edu/music/movies/peterWhitehead_Low.html'],
+    ncssm: ['NCSSM — mathematics and musical composition', 'https://www.ncssm.edu/stories/hands-on-activities-illustrate-connection-between-mathematics-and-music'],
+    preshall: ['Preservation Hall Foundation — Music and Math', 'https://lessons.preshallfoundation.org/lesson/music-and-math/'],
   };
 
-  return { grade: 'ו', rows: rows, order: order, ST: ST, standards: standards, items: items, music: music };
+  // Bank standard key → ways, one per level (1, 2, 3), so every topic is met
+  // through at least two different musical models. A way is [music tag, how
+  // to solve it with music (Hebrew; never the numbers of an item), source id,
+  // evidence label]. banks.js gives each item without a music activity the
+  // way of its level. G6_DEC_CALC shares its text with DEC_MUL.
+  const music = {
+    FRAC_MUL: [
+      ['noteLength', 'תיבה של 4/4 היא השלם: רבע מנוקד הוא רבע כפול 3/2. נגנו רבע ואז רבע מנוקד ומנו שמיניות — כך שומעים כפל שברים.', 'azaryahu2020', 'D'],
+      ['barFill', 'ציירו את התיבה כפס שברים: קחו חצי ממנה ואז חצי מהחצי. החלק שנשאר הוא המכפלה — ביצוע, ציור ואז תרגיל.', 'azaryahu2020', 'D'],
+      ['tripletShare', 'בשלישייה שלושה תווים נכנסים בזמן של שניים, וכל תו הוא 2/3 מאורכו. נגנו, ואז כתבו את הכפל.', 'azaryahu2020', 'A'],
+    ],
+    FRAC_DIV: [
+      ['durationCount', 'כמה שמיניות נכנסות בחצי? נגנו חצי, ואז שמיניות עד שהזמן נגמר, ומנו. חילוק שבר בשבר הוא «כמה פעמים נכנס».', 'azaryahu2020', 'D'],
+      ['phraseShare', 'קחו את פעימות התיבה וחלקו אותן לקטעים שווים באורך המחלק: מספר הקטעים הוא המנה — חילוק כקיבוץ.', 'azaryahu2020', 'A'],
+      ['barFill', 'ציירו את התיבה כפס, סמנו את המחולק ומנו כמה פעמים המחלק נכנס בו. רק אז כתבו את התרגיל ובדקו.', 'azaryahu2020', 'D'],
+    ],
+    DEC_MUL: [
+      ['intervalRatio', 'קווינטה היא פי 1.5 בתדר ואוקטבה פי 2. השמיעו 220 ו־440 הרץ במחולל צלילים ובדקו את היחס — כפל בעשרוני ששומעים.', 'interplay2024', 'R'],
+      ['beatDecimal', 'פעימה אחת = 1. שמינית = 0.5 ושש־עשרית = 0.25. הרכיבו תבנית של פעימה אחת וכתבו אותה גם בשברים וגם בעשרוניים.', 'azaryahu2020', 'A'],
+      ['clipSeconds', 'בעורך מוזיקה יש קטעים של 1.25, 0.75 ו־2.5 שניות: חזו את הסכום ואת הכפולות לפני ההשמעה, ואז בדקו בציר הזמן.', 'wnetMathInMusic', 'R'],
+    ],
+    PERCENT: [
+      ['tempoPercent', 'העלו מטרונום מ־80 ל־100 BPM: העלייה היא 20 מתוך 80, כלומר 25%. שמעו לפני ואחרי, ואז חשבו.', 'wnetMathInMusic', 'A'],
+      ['loopPositions', 'לולאת תופים של 20 משבצות: 5 נשמעות ו־15 שקטות. איזה אחוז מהמשבצות נשמע? החלק מתוך 100.', 'azaryahu2020', 'A'],
+      ['songForm', 'שיר של 10 תיבות: 4 בית, 4 פזמון ו־2 סיום הם 40%, 40% ו־20%. בדקו שהאחוזים מסתכמים ל־100.', 'interplay2024', 'A'],
+    ],
+    G6_DECIMAL_SYS: [
+      ['noteNames', 'לצליל אחד כמה שיטות סימון — דו־רה־מי, C-D-E ותו על החמשה — וכולן אותו צליל, כמו 14 ו־XIV שהם אותו מספר.', 'interplay2024', 'A'],
+      ['baseTenDrums', 'שייקר = 1, תוף = 10, מצילה = 100. נגנו מספר: מצילה אחת, שתי תיפות וארבע נקישות — ופענחו מספר שחבר ניגן.', 'kcConnections', 'A'],
+      ['placeScore', 'כתבו מספר כפרטיטורה בשלוש שורות: מאות, עשרות ויחידות. שורה ריקה היא האפס — ובלעדיה המספר משתנה.', 'interplay2024', 'A'],
+    ],
+    G6_NAT_PROPS: [
+      ['meterGroups', 'תיבה של 6 פעימות נחלקת ל־2 קבוצות של 3 או ל־3 של 2; תיבה של 7 — מספר ראשוני — רק לקבוצות לא שוות. הדגישו וראו.', 'kcConnections', 'A'],
+      ['lcmDrums', 'תוף אחד מכה כל 2 פעימות ואחר כל 3: הם נפגשים ב־6, 12, 18. כפולות משותפות והתחלקות — באוזן.', 'makingMusicCount', 'R'],
+      ['accentSkip', 'שמרו פעימה קבועה, הדגישו כל פעימה חמישית ואמרו רק את ההדגשות: 5, 10, 15 — כך מזהים מי מתחלק ב־5.', 'kcLessons', 'R'],
+    ],
+    G6_NAT_OPS: [
+      ['barCount', 'A = משפט של 2 פעימות, B = של 3. נגנו A ואז B שלוש פעמים, ואז (A ו־B) שלוש פעמים — הסוגריים משנים את האורך.', 'kcMath', 'A'],
+      ['songRecipe', 'מתכון שיר: פתיחה של 2 פעימות ואז 3 תיבות של 4. ציירו את המבנה ומנו — הכפל נספר לפני שמוסיפים את הפתיחה.', 'interplay2024', 'A'],
+      ['nestedRepeat', 'חזרה בתוך חזרה: סימן חזרה חיצוני שמכיל פתיחה ושני מוטיבים. בנו את התווים קודם, ורק אחר כך חשבו את הפעימות.', 'ncssm', 'A'],
+    ],
+    G6_NAT_EST: [
+      ['playlistTime', 'האם רשימת השירים נכנסת בשיעור? עגלו כל שיר לדקה שלמה וחברו — אומדן לפני חישוב מדויק.', 'wnetMathInMusic', 'A'],
+      ['bpmEstimate', 'ספרו פעימות ב־15 שניות וכפלו ב־4 — זה אומדן ה־BPM. השוו לספירה של דקה שלמה ודברו על ההפרש.', 'wnetMathInMusic', 'R'],
+      ['timelineEdit', 'קטע של 12 שניות ועוד קטע של 8: חזו את האורך לפני ההשמעה ובדקו בשעון עצר — כך בודקים תוצאה בלי לחשב במדויק.', 'wnetMathInMusic', 'A'],
+    ],
+    G6_MIXED: [
+      ['dottedBeats', 'רבע מנוקד נמשך 1 ו־1/2 פעימות. ארבעה כאלה ברצף: נגנו ומנו פעימות — זה כפל של מספר מעורב.', 'azaryahu2020', 'D'],
+      ['barsAndHalf', 'שיר של 2 ו־1/2 תיבות: כמה חצאי תיבה יש בו? נגנו וספרו חצאים — חילוק של מספר מעורב.', 'azaryahu2020', 'A'],
+      ['barFill', 'ציירו מספר מעורב כתיבות מלאות ועוד חלק תיבה, ואז הכפילו או חלקו את הציור לפני שכותבים שברים מדומים.', 'azaryahu2020', 'D'],
+    ],
+    G6_FRAC_LAWS: [
+      ['barFill', 'מלאו תיבה בתווים — רבע, שמינית, חצי — עד שהיא בדיוק שלמה. ההרכבה חייבת להסתכם ב־1, וכך בודקים כל חישוב.', 'azaryahu2020', 'D'],
+      ['reciprocalNotes', 'חצי ושני רבעים נמשכים אותו זמן: 1/2 = 2 × 1/4. ההופכי של רבע הוא 4, כי ארבעה רבעים ממלאים תיבה שלמה.', 'azaryahu2020', 'D'],
+      ['repeatSign', 'סימן חזרה הוא סוגריים: (חצי ועוד חצי) כפול חצי, מול חצי ועוד (חצי כפול חצי). נגנו את שניהם — האורך שונה.', 'kcMath', 'A'],
+    ],
+    G6_FRAC_PART: [
+      ['songParts', 'פזמון של 8 תיבות הוא רבע מהשיר: כמה תיבות בשיר? מכפילים את החלק — השלם לפי החלק, במבנה של שיר.', 'interplay2024', 'A'],
+      ['barFraction', 'איזה חלק מהתיבה הן 3 שמיניות? מנו שמיניות מתוך 8 בתיבה — החלק לפי הערך, בתווים.', 'azaryahu2020', 'D'],
+      ['dayAsSong', 'יממה היא כמו שיר של 24 תיבות: 3 תיבות הן 3/24. גם זמן של יום ושל שבוע אפשר לחלק כמו תיבה.', 'azaryahu2020', 'A'],
+    ],
+    G6_FRAC_EST: [
+      ['shortenNote', 'תו שמתנגן רק 5/6 מאורכו נעשה קצר יותר: כפל בשבר קטן מ־1 מקטין. שמעו לפני שמחשבים.', 'azaryahu2020', 'D'],
+      ['quarterCount', 'חילוק ברבע שואל כמה רבעים נכנסים — יותר מהמספר עצמו. בתיבה אחת כבר ארבעה. שמעו וספרו.', 'azaryahu2020', 'D'],
+      ['roundBars', '2 ו־7/8 תיבות הן כמעט 3 תיבות: אומדים לתיבות שלמות, ורק אחר כך מחשבים בדיוק.', 'azaryahu2020', 'A'],
+    ],
+    G6_DEC_EST: [
+      ['playlistTime', 'שיר של 3.9 דקות הוא בערך 4: עגלו כל קטע ואז חברו — האם הרשימה ארוכה מ־10 דקות? אומדן בלי חישוב מדויק.', 'wnetMathInMusic', 'R'],
+      ['clipSeconds', 'קטעים של 1.25 ו־0.75 שניות בעורך: חזו אם הסכום גדול מ־2 לפני שמשמיעים, ואז בדקו בציר הזמן.', 'wnetMathInMusic', 'R'],
+      ['tempoBounds', 'שני גורמים קטנים מ־10 — למשל שני קצבים — לא יכולים לתת מכפלה של 100. אומדים לפי גבולות, לא לפי חישוב.', 'wnetMathInMusic', 'A'],
+    ],
+    G6_DEC_LAWS: [
+      ['beatSeconds', 'ב־120 BPM פעימה נמשכת 0.5 שנייה: קודם סופרים את הפעימות שבסוגריים, ואז כופלים ב־0.5.', 'wnetMathInMusic', 'R'],
+      ['tempoSwap', 'כמו תווים שמחליפים מקום בתיבה בלי לשנות את אורכה — חוק החילוף: סדרו את הגורמים כך שזוג נותן 10 קודם.', 'azaryahu2020', 'A'],
+      ['clipSeconds', '99 קטעים של אותו אורך ועוד קטע אחד הם 100 קטעים: חוק הפילוג בציר הזמן של עורך המוזיקה.', 'wnetMathInMusic', 'A'],
+    ],
+    G6_PCT_WHOLE: [
+      ['tempoPercent', 'אם 10% מהקצב הם 9 פעימות בדקה, הקצב כולו (100%) גדול פי 10. השמיעו 9 פעימות, ואז את הקצב המלא.', 'wnetMathInMusic', 'A'],
+      ['loopPositions', 'לולאה של 25 משבצות ו־10 מהן נשמעות: החלק הוא 10 מתוך 25, וכדי לקבל אחוז מרחיבים ל־100.', 'azaryahu2020', 'A'],
+      ['songForm', 'אם 4 תיבות הן 25% מהשיר, השיר הוא 16 תיבות — השלם לפי האחוז, במבנה השיר.', 'interplay2024', 'A'],
+    ],
+    G6_PCT_CHANGE: [
+      ['tempoPercent', 'האטה של 20% מ־100 BPM: מורידים 20 ומגיעים ל־80 — כמו הנחה במחיר. שמעו את הקצב לפני ואחרי.', 'wnetMathInMusic', 'A'],
+      ['tempoRef', 'מ־80 ל־100 BPM זו עלייה של 25%, אבל מ־100 ל־80 זו ירידה של 20% — השלם שממנו יוצאים קובע את האחוז.', 'wnetMathInMusic', 'A'],
+      ['songForm', 'הארכת פזמון מ־8 ל־10 תיבות היא התייקרות של 25%: ההפרש חלקי המקור, לא חלקי התוצאה.', 'interplay2024', 'A'],
+    ],
+    G6_CIRCLE_TERMS: [
+      ['circleTerms', 'במעגל הקווינטות: ממרכז לדו — רדיוס; מדו לפה דיאז דרך המרכז — קוטר; מדו לסול בלי לעבור במרכז — מיתר.', 'interplay2024', 'A'],
+      ['drumHead', 'על עור תוף: מתחו חוט מהמרכז לשפה (רדיוס) ומשפה לשפה דרך המרכז (קוטר) והשוו — הקוטר תמיד כפול.', 'palmPipes', 'A'],
+      ['beatClock', 'שעון מקצב של 12 עמדות: 3 צעדים הם רבע סיבוב — גזרה עם 90° במרכז, והדרך על המעגל ביניהם היא קשת.', 'interplay2024', 'A'],
+    ],
+    G6_CIRCLE_CALC: [
+      ['drumHead', 'מדדו היקף וקוטר של כמה תופים עגולים: ההיקף תמיד בערך פי 3.14 מהקוטר — ככה מגלים את π בעצמכם.', 'makingMusicCount', 'A'],
+      ['beatClock', 'חצי עיגול הוא 6 מתוך 12 עמדות בשעון המקצב — ולכן חצי מההיקף וחצי מהשטח. חשבו את השלם וחלקו.', 'interplay2024', 'A'],
+      ['circleTerms', 'מעגל קווינטות ברדיוס כפול: ההיקף גדל פי 2, אבל השטח פי 4 — כי רדיוס כפול רדיוס.', 'interplay2024', 'A'],
+    ],
+    G6_COMP_RECT: [
+      ['stagePlan', 'במה בצורת L: חלקו לשני מלבנים ונגנו צליל אחד לכל משבצת, שורה אחרי שורה. סכום הצלילים הוא השטח.', 'kcMath', 'A'],
+      ['perimeterWalk', 'הקיפו את הצורה לפי פעימה: נקישה לכל צעד של יחידה וצליל אחר בכל פינה — מספר הנקישות הוא ההיקף.', 'kcPractice', 'A'],
+      ['sameWalk', 'מורידים ריבוע מהפינה — ההליכה הקצבית סביב הצורה לא מתקצרת: אותו מספר צעדים, אותו היקף, פחות שטח.', 'interplay2024', 'A'],
+    ],
+    G6_COMP_TRI: [
+      ['instrumentShape', 'גוף הבללייקה הוא משולש וגוף הפסנתר כמעט מקבילית: פרקו את הצורה לחלקים, חשבו כל חלק, חברו.', 'interplay2024', 'A'],
+      ['vertexBells', 'צעדו על המצולע לפי מקצב ופעמון בכל קודקוד: כך סופרים צלעות — וצלע משותפת לשני חלקים לא נכנסת להיקף.', 'interplay2024', 'A'],
+      ['areaScore', 'משולש הוא חצי מלבן: נגנו את כל משבצות המלבן, ואז רק חצי מהן — בסיס כפול גובה חלקי 2.', 'kcMath', 'A'],
+    ],
+    G6_BOX_VOL: [
+      ['speakerBox', 'תיבת רמקול: שכבה של קוביות ועוד שכבה. נגנו משפט של צליל לקובייה לכל שכבה — מספר השכבות כפול הצלילים בשכבה.', 'kcMath', 'A'],
+      ['shakerCubes', 'בנו שייקר סביב סידור של קוביות, הוציאו אותן ומלאו אורז — נפח הפנים הוא מספר הקוביות: אורך × רוחב × גובה.', 'whitehead', 'A'],
+      ['layerCount', 'יודעים את הנפח ואת הבסיס? נגנו שכבה־שכבה עד שמגיעים לנפח — מספר השכבות הוא הגובה: נפח חלקי שטח בסיס.', 'kcMath', 'A'],
+    ],
+    G6_VOL_UNITS: [
+      ['waterGlasses', 'מזגו 250 מ״ל לכל כוס והקישו: כל כוס היא יחידה אחת — כמה כוסות ממלא בקבוק של ליטר וחצי?', 'whitehead', 'A'],
+      ['cubeMl', 'מ״ל אחד ממלא קובייה של 1 ס״מ: מזגו 1,000 מ״ל לתיבה של 10 על 10 על 10 — וזה ליטר. הקישו עליה.', 'whitehead', 'A'],
+      ['unitChoice', 'בריכה מול כוס מוזיקלית: את הכוס מודדים במ״ל ואת הבריכה במ״ק — בוחרים יחידה לפי גודל הכלי.', 'whitehead', 'A'],
+    ],
+    G6_MEAN: [
+      ['tapTempo', 'הקישו כמה פעמים על הקצב וקבלו ערכי BPM: סכום הערכים חלקי מספרם — כך מטרונום «הקשה» מוצא את הממוצע.', 'wnetMathInMusic', 'A'],
+      ['meanBounds', 'ממוצע ההקשות תמיד בין האיטית למהירה, ולא חייב להיות אחת מהן ולא מספר שלם. בדקו עם שלוש הקשות.', 'wnetMathInMusic', 'A'],
+      ['zeroTap', 'פספסתם הקשה — היא נספרת כ־0 והממוצע יורד. גם אפס הוא נתון. חשבו לפני ואחרי.', 'wnetMathInMusic', 'A'],
+    ],
+    G6_DATA_READ: [
+      ['instrumentSurvey', 'ספרו כמה פעמים נשמע כל כלי בקטע ובנו דיאגרמת עמודות: קריאה היא השוואת גבהים, והסכום הוא כל הצלילים.', 'kcMath', 'A'],
+      ['pipePlot', 'מדדו אורכי צינורות של כלי נגינה ושימו כל מדידה כנקודה על דיאגרמת נקודות — כך קוראים פיזור של נתונים.', 'preshall', 'R'],
+      ['pictoBeats', 'בפיקטוגרם כל סמל הוא 20 פעימות: סופרים סמלים וכופלים במפתח — ובעוגה כל גזרה היא חלק מכל הצלילים.', 'kcMath', 'A'],
+    ],
+    G6_DATA_SHOW: [
+      ['instrumentSurvey', 'אותם נתונים על כלי הכיתה אפשר להציג בטבלה, בעמודות או בעוגה — חלקים של שלם אחד מתאימים לעוגה.', 'kcMath', 'A'],
+      ['songFormPie', 'שיר של 4 חלקים שווים, 3 פזמון ו־1 בית: בעוגה של 4 גזרות, 3 ל«פזמון». ההצגה היא בחירה, לא ציור חופשי.', 'interplay2024', 'A'],
+      ['sectorDegrees', 'גזרה של רבע בשעון המקצב של 12 עמדות היא 3 עמדות ו־90 מעלות — אחוזים הופכים למעלות בעוגה.', 'interplay2024', 'A'],
+    ],
+  };
+
+  return { grade: 'ו', rows: rows, order: order, ST: ST, standards: standards, items: items, music: music, sources: sources };
 });

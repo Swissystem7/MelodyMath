@@ -1884,22 +1884,29 @@
   const GRADE_FILES = (typeof module === 'object' && module.exports)
     ? [require('./curriculum/grade6')]
     : [typeof globalThis !== 'undefined' && globalThis.MM_GRADE6];
+  // Research behind the music ways of the grade files (#591): id → [label, URL].
+  const MUSIC_SOURCES = {};
   GRADE_FILES.forEach(function (f) {
     if (!f || !Array.isArray(f.items)) return;
     Object.keys(f.ST).forEach(function (k) { ST[k] = f.ST[k][0]; });
+    Object.keys(f.sources || {}).forEach(function (k) { MUSIC_SOURCES[k] = f.sources[k]; });
     f.items.forEach(function (x) {
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
       RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart }));
     });
-    // Every item of the grade without a music activity gets the music link
-    // of its standard, older builders (G56, MV) included.
+    // Every item of the grade without a music activity learns its standard
+    // through music (#591): the grade file lists research-backed ways per
+    // standard, one per level, and the item takes the way of its level —
+    // older builders (G56, MV) included. A way is [tag, note, source, evidence].
     const link = {};
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     RAW.forEach(function (raw) {
-      const m = raw.grade === f.grade && !raw.music && link[raw.standard];
-      if (m) { raw.music = m[0]; raw.musicNote = m[1]; }
+      const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+      if (!ways) return;
+      const m = ways[Math.min(clampLevel(raw.level), ways.length) - 1];
+      raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
     });
   });
 
@@ -1936,6 +1943,7 @@
     if (raw.tolerance != null) it.tolerance = raw.tolerance;
     if (raw.music) it.music = raw.music;
     if (raw.musicNote) it.musicNote = raw.musicNote;
+    if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
     if (raw.grid) it.grid = raw.grid;
     SHIPPED.push(it);
   });
@@ -2089,6 +2097,7 @@
     RM_BANK: RM_BANK,
     SKILL_GRADE: SKILL_GRADE,
     LEVEL_HE: LEVEL_HE,
+    MUSIC_SOURCES: MUSIC_SOURCES,
     skillHe: skillHe,
     skillGrade: skillGrade,
     levelHe: levelHe,
