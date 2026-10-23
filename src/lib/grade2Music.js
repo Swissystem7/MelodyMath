@@ -308,6 +308,7 @@
   }
 
   function isQuiet() {
+    if (typeof isMusicOff === 'function' && isMusicOff()) return true; // #591 rule 5: music toggled off
     const load = typeof loadAccess === 'function' ? loadAccess : null;
     if (!load) return false;
     try { return !!load().quiet; } catch (e) { return false; }

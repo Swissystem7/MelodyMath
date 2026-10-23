@@ -318,6 +318,7 @@
   // Quiet mode is a hard mute. Every narration below is on screen too, so a
   // silenced tablet loses nothing (§4.3, §4.7).
   function isQuiet() {
+    if (typeof isMusicOff === 'function' && isMusicOff()) return true; // #591 rule 5: music toggled off
     if (typeof loadAccess !== 'function') return false;
     try { return !!loadAccess().quiet; } catch (e) { return false; }
   }
