@@ -35,6 +35,9 @@
     patterns: { he: 'דגמים וסדרות', mechanism: 'M6' },
     symmetry: { he: 'סימטריה', mechanism: 'M6' },
     lcm: { he: 'כפולה משותפת', mechanism: 'M4' },
+    // RhythmPolygon (owner 6376161263): the rhythm clock is a rhythmic pattern
+    // on a circle, so geometry joins symmetry on M6. M7 walking stays optional.
+    polygons: { he: 'מצולעים, זוויות וסיבוב', mechanism: 'M6' },
     numberLine: { he: 'ישר המספרים וסדר', mechanism: 'M5' },
   };
 
