@@ -64,6 +64,7 @@ const ASSETS = [
   './src/lib/tabs.js',
   './src/lib/print.css',
   './src/lib/learnerPlanView.js',
+  './src/lib/topicDiagnostic.js',
   './src/lib/music/groove.js',
   './src/lib/music/streak.js',
   './src/lib/music/unlocks.js',
