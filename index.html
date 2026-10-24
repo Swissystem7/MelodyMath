@@ -154,6 +154,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 @keyframes mmTap{0%{transform:scale(.9)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.mm-tap{animation:none!important;transform:none!important;outline:3px solid #ffd600}}
 .mm-pad{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 14px}.mm-pad-title{font-size:.88rem;color:var(--muted);font-weight:700}
+.mm-unlock{position:fixed;inset-inline:12px;bottom:16px;margin:auto;max-width:420px;z-index:60;background:#fff5ce;color:var(--ink);border:2px solid var(--yellow);border-radius:16px;padding:12px 16px;font-weight:800;text-align:center;box-shadow:0 10px 30px #4638702e}
 .mm-pad-key{min-width:48px;min-height:48px;padding:6px 10px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--purple);font-weight:800}.mm-pad-new{border:2px solid var(--yellow)}
 .nl-control{margin:10px 0}
 .nl-control input[type=range]{min-height:48px}
@@ -446,6 +447,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">סטודיו מקצב וצליל · העשרה</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% · 370 Hz" aria-label="גובה על המסך לתדר"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון: <b id="accuracyLabel">70%</b></label><input id="accuracy" type="range" min="0" max="100" value="70" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70" aria-valuetext="70%" aria-label="דיוק אחרון במחולל המקצב"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm" aria-live="polite"></div></div><div class="tool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><h3 style="margin:0;">ישר מספרים מנגן — שברים ותדרים</h3><span class="tag">מחוון רציף ופעמוני שבר</span></div><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% (1/2) 🔔 פעמון שבר: 1/2" aria-label="מיקום על ישר המספרים"></div><div class="nl-keys" role="group" aria-label="נקודות שבר עיקריות על ישר המספרים"><button type="button" class="secondary" data-pct="0" aria-pressed="false">0 (בסיס)</button><button type="button" class="secondary" data-pct="25" aria-pressed="false">1/4 (רבע)</button><button type="button" class="secondary selected" data-pct="50" aria-pressed="true">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75" aria-pressed="false">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100" aria-pressed="false">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div><div class="tool rhythm-studio" id="rhythmGameTool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><h3 style="margin:0;color:var(--pink);font-size:1.35rem;">🥁 סטודיו מקצב ומוזיקה — מנגנים עם הלהקה</h3><span class="tag" id="rhythmStageTag">שלב 1: פעימת מקצב (4/4)</span></div><div class="band-stage" id="bandStage" role="region" aria-label="שלבי הלהקה"><div class="band-card unlocked" id="bandDrums" data-level="1"><span class="band-icon">🥁</span><span class="band-name">תופים</span><span class="band-level">שלב 1 · פעימה</span></div><div class="band-card" id="bandBass" data-level="2"><span class="band-icon">🎸</span><span class="band-name">קו בס</span><span class="band-level">שלב 2 · רצף 3+</span></div><div class="band-card" id="bandChords" data-level="3"><span class="band-icon">🎹</span><span class="band-name">אקורדים</span><span class="band-level">שלב 3 · רצף 6+</span></div><div class="band-card" id="bandMelody" data-level="4"><span class="band-icon">🎷</span><span class="band-name">סולו</span><span class="band-level">שלב 4 · רצף 10+</span></div></div><div class="rhythm-highway-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.95rem;color:#ded6f0;"><span id="rhythmPatternName" style="color:var(--card);"><b>תבנית:</b> ארבעה רבעים (4/4)</span><span id="rhythmBpmDisplay" style="color:#ffd85d;font-weight:bold;"><b>טמפו:</b> 80 BPM</span></div><div class="rhythm-highway" id="rhythmFractionsVisual" aria-label="חלוקת התיבה לשברים"></div><div class="rhythm-track" style="position:relative;height:12px;background:rgba(255,255,255,0.15);border-radius:99px;overflow:hidden;margin-top:10px;"><div id="rhythmCursor" class="rhythm-cursor-line"></div></div><div id="rhythmSpark" class="rhythm-spark" aria-live="assertive">בול! 💥</div></div><div class="drum-pads-grid" role="group" aria-label="פדים לתופים"><button type="button" id="drumPadBtn" class="drum-pad pad-kick" data-sound="kick" title="בס (Kick) — רווח או מקש 1"><span class="pad-icon">🥁</span><span class="pad-label">בס (Kick)</span><span class="pad-key">רווח / 1</span></button><button type="button" id="drumSnareBtn" class="drum-pad pad-snare" data-sound="snare" title="סנר (Snare) — מקש 2"><span class="pad-icon">🪘</span><span class="pad-label">סנר (Snare)</span><span class="pad-key">מקש 2</span></button><button type="button" id="drumHihatBtn" class="drum-pad pad-hihat" data-sound="hihat" title="היי-האט — מקש 3"><span class="pad-icon">🪙</span><span class="pad-label">היי-האט</span><span class="pad-key">מקש 3</span></button><button type="button" id="drumClapBtn" class="drum-pad pad-clap" data-sound="clap" title="מחיאת כף — מקש 4"><span class="pad-icon">👏</span><span class="pad-label">כף (Clap)</span><span class="pad-key">מקש 4</span></button></div><div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap;"><button type="button" id="rhythmStartBtn" class="primary" style="width:auto;min-height:48px;padding:12px 24px;">▶ התחלת נגינה</button><button type="button" id="rhythmPatternNextBtn" class="secondary" style="width:auto;min-height:48px;padding:12px 20px;">🔄 החלף מקצב</button></div><div style="display:flex;justify-content:space-around;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin:12px 0;"><div><span style="font-size:0.8rem;color:var(--muted);display:block;">רצף מקצב</span><b id="rhythmStreakDisplay" style="font-size:1.45rem;color:var(--purple);">0</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">שכבה מוזיקלית</span><b id="rhythmLayerDisplay" style="font-size:1.45rem;color:var(--good);">רק תופים</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">דיוק פעימה</span><b id="rhythmAccuracyDisplay" style="font-size:1.45rem;color:var(--ink);">-</b></div></div><div class="xylo-shelf" id="xyloStudio"><div style="display:flex;justify-content:space-between;align-items:center;color:#ded6f0;margin-bottom:10px;font-size:0.88rem;"><span style="color:var(--card);"><b>🎹 קסילופון צבעוני:</b> הקישו על הקלידים או במקלדת A–K / 1–8</span><span id="xyloLastNote" style="color:#ffd85d;font-weight:bold;">נגנו מנגינה עם המקצב!</span></div><div class="xylo-keys" id="xyloKeys" role="group" aria-label="קלידי קסילופון 8 צלילים"></div></div></div></div></div></section>
 <section id="musicGames" class="panel" role="tabpanel" aria-labelledby="tab-musicGames" hidden><div class="card"><span class="tag">משחקי מוזיקה · #591</span><h2>מנגנים ופותרים</h2><p>בכל נושא יש דרך מוזיקלית אחת שממשיכה מכיתה לכיתה. הכלי משנה רק את הצליל. אפשר לכבות את המוזיקה בכל תרגיל ולפתור בלי צליל. זה תרגול, לא טיפול ואין טענת יעילות.</p></div>
 <div class="card mm-game" id="fbpCard" aria-label="ממלאים תיבה במשכי תווים"></div>
+<div class="card mm-game" id="bcCard" aria-label="ספירה לפי פעמה"></div>
 <div class="card mm-game" id="ttgCard" aria-label="לוח הכפל כשיר קצבי"></div>
 <div class="card mm-game" id="rmCard" aria-label="RhythmMaster, אתגר פולי־ריתמוס"></div>
 <!-- #591 music games end -->
@@ -865,7 +867,7 @@ function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',tru
 const PLAN_PER_SKILL=6;
 function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItemsOrAll==='function'?gateItemsOrAll(st.items,st.history||[],st.items):(typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items);const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
 function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))setItemTag($('rmPlanTag'),it);setMath($('rmPlanPrompt'),it.prompt);setMusicWay('rmPlanWay',it);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
-function rpCheck(){if(rpAnswered)return;if(!normalizeAnswer($('rmPlanAnswer').value))return askForAnswer('rmPlanAnswer','rmPlanFeedback');rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerOk(it,$('rmPlanAnswer').value);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;st.level=nextLevel(it.level||st.level||1,st.history.slice(-2));noteMetro(correct);logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(answerHint(it,$('rmPlanAnswer').value,correct))}. התשובה: <b>${mathHtml(it.answer)}</b></div>${musicSourceHtml(it)}`;show('rmPlanFeedback',true);revealWidget('rmPlanWidget');$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא';if($('rmPlanNext')&&typeof $('rmPlanNext').focus==='function')$('rmPlanNext').focus();}
+function rpCheck(){if(rpAnswered)return;if(!normalizeAnswer($('rmPlanAnswer').value))return askForAnswer('rmPlanAnswer','rmPlanFeedback');rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerOk(it,$('rmPlanAnswer').value);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;const lv0=it.level||st.level||1;st.level=nextLevel(lv0,st.history.slice(-2));noteMetro(correct);if(st.level>lv0&&typeof playLevelTune==='function')playLevelTune();logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(answerHint(it,$('rmPlanAnswer').value,correct))}. התשובה: <b>${mathHtml(it.answer)}</b></div>${musicSourceHtml(it)}`;show('rmPlanFeedback',true);revealWidget('rmPlanWidget');$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא';if($('rmPlanNext')&&typeof $('rmPlanNext').focus==='function')$('rmPlanNext').focus();}
 function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);show('rmPlanDoneActions',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;if($('rmPlanRestart'))$('rmPlanRestart').focus()}}
 $('rmBegin').onclick=()=>{RM_DIAG=currentDiag();rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmPlanDoneActions',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
@@ -1035,6 +1037,12 @@ function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); i
 function noteMetro(correct){
   // A wrong answer gets its own soft falling step; a right one climbs with the streak.
   if(!correct && typeof playTap==='function') playTap('wrong');
+  // #591 A.4: the streak melody grows a note per right answer; right answers unlock strip instruments.
+  else if(correct && typeof playStreakMelody==='function'){
+    playStreakMelody(metroStreak + 1);
+    const u=typeof recordCorrect==='function'?recordCorrect():null;
+    if(u&&u.unlocked&&typeof announceUnlock==='function') announceUnlock(u.unlocked);
+  }
   else if(typeof playHarmonicReward==='function'){
     playHarmonicReward(correct ? metroStreak + 1 : 0);
   }
@@ -1208,7 +1216,9 @@ function finishBeatPick(value, correct, late){
   stopBeatTimer();
   beatHist.push({id:beatCurrent.id,correct:correct});
   beatLastId=beatCurrent.id;
-  beatLevel=nextLevel(beatCurrent.level||beatLevel, beatHist.slice(-2));
+  const lv0=beatCurrent.level||beatLevel;
+  beatLevel=nextLevel(lv0, beatHist.slice(-2));
+  if(beatLevel>lv0 && typeof playLevelTune==='function') playLevelTune(); // #591 A.4: a level is completed
   const paced=typeof applyStreak==='function'?applyStreak(metroBpmNow(), metroStreak, correct && !late, !!( $('metroAccel') && $('metroAccel').checked )):null;
   if(paced){
     metroStreak=paced.streak;
@@ -1413,6 +1423,8 @@ function renderStepperPills() {
   const l = getLessonById(activeLessonId);
   if (!l) return;
   const stepNames = ['1. מושג', '2. הדגמה', '3. התנסות', '4. בדיקה'];
+  stepper.setAttribute('role', 'navigation');
+  stepper.setAttribute('aria-label', 'שלבי השיעור');
   stepper.innerHTML = l.steps.map((_, idx) => `
     <button type="button" class="step-pill ${idx === activeStepIndex ? 'active' : ''} ${idx < activeStepIndex ? 'done' : ''}" data-step-idx="${idx}" aria-current="${idx === activeStepIndex ? 'step' : 'false'}" aria-label="${stepNames[idx] || ('שלב ' + (idx + 1))}">
       ${stepNames[idx] || ('שלב ' + (idx + 1))}
@@ -1857,7 +1869,7 @@ function renderStepAction(step) {
       <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
         <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">מצולע של 3 צלילים על מעגל של 12 פעימות (משולש שווה צלעות):</div>
         <div style="display:flex;justify-content:center;margin:12px 0;">
-          <svg width="180" height="180" viewBox="0 0 180 180">
+          <svg width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="גלגל מקצב אוקלידי: ${euclideanPulses} קודקודים מתוך ${euclideanSteps} פעימות">
             <circle cx="90" cy="90" r="70" fill="none" stroke="#ddd" stroke-width="3" />
             <polygon points="90,20 150.62,125 29.38,125" fill="rgba(107,70,193,0.12)" stroke="var(--purple)" stroke-width="3" />
             <circle cx="90" cy="20" r="8" fill="var(--purple)" />
@@ -2209,7 +2221,7 @@ function renderFractionBuilderUI(box) {
         סה״כ: <span style="color:${isPerfect ? 'var(--good)' : isOver ? 'var(--bad)' : 'var(--purple)'};">${sum.toFixed(3).replace(/\.?0+$/, '')}</span> מתוך 1
         ${isPerfect ? ' 🎉 מושלם! 1 שלם מדויק!' : isOver ? ' ⚠️ עברתם את השלם!' : ''}
       </div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;">
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;" role="group" aria-label="הוספת לבני שברים">
         <button type="button" class="secondary" id="fbAddHalf" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;width:auto;padding:8px 16px;">+ 1/2 (חצי)</button>
         <button type="button" class="secondary" id="fbAddQuarter" style="background:#ede7f6;color:#4527a0;border-color:#b39ddb;width:auto;padding:8px 16px;">+ 1/4 (רבע)</button>
         <button type="button" class="secondary" id="fbAddEighth" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;width:auto;padding:8px 16px;">+ 1/8 (שמינית)</button>
@@ -2252,14 +2264,14 @@ function renderMultExplorerUI(box) {
       <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">מספר קבוצות:</label>
-          <div style="display:inline-flex;gap:4px;" id="mgGroupBtns">
-            ${[2, 3, 4, 5].map(g => `<button type="button" class="secondary ${g === multExplorerGroups ? 'primary' : ''}" data-g="${g}" style="min-width:44px;min-height:44px;padding:0;">${g}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="mgGroupBtns" role="group" aria-label="מספר קבוצות">
+            ${[2, 3, 4, 5].map(g => `<button type="button" class="secondary ${g === multExplorerGroups ? 'primary' : ''}" data-g="${g}" aria-pressed="${g === multExplorerGroups}" style="min-width:44px;min-height:44px;padding:0;">${g}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">גודל כל קבוצה:</label>
-          <div style="display:inline-flex;gap:4px;" id="mgSizeBtns">
-            ${[2, 3, 4, 5].map(s => `<button type="button" class="secondary ${s === multExplorerSize ? 'primary' : ''}" data-s="${s}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="mgSizeBtns" role="group" aria-label="גודל כל קבוצה">
+            ${[2, 3, 4, 5].map(s => `<button type="button" class="secondary ${s === multExplorerSize ? 'primary' : ''}" data-s="${s}" aria-pressed="${s === multExplorerSize}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2301,7 +2313,7 @@ function renderTensBuilderUI(box) {
   box.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;">
       <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">בנו מספר באמצעות עשרות ואחדות:</div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;" role="toolbar" aria-label="פעולות עשרות ואחדות">
         <button type="button" class="secondary" id="tbAddTen" style="background:#ede7f6;color:#5e35b1;border-color:#b39ddb;width:auto;padding:8px 14px;">+ עשרת (10)</button>
         <button type="button" class="secondary" id="tbSubTen" style="width:auto;padding:8px 14px;" ${tensBuilderTens <= 0 ? 'disabled' : ''}>- עשרת</button>
         <button type="button" class="secondary" id="tbAddOne" style="background:#fff8e1;color:#f57f17;border-color:#ffe082;width:auto;padding:8px 14px;">+ אחדה (1)</button>
@@ -2355,8 +2367,8 @@ function renderLineExplorerUI(box) {
       <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">צעדו וקפצו על ישר המספרים:</div>
       <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <label style="font-weight:bold;">גודל דילוג:</label>
-        <div style="display:inline-flex;gap:6px;" id="leStepBtns">
-          ${[1, 2, 5].map(s => `<button type="button" class="secondary ${s === lineExplorerStep ? 'primary' : ''}" data-step="${s}" style="min-width:44px;min-height:44px;padding:0;">+${s}</button>`).join('')}
+        <div style="display:inline-flex;gap:6px;" id="leStepBtns" role="group" aria-label="גודל דילוג">
+          ${[1, 2, 5].map(s => `<button type="button" class="secondary ${s === lineExplorerStep ? 'primary' : ''}" data-step="${s}" aria-pressed="${s === lineExplorerStep}" style="min-width:44px;min-height:44px;padding:0;">+${s}</button>`).join('')}
         </div>
       </div>
       <div style="background:#f4f0ff;border-radius:12px;padding:16px;margin:14px auto;max-width:520px;overflow-x:auto;">
@@ -2480,14 +2492,14 @@ function renderEuclideanWheelUI(box) {
       <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">סה״כ צעדים במעגל:</label>
-          <div style="display:inline-flex;gap:4px;" id="eucStepsBtns">
-            ${[8, 12, 16].map(s => `<button type="button" class="secondary ${s === euclideanSteps ? 'primary' : ''}" data-s="${s}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="eucStepsBtns" role="group" aria-label="סה״כ צעדים במעגל">
+            ${[8, 12, 16].map(s => `<button type="button" class="secondary ${s === euclideanSteps ? 'primary' : ''}" data-s="${s}" aria-pressed="${s === euclideanSteps}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">צלילים פעילים (קדקודים):</label>
-          <div style="display:inline-flex;gap:4px;" id="eucPulsesBtns">
-            ${[3, 4, 5].map(p => `<button type="button" class="secondary ${p === euclideanPulses ? 'primary' : ''}" data-p="${p}" style="min-width:44px;min-height:44px;padding:0;">${p}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="eucPulsesBtns" role="group" aria-label="צלילים פעילים">
+            ${[3, 4, 5].map(p => `<button type="button" class="secondary ${p === euclideanPulses ? 'primary' : ''}" data-p="${p}" aria-pressed="${p === euclideanPulses}" style="min-width:44px;min-height:44px;padding:0;">${p}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2539,8 +2551,8 @@ function renderEvenOddExplorerUI(box) {
       <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">חוקר הזוגי והאי־זוגי:</div>
       <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <label style="font-weight:bold;">בחרו מספר:</label>
-        <div style="display:inline-flex;gap:4px;flex-wrap:wrap;" id="eoNumBtns">
-          ${[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" class="secondary ${n === evenOddCount ? 'primary' : ''}" data-n="${n}" style="min-width:44px;min-height:44px;padding:0;">${n}</button>`).join('')}
+        <div style="display:inline-flex;gap:4px;flex-wrap:wrap;" id="eoNumBtns" role="group" aria-label="בחירת מספר לבדיקת זוגיות">
+          ${[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" class="secondary ${n === evenOddCount ? 'primary' : ''}" data-n="${n}" aria-pressed="${n === evenOddCount}" style="min-width:44px;min-height:44px;padding:0;">${n}</button>`).join('')}
         </div>
       </div>
       <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:16px 0;">
@@ -2597,14 +2609,14 @@ function renderPolyrhythmExplorerUI(box) {
       <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">תוף א׳ מכה כל:</label>
-          <div style="display:inline-flex;gap:4px;" id="polyABtns">
-            ${[2, 3, 4].map(a => `<button type="button" class="secondary ${a === polyrhythmCycleA ? 'primary' : ''}" data-a="${a}" style="min-width:44px;min-height:44px;padding:0;">${a}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="polyABtns" role="group" aria-label="מחזור תוף א׳">
+            ${[2, 3, 4].map(a => `<button type="button" class="secondary ${a === polyrhythmCycleA ? 'primary' : ''}" data-a="${a}" aria-pressed="${a === polyrhythmCycleA}" style="min-width:44px;min-height:44px;padding:0;">${a}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">תוף ב׳ מכה כל:</label>
-          <div style="display:inline-flex;gap:4px;" id="polyBBtns">
-            ${[3, 4, 6].map(b => `<button type="button" class="secondary ${b === polyrhythmCycleB ? 'primary' : ''}" data-b="${b}" style="min-width:44px;min-height:44px;padding:0;">${b}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="polyBBtns" role="group" aria-label="מחזור תוף ב׳">
+            ${[3, 4, 6].map(b => `<button type="button" class="secondary ${b === polyrhythmCycleB ? 'primary' : ''}" data-b="${b}" aria-pressed="${b === polyrhythmCycleB}" style="min-width:44px;min-height:44px;padding:0;">${b}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2663,17 +2675,17 @@ function renderFractionDivExplorerUI(box) {
       <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">משך היעד:</label>
-          <div style="display:inline-flex;gap:4px;" id="fdBaseBtns">
+          <div style="display:inline-flex;gap:4px;" id="fdBaseBtns" role="group" aria-label="משך היעד">
             ${[['1/2', 'חצי'], ['3/8', 'רבע מנוקד'], ['3/4', '3/4']].map(([k, label]) => `
-              <button type="button" class="secondary ${k === fractionDivBase ? 'primary' : ''}" data-base="${k}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
+              <button type="button" class="secondary ${k === fractionDivBase ? 'primary' : ''}" data-base="${k}" aria-pressed="${k === fractionDivBase}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
             `).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">יחידת החלוקה:</label>
-          <div style="display:inline-flex;gap:4px;" id="fdUnitBtns">
+          <div style="display:inline-flex;gap:4px;" id="fdUnitBtns" role="group" aria-label="יחידת החלוקה">
             ${[['1/8', 'שמינית'], ['1/16', 'שש־עשרית']].map(([k, label]) => `
-              <button type="button" class="secondary ${k === fractionDivUnit ? 'primary' : ''}" data-unit="${k}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
+              <button type="button" class="secondary ${k === fractionDivUnit ? 'primary' : ''}" data-unit="${k}" aria-pressed="${k === fractionDivUnit}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
             `).join('')}
           </div>
         </div>
@@ -2739,6 +2751,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 </script><script src="src/lib/learnerPlanView.js"></script>
 <script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/components/jamKit.js"></script>
 <script src="src/lib/music/fractionBar.js"></script><script src="src/components/FractionBarPad.js"></script>
+<script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
 <script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/lib/music/unlocks.js"></script><script src="src/components/TimesTableGroove.js"></script>
 <script src="src/lib/music/rhythmMaster.js"></script><script src="src/lib/music/rhythmMeasure.js"></script><script src="src/components/RhythmMaster.js"></script>
 <!-- #591 music game scripts end -->

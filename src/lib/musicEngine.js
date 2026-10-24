@@ -549,9 +549,134 @@
     const off = !!(o.quiet || audioState.muted);
     box.classList.toggle('hidden', off);
     if (off) { box.innerHTML = ''; return box; }
-    const set = padFor(o.mechanism, o.extra);
+    const set = padFor(o.mechanism, o.extra != null ? o.extra : unlockedVoices(loadTapProgress().count));
     box.setAttribute('aria-label', 'נגנו חופשי לפני שעונים: ' + set.he);
     box.innerHTML = padHtml(set);
+    return box;
+  }
+
+  // ---------- reward loop (#591 goal A.4) ----------
+  // Every reward is music the child hears or can play, never points, and a
+  // wrong answer is never punished with a sound or a lost reward (the owner's
+  // feature 2/5 cites Deci, Koestner & Ryan 1999 for this). Three parts:
+  // a streak melody that grows one note per right answer in a row and gains a
+  // layer every 3, a short tune when a level is completed, and instruments for
+  // the free-play strip unlocked by the number of right answers so far.
+  const STREAK_TUNE = [0, 1, 2, 3, 2, 3, 4, 5]; // steps on the pentatonic ladder
+  const STREAK_GAP = 0.09;
+
+  function streakMelody(streak) {
+    const s = Math.round(Number(streak) || 0);
+    if (s <= 0) return [];
+    const n = Math.min(s, STREAK_TUNE.length);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      out.push({ at: i * STREAK_GAP, dur: 0.16, hz: PENTA[STREAK_TUNE[i]], gain: 0.16, type: 'triangle', layer: 'melody' });
+    }
+    const end = (n - 1) * STREAK_GAP;
+    const last = PENTA[STREAK_TUNE[n - 1]];
+    // 3 in a row: a bass under the phrase; 6: a third over the last note; 9: an octave sparkle.
+    if (s >= 3) out.push({ at: 0, dur: end + 0.2, hz: PENTA[0] / 2, gain: 0.1, type: 'sine', layer: 'bass' });
+    if (s >= 6) out.push({ at: end, dur: 0.24, hz: last * 5 / 4, gain: 0.1, type: 'triangle', layer: 'harmony' });
+    if (s >= 9) out.push({ at: end + 0.06, dur: 0.2, hz: last * 2, gain: 0.07, type: 'sine', layer: 'sparkle' });
+    return out;
+  }
+
+  function streakLayers(streak) {
+    const s = Math.round(Number(streak) || 0);
+    return ['bass', 'harmony', 'sparkle'].slice(0, Math.max(0, Math.min(3, Math.floor(s / 3))));
+  }
+
+  // A rising G-E-G-C cadence, then the C major chord together.
+  function levelTune() {
+    const G = 392.00, E = 329.63, C = 261.63, C2 = 523.25;
+    const out = [G, E, G, C2].map(function (hz, i) {
+      return { at: i * 0.12, dur: 0.16, hz: hz, gain: 0.16, type: 'triangle' };
+    });
+    [C, E, G, C2].forEach(function (hz) { out.push({ at: 0.5, dur: 0.6, hz: hz, gain: 0.07, type: 'sine' }); });
+    return out;
+  }
+
+  // Rewards queue after one another (a level tune waits for the streak
+  // melody) and stop with stopSequence, but do not cut a sequence that plays.
+  let rewardEnd = 0;
+  function playReward(events) {
+    if (!events.length || audioState.muted) return null;
+    const ac = getSharedAudioContext();
+    if (!ac) return null;
+    if (ac.state === 'suspended') { try { ac.resume(); } catch (e) { /* autoplay policy */ } }
+    if (rewardEnd > ac.currentTime + 3) rewardEnd = 0; // a new context restarts its clock
+    const start = Math.max(ac.currentTime + 0.02, rewardEnd);
+    const plan = planSequence(events, start);
+    plan.forEach(function (note) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = note.type;
+      o.frequency.setValueAtTime(note.hz, note.time);
+      g.gain.setValueAtTime(0.0001, note.time);
+      g.gain.linearRampToValueAtTime(note.gain, note.time + ATTACK);
+      g.gain.exponentialRampToValueAtTime(0.0001, note.time + note.dur);
+      o.connect(g).connect(ac.destination);
+      o.start(note.time);
+      o.stop(note.time + note.dur + 0.02);
+      live.push(o);
+    });
+    rewardEnd = plan.reduce(function (m, n) { return Math.max(m, n.time + n.dur); }, start);
+    return { startTime: start, endTime: rewardEnd, notes: plan.length };
+  }
+
+  function playStreakMelody(streak) { return playReward(streakMelody(streak)); }
+  function playLevelTune() { return playReward(levelTune()); }
+
+  // Instruments for the free-play strip, unlocked by right answers on this
+  // device. They change the timbre only, never the method.
+  const TAP_UNLOCKS = [
+    { voice: 'clap', at: 5 }, { voice: 'bell', at: 10 }, { voice: 'snare', at: 20 },
+    { voice: 'kick', at: 30 }, { voice: 'xylo', at: 45 }, { voice: 'hihat', at: 60 },
+  ];
+  const PROGRESS_KEY = 'mm.tapProgress.v1';
+
+  function unlockedVoices(count) {
+    const c = Number(count) || 0;
+    return TAP_UNLOCKS.filter(function (u) { return c >= u.at; }).map(function (u) { return u.voice; });
+  }
+
+  function defaultStore() {
+    try { return typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { return null; }
+  }
+
+  function loadTapProgress(store) {
+    const s = store || defaultStore();
+    let count = 0;
+    try { count = s ? Number(JSON.parse(s.getItem(PROGRESS_KEY) || '{}').count) || 0 : 0; } catch (e) { count = 0; }
+    return { count: Math.max(0, Math.floor(count)) };
+  }
+
+  // One more right answer. Returns the new count and the voice it unlocked
+  // (null most of the time). Nothing is ever taken away.
+  function recordCorrect(store) {
+    const s = store || defaultStore();
+    const count = loadTapProgress(s).count + 1;
+    try { if (s) s.setItem(PROGRESS_KEY, JSON.stringify({ count: count })); } catch (e) { /* private mode */ }
+    const hit = TAP_UNLOCKS.filter(function (u) { return u.at === count; })[0];
+    return { count: count, unlocked: hit ? hit.voice : null };
+  }
+
+  // A short polite note on screen and the new instrument's own sound.
+  function announceUnlock(voice) {
+    if (!TAP_VOICES[voice] || typeof document === 'undefined' || !document.body) return null;
+    let box = document.getElementById('mmUnlock');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'mmUnlock';
+      box.className = 'mm-unlock';
+      box.setAttribute('role', 'status');
+      document.body.appendChild(box);
+    }
+    box.textContent = '🎁 כלי חדש נפתח: ' + VOICE_HE[voice] + '. נסו אותו בפס הנגינה.';
+    box.classList.remove('hidden');
+    setTimeout(function () { box.classList.add('hidden'); }, 3500);
+    playTap(voice, { step: 2 });
     return box;
   }
 
@@ -674,6 +799,8 @@
     isAudioUnlocked: audioReady, playSequence: scheduleSequence,
     canReplay, replaySequence, TAP_VOICES, tapPlan, playTap, audioState, setMuted,
     tapFeedback, installTapFeedback, PAD_SETS, padFor, padHtml, mountFreePad,
+    streakMelody, streakLayers, levelTune, playStreakMelody, playLevelTune,
+    TAP_UNLOCKS, unlockedVoices, loadTapProgress, recordCorrect, announceUnlock,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.

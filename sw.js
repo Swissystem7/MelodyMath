@@ -77,6 +77,8 @@ const ASSETS = [
   './src/lib/music/rhythmMaster.js',
   './src/lib/music/rhythmMeasure.js',
   './src/components/RhythmMaster.js',
+  './src/lib/music/beatCounter.js',
+  './src/components/BeatCounter.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/sefirot.css',
