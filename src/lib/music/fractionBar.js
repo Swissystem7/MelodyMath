@@ -6,9 +6,10 @@
 // 1/2 + 1/4 + 1/4 is exactly one bar and 1/3 + 1/3 + 1/3 is too.
 //
 // checkFill() tells the child what is over or missing ("עברת ב־1/8",
-// "חסר 1/4"); addTile() refuses a tile that would overflow the bar, so the
-// child can try again at once. barFractionToDecimal / decimalToBarFraction
-// read 0.25 as a quarter of the bar and back.
+// "חסר 1/4"); addTile() refuses a tile that would overflow the target, so the
+// child can try again at once. The target may be longer than one bar (7/4).
+// barFractionToDecimal / decimalToBarFraction read 0.25 as a quarter of a bar
+// and 1.75 as 7/4. barsFor() only splits that length into whole bars for display.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -18,6 +19,9 @@
 
   const MECHANISM = 'M3';
   const MAX_DEN = 64;
+  // A mixed number is drawn as this many whole bars plus a remainder.
+  // Past this, barsFor returns null instead of building a huge row of bars.
+  const MAX_WHOLE_BARS = 16;
 
   // The note tiles of the pad: whole, half, quarter, eighth, sixteenth.
   const DURATIONS = [
@@ -126,12 +130,59 @@
     return { accepted: true, fill: next, check: check, over: null };
   }
 
-  // 0.25 -> '1/4'; 0.375 -> '3/8'. Only durations a bar can hold (power-of-two
-  // denominators up to 1/16 and at most one bar); otherwise null.
+  // 0.25 -> '1/4'; 1.75 -> '7/4'. Only note lengths (a power-of-two
+  // denominator up to 1/16). A value above one bar stays an improper
+  // fraction so a mixed number can continue into the next bar; otherwise null.
   function decimalToBarFraction(x) {
     const f = toFraction(typeof x === 'string' ? x : Number(x));
-    if (!f || f.n < 0 || cmp(f, frac(1, 1)) > 0 || 16 % f.d !== 0) return null;
+    if (!f || f.n < 0 || 16 % f.d !== 0) return null;
     return format(f);
+  }
+
+  // Whole bars plus a remainder, for display only. 1.75 and '7/4' are
+  // ['1', '3/4']; a single bar stays one entry. null when it is not a note
+  // length or it would need more than MAX_WHOLE_BARS bars.
+  function barsFor(v) {
+    const f = toFraction(v);
+    if (!f || f.n < 0 || 16 % f.d !== 0) return null;
+    const wholes = Math.floor(f.n / f.d);
+    if (wholes > MAX_WHOLE_BARS) return null;
+    const rem = f.n - wholes * f.d;
+    const bars = [];
+    for (let i = 0; i < wholes; i++) bars.push('1');
+    if (rem > 0) bars.push(format(frac(rem, f.d)));
+    else if (wholes === 0) bars.push('0');
+    return bars;
+  }
+
+  // Group fill indexes into bars of 1. A tile that crosses the next whole
+  // starts a new bar; the fill list itself is unchanged. null when a tile is
+  // unreadable or longer than one bar.
+  function splitFill(fill) {
+    const bars = [];
+    let cur = [];
+    let sum = frac(0, 1);
+    const one = frac(1, 1);
+    const list = fill || [];
+    for (let i = 0; i < list.length; i++) {
+      const f = toFraction(list[i]);
+      if (!f || f.n < 0 || cmp(f, one) > 0) return null;
+      if (cur.length && cmp(add(sum, f), one) > 0) {
+        bars.push(cur);
+        if (bars.length > MAX_WHOLE_BARS) return null;
+        cur = [];
+        sum = frac(0, 1);
+      }
+      cur.push(i);
+      sum = add(sum, f);
+      if (cmp(sum, one) === 0) {
+        bars.push(cur);
+        cur = [];
+        sum = frac(0, 1);
+      }
+    }
+    if (cur.length) bars.push(cur);
+    return bars;
   }
 
   // '3/8' -> 0.375; the decimal the same part of the bar is written as.
@@ -152,5 +203,7 @@
     addTile: addTile,
     decimalToBarFraction: decimalToBarFraction,
     barFractionToDecimal: barFractionToDecimal,
+    barsFor: barsFor,
+    splitFill: splitFill,
   };
 });

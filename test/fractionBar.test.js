@@ -67,9 +67,45 @@ test('decimals and bar fractions convert both ways', () => {
   assert.equal(fb.decimalToBarFraction(0.375), '3/8');
   assert.equal(fb.decimalToBarFraction(1), '1');
   assert.equal(fb.decimalToBarFraction(0.2), null); // 1/5 is not a note length
-  assert.equal(fb.decimalToBarFraction(1.5), null); // more than one bar
+  assert.equal(fb.decimalToBarFraction(1 / 3), null); // a triplet is not a note tile
   assert.equal(fb.barFractionToDecimal('1/4'), 0.25);
   assert.equal(fb.barFractionToDecimal('3/8'), 0.375);
   assert.equal(fb.barFractionToDecimal('¾'), 0.75);
   assert.equal(fb.barFractionToDecimal('?'), null);
+});
+
+test('a length above one bar stays a note fraction: 1.75 is 7/4, drawn as 1 and 3/4', () => {
+  assert.equal(fb.decimalToBarFraction(1.75), '7/4');
+  assert.equal(fb.decimalToBarFraction('1.75'), '7/4');
+  assert.equal(fb.decimalToBarFraction('7/4'), '7/4');
+  assert.equal(fb.decimalToBarFraction(1.5), '3/2');
+  assert.equal(fb.decimalToBarFraction(2), '2');
+  assert.equal(fb.decimalToBarFraction(2.25), '9/4');
+  assert.equal(fb.barFractionToDecimal(fb.decimalToBarFraction(1.75)), 1.75);
+  assert.deepEqual(fb.barsFor(1.75), ['1', '3/4']);
+  assert.deepEqual(fb.barsFor('7/4'), ['1', '3/4']);
+  assert.deepEqual(fb.barsFor('11/4'), ['1', '1', '3/4']);
+  assert.deepEqual(fb.barsFor(2), ['1', '1']);
+  assert.deepEqual(fb.barsFor(0.5), ['1/2']);
+  assert.equal(fb.barsFor(1 / 5), null);
+  assert.equal(fb.barsFor(1000), null); // more whole bars than the pad will draw
+  assert.deepEqual(fb.splitFill(['1/4', '1/4', '1/4', '1/4', '1/4', '1/4', '1/4']), [[0, 1, 2, 3], [4, 5, 6]]);
+  assert.deepEqual(fb.splitFill(['1', '3/4']), [[0], [1]]);
+  assert.equal(fb.splitFill(['3/2']), null);
+});
+
+test('target 7/4 accepts seven quarter tiles and rejects the eighth', () => {
+  let fill = [];
+  for (let i = 0; i < 7; i++) {
+    const step = fb.addTile(fill, '1/4', '7/4');
+    assert.equal(step.accepted, true, 'tile ' + (i + 1));
+    fill = step.fill;
+  }
+  assert.equal(fb.checkFill(fill, '7/4').status, 'exact');
+  assert.deepEqual(fb.barsFor(fb.checkFill(fill, '7/4').sum), ['1', '3/4']);
+  const over = fb.addTile(fill, '1/4', '7/4');
+  assert.equal(over.accepted, false);
+  assert.equal(over.over, '1/4');
+  assert.equal(over.fill.length, 7);
+  assert.equal(fb.checkFill(fill.concat(['1/4']), '7/4').status, 'over');
 });

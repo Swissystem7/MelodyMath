@@ -6,6 +6,7 @@ const assert = require('node:assert/strict');
 const cur = require('../src/lib/curriculum');
 const banks = require('../src/lib/banks');
 const viz = require('../src/lib/dataViz');
+const fb = require('../src/lib/music/fractionBar');
 const { isCorrect } = require('../src/lib/adaptive');
 
 const ST = banks.ST;
@@ -54,6 +55,9 @@ test('#709: mixed numbers and fractions above 1 are solved with fillBar over con
   const val = (s) => { const m = /^(?:(\d+) ו־)?(\d+)\/(\d+)$/.exec(String(s)); return m ? Number(m[1] || 0) + m[2] / m[3] : Number(s); };
   mine.forEach((it) => {
     assert.ok(val(it.answer) > 1, it.id);
+    const shown = fb.decimalToBarFraction(val(it.answer));
+    assert.ok(shown, it.id + ' ' + it.answer);
+    assert.ok(fb.barsFor(shown).length > 1, it.id + ' ' + shown);
     assert.equal(it.music, 'fillBar', it.id);
     assert.match(it.musicNote, /תיבות ברצף/, it.id);
     assert.ok((it.musicExtra || []).some((x) => x.music === 'noteValues'), it.id);

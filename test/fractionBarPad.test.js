@@ -50,6 +50,30 @@ test('the three-kinds exercise does not accept a fill of two kinds', () => {
   assert.equal(ok.status, 'exact');
 });
 
+test('1.75 is 7/4 drawn across bars: one full bar and then 3/4', () => {
+  const props = { target: '1.75', allowed: ['quarter'], he: 'מלאו 1.75 — תיבה שלמה ועוד 3/4' };
+  let s = PAD.createState(0, true, props);
+  const empty = PAD.renderHtml(s, 'drumLow');
+  assert.match(empty, /1\.75 = 7\/4/);
+  assert.equal((empty.match(/class="fbp-bar(?: done)?"/g) || []).length, 2);
+  for (let n = 0; n < 7; n++) s = PAD.tapTile(s, 'quarter');
+  assert.equal(s.status, 'exact');
+  assert.match(s.message, /התיבות מלאות בדיוק/);
+  const html = PAD.renderHtml(s, 'drumLow');
+  const bar = (n) => {
+    const m = new RegExp('data-bar="' + n + '">([\\s\\S]*?)</div>').exec(html);
+    assert.ok(m, 'bar ' + n);
+    return m[1];
+  };
+  const first = bar(0);
+  const second = bar(1);
+  assert.equal((first.match(/data-seg="/g) || []).length, 4);
+  assert.equal((second.match(/data-seg="/g) || []).length, 3);
+  assert.doesNotMatch(first, /מחוץ ליעד/);
+  assert.match(second, /מחוץ ליעד/);
+  assert.match(first, /width:25%/);
+});
+
 test('decimal targets read as parts of the bar: 0.75 = 3/4', () => {
   const s = PAD.createState(4);
   assert.match(PAD.renderHtml(s, 'drumLow'), /0\.75 = 3\/4/);

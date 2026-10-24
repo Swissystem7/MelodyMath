@@ -68,7 +68,7 @@
       if (state.ex.minKinds && kindsUsed(r.fill) < state.ex.minKinds) {
         return Object.assign(next, { status: 'filling', message: 'התיבה מלאה, אבל השתמשו ב־' + state.ex.minKinds + ' סוגי אריחים. הסירו אריח ונסו שוב.', sound: 'wrong' });
       }
-      return Object.assign(next, { status: 'exact', message: summary(r.fill) + ' — התיבה מלאה בדיוק!', sound: 'cadence' });
+      return Object.assign(next, { status: 'exact', message: filledMessage(r.fill, state.ex.target), sound: 'cadence' });
     }
     return next;
   }
@@ -79,9 +79,15 @@
     return fill.join(' + ') + ' = ' + FB.formatFraction(sum);
   }
 
+  function filledMessage(fill, target) {
+    const bars = FB.barsFor(target);
+    const word = bars && bars.length > 1 ? 'התיבות מלאות בדיוק' : 'התיבה מלאה בדיוק';
+    return summary(fill) + ' — ' + word + '!';
+  }
+
   function check(state) {
     const c = FB.checkFill(state.fill, state.ex.target);
-    if (c.status === 'exact') return Object.assign({}, state, { status: 'exact', message: summary(state.fill) + ' — התיבה מלאה בדיוק!', sound: 'cadence' });
+    if (c.status === 'exact') return Object.assign({}, state, { status: 'exact', message: filledMessage(state.fill, state.ex.target), sound: 'cadence' });
     if (c.status === 'under') return Object.assign({}, state, { status: 'under', message: 'חסר ' + c.diff + '. הוסיפו אריח.', sound: 'wrong' });
     return Object.assign({}, state, { sound: null });
   }
@@ -115,18 +121,38 @@
     const on = state.showMusic;
     const target = FB.toFraction(state.ex.target);
     const targetText = FB.formatFraction(target);
+    const sum = FB.sumFraction(state.fill);
     const isDecimal = /[.]/.test(String(state.ex.target));
-    const segs = state.fill.map(function (f, i) {
+    function segSpan(i) {
+      const f = state.fill[i];
       return '<span class="fbp-seg" data-seg="' + i + '" style="width:' + (FB.sumDurations([f]) * 100) + '%"><bdi dir="ltr">' + e(f) + '</bdi></span>';
-    }).join('');
-    const rest = target.n / target.d < 1 ? '<span class="fbp-out" style="width:' + ((1 - target.n / target.d) * 100) + '%">מחוץ ליעד</span>' : '';
+    }
+    const goalBars = FB.barsFor(state.ex.target);
+    const filledBars = FB.splitFill(state.fill);
+    const multi = (goalBars && goalBars.length > 1) || (filledBars && filledBars.length > 1);
+    let barsHtml;
+    if (!multi) {
+      const segs = state.fill.map(function (f, i) { return segSpan(i); }).join('');
+      const rest = target.n / target.d < 1 ? '<span class="fbp-out" style="width:' + ((1 - target.n / target.d) * 100) + '%">מחוץ ליעד</span>' : '';
+      barsHtml = '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="' + (on ? 'תיבה' : 'רצועה') + ' מלאה ' + FB.formatFraction(sum) + ' מתוך ' + targetText + '">' + segs + rest + '</div>';
+    } else {
+      const count = Math.max(goalBars ? goalBars.length : 0, filledBars ? filledBars.length : 0);
+      const chunks = [];
+      for (let b = 0; b < count; b++) {
+        const portion = goalBars && goalBars[b] ? FB.toFraction(goalBars[b]) : null;
+        const outside = portion && portion.n < portion.d ? (1 - portion.n / portion.d) * 100 : 0;
+        const segs = ((filledBars && filledBars[b]) || []).map(segSpan).join('');
+        const rest = outside > 0 ? '<span class="fbp-out" style="width:' + outside + '%">מחוץ ליעד</span>' : '';
+        chunks.push('<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" data-bar="' + b + '">' + segs + rest + '</div>');
+      }
+      barsHtml = '<div class="fbp-bars' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="' + count + ' ' + (on ? 'תיבות' : 'רצועות') + ', מלא ' + FB.formatFraction(sum) + ' מתוך ' + targetText + '">' + chunks.join('') + '</div>';
+    }
     const tiles = state.ex.allowed.map(function (id) {
       const d = duration(id);
       const tap = on ? ' data-tap="' + e(voice) + '"' : '';
       return '<button type="button" class="fbp-tile" data-act="tile" data-tile="' + id + '"' + tap + ' aria-label="אריח ' + d.he + ' ' + d.n + '/' + d.d + '">' +
         '<b><bdi dir="ltr">' + d.n + '/' + d.d + '</bdi></b><span>' + d.he + (on ? ' · ' + beatsHe(d) : '') + '</span></button>';
     }).join('');
-    const sum = FB.sumFraction(state.fill);
     const sumDec = FB.barFractionToDecimal(FB.formatFraction(sum));
     const over = state.over ? '<div class="fbp-over" role="note">עודף: <span class="fbp-overbar" style="width:' + (FB.sumDurations([state.over]) * 100) + '%"></span> <bdi dir="ltr">' + e(state.over) + '</bdi></div>' : '';
     const free = on ? '<div class="jam-free" role="group" aria-label="נגינה חופשית על דרבוקה"><span>🪘 נגנו חופשי:</span>' +
@@ -134,7 +160,7 @@
     return '<div class="jam-head"><span class="tag">M3 · משכי תווים · כיתות ג׳–ו׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🥁 ממלאים תיבה במשכי תווים' : 'ממלאים רצועת שבר') + '</h3>' +
       '<p class="jam-prompt">' + e(state.ex.he) + (isDecimal ? ' (<bdi dir="ltr">' + e(state.ex.target) + ' = ' + targetText + '</bdi>)' : '') + '</p>' +
-      '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="' + (on ? 'תיבה' : 'רצועה') + ' מלאה ' + FB.formatFraction(sum) + ' מתוך ' + targetText + '">' + segs + rest + '</div>' + over +
+      barsHtml + over +
       '<p class="fbp-sum">מילאתם: <bdi dir="ltr">' + FB.formatFraction(sum) + (sumDec != null ? ' = ' + sumDec : '') + '</bdi> מתוך <bdi dir="ltr">' + targetText + '</bdi></p>' +
       '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div>' + free +
       '<div class="jam-row">' + (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') +
