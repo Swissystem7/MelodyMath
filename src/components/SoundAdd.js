@@ -99,6 +99,7 @@
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
   const MODES = ['tap', 'choice', 'drag', 'line'];
   const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
+  const CHOICE_COUNT = 5; // the stages with sound offer five numbers, not three
   const LINE_MAX = 10; // the number line runs 0..10, or 0..20 past ten (lineMax)
   const MODE_PROMPTS = {
     choice: {
@@ -239,7 +240,7 @@
   }
 
   // Five numbers in a row around the sum (t-2..t+2, slid to stay inside
-  // 1..CHOICE_MAX); the row is rotated by the exercise index, so the right one
+  // 1..CHOICE_MAX, or 1..20 past ten); the row is rotated by the exercise index, so the right one
   // moves between the five places and is not always in the middle (owner
   // note on #700: three neighbours were a 1-in-3 guess, always the centre).
   // The silent stage is the no-music mastery check, so there the
@@ -247,9 +248,11 @@
   // guess is right 1 time in 10 and mastery needs two right first tries).
   function choices(item, index, stage) {
     const t = sum(item);
-    if (stage === 'silent') return Array.from({ length: t > CHOICE_MAX ? 2 * CHOICE_MAX : CHOICE_MAX }, function (_, i) { return i + 1; });
-    const opts = [t - 1, t, t + 1];
-    const r = (index || 0) % 3;
+    const hi = t > CHOICE_MAX ? 2 * CHOICE_MAX : CHOICE_MAX;
+    if (stage === 'silent') return Array.from({ length: hi }, function (_, i) { return i + 1; });
+    const lo = Math.max(1, Math.min(t - 2, hi - (CHOICE_COUNT - 1)));
+    const opts = Array.from({ length: CHOICE_COUNT }, function (_, i) { return lo + i; });
+    const r = (index || 0) % CHOICE_COUNT;
     return opts.slice(r).concat(opts.slice(0, r));
   }
 
@@ -638,7 +641,7 @@
 
   return {
     GAME: GAME, PROGRESSION: PROGRESSION, ITEMS: ITEMS, STEPS: STEPS, WAYS: WAYS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, LINE_MAX: LINE_MAX,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, CHOICE_COUNT: CHOICE_COUNT, LINE_MAX: LINE_MAX,
     sum: sum, lineMax: lineMax, numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,
