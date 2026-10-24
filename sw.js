@@ -74,6 +74,8 @@ const ASSETS = [
   './src/components/jam.css',
   './src/lib/music/fractionBar.js',
   './src/components/FractionBarPad.js',
+  './src/lib/music/musicianship.js',
+  './src/components/MusicianshipPath.js',
   './src/lib/music/beatCounter.js',
   './src/components/BeatCounter.js',
   './src/data/struggleTopics.js',
