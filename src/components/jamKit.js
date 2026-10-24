@@ -61,7 +61,7 @@
   function instrument(id, fallback) {
     const data = instruments();
     const x = data && data.instrumentById ? data.instrumentById(id) : null;
-    if (!x) return { id: id, he: id, voice: fallback || 'woodBar', why: '', source: 'TODO' };
+    if (!x) return { id: id, he: id, voice: fallback || 'woodBar', why: '', source: null };
     return { id: x.id, he: x.instrument.he, voice: x.voice, why: x.why, source: x.source };
   }
 

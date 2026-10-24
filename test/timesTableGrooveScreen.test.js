@@ -44,14 +44,14 @@ test('a right answer to 4 × 7, three in a row add a layer, a wrong one keeps th
   assert.match(wrong.message, /^עוד לא\./);
 });
 
-test('completing a column (×1 to ×10) unlocks an M2 instrument: timbre only, with a source or TODO', () => {
+test('completing a column (×1 to ×10) unlocks an M2 instrument: timbre only, with a real source', () => {
   let s = TTG.createState({ factor: 3 });
   for (let i = 0; i < 30 && !s.unlocks.unlocked.length; i++) s = TTG.answer(TTG.next(s), TTG.next(s).q.answer);
   assert.deepEqual(s.unlocks.completed, ['3']);
   assert.equal(s.unlocks.unlocked.length, 1);
   const x = INST.instrumentById(s.unlocks.unlocked[0]);
   assert.equal(x.mechanism, 'M2', 'an unlocked instrument keeps the method');
-  assert.ok(x.source === 'TODO' || /^https:/.test(x.source));
+  assert.match(x.source, /^https:/);
   assert.match(s.message, /נפתח כלי חדש/);
   TTG.UNLOCK_LIST.forEach((id) => assert.ok(INST.forTopic('multiplication').some((y) => y.id === id), id));
 });

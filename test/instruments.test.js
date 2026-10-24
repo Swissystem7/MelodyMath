@@ -33,9 +33,14 @@ test('every instrument has every field', () => {
   });
 });
 
-test('source is a URL or DOI, or exactly TODO', () => {
+test('source is a URL or DOI, or null for a weak optional timbre; never TODO', () => {
   ALL.forEach((x) => {
-    if (x.source === 'TODO') return;
+    assert.notEqual(x.source, 'TODO', x.id);
+    if (x.source === null) {
+      assert.equal(x.optional, true, x.id);
+      assert.equal(x.evidence, 'weak', x.id);
+      return;
+    }
     assert.match(x.source, /^https:\/\/[^\s]+$/, x.id + ' source ' + x.source);
   });
 });
@@ -49,7 +54,7 @@ test('mechanism exists in MUSIC_MECHANISMS and is evidenced', () => {
 
 test('no weak mechanism without the optional mark (dosage rule 2)', () => {
   ALL.forEach((x) => {
-    if (I.WEAK.includes(x.mechanism)) {
+    if (I.WEAK.includes(x.mechanism) || x.source === null) {
       assert.equal(x.optional, true, x.id);
       assert.equal(x.evidence, 'weak', x.id);
     } else {

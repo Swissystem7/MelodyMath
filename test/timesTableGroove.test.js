@@ -103,13 +103,14 @@ test('completing a column unlocks the next instrument from the given list', () =
   assert.equal(r.unlocked, null); // nothing left to unlock
 });
 
-test('an unlockable instrument has a source or TODO', () => {
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'gamelan', source: 'TODO' }), true);
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'tabla', source: 'https://example.org/x' }), true);
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'oud' }), false);
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'oud', source: ' ' }), false);
+test('an unlockable instrument has a real source, never TODO', () => {
+  assert.equal(unlocks.hasSource({ instrument: 'gamelan', source: 'TODO' }), false);
+  assert.equal(unlocks.hasSource({ instrument: 'tabla', source: 'https://example.org/x' }), true);
+  assert.equal(unlocks.hasSource({ instrument: 'oud' }), false);
+  assert.equal(unlocks.hasSource({ instrument: 'oud', source: ' ' }), false);
   assert.throws(() => unlocks.recordCorrect(null, 2, 1, [{ instrument: 'oud' }]), /source/);
-  const r = unlocks.recordCorrect(null, 2, 1, [{ instrument: 'gamelan', source: 'TODO' }]);
+  assert.throws(() => unlocks.recordCorrect(null, 2, 1, [{ instrument: 'gamelan', source: 'TODO' }]), /source/);
+  const r = unlocks.recordCorrect(null, 2, 1, [{ instrument: 'tabla', source: 'https://compmusic.upf.edu/hi/examples-taal-hindustani' }]);
   assert.deepEqual(r.state.solved, { 2: [1] });
 });
 

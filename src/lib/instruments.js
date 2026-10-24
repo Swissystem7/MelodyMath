@@ -11,7 +11,9 @@
 // record, an ethnomusicology article, a primary text); the evidence that the
 // mechanism helps children learn maths lives with the mechanism in banks.js.
 // Every source URL was opened and checked on 23.10.2026. Where no source was
-// confirmed, source is exactly 'TODO' and `why` stays modest.
+// confirmed, source is null (never 'TODO', #691 review item 6): the entry is
+// then a weak optional timbre (optional:true, evidence:'weak'), never the way
+// a topic is voiced, and `why` stays modest.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -41,7 +43,7 @@
   // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
   function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source) {
     const x = { id, instrument: { he, en }, origin, family, mathTopics, mechanism, why, source, voice };
-    if (WEAK.indexOf(mechanism) >= 0) { x.optional = true; x.evidence = 'weak'; }
+    if (WEAK.indexOf(mechanism) >= 0 || source === null) { x.optional = true; x.evidence = 'weak'; }
     return x;
   }
 
@@ -87,8 +89,8 @@
       'Two players interlock kushaura and kutsinhira; four twelve-pulse phrases repeat as a cycle of 48 pulses (Peterman 2010): 4 × 12 = 48 (M2).',
       'https://doi.org/10.31091/mudra.v25i3.1560'),
     e('kalimba', 'קלימבה', 'Kalimba', 'Africa (lamellophone)', 'percussion', 'M6', ['patterns'], 'tine',
-      'A thumb piano with metal tines; short repeating tunes on it are a timbre for melodic patterns (M6). No verified source yet.',
-      'TODO'),
+      'A thumb piano with metal tines; short repeating tunes on it are a timbre for melodic patterns (M6). No verified source yet, so optional timbre only (weak).',
+      null),
     e('marimba', 'מרימבה', 'Marimba', 'Central America (Guatemala, Chiapas), from Africa', 'percussion', 'M6', ['patterns', 'symmetry'], 'woodBar',
       'Brought to Central America by African slaves and adopted by Maya musicians; wooden bars with gourd resonators, a warm timbre for melodic and mirror patterns (M6).',
       'https://mim.org/new-acquisitions-and-exhibit-showcase-the-versatile-marimba/'),
@@ -197,11 +199,12 @@
   function byFamily(family) {
     return INSTRUMENTS.filter(function (x) { return x.family === family; });
   }
-  // Instruments that may voice a topic: only those using its primary way.
+  // Instruments that may voice a topic: only those using its primary way and
+  // carrying a real source (an unsourced timbre is optional play only).
   function forTopic(topic) {
     const t = TOPICS[topic];
     if (!t) return [];
-    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && x.mechanism === t.mechanism; });
+    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && x.mechanism === t.mechanism && x.source !== null; });
   }
 
   return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, forTopic };

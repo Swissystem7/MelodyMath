@@ -80,7 +80,7 @@
     let unlocks = state.unlocks;
     let message = (q.division ? q.answer + ' קבוצות. ' : q.factor + ' × ' + q.k + ' = ' + q.answer + '. ') + 'נכון!';
     if (!q.division) {
-      const u = UNLOCKS.recordCorrect(unlocks, q.factor, q.k, UNLOCK_LIST.map(function (id) { return { instrument: id, source: JAM.instrument(id).source || 'TODO' }; }));
+      const u = UNLOCKS.recordCorrect(unlocks, q.factor, q.k, UNLOCK_LIST.map(function (id) { return { instrument: id, source: JAM.instrument(id).source }; }));
       unlocks = u.state;
       if (u.unlocked) message += ' השלמתם את עמודת ×' + u.columnCompleted + ': נפתח כלי חדש, ' + JAM.instrument(u.unlocked).he + '.';
     }

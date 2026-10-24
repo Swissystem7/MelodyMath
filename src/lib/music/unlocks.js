@@ -5,9 +5,9 @@
 // been answered correctly once. Every completed column unlocks the next
 // instrument of the list the caller passes in (ids from the instruments
 // data). An unlocked instrument changes only the timbre, never the method:
-// the mechanism stays M2. An instrument record must carry a source, or the
-// literal 'TODO' when no source is known yet; records without one are
-// refused. Load/save go through an injectable storage like streak.js.
+// the mechanism stays M2. An instrument record must carry a real source (an
+// https URL or DOI link); a record without one, or with 'TODO', is refused
+// (#691 review item 6). Load/save go through an injectable storage like streak.js.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -22,11 +22,11 @@
     return { solved: {}, completed: [], unlocked: [] };
   }
 
-  // A record { instrument, source } is usable when source is a non-empty
-  // string ('TODO' included); a bare id string is accepted as is.
-  function hasSourceOrTodo(entry) {
+  // A record { instrument, source } is usable when source is an https URL;
+  // 'TODO' is not a source. A bare id string is accepted as is.
+  function hasSource(entry) {
     if (typeof entry === 'string') return entry.length > 0;
-    return !!entry && typeof entry.instrument === 'string' && typeof entry.source === 'string' && entry.source.trim().length > 0;
+    return !!entry && typeof entry.instrument === 'string' && typeof entry.source === 'string' && /^https:\/\/\S+$/.test(entry.source);
   }
 
   function idOf(entry) {
@@ -39,7 +39,7 @@
   function recordCorrect(state, factor, multiplier, instruments) {
     const list = instruments || [];
     list.forEach(function (e) {
-      if (!hasSourceOrTodo(e)) throw new Error('instrument without source (use TODO): ' + JSON.stringify(e));
+      if (!hasSource(e)) throw new Error('instrument without a real source: ' + JSON.stringify(e));
     });
     const s = state || initialUnlocks();
     const next = { solved: Object.assign({}, s.solved), completed: s.completed.slice(), unlocked: s.unlocked.slice() };
@@ -80,7 +80,7 @@
     COLUMN_LENGTH: COLUMN_LENGTH,
     STORAGE_KEY: STORAGE_KEY,
     initialUnlocks: initialUnlocks,
-    hasSourceOrTodo: hasSourceOrTodo,
+    hasSource: hasSource,
     recordCorrect: recordCorrect,
     loadUnlocks: loadUnlocks,
     saveUnlocks: saveUnlocks,

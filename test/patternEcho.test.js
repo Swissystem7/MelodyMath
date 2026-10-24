@@ -53,8 +53,9 @@ test('findRuleBreak points at the note where the echo breaks the rule', () => {
   assert.equal(pat.findRuleBreak(r, r.notes.slice(0, 3).concat([{ value: 1 }])), 3);
 });
 
-test('a timbre without a source fails unless it says TODO', () => {
-  assert.equal(pat.timbreHasSource({ instrument: 'gamelan', why: 'TODO', source: 'TODO' }), true);
+test('a timbre without a real source fails, TODO included', () => {
+  assert.equal(pat.timbreHasSource({ instrument: 'gamelan', source: 'TODO' }), false);
+  assert.equal(pat.timbreHasSource({ instrument: 'gamelan', source: 'https://doi.org/10.31091/mudra.v25i3.1560' }), true);
   assert.equal(pat.timbreHasSource({ instrument: 'marimba' }), false);
   assert.equal(pat.timbreHasSource({ instrument: 'piano', source: '' }), false);
 });

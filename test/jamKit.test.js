@@ -33,10 +33,10 @@ test('the showMusic switch is on by default, kept per game, and labelled by its 
   assert.match(JAM.musicToggleHtml(false), /aria-pressed="false"[^]*בלי מוזיקה/);
 });
 
-test('an unknown instrument falls back to a voice and a TODO source, never an invented one', () => {
+test('an unknown instrument falls back to a voice and no source, never an invented or TODO one', () => {
   const x = JAM.instrument('no-such-instrument', 'woodBar');
   assert.equal(x.voice, 'woodBar');
-  assert.equal(x.source, 'TODO');
+  assert.equal(x.source, null);
   assert.equal(JAM.esc('<b a="1">&'), '&lt;b a=&quot;1&quot;&gt;&amp;');
 });
 

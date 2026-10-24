@@ -9,9 +9,8 @@
 // The same way carries from a repeating pattern (א׳) to a sequence rule
 // (ה׳). findRuleBreak() points at the first note of an echo that breaks the
 // rule, so the feedback can replay the right phrase and mark that note.
-// Marimba, gamelan and piano are timbre only; a timbre record needs a
-// source or the literal 'TODO' (gamelan's why stays TODO until an
-// ethnomusicology source is found). Pure logic: no sound.
+// Marimba, gamelan and piano are timbre only; a timbre record needs a real
+// source (an https URL, never 'TODO', #691 review item 6). Pure logic: no sound.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -102,9 +101,9 @@
     return got.length > want.length ? want.length : -1;
   }
 
-  // A timbre record { instrument, source } needs a source; 'TODO' counts.
+  // A timbre record { instrument, source } needs a real source; 'TODO' does not count.
   function timbreHasSource(entry) {
-    return !!entry && typeof entry.source === 'string' && entry.source.trim().length > 0;
+    return !!entry && typeof entry.source === 'string' && /^https:\/\/\S+$/.test(entry.source);
   }
 
   return {
