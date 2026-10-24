@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MelodyMath · תרגיל לדוגמה: שומעים חיבור</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="src/sefirot.css">
+  <link rel="stylesheet" href="src/theme.css">
+  <link rel="stylesheet" href="src/components/jam.css">
+  <link rel="stylesheet" href="src/components/soundAdd.css">
+</head>
+<body>
+  <!-- #665 example exercise: the exercise is the whole child screen, nothing above it. -->
+  <main id="main" class="sa-card">
+    <section id="saCard" class="mm-game" aria-label="תרגיל חיבור בצלילים"></section>
+    <details class="sa-teacher">
+      <summary>למורה ▸</summary>
+      <p>חיבור עד 10, כיתות א׳–ב׳. המספר הראשון נשמע בתופים נמוכים, השני בגבוהים, וכל צליל מדליק עיגול. הילד מקיש את הסכום, הקשה אחת לכל צליל.</p>
+      <p>שלבים (CRA): דוגמה פתורה, צליל ועיגולים, עיגולים בלבד, סמל, וסמל בלי צליל. שתי תשובות נכונות בניסיון ראשון מקדמות שלב; שני ניסיונות שגויים מחזירים שלב. אחרי טעות: השמעה חוזרת עם ספירה על כל עיגול, סימון של מה שחסר או עודף, וניסיון שני.</p>
+      <p>מקורות: Hattie &amp; Timperley 2007 (משוב), Fyfe et al. 2014 (מעבר הדרגתי), Atkinson et al. 2000 (דוגמה פתורה), Kalyuga 2003 (דעיכת תמיכה), Akın (מטא-אנליזה, מוזיקה ומתמטיקה).</p>
+    </details>
+  </main>
+  <script src="src/lib/musicEngine.js"></script>
+  <script src="src/lib/instrumentVoices.js"></script>
+  <script src="src/components/jamKit.js"></script>
+  <script>
+    if (typeof installAudioUnlock === 'function') installAudioUnlock(document);
+    if (typeof installTapFeedback === 'function') installTapFeedback(document);
+  </script>
+  <script src="src/components/SoundAdd.js"></script>
+</body>
+</html>
