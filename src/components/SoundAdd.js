@@ -198,7 +198,9 @@
 
   // A picking type: choose a number; one already crossed out stays out.
   function pick(state, n) {
-    if (done(state) || !picking(state) || state.wrong.indexOf(n) >= 0) return Object.assign({}, state, { sound: null });
+    // On the line the thumb may pass a crossed-out number; ✔ stays off there.
+    const out = state.mode === 'line' ? !(n >= 0 && n <= LINE_MAX) : state.wrong.indexOf(n) >= 0;
+    if (done(state) || !picking(state) || out) return Object.assign({}, state, { sound: null });
     return Object.assign({}, state, { taps: n, sound: null });
   }
 
@@ -322,20 +324,40 @@
     return '<div class="sa-answer' + (basket ? ' sa-basket' : '') + '" dir="ltr" aria-live="polite" aria-label="' + (basket ? 'בסל ' : picking(state) ? 'בחרתם ' : 'הקשתם ') + taps + '">' + html + '</div>';
   }
 
-  // The answer control of each type: the pad, or the number buttons.
+  // 'line' mirrors the #singingLine number line (index.html, kept in PR #656):
+  // a range input with aria-value* on 0..LINE_MAX, the tick numbers under it,
+  // and a group of 44px step buttons (◀ ▶) for a child who cannot place the
+  // thumb. A crossed-out number can be reached again but not checked.
+  function lineHtml(state, fin) {
+    const total = sum(state.item);
+    const v = state.taps == null ? 0 : state.taps;
+    let ticks = '';
+    for (let n = 0; n <= LINE_MAX; n++) {
+      const c = 'sa-tick' + (state.wrong.indexOf(n) >= 0 ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '') + (state.taps === n ? ' sa-on' : '');
+      ticks += '<span class="' + c + '" data-tick="' + n + '">' + n + '</span>';
+    }
+    const off = fin ? ' disabled' : '';
+    return '<div class="sa-line nl-control" dir="ltr"><input id="saLine" class="sa-range" type="range" data-act="slide" min="0" max="' + LINE_MAX + '" step="1" value="' + v + '"' +
+      ' aria-valuemin="0" aria-valuemax="' + LINE_MAX + '" aria-valuenow="' + v + '" aria-valuetext="' + v + '" aria-label="מיקום על ישר המספרים"' + off + '>' +
+      '<div class="sa-ticks" aria-hidden="true">' + ticks + '</div></div>' +
+      '<div class="nl-keys sa-nudge" dir="ltr" role="group" aria-label="צעד על הישר">' +
+      '<button type="button" data-act="nudge" data-d="-1" aria-label="צעד אחורה"' + off + '>◀</button>' +
+      '<button type="button" data-act="nudge" data-d="1" aria-label="צעד קדימה"' + off + '>▶</button></div>';
+  }
+
+  // The answer control of each type: the pad, the number buttons or the line.
   function controlHtml(state, fin, tapAttr, icon) {
     const total = sum(state.item);
+    if (state.mode === 'line') return lineHtml(state, fin);
     if (picking(state)) {
-      const line = state.mode === 'line';
-      const grid = !line && state.stage === 'silent';
-      const nums = line ? Array.from({ length: LINE_MAX + 1 }, function (_, i) { return i; }) : choices(state.item, state.index, state.stage);
-      const btns = nums.map(function (n) {
+      const grid = state.stage === 'silent';
+      const btns = choices(state.item, state.index, state.stage).map(function (n) {
         const out = state.wrong.indexOf(n) >= 0;
-        const c = (line ? 'sa-tick' : 'sa-opt') + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
-        return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + (line ? ' data-tick="' + n + '"' : '') + tapAttr +
+        const c = 'sa-opt' + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
+        return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + tapAttr +
           ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
       }).join('');
-      return '<div class="' + (line ? 'sa-line' : 'sa-opts' + (grid ? ' sa-grid' : '')) + '" dir="ltr" role="group" aria-label="' + (line ? 'ישר המספרים 0 עד 10' : 'בחרו מספר') + '">' + btns + '</div>';
+      return '<div class="sa-opts' + (grid ? ' sa-grid' : '') + '" dir="ltr" role="group" aria-label="בחרו מספר">' + btns + '</div>';
     }
     if (state.mode === 'drag') {
       return '<button type="button" class="sa-pad sa-source" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="גררו עיגול לסל. בסל ' + state.taps + '">🔵 <span>' + state.taps + '</span></button>';
@@ -420,7 +442,7 @@
     const q = root.location && /[?&]mode=(\w+)/.exec(root.location.search || '');
     let state = createState({ mode: q && q[1] });
     let playing = null;
-    const answerSel = picking(state) ? '[data-act="pick"]:not([disabled])' : '[data-act="tap"]';
+    const answerSel = state.mode === 'line' ? '#saLine' : picking(state) ? '[data-act="pick"]:not([disabled])' : '[data-act="tap"]';
     function stop() { if (playing) playing.stop(); playing = null; }
     function draw(focusSel) {
       el.innerHTML = renderHtml(state);
@@ -471,9 +493,31 @@
       enabled: function () { return state.mode === 'drag'; },
       onDrop: function () { run('tap'); },
     });
+    // 'line': like #singingLine, every number sings its own pitch
+    // (numberLine.js soundForTick) while the thumb moves; the card is drawn
+    // again only when the thumb is let go, so the drag is not cut.
+    function sing(n) {
+      if (!tapSounds(state) || typeof root.soundForTick !== 'function') return;
+      JAM.playNotes([{ at: 0, voice: 'woodBar', hz: root.soundForTick(n, { min: 0, max: LINE_MAX }).frequency }]);
+    }
+    el.addEventListener('input', function (ev) {
+      if (!ev.target.classList || !ev.target.classList.contains('sa-range')) return;
+      const n = Number(ev.target.value);
+      state = pick(state, n);
+      ev.target.setAttribute('aria-valuenow', n);
+      ev.target.setAttribute('aria-valuetext', n);
+      el.querySelectorAll('.sa-tick').forEach(function (t) { t.classList.toggle('sa-on', Number(t.getAttribute('data-tick')) === n); });
+      const ok = el.querySelector('[data-act="check"]');
+      if (ok) ok.disabled = !answered(state);
+      sing(n);
+    });
+    el.addEventListener('change', function (ev) {
+      if (ev.target.classList && ev.target.classList.contains('sa-range')) draw('#saLine');
+    });
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
       if (dragKit.dragged(b)) return;
+      if (b && b.getAttribute('data-act') === 'slide') return;
       if (!b || b.disabled) return;
       run(b.getAttribute('data-act'), b);
     });
@@ -493,6 +537,11 @@
       else if (act === 'tap') state = tap(state);
       else if (act === 'untap') state = untap(state);
       else if (act === 'pick') state = pick(state, Number(b.getAttribute('data-n')));
+      else if (act === 'nudge') {
+        state = pick(state, Math.max(0, Math.min(LINE_MAX, (state.taps == null ? 0 : state.taps) + Number(b.getAttribute('data-d')))));
+        focus = '[data-act="nudge"][data-d="' + b.getAttribute('data-d') + '"]';
+        sing(state.taps);
+      }
       else if (act === 'check') { state = check(state); save(); focus = state.status === 'retry' ? answerSel : '[data-act="next"]'; }
       else if (act === 'next') { stop(); state = next(state); focus = answerSel; }
       draw(focus);
