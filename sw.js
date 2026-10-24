@@ -78,6 +78,8 @@ const ASSETS = [
   './src/lib/music/percentMix.js',
   './src/lib/music/dataPercentCheck.js',
   './src/components/DataBeats.js',
+  './src/lib/music/beatCounter.js',
+  './src/components/BeatCounter.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/sefirot.css',
