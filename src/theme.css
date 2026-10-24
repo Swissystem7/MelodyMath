@@ -85,7 +85,7 @@ button:active:not(:disabled) { transform: scale(.97); }
 button:disabled { opacity: .5; cursor: default; }
 
 /* Tabs: a segmented control on one tinted track. */
-.tabs { gap: var(--s-1); padding: var(--s-1); border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line); }
+.tabs { gap: var(--s-2); padding: var(--s-1); border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line); }
 .tab { border: 0; border-radius: var(--r-pill); background: transparent; color: var(--muted); padding-inline: var(--s-4); }
 .tab:hover:not(.active) { color: var(--ink); }
 .tab.active { background: var(--card); color: var(--accent); box-shadow: var(--e-2); }

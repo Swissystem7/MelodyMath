@@ -13,7 +13,7 @@
   body{margin:0;font-family:var(--sans);color:var(--ink);background:#fff;line-height:1.7}
   .wrap{max-width:760px;margin:0 auto;padding:0 20px}
   a{color:var(--green-d)}
-  a:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+  :focus-visible{outline:3px solid var(--teal);outline-offset:2px}
   header{background:linear-gradient(180deg,var(--soft),#fff);padding:32px 0 20px}
   h1{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .3em}
   h2{font-size:1.15rem;margin:0 0 .4em}
@@ -21,14 +21,19 @@
   code{background:var(--soft);padding:1px 6px;border-radius:6px}
   .lead{color:var(--muted);font-size:1.05rem}
   footer{padding:24px 0 40px;color:var(--muted);font-size:.86rem;text-align:center;border-top:1px solid var(--line)}
+  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:var(--ink);color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip:focus{transform:none}
+  #main:focus{outline:none}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<a class="mm-skip" href="#main">דלגו לתוכן</a>
 <header><div class="wrap">
   <h1>פרטיות ונתוני ילדים</h1>
   <p class="lead">MelodyMath משמש ילדים. לכן הכלל פשוט: <b>שום דבר על הילד לא יוצא מהמכשיר</b> בלי שמבוגר מוציא אותו ביד.</p>
 </div></header>
-<main class="wrap">
+<main class="wrap" id="main" tabindex="-1">
 <section id="what">
   <h2>מה נשמר</h2>
   <ul>
@@ -63,5 +68,7 @@
 </section>
 </main>
 <footer><div class="wrap">MelodyMath · פרטיות · <a href="./">תרגול יסודי</a> · <a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a></div></footer>
+<script src="src/lib/access.js"></script>
+<script src="src/lib/core.js"></script>
 </body>
 </html>

@@ -177,6 +177,29 @@ test('grade-א diagnostic keeps the five-drum hear cue', () => {
   assert.deepEqual(plus.hear, [3, 2]);
 });
 
+test('grade-ג word problems add two-step items and «בכמה» vs «פי כמה» contrasts (#467)', () => {
+  const words = banks.rowsOf('word_problems', 'ג');
+  const tagged = words.filter((it) => Array.isArray(it.tags));
+  assert.equal(tagged.length, 10);
+  tagged.forEach((it) => {
+    assert.equal(it.standard, banks.ST.WORD_TWO_STEP, it.id);
+    assert.ok(it.level === 2 || it.level === 3, it.id);
+    assert.equal(it.widget, undefined, it.id);
+  });
+  const contrast = tagged.filter((it) => it.tags.includes('contrast'));
+  assert.equal(contrast.length, 5);
+  const nums = (s) => (s.match(/\d+/g) || []).join(',');
+  contrast.forEach((it) => {
+    assert.match(it.prompt, /בכמה/, it.id);
+    const twin = words.find((w) => /פי כמה/.test(w.prompt) && nums(w.prompt) === nums(it.prompt));
+    assert.ok(twin, it.id + ' has no «פי כמה» twin');
+    assert.notEqual(it.answer, twin.answer, it.id);
+    assert.ok(it.hint.includes('פי כמה» היה ' + twin.answer), it.id);
+  });
+  const L2 = banks.itemsAtLevel('word_problems', 2, 'ג');
+  assert.ok(L2.some((it) => it.tags && it.tags.includes('two_step')));
+});
+
 test('a prototype-key grade falls back instead of crashing', () => {
   ['constructor', 'toString', '__proto__', 'hasOwnProperty'].forEach((g) => {
     assert.equal(banks.isGrade(g), false, g);
