@@ -68,6 +68,7 @@
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
   const MODES = ['tap', 'choice', 'drag', 'line'];
   const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
+  const CHOICE_COUNT = 5; // the stages with sound offer five numbers, not three
   const LINE_MAX = 10; // the number line runs 0..10, every sum fits
   const MODE_PROMPTS = {
     choice: {
@@ -569,7 +570,7 @@
 
   return {
     GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, LINE_MAX: LINE_MAX,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, CHOICE_COUNT: CHOICE_COUNT, LINE_MAX: LINE_MAX,
     numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,
