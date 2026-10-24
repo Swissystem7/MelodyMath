@@ -1425,6 +1425,8 @@ function renderStepperPills() {
   const l = getLessonById(activeLessonId);
   if (!l) return;
   const stepNames = ['1. מושג', '2. הדגמה', '3. התנסות', '4. בדיקה'];
+  stepper.setAttribute('role', 'navigation');
+  stepper.setAttribute('aria-label', 'שלבי השיעור');
   stepper.innerHTML = l.steps.map((_, idx) => `
     <button type="button" class="step-pill ${idx === activeStepIndex ? 'active' : ''} ${idx < activeStepIndex ? 'done' : ''}" data-step-idx="${idx}" aria-current="${idx === activeStepIndex ? 'step' : 'false'}" aria-label="${stepNames[idx] || ('שלב ' + (idx + 1))}">
       ${stepNames[idx] || ('שלב ' + (idx + 1))}
@@ -1869,7 +1871,7 @@ function renderStepAction(step) {
       <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:12px;">
         <div style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">מצולע של 3 צלילים על מעגל של 12 פעימות (משולש שווה צלעות):</div>
         <div style="display:flex;justify-content:center;margin:12px 0;">
-          <svg width="180" height="180" viewBox="0 0 180 180">
+          <svg width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="גלגל מקצב אוקלידי: ${euclideanPulses} קודקודים מתוך ${euclideanSteps} פעימות">
             <circle cx="90" cy="90" r="70" fill="none" stroke="#ddd" stroke-width="3" />
             <polygon points="90,20 150.62,125 29.38,125" fill="rgba(107,70,193,0.12)" stroke="var(--purple)" stroke-width="3" />
             <circle cx="90" cy="20" r="8" fill="var(--purple)" />
@@ -2221,7 +2223,7 @@ function renderFractionBuilderUI(box) {
         סה״כ: <span style="color:${isPerfect ? 'var(--good)' : isOver ? 'var(--bad)' : 'var(--purple)'};">${sum.toFixed(3).replace(/\.?0+$/, '')}</span> מתוך 1
         ${isPerfect ? ' 🎉 מושלם! 1 שלם מדויק!' : isOver ? ' ⚠️ עברתם את השלם!' : ''}
       </div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;">
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;" role="group" aria-label="הוספת לבני שברים">
         <button type="button" class="secondary" id="fbAddHalf" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;width:auto;padding:8px 16px;">+ 1/2 (חצי)</button>
         <button type="button" class="secondary" id="fbAddQuarter" style="background:#ede7f6;color:#4527a0;border-color:#b39ddb;width:auto;padding:8px 16px;">+ 1/4 (רבע)</button>
         <button type="button" class="secondary" id="fbAddEighth" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;width:auto;padding:8px 16px;">+ 1/8 (שמינית)</button>
@@ -2264,14 +2266,14 @@ function renderMultExplorerUI(box) {
       <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">מספר קבוצות:</label>
-          <div style="display:inline-flex;gap:4px;" id="mgGroupBtns">
-            ${[2, 3, 4, 5].map(g => `<button type="button" class="secondary ${g === multExplorerGroups ? 'primary' : ''}" data-g="${g}" style="min-width:44px;min-height:44px;padding:0;">${g}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="mgGroupBtns" role="group" aria-label="מספר קבוצות">
+            ${[2, 3, 4, 5].map(g => `<button type="button" class="secondary ${g === multExplorerGroups ? 'primary' : ''}" data-g="${g}" aria-pressed="${g === multExplorerGroups}" style="min-width:44px;min-height:44px;padding:0;">${g}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">גודל כל קבוצה:</label>
-          <div style="display:inline-flex;gap:4px;" id="mgSizeBtns">
-            ${[2, 3, 4, 5].map(s => `<button type="button" class="secondary ${s === multExplorerSize ? 'primary' : ''}" data-s="${s}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="mgSizeBtns" role="group" aria-label="גודל כל קבוצה">
+            ${[2, 3, 4, 5].map(s => `<button type="button" class="secondary ${s === multExplorerSize ? 'primary' : ''}" data-s="${s}" aria-pressed="${s === multExplorerSize}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2313,7 +2315,7 @@ function renderTensBuilderUI(box) {
   box.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;">
       <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">בנו מספר באמצעות עשרות ואחדות:</div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;" role="toolbar" aria-label="פעולות עשרות ואחדות">
         <button type="button" class="secondary" id="tbAddTen" style="background:#ede7f6;color:#5e35b1;border-color:#b39ddb;width:auto;padding:8px 14px;">+ עשרת (10)</button>
         <button type="button" class="secondary" id="tbSubTen" style="width:auto;padding:8px 14px;" ${tensBuilderTens <= 0 ? 'disabled' : ''}>- עשרת</button>
         <button type="button" class="secondary" id="tbAddOne" style="background:#fff8e1;color:#f57f17;border-color:#ffe082;width:auto;padding:8px 14px;">+ אחדה (1)</button>
@@ -2367,8 +2369,8 @@ function renderLineExplorerUI(box) {
       <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">צעדו וקפצו על ישר המספרים:</div>
       <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <label style="font-weight:bold;">גודל דילוג:</label>
-        <div style="display:inline-flex;gap:6px;" id="leStepBtns">
-          ${[1, 2, 5].map(s => `<button type="button" class="secondary ${s === lineExplorerStep ? 'primary' : ''}" data-step="${s}" style="min-width:44px;min-height:44px;padding:0;">+${s}</button>`).join('')}
+        <div style="display:inline-flex;gap:6px;" id="leStepBtns" role="group" aria-label="גודל דילוג">
+          ${[1, 2, 5].map(s => `<button type="button" class="secondary ${s === lineExplorerStep ? 'primary' : ''}" data-step="${s}" aria-pressed="${s === lineExplorerStep}" style="min-width:44px;min-height:44px;padding:0;">+${s}</button>`).join('')}
         </div>
       </div>
       <div style="background:#f4f0ff;border-radius:12px;padding:16px;margin:14px auto;max-width:520px;overflow-x:auto;">
@@ -2492,14 +2494,14 @@ function renderEuclideanWheelUI(box) {
       <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">סה״כ צעדים במעגל:</label>
-          <div style="display:inline-flex;gap:4px;" id="eucStepsBtns">
-            ${[8, 12, 16].map(s => `<button type="button" class="secondary ${s === euclideanSteps ? 'primary' : ''}" data-s="${s}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="eucStepsBtns" role="group" aria-label="סה״כ צעדים במעגל">
+            ${[8, 12, 16].map(s => `<button type="button" class="secondary ${s === euclideanSteps ? 'primary' : ''}" data-s="${s}" aria-pressed="${s === euclideanSteps}" style="min-width:44px;min-height:44px;padding:0;">${s}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">צלילים פעילים (קדקודים):</label>
-          <div style="display:inline-flex;gap:4px;" id="eucPulsesBtns">
-            ${[3, 4, 5].map(p => `<button type="button" class="secondary ${p === euclideanPulses ? 'primary' : ''}" data-p="${p}" style="min-width:44px;min-height:44px;padding:0;">${p}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="eucPulsesBtns" role="group" aria-label="צלילים פעילים">
+            ${[3, 4, 5].map(p => `<button type="button" class="secondary ${p === euclideanPulses ? 'primary' : ''}" data-p="${p}" aria-pressed="${p === euclideanPulses}" style="min-width:44px;min-height:44px;padding:0;">${p}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2551,8 +2553,8 @@ function renderEvenOddExplorerUI(box) {
       <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px;">חוקר הזוגי והאי־זוגי:</div>
       <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <label style="font-weight:bold;">בחרו מספר:</label>
-        <div style="display:inline-flex;gap:4px;flex-wrap:wrap;" id="eoNumBtns">
-          ${[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" class="secondary ${n === evenOddCount ? 'primary' : ''}" data-n="${n}" style="min-width:44px;min-height:44px;padding:0;">${n}</button>`).join('')}
+        <div style="display:inline-flex;gap:4px;flex-wrap:wrap;" id="eoNumBtns" role="group" aria-label="בחירת מספר לבדיקת זוגיות">
+          ${[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" class="secondary ${n === evenOddCount ? 'primary' : ''}" data-n="${n}" aria-pressed="${n === evenOddCount}" style="min-width:44px;min-height:44px;padding:0;">${n}</button>`).join('')}
         </div>
       </div>
       <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:16px 0;">
@@ -2609,14 +2611,14 @@ function renderPolyrhythmExplorerUI(box) {
       <div style="display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">תוף א׳ מכה כל:</label>
-          <div style="display:inline-flex;gap:4px;" id="polyABtns">
-            ${[2, 3, 4].map(a => `<button type="button" class="secondary ${a === polyrhythmCycleA ? 'primary' : ''}" data-a="${a}" style="min-width:44px;min-height:44px;padding:0;">${a}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="polyABtns" role="group" aria-label="מחזור תוף א׳">
+            ${[2, 3, 4].map(a => `<button type="button" class="secondary ${a === polyrhythmCycleA ? 'primary' : ''}" data-a="${a}" aria-pressed="${a === polyrhythmCycleA}" style="min-width:44px;min-height:44px;padding:0;">${a}</button>`).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">תוף ב׳ מכה כל:</label>
-          <div style="display:inline-flex;gap:4px;" id="polyBBtns">
-            ${[3, 4, 6].map(b => `<button type="button" class="secondary ${b === polyrhythmCycleB ? 'primary' : ''}" data-b="${b}" style="min-width:44px;min-height:44px;padding:0;">${b}</button>`).join('')}
+          <div style="display:inline-flex;gap:4px;" id="polyBBtns" role="group" aria-label="מחזור תוף ב׳">
+            ${[3, 4, 6].map(b => `<button type="button" class="secondary ${b === polyrhythmCycleB ? 'primary' : ''}" data-b="${b}" aria-pressed="${b === polyrhythmCycleB}" style="min-width:44px;min-height:44px;padding:0;">${b}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2675,17 +2677,17 @@ function renderFractionDivExplorerUI(box) {
       <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
         <div>
           <label style="font-weight:bold;margin-left:6px;">משך היעד:</label>
-          <div style="display:inline-flex;gap:4px;" id="fdBaseBtns">
+          <div style="display:inline-flex;gap:4px;" id="fdBaseBtns" role="group" aria-label="משך היעד">
             ${[['1/2', 'חצי'], ['3/8', 'רבע מנוקד'], ['3/4', '3/4']].map(([k, label]) => `
-              <button type="button" class="secondary ${k === fractionDivBase ? 'primary' : ''}" data-base="${k}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
+              <button type="button" class="secondary ${k === fractionDivBase ? 'primary' : ''}" data-base="${k}" aria-pressed="${k === fractionDivBase}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
             `).join('')}
           </div>
         </div>
         <div>
           <label style="font-weight:bold;margin-left:6px;">יחידת החלוקה:</label>
-          <div style="display:inline-flex;gap:4px;" id="fdUnitBtns">
+          <div style="display:inline-flex;gap:4px;" id="fdUnitBtns" role="group" aria-label="יחידת החלוקה">
             ${[['1/8', 'שמינית'], ['1/16', 'שש־עשרית']].map(([k, label]) => `
-              <button type="button" class="secondary ${k === fractionDivUnit ? 'primary' : ''}" data-unit="${k}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
+              <button type="button" class="secondary ${k === fractionDivUnit ? 'primary' : ''}" data-unit="${k}" aria-pressed="${k === fractionDivUnit}" style="padding:6px 12px;min-height:44px;">${label} (${k})</button>
             `).join('')}
           </div>
         </div>
