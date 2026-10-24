@@ -56,3 +56,23 @@ test('a music activity of an evidenced mechanism other than M5 and M7 cites that
     if (['M1', 'M2', 'M3', 'M4', 'M6'].includes(id)) assert.ok(M[id].sources.includes(it.musicSrc), it.id + ' ' + it.music + ' ' + it.musicSrc);
   });
 });
+
+test('every way of an evidenced mechanism cites one of its studies', () => {
+  const wrong = [];
+  FILES.forEach((file) => Object.keys(file.music).forEach((key) => file.music[key].forEach(([tag, , src]) => {
+    const id = banks.mechanismOf(tag);
+    if (EVIDENCED.includes(id) && !M[id].sources.includes(src)) wrong.push(file.grade + ' ' + key + ' ' + tag + ' ' + src);
+  })));
+  assert.deepEqual(wrong, []);
+});
+
+// M8-M14 have no evidence: in these grades every such way was replaced by a
+// way of M2, M3, M6 or M7, distinct within its standard.
+const REPLACED = ['א', 'ב', 'ג', 'ד'];
+test('grades ' + REPLACED.join(', ') + ': no way uses a mechanism without evidence (M8-M14)', () => {
+  const left = [];
+  FILES.filter((file) => REPLACED.includes(file.grade)).forEach((file) => Object.keys(file.music).forEach((key) => file.music[key].forEach(([tag]) => {
+    if (!EVIDENCED.includes(banks.mechanismOf(tag))) left.push(file.grade + ' ' + key + ' ' + tag);
+  })));
+  assert.deepEqual(left, []);
+});
