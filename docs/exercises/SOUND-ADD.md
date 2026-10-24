@@ -15,7 +15,9 @@ moment.
 to answer. Open the page with `?mode=`:
 - `exercise.html?mode=tap` (default): one tap on the pad per sound.
 - `exercise.html?mode=choice`: three numbers; a wrong one is crossed out for
-  the second try.
+  the second try. In the silent stage (the no-music mastery check) the child
+  picks from every number 1-10 on a 5x2 grid instead, so a guess is right
+  only 1 time in 10 and two right first tries by chance are 1 in 100.
 - `exercise.html?mode=drag`: drag one circle per sound into the basket; a
   plain tap (or Enter) on the pile adds one too, so it works without dragging.
 

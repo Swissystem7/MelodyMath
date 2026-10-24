@@ -23,7 +23,8 @@
 //   musical version. Plain-stage tries and right answers are counted.
 // - The same sounds, stages and feedback carry several answer types (#671),
 //   picked with exercise.html?mode=...: 'tap' (the pad, default),
-//   'choice' (three numbers; a wrong one is crossed out for the second try)
+//   'choice' (three numbers; a wrong one is crossed out for the second try;
+//   the silent mastery check offers every number 1-10, not three)
 //   and 'drag' (drag one circle per sound into the basket; a plain tap or
 //   Enter on the pile adds one too, so it works without dragging).
 // The state functions and renderHtml are pure and tested in Node; mount()
@@ -65,6 +66,7 @@
   // Answer types (#671). MODE_PROMPTS replace PROMPTS for a type that is not
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
   const MODES = ['tap', 'choice', 'drag'];
+  const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
   const MODE_PROMPTS = {
     choice: {
       sound: 'הקשיבו 👂 ובחרו מספר',
@@ -170,9 +172,13 @@
   }
 
   // Three numbers: the sum and its two neighbours; the right one moves
-  // between the three places from exercise to exercise.
-  function choices(item, index) {
+  // between the three places from exercise to exercise. The silent stage is
+  // the no-music mastery check, so it cannot be a 1-in-3 guess: there the
+  // child picks from every number 1..CHOICE_MAX (a grid of big buttons, a
+  // guess is right 1 time in 10 and mastery needs two right first tries).
+  function choices(item, index, stage) {
     const t = sum(item);
+    if (stage === 'silent') return Array.from({ length: Math.max(CHOICE_MAX, t) }, function (_, i) { return i + 1; });
     const opts = [t - 1, t, t + 1];
     const r = (index || 0) % 3;
     return opts.slice(r).concat(opts.slice(0, r));
@@ -308,13 +314,14 @@
   function controlHtml(state, fin, tapAttr, icon) {
     const total = sum(state.item);
     if (picking(state)) {
-      const btns = choices(state.item, state.index).map(function (n) {
+      const grid = state.stage === 'silent';
+      const btns = choices(state.item, state.index, state.stage).map(function (n) {
         const out = state.wrong.indexOf(n) >= 0;
         const c = 'sa-opt' + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
         return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + tapAttr +
           ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
       }).join('');
-      return '<div class="sa-opts" dir="ltr" role="group" aria-label="בחרו מספר">' + btns + '</div>';
+      return '<div class="sa-opts' + (grid ? ' sa-grid' : '') + '" dir="ltr" role="group" aria-label="בחרו מספר">' + btns + '</div>';
     }
     if (state.mode === 'drag') {
       return '<button type="button" class="sa-pad sa-source" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="גררו עיגול לסל. בסל ' + state.taps + '">🔵 <span>' + state.taps + '</span></button>';
@@ -520,7 +527,7 @@
 
   return {
     GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX,
     numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,
