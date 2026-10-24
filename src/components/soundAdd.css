@@ -35,6 +35,11 @@
 .sa-basket::before{content:"🧺";position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:1.5rem}
 .sa-source{touch-action:none}
 .sa-ghost{position:fixed;z-index:10;pointer-events:none;transform:translate(-50%,-50%)}
+/* line: 0-10 number line, each tick a 48px target; a sound lights its hop */
+.sa-line{display:flex;justify-content:space-between;gap:2px;border-top:4px solid var(--ink);padding-top:6px;margin:16px 0 8px}
+.sa-tick{flex:1;min-width:0;min-height:48px;padding:0;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);font-size:1.1rem;font-weight:bold}
+.sa-tick[aria-pressed="true"]{background:color-mix(in srgb, var(--mint) 60%, var(--card))}
+.sa-tick.lit{animation:saPop .3s ease-out}
 .sa-mastered{font-weight:bold;color:var(--good);text-align:center}
 .sa-card,#saCard{position:relative}
 .sa-families{display:flex;justify-content:center;gap:10px;margin:2px 0 8px}
@@ -57,4 +62,4 @@
 @keyframes saPulse{50%{box-shadow:inset 0 0 0 6px var(--focus)}}
 @media (prefers-reduced-motion:reduce){.sa-start{animation:none}.sa-dots .sa-group,.sa-dots .sa-plus,.sa-total{transition:none}}
 @keyframes saPop{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
-@media (prefers-reduced-motion:reduce){.sa-dot.lit,.sa-ans.lit{animation:none;outline:3px solid var(--focus)}}
+@media (prefers-reduced-motion:reduce){.sa-dot.lit,.sa-ans.lit,.sa-tick.lit{animation:none;outline:3px solid var(--focus)}}

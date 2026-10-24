@@ -23,9 +23,10 @@
 //   musical version. Plain-stage tries and right answers are counted.
 // - The same sounds, stages and feedback carry several answer types (#671),
 //   picked with exercise.html?mode=...: 'tap' (the pad, default),
-//   'choice' (three numbers; a wrong one is crossed out for the second try)
-//   and 'drag' (drag one circle per sound into the basket; a plain tap or
-//   Enter on the pile adds one too, so it works without dragging).
+//   'choice' (three numbers; a wrong one is crossed out for the second try),
+//   'drag' (drag one circle per sound into the basket; a plain tap or Enter
+//   on the pile adds one too, so it works without dragging) and 'line'
+//   (every sound is one hop on a 0-10 number line; tap where it lands).
 // The state functions and renderHtml are pure and tested in Node; mount()
 // wires them to the page.
 (function (root, factory) {
@@ -64,7 +65,8 @@
   };
   // Answer types (#671). MODE_PROMPTS replace PROMPTS for a type that is not
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
-  const MODES = ['tap', 'choice', 'drag'];
+  const MODES = ['tap', 'choice', 'drag', 'line'];
+  const LINE_MAX = 10; // the number line runs 0..10, every sum fits
   const MODE_PROMPTS = {
     choice: {
       sound: 'הקשיבו 👂 ובחרו מספר',
@@ -77,6 +79,12 @@
       picture: 'כמה עיגולים? גררו 🔵 לסל על כל עיגול',
       symbol: 'כמה זה? גררו 🔵 לסל',
       silent: 'כמה זה? גררו 🔵 לסל',
+    },
+    line: {
+      sound: 'הקשיבו 👂 כל צליל קפיצה. איפה נחתנו?',
+      picture: 'כמה עיגולים? הקישו על המספר בקו',
+      symbol: 'כמה זה? הקישו על המספר בקו',
+      silent: 'כמה זה? הקישו על המספר בקו',
     },
   };
   const BACK_PROMPT = 'נתרגל עוד קצת עם צלילים 🎵';
@@ -100,6 +108,10 @@
     'drag.picture': 'כמה עיגולים יש? גררו לסל עיגול על כל עיגול',
     'drag.symbol': 'כמה זה? גררו לסל את התשובה',
     'drag.silent': 'כמה זה? גררו לסל את התשובה',
+    'line.sound': 'הקשיבו. כל צליל הוא קפיצה. איפה נחתנו?',
+    'line.picture': 'כמה עיגולים יש? הקישו על המספר בקו',
+    'line.symbol': 'כמה זה? הקישו על המספר בקו',
+    'line.silent': 'כמה זה? הקישו על המספר בקו',
   };
   // Recorded clips present in sounds/voice/he/ (key -> file). Empty until the
   // owner records them with tools/record-voice.html; SOUNDS-LICENSES.md lists
@@ -154,7 +166,7 @@
   function tapSounds(state) { return state.stage !== 'silent'; }
   function done(state) { return state.status === 'right' || state.status === 'shown'; }
   // Types where the child picks one number instead of tapping one per sound.
-  function picks(mode) { return mode === 'choice'; }
+  function picks(mode) { return mode === 'choice' || mode === 'line'; }
   function picking(state) { return picks(state.mode); }
   // ✔ is live once there is an answer that was not already marked wrong.
   function answered(state) { return state.taps != null && state.wrong.indexOf(state.taps) < 0; }
@@ -308,13 +320,15 @@
   function controlHtml(state, fin, tapAttr, icon) {
     const total = sum(state.item);
     if (picking(state)) {
-      const btns = choices(state.item, state.index).map(function (n) {
+      const line = state.mode === 'line';
+      const nums = line ? Array.from({ length: LINE_MAX + 1 }, function (_, i) { return i; }) : choices(state.item, state.index);
+      const btns = nums.map(function (n) {
         const out = state.wrong.indexOf(n) >= 0;
-        const c = 'sa-opt' + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
-        return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + tapAttr +
+        const c = (line ? 'sa-tick' : 'sa-opt') + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
+        return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + (line ? ' data-tick="' + n + '"' : '') + tapAttr +
           ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
       }).join('');
-      return '<div class="sa-opts" dir="ltr" role="group" aria-label="בחרו מספר">' + btns + '</div>';
+      return '<div class="' + (line ? 'sa-line' : 'sa-opts') + '" dir="ltr" role="group" aria-label="' + (line ? 'ישר המספרים 0 עד 10' : 'בחרו מספר') + '">' + btns + '</div>';
     }
     if (state.mode === 'drag') {
       return '<button type="button" class="sa-pad sa-source" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="גררו עיגול לסל. בסל ' + state.taps + '">🔵 <span>' + state.taps + '</span></button>';
@@ -416,6 +430,7 @@
       stop();
       playing = JAM.playNotes(plan, function (n) {
         light('[data-dot="' + n.dot + '"]', withCount ? n.count : 0);
+        if (state.mode === 'line' && n.kind !== 'scale') light('[data-tick="' + (n.dot + 1) + '"]'); // one hop per sound
         if (n.kind === 'scale') light('[data-ans="' + n.dot + '"]');
         if (withCount) say('count' + n.count);
       });
@@ -520,7 +535,7 @@
 
   return {
     GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, LINE_MAX: LINE_MAX,
     numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,

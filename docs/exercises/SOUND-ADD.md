@@ -18,6 +18,8 @@ to answer. Open the page with `?mode=`:
   the second try.
 - `exercise.html?mode=drag`: drag one circle per sound into the basket; a
   plain tap (or Enter) on the pile adds one too, so it works without dragging.
+- `exercise.html?mode=line`: a 0-10 number line; every sound is one hop on it
+  (the tick lights up), and the child taps where the hops land.
 
 **Opening:** the exercise speaks its instruction and plays its sound as soon
 as it opens. A browser that blocks audio before the first touch shows one big

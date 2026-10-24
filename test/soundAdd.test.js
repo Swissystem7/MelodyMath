@@ -285,3 +285,21 @@ test('drag: a basket and a pile the child can also tap; hints speak of circles i
   assert.match(SA.check(taps(s, 6)).message, /יש בסל עיגול אחד יותר מדי/);
   assert.match(SA.renderHtml(SA.createState({ stage: 'silent', mode: 'drag' })), /class="sa-pad sa-source" data-act="tap" aria-label/, 'silent: the pile makes no sound');
 });
+
+test('line: a 0-10 number line, every sum lands on it, the solution is marked on it', () => {
+  const s = SA.createState({ stage: 'sound', mode: 'line', item: [3, 2] });
+  assert.equal(s.taps, null);
+  assert.equal(SA.speechKey(s), 'line.sound');
+  const html = SA.renderHtml(s);
+  assert.equal((html.match(/class="sa-tick[^"]*"/g) || []).length, SA.LINE_MAX + 1);
+  assert.match(html, /data-tick="0"/);
+  assert.match(html, /data-tick="10"/);
+  assert.doesNotMatch(html, /data-act="untap"/);
+  SA.ITEMS.forEach(([a, b]) => assert.ok(a + b <= SA.LINE_MAX, a + ' + ' + b));
+  const w = SA.check(SA.pick(s, 7));
+  assert.match(w.message, /גדול מדי/);
+  assert.match(SA.renderHtml(w), /class="sa-tick sa-wrong" data-act="pick" data-n="7"[^>]* disabled/);
+  const shown = SA.check(SA.pick(w, 8));
+  assert.match(shown.message, /3 \+ 2 = 5/);
+  assert.match(SA.renderHtml(shown), /class="sa-tick sa-right" data-act="pick" data-n="5"/);
+});
