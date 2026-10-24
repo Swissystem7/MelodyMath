@@ -39,6 +39,15 @@
 
   const JAM = root.MM_JAM || require('./jamKit.js');
   const GAME = 'soundAdd';
+  // Where the exercise sits in the curriculum (#691 review item 2). The same
+  // links are in src/lib/curriculum/progression.js; test/soundAdd.test.js
+  // fails if the two disagree.
+  const PROGRESSION = Object.freeze({
+    topicId: 'mm-cur-3',
+    prereq: ['mm-cur-1', 'mm-cur-2'],
+    skill: 'joining two groups of sounds into one sum (addition within 10)',
+    buildsTo: ['mm-cur-4', 'mm-cur-7', 'mm-cur-11'],
+  });
   const BEAT = 0.42; // seconds between two sounds of one group
   const GAP = 0.5; // the extra pause between the two groups
   const MAX_TRIES = 2;
@@ -534,7 +543,7 @@
   }
 
   return {
-    GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
+    GAME: GAME, PROGRESSION: PROGRESSION, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
     MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, LINE_MAX: LINE_MAX,
     numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,

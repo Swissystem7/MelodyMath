@@ -303,3 +303,14 @@ test('line: a 0-10 number line, every sum lands on it, the solution is marked on
   assert.match(shown.message, /3 \+ 2 = 5/);
   assert.match(SA.renderHtml(shown), /class="sa-tick sa-right" data-act="pick" data-n="5"/);
 });
+
+test('PROGRESSION matches the curriculum map (#691 review item 2)', () => {
+  const P = require('../src/lib/curriculum/progression.js');
+  const links = P.linksForTopic(SA.PROGRESSION.topicId);
+  assert.ok(links, 'topic is in MM_PROGRESSION');
+  assert.deepEqual([...SA.PROGRESSION.prereq].sort(), [...links.prereq].sort());
+  assert.deepEqual([...SA.PROGRESSION.buildsTo].sort(), [...links.buildsTo].sort());
+  assert.equal(typeof SA.PROGRESSION.skill, 'string');
+  assert.ok(SA.PROGRESSION.skill.length > 0);
+  SA.ITEMS.forEach(([a, b]) => assert.ok(a + b <= 20, 'mm-cur-3 is addition within 20: ' + a + ' + ' + b));
+});
