@@ -53,4 +53,15 @@
 .st-key{width:44px;min-height:120px;border-radius:0 0 8px 8px}
 .st-slide{display:flex;gap:0;flex:1 1 100%}.st-step{flex:1;border-radius:0}
 .st-damp{width:auto;min-height:48px}
+.st-pad{min-width:84px;min-height:84px}
+.st-strings{display:flex;flex-direction:column;gap:4px;flex:1 1 100%}.st-string{width:100%;min-height:48px;border-radius:6px;border-style:solid;border-color:var(--ink);border-left:0;border-right:0;background:transparent}
+.st-hole{min-width:56px;min-height:56px;border-radius:50%}
+.lib-family h4{margin:10px 0 4px}
+.lib-grid{display:flex;flex-wrap:wrap;gap:6px}
+.lib-item{display:flex;flex-direction:column;align-items:center;width:auto;min-width:96px;min-height:56px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:normal}
+.lib-item[aria-pressed="true"]{border-color:var(--good)}
+.lib-item.locked{color:var(--muted);border-style:dashed}.lib-item small{font-size:.75rem}
+.lib-card{border:2px solid var(--purple);border-radius:16px;padding:10px 14px;margin:12px 0}
+.lib-facts{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0}.lib-facts dt{font-weight:bold}.lib-facts dd{margin:0}
+.lib-src{align-self:center}
 .st-shelf{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}.st-shelf li{border:1px solid var(--line);border-radius:12px;padding:4px 10px}.st-shelf li.locked{color:var(--muted)}

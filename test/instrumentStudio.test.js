@@ -8,14 +8,17 @@ const S = require('../src/lib/music/instrumentStudio.js');
 const UI = require('../src/components/InstrumentStudio.js');
 const I = require('../src/lib/instruments.js');
 const V = require('../src/lib/instrumentVoices.js');
+const LIB = require('../src/lib/music/instrumentLibrary.js');
 
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const answer = (s, correct, topic) => S.onEvent(s, { type: 'answer', correct, topic: topic || 'fractions' });
 const answers = (s, n, topic) => { for (let i = 0; i < n; i++) s = answer(s, true, topic); return s; };
 
-test('the six starting profiles are real instruments, each with its own mechanic, samples and look', () => {
-  assert.deepEqual(S.PROFILES.map((x) => x.mechanic).sort(), ['barsByPitch', 'keys', 'pressSlide', 'strikeDamp', 'tapZones', 'thumbPluck']);
+test('every profile is a real instrument with its own mechanic, samples and look (24 since the library)', () => {
+  assert.equal(S.PROFILES.length, 24);
+  assert.deepEqual(S.PROFILES.filter((x) => x.basic).map((x) => x.mechanic).sort(), ['barsByPitch', 'keys', 'pressSlide', 'strikeDamp', 'tapZones', 'thumbPluck'], 'the six starting ones keep their own mechanics');
+  assert.deepEqual([...new Set(S.PROFILES.map((x) => x.mechanic))].sort(), Object.keys(S.MECHANICS).sort());
   const seen = { pair: new Set(), samples: new Set(), theme: new Set() };
   S.PROFILES.forEach((x) => {
     assert.ok(I.instrumentById(x.id), x.id + ' is in instruments.js');
@@ -38,8 +41,8 @@ test('unlocks are deterministic: the same answers open the same instruments in t
     return log;
   };
   assert.deepEqual(run(), run());
-  assert.deepEqual(run()[2], ['darbuka', 'marimba', 'piano', 'kalimba', 'tabla', 'gamelan']);
-  assert.deepEqual(S.unlockedIds(answers(S.initialState(), S.MASTERY - 1)), ['darbuka', 'marimba', 'piano'], 'one short of mastery opens nothing');
+  assert.deepEqual(run()[2], LIB.basicIds().concat(['djembe', 'oud', 'flute']));
+  assert.deepEqual(S.unlockedIds(answers(S.initialState(), S.MASTERY - 1)), LIB.basicIds(), 'one short of mastery opens nothing');
   const src = fs.readFileSync(path.join(root, 'src/lib/music/instrumentStudio.js'), 'utf8');
   assert.doesNotMatch(src, /Math\.random|Date\.now|setTimeout|setInterval/, 'no chance and no timers in unlocks');
 });
@@ -73,14 +76,14 @@ test('a choice opens only at topic start, after 5 correct in a row and on a new 
   assert.equal(s.moment, null, 'a wrong answer never opens a choice');
   const u = answers(S.initialState(), S.MASTERY, 'fractions');
   assert.equal(u.moment.kind, 'unlock');
-  assert.equal(u.moment.fresh, 'kalimba');
-  assert.equal(u.moment.options[0], 'kalimba');
+  assert.equal(u.moment.fresh, 'djembe');
+  assert.equal(u.moment.options[0], 'djembe');
   [start, u].forEach((x) => {
     assert.ok(x.moment.options.length >= S.MIN_OPTIONS && x.moment.options.length <= S.MAX_OPTIONS);
     assert.ok(x.moment.options.includes(x.current), 'the current instrument can be kept');
   });
   const all = answers(answers(answers(S.initialState(), 5, 'a'), 5, 'b'), 5, 'c');
-  assert.equal(S.onEvent(all, { type: 'topicStart' }).moment.options.length, 4, 'never more than 4 of 6');
+  assert.equal(S.onEvent(all, { type: 'topicStart' }).moment.options.length, 4, 'never more than 4 of 9');
   assert.equal(S.choose(S.initialState(), 'piano').current, 'darbuka', 'no switch outside a moment');
 });
 
@@ -115,7 +118,7 @@ test('nothing is sold: no payment UI or code, every instrument is free, no trans
   const pay = /purchas|price|paywall|subscri|checkout|entitle|parental|premium|coin|loot|קנה|קנייה|מחיר|רכישה|מנוי|תשלום|מטבע/i;
   const claim = /improves? math|משפר[^.]{0,30}מתמטיקה/i;
   files.forEach((f) => { assert.doesNotMatch(f, pay); assert.doesNotMatch(f, claim); });
-  S.PROFILES.forEach((x) => assert.deepEqual(Object.keys(x).sort(), ['family', 'feel', 'he', 'id', 'mechanic', 'opensAt', 'samples', 'theme', 'voice']));
+  S.PROFILES.forEach((x) => assert.deepEqual(Object.keys(x).sort(), ['basic', 'card', 'family', 'feel', 'he', 'id', 'mechanic', 'opensAt', 'samples', 'theme', 'voice']));
   assert.match(UI.renderHtml(S.initialState()), /כל הכלים בחינם/);
 });
 

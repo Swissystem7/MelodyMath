@@ -36,6 +36,19 @@
     drone: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.2]], sweep: 1, noise: 0.08, filter: ['lowpass', 700], attack: 0.1, decay: 1.2, hz: 73, vibrato: [6, 2] },
     keys: { wave: 'triangle', partials: [[1, 0.6], [2, 0.2], [3, 0.08]], sweep: 1, noise: 0.01, filter: ['lowpass', 4000], attack: 0.004, decay: 0.8, hz: 262 },
     organ: { wave: 'sine', partials: [[1, 0.5], [2, 0.3], [4, 0.15]], sweep: 1, noise: 0, filter: null, attack: 0.03, decay: 1, hz: 262 },
+    // WorldInstrumentLibrary (#591, 6376067230): one voice of its own per library instrument.
+    tablaBol: { wave: 'sine', partials: [[1, 0.7], [2, 0.25], [3, 0.12]], sweep: 1.02, noise: 0.2, filter: ['bandpass', 1500], attack: 0.001, decay: 0.45, hz: 294 },
+    taiko: { wave: 'sine', partials: [[1, 1], [1.5, 0.2]], sweep: 0.5, noise: 0.25, filter: ['lowpass', 600], attack: 0.003, decay: 0.8, hz: 60 },
+    xylo: { wave: 'sine', partials: [[1, 0.7], [3, 0.3], [6.3, 0.08]], sweep: 1, noise: 0.08, filter: null, attack: 0.001, decay: 0.25, hz: 784 },
+    sitar: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.25], [3.01, 0.15]], sweep: 1, noise: 0.04, filter: ['bandpass', 3200], attack: 0.002, decay: 1.4, hz: 220, vibrato: [4, 6] },
+    koto: { wave: 'triangle', partials: [[1, 0.7], [2, 0.2], [4, 0.05]], sweep: 1, noise: 0.04, filter: ['lowpass', 3500], attack: 0.002, decay: 1.1, hz: 294 },
+    nylon: { wave: 'triangle', partials: [[1, 0.6], [2, 0.25], [3, 0.1]], sweep: 1, noise: 0.02, filter: ['lowpass', 1800], attack: 0.004, decay: 1, hz: 196 },
+    harp: { wave: 'sine', partials: [[1, 0.8], [2, 0.2], [3, 0.06]], sweep: 1, noise: 0.01, filter: null, attack: 0.003, decay: 1.8, hz: 262 },
+    qanun: { wave: 'sawtooth', partials: [[1, 0.4], [2, 0.2]], sweep: 1, noise: 0.06, filter: ['highpass', 400], attack: 0.001, decay: 0.7, hz: 392 },
+    flute: { wave: 'sine', partials: [[1, 0.8], [2, 0.08]], sweep: 1, noise: 0.06, filter: ['lowpass', 5000], attack: 0.04, decay: 2.5, hz: 523, vibrato: [5, 4] },
+    recorderPipe: { wave: 'triangle', partials: [[1, 0.8]], sweep: 1, noise: 0.03, filter: ['lowpass', 3000], attack: 0.03, decay: 2.2, hz: 523 },
+    trumpet: { wave: 'sawtooth', partials: [[1, 0.6], [2, 0.2]], sweep: 1, noise: 0.02, filter: ['lowpass', 2600], attack: 0.03, decay: 2.5, hz: 349, vibrato: [5, 3] },
+    clarinet: { wave: 'square', partials: [[1, 0.45], [3, 0.12]], sweep: 1, noise: 0.02, filter: ['lowpass', 1800], attack: 0.03, decay: 2.5, hz: 294 },
   };
 
   const MAX_GAIN = 0.3; // same ceiling idea as musicEngine.MAX_GAIN: gentle on small ears
