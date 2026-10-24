@@ -16,6 +16,8 @@ to answer. Open the page with `?mode=`:
 - `exercise.html?mode=tap` (default): one tap on the pad per sound.
 - `exercise.html?mode=choice`: three numbers; a wrong one is crossed out for
   the second try.
+- `exercise.html?mode=drag`: drag one circle per sound into the basket; a
+  plain tap (or Enter) on the pile adds one too, so it works without dragging.
 
 **Opening:** the exercise speaks its instruction and plays its sound as soon
 as it opens. A browser that blocks audio before the first touch shows one big

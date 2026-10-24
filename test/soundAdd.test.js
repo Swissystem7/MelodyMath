@@ -271,3 +271,17 @@ test('the answer types are listed for the teacher in the notes, not on the child
   SA.MODES.forEach((m) => assert.ok(doc.includes('?mode=' + m), m));
   assert.doesNotMatch(page, /\?mode=/);
 });
+
+test('drag: a basket and a pile the child can also tap; hints speak of circles in the basket', () => {
+  const s = SA.createState({ stage: 'sound', mode: 'drag', item: [3, 2] });
+  assert.equal(s.taps, 0);
+  const html = SA.renderHtml(s);
+  assert.match(html, /class="sa-answer sa-basket"/);
+  assert.match(html, /class="sa-pad sa-source" data-act="tap" data-tap="drumLow"/, 'tapping the pile works without dragging');
+  assert.match(html, /data-act="untap"/, 'a circle can be taken out again');
+  assert.equal(SA.speechKey(s), 'drag.sound');
+  assert.match(SA.check(taps(s, 3)).message, /חסרים 2 עיגולים בסל/);
+  assert.match(SA.check(taps(s, 4)).message, /חסר עיגול אחד בסל/);
+  assert.match(SA.check(taps(s, 6)).message, /יש בסל עיגול אחד יותר מדי/);
+  assert.match(SA.renderHtml(SA.createState({ stage: 'silent', mode: 'drag' })), /class="sa-pad sa-source" data-act="tap" aria-label/, 'silent: the pile makes no sound');
+});

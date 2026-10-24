@@ -22,8 +22,10 @@
 //   stage on. Mastery needs the plain stage; a miss there goes back to the
 //   musical version. Plain-stage tries and right answers are counted.
 // - The same sounds, stages and feedback carry several answer types (#671),
-//   picked with exercise.html?mode=...: 'tap' (the pad, default) and
-//   'choice' (three numbers; a wrong one is crossed out for the second try).
+//   picked with exercise.html?mode=...: 'tap' (the pad, default),
+//   'choice' (three numbers; a wrong one is crossed out for the second try)
+//   and 'drag' (drag one circle per sound into the basket; a plain tap or
+//   Enter on the pile adds one too, so it works without dragging).
 // The state functions and renderHtml are pure and tested in Node; mount()
 // wires them to the page.
 (function (root, factory) {
@@ -62,13 +64,19 @@
   };
   // Answer types (#671). MODE_PROMPTS replace PROMPTS for a type that is not
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
-  const MODES = ['tap', 'choice'];
+  const MODES = ['tap', 'choice', 'drag'];
   const MODE_PROMPTS = {
     choice: {
       sound: 'הקשיבו 👂 ובחרו מספר',
       picture: 'כמה עיגולים? בחרו מספר',
       symbol: 'כמה זה? בחרו מספר',
       silent: 'כמה זה? בחרו מספר',
+    },
+    drag: {
+      sound: 'הקשיבו 👂 וגררו 🔵 לסל על כל צליל',
+      picture: 'כמה עיגולים? גררו 🔵 לסל על כל עיגול',
+      symbol: 'כמה זה? גררו 🔵 לסל',
+      silent: 'כמה זה? גררו 🔵 לסל',
     },
   };
   const BACK_PROMPT = 'נתרגל עוד קצת עם צלילים 🎵';
@@ -88,6 +96,10 @@
     'choice.picture': 'כמה עיגולים יש? בחרו את המספר',
     'choice.symbol': 'כמה זה? בחרו את המספר',
     'choice.silent': 'כמה זה? בחרו את המספר',
+    'drag.sound': 'הקשיבו, ואז גררו לסל עיגול על כל צליל',
+    'drag.picture': 'כמה עיגולים יש? גררו לסל עיגול על כל עיגול',
+    'drag.symbol': 'כמה זה? גררו לסל את התשובה',
+    'drag.silent': 'כמה זה? גררו לסל את התשובה',
   };
   // Recorded clips present in sounds/voice/he/ (key -> file). Empty until the
   // owner records them with tools/record-voice.html; SOUNDS-LICENSES.md lists
@@ -186,6 +198,7 @@
   function diffText(mode, diff) {
     const n = Math.abs(diff);
     if (picks(mode)) return diff > 0 ? 'קטן מדי.' : 'גדול מדי.';
+    if (mode === 'drag') return diff === 1 ? 'חסר עיגול אחד בסל.' : diff > 1 ? 'חסרים ' + n + ' עיגולים בסל.' : diff === -1 ? 'יש בסל עיגול אחד יותר מדי.' : 'יש בסל ' + n + ' עיגולים יותר מדי.';
     return diff === 1 ? 'חסרה הקשה אחת.' : diff > 1 ? 'חסרות ' + n + ' הקשות.' : diff === -1 ? 'יש הקשה אחת יותר מדי.' : 'יש ' + n + ' הקשות יותר מדי.';
   }
 
@@ -287,7 +300,8 @@
       else if (state.hint && state.hint.extra && i >= total) c += ' sa-extra';
       html += '<span class="' + c + '" data-ans="' + i + '"></span>';
     }
-    return '<div class="sa-answer" dir="ltr" aria-live="polite" aria-label="' + (picking(state) ? 'בחרתם ' : 'הקשתם ') + taps + '">' + html + '</div>';
+    const basket = state.mode === 'drag';
+    return '<div class="sa-answer' + (basket ? ' sa-basket' : '') + '" dir="ltr" aria-live="polite" aria-label="' + (basket ? 'בסל ' : picking(state) ? 'בחרתם ' : 'הקשתם ') + taps + '">' + html + '</div>';
   }
 
   // The answer control of each type: the pad, or the number buttons.
@@ -301,6 +315,9 @@
           ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
       }).join('');
       return '<div class="sa-opts" dir="ltr" role="group" aria-label="בחרו מספר">' + btns + '</div>';
+    }
+    if (state.mode === 'drag') {
+      return '<button type="button" class="sa-pad sa-source" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="גררו עיגול לסל. בסל ' + state.taps + '">🔵 <span>' + state.taps + '</span></button>';
     }
     return '<button type="button" class="sa-pad" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="הקשה. הקשתם ' + state.taps + '">' + icon + ' <span>' + state.taps + '</span></button>';
   }
@@ -423,8 +440,44 @@
     function save() {
       try { root.localStorage.setItem('mm.soundAdd.plain', JSON.stringify({ tried: state.plainTried, right: state.plainRight })); } catch (e) { /* private mode */ }
     }
+    // 'drag': a circle follows the finger from the pile; dropped on the
+    // basket it counts, dropped elsewhere it does not. The click after a drag
+    // is swallowed so a drop never counts twice.
+    let drag = null;
+    let swallow = false;
+    el.addEventListener('pointerdown', function (ev) {
+      swallow = false;
+      const s = state.mode === 'drag' && ev.target.closest ? ev.target.closest('.sa-source') : null;
+      if (!s || s.disabled) return;
+      drag = { x: ev.clientX, y: ev.clientY, ghost: null };
+      if (s.setPointerCapture) s.setPointerCapture(ev.pointerId);
+    });
+    el.addEventListener('pointermove', function (ev) {
+      if (!drag) return;
+      if (!drag.ghost) {
+        if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) < 10) return;
+        drag.ghost = document.createElement('span');
+        drag.ghost.className = 'sa-ans sa-ghost';
+        document.body.appendChild(drag.ghost);
+      }
+      drag.ghost.style.left = ev.clientX + 'px';
+      drag.ghost.style.top = ev.clientY + 'px';
+    });
+    function drop(ev) {
+      if (!drag) return;
+      const moved = drag.ghost;
+      drag = null;
+      if (!moved) return;
+      moved.remove();
+      swallow = true;
+      const over = ev.type === 'pointerup' && document.elementFromPoint(ev.clientX, ev.clientY);
+      if (over && over.closest('.sa-basket')) run('tap');
+    }
+    el.addEventListener('pointerup', drop);
+    el.addEventListener('pointercancel', drop);
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
+      if (swallow) { swallow = false; if (b && b.classList.contains('sa-source')) return; }
       if (!b || b.disabled) return;
       run(b.getAttribute('data-act'), b);
     });
