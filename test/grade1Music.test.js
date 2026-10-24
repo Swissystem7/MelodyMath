@@ -253,9 +253,9 @@ test('bindGrade1 renders play button, visible note and screen-reader narration f
   t.after(() => { delete global.document; });
 
   const specs = [
-    { kind: 'beats', from: 0, step: 5, accents: 3 },
+    { kind: 'beats', from: 0, step: 5, accents: 3, answer: 20 },
     { kind: 'scale', from: 0, to: 10, baseFreq: 220 },
-    { kind: 'chart100', number: 34 },
+    { kind: 'chart100', number: 34, answer: 34 },
     { kind: 'pattern', type: 'ABC', length: 6 },
     { kind: 'countOn', from: 7, steps: 3 },
   ];
@@ -277,6 +277,13 @@ test('bindGrade1 renders play button, visible note and screen-reader narration f
     const sr = box.children[0];
     assert.equal(sr.className, 'sr-only');
     assert.equal(sr.textContent, note.textContent);
+    // #457: the note is on screen while the question is open, so it must not
+    // name the number the child is asked for.
+    if (spec.answer != null) {
+      const says = new RegExp('(^|[^0-9])' + spec.answer + '([^0-9]|$)');
+      assert.doesNotMatch(note.textContent, says, spec.kind);
+      assert.doesNotMatch(sr.textContent, says, spec.kind);
+    }
   });
 
   assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'unknown' }), false);

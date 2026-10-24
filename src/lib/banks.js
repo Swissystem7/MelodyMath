@@ -36,6 +36,7 @@
     SUB10: 'חיסור בתחום העשר',
     SUB20: 'חיסור בתחום העשרים',
     NLINE: 'ישר המספרים — מיקום מדויק ומקורב; תשתית לחיבור/חיסור',
+    NUMBER_LINE_APPROX: 'ישר המספרים — מיקום מקורב (הערכה) בין 0 ל־100',
     MUL_B: 'כפולות 2, 4, 5 ו־10 עד סוף כיתה ב׳',
     MUL_C: 'לוח כפל 10×10 אחרי שליטה ב־2/4/5/10',
     DIV_PART: 'חילוק לחלקים',
@@ -52,6 +53,7 @@
     WORD_REMOVE: 'שאלת מילים — הפרדה (הסרה מקבוצה)',
     WORD_COMPARE: 'שאלת מילים — השוואה בין שתי כמויות',
     GEO_SORT: 'מיון מצולעים לפי מספר צלעות וקודקודים',
+    POLY_CUT_A: 'פירוק מצולע בגזירה והרכבת מצולעים ממצולעים נתונים',
     RIGHT_ANGLE: 'זיהוי זווית ישרה',
     ANGLE_KINDS: 'זווית חדה, ישרה, קהה ושטוחה',
     TRI_SORT: 'מיון משולשים לפי זוויות ולפי צלעות',
@@ -95,6 +97,25 @@
     ADD_SUB_10K: 'חיבור וחיסור במאוזן ובמאונך עד רבבה',
     MUL_DIV_10: 'כפל וחילוק ב־10, 100 ו־1,000',
     WORD_TWO_STEP: 'שאלות מילוליות דו־שלביות',
+    POLY_DECOMP: 'פירוק מצולע והרכבת מצולע חדש מכל החלקים',
+    MONEY_BILLS: 'כסף — סכום בשטרות ובמטבעות, קנייה ועודף בשקלים',
+    NUM_MILLION: 'מספרים עד מיליון — מבנה עשרוני, השוואה ועיגול',
+    ADD_SUB_MILLION: 'חיבור וחיסור בתחום המיליון, גם במאונך',
+    MUL_DIV_VERT: 'כפל וחילוק במספר חד־ספרתי, גם במאונך; סימני התחלקות',
+    ORDER_OPS: 'סדר פעולות החשבון, כולל סוגריים',
+    FRAC_OF_QTY: 'שבר כחלק מכמות — מציאת הכמות החלקית',
+    FRAC_NAMES: 'שמות שונים לשבר והשוואה בין שברים',
+    FRAC_ADD_D: 'חיבור וחיסור שברים במכנים שווים או כשמכנה אחד כפולה של השני',
+    BOX_AREA: 'שטח פנים של תיבה',
+    PIE: 'קריאת דיאגרמת עוגה',
+    NUM_BIG: 'מספרים גדולים ממיליון — מבנה עשרוני, קריאה, כתיבה והשוואה',
+    OPS_MILLION: 'ארבע פעולות החשבון עד מיליון, עיגול ואומדן',
+    PRIME_FACTOR: 'מספרים ראשוניים ופריקים, פירוק לגורמים, סימני התחלקות',
+    FRAC_MODELS: 'ייצוג שברים במודלים ועל ישר המספרים; השבר כמנה',
+    TRI_AREA: 'גובה במשולש ושטח משולש',
+    PARA_AREA: 'גובה במקבילית ושטח מקבילית',
+    SOLIDS: 'פירמידות ומנסרות ישרות — פאות, מקצועות, קודקודים ופריסות',
+    FREQ: 'שכיחות, טבלת שכיחויות ושכיח',
   };
 
   const SKILL_HE = {
@@ -127,13 +148,16 @@
     'ו': ['fractions', 'decimals', 'percent', 'geometry'],
   };
 
+  // Teaching order of the gaps (RM_ORDER): place value comes before addition
+  // and subtraction, because two-digit work with regrouping needs tens and
+  // ones first (#591 audit, 23.10.2026).
   const RM_SKILLS = [
     ['counting', SKILL_HE.counting],
+    ['place_value', SKILL_HE.place_value],
     ['addition', SKILL_HE.addition],
     ['subtraction', SKILL_HE.subtraction],
     ['number_line', SKILL_HE.number_line],
     ['word_problems', SKILL_HE.word_problems],
-    ['place_value', SKILL_HE.place_value],
     ['multiplication', SKILL_HE.multiplication],
     ['division', SKILL_HE.division],
     ['measurement', SKILL_HE.measurement],
@@ -217,6 +241,8 @@
       typed: extra.typed,
       music: extra.music,
       grid: extra.grid,
+      tags: extra.tags,
+      tolerance: extra.tolerance,
     };
   }
 
@@ -1298,6 +1324,7 @@
       g3: e.g3,
       table: e.table,
       typed: e.typed,
+      tags: e.tags,
       level: e.level || 1,
     });
   }
@@ -1402,12 +1429,14 @@
     MEAS('ג', 'חילקנו 60 ₪ שווה בשווה בין 4 ילדים. כמה ₪ לכל אחד?', 15, '60 חלקי 4', 3, ST.MONEY),
     MEAS('ג', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 40, 'שני חצאי שקל משלימים שקל', 3, ST.MONEY),
 
-    MEAS('ג', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.MASS_VOL),
-    MEAS('ג', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.MASS_VOL),
-    MEAS('ג', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.MASS_VOL),
-    MEAS('ג', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.MASS_VOL),
-    MEAS('ג', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.MASS_VOL),
-    MEAS('ג', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.MASS_VOL),
+    // ק״ג/ליטר are not in the ג׳ programme; ד׳ teaches them (המרת יחידות),
+    // so these items moved there (#591). Kept in place so no other id shifts.
+    MEAS('ד', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.UNITS),
+    MEAS('ד', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.UNITS),
+    MEAS('ד', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.UNITS),
+    MEAS('ד', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.UNITS),
+    MEAS('ד', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.UNITS),
+    MEAS('ד', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.UNITS),
 
     MEAS('ד', 'כמה אגורות יש ב־8 ₪?', 800, 'בכל שקל 100 אגורות', 1, ST.MONEY),
     MEAS('ד', 'שילמנו 100 ₪ על קנייה של 64 ₪. כמה ₪ עודף?', 36, '100 פחות 64', 1, ST.MONEY),
@@ -1568,6 +1597,377 @@
     MEAS('ב', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
   );
 
+  // ---------- כיתה א׳ · ישר מספרים — מיקום מקורב (#466) ----------
+  // No mark on the line: the child estimates, and within 4 counts. Appended
+  // last because ids are RAW indices and existing ids must not move.
+  [17, 23, 37, 48, 62, 71, 86, 94].forEach(function (n) {
+    const lo = Math.floor(n / 10) * 10;
+    RAW.push(I('א', 'number_line', 'איפה בערך ' + n + ' על הישר 0–100? (סמנו קרוב)', n, 'בין ' + lo + ' ל-' + (lo + 10), {
+      standard: ST.NUMBER_LINE_APPROX, level: 2, widget: 'numberLine', line: { min: 0, max: 100 }, tolerance: 4,
+    }));
+  });
+
+  // ---------- כיתה ד׳ · השלמת התוכנית הרשמית (#559) ----------
+  // One item per line, read against Newprogramgrade4.pdf: numbers to a
+  // million, vertical algorithms and order of operations; a fraction as part
+  // of a quantity, other names for a fraction, comparing, adding; surface
+  // area of a box; the Hebrew calendar and decimetres; tables and diagrams
+  // with fractions. Appended last so existing ids stay put.
+  function G4(skill, prompt, answer, hint, level, standard, extra) {
+    const e = extra || {};
+    const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
+      : skill === 'measurement' ? STRAND.MEASURE : skill === 'data' ? STRAND.DATA : STRAND.NUM;
+    return I('ד', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, widget: e.widget, vert: e.vert, chart: e.chart });
+  }
+  const KIOSK = { bars: [{ label: 'א׳', value: 40 }, { label: 'ב׳', value: 25 }, { label: 'ג׳', value: 50 }, { label: 'ד׳', value: 30 }, { label: 'ה׳', value: 20 }] };
+  const VOTES = { bars: [{ label: 'חן', value: 10 }, { label: 'אוהד', value: 10 }, { label: 'נטע', value: 20 }] };
+  const POLL = { parts: 4, slices: [{ label: 'בעד', parts: 3 }, { label: 'נגד', parts: 1 }] };
+  const ROUTE = { parts: 4, slices: [{ label: 'ברגל', parts: 2 }, { label: 'באופניים', parts: 1 }, { label: 'ברכב', parts: 1 }] };
+  const BAND = { parts: 8, slices: [{ label: 'תופים', parts: 3 }, { label: 'חליל', parts: 1 }, { label: 'פסנתר', parts: 4 }] };
+  const V = function (a, b, op) { return { widget: 'vertical', vert: { a: a, b: b, op: op } }; };
+  RAW.push(
+    G4('place_value', 'במספר 472,315, מהי ספרת מאות האלפים?', 4, 'הספרה השישית מימין', 1, ST.NUM_MILLION),
+    G4('place_value', 'במספר 472,315, מהי ספרת עשרות האלפים?', 7, 'הספרה החמישית מימין', 1, ST.NUM_MILLION),
+    G4('place_value', '300,000 + 40,000 + 5,000 + 200 + 6 = ?' + NO_COMMA, 345206, 'אין עשרות — כותבים 0 במקום העשרות', 1, ST.NUM_MILLION),
+    G4('place_value', 'איזה מספר גדול יותר: 254,129 או 245,929? כתבו את המספר.' + NO_COMMA, 254129, 'במקום עשרות האלפים: 5 גדול מ־4', 2, ST.NUM_MILLION),
+    G4('place_value', 'עגלו את 318,460 לאלפים.' + NO_COMMA, 318000, '460 קטן מ־500, לכן מעגלים למטה', 2, ST.NUM_MILLION),
+    G4('place_value', '3,450 × 100 = ?' + NO_COMMA, 345000, 'הגדלה פי 100 — מוסיפים שני אפסים', 2, ST.NUM_MILLION),
+    G4('place_value', 'עגלו את 649,500 למאות אלפים.' + NO_COMMA, 600000, '49,500 קטן מ־50,000, לכן מעגלים למטה', 3, ST.NUM_MILLION),
+    G4('place_value', 'השלימו: 257,324 = 250,024 + ☐' + NO_COMMA, 7300, '257,324 פחות 250,024', 3, ST.NUM_MILLION),
+    G4('place_value', 'מה המספר שבא אחרי 999,999?' + NO_COMMA, 1000000, 'מיליון — אחד ושישה אפסים', 3, ST.NUM_MILLION),
+    G4('addition', '250,000 + 120,000 = ?' + NO_COMMA, 370000, 'מאות אלפים עם מאות אלפים, עשרות אלפים עם עשרות אלפים', 1, ST.ADD_SUB_MILLION),
+    G4('addition', 'חשבו במאונך: 123,456 + 214,321' + NO_COMMA, 337777, 'מחברים טור־טור מימין לשמאל, בלי המרה', 1, ST.ADD_SUB_MILLION, V(123456, 214321, '+')),
+    G4('addition', 'חשבו במאונך: 245,318 + 132,694' + NO_COMMA, 378012, 'המרה ביחידות, בעשרות ובמאות', 2, ST.ADD_SUB_MILLION, V(245318, 132694, '+')),
+    G4('addition', '506 + 6,814 = ?' + NO_COMMA, 7320, '6 ועוד 4 הם 10 — ספרת היחידות היא 0', 2, ST.ADD_SUB_MILLION),
+    G4('addition', 'חשבו במאונך: 486,750 + 513,250' + NO_COMMA, 1000000, 'כל טור משלים ל־10 עם ההמרה', 3, ST.ADD_SUB_MILLION, V(486750, 513250, '+')),
+    G4('addition', 'השלימו: 3,215 + ☐ = 6,216' + NO_COMMA, 3001, 'פעולה הפוכה: 6,216 פחות 3,215', 3, ST.ADD_SUB_MILLION),
+    G4('subtraction', '500,000 − 200,000 = ?' + NO_COMMA, 300000, '5 מאות אלפים פחות 2 מאות אלפים', 1, ST.ADD_SUB_MILLION),
+    G4('subtraction', 'חשבו במאונך: 658,947 − 324,615' + NO_COMMA, 334332, 'מחסרים טור־טור מימין לשמאל, בלי פריטה', 1, ST.ADD_SUB_MILLION, V(658947, 324615, '-')),
+    G4('subtraction', 'חשבו במאונך: 403,520 − 158,370' + NO_COMMA, 245150, 'פורטים מהמאות ומהאלפים', 2, ST.ADD_SUB_MILLION, V(403520, 158370, '-')),
+    G4('subtraction', 'השלימו: 3,514 − ☐ = 3,000', 514, 'מה מורידים מ־3,514 כדי להגיע ל־3,000', 2, ST.ADD_SUB_MILLION),
+    G4('subtraction', 'חשבו במאונך: 700,000 − 286,435' + NO_COMMA, 413565, 'פורטים מאחת ממאות האלפים', 3, ST.ADD_SUB_MILLION, V(700000, 286435, '-')),
+    G4('subtraction', 'השלימו: ☐ − 4,000 = 2,357' + NO_COMMA, 6357, 'פעולה הפוכה: 2,357 ועוד 4,000', 3, ST.ADD_SUB_MILLION),
+    G4('multiplication', '300 × 4 = ?' + NO_COMMA, 1200, '3 מאות כפול 4 הם 12 מאות', 1, ST.MUL_DIV_VERT),
+    G4('multiplication', '24 × 3 = ?', 72, '20 × 3 ועוד 4 × 3', 1, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 237 × 4', 948, 'כופלים יחידות, עשרות ומאות ומעבירים', 2, ST.MUL_DIV_VERT),
+    G4('multiplication', '32 × 19 = ?', 608, 'חוק הפילוג: 32 × 20 פחות 32', 2, ST.MUL_DIV_VERT),
+    G4('multiplication', '25 × 36 = ?', 900, '25 × 4 × 9 = 100 × 9', 3, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 586 × 7' + NO_COMMA, 4102, '6 × 7 = 42 — כותבים 2 ומעבירים 4', 3, ST.MUL_DIV_VERT),
+    G4('division', '84 : 4 = ?', 21, '80 : 4 ועוד 4 : 4', 1, ST.MUL_DIV_VERT),
+    G4('division', '2,400 : 100 = ?', 24, 'הקטנה פי 100 — מורידים שני אפסים', 1, ST.MUL_DIV_VERT),
+    G4('division', 'חשבו במאונך: 856 : 4', 214, 'מחלקים מאות, עשרות ויחידות', 2, ST.MUL_DIV_VERT),
+    G4('division', '1,536 : 3 = ?', 512, '1,500 : 3 ועוד 30 : 3 ועוד 6 : 3', 2, ST.MUL_DIV_VERT),
+    G4('division', '307 תלמידים חוזרים באוטובוסים של 50 מקומות. מה מספר האוטובוסים הקטן ביותר שיש להזמין?', 7, '6 אוטובוסים הם 300 מקומות — ונשארו 7 תלמידים', 3, ST.MUL_DIV_VERT),
+    G4('division', 'האם 1,827 מתחלק ב־9 בלי שארית? (כן/לא)', 'כן', 'סכום הספרות 1 + 8 + 2 + 7 הוא 18', 3, ST.MUL_DIV_VERT),
+    G4('division', 'מהי השארית כשמחלקים 346 ב־3?', 1, 'סכום הספרות הוא 13; 12 מתחלק ב־3', 3, ST.MUL_DIV_VERT),
+    G4('multiplication', '2 + 3 × 4 = ?', 14, 'כפל לפני חיבור', 1, ST.ORDER_OPS),
+    G4('multiplication', '(2 + 3) × 4 = ?', 20, 'קודם מה שבסוגריים', 1, ST.ORDER_OPS),
+    G4('multiplication', '100 + 20 × 50 = ?' + NO_COMMA, 1100, 'קודם 20 × 50', 2, ST.ORDER_OPS),
+    G4('multiplication', '(100 + 20) × 50 = ?' + NO_COMMA, 6000, 'קודם 100 + 20', 2, ST.ORDER_OPS),
+    G4('division', '48 : 6 : 2 = ?', 4, 'כפל וחילוק בלבד — לפי סדר הכתיבה', 2, ST.ORDER_OPS),
+    G4('multiplication', '36 − 12 : 4 + 2 = ?', 35, 'קודם 12 : 4, ואחר כך משמאל לימין', 3, ST.ORDER_OPS),
+    G4('multiplication', 'תמר קוראת 36 עמודים בכל יום. אחרי 3 שבועות נשארו לה 127 עמודים. כמה עמודים יש בספר?', 883, '36 × 21 ועוד 127', 3, ST.ORDER_OPS),
+
+    G4('fractions', 'כמה זה 1/2 מ־10 תפוחים?', 5, 'מחלקים ל־2 חלקים שווים', 1, ST.FRAC_OF_QTY),
+    G4('fractions', 'כמה זה 1/4 מ־12 עפרונות?', 3, 'מחלקים ל־4 חלקים שווים', 1, ST.FRAC_OF_QTY),
+    G4('fractions', 'כמה זה 3/4 מ־8 ספרים?', 6, 'רבע מ־8 הוא 2, ושלושה רבעים', 2, ST.FRAC_OF_QTY),
+    G4('fractions', 'בכיתה 24 תלמידים, ו־1/3 מהם מנגנים. כמה תלמידים מנגנים?', 8, 'מחלקים את 24 ל־3 חלקים שווים', 2, ST.FRAC_OF_QTY),
+    G4('fractions', 'חצי מ־20 תפוחים וחצי מ־10 תפוחים — בכמה תפוחים הראשון גדול יותר?', 5, '10 פחות 5', 3, ST.FRAC_OF_QTY),
+    G4('fractions', 'כמה ילדים הם 2/5 מ־30 ילדים?', 12, 'חמישית מ־30 היא 6', 3, ST.FRAC_OF_QTY),
+    G4('fractions', 'השלימו: 1/2 = ?/4. מה המונה?', 2, 'חצי הוא שני רבעים', 1, ST.FRAC_NAMES),
+    G4('fractions', 'איזה שבר גדול יותר: 1/3 או 1/5? כתבו את השבר.', '1/3', 'ככל שמחלקים ליותר חלקים, כל חלק קטן יותר', 1, ST.FRAC_NAMES),
+    G4('fractions', 'השלימו: 3/4 = ?/8. מה המונה?', 6, 'כל רבע הוא שתי שמיניות', 2, ST.FRAC_NAMES),
+    G4('fractions', 'איזה שבר גדול יותר: 3/8 או 5/8? כתבו את השבר.', '5/8', 'אותו מכנה — משווים את המונים', 2, ST.FRAC_NAMES),
+    G4('fractions', 'איזה שבר גדול יותר: 2/3 או 3/4? כתבו את השבר.', '3/4', 'ל־2/3 חסר שליש עד השלם, ל־3/4 חסר רק רבע', 3, ST.FRAC_NAMES),
+    G4('fractions', 'נועה אומרת ש־1/3 מעוגה קטן מ־1/4 מאותה עוגה, כי 3 קטן מ־4. האם היא צודקת? (כן/לא)', 'לא', 'שליש הוא חלק מתוך 3 — גדול מחלק מתוך 4', 3, ST.FRAC_NAMES),
+    G4('fractions', '1/5 + 2/5 = ?', '3/5', 'אותו מכנה — מחברים את המונים', 1, ST.FRAC_ADD_D),
+    G4('fractions', '5/6 − 2/6 = ?', '3/6', 'אותו מכנה — מחסרים את המונים', 1, ST.FRAC_ADD_D),
+    G4('fractions', '1/2 + 1/4 = ?', '3/4', 'חצי הוא שני רבעים', 2, ST.FRAC_ADD_D),
+    G4('fractions', '1 ו־1/3 + 1/3 = ? (שלם ושבר)', '1 ו־2/3', 'השלם נשאר, ושליש ועוד שליש', 2, ST.FRAC_ADD_D),
+    G4('fractions', '3/4 − 1/8 = ?', '5/8', 'שלושה רבעים הם שש שמיניות', 3, ST.FRAC_ADD_D),
+    G4('fractions', 'חגית צריכה 1/2 מדלי הצבע, ורחלי צריכה 3/8 ממנו. איזה חלק מהדלי הן צריכות יחד?', '7/8', 'חצי הוא ארבע שמיניות', 3, ST.FRAC_ADD_D),
+
+    G4('geometry', 'פאה של תיבה היא מלבן של 3 ס״מ על 2 ס״מ. מה שטח הפאה בסמ״ר?', 6, '3 כפול 2', 1, ST.BOX_AREA),
+    G4('geometry', 'לקובייה 6 פאות, ושטח כל פאה 4 סמ״ר. מה שטח הפנים של הקובייה בסמ״ר?', 24, '6 פעמים 4', 1, ST.BOX_AREA),
+    G4('geometry', 'המקצוע של קובייה הוא 3 ס״מ. מה שטח הפנים שלה בסמ״ר?', 54, 'כל פאה 9 סמ״ר, ויש 6 פאות', 2, ST.BOX_AREA),
+    G4('geometry', 'לתיבה מידות של 3, 2 ו־1 ס״מ. מה שטח הפנים שלה בסמ״ר?', 22, 'שלושה זוגות פאות: 6, 3 ו־2 — כל אחד פעמיים', 2, ST.BOX_AREA),
+    G4('geometry', 'לתיבה מידות של 5, 4 ו־2 ס״מ. מה שטח הפנים שלה בסמ״ר?', 76, '2 × (20 + 10 + 8)', 3, ST.BOX_AREA),
+    G4('geometry', 'המקצוע של קובייה גדל מ־1 ס״מ ל־2 ס״מ. פי כמה גדל שטח הפנים?', 4, 'מ־6 סמ״ר ל־24 סמ״ר', 3, ST.BOX_AREA),
+
+    G4('measurement', 'כמה חודשים יש בשנה עברית פשוטה, לא מעוברת?', 12, 'מתשרי עד אלול', 1, ST.CALENDAR),
+    G4('measurement', 'בלוח העברי, כ׳ בחשוון — מה מספר היום בחודש?', 20, 'האות כ׳ היא 20', 1, ST.CALENDAR),
+    G4('measurement', 'כמה חודשים יש בשנה עברית מעוברת?', 13, 'בשנה מעוברת יש אדר א׳ ואדר ב׳', 2, ST.CALENDAR),
+    G4('measurement', 'ט״ו בשבט — מה מספר היום בחודש שבט?', 15, 'ט׳ היא 9 ו־ו׳ היא 6', 2, ST.CALENDAR),
+    G4('measurement', 'ל״ג בעומר — איזה מספר הוא ל״ג?', 33, 'ל׳ היא 30 ו־ג׳ היא 3', 3, ST.CALENDAR),
+    G4('measurement', 'חנוכה מתחיל בכ״ה בכסלו ונמשך 8 ימים. השנה יש בכסלו 30 ימים. באיזה יום בטבת חל היום השמיני?', 2, 'מכ״ה עד ל׳ בכסלו יש 6 ימים', 3, ST.CALENDAR),
+    G4('measurement', 'כמה ס״מ יש ב־4 דצ״מ?', 40, 'בדצימטר אחד 10 ס״מ', 1, ST.UNITS),
+    G4('measurement', 'כמה דצ״מ יש במטר אחד?', 10, 'מטר הוא 100 ס״מ, ודצימטר 10 ס״מ', 2, ST.UNITS),
+
+    G4('data', 'בטבלת המכירות בקיוסק: יום א׳ — 45 בקבוקים, יום ב׳ — 30, יום ג׳ — 60. כמה בקבוקים נמכרו ביום ג׳?', 60, 'קוראים את השורה של יום ג׳', 1, ST.TABLE),
+    G4('data', 'בטבלת המכירות בקיוסק: יום א׳ — 45 בקבוקים, יום ב׳ — 30, יום ג׳ — 60. כמה בקבוקים נמכרו בשלושת הימים?', 135, '45 ועוד 30 ועוד 60', 2, ST.TABLE),
+    G4('data', 'בטבלת המבקרים בתערוכה: 2024 — 125,400 מבקרים, 2025 — 131,900 מבקרים. בכמה מבקרים יותר היו ב־2025?' + NO_COMMA, 6500, '131,900 פחות 125,400', 3, ST.TABLE),
+    G4('data', 'הדיאגרמה מראה כמה בקבוקי מים נמכרו בקיוסק בכל יום. כמה נמכרו ביום ג׳?', 50, 'גובה העמודה של ג׳', 1, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'ביום ג׳ נמכרו 20 בקבוקים יותר מביום ד׳. נכון או לא נכון?', 'נכון', '50 פחות 30', 2, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'פי כמה גדול מספר הבקבוקים שנמכרו ביום א׳ ממספרם ביום ה׳?', 2, '40 לעומת 20', 2, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'כמה בקבוקים נמכרו בכל חמשת הימים יחד?', 165, 'מחברים את כל העמודות', 3, ST.BARCHART, { widget: 'barchart', chart: KIOSK }),
+    G4('data', 'הדיאגרמה מראה את קולות הבחירות לנציג הכיתה. איזה חלק מכל הקולות קיבלה נטע? כתבו שבר.', '1/2', '20 מתוך 40', 3, ST.BARCHART, { widget: 'barchart', chart: VOTES }),
+    G4('data', 'איזה חלק מכל הקולות קיבלה חן? כתבו שבר.', '1/4', '10 מתוך 40', 3, ST.BARCHART, { widget: 'barchart', chart: VOTES }),
+    G4('data', 'דיאגרמת העוגה מראה איך מגיעים התלמידים לבית הספר. איזה חלק מהם מגיע ברגל? כתבו שבר.', '1/2', 'כמה חלקים מתוך 4 צבועים בצבע של ברגל', 1, ST.PIE, { widget: 'pie', chart: ROUTE }),
+    G4('data', 'בסקר השתתפו 24 תלמידים. כמה מהם מגיעים באופניים?', 6, 'רבע מ־24', 2, ST.PIE, { widget: 'pie', chart: ROUTE }),
+    G4('data', 'דיאגרמת העוגה מראה איזה כלי בחרו הילדים. איזה כלי בחרו בדיוק חצי מהילדים?', 'פסנתר', '4 חלקים מתוך 8', 2, ST.PIE, { widget: 'pie', chart: BAND }),
+    G4('data', 'דיאגרמת העוגה מראה את תוצאות המשאל על גינת הירקות. 60 תלמידים הצביעו בעד. כמה הצביעו נגד?', 20, '3 חלקים הם 60, אז חלק אחד הוא 20', 3, ST.PIE, { widget: 'pie', chart: POLL })
+  );
+
+  // Grade ה׳ rows of Newprogramgrade5.pdf (#559): plain exercises for every
+  // heading of the topics column. Diagnosis keeps fractions, decimals and data.
+  function G5(skill, prompt, answer, hint, level, standard, extra) {
+    const e = extra || {};
+    const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
+      : skill === 'data' ? STRAND.DATA : STRAND.NUM;
+    return I('ה', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, widget: e.widget, vert: e.vert, chart: e.chart });
+  }
+  const STREETS = { icon: '🏠', key: 9, rows: [{ label: 'רחוב נרקיס', count: 63 }, { label: 'רחוב כלנית', count: 27 }] };
+  const CAKE = { parts: 8, slices: [{ label: 'איתמר', parts: 3 }, { label: 'רחל', parts: 1 }, { label: 'החברים', parts: 4 }] };
+  RAW.push(
+    G5('place_value', 'במספר 3,456,789, מהי ספרת המיליונים?', 3, 'הספרה השביעית מימין', 1, ST.NUM_BIG),
+    G5('place_value', 'כתבו בספרות: שני מיליון ושלוש מאות אלף' + NO_COMMA, 2300000, 'מיליון הוא 1 ושישה אפסים', 1, ST.NUM_BIG),
+    G5('place_value', 'מה המספר שבא אחרי 1,999,999?' + NO_COMMA, 2000000, 'מוסיפים 1 — כל התשיעיות הופכות ל־0', 1, ST.NUM_BIG),
+    G5('place_value', 'איזה מספר גדול יותר: 4,050,000 או 4,500,000? כתבו את המספר.' + NO_COMMA, 4500000, 'במקום מאות האלפים: 5 גדול מ־0', 2, ST.NUM_BIG),
+    G5('place_value', '5,000,000 + 70,000 + 300 + 8 = ?' + NO_COMMA, 5070308, 'אין מאות אלפים, אלפים ועשרות — כותבים שם 0', 2, ST.NUM_BIG),
+    G5('place_value', 'מה ערך הספרה 7 במספר 27,000,000?' + NO_COMMA, 7000000, 'הספרה 7 במקום המיליונים', 2, ST.NUM_BIG),
+    G5('place_value', 'כמה אלפים יש במיליון?' + NO_COMMA, 1000, 'מיליון הוא 1,000 פעמים 1,000', 3, ST.NUM_BIG),
+    G5('place_value', 'מהו המספר הקטן ביותר בן 7 ספרות?' + NO_COMMA, 1000000, '1 ואחריו שישה אפסים', 3, ST.NUM_BIG),
+    G5('place_value', 'בעיר אחת 1,284,000 תושבים ובעיר אחרת 1,248,000. בכמה גדול מספר התושבים בעיר הראשונה?' + NO_COMMA, 36000, '1,284,000 פחות 1,248,000', 3, ST.NUM_BIG),
+
+    G5('addition', '400,000 + 350,000 = ?' + NO_COMMA, 750000, 'מאות אלפים עם מאות אלפים', 1, ST.OPS_MILLION),
+    G5('addition', 'חשבו במאונך: 356,478 + 287,615' + NO_COMMA, 644093, 'מחברים טור־טור מימין לשמאל ומעבירים', 2, ST.OPS_MILLION, V(356478, 287615, '+')),
+    G5('subtraction', '900,000 − 300,000 = ?' + NO_COMMA, 600000, '9 מאות אלפים פחות 3 מאות אלפים', 1, ST.OPS_MILLION),
+    G5('subtraction', 'חשבו במאונך: 800,000 − 456,789' + NO_COMMA, 343211, 'פורטים מאחת משמונה מאות האלפים', 2, ST.OPS_MILLION, V(800000, 456789, '-')),
+    G5('subtraction', 'השלימו: 4,000 − 2,397 = 3,999 − ☐' + NO_COMMA, 2396, 'מקטינים את המחוסר ואת המחסר באותו מספר', 3, ST.OPS_MILLION),
+    G5('multiplication', '2,500 × 4 = ?' + NO_COMMA, 10000, '25 מאות כפול 4 הם 100 מאות', 1, ST.OPS_MILLION),
+    G5('multiplication', '987,654 × 1 = ?' + NO_COMMA, 987654, 'כפל ב־1 לא משנה את המספר', 1, ST.OPS_MILLION),
+    G5('multiplication', '0 × 1,234,567 = ?', 0, 'כפל ב־0 תמיד נותן 0', 1, ST.OPS_MILLION),
+    G5('multiplication', '28 × 5 = ?', 140, 'כופלים 28 ב־10 ומחלקים ב־2', 2, ST.OPS_MILLION),
+    G5('multiplication', 'נתון: 324 × 79 = 25,596. כמה זה 324 × 80?' + NO_COMMA, 25920, 'עוד פעם אחת 324', 2, ST.OPS_MILLION),
+    G5('multiplication', 'חשבו במאונך: 1,234 × 56' + NO_COMMA, 69104, '1,234 × 50 ועוד 1,234 × 6', 3, ST.OPS_MILLION),
+    G5('division', '48,000 : 8 = ?' + NO_COMMA, 6000, '48 : 8 הם 6, ונשארים שלושה אפסים', 1, ST.OPS_MILLION),
+    G5('division', 'נתון: 324 × 79 = 25,596. כמה זה 25,596 : 79?', 324, 'חילוק הוא הפעולה ההפוכה לכפל', 2, ST.OPS_MILLION),
+    G5('division', 'מסדרים 2,000 ביצים בתבניות של 30. כמה תבניות מלאות יתקבלו?', 66, '30 × 66 = 1,980, ונשארות 20 ביצים', 2, ST.OPS_MILLION),
+    G5('division', 'מהי השארית כשמחלקים 1,000 ב־7?', 6, '7 × 142 = 994', 3, ST.OPS_MILLION),
+    G5('multiplication', '200 × 30 + 400 = ?' + NO_COMMA, 6400, 'כפל לפני חיבור', 2, ST.OPS_MILLION),
+    G5('multiplication', '(1,500 − 300) × 4 : 8 = ?', 600, 'קודם הסוגריים, אחר כך משמאל לימין', 3, ST.OPS_MILLION),
+    G5('place_value', 'עגלו את 4,386,512 למיליונים.' + NO_COMMA, 4000000, '386,512 קטן מחצי מיליון, לכן מעגלים למטה', 1, ST.OPS_MILLION),
+    G5('place_value', 'עגלו את 738,450 לעשרות אלפים.' + NO_COMMA, 740000, '8,450 הם יותר מ־5,000, לכן מעגלים למעלה', 2, ST.OPS_MILLION),
+    G5('division', 'בלי לחשב במדויק: האם 42,187 : 150 גדול מ־42,187 : 250? (כן/לא)', 'כן', 'מחלקים את אותו מספר לפחות חלקים — כל חלק גדול יותר', 2, ST.OPS_MILLION),
+    G5('multiplication', 'אומדן: 3,980 × 21 קרוב יותר ל־8,000 או ל־80,000? כתבו את המספר.' + NO_COMMA, 80000, '4,000 × 20', 3, ST.OPS_MILLION),
+
+    G5('division', 'האם 7 הוא מספר ראשוני? (כן/לא)', 'כן', 'המחלקים שלו הם רק 1 ו־7', 1, ST.PRIME_FACTOR),
+    G5('division', 'האם 9 הוא מספר ראשוני? (כן/לא)', 'לא', '3 × 3 = 9, לכן 9 פריק', 1, ST.PRIME_FACTOR),
+    G5('division', 'מהו המספר הראשוני הזוגי היחיד?', 2, 'כל מספר זוגי אחר מתחלק ב־2', 1, ST.PRIME_FACTOR),
+    G5('division', 'האם 645 מתחלק ב־5 בלי שארית? (כן/לא)', 'כן', 'ספרת היחידות היא 5', 1, ST.PRIME_FACTOR),
+    G5('division', 'האם 1 הוא מספר ראשוני? (כן/לא)', 'לא', 'ל־1 יש מחלק אחד בלבד — הוא לא ראשוני ולא פריק', 2, ST.PRIME_FACTOR),
+    G5('division', 'מהו המספר הראשוני הגדול ביותר שקטן מ־30?', 29, '29 מתחלק רק ב־1 וב־29', 2, ST.PRIME_FACTOR),
+    G5('division', 'נתון: 23 × 9 = 207. האם 207 הוא מספר ראשוני? (כן/לא)', 'לא', 'יש לו מחלקים מלבד 1 ו־207', 2, ST.PRIME_FACTOR),
+    G5('division', 'פרקו לגורמים ראשוניים: 12 = 2 × 2 × ☐. מה הגורם החסר?', 3, '2 × 2 = 4, ו־12 : 4 = 3', 2, ST.PRIME_FACTOR),
+    G5('division', 'פרקו לגורמים ראשוניים: 60 = 2 × 2 × 3 × ☐. מה הגורם החסר?', 5, '2 × 2 × 3 = 12, ו־60 : 12 = 5', 3, ST.PRIME_FACTOR),
+    G5('division', 'מהו הגורם הראשוני הגדול ביותר של 84?', 7, '84 = 2 × 2 × 3 × 7', 3, ST.PRIME_FACTOR),
+    G5('division', 'האם 3,615 מתחלק ב־3 בלי שארית? (כן/לא)', 'כן', 'סכום הספרות 3 + 6 + 1 + 5 הוא 15', 3, ST.PRIME_FACTOR),
+    G5('division', 'כמה מלבנים שונים, באורכי צלעות שלמים, אפשר לבנות מ־7 יחידות שטח ריבועיות? (1 × 7 ו־7 × 1 הם אותו מלבן)', 1, '7 ראשוני — יש לו רק המחלקים 1 ו־7', 3, ST.PRIME_FACTOR),
+
+    G5('fractions', 'מלבן מחולק ל־8 חלקים שווים, ו־3 מהם צבועים. איזה חלק מהמלבן צבוע? כתבו שבר.', '3/8', '3 חלקים מתוך 8', 1, ST.FRAC_MODELS),
+    G5('fractions', 'הקטע מ־0 עד 1 בישר המספרים מחולק ל־5 קטעים שווים. איזה שבר מתאים לשנתה השנייה אחרי 0?', '2/5', 'כל קטע הוא חמישית', 1, ST.FRAC_MODELS),
+    G5('fractions', 'מחלקים 3 פיצות שווה בשווה בין 4 ילדים. איזה חלק מפיצה מקבל כל ילד? כתבו שבר.', '3/4', 'השבר כמנה: 3 : 4', 1, ST.FRAC_MODELS),
+    G5('fractions', 'בישר המספרים, בין אילו שני מספרים שלמים נמצא 7/3? כתבו את הקטן מביניהם.', 2, '6/3 = 2 ו־9/3 = 3', 2, ST.FRAC_MODELS),
+    G5('fractions', 'תופרת גוזרת סרט של 25 מטרים ל־4 חלקים שווים. מה אורך כל חלק במטרים? (שלם ושבר)', '6 ו־1/4', '25 : 4 = 6 ושארית 1 — והמטר הנותר מתחלק ל־4', 2, ST.FRAC_MODELS),
+    G5('fractions', 'הקטע הצבוע הוא 1/4 מרצועה, ואורכו 3 ס״מ. מה אורך הרצועה כולה בס״מ?', 12, 'מציאת השלם: 4 רבעים', 2, ST.FRAC_MODELS),
+    G5('fractions', 'השטח הצבוע הוא 2/3 משטח מלבן, והוא 8 משבצות. מכמה משבצות בנוי המלבן כולו?', 12, 'שליש אחד הוא 4 משבצות', 3, ST.FRAC_MODELS),
+    G5('fractions', 'מחלקים את הצבע של 5 דליים שווה בשווה ל־7 מכלים. איזה חלק מדלי יש בכל מכל? כתבו שבר.', '5/7', 'השבר כמנה: 5 : 7', 3, ST.FRAC_MODELS),
+
+    G5('fractions', 'בקופסה 20 עפרונות, ו־1/4 מהם אדומים. כמה עפרונות אדומים?', 5, 'רבע מ־20', 1, ST.FRAC_OF),
+    G5('fractions', '1/3 מהתלמידים בכיתה הם 9 תלמידים. כמה תלמידים יש בכיתה?', 27, 'מציאת השלם: 3 שלישים', 2, ST.FRAC_OF),
+    G5('fractions', 'מתוך 24 תלמידים, 6 מנגנים. איזה חלק מהתלמידים מנגנים? כתבו שבר.', '1/4', 'מציאת החלק: 6 מתוך 24', 2, ST.FRAC_OF),
+    G5('fractions', '3/5 מהספרים במדף הם 18 ספרים. כמה ספרים יש במדף?', 30, 'חמישית אחת היא 6 ספרים', 3, ST.FRAC_OF),
+    G5('fractions', 'רונית קראה 2/3 מספר של 150 עמודים, ואלון קרא 3/4 מספר של 120 עמודים. כמה עמודים קראה רונית יותר מאלון?', 10, '100 עמודים מול 90 עמודים', 3, ST.FRAC_OF),
+
+    G5('fractions', '1/6 + 1/4 = ?', '5/12', 'ל־6 ול־4 יש גורם משותף: מכנה משותף 12', 2, ST.FRAC_ADD),
+    G5('fractions', '5/6 − 3/8 = ?', '11/24', 'מכנה משותף 24: 20/24 − 9/24', 3, ST.FRAC_ADD),
+    G5('fractions', 'אומדן: 7/8 + 12/13 קרוב יותר ל־1 או ל־2? כתבו את המספר.', 2, 'כל אחד מהשברים קרוב ל־1', 3, ST.FRAC_ADD),
+
+    G5('decimals', 'כתבו כשבר עשרוני: 3 אלפיות', 0.003, 'אלפיות — שלוש ספרות אחרי הנקודה', 1, ST.DEC_PLACE),
+    G5('decimals', '2.5 × 10 = ?', 25, 'כל ספרה זזה מקום אחד שמאלה', 1, ST.DEC_PLACE),
+    G5('decimals', '0.47 × 100 = ?', 47, 'כל ספרה זזה שני מקומות שמאלה', 2, ST.DEC_PLACE),
+    G5('decimals', '36.5 : 100 = ?', 0.365, 'כל ספרה זזה שני מקומות ימינה', 2, ST.DEC_PLACE),
+    G5('decimals', 'כתבו במטרים כשבר עשרוני: 1 מטר ו־37 ס״מ', 1.37, 'כל ס״מ הוא מאית מטר', 2, ST.DEC_PLACE),
+    G5('decimals', 'כתבו כשבר פשוט: 0.75', '3/4', '0.75 = 75/100', 3, ST.DEC_PLACE),
+    G5('decimals', 'סדרו מהקטן לגדול: 0.6, 0.75, 0.5, 0.8. מהו המספר השני בסדר?', 0.6, 'כתבו את כולם במאיות: 0.60, 0.75, 0.50, 0.80', 3, ST.DEC_PLACE),
+    G5('decimals', '4.2 : 1,000 = ?', 0.0042, 'כל ספרה זזה שלושה מקומות ימינה', 3, ST.DEC_PLACE),
+    G5('decimals', 'מה גדול יותר, 0.09 או 0.1? כתבו את הגדול.', 0.1, '0.10 מול 0.09', 3, ST.DEC_PLACE),
+
+    G5('decimals', '5.2 + 2.3 = ?', 7.5, 'שלמים עם שלמים, עשיריות עם עשיריות', 1, ST.DEC_ADD),
+    G5('decimals', 'עגלו את 3.68 לעשיריות.', 3.7, '8 מאיות הן יותר מחצי עשירית', 2, ST.DEC_ADD),
+    G5('decimals', 'עגלו את 23.42 למספר שלם.', 23, '0.42 קטן מחצי', 2, ST.DEC_ADD),
+    G5('decimals', '0.5 + 1/4 = ? (כתבו כשבר עשרוני)', 0.75, '1/4 = 0.25', 2, ST.DEC_ADD),
+    G5('decimals', 'בכרטיס יש 50 ₪. קניתי מוצר שמחירו 18.55 ₪. כמה ₪ נשארו בכרטיס?', 31.45, '50.00 − 18.55', 3, ST.DEC_ADD),
+    G5('decimals', 'שחיין א׳ סיים ב־23.42 שניות ושחיין ב׳ ב־23.18 שניות. בכמה שניות היה שחיין ב׳ מהיר יותר?', 0.24, '23.42 − 23.18', 3, ST.DEC_ADD),
+    G5('decimals', 'בלי לחשב במדויק: האם 2.53 + 0.9 גדול מ־3? (כן/לא)', 'כן', '2.5 ועוד כמעט 1', 3, ST.DEC_ADD),
+
+    G5('geometry', 'במשולש, הבסיס 6 ס״מ והגובה אליו 4 ס״מ. מה שטח המשולש בסמ״ר?', 12, 'בסיס כפול גובה, חלקי 2', 1, ST.TRI_AREA),
+    G5('geometry', 'במשולש ישר־זווית הניצבים 3 ס״מ ו־4 ס״מ. מה שטח המשולש בסמ״ר?', 6, 'ניצב אחד הוא הגובה לניצב השני', 1, ST.TRI_AREA),
+    G5('geometry', 'כמה גבהים יש לכל משולש?', 3, 'גובה אחד לכל צלע', 2, ST.TRI_AREA),
+    G5('geometry', 'במשולש קהה־זווית, האם גובה יכול ליפול מחוץ למשולש? (כן/לא)', 'כן', 'הגובה לצלע ליד הזווית הקהה נופל על המשך הצלע', 2, ST.TRI_AREA),
+    G5('geometry', 'שטח משולש 20 סמ״ר והבסיס 8 ס״מ. מה הגובה לבסיס זה בס״מ?', 5, '8 כפול הגובה הוא 40', 2, ST.TRI_AREA),
+    G5('geometry', 'מלבן של 6 ס״מ על 4 ס״מ חולק באלכסון לשני משולשים. מה שטח כל משולש בסמ״ר?', 12, 'חצי משטח המלבן', 3, ST.TRI_AREA),
+    G5('geometry', 'מלבן חולק באלכסון לשני משולשים. איזה חלק משטח המלבן הוא שטח משולש אחד? כתבו שבר.', '1/2', 'שני המשולשים חופפים', 3, ST.TRI_AREA),
+    G5('geometry', 'במקבילית, אורך צלע 8 ס״מ והגובה אליה 5 ס״מ. מה שטח המקבילית בסמ״ר?', 40, 'צלע כפול הגובה אליה', 1, ST.PARA_AREA),
+    G5('geometry', 'כמה גבהים שונים, לפי הצלעות, יש למקבילית?', 2, 'גובה לכל זוג צלעות נגדיות', 1, ST.PARA_AREA),
+    G5('geometry', 'קיר בצורת מקבילית: אורך הצלע 86 מטרים והגובה אליה 55 מטרים. מה השטח במ״ר?' + NO_COMMA, 4730, '86 × 55', 2, ST.PARA_AREA),
+    G5('geometry', 'שטח מקבילית 36 סמ״ר והגובה 4 ס״מ. מה אורך הצלע שאליה הגובה, בס״מ?', 9, 'הצלע כפול 4 הוא 36', 2, ST.PARA_AREA),
+    G5('geometry', 'למקבילית ולמשולש אותו בסיס ואותו גובה. פי כמה גדול שטח המקבילית משטח המשולש?', 2, 'שטח משולש הוא חצי מבסיס כפול גובה', 3, ST.PARA_AREA),
+    G5('geometry', 'במקבילית צלעות של 10 ס״מ ו־6 ס״מ. הגובה לצלע של 10 ס״מ הוא 3 ס״מ. מה הגובה לצלע של 6 ס״מ, בס״מ?', 5, 'השטח 30 סמ״ר בשתי הדרכים', 3, ST.PARA_AREA),
+
+    G5('geometry', 'כמה פאות יש למנסרה משולשת?', 5, 'שני בסיסים משולשים ו־3 פאות צדדיות', 1, ST.SOLIDS),
+    G5('geometry', 'כמה קודקודים יש לפירמידה שבסיסה ריבוע?', 5, '4 בבסיס ועוד הקודקוד הראשי', 1, ST.SOLIDS),
+    G5('geometry', 'כמה מקצועות יש למנסרה משולשת?', 9, '3 בכל בסיס ועוד 3 צדדיים', 2, ST.SOLIDS),
+    G5('geometry', 'כמה מקצועות יש לפירמידה שבסיסה ריבוע?', 8, '4 בבסיס ועוד 4 אל הקודקוד הראשי', 2, ST.SOLIDS),
+    G5('geometry', 'בפריסה של מנסרה משולשת ישרה, כמה מלבנים יש?', 3, 'פאה צדדית לכל צלע של הבסיס', 2, ST.SOLIDS),
+    G5('geometry', 'בפריסה של פירמידה שבסיסה משושה, כמה משולשים יש?', 6, 'פאה צדדית לכל צלע של הבסיס', 3, ST.SOLIDS),
+    G5('geometry', 'למנסרה יש 8 פאות. כמה צלעות יש למצולע שבבסיס שלה?', 6, '8 פאות הן 2 בסיסים ו־6 פאות צדדיות', 3, ST.SOLIDS),
+    G5('geometry', 'כמה קודקודים יש למנסרה שבסיסה מחומש?', 10, '5 קודקודים בכל בסיס', 3, ST.SOLIDS),
+
+    G5('data', 'בטבלת השכיחויות של צבעי החולצות: אדום — 100, ירוק — 50, כחול — 25, לבן — 25. מה השכיחות של ירוק?', 50, 'קוראים את השורה של ירוק', 1, ST.FREQ),
+    G5('data', 'הציונים בבוחן: 7, 8, 8, 9, 8, 10, 7. מהו השכיח?', 8, 'הערך שמופיע הכי הרבה פעמים', 1, ST.FREQ),
+    G5('data', 'בטבלת השכיחויות של צבעי החולצות: אדום — 100, ירוק — 50, כחול — 25, לבן — 25. איזה צבע הוא השכיח?', 'אדום', 'הצבע עם השכיחות הגדולה ביותר', 2, ST.FREQ),
+    G5('data', 'בטבלת השכיחויות של צבעי החולצות: אדום — 100, ירוק — 50, כחול — 25, לבן — 25. איזה חלק מהתלמידים לבשו חולצה אדומה? כתבו שבר.', '1/2', '100 מתוך 200', 2, ST.FREQ),
+    G5('data', 'במשאל אחרי ההצגה: 25 תלמידים אהבו, 15 לא אהבו ו־5 בלי דעה. כמה תלמידים השתתפו במשאל?', 45, 'סכום כל השכיחויות', 2, ST.FREQ),
+    G5('data', 'מספר האחים של תלמידי קבוצה: 1, 2, 2, 3, 1, 2, 4, 2, 0. מה השכיחות של המספר 2?', 4, 'סופרים כמה פעמים מופיע 2', 3, ST.FREQ),
+    G5('data', 'הפיקטוגרם מראה כמה בתים יש בכל רחוב. כמה בתים יש ברחוב כלנית?', 27, 'כל סמל שווה 9 בתים', 2, ST.PICTOGRAM, { widget: 'pictogram', chart: STREETS }),
+    G5('data', 'הפיקטוגרם מראה כמה בתים יש בכל רחוב. כמה בתים יש בשני הרחובות יחד?', 90, '63 ועוד 27', 3, ST.PICTOGRAM, { widget: 'pictogram', chart: STREETS }),
+    G5('data', 'דיאגרמת העוגה מראה איך חולקה עוגת יום ההולדת. איזה חלק מהעוגה קיבל איתמר? כתבו שבר.', '3/8', '3 חלקים מתוך 8', 2, ST.PIE, { widget: 'pie', chart: CAKE }),
+    G5('data', 'דיאגרמת העוגה מראה איך חולקה עוגת יום ההולדת. איזה חלק מהעוגה קיבלו איתמר ורחל יחד? כתבו שבר.', '1/2', '3 ועוד 1 הם 4 חלקים מתוך 8', 3, ST.PIE, { widget: 'pie', chart: CAKE })
+  );
+
+  // ---------- כיתה ג׳ · אגורות במאות שלמות לשקלים (#559) ----------
+  // Newprogramgrade3.pdf names this direction too. Appended last so ids stay.
+  RAW.push(
+    MEAS('ג', '700 אגורות הם כמה ₪?', 7, 'בכל שקל 100 אגורות', 1, ST.MONEY),
+    MEAS('ג', 'בקופה 2,300 אגורות. כמה ₪ זה?', 23, '23 מאות אגורות', 2, ST.MONEY)
+  );
+
+  // ---------- כיתה ב׳ · פירוק והרכבה של מצולעים; כסף בשטרות ובמטבעות (#559) ----------
+  // Read against Newprogramgrade2.pdf: cutting a polygon and building a new
+  // one from all the parts (which properties are kept), and a sum shown in
+  // bills and coins — in shekels only, the ב׳ PDF has no אגורות. Appended
+  // last so existing ids stay put.
+  RAW.push(
+    GEOA('ב', 'חותכים מלבן לאורך האלכסון. כמה משולשים מתקבלים?', 2, 'האלכסון מחבר שתי פינות נגדיות', 1, ST.POLY_DECOMP),
+    GEOA('ב', 'מרכיבים מלבן משני ריבועים זהים, צלע אל צלע. כמה צלעות יש למלבן שהתקבל?', 4, 'לכל מלבן 4 צלעות', 1, ST.POLY_DECOMP),
+    GEOA('ב', 'חתכנו ריבוע לאורך האלכסון לשני משולשים. כמה קודקודים יש לשני המשולשים יחד?', 6, 'לכל משולש 3 קודקודים', 2, ST.POLY_DECOMP),
+    GEOA('ב', 'מצמידים שני משולשים ישרי־זווית זהים לאורך הצלע הארוכה. איזו צורה יכולה להתקבל: מלבן או מחומש?', 'מלבן', 'החתך לאורך האלכסון של מלבן — הפוך', 2, ST.POLY_DECOMP),
+    GEOA('ב', 'פירקו טרפז לריבוע ולשני משולשים. מכמה חלקים מרכיבים אותו מחדש?', 3, 'ריבוע אחד ועוד שני משולשים', 3, ST.POLY_DECOMP),
+    GEOA('ב', 'חותכים מלבן לאורך האלכסון. האם לכל חלק יש 4 קודקודים, כמו למלבן? (כן/לא)', 'לא', 'מספר הקודקודים לא נשמר — לכל משולש 3', 3, ST.POLY_DECOMP),
+    MEAS('ב', 'בארנק שטר של 20 ₪ ושני מטבעות של 5 ₪. כמה ₪ בסך הכול?', 30, '20 ועוד 5 ועוד 5', 1, ST.MONEY_BILLS),
+    MEAS('ב', 'כמה מטבעות של 10 ₪ צריך כדי לשלם 50 ₪?', 5, 'כמה פעמים 10 ב־50', 1, ST.MONEY_BILLS),
+    MEAS('ב', 'שטר של 50 ₪, שטר של 20 ₪ ומטבע של 2 ₪. כמה ₪ בסך הכול?', 72, '50 ועוד 20 ועוד 2', 2, ST.MONEY_BILLS),
+    MEAS('ב', 'לדנה 3 מטבעות של 1 ₪, ולרון מטבע אחד של 10 ₪. כמה ₪ יש למי שיש לו יותר כסף?', 10, 'יותר מטבעות זה לא בהכרח יותר כסף', 2, ST.MONEY_BILLS),
+    MEAS('ב', 'לרותי שטר של 50 ₪, מטבע של 10 ₪ ושני מטבעות של 1 ₪. כמה ₪ יש לה?', 62, '50 ועוד 10 ועוד 2', 3, ST.MONEY_BILLS),
+    MEAS('ב', 'למיה 110 ₪. היא קונה מחברת ב־11 ₪, ספר ב־37 ₪ וספר נוסף ב־49 ₪. כמה ₪ יישארו לה?', 13, 'הקנייה היא 97 ₪', 3, ST.MONEY_BILLS)
+  );
+
+  // ---------- כיתה א׳ · פירוק והרכבה של מצולעים (#559) ----------
+  // Newprogramgrade1.pdf: cut a polygon into others, build polygons from
+  // given ones, find polygons inside a compound shape (מגן דוד), and ask what
+  // is kept — e.g. do the two parts of a cut rectangle still have 4 corners?
+  // Appended last so existing ids stay put.
+  RAW.push(
+    GEOA('א', 'גוזרים ריבוע בקו ישר מפינה לפינה. כמה משולשים מתקבלים?', 2, 'הקו חוצה את הריבוע לשני חלקים', 1, ST.POLY_CUT_A),
+    GEOA('א', 'מצמידים שני ריבועים זהים זה לזה ומקבלים מלבן. כמה קודקודים יש למלבן?', 4, 'ארבע פינות', 1, ST.POLY_CUT_A),
+    GEOA('א', 'במגן דוד מסתתרים משולשים גדולים. כמה משולשים גדולים יש בו?', 2, 'אחד מצביע למעלה ואחד למטה', 2, ST.POLY_CUT_A),
+    GEOA('א', 'גוזרים מלבן לשני מלבנים קטנים. כמה מרובעים מתקבלים?', 2, 'כל מלבן הוא מרובע', 2, ST.POLY_CUT_A),
+    GEOA('א', 'גוזרים מלבן לשני מלבנים קטנים. כמה קודקודים יש לשני החלקים יחד?', 8, 'לכל חלק 4 קודקודים', 3, ST.POLY_CUT_A),
+    GEOA('א', 'גוזרים מלבן מפינה לפינה לשני משולשים. כמה צלעות יש לשני החלקים יחד?', 6, 'לכל משולש 3 צלעות', 3, ST.POLY_CUT_A)
+  );
+
+  // A grade kept in its own file (src/lib/curriculum/grade<n>.js), appended
+  // last so existing ids stay put. Pages load it before this file. A file
+  // may carry only the music side of a grade whose items live here (grade1,
+  // grade2, grade3, grade4, grade5).
+  const G = typeof globalThis !== 'undefined' ? globalThis : {};
+  const GRADE_FILES = (typeof module === 'object' && module.exports)
+    ? [require('./curriculum/grade6'), require('./curriculum/grade1'), require('./curriculum/grade4'), require('./curriculum/grade5'), require('./curriculum/grade3'), require('./curriculum/grade2')]
+    : [G.MM_GRADE6, G.MM_GRADE1, G.MM_GRADE4, G.MM_GRADE5, G.MM_GRADE3, G.MM_GRADE2];
+  // Research behind the music ways of the grade files (#591): id → [label, URL].
+  const MUSIC_SOURCES = {};
+  GRADE_FILES.forEach(function (f) {
+    if (!f || !Array.isArray(f.items)) return;
+    Object.keys(f.ST).forEach(function (k) { ST[k] = f.ST[k][0]; });
+    Object.keys(f.sources || {}).forEach(function (k) { MUSIC_SOURCES[k] = f.sources[k]; });
+    f.items.forEach(function (x) {
+      const e = x[6] || {};
+      const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
+        : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
+      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart }));
+    });
+    // Every item of the grade without a music activity learns its standard
+    // through music (#591): the grade file lists research-backed ways per
+    // standard, one per level, and the item takes the way of its level —
+    // older builders (G56, MV) included. A way is [tag, note, source, evidence].
+    const link = {};
+    Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
+    // A prompt that already plays sound or reads music notation is a music
+    // activity: counted beats (hear), the playing widgets of grades א׳-ג׳
+    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid)
+    // and the 4/4 bar of the fraction items (bar44).
+    const cap = function (k) { return k.charAt(0).toUpperCase() + k.slice(1); };
+    RAW.forEach(function (raw) {
+      if (raw.grade !== f.grade || raw.music) return;
+      if (raw.g1 && raw.g1.kind) raw.music = 'g1' + cap(raw.g1.kind);
+      else if (raw.g2 && raw.g2.kind) raw.music = 'g2' + cap(raw.g2.kind);
+      else if (raw.g3 && raw.g3.kind) raw.music = 'g3' + cap(raw.g3.kind);
+      else if (hearOf(raw.hear)) raw.music = 'hearBeats';
+      else if (raw.widget === 'bar44') raw.music = 'bar44Notes';
+    });
+    // Dosage rules (#591, 23.10 15:54): the item is solved with a primary way;
+    // optional ways (extra practice, weak evidence marked) ride along.
+    RAW.forEach(function (raw) {
+      const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+      if (!ways) return;
+      const primary = primaryWays(ways);
+      if (!primary.length) return;
+      const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+      raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+      const extra = ways.filter(isOptionalWay).map(function (w) {
+        return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
+      });
+      if (extra.length) raw.musicExtra = extra;
+    });
+  });
+
+  // ---------- כיתה ג׳ · שאלות מילוליות: דו־שלביות ו«בכמה» מול «פי כמה» (#467) ----------
+  // Appended last so older ids stay put. Each 'contrast' item reuses the two
+  // numbers of a one-step «פי כמה» item above and asks «בכמה» instead, so a
+  // child who answers the ratio sees the hint that names both questions.
+  RAW.push(
+    G3('word_problems', 'תוף מנגן 4 פעימות בתיבה. ניגנו 3 תיבות, ועוד 2 פעימות בסוף. כמה פעימות בסך הכול?', 14, 'שלב א׳: 3 × 4 = 12; שלב ב׳: 12 + 2 = 14', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'במשקל 3/4 ניגנו 5 תיבות, ואחריהן עוד 4 פעמות. כמה פעמות ניגנו?', 19, 'שלב א׳: 5 × 3 = 15; שלב ב׳: 15 + 4 = 19', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'במקהלה 3 שורות של 7 זמרים. 5 זמרים יצאו להפסקה. כמה זמרים נשארו?', 16, 'שלב א׳: 3 × 7 = 21; שלב ב׳: 21 − 5 = 16', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
+    G3('word_problems', 'לנגן היו 40 ₪. הוא קנה 4 מיתרים ב־6 ₪ כל אחד. כמה כסף נשאר לו?', 16, 'שלב א׳: 4 × 6 = 24; שלב ב׳: 40 − 24 = 16', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
+    G3('word_problems', 'הבית הראשון בשיר הוא 6 תיבות של 4 פעמות. הבית השני ארוך פי 2. כמה פעמות בבית השני?', 48, 'שלב א׳: 6 × 4 = 24; שלב ב׳: 24 × 2 = 48', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
+    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. בכמה BPM מהיר הטמפו השני?', 60, '«בכמה» הוא הפרש: 120 − 60 = 60. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. בכמה Hz גבוה התדר השני?', 220, '«בכמה» הוא הפרש: 440 − 220 = 220. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. בכמה תיבות יש יותר בשנייה?', 12, '«בכמה» הוא הפרש: 18 − 6 = 12. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. בכמה BPM מהיר הטמפו השני?', 100, '«בכמה» הוא הפרש: 150 − 50 = 100. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] }),
+    G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. בכמה תיבות ארוכה השנייה?', 8, '«בכמה» הוא הפרש: 12 − 4 = 8. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] })
+  );
+
+  // ---------- כיתה ב׳ · קנייה ומכירה בשקלים (#559, PR #569) ----------
+  // Newprogramgrade2.pdf p. 7: «רצוי לשלב שאלות העוסקות בקנייה ובמכירה».
+  // Appended after the grade files so no existing id moves.
+  RAW.push(
+    MEAS('ב', 'מוכר קנה 10 מוצרים ב־4 ₪ כל אחד, ומכר כל אחד מהם ב־5 ₪. כמה ₪ הרוויח?', 10, 'על כל מוצר הוא הרוויח 1 ₪', 3, ST.MONEY_BILLS)
+  );
+
+  // Items appended after the grade files learn their standard through music
+  // too (#591): each takes its grade file's way for its standard and level.
   // ---------- כיתה א׳ · ספירה הלאה (#462) ----------
   // Appended last so older ids stay put. The child taps a pad on each beat,
   // counting on from `from` instead of from 1, and types where the count landed.
@@ -1576,6 +1976,135 @@
     RAW.push(I('א', 'counting', 'מתחילים ב־' + from + ' ושומעים ' + steps + ' פעימות — לאן הגענו?', from + steps,
       from + ' ואז ' + steps + ' קדימה',
       { standard: ST.COUNT_ON, level: r[2], widget: 'g1', g1: { kind: 'countOn', from: from, steps: steps } }));
+  });
+
+  function musicForLate() {
+    RAW.forEach(function (raw) {
+      if (raw.g1 && raw.g1.kind && !raw.music) raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
+    });
+    GRADE_FILES.forEach(function (f) {
+      if (!f || !Array.isArray(f.items)) return;
+      const link = {};
+      Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
+      RAW.forEach(function (raw) {
+        const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+        if (!ways) return;
+        const primary = primaryWays(ways); // dosage rule: weak ways stay optional
+        const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+        raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+      });
+    });
+  }
+  musicForLate();
+
+  // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
+  // way and music activity uses one of 14 mechanisms; the peer-reviewed
+  // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:
+  // their ways are being replaced by ways from an evidenced mechanism.
+  // azaryahu2020 (MusiMath and Academic Music, M3) is in the grade files.
+  const EVIDENCE_SOURCES = {
+    mcdonel2015: ['McDonel 2015 — Exploring learning connections between music and mathematics in early childhood (Bull. Counc. Res. Music Educ. 203)', 'https://doi.org/10.5406/bulcouresmusedu.203.0045'],
+    akin2023: ['Akın 2023 — Let me make mathematics and music together: a meta-analysis of music interventions on mathematics achievement (Educational Studies)', 'https://doi.org/10.1080/03055698.2023.2216826'],
+    das2023: ['Das 2023 — Multiplication table learning through music and rhythm in the elementary stage (J. Teacher Educ. Res.)', 'https://doi.org/10.36268/jter/18203'],
+    ribeiro2020: ['Ribeiro & Santos 2020 — Persistent effects of musical training on mathematical skills of children with developmental dyscalculia (Front. Psychol.)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/'],
+    courey2012: ['Courey et al. 2012 — Academic Music: music instruction to engage third-grade students in learning basic fraction concepts (Educ. Stud. Math.)', 'https://doi.org/10.1007/s10649-012-9395-9'],
+    rissman2005: ['Rissman 2005 — Cycling through polyrhythms (J. Music Theory Pedagogy)', 'https://doi.org/10.71156/2994-7073.1141'],
+    stevens2001: ['Stevens, Sharp & Nelson 2001 — The intersection of two unlikely worlds: ratios and drums (Teaching Children Mathematics)', 'https://doi.org/10.5951/tcm.7.6.0376'],
+    rusconi2005: ['Rusconi et al. 2005 — The mental space of pitch height (Ann. N. Y. Acad. Sci.)', 'https://doi.org/10.1196/annals.1360.056'],
+    mohring2016: ['Möhring et al. 2016 — Where music meets space: pitch intervals and spatial transformation in children (Cognition)', 'https://doi.org/10.1016/j.cognition.2016.02.016'],
+    azaryahuPatterns: ['Azaryahu & Adi-Japha — MusiMath: a music-based intervention for learning patterns and symmetry (J. Exp. Educ.)', 'https://doi.org/10.1080/00220973.2020.1799316'],
+    shoval2011: ['Shoval 2011 — Using mindful movement in cooperative learning while learning about angles (Instructional Science)', 'https://doi.org/10.1007/s11251-010-9137-2'],
+    smith2014: ['Smith, King & Hoyte 2014 — Learning angles through movement (J. Math. Behav.)', 'https://doi.org/10.1016/j.jmathb.2014.09.001'],
+    moore2012: ['Moore & Linder 2012 — Using dance to deepen student understanding of geometry (J. Dance Educ.)', 'https://doi.org/10.1080/15290824.2012.701175'],
+  };
+  Object.keys(EVIDENCE_SOURCES).forEach(function (k) { MUSIC_SOURCES[k] = EVIDENCE_SOURCES[k]; });
+
+  // Mechanism → its Hebrew name, the studies behind it (none for M8-M14), the
+  // one-line finding, and the way and activity tags that use it.
+  const MUSIC_MECHANISMS = {
+    M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
+      finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
+      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'g1CountOn'] },
+    M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
+      finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
+      tags: ['faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
+        'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
+        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid'] },
+    M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
+      finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
+      tags: ['columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
+        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar',
+        'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
+    M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
+      finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
+      tags: ['lcmDrums', 'stepCycle', 'drumsMeet'] },
+    M5: { he: 'גובה צליל — ישר המספרים וסדר', sources: ['rusconi2005', 'mohring2016'],
+      finding: 'Partial: low pitches map to down or left and high pitches to up or right even when pitch is irrelevant (SMARC, Rusconi et al. 2005); children map pitch onto space, but their pitch skill was not related to number-line skill (Möhring et al. 2016).',
+      tags: ['scaleSteps', 'scaleJump', 'tenAsOctave', 'pitchBound', 'pitchMean'] },
+    M6: { he: 'דגמים מלודיים וקצביים — דגמים וסימטריה', sources: ['azaryahuPatterns'],
+      finding: 'Third graders who wrote and played musical patterns gained more on pattern and symmetry tests than comparison classes, kept six months later (Azaryahu & Adi-Japha, MusiMath).',
+      tags: ['parallelVoices', 'quadMotif', 'oppositeEcho', 'triangleMotif', 'mirrorTriangle', 'melodyAb', 'mirrorPattern', 'composePattern', 'g1Pattern',
+        'shapeLoop', 'stairRows', 'columnPattern', 'tensSequence', 'digitMotif', 'sideCountMotif', 'foldCorner', 'hourCycle', 'cubeRowPattern', 'tableRowPattern'] },
+    M7: { he: 'הליכה ופנייה בקצב — זוויות, היקף ומצולעים', sources: ['shoval2011', 'smith2014', 'moore2012'],
+      finding: 'Movement-based, not music alone: pupils learned angles through mindful body movement in cooperative groups (Shoval 2011) and body-scale angle actions (Smith et al. 2014); a third-grade dance and geometry unit (Moore & Linder 2012, practice report).',
+      tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
+        'floorWalkSides', 'turnCount', 'armQuarterTurn', 'joinWalk', 'heelToeSteps', 'clockWalk', 'barStepWalk', 'addWalkLine', 'subWalkBack', 'subColumnSteps', 'zeroStartSteps', 'handTurnBody', 'halfTurnBody', 'rowStepsCompare', 'barTowerSteps', 'splitWalk'] },
+    M8: { he: 'טמפו ו־BPM — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
+      tags: ['sixtyBeats', 'tempoPercent', 'tapTempo', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
+        'howManyTimes', 'tuneTime', 'bpm', 'secPerBeat', 'mean', 'meanBpm', 'tempo'] },
+    M9: { he: 'יחסי תדרים — עשרוניים ואחוזים', sources: [], finding: null,
+      tags: ['intervalRatio', 'pitchPercent', 'hzCompare', 'g3Pair', 'hzChart', 'ratioHz'] },
+    M10: { he: 'ערך המקום בכלי נגינה', sources: [], finding: null,
+      tags: ['tenExchange', 'placeScore', 'baseTenDrums', 'noteNames', 'g1Chart100', 'twoInstruments', 'registers'] },
+    M11: { he: 'נתוני כלים ופיקטוגרמות', sources: [], finding: null,
+      tags: ['instrumentSurvey', 'rowRhythm', 'pictoBeats', 'barDifference', 'pipePlot'] },
+    M12: { he: 'אורך צינורות וכוסות מים — אורך ונפח', sources: [], finding: null,
+      tags: ['pipeLengths', 'unitSteps', 'comparePipes', 'pipeDecimals', 'waterGlasses', 'shakerCubes', 'cubeMl', 'unitChoice', 'speakerBox'] },
+    M13: { he: 'מבנה שיר וסימני חזרה — חלקים, עוגה וסדר פעולות', sources: [], finding: null,
+      tags: ['songForm', 'songFormPie', 'songParts', 'songRecipe', 'repeatSign', 'nestedRepeat', 'roadMap', 'loopPositions', 'sectorDegrees'] },
+    M14: { he: 'פעמונים בקודקודים, מקצבי צורות ומעגל הקווינטות — צורות וגופים', sources: [], finding: null,
+      tags: ['vertexBells', 'shapeRhythm', 'sideMelody', 'instrumentShape', 'drumHead', 'circleTerms', 'staffLines', 'stagePlan', 'circleFifths'] },
+  };
+  const MECH_OF = {};
+  Object.keys(MUSIC_MECHANISMS).forEach(function (m) {
+    MUSIC_MECHANISMS[m].tags.forEach(function (t) { MECH_OF[t] = m; });
+  });
+  // Mechanism id of a way or activity tag (M1-M14), or null when unmapped.
+  function mechanismOf(tag) { return MECH_OF[tag] || null; }
+
+  // Dosage rules (#591, owner 23.10 15:54). Only strongly evidenced
+  // mechanisms may be the way an item is solved with; weak ones are optional
+  // extra practice and always say so. A way may end with an options object:
+  // [tag, note, src, ev, { optional: true, evidence: 'weak' }]. A way without
+  // it is primary; the primary ways of a standard share one mechanism.
+  const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
+  function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
+  function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
+
+  // A music activity (the prompt itself plays or reads music) cites the same
+  // source and label as the way that uses the same relationship (#591 audit,
+  // item 2). Azaryahu 2020 keeps D only on fraction items, where MusiMath
+  // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
+  // that mechanism's study. Activity tag → [source id, evidence].
+  const ACTIVITY_SOURCES = {
+    hearBeats: ['mcdonel2015', 'A'], g1CountOn: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
+    g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
+    evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
+    beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
+    meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'],
+    leftoverBeats: ['das2023', 'A'], g3Remainder: ['das2023', 'A'],
+    howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
+    stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
+    bar44Notes: ['azaryahu2020', 'D'], bars: ['azaryahu2020', 'D'], lcm: ['azaryahu2020', 'D'],
+    mixedBar: ['azaryahu2020', 'D'], bpm: ['wnetMathInMusic', 'A'], secPerBeat: ['wnetMathInMusic', 'A'],
+    drumsMeet: ['rissman2005', 'R'], hzChart: ['interplay2024', 'A'],
+    dotted: ['azaryahu2020', 'D'], triplet: ['azaryahu2020', 'A'], durationDiv: ['azaryahu2020', 'D'],
+    mean: ['wnetMathInMusic', 'A'], meanBpm: ['wnetMathInMusic', 'A'], tempo: ['wnetMathInMusic', 'A'],
+    ratioHz: ['interplay2024', 'R'], circleFifths: ['interplay2024', 'A'],
+  };
+  RAW.forEach(function (raw) {
+    const s = raw.music && !raw.musicSrc && ACTIVITY_SOURCES[raw.music];
+    if (s) { raw.musicSrc = s[0]; raw.musicEv = s[1]; }
   });
 
   const SHIPPED = [];
@@ -1608,8 +2137,13 @@
     if (raw.g2) it.g2 = raw.g2;
     if (raw.g3) it.g3 = raw.g3;
     if (raw.typed) it.typed = true;
+    if (raw.tolerance != null) it.tolerance = raw.tolerance;
     if (raw.music) it.music = raw.music;
+    if (raw.musicNote) it.musicNote = raw.musicNote;
+    if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
+    if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
+    if (raw.tags) it.tags = raw.tags.slice();
     SHIPPED.push(it);
   });
 
@@ -1669,9 +2203,14 @@
     });
   }
 
-  function classItems() {
+  // Class mode follows the grade picked in the header; no argument keeps the
+  // grade-1 bank that beat mode and the worksheets rely on. Class mode answers
+  // by tapping a choice, so typed items («3 שארית 2») stay out.
+  function classItems(grade) {
+    const g = isGrade(grade) ? grade : 'א';
+    const skills = g === 'א' ? ['counting', 'addition', 'subtraction', 'number_line'] : skillsForGrade(g);
     return SHIPPED.filter(function (it) {
-      return it.grade === 'א' && ['counting', 'addition', 'subtraction', 'number_line'].indexOf(it.skill) !== -1;
+      return it.grade === g && skills.indexOf(it.skill) !== -1 && !it.typed;
     });
   }
 
@@ -1757,6 +2296,12 @@
     RM_BANK: RM_BANK,
     SKILL_GRADE: SKILL_GRADE,
     LEVEL_HE: LEVEL_HE,
+    MUSIC_SOURCES: MUSIC_SOURCES,
+    MUSIC_MECHANISMS: MUSIC_MECHANISMS,
+    mechanismOf: mechanismOf,
+    MUSIC_DOSAGE: MUSIC_DOSAGE,
+    isOptionalWay: isOptionalWay,
+    primaryWays: primaryWays,
     skillHe: skillHe,
     skillGrade: skillGrade,
     levelHe: levelHe,

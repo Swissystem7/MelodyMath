@@ -42,8 +42,8 @@ test('topicPace resolves a topicId or the exact topic text, and nothing else', (
   assert.deepEqual(pace.topicPace(cur.topicById('mm-cur-24').topic), byId);
   assert.deepEqual(pace.topicPace({ topicId: 'mm-cur-24' }), byId);
   // A fuzzy lookup would hand the decimals topic the fractions topic's goal.
-  assert.equal(pace.topicPace('כפל וחילוק שברים').topicId, 'mm-cur-47');
-  assert.equal(pace.topicPace('כפל וחילוק שברים עשרוניים').topicId, 'mm-cur-48');
+  assert.equal(pace.topicPace('כפל וחילוק שברים').topicId, 'mm-cur-51');
+  assert.equal(pace.topicPace('כפל וחילוק שברים עשרוניים').topicId, 'mm-cur-52');
   [null, undefined, '', 'לוח כפל', 'constructor', '__proto__', 0, [], { topic: 'אין כזה' }]
     .forEach((bad) => assert.equal(pace.topicPace(bad), null, String(bad)));
 });
