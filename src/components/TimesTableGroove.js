@@ -138,7 +138,7 @@
       return '<button type="button" class="jam-pad" data-act="instrument" data-inst="' + e(id) + '" data-tap="' + e(x.voice) + '" aria-pressed="' + (id === state.instrument) + '">' + e(x.he) + '</button>';
     }).join('') + '</div>' : '';
     const layers = state.streak.layers.map(function (l) { return LAYER_HE[l]; }).join(' · ');
-    return '<div class="jam-head"><span class="tag">M2 · פעמות מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
+    return '<div class="jam-head"><span class="tag">פעמות מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🪘 לוח הכפל כשיר קצבי' : 'ספירה בדילוגים') + '</h3>' +
       '<div class="jam-row" role="group" aria-label="עמודה בלוח הכפל">' + factors + '</div>' +
       row + '<p class="jam-prompt"><bdi dir="ltr">' + e(q.he) + '</bdi></p>' +
@@ -147,7 +147,8 @@
         '<button type="button" class="jam-pad" data-tap="' + e(inst.voice) + '" aria-label="הקשה חופשית">🥁 הקישו</button></div>' : '') +
       instRow + (on && layers ? '<p class="jam-free">שכבות בשיר: ' + e(layers) + '</p>' : '') +
       '<div class="jam-row"><button type="button" class="secondary" data-act="next">שאלה הבאה ←</button></div>' +
-      '<p class="jam-msg ' + (state.status === 'right' ? 'good' : state.status === 'retry' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
+      '<p class="jam-msg ' + (state.status === 'right' ? 'good' : state.status === 'retry' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>' +
+      (on ? '<details class="teacher-info" role="region" aria-label="מידע למורה" style="margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M2 (פעימות מודגשות ומקובצות) · כיתות ב׳–ד׳ · 100 פעימות לדקה · מקור: Das 2023</div></details>' : '');
   }
 
   function mount(el) {
