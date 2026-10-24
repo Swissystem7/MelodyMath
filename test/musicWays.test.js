@@ -15,7 +15,7 @@ const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 const keyOf = (file, it) => Object.keys(file.music).find((k) => banks.ST[k] === it.standard);
 const wayOf = (file, it) => {
-  const ways = file.music[keyOf(file, it)];
+  const ways = banks.primaryWays(file.music[keyOf(file, it)]);
   return ways && ways[Math.min(it.level, ways.length) - 1];
 };
 
@@ -31,7 +31,7 @@ Object.keys(FILES).forEach((grade) => {
         assert.ok(it.musicSrc && it.musicEv, it.id);
         const way = wayOf(file, it);
         assert.ok(way, it.id + ' has no way for ' + it.standard + ' level ' + it.level);
-        assert.deepEqual([it.music, it.musicNote, it.musicSrc, it.musicEv], way, it.id);
+        assert.deepEqual([it.music, it.musicNote, it.musicSrc, it.musicEv], way.slice(0, 4), it.id);
       } else {
         assert.ok(banks.MUSIC_SOURCES[it.musicSrc] && it.musicEv, it.id + ' activity ' + it.music);
       }
@@ -53,7 +53,11 @@ Object.keys(FILES).forEach((grade) => {
       s.tags.add(it.music);
     });
     Object.keys(byStd).forEach((std) => {
-      if (byStd[std].levels.size >= 2) assert.ok(byStd[std].tags.size >= 2, grade + ' ' + std);
+      // Dosage rule 4: one consistent way per topic, so a standard may have a
+      // single primary way; with more, levels take different ones.
+      const key = Object.keys(file.music).find((k) => banks.ST[k] === std);
+      const n = banks.primaryWays(file.music[key]).length;
+      assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, grade + ' ' + std);
     });
     // A way tag is never an activity tag of the same grade.
     const activityTags = new Set(items.filter((it) => !it.musicNote).map((it) => it.music));
@@ -65,7 +69,7 @@ Object.keys(FILES).forEach((grade) => {
       assert.match(tag, /^[a-z][A-Za-z0-9]+$/);
       assert.match(note, /[א-ת]/);
       assert.ok(note.length < 140, note.length + ' ' + note);
-      assert.ok(file.sources[src], grade + ' ' + tag + ' → ' + src);
+      assert.ok(file.sources[src] || banks.MUSIC_SOURCES[src], grade + ' ' + tag + ' → ' + src);
       assert.ok(['D', 'R', 'A'].includes(ev), tag + ' ' + ev);
     }));
     Object.keys(file.sources).forEach((id) => {
@@ -123,9 +127,9 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1193/1193', () => {
+test('every item of every grade has a music side: 1204/1204', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1193);
+  assert.equal(all.length, 1204); // + 10 two-step and contrast items (#467) + the seller-profit money item (#569)
   assert.equal(all.filter((it) => it.music).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);

@@ -480,6 +480,81 @@
     return true;
   }
 
+  // ---------- free play in every exercise (#591 goal A.3) ----------
+  // A small instrument strip under each exercise. The child may play it
+  // freely before answering, with as many fingers as they like: it never
+  // scores. Each key is a [data-tap] element, so installTapFeedback gives it
+  // the instant sound, glow and buzz. The timbre follows the item's one
+  // musical way (dosage rule 4): steady beats ring on bells, accented groups
+  // on drums, note lengths on a drum and hi-hat, patterns on xylophone bars.
+  // Weak or unmapped ways get the neutral xylophone: a timbre, never a method.
+  const NOTE_HE = ['דו', 'רה', 'מי', 'סול', 'לה', 'דו׳', 'רה׳', 'מי׳'];
+  const VOICE_HE = {
+    kick: 'תוף בס', snare: 'תוף סנר', hihat: 'מצילה', clap: 'מחיאת כף',
+    drum: 'תוף', xylo: 'קסילופון', bell: 'פעמון',
+  };
+  const VOICE_ICON = { kick: 'בס', snare: 'סנר', hihat: '✨', clap: '👏', drum: '🥁' };
+  function ladder(voice, n) {
+    const out = [];
+    for (let i = 0; i < n; i++) out.push({ voice: voice, step: i });
+    return out;
+  }
+  const PAD_SETS = {
+    M1: { he: 'פעמונים', keys: ladder('bell', 5) },
+    M2: { he: 'תופים', keys: [{ voice: 'kick', step: 0 }, { voice: 'drum', step: 0 }, { voice: 'snare', step: 0 }, { voice: 'clap', step: 0 }, { voice: 'hihat', step: 0 }] },
+    M3: { he: 'תוף ומצילה', keys: [{ voice: 'drum', step: 0 }, { voice: 'snare', step: 0 }, { voice: 'hihat', step: 0 }, { voice: 'clap', step: 0 }] },
+    M6: { he: 'קסילופון', keys: ladder('xylo', 6) },
+  };
+  const PAD_DEFAULT = { he: 'קסילופון', keys: ladder('xylo', 5) };
+
+  // The strip for a mechanism: its own keys, then any extra voices (unlocked
+  // later by progress) that the strip does not have yet.
+  function padFor(mechanism, extra) {
+    const base = PAD_SETS[mechanism] || PAD_DEFAULT;
+    const keys = base.keys.slice();
+    (Array.isArray(extra) ? extra : []).forEach(function (v) {
+      if (TAP_VOICES[v] && !keys.some(function (k) { return k.voice === v; })) keys.push({ voice: v, step: 2, extra: true });
+    });
+    return { he: base.he, keys: keys };
+  }
+
+  function padKeyName(k) {
+    const pitched = k.voice === 'xylo' || k.voice === 'bell';
+    return VOICE_HE[k.voice] + (pitched ? ' ' + NOTE_HE[k.step] : '');
+  }
+
+  function padHtml(set) {
+    const s = set || PAD_DEFAULT;
+    return '<span class="mm-pad-title">🎶 נגנו חופשי (' + s.he + '):</span>' + s.keys.map(function (k) {
+      const pitched = k.voice === 'xylo' || k.voice === 'bell';
+      const face = pitched ? NOTE_HE[k.step] : VOICE_ICON[k.voice] || '♪';
+      return '<button type="button" class="mm-pad-key' + (k.extra ? ' mm-pad-new' : '') + '" data-tap="' + k.voice +
+        '" data-step="' + k.step + '" aria-label="' + padKeyName(k) + '">' + face + '</button>';
+    }).join('');
+  }
+
+  // Puts (or refreshes) the strip right after `anchor`, the exercise's music
+  // way line, so it sits in every exercise screen without new markup. Hidden
+  // when sound is off (quiet preference or the mute switch).
+  function mountFreePad(anchor, opts) {
+    if (!anchor || !anchor.parentNode || typeof document === 'undefined') return null;
+    const o = opts || {};
+    let box = anchor.nextElementSibling;
+    if (!box || !box.classList || !box.classList.contains('mm-pad')) {
+      box = document.createElement('div');
+      box.className = 'mm-pad';
+      box.setAttribute('role', 'group');
+      anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    }
+    const off = !!(o.quiet || audioState.muted);
+    box.classList.toggle('hidden', off);
+    if (off) { box.innerHTML = ''; return box; }
+    const set = padFor(o.mechanism, o.extra);
+    box.setAttribute('aria-label', 'נגנו חופשי לפני שעונים: ' + set.he);
+    box.innerHTML = padHtml(set);
+    return box;
+  }
+
   // ---------- the shared AudioContext ----------
   let audioCtx = null;
   const live = [];
@@ -598,7 +673,7 @@
     stopSequence, stopAll, audioReady,
     isAudioUnlocked: audioReady, playSequence: scheduleSequence,
     canReplay, replaySequence, TAP_VOICES, tapPlan, playTap, audioState, setMuted,
-    tapFeedback, installTapFeedback,
+    tapFeedback, installTapFeedback, PAD_SETS, padFor, padHtml, mountFreePad,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.
