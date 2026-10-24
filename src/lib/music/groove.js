@@ -4,8 +4,8 @@
 // buildGroove(4, 90) is a run of steady beats where every 4th beat is
 // accented; the accented beats carry the running products 4, 8, 12, ...
 // stopAt() freezes the groove after k accents and asks factor × k. The same
-// groove is skip counting in grade ב׳ and division in grade ד׳ (how many
-// accented groups fit), so the method never changes between grades.
+// groove is skip counting and division by grouping, both grade ב׳ (mm-cur-15,
+// mm-cur-16: how many accented groups fit), so the method never changes.
 // Pure logic: the touch layer plays the beats.
 (function (root, factory) {
   const api = factory();
@@ -61,7 +61,7 @@
   }
 
   // Division read off the same groove: how many accented groups fill
-  // `total` beats (grade ד׳). Null when it does not divide evenly.
+  // `total` beats (grade ב׳, mm-cur-16). Null when it does not divide evenly.
   function groupsIn(groove, total) {
     const t = Number(total);
     if (!groove || !Number.isInteger(t) || t < 0 || t % groove.factor !== 0) return null;

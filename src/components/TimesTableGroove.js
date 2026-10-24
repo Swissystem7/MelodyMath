@@ -3,8 +3,9 @@
 // A times-table column is a rhythmic groove: steady beats with every
 // factor-th beat accented and carrying the running product (4, 8, 12, ...).
 // The groove stops before the k-th accent and the child completes factor × k
-// by touch. Every third question is the same groove read as division (grade
-// ד׳): how many accented groups fill the beats. One method only: M2.
+// by touch. Every third question is the same groove read as division by
+// grouping (חילוק להכלה, grade ב׳, topic mm-cur-16): how many accented groups
+// fill the beats. One method only: M2.
 // Tabla is the default timbre; a completed column unlocks another
 // instrument (timbre only). Every 3 right answers in a row add a layer to
 // the groove (bass, melody, harmony); a wrong answer restarts the count,
@@ -32,6 +33,9 @@
   const INST = typeof root.forTopic === 'function' ? root : require('../lib/instruments.js');
   const UNLOCK_LIST = INST.forTopic('multiplication').map(function (x) { return x.id; }).filter(function (id) { return id !== START_INSTRUMENT; });
   const LAYER_HE = { bass: 'בס', melody: 'מנגינה', harmony: 'הרמוניה' };
+  // Curriculum topics (curriculum.js / progression.js): multiplication is
+  // mm-cur-15 (ב׳), division by grouping is mm-cur-16 (ב׳), which builds on it.
+  const TOPIC = { multiplication: 'mm-cur-15', division: 'mm-cur-16' };
   const PENTA = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 783.99, 880];
 
   // Question n of a column: k cycles 1..10 in a fixed spread order; every
@@ -43,7 +47,7 @@
     const stop = G.stopAt(groove, k);
     const division = n % 3 === 2;
     return {
-      factor: factor, k: k, n: n, division: division, groove: groove, played: stop.played,
+      factor: factor, k: k, n: n, division: division, topicId: division ? TOPIC.division : TOPIC.multiplication, groove: groove, played: stop.played,
       answer: division ? k : stop.answer,
       he: division ? 'כמה קבוצות של ' + factor + ' יש ב־' + stop.answer + '?' : stop.question + ' = ?',
     };
@@ -138,7 +142,7 @@
       return '<button type="button" class="jam-pad" data-act="instrument" data-inst="' + e(id) + '" data-tap="' + e(x.voice) + '" aria-pressed="' + (id === state.instrument) + '">' + e(x.he) + '</button>';
     }).join('') + '</div>' : '';
     const layers = state.streak.layers.map(function (l) { return LAYER_HE[l]; }).join(' · ');
-    return '<div class="jam-head"><span class="tag">M2 · פעמות מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
+    return '<div class="jam-head"><span class="tag">M2 · פעמות מודגשות · כיתות ב׳–ג׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🪘 לוח הכפל כשיר קצבי' : 'ספירה בדילוגים') + '</h3>' +
       '<div class="jam-row" role="group" aria-label="עמודה בלוח הכפל">' + factors + '</div>' +
       row + '<p class="jam-prompt"><bdi dir="ltr">' + e(q.he) + '</bdi></p>' +
@@ -192,5 +196,5 @@
     return { get state() { return state; } };
   }
 
-  return { GAME: GAME, FACTORS: FACTORS, UNLOCK_LIST: UNLOCK_LIST, question: question, choices: choices, createState: createState, answer: answer, next: next, groovePlan: groovePlan, renderHtml: renderHtml, mount: mount };
+  return { GAME: GAME, TOPIC: TOPIC, FACTORS: FACTORS, UNLOCK_LIST: UNLOCK_LIST, question: question, choices: choices, createState: createState, answer: answer, next: next, groovePlan: groovePlan, renderHtml: renderHtml, mount: mount };
 });

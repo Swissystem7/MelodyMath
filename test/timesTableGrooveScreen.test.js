@@ -19,7 +19,7 @@ test('4 × 7: the groove stops before the 7th accent, the accents carry 4, 8 ...
   assert.equal(new Set(TTG.choices(q)).size, 4);
 });
 
-test('every third question reads the same groove as division (grade ד׳)', () => {
+test('every third question reads the same groove as division (grade ב׳, mm-cur-16)', () => {
   const q = TTG.question(4, 2);
   assert.equal(q.division, true);
   assert.match(q.he, /כמה קבוצות של 4 יש ב־36/);
