@@ -1967,6 +1967,20 @@
 
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
+  // ---------- כיתה ב׳ · מעבר עשרת על הפעימה (#465) ----------
+  // Appended last so older ids stay put. Every one of these crosses a ten,
+  // so the beat-mode pack «מעבר עשרת» can run a whole session on regrouping.
+  RAW.push(
+    DUO('-', 42, 17, 25, '2 − 7 לא יוצא: ' + UNGROUP, 1),
+    DUO('-', 61, 28, 33, '1 − 8 לא יוצא: ' + UNGROUP, 2),
+    DUO('-', 53, 35, 18, '3 − 5 לא יוצא: ' + UNGROUP, 2),
+    DUO('-', 80, 53, 27, 'אפס מכות תוף: ' + UNGROUP, 2),
+    DUO('+', 28, 35, 63, '8 + 5 = 13 מכות תוף: ' + REGROUP, 1),
+    DUO('+', 47, 36, 83, '7 + 6 = 13 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 56, 27, 83, '6 + 7 = 13 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 69, 14, 83, '9 + 4 = 13 מכות תוף: ' + REGROUP, 1)
+  );
+
   function musicForLate() {
     GRADE_FILES.forEach(function (f) {
       if (!f || !Array.isArray(f.items)) return;
@@ -2209,6 +2223,16 @@
     });
   }
 
+  // The duo items whose ones column crosses a ten (carry or borrow). The
+  // no-regrouping warm-ups such as 23 + 14 stay out of this pack.
+  function regroupItems() {
+    return SHIPPED.filter(function (it) {
+      if (!it.g2 || it.g2.kind !== 'duo' || it.typed) return false;
+      const a = it.g2.a % 10, b = it.g2.b % 10;
+      return it.g2.op === '+' ? a + b >= 10 : a < b;
+    });
+  }
+
   // Pass a skill to borrow only that skill's core facts: a grade-ג division
   // stage must not fill up with multiplication questions.
   function coreFactItems(skill) {
@@ -2305,6 +2329,7 @@
     classItems: classItems,
     practiceItems: practiceItems,
     coreFactItems: coreFactItems,
+    regroupItems: regroupItems,
     coverage: coverage,
     coverageByGrade: coverageByGrade,
   };

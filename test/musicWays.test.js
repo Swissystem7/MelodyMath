@@ -127,9 +127,9 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1204/1204', () => {
+test('every item of every grade has a music side: 1212/1212', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1204); // + 10 two-step and contrast items (#467) + the seller-profit money item (#569)
+  assert.equal(all.length, 1212); // + 8 regrouping duo items (#465) // + 10 two-step and contrast items (#467) + the seller-profit money item (#569)
   assert.equal(all.filter((it) => it.music).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);

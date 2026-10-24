@@ -269,6 +269,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
         <option value="multiplication">כפל (עם שער 2/4/5/10)</option>
         <option value="division">חילוק לחלקים ולהכלה</option>
         <option value="basic_fractions">שברים מול תיבה 4/4</option>
+        <option value="regroup">מעבר עשרת · פריטה והמרה (ב׳)</option>
       </select>
     </label>
   </div>
@@ -1154,6 +1155,7 @@ function beatPool(){
   let pool;
   if(pack==='grade') pool=itemsForGrade(selectedGrade);
   else if(pack==='multiplication' || pack==='division' || pack==='basic_fractions') pool=rowsOf(pack);
+  else if(pack==='regroup') pool=regroupItems();
   else pool=classItems();
   if(typeof gateItems==='function') pool=gateItems(pool, beatHist, typeof allItems==='function'?allItems():pool);
   // Beat mode answers by tapping a choice, so an item that needs a typed
