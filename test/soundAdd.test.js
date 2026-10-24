@@ -286,22 +286,142 @@ test('drag: a basket and a pile the child can also tap; hints speak of circles i
   assert.match(SA.renderHtml(SA.createState({ stage: 'silent', mode: 'drag' })), /class="sa-pad sa-source" data-act="tap" aria-label/, 'silent: the pile makes no sound');
 });
 
-test('line: a 0-10 number line, every sum lands on it, the solution is marked on it', () => {
+test('line: the #singingLine pattern on 0-10, every sum lands on it, the solution is marked on it', () => {
   const s = SA.createState({ stage: 'sound', mode: 'line', item: [3, 2] });
   assert.equal(s.taps, null);
   assert.equal(SA.speechKey(s), 'line.sound');
   const html = SA.renderHtml(s);
-  assert.equal((html.match(/class="sa-tick[^"]*"/g) || []).length, SA.LINE_MAX + 1);
+  assert.match(html, /<input id="saLine" class="sa-range" type="range" data-act="slide" min="0" max="10" step="1" value="0" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" aria-valuetext="0" aria-label="מיקום על ישר המספרים">/);
+  assert.match(html, /class="nl-keys sa-nudge"[^>]*role="group"/);
+  assert.match(html, /data-act="nudge" data-d="-1"/);
+  assert.match(html, /data-act="nudge" data-d="1"/);
+  assert.equal((html.match(/data-tick=/g) || []).length, SA.LINE_MAX + 1);
   assert.match(html, /data-tick="0"/);
   assert.match(html, /data-tick="10"/);
   assert.doesNotMatch(html, /data-act="untap"/);
+  assert.match(html, /data-act="check" disabled/, 'nothing to check before the thumb moves');
   SA.ITEMS.forEach(([a, b]) => assert.ok(a + b <= SA.LINE_MAX, a + ' + ' + b));
+  assert.equal(SA.pick(s, SA.LINE_MAX + 1).taps, null, 'off the line');
   const w = SA.check(SA.pick(s, 7));
   assert.match(w.message, /גדול מדי/);
-  assert.match(SA.renderHtml(w), /class="sa-tick sa-wrong" data-act="pick" data-n="7"[^>]* disabled/);
+  const wh = SA.renderHtml(w);
+  assert.match(wh, /class="sa-tick sa-wrong sa-on" data-tick="7"/);
+  assert.match(wh, /aria-valuenow="7"/);
+  assert.match(wh, /data-act="check" disabled/, 'the crossed-out number cannot be checked again');
+  assert.equal(SA.pick(w, 7).taps, 7, 'the thumb may pass it');
   const shown = SA.check(SA.pick(w, 8));
   assert.match(shown.message, /3 \+ 2 = 5/);
-  assert.match(SA.renderHtml(shown), /class="sa-tick sa-right" data-act="pick" data-n="5"/);
+  assert.match(SA.renderHtml(shown), /class="sa-tick sa-right" data-tick="5"/);
+  assert.match(SA.renderHtml(shown), /class="sa-range"[^>]* disabled>/);
+});
+
+test('line: every tap target is at least 44px (owner note 24.10, checked at 390px in e2e)', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'soundAdd.css'), 'utf8');
+  const rule = (sel) => (css.split('}').find((r) => r.trim().startsWith(sel + '{')) || '');
+  ['.sa-range::-webkit-slider-thumb', '.sa-range::-moz-range-thumb'].forEach((sel) => {
+    assert.match(rule(sel), /width:44px/, sel);
+    assert.match(rule(sel), /height:44px/, sel);
+  });
+  assert.match(rule('.sa-range'), /min-height:48px/);
+  assert.match(rule('.sa-nudge button'), /min-width:44px/);
+  assert.match(rule('.sa-nudge button'), /min-height:44px/);
+  assert.doesNotMatch(rule('.sa-tick'), /min-width:0/, 'no squeezed tick buttons any more');
+  assert.match(page, /src="src[/]lib[/]numberLine.js"/, 'the line sings through numberLine.js soundForTick');
+});
+
+test('choice: the silent mastery check is not a 1-in-3 guess (owner note 24.10)', () => {
+  SA.ITEMS.forEach(([a, b], i) => {
+    const grid = SA.choices([a, b], i, 'silent');
+    assert.ok(grid.length >= SA.CHOICE_MAX, a + ' + ' + b + ': ' + grid.length + ' options');
+    assert.ok(grid.includes(a + b));
+    assert.equal(new Set(grid).size, grid.length);
+  });
+  const s = SA.createState({ stage: 'silent', mode: 'choice', item: [4, 3] });
+  const html = SA.renderHtml(s);
+  assert.match(html, /class="sa-opts sa-grid"/);
+  assert.equal((html.match(/data-act="pick"/g) || []).length, SA.CHOICE_MAX);
+  assert.doesNotMatch(SA.renderHtml(SA.createState({ stage: 'symbol', mode: 'choice', item: [4, 3] })), /sa-grid/, 'the supported stages keep three numbers');
+  const w = SA.check(SA.pick(s, 9));
+  assert.equal(w.plainTried, 1);
+  assert.equal(w.plainRight, 0);
+  assert.match(SA.renderHtml(w), /class="sa-opt sa-wrong" data-act="pick" data-n="9"[^>]* disabled/);
+  const r = SA.check(SA.pick(SA.createState({ stage: 'silent', mode: 'choice', item: [4, 3] }), 7));
+  assert.equal(r.status, 'right');
+  assert.equal(r.plainRight, 1);
+});
+
+// #701 owner note: the drag goes through the shared kit (JAM.dragToTarget).
+function fakeDragPage() {
+  const handlers = {};
+  const el = { addEventListener: (t, f) => { handlers[t] = f; } };
+  const basket = { closest: (sel) => (sel === '.sa-basket' ? basket : null) };
+  const floor = { closest: () => null };
+  const source = { disabled: false, closest: (sel) => (sel === '.sa-source' ? source : null), setPointerCapture() {} };
+  const ghosts = [];
+  const doc = {
+    body: { appendChild: (g) => ghosts.push(g) },
+    createElement: () => ({ style: {}, remove() { this.removed = true; } }),
+    elementFromPoint: (x) => (x >= 100 ? basket : floor),
+  };
+  const fire = (type, x, y) => handlers[type]({ type, target: source, clientX: x, clientY: y, pointerId: 1 });
+  return { el, doc, source, ghosts, fire };
+}
+
+test('drag: JAM.dragToTarget drops on the basket only, and the click after a drag is not a second circle', () => {
+  const JAM = require('../src/components/jamKit.js');
+  const p = fakeDragPage();
+  const saved = globalThis.document;
+  globalThis.document = p.doc;
+  try {
+    let drops = 0;
+    const kit = JAM.dragToTarget(p.el, { source: '.sa-source', target: '.sa-basket', ghostClass: 'sa-ans sa-ghost', onDrop: () => { drops++; } });
+    p.fire('pointerdown', 0, 0); p.fire('pointermove', 50, 0); p.fire('pointerup', 120, 0);
+    assert.equal(drops, 1, 'dropped on the basket');
+    assert.equal(p.ghosts.length, 1);
+    assert.ok(p.ghosts[0].removed, 'the ghost is gone after the drop');
+    assert.equal(kit.dragged(p.source), true, 'the click that ends the drag is ignored');
+    assert.equal(kit.dragged(p.source), false, 'only once');
+    p.fire('pointerdown', 0, 0); p.fire('pointermove', 50, 0); p.fire('pointerup', 20, 0);
+    assert.equal(drops, 1, 'dropped beside the basket: nothing');
+    p.fire('pointerdown', 0, 0); p.fire('pointermove', JAM.DRAG_MIN - 5, 0); p.fire('pointerup', 120, 0);
+    assert.equal(drops, 1, 'a small wobble is a tap, not a drag');
+    assert.equal(kit.dragged(p.source), false, 'its click still counts one circle');
+  } finally {
+    globalThis.document = saved;
+  }
+});
+
+test('drag: the right answer is the number of circles in the basket', () => {
+  const s = SA.createState({ stage: 'picture', mode: 'drag', item: [4, 3] });
+  const r = SA.check(taps(s, 7));
+  assert.equal(r.status, 'right');
+  assert.equal(r.tries, 1);
+  assert.equal(r.streak, 1);
+  assert.equal(r.sound, 'scale');
+  assert.match(r.message, /4 \+ 3 = 7/);
+  assert.match(SA.renderHtml(r), /class="sa-pad sa-source" data-act="tap"[^>]* disabled/, 'the pile is closed once it is right');
+});
+
+test('drag: after an error the exercise is replayed counted and the basket is kept for the second try', () => {
+  const s = SA.createState({ stage: 'sound', mode: 'drag', item: [4, 3] });
+  const w = SA.check(taps(s, 5));
+  assert.equal(w.status, 'retry');
+  assert.equal(w.sound, 'hint', 'the exercise is played again');
+  assert.deepEqual(w.hint, { missing: 2 });
+  assert.equal(w.taps, 5, 'the circles stay in the basket');
+  const replay = SA.countPlan(w.item, w.family);
+  assert.deepEqual(replay.map((n) => n.count), [1, 2, 3, 4, 5, 6, 7], 'the replay counts every sound');
+  const html = SA.renderHtml(w);
+  assert.match(html, /data-act="listen"/, 'the child can hear it again');
+  assert.equal((html.match(/sa-missing/g) || []).length, 2, 'the two missing circles are drawn empty');
+  assert.match(html, /class="sa-pad sa-source" data-act="tap"/);
+  const r = SA.check(taps(w, 2));
+  assert.equal(r.status, 'right');
+  assert.equal(r.tries, 2);
+  assert.equal(r.streak, 0, 'a second try does not move the stage on');
+  const x = SA.check(SA.untap(w));
+  assert.equal(x.status, 'shown', 'two misses show the solution');
+  assert.equal(SA.next(x).mode, 'drag');
 });
 
 test('PROGRESSION matches the curriculum map (#691 review item 2)', () => {

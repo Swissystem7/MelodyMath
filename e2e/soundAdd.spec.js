@@ -118,6 +118,9 @@ for (const [mode, control] of [['choice', '.sa-opts'], ['drag', '.sa-source'], [
       await page.mouse.up();
       await expect(page.locator('.sa-basket .sa-ans')).toHaveCount(1);
       for (let i = 1; i < circles; i++) await page.locator('.sa-source').tap();
+    } else if (mode === 'line') {
+      for (let i = 0; i < circles; i++) await page.locator('[data-act="nudge"][data-d="1"]').tap();
+      await expect(page.locator('#saLine')).toHaveAttribute('aria-valuenow', String(circles));
     } else {
       await page.locator('[data-act="pick"][data-n="' + circles + '"]').tap();
     }
@@ -138,4 +141,17 @@ test('choice: a wrong number is crossed out for the second try', async ({ page }
   await expect(page.locator('.sa-msg')).toContainText('כמעט');
   await expect(page.locator('[data-n="' + n + '"]')).toBeDisabled();
   await expect(page.locator('[data-n="' + n + '"]')).toHaveClass(/sa-wrong/);
+});
+test('line: at 390px every target on the line is at least 44px and nothing scrolls sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors = await open(page, 'line');
+  for (const sel of ['#saLine', '[data-act="nudge"][data-d="-1"]', '[data-act="nudge"][data-d="1"]']) {
+    const box = await page.locator(sel).boundingBox();
+    expect(box.width, sel).toBeGreaterThanOrEqual(44);
+    expect(box.height, sel).toBeGreaterThanOrEqual(44);
+  }
+  const thumb = await page.locator('#saLine').evaluate((r) => parseFloat(getComputedStyle(r, '::-webkit-slider-thumb').height) || 44);
+  expect(thumb).toBeGreaterThanOrEqual(44);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  expect(errors).toEqual([]);
 });
