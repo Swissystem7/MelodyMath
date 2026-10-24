@@ -1,0 +1,352 @@
+/* Design system (#507). One set of tokens for type, space, radius, depth and
+   motion, used by every rule below. Loaded after sefirot.css and names no
+   colors: every paint is a token from sefirot.css or a color-mix of tokens.
+   Mobile first; logical properties so RTL needs no mirrored rules. */
+:root {
+  --font: "Rubik", "Heebo", "Assistant", "Segoe UI", "Arial Hebrew", system-ui, sans-serif;
+  --t-xs: .8125rem; --t-sm: .9375rem; --t-md: 1.0625rem; --t-lg: 1.375rem; --t-xl: clamp(1.9rem, 7vw, 3rem);
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; /* a 4px grid */
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-pill: 999px;
+  /* depth: hairline + soft ambient, never a hard 3D edge */
+  --e-1: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent);
+  --e-2: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent), 0 8px 24px color-mix(in srgb, var(--ink) 7%, transparent);
+  --e-3: 0 2px 6px color-mix(in srgb, var(--ink) 6%, transparent), 0 18px 44px color-mix(in srgb, var(--ink) 12%, transparent);
+  /* the one action colour on a screen (#88); a panel may swap it below */
+  --accent: var(--confidence);
+  --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--card));
+  --surface-2: color-mix(in srgb, var(--ink) 3%, var(--card));
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --ease-pop: cubic-bezier(.34, 1.4, .64, 1);
+  --d-1: .14s; --d-2: .26s; --d-3: .45s;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Header: a quiet label, then one big headline with room to breathe. */
+header { margin-block-end: var(--s-5); }
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+h1 { font-size: var(--t-xl); line-height: 1.1; font-weight: 800; letter-spacing: -.02em; margin-block: var(--s-3) var(--s-2); }
+h2 { font-size: var(--t-lg); line-height: 1.25; font-weight: 800; letter-spacing: -.01em; }
+h3 { line-height: 1.3; font-weight: 700; }
+p { line-height: 1.6; }
+
+/* Panels: the guided lessons are the "focus" sphere, so their action is
+   raspberry; every other screen acts in violet. One accent per screen. */
+#lessons { --accent: var(--focus); --confidence: var(--focus); --purple: var(--focus); }
+
+/* Cards: flat surfaces lifted by a soft shadow and a hairline. */
+.card,
+.who-bar,
+.metro-bar,
+.first-run,
+.rama-card,
+.lesson-card {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+}
+.card {
+  background: var(--card);
+  box-shadow: var(--e-2);
+}
+.who-bar, .metro-bar { box-shadow: var(--e-1); }
+.panel.active { animation: mm-rise var(--d-3) var(--ease) both; }
+@keyframes mm-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Buttons: flat, solid, a gentle press. */
+button, .primary, .mm-contact-links a {
+  border-radius: var(--r-md);
+  font-weight: 700;
+  transition: transform var(--d-1) var(--ease), box-shadow var(--d-2) var(--ease), background-color var(--d-2) var(--ease);
+}
+.primary { background: var(--accent); font-size: var(--t-md); padding-block: var(--s-4); }
+button:active:not(:disabled) { transform: scale(.97); }
+button:disabled { opacity: .5; cursor: default; }
+
+/* Tabs: a segmented control on one tinted track. */
+.tabs { gap: var(--s-2); padding: var(--s-1); border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line); }
+.tab { border: 0; border-radius: var(--r-pill); background: transparent; color: var(--muted); padding-inline: var(--s-4); }
+.tab:hover:not(.active) { color: var(--ink); }
+.tab.active { background: var(--card); color: var(--accent); box-shadow: var(--e-2); }
+
+/* Level picker */
+.level {
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--e-1);
+  transition: transform var(--d-2) var(--ease), border-color var(--d-2) var(--ease), box-shadow var(--d-2) var(--ease);
+}
+.level:hover { transform: translateY(-2px); box-shadow: var(--e-2); }
+.level.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent), var(--e-2);
+}
+
+/* Exercise screen */
+.topline { font-weight: 600; font-size: var(--t-sm); }
+.tag { background: var(--surface-2); color: var(--muted); padding: var(--s-1) var(--s-3); border: 1px solid var(--line); }
+/* A live bar: the fill eases forward and a sheen runs across it. */
+.progress { height: 10px; border-radius: var(--r-pill); }
+.progress span {
+  position: relative;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  transition: width var(--d-3) var(--ease-pop);
+  overflow: hidden;
+}
+.progress span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--card) 45%, transparent), transparent);
+  animation: mm-sheen 2.4s var(--ease) infinite;
+}
+@keyframes mm-sheen {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+.prompt { font-weight: 800; letter-spacing: -.01em; line-height: 1.35; padding: var(--s-5); border-radius: var(--r-lg); background: var(--surface-2); }
+input, select {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+  transition: border-color var(--d-2) var(--ease), box-shadow var(--d-2) var(--ease);
+}
+.answer-row input { font-size: var(--t-lg); font-weight: 700; }
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.choice {
+  border-radius: var(--r-lg);
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--e-1);
+  font-weight: 800;
+}
+.choice:hover:not(:disabled) { border-color: var(--accent); box-shadow: var(--e-2); }
+.choice.picked-good { color: var(--card); border-color: var(--good); animation: mm-pop var(--d-3) var(--ease-pop); }
+.choice.picked-bad { color: var(--card); border-color: var(--bad); animation: mm-shake .35s var(--ease); }
+
+/* Feedback: a correct answer pops in and a ring of light spreads from it. */
+.feedback { border-radius: var(--r-md); font-size: var(--t-md); font-weight: 600; }
+.feedback.good {
+  border: 1px solid color-mix(in srgb, var(--good) 30%, var(--card));
+  animation: mm-pop var(--d-3) var(--ease-pop), mm-ring .9s var(--ease) .1s;
+}
+.feedback.bad {
+  border: 1px solid color-mix(in srgb, var(--bad) 25%, var(--card));
+  animation: mm-shake .35s var(--ease);
+}
+@keyframes mm-pop {
+  0% { transform: scale(.94); opacity: 0; }
+  60% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes mm-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+@keyframes mm-ring {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 35%, transparent); }
+  to { box-shadow: 0 0 0 14px color-mix(in srgb, var(--good) 0%, transparent); }
+}
+
+/* Progress / rewards */
+.stat, .result { border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); }
+.stat strong { color: var(--ink); font-size: 2rem; font-weight: 800; letter-spacing: -.02em; }
+.cert { border-radius: var(--r-lg); background: var(--card); }
+
+/* More-pages cards */
+.navcard {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--e-1);
+  transition: transform var(--d-2) var(--ease), box-shadow var(--d-2) var(--ease), border-color var(--d-2) var(--ease);
+}
+.navcard:hover, .navcard:focus-visible { transform: translateY(-2px); box-shadow: var(--e-3); }
+
+/* Guided lesson: cards and a stepper on the same surface language. */
+.lesson-card {
+  background: var(--card);
+  box-shadow: var(--e-1);
+  transition: transform var(--d-2) var(--ease), box-shadow var(--d-2) var(--ease), border-color var(--d-2) var(--ease);
+}
+.lesson-card:hover, .lesson-card:focus-visible { border-color: var(--accent); box-shadow: var(--e-3); }
+.step-pill { border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); }
+.step-pill.active { background: var(--accent); border-color: var(--accent); color: var(--card); }
+.step-pill.done { background: color-mix(in srgb, var(--good) 10%, var(--card)); border-color: color-mix(in srgb, var(--good) 35%, var(--card)); }
+
+/* Teacher / class dashboard */
+.report-table, .class-board {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+.report-table th {
+  background: color-mix(in srgb, var(--confidence) 8%, var(--card));
+  color: var(--ink);
+  font-weight: 800;
+  padding: 10px 8px;
+}
+.report-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--confidence) 4%, var(--card)); }
+.report-table tbody tr:hover td { background: color-mix(in srgb, var(--yellow) 16%, var(--card)); }
+.report-table td { padding: 10px 8px; }
+.class-timer {
+  display: inline-block;
+  padding: 8px 22px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--confidence) 10%, var(--card));
+}
+.class-kids button { border-radius: 99px; }
+
+/* Tablet and up: more air */
+@media (min-width: 681px) {
+  .wrap { padding-block-start: 36px; }
+  .prompt { padding: 24px 28px; }
+}
+/* Phone: thumb-sized controls, prompt first */
+@media (max-width: 480px) {
+  .card { border-radius: var(--r-md); }
+  .tab, .secondary { padding-inline: 12px; font-size: .95rem; }
+  .choice { min-height: 72px; }
+  .prompt { padding: 14px 16px; }
+}
+
+/* #504: a button's colour says what we want the child to do next (design
+   agent, #88). Accent = go on; green = you earned it, go on; quiet ink =
+   step back. Raspberry only marks where the keyboard is. Still no literals. */
+.primary,
+.answer-row button {
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 30%, transparent), 0 6px 16px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.answer-row button { background: var(--accent); }
+.primary:hover:not(:disabled),
+.answer-row button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+}
+/* «הבא» right after a correct answer turns green: the reward is moving on. */
+.feedback.good:not(.hidden) ~ .primary:not(.hidden) {
+  background: var(--good);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--good) 25%, transparent);
+}
+.feedback:not(.hidden) ~ .primary:not(.hidden) { animation: mm-rise var(--d-2) var(--ease) both; }
+
+/* Stepping back is never the loud choice. Toggles that are on take the accent. */
+.secondary {
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding-inline: var(--s-4);
+}
+.secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.secondary.selected,
+.secondary.primary,
+.secondary[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--confidence);
+}
+
+/* Focus: a raspberry ring with a card-coloured gap, visible on violet too. */
+:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline-color: var(--focus);
+  outline-offset: 3px;
+}
+.primary:focus-visible,
+.tab.active:focus-visible { box-shadow: 0 0 0 3px var(--card), var(--e-2); }
+
+/* Numbers that tick should not make the line jump. */
+.topline,
+.stat strong,
+.class-timer,
+.mm-plan-pace { font-variant-numeric: tabular-nums; }
+
+/* Tags read as small labels, not as buttons. */
+.tag {
+  border-radius: var(--r-pill);
+  font-size: var(--t-xs);
+  font-weight: 600;
+}
+
+/* More-pages cards point the way they open (RTL: forward is ←). */
+.navcard strong::after {
+  content: "←" / "";
+  display: inline-block;
+  margin-inline-start: 6px;
+  transition: transform .18s var(--ease-pop);
+}
+.navcard:hover strong::after,
+.navcard:focus-visible strong::after { transform: translateX(-4px); }
+.navcard:focus-visible { box-shadow: 0 0 0 3px var(--card), 0 0 0 6px var(--focus); }
+
+/* Phone first: the tab row scrolls sideways in one line instead of stacking
+   into three, and the edges fade so the child sees there is more. */
+@media (max-width: 680px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    margin-inline: -18px;
+    padding: 8px 18px 10px;
+    scroll-padding-inline: 18px;
+    -webkit-mask-image: linear-gradient(to left, transparent, var(--ink) 18px, var(--ink) calc(100% - 18px), transparent);
+    mask-image: linear-gradient(to left, transparent, var(--ink) 18px, var(--ink) calc(100% - 18px), transparent);
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; scroll-snap-align: start; }
+  .card { padding: 18px 16px; }
+}
+/* Fingers, not mice: every control at least 48px tall. */
+@media (pointer: coarse) {
+  button, .primary, .tab, .secondary, input, select { min-height: 48px; }
+}
+
+/* index.html's reduced-motion rule uses «*», which does not reach the
+   pseudo-element sheen; stop it and every lift here too. */
+@media (prefers-reduced-motion: reduce) {
+  .progress span::after { animation: none; display: none; }
+  .feedback.good, .feedback.bad, .choice.picked-good, .choice.picked-bad { animation: none; }
+  button:active:not(:disabled), .level:hover, .navcard:hover, .navcard:focus-visible,
+  .navcard:hover strong::after, .navcard:focus-visible strong::after { transform: none; }
+}
+
+@media print {
+  body { background: none; font-family: var(--font); }
+  .progress span::after { display: none; }
+  .report-table, .class-board { border-radius: 0; }
+}

@@ -1,0 +1,54 @@
+/* Palette (#497, calmed in #507). Same three roles: violet = confidence
+   (buttons, links), raspberry = the one focus, sunshine = the week's progress
+   (fills only, never text). Neutral ink and paper so the one accent leads.
+   Every text pair is AA; see docs/DESIGN.md. */
+:root {
+  --ink: #1b1830;
+  --muted: #55526b;
+  --purple: #5b3fd1;
+  --pink: #c2185b;
+  --yellow: #ffc83d;
+  --bg: #f6f6fa;
+  --card: #ffffff;
+  --line: #e5e4ee;
+  --good: #137a43;
+  --bad: #b3261e;
+  --focus: #c2185b;
+  --joy: #ffb020;
+  --confidence: #5b3fd1;
+  --sky: #2b8fd6;
+  --mint: #1fb58f;
+}
+body { background: var(--bg); color: var(--ink); }
+h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+.card { box-shadow: none; }
+.mm-plan {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-inline-start: 4px solid var(--focus);
+  border-radius: var(--r-lg, 16px);
+  box-shadow: var(--e-1, none);
+  padding: 16px 18px;
+  margin: 0 0 16px;
+}
+.mm-plan-kicker { margin: 0; color: var(--focus); font-size: .78rem; font-weight: 800; }
+.mm-plan-topic { margin: 4px 0 6px; font-size: 1.15rem; line-height: 1.35; }
+.mm-plan-adult, .mm-plan-pace, .mm-plan-note { margin: 0 0 6px; color: var(--muted); font-size: .92rem; }
+.mm-plan-why { margin: 4px 0 10px; color: var(--muted); font-size: .9rem; }
+/* A thumb target like every other link on the home panel (44x44, e2e/musicEngine.spec.js). */
+.mm-plan-source { color: var(--confidence); font-size: .85rem; display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+/* The footer links are thumb targets too (44x44, 8px apart). */
+footer a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 4px; margin-block: 4px; }
+.mm-plan-track { height: 8px; background: color-mix(in srgb, var(--confidence) 10%, var(--card)); border-radius: 99px; overflow: hidden; margin: 6px 0 8px; }
+.mm-plan-track > span { display: block; height: 100%; background: var(--confidence); }
+.mm-plan-slot.hidden { display: none; }
+/* The pace meter borrows the plan card. Its accent carries the one status
+   word, so colour and text always say the same thing. */
+.mm-pace { border-inline-start-color: var(--confidence); }
+.mm-pace[data-status="ahead"] { border-inline-start-color: var(--good); }
+.mm-pace[data-status="behind"] { border-inline-start-color: var(--joy); }
+.mm-pace-status { margin: 0 0 6px; font-size: .92rem; }
+.mm-pace-status b { color: var(--confidence); }
+.mm-pace[data-status="ahead"] .mm-pace-status b { color: var(--good); }
+.mm-pace[data-status="behind"] .mm-pace-status b { color: var(--focus); }
+@media print { .mm-plan { break-inside: avoid; } }

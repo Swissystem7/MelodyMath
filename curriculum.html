@@ -29,6 +29,11 @@
   .st-covered{color:#059669;font-weight:700}
   .st-partial{color:#d97706;font-weight:700}
   .st-gap{color:#dc2626;font-weight:700}
+  .pct{display:block;font-size:1.1rem;font-weight:800;color:var(--purple)}
+  .src-q{font-size:.85rem}
+  .cov-table td[class^="st-"],.cov-table th{white-space:nowrap}
+  .src-q a{color:var(--purple);font-weight:700}
+  .unverified{color:#b23a52;font-weight:700}
   .rem-card{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
   .rem-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:.8rem;font-weight:700;background:var(--purple);color:#fff;margin-bottom:8px}
   .rem-badge.mid{background:#3730a3}
@@ -38,10 +43,13 @@
   .rem-box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.92rem}
   .rem-box strong{display:block;color:var(--purple);margin-bottom:6px;font-size:.95rem}
   .rem-box.music-box strong{color:#059669}
-  .sound-btn{margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem}
+  .sound-btn{margin-top:10px;padding:10px 16px;min-height:44px;min-width:44px;border-radius:10px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center}
   .sound-btn:hover{background:#4f46e5}
+  .sound-btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
   .status-sound{margin-top:6px;font-size:.85rem;color:var(--muted);min-height:1.2em}
 </style>
+<link rel="stylesheet" href="src/sefirot.css">
+<link rel="stylesheet" href="src/theme.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
@@ -51,7 +59,7 @@
   <p class="lead">כל שורה היא נושא שהמשרד כותב במסמך. <b>מכוסה</b> = יש פריטים מתויגים בבנק. <b>חלקי</b> = נוגעים בשם, חסר הטווח או המשמעות. <b>לא מכוסה</b> = אין בבנק, וזה גל 2.</p>
   <div class="sum" id="sum"></div>
   <div id="tables"></div>
-  <p class="note">מקור המיפוי: Newprogramgrade1–4.pdf באתר המשרד, נקראו ב־13.8.2026. גאומטריה ומדידה מכוסות בחלקן (ראו בטבלה מה חסר); חקר נתונים — פער, לא «בקרוב» ממותג.</p>
+  <p class="note">מקור המיפוי: <a href="https://pop.education.gov.il/tchumey_daat/matmatika/yesodi/oraat-math/new-curriculum/" target="_blank" rel="noopener">תוכנית הלימודים החדשה במתמטיקה ליסודי — אתר משרד החינוך</a> (Newprogramgrade1–6.pdf). כל ציטוט בעמודה «לפי תוכנית משרד החינוך» נבדק מול קובץ הכיתה ב־21.10.2026; שורה שלא נמצא לה ציטוט מסומנת «לא אומת». האחוז = שורות מכוסות מתוך שורות הכיתה בטבלה, לא מתוך כל תת־סעיף במסמך. גאומטריה ומדידה מכוסות בחלקן (ראו בטבלה מה חסר); חקר נתונים — פער, לא «בקרוב» ממותג.</p>
 
   <section class="grade-block" id="remediation-section" style="border: 2px solid var(--purple); background: #ffffff; margin-top: 36px;">
     <h2 style="color: var(--purple); margin-top: 0;">מוקדי כשל לאומיים (ראמ״ה / מיצ״ב) ומנגנוני תיקון מוזיקליים</h2>
@@ -69,21 +77,35 @@
     <div id="research-cards"></div>
   </section>
 </main>
+<script src="src/lib/curriculum/grade6.js"></script>
+<script src="src/lib/curriculum/grade1.js"></script>
+<script src="src/lib/curriculum/grade4.js"></script>
+<script src="src/lib/curriculum/grade5.js"></script>
+<script src="src/lib/curriculum/grade3.js"></script>
+<script src="src/lib/curriculum/grade2.js"></script>
 <script src="src/lib/curriculum.js"></script>
 <script src="src/lib/remediation.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
+<script src="src/lib/learnerPlanView.js"></script>
 <script>
 (function () {
+  function escapeHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
   const gradeList = grades();
   const sum = document.getElementById('sum');
   const tables = document.getElementById('tables');
   if (sum) {
     sum.innerHTML = gradeList.map(function (g) {
       const s = summaryForGrade(g);
+      const p = coveragePercent(g);
       return '<div class="stat"><strong>כיתה ' + g + '׳</strong>'
-        + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה</div>';
+        + '<span class="pct">' + p.covered + '% מכוסה</span>'
+        + p.partial + '% חלקי · ' + p.gap + '% לא מכוסה<br>'
+        + s.covered + ' מכוסה · ' + s.partial + ' חלקי · ' + s.gap + ' לא מכוסה'
+        + '<br>אומתו מול המקור: ' + p.verified + '/' + p.total + '</div>';
     }).join('');
   }
   if (tables) {
@@ -92,16 +114,21 @@
       const body = rows.map(function (r) {
         return '<tr><td>' + r.strandHe + '</td><td>' + r.topic + '</td>'
           + '<td class="st-' + r.status + '">' + r.statusHe + '</td>'
-          + '<td>' + r.note + '</td></tr>';
+          + '<td>' + r.note + '</td>'
+          + '<td class="src-q">' + (r.verified
+            ? '«' + escapeHtml(r.quote) + '» '
+            : '<span class="unverified">' + UNVERIFIED_HE + '</span> ')
+          + '<a href="' + r.sourceUrl + '" target="_blank" rel="noopener">לתוכנית הרשמית ↗</a></td></tr>';
       }).join('');
       const bank = (typeof coverageByGrade === 'function' ? coverageByGrade()[g] : {}) || {};
       const bankNote = Object.keys(bank).map(function (sk) {
         return bank[sk].he + ': ' + bank[sk].total + ' פריטים';
       }).join(' · ');
-      return '<section class="grade-block"><h2>כיתה ' + g + '׳</h2>'
+      const pc = coveragePercent(g);
+      return '<section class="grade-block"><h2>כיתה ' + g + '׳ · ' + pc.covered + '% מכוסה</h2>'
         + '<p class="note">בבנק עכשיו: ' + (bankNote || 'אין') + '</p>'
         + '<table class="cov-table"><caption class="sr-only">כיסוי כיתה ' + g + '׳</caption>'
-        + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th></tr></thead>'
+        + '<thead><tr><th scope="col">תחום</th><th scope="col">נושא בתוכנית</th><th scope="col">סטטוס</th><th scope="col">הערה</th><th scope="col">לפי תוכנית משרד החינוך</th></tr></thead>'
         + '<tbody>' + body + '</tbody></table></section>';
     }).join('');
   }
@@ -120,8 +147,8 @@
         + '<div class="rem-box music-box"><strong>המנגנון המוזיקלי המתקן:</strong>' + p.musicalMechanism + '</div>'
         + '</div>'
         + '<p class="note" style="margin-top:8px;">סילבוס רשמי: ' + p.syllabusRef + '</p>'
-        + '<button type="button" class="sound-btn" data-action="' + p.exerciseRef + '">השמעת המחשה מוזיקלית</button>'
-        + '<div class="status-sound" id="status-' + p.exerciseRef + '"></div>'
+        + '<button type="button" class="sound-btn" data-action="' + p.exerciseRef + '" aria-label="השמעת המחשה מוזיקלית: ' + escapeHtml(p.topicHe) + '" aria-describedby="status-' + p.exerciseRef + '">השמעת המחשה מוזיקלית</button>'
+        + '<div class="status-sound" id="status-' + p.exerciseRef + '" role="status" aria-live="polite"></div>'
         + '</div>';
     }).join('');
 
@@ -181,6 +208,13 @@
         playTone(440, 0.20, 0.6); // eighth
         playTone(440, 0.20, 0.9); // eighth
         setTimeout(function () { if (status) status.textContent = 'שמינית נשמעת ונמשכת בדיוק חצי מרבע.'; }, 1400);
+      } else if (action === 'metroLoop') {
+        if (status) status.textContent = 'משמיע: לולאת מקצב קבועה לשינון כפולות — 4 פעימות טמפו מדויקות';
+        playTone(330, 0.12, 0, 'triangle');
+        playTone(330, 0.12, 0.35, 'triangle');
+        playTone(330, 0.12, 0.70, 'triangle');
+        playTone(440, 0.22, 1.05, 'sine');
+        setTimeout(function () { if (status) status.textContent = 'הקצב והדפוס השמיעתי מקבעים את סדרת הדילוגים.'; }, 1600);
       } else if (action === 'functionsSlope') {
         if (status) status.textContent = 'משמיע: שיפוע חיובי (צליל נוסק) מול שיפוע שלילי (צליל צונח)';
         playSweep(220, 660, 0.8, 0); // positive slope

@@ -194,17 +194,20 @@
       tensFreq: tensFreq,
       clickCount: clickCount,
       label: label,
+      // The sounds alone, without the number they make: the note shown while
+      // the question is still open (#457).
+      cue: chart100Cue(tens, ones),
       // What a screen reader says for the sound the tap just made.
-      speech: chart100Speech(n, tens, ones, label),
+      speech: n + ': ' + label + '. ' + chart100Cue(tens, ones),
     };
   }
 
-  function chart100Speech(n, tens, ones, label) {
+  function chart100Cue(tens, ones) {
     const parts = [];
     if (tens > 0) parts.push(tens === 1 ? 'צליל נמוך אחד לעשרת' : tens + ' צלילים נמוכים לעשרות');
     if (ones > 0) parts.push(ones === 1 ? 'נקישה אחת ליחידה' : ones + ' נקישות ליחידות');
     if (!parts.length) parts.push('בלי צליל');
-    return n + ': ' + label + '. ' + parts.join(', ') + '.';
+    return parts.join(', ') + '.';
   }
 
   // The tens are a low tone per ten; the ones are short clicks after them, so
@@ -266,6 +269,141 @@
     return 'הדגם הוא ' + challenge.type + '. שמעתם: ' + heard + '. מה בא אחר כך?';
   }
 
+  // ---------- widgets (slice 2 of #102 / #328) ----------
+  function doc() {
+    return typeof document === 'undefined' ? null : document;
+  }
+
+  function isQuiet() {
+    const load = typeof loadAccess === 'function' ? loadAccess : null;
+    if (!load) return false;
+    try { return !!load().quiet; } catch (e) { return false; }
+  }
+
+  function playIfAllowed(events) {
+    if (isQuiet()) return null;
+    return playEvents(events);
+  }
+
+  function node(tag, cls, text) {
+    const el = doc().createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  function padRow(box) {
+    const row = node('div', 'g3-row');
+    row.dir = 'ltr';
+    box.appendChild(row);
+    return row;
+  }
+
+  function pads(count, cls) {
+    const group = node('span', 'g3-bar');
+    for (let i = 0; i < Math.max(0, count); i++) group.appendChild(node('i', cls));
+    return group;
+  }
+
+  function addPlay(box, label, makeEvents) {
+    const b = node('button', 'g3-play', label);
+    b.type = 'button';
+    b.addEventListener('click', function () { playIfAllowed(makeEvents()); });
+    box.appendChild(b);
+    return b;
+  }
+
+  // `pending` is on screen while the question is open; `full` may name the
+  // answer, so it waits in data-reveal until revealWidget (index.html) runs
+  // after the child answers.
+  function addNote(box, pending, full) {
+    const p = node('p', 'g3-note', pending);
+    if (full && full !== pending) p.setAttribute('data-reveal', full);
+    box.appendChild(p);
+  }
+
+  function drawBeats(box, spec) {
+    const track = metronomeBeats(spec.from, spec.step, spec.accents);
+    if (!track) return;
+    const row = padRow(box);
+    const group = node('span', 'g3-bar');
+    track.beats.forEach(function (b) {
+      group.appendChild(node('i', b.accented ? 'on' : ''));
+    });
+    row.appendChild(group);
+    addPlay(box, '▶ השמע שוב', function () {
+      return metronomeEvents(spec.from, spec.step, spec.accents, spec.bpm);
+    });
+    box.appendChild(node('p', 'g3-note', metronomeNarration(spec.from, spec.step, spec.accents)));
+  }
+
+  function drawScale(box, spec) {
+    if (spec.from == null || spec.to == null) return;
+    const jump = numberLineScaleJump(spec.from, spec.to, spec.baseFreq);
+    if (!jump || !Number.isFinite(jump.frequency) || jump.jump === 0) return;
+    const row = padRow(box);
+    row.appendChild(pads(Math.min(20, Math.abs(jump.jump)), jump.isOctave ? 'on' : 'left'));
+    addPlay(box, '▶ השמע שוב', function () {
+      return scaleJumpEvents(spec.from, spec.to, spec.baseFreq, spec.bpm);
+    });
+    box.appendChild(node('p', 'g3-note', scaleJumpNarration(spec.from, spec.to, spec.baseFreq)));
+  }
+
+  function drawChart100(box, spec) {
+    const num = whole(spec.number, 1, 100);
+    if (num == null) return;
+    const s = chart100Sound(num, spec.baseTensFreq);
+    const row = padRow(box);
+    if (s.tens > 0) row.appendChild(pads(s.tens, 'on'));
+    if (s.ones > 0) row.appendChild(pads(s.ones, 'left'));
+    addPlay(box, '▶ השמע שוב', function () {
+      return chart100Events(num, spec.baseTensFreq, spec.bpm);
+    });
+    addNote(box, s.cue, s.speech);
+  }
+
+  function drawPattern(box, spec) {
+    if (!spec.type || !PATTERN_TYPES[spec.type]) return;
+    const challenge = createPatternChallenge(spec.type, spec.length);
+    if (!challenge.sequence.length) return;
+    const row = padRow(box);
+    const group = node('span', 'g3-bar');
+    challenge.sequence.forEach(function (sh) {
+      group.appendChild(node('span', 'g1-shape', sh.icon + ' ' + sh.name));
+    });
+    row.appendChild(group);
+    addPlay(box, '▶ השמע שוב', function () {
+      return patternEvents(spec.type, spec.length, spec.bpm);
+    });
+    box.appendChild(node('p', 'g3-note', patternNarration(spec.type, spec.length)));
+  }
+
+  const DRAW = {
+    beats: drawBeats,
+    scale: drawScale,
+    chart100: drawChart100,
+    pattern: drawPattern,
+  };
+
+  function bindGrade1(host, spec) {
+    if (!doc() || !host || !spec || !DRAW[spec.kind]) return false;
+    host.textContent = '';
+    const box = node('div', 'g3');
+    DRAW[spec.kind](box, spec);
+    if (!box.children.length) return false;
+    host.appendChild(box);
+    const row = box.querySelector('.g3-row');
+    if (row) row.setAttribute('aria-hidden', 'true');
+    const note = box.querySelector('.g3-note');
+    if (note) {
+      const sr = box.insertBefore(node('p', 'sr-only', note.textContent), box.firstChild);
+      const full = note.getAttribute && note.getAttribute('data-reveal');
+      if (full) sr.setAttribute('data-reveal', full);
+      note.setAttribute('aria-hidden', 'true');
+    }
+    return true;
+  }
+
   return {
     PATTERN_SHAPES: PATTERN_SHAPES,
     PATTERN_TYPES: PATTERN_TYPES,
@@ -284,6 +422,7 @@
     createPatternChallenge: createPatternChallenge,
     patternEvents: patternEvents,
     patternNarration: patternNarration,
-    playEvents: playEvents
+    playEvents: playEvents,
+    bindGrade1: bindGrade1
   };
 });

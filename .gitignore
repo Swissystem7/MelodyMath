@@ -11,3 +11,4 @@ Thumbs.db
 dist/
 build/
 *.apk
+test-results/

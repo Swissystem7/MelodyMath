@@ -40,13 +40,19 @@ test('mixed-number items reach grade ה׳ practice and nothing else', () => {
 test('the new items are appended, so every older item keeps its id', () => {
   // ids are RAW indexes. Inserting mid-bank would renumber everything after
   // the insertion point and orphan the rows a teacher report already holds.
+  // A later append may sit after the percent-meaning items; it must not sit
+  // inside the block that starts at the mixed numbers.
   const index = (it) => Number(it.id.split('-').pop());
-  const newest = banks.allItems().filter((it) => it.standard === banks.ST.FRAC_MIXED
-    || (it.skill === 'percent' && String(it.prompt).includes('אחוז אחד הוא איזה חלק')));
-  const firstNew = Math.min(...newest.map(index));
-  banks.allItems()
-    .filter((it) => it.standard !== banks.ST.FRAC_MIXED && it.skill !== 'percent')
-    .forEach((it) => assert.ok(index(it) < firstNew, it.id + ' was renumbered'));
+  const mixed = banks.allItems().filter((it) => it.standard === banks.ST.FRAC_MIXED);
+  const firstMixed = Math.min(...mixed.map(index));
+  const meaning = banks.allItems().filter((it) => it.skill === 'percent' && String(it.prompt).includes('אחוז אחד הוא איזה חלק'));
+  const lastMeaning = Math.max(...meaning.map(index));
+  banks.allItems().forEach((it) => {
+    const n = index(it);
+    if (n > lastMeaning) return;
+    if (it.standard === banks.ST.FRAC_MIXED || meaning.indexOf(it) !== -1) return;
+    assert.ok(n < firstMixed, it.id + ' was renumbered');
+  });
 });
 
 test('parseMixedNumber reads the textbook form and refuses a bare fraction', () => {

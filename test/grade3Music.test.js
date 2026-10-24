@@ -285,7 +285,9 @@ test('the rendered sequencer grid keeps 44px cells and a screen-reader line', ()
     });
     assert.equal(dom.all(box, 'sr-only').length, 1);
     assert.equal(box.firstChild.className, 'sr-only');
-    assert.match(box.firstChild.textContent, /32 תאים/);
+    // The total is the answer, so it waits in data-reveal until feedback (#457).
+    assert.doesNotMatch(box.firstChild.textContent, /32/);
+    assert.match(box.firstChild.getAttribute('data-reveal'), /32 תאים/);
     assert.equal(dom.all(box, 'g3-note')[0].getAttribute('aria-hidden'), 'true');
     assert.equal(dom.all(box, 'g3-play').length, 1, 'a visible play-again button');
   } finally {
@@ -301,7 +303,8 @@ test('the meter, remainder and pair widgets render without a real browser', () =
     g3.bindGrade3(meter, { kind: 'meter', table: 3, bars: 4 });
     assert.equal(dom.all(meter, 'g3-bar').length, 4, 'one group per bar');
     assert.equal(dom.all(meter, 'on').length, 4, 'one accent per multiple of 3');
-    assert.deepEqual(dom.all(meter, 'on').map((p) => p.textContent), ['3', '6', '9', '12']);
+    assert.deepEqual(dom.all(meter, 'on').map((p) => p.textContent), ['3', '6', '9', '']);
+    assert.equal(dom.all(meter, 'on')[3].getAttribute('data-reveal'), '12');
     // The pads picture the sr-only line, so a reader does not hear it twice.
     assert.equal(dom.all(meter, 'g3-row')[0].getAttribute('aria-hidden'), 'true');
 
@@ -407,4 +410,18 @@ test('index.html draws the grade-ג widget, checks remainders and unlocks audio'
   const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   assert.ok(sw.includes("'./src/lib/grade3Music.js'"));
   assert.ok(sw.includes("'./src/lib/musicEngine.js'"));
+});
+
+// #458: the diagnostic samples tables the practice gate still keeps closed, so
+// the start-card note must say the gate is about personal practice only.
+test('the gate note states its scope, since the diagnostic samples locked tables', () => {
+  const diag = banks.diagnosticItems('ג');
+  assert.ok(diag.some((it) => mastery.isBlockedItem(it)), 'diagnostic no longer samples gated tables — reword the note');
+  // Grade ב shows the same gate note but its diagnostic stays on open tables,
+  // so the diagnostic sentence is toggled from the data rather than per grade.
+  assert.ok(!banks.diagnosticItems('ב').some((it) => mastery.isBlockedItem(it)));
+  const note = (indexHtml.match(/<div id="gateNote"[^>]*>(.*?)<\/div>/) || [])[1] || '';
+  assert.match(note, /^בתרגול האישי/);
+  assert.match(note, /<span id="gateNoteDiag" class="hidden"> האבחון[^.]*לוחות שעוד לא נפתחו/);
+  assert.ok(indexHtml.includes('diagnosticItems(selectedGrade).some(isBlockedItem)'));
 });

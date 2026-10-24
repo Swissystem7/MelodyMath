@@ -24,17 +24,18 @@
   .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;}
   .brand{font-weight:800;font-size:1.15rem;display:flex;align-items:center;gap:8px;}
   .brand span{font-size:1.35rem;}
-  .nav a.cta{background:var(--green);color:#fff;padding:9px 16px;border-radius:11px;text-decoration:none;font-weight:800;font-size:.92rem;}
-  .nav a.cta:hover{background:var(--green-d);}
+  .nav a.cta{background:var(--green);color:#fff;padding:10px 18px;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;text-decoration:none;font-weight:800;font-size:.92rem;}
+  .nav a.cta:hover:not(:disabled){background:var(--green-d);}
 
   .hero{background:linear-gradient(180deg,var(--soft),#fff);padding:64px 0 52px;}
   .hero h1{font-size:2.5rem;}
   .hero p.lead{font-size:1.22rem;color:var(--muted);max-width:44ch;margin:0 0 26px;}
   .hero .who{display:inline-block;background:#e6f6ef;color:var(--green-d);font-weight:800;font-size:.85rem;padding:6px 13px;border-radius:99px;margin-bottom:18px;}
   .btns{display:flex;gap:12px;flex-wrap:wrap;}
-  .btn{display:inline-block;padding:13px 22px;border-radius:13px;font-weight:800;text-decoration:none;font-size:1rem;}
-  .btn.primary{background:var(--green);color:#fff;} .btn.primary:hover{background:var(--green-d);}
-  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);} .btn.ghost:hover{border-color:var(--green);}
+  button,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:12px 22px;border:0;border-radius:13px;font:inherit;font-weight:800;text-decoration:none;font-size:1rem;cursor:pointer;}
+  .btn.primary{background:var(--green);color:#fff;} .btn.primary:hover:not(:disabled){background:var(--green-d);}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);} .btn.ghost:hover:not(:disabled){border-color:var(--green);}
+  button:disabled,.btn:disabled{opacity:.5;cursor:not-allowed;}
 
   section{padding:52px 0;border-top:1px solid var(--line);}
   h2{font-size:1.7rem;} .sub{color:var(--muted);max-width:56ch;margin:0 0 30px;}
@@ -64,6 +65,8 @@
   .mm-contact-links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px}
   .contact p.mm-contact-note{font-size:.92rem;margin:12px auto 0}
   footer{padding:30px 0 46px;color:var(--muted);font-size:.86rem;text-align:center;border-top:1px solid var(--line);}
+  footer a{color:var(--green-d);font-weight:700;text-decoration:none;margin:0 4px;}
+  footer a:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
   @media (max-width:720px){
     .hero h1{font-size:2rem;} .grid{grid-template-columns:1fr;} .why .grid2{grid-template-columns:1fr;gap:20px;} .align,.two-products{grid-template-columns:1fr;}
   }
@@ -73,6 +76,7 @@
   a:focus-visible,.btn:focus-visible,.nav a.cta:focus-visible,.mm-skip:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{animation:none!important;transition:none!important}}
 </style>
+<link rel="stylesheet" href="src/sefirot.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
@@ -125,7 +129,7 @@
       <div class="box"><div class="g">כיתה א׳</div><h3>מנייה · חיבור/חיסור · ישר</h3><p>ספירה עד 100, אחורה, דילוגי 2 מ־50 ודילוגי 5, קיבוץ ל־10, פירוקי 10, = משמאל, שלושה מחוברים, עשרות שלמות, וישר מספרים.</p></div>
       <div class="box"><div class="g">כיתות ב׳–ג׳</div><h3>כפל עם שער · חילוק</h3><p>ב׳: 2/4/5/10 וחילוק לחלקים ולהכלה. 3/6/7/8/9 נפתחים רק אחרי שליטה בליבה — זה מה שהתוכנית דורשת.</p></div>
       <div class="box"><div class="g">כיתה ד׳</div><h3>שבר מול תיבה 4/4</h3><p>רק 1/2, 1/4, 1/8 כחלק משלם מול תיבה מוזיקלית. תשובה כמו «חצי מ־8 = 4» אינה שבר ואינה בבנק.</p></div>
-      <div class="box"><div class="g">מוצר נפרד · ז׳–י״ב</div><h3>🎧 סוניפיקציה</h3><p>גרפים שנשמעים, ו־807 לגדילה ודעיכה. לא חלק מהתרגול היסודי. <a href="functions.html">לגרפים »</a></p></div>
+      <div class="box"><div class="g">מוצר נפרד · ז׳–י״ב</div><h3>🎧 סוניפיקציה</h3><p>גרפים שנשמעים, ו־807 לגדילה ודעיכה. לא חלק מהתרגול היסודי. <a href="functions.html">לגרפים »</a> · <a href="807.html">ל־807 »</a></p></div>
     </div>
   </div></section>
 
@@ -150,7 +154,7 @@
   </div></section>
   </main>
 
-  <footer><div class="wrap">MelodyMath · שני מוצרים בעברית · Swissystem7 · <a href="./">תרגול יסודי</a> · <a href="curriculum.html">כיסוי</a> · <a href="functions.html">סוניפיקציה</a></div></footer>
+  <footer><div class="wrap">MelodyMath · שני מוצרים בעברית · Swissystem7 · <a href="./">תרגול יסודי</a> · <a href="curriculum.html">כיסוי תוכנית</a> · <a href="functions.html">שומעים פונקציה</a> · <a href="807.html">שאלון 807</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="privacy.html">פרטיות</a></div></footer>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/contact.js"></script>
 <script src="src/lib/core.js"></script>

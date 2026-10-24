@@ -30,6 +30,20 @@
     return label;
   }
 
+  // A roster row may carry the grade the teacher picked for that child. The
+  // class picture needs it per child, because one tablet is shared by a
+  // מחנכת שילוב whose group spans grades — the grade showing on screen is not
+  // every child's grade. Anything that is not א׳–ו׳ stays unknown, never a
+  // guess: a wrong grade would build a plan from the wrong topic path.
+  function gradeLabel(value) {
+    const first = String(value == null ? '' : value).trim().slice(0, 1);
+    return ['א', 'ב', 'ג', 'ד', 'ה', 'ו'].indexOf(first) >= 0 ? first : '';
+  }
+
+  function studentGrade(student) {
+    return gradeLabel(student && student.grade);
+  }
+
   function ownStudent(roster, label) {
     const students = roster && roster.students;
     if (!students || !label || !Object.prototype.hasOwnProperty.call(students, label)) return null;
@@ -111,8 +125,24 @@
       return a.localeCompare(b, 'he');
     }).map(function (name) {
       const student = roster.students[name];
-      return { name: student.name, created: student.created };
+      return { name: student.name, created: student.created, grade: studentGrade(student) };
     });
+  }
+
+  // Returns the grade now on the row: '' when the teacher cleared it (the class
+  // picture then falls back to the tablet's grade), or null when nothing was
+  // written — no such student, or a value that is not א׳–ו׳.
+  function setStudentGrade(classCode, name, grade, storage) {
+    const raw = String(grade == null ? '' : grade).trim();
+    const g = gradeLabel(raw);
+    if (raw && !g) return null;
+    const roster = loadRoster(classCode, storage);
+    const student = ownStudent(roster, studentLabel(name));
+    if (!student) return null;
+    if (g) student.grade = g;
+    else delete student.grade;
+    saveRoster(classCode, roster, storage);
+    return g;
   }
 
   // A hand-edited or partially imported roster may carry a student row with
@@ -451,6 +481,7 @@
       const last = latestSession(sessions);
       return {
         name: name,
+        grade: studentGrade(student),
         total: report.total,
         totalPractices: report.total,
         correct: report.correct,
@@ -532,7 +563,16 @@
     const observation = String(o.observation || '').replace(/\s+/g, ' ').trim().slice(0, 280);
     const lastNotes = listNotes(student);
     const lastNote = lastNotes.length ? lastNotes[lastNotes.length - 1].text : '';
-    return {
+    // The one topic from buildLearnerPlan, when the caller has it. Older callers
+    // pass no plan and get the same note (and the same HTML) as before.
+    const plan = o.plan && o.plan.ok !== false && o.plan.topic ? {
+      planTopic: String(o.plan.topic),
+      planHook: String(o.plan.hook || ''),
+      paceDone: Number(o.plan.paceDone) || 0,
+      paceExpected: Number(o.plan.paceExpected) || 0,
+      homeTip: homeTipFor(o.plan.topic),
+    } : null;
+    return Object.assign({
       title: 'מכתב קצר להורה — MelodyMath',
       name: name,
       classCode: classCode,
@@ -542,7 +582,17 @@
       repeatingErrors: report.repeatingErrors,
       observation: observation || lastNote,
       disclaimer: 'המספרים הם ספירה של תשובות במכשיר הזה — לא ציון, לא אבחון, ולא הוכחה שהתרגול עוזר. MelodyMath הוא דף דפדפן בלי שרת. אין כאן טיפול ואין טענת יעילות.',
-    };
+    }, plan);
+  }
+
+  // A 5-minute thing to do at home, picked by a fragment of the plan topic.
+  // «כפל וחילוק שברים» is fractions, not the times table, so it gets the default.
+  function homeTipFor(topic) {
+    const t = String(topic || '');
+    if (/ספירה|מנייה/.test(t)) return 'ספרו יחד 10 פעימות בכפיים, ואז הלאה מ-10';
+    if (/כפל/.test(t) && !/שבר/.test(t)) return 'אמרו את הכפולות של 5 עם מחיאת כף';
+    if (/חיסור/.test(t)) return 'פרטו שטר של 10 למטבעות';
+    return '5 דקות תרגול במכשיר, בלי לחץ';
   }
 
   function buildCertificate(student, extras) {
@@ -597,6 +647,10 @@
       + '. זה דף סיכום להורה, לא מבחן.</p>'
       + '<p><b>במכשיר:</b> ' + n.correct + ' נכונות מתוך ' + n.total + '.</p>'
       + (skills ? '<p><b>לפי מיומנות</b></p><ul class="err-list">' + skills + '</ul>' : '')
+      + (n.planTopic ? '<section class="parent-plan"><h3>על מה ' + escapeHtml(n.name || 'הילד/ה') + ' עובד/ת עכשיו</h3>'
+        + '<p>' + escapeHtml(n.planTopic) + (n.planHook ? ' — <span class="parent-plan-hook">' + escapeHtml(n.planHook) + '</span>' : '')
+        + '. ' + n.paceDone + ' מתוך ' + n.paceExpected + ' מפגשים השבוע.</p>'
+        + '<p><b>5 דקות בבית:</b> ' + escapeHtml(n.homeTip) + '</p></section>' : '')
       + '<p><b>תרגילים שחזרו כשגיאה</b></p>'
       + (errs ? '<ul class="err-list">' + errs + '</ul>' : '<p>אין תרגיל שנפסל פעמיים או יותר במדגם הזה.</p>')
       + (n.observation ? '<p><b>הערת המורה:</b> ' + escapeHtml(n.observation) + '</p>' : '')
@@ -648,6 +702,7 @@
         roster.students[name] = {
           name: name,
           created: incoming.created || Date.now(),
+          grade: gradeLabel(incoming.grade),
           sessions: sessions,
           assignments: incomingAssignments,
           notes: incomingNotes,
@@ -656,6 +711,12 @@
         notes += incomingNotes.length;
         assignments += incomingAssignments.length;
         return;
+      }
+      // A grade set on this tablet wins: the teacher typed it here, and the
+      // other tablet's export may be weeks old. An unset grade is filled in.
+      if (!studentGrade(roster.students[name])) {
+        const incomingGrade = gradeLabel(incoming.grade);
+        if (incomingGrade) roster.students[name].grade = incomingGrade;
       }
       const have = {};
       ensureSessions(roster.students[name]);
@@ -813,7 +874,7 @@
 
   return {
     PREFIX, WHO_KEY,
-    normalizeCode, studentLabel, storageKey, emptyRoster,
+    normalizeCode, studentLabel, gradeLabel, studentGrade, setStudentGrade, storageKey, emptyRoster,
     loadRoster, saveRoster, listStudents, listClassStudents, upsertStudent, getStudent,
     assignTask, listAssignments, listStudentProgress, listClassStudentsProgress,
     startSession, addItem, endSession, buildReport, allItems,

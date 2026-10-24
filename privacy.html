@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · פרטיות ונתוני ילדים</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<meta name="description" content="מה MelodyMath שומר על תלמידים, איפה, ואיך מוחקים. בלי שרת, בלי חשבון, בלי מעקב.">
+<style>
+  :root{--ink:#132a26;--muted:#5a726b;--line:#e4ede9;--soft:#f4f9f6;--green-d:#0a7d57;--teal:#0f766e;
+    --sans:"Assistant","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);color:var(--ink);background:#fff;line-height:1.7}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  a{color:var(--green-d)}
+  a:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+  header{background:linear-gradient(180deg,var(--soft),#fff);padding:32px 0 20px}
+  h1{font-size:clamp(1.6rem,4vw,2.1rem);margin:0 0 .3em}
+  h2{font-size:1.15rem;margin:0 0 .4em}
+  section{padding:22px 0;border-top:1px solid var(--line)}
+  code{background:var(--soft);padding:1px 6px;border-radius:6px}
+  .lead{color:var(--muted);font-size:1.05rem}
+  footer{padding:24px 0 40px;color:var(--muted);font-size:.86rem;text-align:center;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>פרטיות ונתוני ילדים</h1>
+  <p class="lead">MelodyMath משמש ילדים. לכן הכלל פשוט: <b>שום דבר על הילד לא יוצא מהמכשיר</b> בלי שמבוגר מוציא אותו ביד.</p>
+</div></header>
+<main class="wrap">
+<section id="what">
+  <h2>מה נשמר</h2>
+  <ul>
+    <li>קוד כיתה ושם או כינוי שהמורה הקלידה. אפשר וכדאי להשתמש בקוד («ילד 3») ולא בשם מלא.</li>
+    <li>לכל תרגיל: השאלה, התשובה שנבחרה, נכון/לא נכון והשעה.</li>
+    <li>הערות מורה ומשימות, אם המורה כתבה.</li>
+    <li>הגדרות: כיתה נבחרת, נגישות, קצב.</li>
+  </ul>
+  <p>לא נשמרים: ת״ז, כתובת, טלפון, דוא״ל של הילד, מיקום, תמונה או קול. המיקרופון לא בשימוש.</p>
+</section>
+<section id="where">
+  <h2>איפה זה נשמר</h2>
+  <p>רק ב־<code>localStorage</code> של הדפדפן במכשיר הזה. <b>אין שרת, אין חשבון, אין עוגיות מעקב, ואין אנליטיקה.</b> הדפים לא טוענים קוד מאתר אחר. אותו קוד כיתה בטאבלט אחר לא רואה את הנתונים.</p>
+  <p>כמה ילדים על אותו טאבלט: לכל ילד שורה נפרדת לפי קוד כיתה + שם. מעבר בין ילדים בלחיצה על השם לא מעביר תשובות מילד לילד.</p>
+</section>
+<section id="out">
+  <h2>מתי משהו יוצא מהמכשיר</h2>
+  <ul>
+    <li><b>ייצוא גיבוי JSON</b> — קובץ שהמורה מורידה לבד. הוא מכיל את נתוני הכיתה: שמרו אותו בתיקייה של בית הספר ואל תשלחו אותו לגורם שלא צריך אותו.</li>
+    <li><b>הדפסה</b> של דוח, מכתב להורה או תעודה.</li>
+    <li><b>טופס פנייה לפרויקט</b> — טופס חיצוני שמבוגר ממלא. אל תכתבו בו שמות של ילדים.</li>
+  </ul>
+</section>
+<section id="delete">
+  <h2>איך מוחקים</h2>
+  <p>בדפדפן: הגדרות ← פרטיות ← נתוני אתר ← מחיקת הנתונים של האתר הזה. זה מוחק את כל הכיתות במכשיר. גיבוי JSON שהורד נמחק כמו כל קובץ אחר.</p>
+  <p>בסוף ניסוי של 4 שבועות — מחקו את נתוני האתר בטאבלטים של בית הספר.</p>
+</section>
+<section id="parents">
+  <h2>להורים ולמנהל/ת</h2>
+  <p>זה דמו פתוח, לא מערכת בית ספרית ולא רשומה רשמית. המספרים הם ספירה במכשיר, לא ציון ולא אבחון. כדאי לקבל אישור הורים לפי נוהלי בית הספר לפני שימוש עם שמות אמיתיים. שאלה? <a href="offer.html">דף הניסוי</a> מוביל לערוץ הפנייה.</p>
+</section>
+</main>
+<footer><div class="wrap">MelodyMath · פרטיות · <a href="./">תרגול יסודי</a> · <a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a></div></footer>
+</body>
+</html>

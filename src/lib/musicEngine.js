@@ -329,6 +329,232 @@
     return out;
   }
 
+  // ---------- instant tap voices (#591 goal A) ----------
+  // Every voice is synthesised, so there is no file to fetch, decode or
+  // license, and a tap starts sounding on the very next audio quantum. Each
+  // part is {at, dur, hz, gain, type}; `noise` parts use the white-noise buffer
+  // built once while the context is unlocked.
+  const PENTA = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+  const TAP_VOICES = {
+    kick: [{ at: 0, dur: 0.14, hz: 82, gain: 0.3, type: 'sine', drop: 45 }],
+    snare: [{ at: 0, dur: 0.08, hz: 280, gain: 0.16, type: 'triangle' }, { at: 0, dur: 0.09, noise: true, gain: 0.12 }],
+    hihat: [{ at: 0, dur: 0.035, noise: true, gain: 0.08 }],
+    clap: [{ at: 0, dur: 0.03, noise: true, gain: 0.14 }, { at: 0.015, dur: 0.05, noise: true, gain: 0.1 }],
+    drum: [{ at: 0, dur: 0.16, hz: 120, gain: 0.26, type: 'sine', drop: 70 }, { at: 0, dur: 0.04, noise: true, gain: 0.06 }],
+    xylo: [{ at: 0, dur: 0.32, hz: 0, gain: 0.24, type: 'sine' }, { at: 0, dur: 0.12, hz: 0, mul: 2.76, gain: 0.07, type: 'sine' }],
+    bell: [{ at: 0, dur: 0.6, hz: 0, gain: 0.18, type: 'sine' }, { at: 0, dur: 0.4, hz: 0, mul: 2.4, gain: 0.06, type: 'sine' }],
+    // Feedback: a soft rising third for right, a soft falling step for wrong.
+    // Neither is loud or harsh: a wrong answer is information, not a buzzer.
+    correct: [{ at: 0, dur: 0.14, hz: 523.25, gain: 0.16, type: 'triangle' }, { at: 0.1, dur: 0.22, hz: 659.25, gain: 0.16, type: 'triangle' }],
+    wrong: [{ at: 0, dur: 0.16, hz: 329.63, gain: 0.1, type: 'sine' }, { at: 0.13, dur: 0.24, hz: 293.66, gain: 0.08, type: 'sine' }],
+  };
+
+  // The parts a voice plays. `step` picks the pitch of a pitched voice (xylo,
+  // bell) on a C pentatonic ladder, so any two bars sound well together.
+  // An explicit `hz` (a xylophone bar that already has its own pitch) wins.
+  function tapPlan(voice, step, hz) {
+    const parts = TAP_VOICES[voice];
+    if (!parts) return [];
+    const s = Math.max(0, Math.min(PENTA.length - 1, Math.round(Number(step) || 0)));
+    const base = positive(hz) ? clampHz(hz) : PENTA[s];
+    return parts.map(function (p) {
+      const out = Object.assign({}, p);
+      if (!p.noise && !p.hz) out.hz = base * (p.mul || 1);
+      delete out.mul;
+      out.gain = clampGain(p.gain);
+      return out;
+    });
+  }
+
+  function nowMs() {
+    return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+  }
+
+  // window.audioState(): 'idle' before any context exists, then the context's
+  // own state. Its properties are what the e2e latency test reads:
+  // lastStart = performance.now() when the last tap sound was started,
+  // lastEventTime = the timeStamp of the pointerdown that asked for it.
+  function audioState() {
+    return audioCtx ? audioCtx.state : 'idle';
+  }
+  audioState.lastStart = null;
+  audioState.lastEventTime = null;
+  audioState.lastVoice = null;
+  audioState.taps = 0;
+  audioState.muted = false;
+
+  function setMuted(on) {
+    audioState.muted = !!on;
+    if (on) stopSequence();
+    return audioState.muted;
+  }
+
+  let noiseBuffer = null;
+  function getNoise(ac) {
+    if (noiseBuffer) return noiseBuffer;
+    try {
+      const len = Math.floor((ac.sampleRate || 44100) * 0.2);
+      noiseBuffer = ac.createBuffer(1, len, ac.sampleRate || 44100);
+      const data = noiseBuffer.getChannelData ? noiseBuffer.getChannelData(0) : null;
+      for (let i = 0; data && i < len; i++) data[i] = Math.random() * 2 - 1;
+    } catch (e) { noiseBuffer = null; }
+    return noiseBuffer;
+  }
+
+  // Plays a voice now: no lookahead and no setTimeout, so the sound starts on
+  // the next audio quantum after the pointerdown that asked for it.
+  function playTap(voice, opts) {
+    const o = opts || {};
+    const parts = tapPlan(voice, o.step, o.hz);
+    if (!parts.length || audioState.muted) return null;
+    const ac = getSharedAudioContext();
+    if (!ac) return null;
+    if (ac.state === 'suspended') { try { ac.resume(); } catch (e) { /* autoplay policy */ } }
+    const t0 = ac.currentTime;
+    parts.forEach(function (p) {
+      const t = t0 + p.at;
+      const g = ac.createGain();
+      let src;
+      if (p.noise) {
+        src = ac.createBufferSource();
+        src.buffer = getNoise(ac);
+      } else {
+        src = ac.createOscillator();
+        src.type = p.type || 'sine';
+        src.frequency.setValueAtTime(p.hz, t);
+        if (p.drop) src.frequency.exponentialRampToValueAtTime(p.drop, t + p.dur);
+      }
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(p.gain, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + p.dur);
+      src.connect(g).connect(ac.destination);
+      src.start(t);
+      src.stop(t + p.dur + 0.02);
+    });
+    audioState.lastStart = nowMs();
+    audioState.lastEventTime = typeof o.eventTime === 'number' ? o.eventTime : audioState.lastStart;
+    audioState.lastVoice = voice;
+    audioState.taps += 1;
+    return { startTime: t0, parts: parts.length };
+  }
+
+  // ---------- tap feedback (#591 goal A.2) ----------
+  // Any element with data-tap="<voice>" (plus data-hz or data-step) sounds on
+  // pointerdown, gets the .mm-tap press/bounce/glow and a 10 ms buzz where the
+  // device supports it. pointerdown fires once per finger, so chords and
+  // two-hand play work. The CSS turns the bounce into a still glow under
+  // prefers-reduced-motion.
+  function tapFeedback(el, ev) {
+    if (!el || typeof el.getAttribute !== 'function') return null;
+    const voice = el.getAttribute('data-tap');
+    if (!voice || el.disabled) return null;
+    const r = playTap(voice, {
+      step: Number(el.getAttribute('data-step')) || 0,
+      hz: Number(el.getAttribute('data-hz')) || null,
+      eventTime: ev && typeof ev.timeStamp === 'number' && ev.timeStamp > 0 ? ev.timeStamp : undefined,
+    });
+    if (el.classList) {
+      el.classList.remove('mm-tap');
+      void el.offsetWidth; // restart the animation on a quick second tap
+      el.classList.add('mm-tap');
+      setTimeout(function () { el.classList.remove('mm-tap'); }, 220);
+    }
+    const nav = typeof navigator !== 'undefined' ? navigator : null;
+    if (nav && typeof nav.vibrate === 'function') { try { nav.vibrate(10); } catch (e) { /* not allowed */ } }
+    return r;
+  }
+
+  function tapTargetOf(ev) {
+    const t = ev && ev.target;
+    return t && typeof t.closest === 'function' ? t.closest('[data-tap]') : null;
+  }
+
+  function installTapFeedback(target) {
+    const t = target || (typeof document !== 'undefined' ? document : null);
+    if (!t || typeof t.addEventListener !== 'function') return false;
+    // Capture phase: the sound starts before any game logic on the element.
+    t.addEventListener('pointerdown', function (e) { tapFeedback(tapTargetOf(e), e); }, { capture: true, passive: true });
+    // Enter/Space on a focused element fires a click with detail 0 and no
+    // pointerdown: keyboard players hear the same sound.
+    t.addEventListener('click', function (e) { if (e.detail === 0) tapFeedback(tapTargetOf(e), e); });
+    return true;
+  }
+
+  // ---------- free play in every exercise (#591 goal A.3) ----------
+  // A small instrument strip under each exercise. The child may play it
+  // freely before answering, with as many fingers as they like: it never
+  // scores. Each key is a [data-tap] element, so installTapFeedback gives it
+  // the instant sound, glow and buzz. The timbre follows the item's one
+  // musical way (dosage rule 4): steady beats ring on bells, accented groups
+  // on drums, note lengths on a drum and hi-hat, patterns on xylophone bars.
+  // Weak or unmapped ways get the neutral xylophone: a timbre, never a method.
+  const NOTE_HE = ['דו', 'רה', 'מי', 'סול', 'לה', 'דו׳', 'רה׳', 'מי׳'];
+  const VOICE_HE = {
+    kick: 'תוף בס', snare: 'תוף סנר', hihat: 'מצילה', clap: 'מחיאת כף',
+    drum: 'תוף', xylo: 'קסילופון', bell: 'פעמון',
+  };
+  const VOICE_ICON = { kick: 'בס', snare: 'סנר', hihat: '✨', clap: '👏', drum: '🥁' };
+  function ladder(voice, n) {
+    const out = [];
+    for (let i = 0; i < n; i++) out.push({ voice: voice, step: i });
+    return out;
+  }
+  const PAD_SETS = {
+    M1: { he: 'פעמונים', keys: ladder('bell', 5) },
+    M2: { he: 'תופים', keys: [{ voice: 'kick', step: 0 }, { voice: 'drum', step: 0 }, { voice: 'snare', step: 0 }, { voice: 'clap', step: 0 }, { voice: 'hihat', step: 0 }] },
+    M3: { he: 'תוף ומצילה', keys: [{ voice: 'drum', step: 0 }, { voice: 'snare', step: 0 }, { voice: 'hihat', step: 0 }, { voice: 'clap', step: 0 }] },
+    M6: { he: 'קסילופון', keys: ladder('xylo', 6) },
+  };
+  const PAD_DEFAULT = { he: 'קסילופון', keys: ladder('xylo', 5) };
+
+  // The strip for a mechanism: its own keys, then any extra voices (unlocked
+  // later by progress) that the strip does not have yet.
+  function padFor(mechanism, extra) {
+    const base = PAD_SETS[mechanism] || PAD_DEFAULT;
+    const keys = base.keys.slice();
+    (Array.isArray(extra) ? extra : []).forEach(function (v) {
+      if (TAP_VOICES[v] && !keys.some(function (k) { return k.voice === v; })) keys.push({ voice: v, step: 2, extra: true });
+    });
+    return { he: base.he, keys: keys };
+  }
+
+  function padKeyName(k) {
+    const pitched = k.voice === 'xylo' || k.voice === 'bell';
+    return VOICE_HE[k.voice] + (pitched ? ' ' + NOTE_HE[k.step] : '');
+  }
+
+  function padHtml(set) {
+    const s = set || PAD_DEFAULT;
+    return '<span class="mm-pad-title">🎶 נגנו חופשי (' + s.he + '):</span>' + s.keys.map(function (k) {
+      const pitched = k.voice === 'xylo' || k.voice === 'bell';
+      const face = pitched ? NOTE_HE[k.step] : VOICE_ICON[k.voice] || '♪';
+      return '<button type="button" class="mm-pad-key' + (k.extra ? ' mm-pad-new' : '') + '" data-tap="' + k.voice +
+        '" data-step="' + k.step + '" aria-label="' + padKeyName(k) + '">' + face + '</button>';
+    }).join('');
+  }
+
+  // Puts (or refreshes) the strip right after `anchor`, the exercise's music
+  // way line, so it sits in every exercise screen without new markup. Hidden
+  // when sound is off (quiet preference or the mute switch).
+  function mountFreePad(anchor, opts) {
+    if (!anchor || !anchor.parentNode || typeof document === 'undefined') return null;
+    const o = opts || {};
+    let box = anchor.nextElementSibling;
+    if (!box || !box.classList || !box.classList.contains('mm-pad')) {
+      box = document.createElement('div');
+      box.className = 'mm-pad';
+      box.setAttribute('role', 'group');
+      anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    }
+    const off = !!(o.quiet || audioState.muted);
+    box.classList.toggle('hidden', off);
+    if (off) { box.innerHTML = ''; return box; }
+    const set = padFor(o.mechanism, o.extra);
+    box.setAttribute('aria-label', 'נגנו חופשי לפני שעונים: ' + set.he);
+    box.innerHTML = padHtml(set);
+    return box;
+  }
+
   // ---------- the shared AudioContext ----------
   let audioCtx = null;
   const live = [];
@@ -337,7 +563,11 @@
     if (typeof window === 'undefined') return null;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    if (!audioCtx || audioCtx.state === 'closed') audioCtx = new AC();
+    if (!audioCtx || audioCtx.state === 'closed') {
+      // 'interactive' asks the browser for its smallest output buffer.
+      try { audioCtx = new AC({ latencyHint: 'interactive' }); } catch (e) { audioCtx = new AC(); }
+      noiseBuffer = null;
+    }
     return audioCtx;
   }
 
@@ -352,6 +582,7 @@
       src.connect(ac.destination);
       src.start(0);
     } catch (e) { /* older engines */ }
+    getNoise(ac); // pre-warm: the drum voices never build a buffer on a tap
     if (ac.state === 'running') return Promise.resolve('running');
     let p;
     try { p = ac.resume(); } catch (e) { p = null; }
@@ -390,10 +621,14 @@
 
   // Schedules on AudioContext.currentTime, never setTimeout, so long
   // sequences keep their timing on a busy phone.
+  let lastEvents = null;
+  let lastOpts = null;
+
   function scheduleSequence(events, opts) {
     const ac = getSharedAudioContext();
-    if (!ac) return null;
+    if (!ac || audioState.muted) return null;
     stopSequence();
+    if (Array.isArray(events)) { lastEvents = events.slice(); lastOpts = opts; }
     const start = ac.currentTime + 0.05;
     const plan = planSequence(events, start, opts);
     plan.forEach(function (note) {
@@ -411,10 +646,22 @@
       live.push(o);
     });
     const end = plan.reduce(function (m, n) { return Math.max(m, n.time + n.dur); }, start);
-    return { startTime: start, endTime: end, notes: plan.length };
+    return { startTime: start, endTime: end, notes: plan.length, plan: plan };
   }
 
-  return {
+  // "Play it again": the last sequence, re-timed from now. Returns the notes
+  // that sound ([] when there is nothing to replay).
+  function canReplay() {
+    return !!(lastEvents && lastEvents.length);
+  }
+
+  function replaySequence() {
+    if (!canReplay()) return [];
+    const r = scheduleSequence(lastEvents, lastOpts);
+    return r ? r.plan : [];
+  }
+
+  const api = {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
     intervalRatio, ratioToHz, harmonic, stringLength, bpmToSeconds, tempoChange,
@@ -425,5 +672,11 @@
     getSharedAudioContext, unlockAudio, installAudioUnlock, scheduleSequence,
     stopSequence, stopAll, audioReady,
     isAudioUnlocked: audioReady, playSequence: scheduleSequence,
+    canReplay, replaySequence, TAP_VOICES, tapPlan, playTap, audioState, setMuted,
+    tapFeedback, installTapFeedback, PAD_SETS, padFor, padHtml, mountFreePad,
   };
+  // Later scripts reuse some global names (bar44.js has its own measureFill),
+  // so the engine is also reachable under one name that nothing overwrites.
+  api.musicEngine = api;
+  return api;
 });
