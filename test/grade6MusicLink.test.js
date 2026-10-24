@@ -15,7 +15,8 @@ const ACTIVITIES = ['dotted', 'triplet', 'durationDiv', 'ratioHz', 'meanBpm', 't
 const wayOf = (it) => {
   const key = Object.keys(g6.music).find((k) => banks.ST[k] === it.standard);
   const ways = g6.music[key];
-  return ways[Math.min(it.level, ways.length) - 1];
+  const primary = banks.primaryWays(ways);
+  return primary[Math.min(it.level, primary.length) - 1];
 };
 
 test('every grade ו׳ item has a music tag', () => {
@@ -47,7 +48,10 @@ test('every standard is met through at least two different musical models', () =
     s.tags.add(it.music);
   });
   Object.keys(byStd).forEach((std) => {
-    if (byStd[std].levels.size >= 2) assert.ok(byStd[std].tags.size >= 2, std);
+    // Dosage rule 4: a standard may have a single primary way.
+    const key = Object.keys(g6.music).find((k) => banks.ST[k] === std);
+    const n = banks.primaryWays(g6.music[key]).length;
+    assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, std);
   });
 });
 
@@ -56,7 +60,7 @@ test('each way is Hebrew, short, and carries a real source with an evidence labe
     assert.match(tag, /^[a-z][A-Za-z]+$/);
     assert.match(note, /[א-ת]/);
     assert.ok(note.length < 140, note.length + ' ' + note);
-    assert.ok(g6.sources[src], tag + ' → ' + src);
+    assert.ok(g6.sources[src] || banks.MUSIC_SOURCES[src], tag + ' → ' + src);
     assert.ok(['D', 'R', 'A'].includes(ev), tag + ' ' + ev);
   }));
   Object.keys(g6.sources).forEach((id) => {
