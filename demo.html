@@ -25,6 +25,10 @@
     .demo-screen-pill { display: inline-block; background: rgba(255,255,255,0.14); padding: 6px 12px; border-radius: 999px; font-weight: 700; margin: 4px 0 8px; }
     .demo-scene-btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
     .demo-disclaimer { margin-top: 16px; color: var(--muted); font-size: 0.95rem; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    footer a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; margin-block: 4px; border-radius: 8px; text-decoration: none; color: var(--accent); font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
+    footer a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
     :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
@@ -43,14 +47,14 @@
     </nav>
   </header>
 
-  <main id="main">
+  <main id="main" tabindex="-1">
     <h1>צפו בסרטון ההדגמה: פתיחה ← אבחון קצר ← תרגול אישי ← דוח מורה</h1>
     <p>סיור מודרך בן 4 פרקים (2:30 דקות) המציג את זרימת העבודה המלאה בכיתה או בקבוצת שילוב, כולל הדגמת צליל והקראה בעברית.</p>
     <div id="demoPlayerMount"></div>
   </main>
 
   <footer>
-    <p>שמירה מקומית במכשיר בלבד (localStorage) · ללא חשבון וללא שרת · <a href="index.html">חזרה לתרגול</a></p>
+    <p>שמירה מקומית במכשיר בלבד (localStorage) · ללא חשבון וללא שרת · <a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">כיסוי תוכנית</a> · <a href="check.html">בדיקת יחידה</a> · <a href="offer.html">בקשת ניסוי כיתתי</a> · <a href="landing.html">אודות</a></p>
   </footer>
 
   <script src="src/lib/core.js"></script>
@@ -110,20 +114,27 @@
         bind();
       }
 
+      function updatePlayButtonState(isPlaying) {
+        var btn = document.getElementById('demoPlayBtn');
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+        btn.textContent = isPlaying ? '⏸ עצירת סרטון ההדגמה' : '▶ הפעלת סרטון ההדגמה (2:30 דק׳)';
+      }
+
       function stopTour() {
         if (timer) { clearInterval(timer); timer = null; }
-        var btn = document.getElementById('demoPlayBtn');
-        if (btn) btn.textContent = '▶ הפעלת סרטון ההדגמה (2:30 דק׳)';
+        updatePlayButtonState(false);
       }
 
       function bind() {
         var playBtn = document.getElementById('demoPlayBtn');
+        var prevBtn = document.getElementById('demoPrevSceneBtn');
         var nextBtn = document.getElementById('demoNextSceneBtn');
         if (playBtn) {
           playBtn.onclick = function () {
             if (timer) { stopTour(); return; }
             playCue(scenes[currentIdx]);
-            playBtn.textContent = '⏸ עצירת סרטון ההדגמה';
+            updatePlayButtonState(true);
             var tick = 0;
             timer = setInterval(function () {
               tick += 1;
@@ -131,13 +142,18 @@
               if (tick % 6 === 0) {
                 if (currentIdx < scenes.length - 1) {
                   render(currentIdx + 1, true);
-                  var pb = document.getElementById('demoPlayBtn');
-                  if (pb) pb.textContent = '⏸ עצירת סרטון ההדגמה';
+                  updatePlayButtonState(true);
                 } else {
                   stopTour();
                 }
               }
             }, 1000);
+          };
+        }
+        if (prevBtn) {
+          prevBtn.onclick = function () {
+            stopTour();
+            render(currentIdx - 1, true);
           };
         }
         if (nextBtn) {
@@ -154,6 +170,27 @@
               render(k, true);
             };
           })(i);
+          btns[i].onkeydown = (function (k) {
+            return function (e) {
+              if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                stopTour();
+                render(k + 1, true);
+                var next = mount.querySelectorAll('.demo-scene-btn')[(k + 1) % scenes.length];
+                if (next) next.focus();
+              } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                stopTour();
+                render(k - 1, true);
+                var prev = mount.querySelectorAll('.demo-scene-btn')[(k - 1 + scenes.length) % scenes.length];
+                if (prev) prev.focus();
+              }
+            };
+          })(i);
+        }
+        var announcer = document.getElementById('demoLiveAnnouncer');
+        if (announcer && scenes[currentIdx]) {
+          announcer.textContent = 'פרק ' + (currentIdx + 1) + ' מתוך ' + scenes.length + ': ' + scenes[currentIdx].titleHe;
         }
       }
 

@@ -76,6 +76,8 @@ const ASSETS = [
   './src/components/FractionBarPad.js',
   './src/lib/music/instrumentStudio.js',
   './src/components/InstrumentStudio.js',
+  './src/lib/music/beatCounter.js',
+  './src/components/BeatCounter.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/sefirot.css',
