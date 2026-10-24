@@ -271,3 +271,24 @@ test('the answer types are listed for the teacher in the notes, not on the child
   SA.MODES.forEach((m) => assert.ok(doc.includes('?mode=' + m), m));
   assert.doesNotMatch(page, /\?mode=/);
 });
+
+test('choice: the silent mastery check is not a 1-in-3 guess (owner note 24.10)', () => {
+  SA.ITEMS.forEach(([a, b], i) => {
+    const grid = SA.choices([a, b], i, 'silent');
+    assert.ok(grid.length >= SA.CHOICE_MAX, a + ' + ' + b + ': ' + grid.length + ' options');
+    assert.ok(grid.includes(a + b));
+    assert.equal(new Set(grid).size, grid.length);
+  });
+  const s = SA.createState({ stage: 'silent', mode: 'choice', item: [4, 3] });
+  const html = SA.renderHtml(s);
+  assert.match(html, /class="sa-opts sa-grid"/);
+  assert.equal((html.match(/data-act="pick"/g) || []).length, SA.CHOICE_MAX);
+  assert.doesNotMatch(SA.renderHtml(SA.createState({ stage: 'symbol', mode: 'choice', item: [4, 3] })), /sa-grid/, 'the supported stages keep three numbers');
+  const w = SA.check(SA.pick(s, 9));
+  assert.equal(w.plainTried, 1);
+  assert.equal(w.plainRight, 0);
+  assert.match(SA.renderHtml(w), /class="sa-opt sa-wrong" data-act="pick" data-n="9"[^>]* disabled/);
+  const r = SA.check(SA.pick(SA.createState({ stage: 'silent', mode: 'choice', item: [4, 3] }), 7));
+  assert.equal(r.status, 'right');
+  assert.equal(r.plainRight, 1);
+});
