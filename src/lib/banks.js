@@ -113,6 +113,7 @@
     FRAC_MODELS: 'ייצוג שברים במודלים ועל ישר המספרים; השבר כמנה',
     TRI_AREA: 'גובה במשולש ושטח משולש',
     PARA_AREA: 'גובה במקבילית ושטח מקבילית',
+    PERIM5: 'היקף משולש ומקבילית — סכום הצלעות ומציאת צלע חסרה',
     SOLIDS: 'פירמידות ומנסרות ישרות — פאות, מקצועות, קודקודים ופריסות',
     FREQ: 'שכיחות, טבלת שכיחויות ושכיח',
   };
@@ -1965,6 +1966,21 @@
     MEAS('ב', 'מוכר קנה 10 מוצרים ב־4 ₪ כל אחד, ומכר כל אחד מהם ב־5 ₪. כמה ₪ הרוויח?', 10, 'על כל מוצר הוא הרוויח 1 ₪', 3, ST.MONEY_BILLS)
   );
 
+  // ---------- כיתה ה׳ · היקף לפני היקף מעגל (#711, mm-cur-47 → mm-cur-54) ----------
+  // Grade ה׳ had area but no perimeter, and grade ו׳ measures a circle's
+  // circumference. Appended after the grade files so no existing id moves.
+  RAW.push(
+    G5('geometry', 'למשולש צלעות של 7, 9 ו־12 ס״מ. מה היקף המשולש בס״מ?', 28, 'מקיפים צלע אחר צלע: 7 + 9 + 12', 1, ST.PERIM5),
+    G5('geometry', 'למקבילית צלעות של 8 ס״מ ו־5 ס״מ. מה היקף המקבילית בס״מ?', 26, 'שתי צלעות של 8 ושתיים של 5', 1, ST.PERIM5),
+    G5('geometry', 'למשולש שווה־צלעות צלע של 6 ס״מ. מה ההיקף בס״מ?', 18, 'שלוש צלעות שוות: 6 + 6 + 6', 1, ST.PERIM5),
+    G5('geometry', 'היקף משולש 30 ס״מ. שתיים מצלעותיו 8 ס״מ ו־13 ס״מ. מה אורך הצלע השלישית בס״מ?', 9, '8 + 13 = 21; מה משלים ל־30?', 2, ST.PERIM5),
+    G5('geometry', 'היקף מקבילית 34 ס״מ ואחת מצלעותיה 10 ס״מ. מה אורך הצלע הסמוכה לה בס״מ?', 7, 'חצי ההיקף הוא שתי צלעות סמוכות: 17 − 10', 2, ST.PERIM5),
+    G5('geometry', 'למשולש שווה־שוקיים שוק של 9 ס״מ ובסיס של 4 ס״מ. מה ההיקף בס״מ?', 22, 'שתי שוקיים ועוד הבסיס: 9 + 9 + 4', 2, ST.PERIM5),
+    G5('geometry', 'במקבילית צלעות של 12 ס״מ ו־5 ס״מ, והגובה לצלע של 12 ס״מ הוא 4 ס״מ. מה היקף המקבילית בס״מ?', 34, 'הגובה אינו צלע — מקיפים רק את הצלעות: 12 + 5 + 12 + 5', 3, ST.PERIM5),
+    G5('geometry', 'היקף משושה משוכלל 42 ס״מ. מה אורך כל צלע בס״מ?', 7, 'שש צלעות שוות: 42 : 6', 3, ST.PERIM5),
+    G5('geometry', 'למצולע משוכלל 12 צלעות של 3 ס״מ, והוא נראה כמעט כמו עיגול. מה ההיקף שלו בס״מ?', 36, '12 × 3. ככל שיש יותר צלעות קצרות, ההיקף קרוב להיקף של מעגל', 3, ST.PERIM5)
+  );
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2019,7 +2035,7 @@
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
       tags: ['decimalNoteScale', 'tenthBeatGroups', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
-        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar',
+        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'polygonToCircleNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar',
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
     M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
       finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',

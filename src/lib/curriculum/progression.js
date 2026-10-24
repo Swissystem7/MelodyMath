@@ -24,6 +24,8 @@
 //   7  א׳ hundred chart before whole tens (mm-cur-5 → mm-cur-4); ה׳ fraction
 //      models before equivalence (mm-cur-42 → mm-cur-41) (#616).
 //   8  ג׳ remainder "1 out of 4" prepares ד׳ fractions: mm-cur-25 → mm-cur-32.
+// #711: ה׳ perimeter, side by side as note lengths, comes before the ו׳
+//   circle's circumference: mm-cur-18 → mm-cur-47 → mm-cur-54.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -83,7 +85,7 @@
     'mm-cur-44': [['mm-cur-41', 'mm-cur-33', 'mm-cur-40'], 'common denominators, mixed numbers'],
     'mm-cur-45': [['mm-cur-42', 'mm-cur-38', 'mm-cur-35'], 'decimal place value'],
     'mm-cur-46': [['mm-cur-45', 'mm-cur-36'], 'decimal addition'],
-    'mm-cur-47': [['mm-cur-28', 'mm-cur-34'], 'height and area'],
+    'mm-cur-47': [['mm-cur-28', 'mm-cur-34', 'mm-cur-18'], 'height, area and perimeter side by side'],
     'mm-cur-48': [['mm-cur-34'], 'solids and nets'],
     'mm-cur-49': [['mm-cur-37'], 'frequency and mode'],
     // ו׳
