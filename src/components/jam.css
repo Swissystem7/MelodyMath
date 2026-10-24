@@ -38,3 +38,15 @@
 .ttg-plain{font-size:1.3rem;font-weight:bold;margin:8px 0}
 .mm-game [aria-pressed="true"]:not(.mm-music-toggle){border-color:var(--purple);box-shadow:0 0 0 3px color-mix(in srgb, var(--purple) 25%, transparent)}
 @media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+
+.np-strip{display:flex;align-items:center;gap:12px;margin:10px 0;flex-wrap:wrap}
+.np-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:44px;padding:8px 16px;border-radius:12px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:bold;font-size:1rem}
+.np-btn:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+.np-circles{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.np-group{display:inline-flex;align-items:center;gap:6px}
+.np-dot{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--line);border:2px solid var(--ink);transition:background-color .15s,transform .15s}
+.np-dot.lit{background:var(--yellow);border-color:var(--ink);transform:scale(1.2)}
+.np-dot[data-group="1"].lit{background:var(--pink)}
+.np-dot[data-group="2"].lit{background:var(--good)}
+.np-gap{display:inline-block;width:12px;text-align:center;color:var(--muted);font-weight:bold}
+@media (prefers-reduced-motion:reduce){.np-dot.lit{animation:none;transform:none}}

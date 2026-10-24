@@ -68,6 +68,7 @@ const ASSETS = [
   './src/lib/music/streak.js',
   './src/lib/music/unlocks.js',
   './src/components/TimesTableGroove.js',
+  './src/components/NumberPlay.js',
   './src/lib/instrumentVoices.js',
   './src/lib/instruments.js',
   './src/components/jamKit.js',
