@@ -23,7 +23,8 @@
 //   musical version. Plain-stage tries and right answers are counted.
 // - The same sounds, stages and feedback carry several answer types (#671),
 //   picked with exercise.html?mode=...: 'tap' (the pad, default),
-//   'choice' (three numbers; a wrong one is crossed out for the second try),
+//   'choice' (three numbers; a wrong one is crossed out for the second try;
+//   the silent mastery check offers every number 1-10, not three),
 //   'drag' (drag one circle per sound into the basket; a plain tap or Enter
 //   on the pile adds one too, so it works without dragging) and 'line'
 //   (every sound is one hop on a 0-10 number line; tap where it lands).
@@ -66,6 +67,7 @@
   // Answer types (#671). MODE_PROMPTS replace PROMPTS for a type that is not
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
   const MODES = ['tap', 'choice', 'drag', 'line'];
+  const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
   const LINE_MAX = 10; // the number line runs 0..10, every sum fits
   const MODE_PROMPTS = {
     choice: {
@@ -182,9 +184,13 @@
   }
 
   // Three numbers: the sum and its two neighbours; the right one moves
-  // between the three places from exercise to exercise.
-  function choices(item, index) {
+  // between the three places from exercise to exercise. The silent stage is
+  // the no-music mastery check, so it cannot be a 1-in-3 guess: there the
+  // child picks from every number 1..CHOICE_MAX (a grid of big buttons, a
+  // guess is right 1 time in 10 and mastery needs two right first tries).
+  function choices(item, index, stage) {
     const t = sum(item);
+    if (stage === 'silent') return Array.from({ length: Math.max(CHOICE_MAX, t) }, function (_, i) { return i + 1; });
     const opts = [t - 1, t, t + 1];
     const r = (index || 0) % 3;
     return opts.slice(r).concat(opts.slice(0, r));
@@ -321,14 +327,15 @@
     const total = sum(state.item);
     if (picking(state)) {
       const line = state.mode === 'line';
-      const nums = line ? Array.from({ length: LINE_MAX + 1 }, function (_, i) { return i; }) : choices(state.item, state.index);
+      const grid = !line && state.stage === 'silent';
+      const nums = line ? Array.from({ length: LINE_MAX + 1 }, function (_, i) { return i; }) : choices(state.item, state.index, state.stage);
       const btns = nums.map(function (n) {
         const out = state.wrong.indexOf(n) >= 0;
         const c = (line ? 'sa-tick' : 'sa-opt') + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
         return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + (line ? ' data-tick="' + n + '"' : '') + tapAttr +
           ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
       }).join('');
-      return '<div class="' + (line ? 'sa-line' : 'sa-opts') + '" dir="ltr" role="group" aria-label="' + (line ? 'ישר המספרים 0 עד 10' : 'בחרו מספר') + '">' + btns + '</div>';
+      return '<div class="' + (line ? 'sa-line' : 'sa-opts' + (grid ? ' sa-grid' : '')) + '" dir="ltr" role="group" aria-label="' + (line ? 'ישר המספרים 0 עד 10' : 'בחרו מספר') + '">' + btns + '</div>';
     }
     if (state.mode === 'drag') {
       return '<button type="button" class="sa-pad sa-source" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="גררו עיגול לסל. בסל ' + state.taps + '">🔵 <span>' + state.taps + '</span></button>';
@@ -456,43 +463,17 @@
       try { root.localStorage.setItem('mm.soundAdd.plain', JSON.stringify({ tried: state.plainTried, right: state.plainRight })); } catch (e) { /* private mode */ }
     }
     // 'drag': a circle follows the finger from the pile; dropped on the
-    // basket it counts, dropped elsewhere it does not. The click after a drag
-    // is swallowed so a drop never counts twice.
-    let drag = null;
-    let swallow = false;
-    el.addEventListener('pointerdown', function (ev) {
-      swallow = false;
-      const s = state.mode === 'drag' && ev.target.closest ? ev.target.closest('.sa-source') : null;
-      if (!s || s.disabled) return;
-      drag = { x: ev.clientX, y: ev.clientY, ghost: null };
-      if (s.setPointerCapture) s.setPointerCapture(ev.pointerId);
+    // basket it counts, dropped elsewhere it does not (JAM.dragToTarget, the
+    // shared kit of the #591 screens). The click after a drag is ignored so
+    // a drop never counts twice; a plain tap on the pile still adds one.
+    const dragKit = JAM.dragToTarget(el, {
+      source: '.sa-source', target: '.sa-basket', ghostClass: 'sa-ans sa-ghost',
+      enabled: function () { return state.mode === 'drag'; },
+      onDrop: function () { run('tap'); },
     });
-    el.addEventListener('pointermove', function (ev) {
-      if (!drag) return;
-      if (!drag.ghost) {
-        if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) < 10) return;
-        drag.ghost = document.createElement('span');
-        drag.ghost.className = 'sa-ans sa-ghost';
-        document.body.appendChild(drag.ghost);
-      }
-      drag.ghost.style.left = ev.clientX + 'px';
-      drag.ghost.style.top = ev.clientY + 'px';
-    });
-    function drop(ev) {
-      if (!drag) return;
-      const moved = drag.ghost;
-      drag = null;
-      if (!moved) return;
-      moved.remove();
-      swallow = true;
-      const over = ev.type === 'pointerup' && document.elementFromPoint(ev.clientX, ev.clientY);
-      if (over && over.closest('.sa-basket')) run('tap');
-    }
-    el.addEventListener('pointerup', drop);
-    el.addEventListener('pointercancel', drop);
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
-      if (swallow) { swallow = false; if (b && b.classList.contains('sa-source')) return; }
+      if (dragKit.dragged(b)) return;
       if (!b || b.disabled) return;
       run(b.getAttribute('data-act'), b);
     });
@@ -535,7 +516,7 @@
 
   return {
     GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, LINE_MAX: LINE_MAX,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, LINE_MAX: LINE_MAX,
     numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,
