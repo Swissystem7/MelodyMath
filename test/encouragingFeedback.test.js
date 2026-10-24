@@ -1,6 +1,8 @@
 // MelodyMath — Encouraging feedback & retry state machine tests (Issue #680, Refs #665).
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const fb = require('../src/lib/encouragingFeedback.js');
 
 test('initial feedback state starts in ask phase with no error flags', () => {
@@ -12,14 +14,18 @@ test('initial feedback state starts in ask phase with no error flags', () => {
   assert.equal(s0.hasRedX, false);
   assert.equal(s0.scoreLoss, false);
   assert.equal(s0.canRetry, false);
+  assert.equal(s0.canPlaySound, true);
 });
 
-test('unit: state machine transitions wrong -> hint_replay -> retry on first mistake', () => {
+test('unit: state machine transitions wrong -> hint_replay -> retry on first mistake and triggers replay', () => {
   const item = { id: 'sub-1', skill: 'subtraction', prompt: '7 - 3 = ?', answer: 4 };
   const s0 = fb.createFeedbackState(item);
 
+  let replayedItem = null;
   // 1. Wrong answer on first attempt
-  const s1 = fb.submitAnswer(s0, 2, false);
+  const s1 = fb.submitAnswer(s0, 2, false, {
+    onReplay: (it) => { replayedItem = it; }
+  });
   assert.equal(s1.phase, 'hint_replay');
   assert.equal(s1.attempts, 1);
   assert.equal(s1.canRetry, true);
@@ -29,6 +35,7 @@ test('unit: state machine transitions wrong -> hint_replay -> retry on first mis
   assert.equal(s1.scoreLoss, false, 'no score loss on first mistake');
   assert.ok(s1.spokenText.length > 0, 'provides gentle spoken encouragement');
   assert.equal(s1.visualAnimation.kind, 'hint_cue');
+  assert.equal(replayedItem, item, 'onReplay callback receives the item');
 
   // 2. Transition from hint_replay to retry
   const s2 = fb.startRetry(s1);
@@ -36,6 +43,20 @@ test('unit: state machine transitions wrong -> hint_replay -> retry on first mis
   assert.equal(s2.replayActive, false);
   assert.equal(s2.canRetry, false);
   assert.match(s2.message, /נסו שוב/);
+});
+
+test('no-music check (#718): hint_replay never plays sound or activates audio replay', () => {
+  const silentItem = { id: 'check-1', skill: 'addition', prompt: '4 + 2 = ?', answer: 6, noMusic: true };
+  const s0 = fb.createFeedbackState(silentItem);
+  assert.equal(s0.canPlaySound, false);
+
+  let played = false;
+  const s1 = fb.submitAnswer(s0, 5, false, {
+    onReplay: () => { played = true; }
+  });
+  assert.equal(s1.phase, 'hint_replay');
+  assert.equal(s1.replayActive, false, 'audio replay must remain inactive during no-music checks');
+  assert.equal(played, false, 'sound replay callback must not be invoked');
 });
 
 test('e2e: a wrong answer then a right one completes the exercise', () => {
@@ -68,11 +89,12 @@ test('second mistake after retry moves to soft revealed with no buzzer', () => {
   assert.match(flow.finalState.spokenText, /12/);
 });
 
-test('snapshot: correct-answer visual animation exists for each exercise type (rule 2)', () => {
+test('snapshot: correct-answer visual animation distinguishes operations including division (rule 2)', () => {
   const types = [
     { skill: 'addition', prompt: '2 + 5', expected: 'merge' },
     { skill: 'subtraction', prompt: '9 - 4', expected: 'takeaway' },
     { skill: 'multiplication', prompt: '3 × 6', expected: 'repeat_group' },
+    { skill: 'division', prompt: '12 ÷ 3', expected: 'partition' },
     { skill: 'fractions', prompt: '2/4', expected: 'bar_split' },
     { skill: 'geometry', prompt: 'היקף מלבן', expected: 'glow_total' }
   ];
@@ -86,10 +108,17 @@ test('snapshot: correct-answer visual animation exists for each exercise type (r
     assert.ok(anim.description, 'has Hebrew description');
   });
 
-  // Verify full animation specs snapshot
   assert.deepEqual(fb.ANIMATION_SPECS.addition.kind, 'merge');
   assert.deepEqual(fb.ANIMATION_SPECS.subtraction.kind, 'takeaway');
   assert.deepEqual(fb.ANIMATION_SPECS.multiplication.kind, 'repeat_group');
+  assert.deepEqual(fb.ANIMATION_SPECS.division.kind, 'partition');
   assert.deepEqual(fb.ANIMATION_SPECS.fractions.kind, 'bar_split');
   assert.deepEqual(fb.ANIMATION_SPECS.default.kind, 'glow_total');
+});
+
+test('index.html integrates encouraging feedback into practice check()', () => {
+  const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(indexHtml.includes('src/lib/encouragingFeedback.js'), 'script is loaded');
+  assert.ok(indexHtml.includes('!correct&&current&&!current._retryDone'), 'first mistake gives retry');
+  assert.ok(indexHtml.includes('feedback soft'), 'applies soft feedback class');
 });
