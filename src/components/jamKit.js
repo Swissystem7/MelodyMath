@@ -8,6 +8,8 @@
 //   the voice: oscillators and noise, without the filter.
 // - playNotes(): a stoppable lookahead scheduler on AudioContext time for
 //   phrases (a bar, a groove, a pattern), with a visual callback per note.
+// - dragToTarget(): drag a piece from a button onto a target, the tap on
+//   the button kept as the no-drag path (SoundAdd's basket, #671).
 // - The showMusic switch: every exercise can be solved without sound
 //   (dosage rule 5); the choice is kept per game in localStorage.
 // Pure parts (tapPartsFor, musicKey) are tested in Node.
@@ -136,6 +138,57 @@
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
 
+  // Drag one piece from a source button onto a target (#671): a ghost
+  // follows the finger once it moves DRAG_MIN px; dropped on the target it
+  // calls onDrop, dropped elsewhere nothing happens. The tap path is kept: a
+  // plain tap or Enter on the source is still its click. The click a browser
+  // fires after a drag must be ignored, so the screen asks dragged(button)
+  // first. o = { source, target, ghostClass, onDrop, enabled() }.
+  const DRAG_MIN = 10;
+  function dragToTarget(el, o) {
+    const doc = root.document;
+    let drag = null;
+    let after = false;
+    el.addEventListener('pointerdown', function (ev) {
+      after = false;
+      const s = ev.target.closest ? ev.target.closest(o.source) : null;
+      if (!s || s.disabled || (o.enabled && !o.enabled())) return;
+      drag = { x: ev.clientX, y: ev.clientY, ghost: null };
+      if (s.setPointerCapture) s.setPointerCapture(ev.pointerId);
+    });
+    el.addEventListener('pointermove', function (ev) {
+      if (!drag) return;
+      if (!drag.ghost) {
+        if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) < DRAG_MIN) return;
+        drag.ghost = doc.createElement('span');
+        drag.ghost.className = o.ghostClass || '';
+        doc.body.appendChild(drag.ghost);
+      }
+      drag.ghost.style.left = ev.clientX + 'px';
+      drag.ghost.style.top = ev.clientY + 'px';
+    });
+    function drop(ev) {
+      if (!drag) return;
+      const ghost = drag.ghost;
+      drag = null;
+      if (!ghost) return;
+      ghost.remove();
+      after = true;
+      const over = ev.type === 'pointerup' && doc.elementFromPoint(ev.clientX, ev.clientY);
+      if (over && over.closest && over.closest(o.target)) o.onDrop(over);
+    }
+    el.addEventListener('pointerup', drop);
+    el.addEventListener('pointercancel', drop);
+    return {
+      // true once for the click on the source that ends a drag
+      dragged: function (b) {
+        if (!after) return false;
+        after = false;
+        return !!(b && b.closest && b.closest(o.source));
+      },
+    };
+  }
+
   return {
     tapPartsFor: tapPartsFor,
     registerTapVoices: registerTapVoices,
@@ -149,5 +202,7 @@
     cadence: cadence,
     stopWhenHidden: stopWhenHidden,
     esc: esc,
+    DRAG_MIN: DRAG_MIN,
+    dragToTarget: dragToTarget,
   };
 });

@@ -448,43 +448,17 @@
       try { root.localStorage.setItem('mm.soundAdd.plain', JSON.stringify({ tried: state.plainTried, right: state.plainRight })); } catch (e) { /* private mode */ }
     }
     // 'drag': a circle follows the finger from the pile; dropped on the
-    // basket it counts, dropped elsewhere it does not. The click after a drag
-    // is swallowed so a drop never counts twice.
-    let drag = null;
-    let swallow = false;
-    el.addEventListener('pointerdown', function (ev) {
-      swallow = false;
-      const s = state.mode === 'drag' && ev.target.closest ? ev.target.closest('.sa-source') : null;
-      if (!s || s.disabled) return;
-      drag = { x: ev.clientX, y: ev.clientY, ghost: null };
-      if (s.setPointerCapture) s.setPointerCapture(ev.pointerId);
+    // basket it counts, dropped elsewhere it does not (JAM.dragToTarget, the
+    // shared kit of the #591 screens). The click after a drag is ignored so
+    // a drop never counts twice; a plain tap on the pile still adds one.
+    const dragKit = JAM.dragToTarget(el, {
+      source: '.sa-source', target: '.sa-basket', ghostClass: 'sa-ans sa-ghost',
+      enabled: function () { return state.mode === 'drag'; },
+      onDrop: function () { run('tap'); },
     });
-    el.addEventListener('pointermove', function (ev) {
-      if (!drag) return;
-      if (!drag.ghost) {
-        if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) < 10) return;
-        drag.ghost = document.createElement('span');
-        drag.ghost.className = 'sa-ans sa-ghost';
-        document.body.appendChild(drag.ghost);
-      }
-      drag.ghost.style.left = ev.clientX + 'px';
-      drag.ghost.style.top = ev.clientY + 'px';
-    });
-    function drop(ev) {
-      if (!drag) return;
-      const moved = drag.ghost;
-      drag = null;
-      if (!moved) return;
-      moved.remove();
-      swallow = true;
-      const over = ev.type === 'pointerup' && document.elementFromPoint(ev.clientX, ev.clientY);
-      if (over && over.closest('.sa-basket')) run('tap');
-    }
-    el.addEventListener('pointerup', drop);
-    el.addEventListener('pointercancel', drop);
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
-      if (swallow) { swallow = false; if (b && b.classList.contains('sa-source')) return; }
+      if (dragKit.dragged(b)) return;
       if (!b || b.disabled) return;
       run(b.getAttribute('data-act'), b);
     });
