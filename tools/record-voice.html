@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MelodyMath · הקלטת קול להוראות (כלי פנימי)</title>
+  <link rel="stylesheet" href="../src/sefirot.css">
+  <link rel="stylesheet" href="../src/theme.css">
+  <style>
+    body{max-width:640px;margin:0 auto;padding:14px}
+    li{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+    li b{min-width:7em}
+    button{min-height:44px}
+  </style>
+</head>
+<body>
+  <!-- Internal tool, not linked from the app. Records the spoken fallback for
+       devices without a Hebrew voice (#665 rule 5). Every line downloads as
+       <key>.<ext>; put the files in sounds/voice/he/, add them to VOICE_CLIPS
+       in src/components/SoundAdd.js and to SOUNDS-LICENSES.md. -->
+  <h1>הקלטת ההוראות הקוליות</h1>
+  <p>לחצו ● כדי להקליט שורה, ■ כדי לעצור. ▶ משמיע, ⬇ מוריד את הקובץ.</p>
+  <ol id="lines"></ol>
+  <script src="../src/components/jamKit.js"></script>
+  <script src="../src/components/SoundAdd.js"></script>
+  <script>
+    (function () {
+      const SA = window.MM_SOUND_ADD;
+      const list = document.getElementById('lines');
+      const esc = window.MM_JAM.esc;
+      Object.keys(SA.SPEECH).forEach(function (key) {
+        const li = document.createElement('li');
+        li.innerHTML = '<b>' + esc(SA.SPEECH[key]) + '</b><code>' + key + '</code>' +
+          '<button type="button" data-rec>●</button><button type="button" data-play disabled>▶</button><a data-save hidden>⬇</a>';
+        list.appendChild(li);
+        let rec = null;
+        let url = null;
+        li.querySelector('[data-rec]').addEventListener('click', function (ev) {
+          const btn = ev.currentTarget;
+          if (rec) { rec.stop(); return; }
+          navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+            const chunks = [];
+            rec = new MediaRecorder(stream);
+            rec.ondataavailable = function (e) { chunks.push(e.data); };
+            rec.onstop = function () {
+              stream.getTracks().forEach(function (t) { t.stop(); });
+              const type = rec.mimeType || 'audio/webm';
+              const ext = /mp4/.test(type) ? 'm4a' : /ogg/.test(type) ? 'ogg' : 'webm';
+              if (url) URL.revokeObjectURL(url);
+              url = URL.createObjectURL(new Blob(chunks, { type: type }));
+              const a = li.querySelector('[data-save]');
+              a.href = url; a.download = key + '.' + ext; a.hidden = false;
+              li.querySelector('[data-play]').disabled = false;
+              rec = null; btn.textContent = '●';
+            };
+            rec.start(); btn.textContent = '■';
+          });
+        });
+        li.querySelector('[data-play]').addEventListener('click', function () { if (url) new Audio(url).play(); });
+      });
+    })();
+  </script>
+</body>
+</html>
