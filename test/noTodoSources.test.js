@@ -73,3 +73,12 @@ test('EnsembleStudio presets cite an https source', async () => {
   const { ENSEMBLE_PRESETS } = await import('../src/components/EnsembleStudio.js');
   ENSEMBLE_PRESETS.forEach((p) => assert.match(p.source, /^https:\/\/\S+$/, p.id));
 });
+
+test('with kalimba out of forTopic, every voiced topic keeps at least 2 instrument families', () => {
+  // Owner note 24.10 16:19 on #698. A topic of a weak way (lcm, M4) is not voiced by instruments at all.
+  Object.keys(I.TOPICS).filter((t) => I.WEAK.indexOf(I.TOPICS[t].mechanism) < 0).forEach((t) => {
+    const fams = new Set(I.forTopic(t).map((x) => x.family));
+    assert.ok(fams.size >= 2, t + ': ' + [...fams].join(','));
+    I.forTopic(t).forEach((x) => assert.match(x.source, /^https:\/\//, t + ' ' + x.id));
+  });
+});

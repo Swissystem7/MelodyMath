@@ -143,7 +143,7 @@
     e('charango', 'צָ׳רַנְגּוֹ', 'Charango', 'Andes (Bolivia, Argentina)', 'strings', 'M2', ['multiplication', 'skipCounting'], 'pluck',
       'A small Andean lute with 10 strings in 5 double courses: 5 groups of 2, so counting its strings in pairs is a times-table group (M2).',
       'https://www.horniman.ac.uk/object/M23-1987/json'),
-    e('balalaika', 'בָּלָלַייקָה', 'Balalaika', 'Russia', 'strings', 'M1', ['counting'], 'pluck',
+    e('balalaika', 'בָּלָלַייקָה', 'Balalaika', 'Russia', 'strings', 'M1', ['counting', 'nextPrev'], 'pluck',
       'A Russian lute with a triangular body and three strings; one strum on each steady beat is a simple timbre for counting one-to-one (M1).',
       'https://collections.ed.ac.uk/mimed/record/112439'),
     e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division'], 'pluck',
