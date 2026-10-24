@@ -1,23 +1,25 @@
 // MelodyMath — No-Music Mastery Check (Refs #681, Refs #665).
-// Each topic fades through sound → picture → symbol → plain check.
-// Plain check has zero audio/musical cues ("עכשיו בלי להקה, רק אתה!").
-// Mastery is only awarded after passing the plain check.
+// Fades through sound → picture → symbol → plain check.
+// Plain check has zero audio/musical cues ("עכשיו בלי להקה, רק אתם!").
+// AudioContext is strictly suspended during plain check.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory();
   } else {
     root.MelodyMathMasteryCheck = factory();
+    if (typeof root.mountMasteryCheck === 'undefined') {
+      root.mountMasteryCheck = root.MelodyMathMasteryCheck.mountMasteryCheck;
+    }
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
   const STAGES = ['sound', 'picture', 'symbol', 'plain'];
-
   const STAGE_LABELS_HE = {
     sound: 'צליל ולהקה',
     picture: 'תמונה ודגם',
     symbol: 'סמל ומספר',
-    plain: 'בלי להקה, רק אתה!'
+    plain: 'בלי להקה, רק אתם!'
   };
 
   function createTopicMastery(topicId, options) {
@@ -35,67 +37,39 @@
 
   function recordAttempt(state, attempt) {
     const att = attempt || {};
-    const stage = att.stage || state.currentStage;
-    const isCorrect = !!att.correct;
-    const isMuted = !!att.muted;
+    let stage = att.stage || state.currentStage;
+    // Enforce stage progression: cannot jump directly to plain without prior musical stages
+    if (stage === 'plain' && (state.soundSolvedCount === 0 && state.currentStage !== 'plain')) {
+      stage = state.currentStage;
+    }
+    const isCorrect = Boolean(att.correct);
+    const isMuted = Boolean(att.muted);
 
-    const record = {
-      stage: stage,
-      correct: isCorrect,
-      muted: isMuted,
-      timestamp: Date.now()
-    };
-    state.history.push(record);
+    state.history.push({ stage, correct: isCorrect, muted: isMuted, timestamp: Date.now() });
 
     if (stage === 'sound') {
       if (isCorrect) {
-        if (!isMuted) {
-          state.soundSolvedCount += 1;
-        }
+        if (!isMuted) state.soundSolvedCount += 1;
         state.currentStage = 'picture';
-        return {
-          nextStage: 'picture',
-          mastered: false,
-          messageHe: 'מצוין! עכשיו בוא נראה את זה בתמונה'
-        };
+        return { nextStage: 'picture', mastered: false, messageHe: 'מצוין! עכשיו בואו נראה את זה בתמונה' };
       }
-      return {
-        nextStage: 'sound',
-        mastered: false,
-        messageHe: 'בוא נקשיב שוב יחד'
-      };
+      return { nextStage: 'sound', mastered: false, messageHe: 'בואו נקשיב שוב יחד' };
     }
 
     if (stage === 'picture') {
       if (isCorrect) {
         state.currentStage = 'symbol';
-        return {
-          nextStage: 'symbol',
-          mastered: false,
-          messageHe: 'יופי! עכשיו עם מספרים וסמלים'
-        };
+        return { nextStage: 'symbol', mastered: false, messageHe: 'יופי! עכשיו עם מספרים וסמלים' };
       }
-      return {
-        nextStage: 'picture',
-        mastered: false,
-        messageHe: 'נסתכל שוב על הדגם'
-      };
+      return { nextStage: 'picture', mastered: false, messageHe: 'נסתכל שוב על הדגם' };
     }
 
     if (stage === 'symbol') {
       if (isCorrect) {
         state.currentStage = 'plain';
-        return {
-          nextStage: 'plain',
-          mastered: false,
-          messageHe: 'נהדר! עכשיו בלי להקה, רק אתה!'
-        };
+        return { nextStage: 'plain', mastered: false, messageHe: 'נהדר! עכשיו בלי להקה, רק אתם!' };
       }
-      return {
-        nextStage: 'symbol',
-        mastered: false,
-        messageHe: 'נבדוק שוב את התרגיל'
-      };
+      return { nextStage: 'symbol', mastered: false, messageHe: 'נבדוק שוב את התרגיל' };
     }
 
     if (stage === 'plain') {
@@ -103,20 +77,12 @@
       if (isCorrect) {
         state.plainSuccesses += 1;
         state.mastered = true;
-        return {
-          nextStage: 'plain',
-          mastered: true,
-          messageHe: 'אלופים! פתרתם לגמרי בעצמכם!'
-        };
+        return { nextStage: 'plain', mastered: true, messageHe: 'אלופים! פתרתם לגמרי בעצמכם!' };
       }
-      // Failure routes back to musical version, never scolding or failing
+      // Failure routes back to musical version, never scolding
       state.mastered = false;
       state.currentStage = 'sound';
-      return {
-        nextStage: 'sound',
-        mastered: false,
-        messageHe: 'בוא ננגן את זה שוב עם הלהקה, ואז ננסה שוב בעצמך!'
-      };
+      return { nextStage: 'sound', mastered: false, messageHe: 'בואו ננגן את זה שוב עם הלהקה, ואז ננסה שוב בעצמכם!' };
     }
 
     return { nextStage: state.currentStage, mastered: state.mastered, messageHe: '' };
@@ -126,7 +92,7 @@
     const rate = state.plainAttempts > 0 ? state.plainSuccesses / state.plainAttempts : null;
     return {
       topicId: state.topicId,
-      mastered: !!state.mastered,
+      mastered: Boolean(state.mastered),
       currentStage: state.currentStage,
       soundSolvedCount: state.soundSolvedCount,
       hasSoundCoverage: state.soundSolvedCount > 0,
@@ -137,23 +103,19 @@
   }
 
   function renderPlainCheckHtml(item, options) {
-    const opts = options || {};
-    const it = item || {};
+    const opts = options || {}, it = item || {};
     const promptText = it.prompt || '';
     const choices = Array.isArray(it.choices) ? it.choices : [];
 
-    // Audio context must be suspended during plain check
     if (opts.audioContext && typeof opts.audioContext.suspend === 'function') {
       try { opts.audioContext.suspend(); } catch (_) {}
     }
 
-    let html = '<div class="mm-plain-mastery-check" role="region" aria-label="בדיקת שליטה ללא מוזיקה" dir="rtl">';
-    html += '<div class="plain-banner" style="background:#f1f5f9;padding:12px;border-radius:10px;margin-bottom:12px;border:1px solid #cbd5e1">';
-    html += '<h3 style="margin:0 0 4px;font-size:1.1rem;color:#0f172a">עכשיו בלי להקה, רק אתה!</h3>';
-    html += '<p style="margin:0;color:#475569;font-size:0.9rem">פתרו את התרגיל ללא צלילים או רמזים מוזיקליים</p>';
-    html += '</div>';
-
-    html += '<p class="plain-exercise-prompt" style="font-size:1.3rem;font-weight:700;margin:16px 0;text-align:center"><bdi dir="ltr">' + promptText + '</bdi></p>';
+    let html = '<div class="mm-plain-mastery-check" role="region" aria-label="בדיקת שליטה ללא מוזיקה" dir="rtl">'
+      + '<div class="plain-banner" style="background:#f1f5f9;padding:12px;border-radius:10px;margin-bottom:12px;border:1px solid #cbd5e1">'
+      + '<h3 style="margin:0 0 4px;font-size:1.1rem;color:#0f172a">עכשיו בלי להקה, רק אתם!</h3>'
+      + '<p style="margin:0;color:#475569;font-size:0.9rem">פתרו את התרגיל ללא צלילים או רמזים מוזיקליים</p></div>'
+      + '<p class="plain-exercise-prompt" style="font-size:1.3rem;font-weight:700;margin:16px 0;text-align:center"><bdi dir="ltr">' + promptText + '</bdi></p>';
 
     if (choices.length > 0) {
       html += '<div class="plain-choices" role="group" aria-label="תשובות אפשריות" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
@@ -162,52 +124,80 @@
       });
       html += '</div>';
     } else {
-      html += '<div class="plain-input-row" style="text-align:center;margin:12px 0">';
-      html += '<input type="text" class="plain-answer-input" aria-label="תשובה" style="font-size:1.2rem;padding:8px 12px;width:120px;text-align:center;border-radius:8px;border:1px solid #94a3b8" /> ';
-      html += '<button type="button" class="plain-submit-btn primary" style="min-height:44px;padding:8px 16px;border-radius:8px;cursor:pointer">בדיקה</button>';
-      html += '</div>';
+      html += '<div class="plain-input-row" style="text-align:center;margin:12px 0">'
+        + '<input type="text" class="plain-answer-input" aria-label="תשובה" style="font-size:1.2rem;padding:8px 12px;width:120px;text-align:center;border-radius:8px;border:1px solid #94a3b8" /> '
+        + '<button type="button" class="plain-submit-btn primary" style="min-height:44px;padding:8px 16px;border-radius:8px;cursor:pointer">בדיקה</button></div>';
     }
-
     html += '</div>';
     return html;
+  }
+
+  function mountMasteryCheck(container, item, options) {
+    if (!container) return null;
+    const opts = options || {};
+    if (opts.audioContext && typeof opts.audioContext.suspend === 'function') {
+      try { opts.audioContext.suspend(); } catch (_) {}
+    }
+    container.innerHTML = renderPlainCheckHtml(item, opts);
+    container.classList.remove('hidden');
+
+    const input = container.querySelector('.plain-answer-input');
+    const submit = container.querySelector('.plain-submit-btn');
+    const choices = container.querySelectorAll('[data-plain-choice]');
+
+    function answer(val) {
+      const ok = (item && item.answer != null) ? String(val).trim() === String(item.answer).trim() : Boolean(val);
+      if (typeof opts.onAnswer === 'function') opts.onAnswer(val, ok);
+    }
+    if (submit && input) {
+      submit.onclick = function () { answer(input.value); };
+      input.onkeydown = function (e) { if (e.key === 'Enter') answer(input.value); };
+    }
+    choices.forEach(function (btn) {
+      btn.onclick = function () { answer(btn.getAttribute('data-plain-choice')); };
+    });
+    return { container, close: function () { container.classList.add('hidden'); } };
+  }
+
+  function isTopicUnlocked(topicId, tracker, progModule) {
+    if (!progModule || typeof progModule.linksForTopic !== 'function') return true;
+    const links = progModule.linksForTopic(topicId);
+    if (!links || !Array.isArray(links.prereq) || links.prereq.length === 0) return true;
+    return links.prereq.every(function (pId) {
+      return tracker && tracker.isMastered(pId);
+    });
   }
 
   function createMasteryTracker() {
     const topics = new Map();
     return {
-      get: function (topicId) {
-        if (!topics.has(topicId)) {
-          topics.set(topicId, createTopicMastery(topicId));
-        }
-        return topics.get(topicId);
+      get: function (id) {
+        if (!topics.has(id)) topics.set(id, createTopicMastery(id));
+        return topics.get(id);
       },
-      record: function (topicId, attempt) {
-        const t = this.get(topicId);
-        return recordAttempt(t, attempt);
+      record: function (id, attempt) {
+        return recordAttempt(this.get(id), attempt);
       },
-      isMastered: function (topicId) {
-        return this.get(topicId).mastered;
+      isMastered: function (id) {
+        return Boolean(this.get(id).mastered);
       },
-      getReport: function (topicId) {
-        return getTopicReport(this.get(topicId));
+      isUnlocked: function (id, progModule) {
+        return isTopicUnlocked(id, this, progModule);
+      },
+      getReport: function (id) {
+        return getTopicReport(this.get(id));
       },
       getAllReports: function () {
         const rep = [];
-        topics.forEach(function (state) {
-          rep.push(getTopicReport(state));
-        });
+        topics.forEach(state => rep.push(getTopicReport(state)));
         return rep;
       }
     };
   }
 
   return {
-    STAGES: STAGES,
-    STAGE_LABELS_HE: STAGE_LABELS_HE,
-    createTopicMastery: createTopicMastery,
-    recordAttempt: recordAttempt,
-    getTopicReport: getTopicReport,
-    renderPlainCheckHtml: renderPlainCheckHtml,
-    createMasteryTracker: createMasteryTracker
+    STAGES, STAGE_LABELS_HE, createTopicMastery, recordAttempt,
+    getTopicReport, renderPlainCheckHtml, mountMasteryCheck,
+    isTopicUnlocked, createMasteryTracker
   };
 });
