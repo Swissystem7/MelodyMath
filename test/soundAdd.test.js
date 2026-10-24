@@ -183,3 +183,91 @@ test('exercise.html: only the exercise, no teacher text, scripts precached', () 
   const sw = fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8');
   [...page.matchAll(/(?:src|href)="(src\/[^"]+)"/g)].forEach((m) => assert.ok(sw.includes("'./" + m[1] + "'"), m[1] + ' not precached'));
 });
+
+// #671: answer types on the same sounds, stages and feedback.
+const doc = fs.readFileSync(path.join(__dirname, '..', 'docs', 'exercises', 'SOUND-ADD.md'), 'utf8');
+function answer(s, n) { return s.mode === 'choice' || s.mode === 'line' ? SA.pick(s, n) : taps(s, n - s.taps); }
+
+test('every answer type: right merges and plays the scale, wrong gives a hinted second try, two wrong show the solution', () => {
+  SA.MODES.forEach((mode) => {
+    const s0 = SA.createState({ stage: 'sound', mode, item: [3, 2], index: 0 });
+    assert.equal(s0.mode, mode);
+    const right = SA.check(answer(s0, 5));
+    assert.equal(right.status, 'right', mode);
+    assert.equal(right.sound, 'scale', mode);
+    assert.match(SA.renderHtml(right), /sa-merge/, mode + ': the groups merge');
+    let w = SA.check(answer(s0, 4));
+    assert.equal(w.status, 'retry', mode);
+    assert.equal(w.sound, 'hint', mode);
+    assert.deepEqual(w.hint, { missing: 1 }, mode);
+    assert.match(w.message, /^כמעט!/, mode);
+    assert.match(SA.renderHtml(w), /data-act="listen"/, mode + ': the counted replay is offered');
+    assert.equal((SA.renderHtml(w).match(/sa-missing/g) || []).length, 1, mode + ': the missing dot is drawn');
+    w = SA.check(answer(w, 6));
+    assert.equal(w.status, 'shown', mode);
+    assert.equal(SA.next(w).stage, 'sound', mode + ': support comes back after a miss');
+    assert.equal(SA.next(w).mode, mode, mode + ': the answer type stays');
+  });
+  assert.equal(SA.createState({ mode: 'nope' }).mode, 'tap', 'an unknown type falls back to the pad');
+});
+
+test('every answer type: the first exercise is real solving and mastery needs the silent stage', () => {
+  SA.MODES.forEach((mode) => {
+    let s = SA.createState({ mode });
+    assert.equal(s.stage, 'sound', mode + ': no worked example');
+    const seen = [s.stage];
+    for (let round = 0; round < 12; round++) {
+      s = SA.next(SA.check(answer(s, s.item[0] + s.item[1])));
+      if (seen[seen.length - 1] !== s.stage) seen.push(s.stage);
+    }
+    assert.deepEqual(seen, ['sound', 'picture', 'symbol', 'silent'], mode);
+    assert.ok(SA.mastered(s), mode);
+  });
+});
+
+test('every answer type: silent plays nothing, the card stays short, every instruction is spoken', () => {
+  SA.MODES.forEach((mode) => {
+    const silent = SA.renderHtml(SA.createState({ stage: 'silent', mode, item: [2, 2] }));
+    assert.doesNotMatch(silent, /data-tap=|data-act="listen"|sa-dot/, mode);
+    SA.STAGES.forEach((stage) => {
+      const s = SA.createState({ stage, mode });
+      assert.ok(SA.SPEECH[SA.speechKey(s)], mode + '/' + stage + ' is spoken');
+      [s, SA.check(answer(s, 1)), SA.check(SA.check(answer(s, 1)))].forEach((x) => {
+        const text = SA.renderHtml(x).replace(/<[^>]+>/g, ' ').replace(/[🥁🎹🎸🎷👂👆🎵🔵▶↩←✔⭐+=?:!.,]/gu, ' ');
+        assert.ok(SA.wordCount(text.replace(/\d+/g, ' ')) <= 15, mode + '/' + stage + ': ' + text);
+        assert.doesNotMatch(text, /למורה/);
+      });
+    });
+  });
+});
+
+test('choice: three numbers with the sum in a moving place; a wrong one is crossed out', () => {
+  const places = new Set();
+  SA.ITEMS.forEach(([a, b], i) => {
+    const c = SA.choices([a, b], i);
+    assert.equal(new Set(c).size, 3);
+    assert.ok(c.includes(a + b));
+    places.add(c.indexOf(a + b));
+  });
+  assert.equal(places.size, 3, 'the right answer is not always in the same place');
+  const s = SA.createState({ stage: 'picture', mode: 'choice', item: [3, 2], index: 0 });
+  assert.equal(s.taps, null);
+  assert.match(SA.renderHtml(s), /data-act="check" disabled/, 'nothing to check before a pick');
+  assert.doesNotMatch(SA.renderHtml(s), /data-act="untap"|class="sa-pad"/);
+  assert.equal(SA.check(s).status, 'ready');
+  assert.equal(SA.speechKey(s), 'choice.picture');
+  const w = SA.check(SA.pick(s, 4));
+  assert.match(w.message, /קטן מדי/);
+  assert.match(SA.renderHtml(w), /class="sa-opt sa-wrong" data-act="pick" data-n="4"[^>]* disabled/);
+  assert.match(SA.renderHtml(w), /data-act="check" disabled/, 'the crossed-out number cannot be checked again');
+  assert.equal(SA.pick(w, 4).taps, 4, 'a crossed-out number cannot be picked again');
+  assert.equal(SA.pick(w, 6).taps, 6);
+  assert.match(SA.check(SA.pick(s, 6)).message, /גדול מדי/);
+  const shown = SA.check(SA.pick(w, 6));
+  assert.match(SA.renderHtml(shown), /class="sa-opt sa-right" data-act="pick" data-n="5"/, 'the solution is marked');
+});
+
+test('the answer types are listed for the teacher in the notes, not on the child screen', () => {
+  SA.MODES.forEach((m) => assert.ok(doc.includes('?mode=' + m), m));
+  assert.doesNotMatch(page, /\?mode=/);
+});

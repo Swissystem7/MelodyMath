@@ -21,6 +21,9 @@
 //   written exercise with no sound at all. Two right first tries move one
 //   stage on. Mastery needs the plain stage; a miss there goes back to the
 //   musical version. Plain-stage tries and right answers are counted.
+// - The same sounds, stages and feedback carry several answer types (#671),
+//   picked with exercise.html?mode=...: 'tap' (the pad, default) and
+//   'choice' (three numbers; a wrong one is crossed out for the second try).
 // The state functions and renderHtml are pure and tested in Node; mount()
 // wires them to the page.
 (function (root, factory) {
@@ -57,6 +60,17 @@
     symbol: 'כמה זה? הקישו {i}',
     silent: 'כמה זה? הקישו את התשובה',
   };
+  // Answer types (#671). MODE_PROMPTS replace PROMPTS for a type that is not
+  // the pad; what they say aloud is in SPEECH under 'mode.stage'.
+  const MODES = ['tap', 'choice'];
+  const MODE_PROMPTS = {
+    choice: {
+      sound: 'הקשיבו 👂 ובחרו מספר',
+      picture: 'כמה עיגולים? בחרו מספר',
+      symbol: 'כמה זה? בחרו מספר',
+      silent: 'כמה זה? בחרו מספר',
+    },
+  };
   const BACK_PROMPT = 'נתרגל עוד קצת עם צלילים 🎵';
   // Everything the exercise says aloud. The same keys name the recorded clips.
   const SPEECH = {
@@ -70,6 +84,10 @@
     shown: 'לא נורא, הנה התשובה',
     count1: 'אחת', count2: 'שתיים', count3: 'שלוש', count4: 'ארבע', count5: 'חמש',
     count6: 'שש', count7: 'שבע', count8: 'שמונה', count9: 'תשע', count10: 'עשר',
+    'choice.sound': 'הקשיבו, ואז בחרו את המספר',
+    'choice.picture': 'כמה עיגולים יש? בחרו את המספר',
+    'choice.symbol': 'כמה זה? בחרו את המספר',
+    'choice.silent': 'כמה זה? בחרו את המספר',
   };
   // Recorded clips present in sounds/voice/he/ (key -> file). Empty until the
   // owner records them with tools/record-voice.html; SOUNDS-LICENSES.md lists
@@ -109,9 +127,11 @@
     const o = opts || {};
     const stage = STAGES.indexOf(o.stage) >= 0 ? o.stage : STAGES[0];
     const index = ((Number(o.index) || 0) % ITEMS.length + ITEMS.length) % ITEMS.length;
+    const mode = MODES.indexOf(o.mode) >= 0 ? o.mode : MODES[0];
+    // In a picking type taps is the picked number, null until there is one.
     return {
-      index: index, item: o.item || ITEMS[index], stage: stage, family: family(o.family).id,
-      taps: 0, tries: 0, status: 'ready', back: !!o.back,
+      index: index, item: o.item || ITEMS[index], stage: stage, family: family(o.family).id, mode: mode,
+      taps: picks(mode) ? null : 0, wrong: [], tries: 0, status: 'ready', back: !!o.back,
       streak: o.streak || 0, silentRight: o.silentRight || 0,
       plainTried: o.plainTried || 0, plainRight: o.plainRight || 0,
       message: '', hint: null, sound: null,
@@ -121,15 +141,35 @@
   function sounding(state) { return state.stage === 'sound'; }
   function tapSounds(state) { return state.stage !== 'silent'; }
   function done(state) { return state.status === 'right' || state.status === 'shown'; }
+  // Types where the child picks one number instead of tapping one per sound.
+  function picks(mode) { return mode === 'choice'; }
+  function picking(state) { return picks(state.mode); }
+  // ✔ is live once there is an answer that was not already marked wrong.
+  function answered(state) { return state.taps != null && state.wrong.indexOf(state.taps) < 0; }
 
   function tap(state) {
-    if (done(state)) return Object.assign({}, state, { sound: null });
+    if (done(state) || picking(state)) return Object.assign({}, state, { sound: null });
     return Object.assign({}, state, { taps: state.taps + 1, sound: null });
   }
 
   function untap(state) {
-    if (done(state) || state.taps === 0) return Object.assign({}, state, { sound: null });
+    if (done(state) || picking(state) || state.taps === 0) return Object.assign({}, state, { sound: null });
     return Object.assign({}, state, { taps: state.taps - 1, sound: null });
+  }
+
+  // Three numbers: the sum and its two neighbours; the right one moves
+  // between the three places from exercise to exercise.
+  function choices(item, index) {
+    const t = sum(item);
+    const opts = [t - 1, t, t + 1];
+    const r = (index || 0) % 3;
+    return opts.slice(r).concat(opts.slice(0, r));
+  }
+
+  // A picking type: choose a number; one already crossed out stays out.
+  function pick(state, n) {
+    if (done(state) || !picking(state) || state.wrong.indexOf(n) >= 0) return Object.assign({}, state, { sound: null });
+    return Object.assign({}, state, { taps: n, sound: null });
   }
 
   // Mid-exercise switch: the same exercise on another family, nothing lost.
@@ -142,9 +182,16 @@
     return STAGES[Math.max(0, Math.min(STAGES.length - 1, i))];
   }
 
+  // What is missing or extra, in the words of the answer type.
+  function diffText(mode, diff) {
+    const n = Math.abs(diff);
+    if (picks(mode)) return diff > 0 ? 'קטן מדי.' : 'גדול מדי.';
+    return diff === 1 ? 'חסרה הקשה אחת.' : diff > 1 ? 'חסרות ' + n + ' הקשות.' : diff === -1 ? 'יש הקשה אחת יותר מדי.' : 'יש ' + n + ' הקשות יותר מדי.';
+  }
+
   // ✔: right, a hinted second try, or (after two tries) the solution.
   function check(state) {
-    if (done(state)) return Object.assign({}, state, { sound: null });
+    if (done(state) || !answered(state)) return Object.assign({}, state, { sound: null });
     const total = sum(state.item);
     const tries = state.tries + 1;
     const eq = state.item[0] + ' + ' + state.item[1] + ' = ' + total;
@@ -165,11 +212,11 @@
     const diff = total - state.taps;
     const hint = diff > 0 ? { missing: diff } : { extra: -diff };
     if (tries < MAX_TRIES) {
-      const says = diff === 1 ? 'חסרה הקשה אחת.' : diff > 1 ? 'חסרות ' + diff + ' הקשות.' : diff === -1 ? 'יש הקשה אחת יותר מדי.' : 'יש ' + (-diff) + ' הקשות יותר מדי.';
       const again = state.stage === 'silent' ? 'נסו שוב.' : 'ננסה שוב עם צלילים 🎵';
       return Object.assign({}, state, counted, {
         tries: tries, status: 'retry', hint: hint, sound: state.stage === 'silent' ? null : 'hint', speak: 'retry', streak: 0,
-        message: 'כמעט! ' + says + ' ' + again,
+        wrong: picking(state) ? state.wrong.concat([state.taps]) : state.wrong,
+        message: 'כמעט! ' + diffText(state.mode, diff) + ' ' + again,
       });
     }
     return Object.assign({}, state, counted, {
@@ -187,7 +234,7 @@
     if (state.status === 'shown') { stage = stage === 'silent' ? STAGES[0] : nextStage(stage, -1); streak = 0; back = true; }
     else if (streak >= STREAK_TO_ADVANCE) { stage = nextStage(stage, +1); streak = 0; }
     return createState({
-      stage: stage, index: state.index + 1, streak: streak, back: back, family: state.family,
+      stage: stage, index: state.index + 1, streak: streak, back: back, family: state.family, mode: state.mode,
       silentRight: state.silentRight, plainTried: state.plainTried, plainRight: state.plainRight,
     });
   }
@@ -202,13 +249,14 @@
   function promptOf(state) {
     if (state.message) return state.message;
     if (state.back) return BACK_PROMPT;
-    return PROMPTS[state.stage].replace('{i}', family(state.family).icon);
+    return (MODE_PROMPTS[state.mode] || PROMPTS)[state.stage].replace('{i}', family(state.family).icon);
   }
 
   // What is spoken when the card is drawn: the feedback, else the instruction.
   function speechKey(state) {
     if (state.speak) return state.speak;
-    return state.back ? 'back' : state.stage;
+    if (state.back) return 'back';
+    return SPEECH[state.mode + '.' + state.stage] ? state.mode + '.' + state.stage : state.stage;
   }
 
   // Left to right like the written exercise: the first group, +, the second.
@@ -230,15 +278,31 @@
 
   function answerHtml(state) {
     const total = sum(state.item);
-    const n = Math.max(state.taps, state.hint && state.hint.missing ? total : 0);
+    const taps = state.taps || 0;
+    const n = Math.max(taps, state.hint && state.hint.missing ? total : 0);
     let html = '';
     for (let i = 0; i < n; i++) {
       let c = 'sa-ans';
-      if (i >= state.taps) c += ' sa-missing';
+      if (i >= taps) c += ' sa-missing';
       else if (state.hint && state.hint.extra && i >= total) c += ' sa-extra';
       html += '<span class="' + c + '" data-ans="' + i + '"></span>';
     }
-    return '<div class="sa-answer" dir="ltr" aria-live="polite" aria-label="הקשתם ' + state.taps + '">' + html + '</div>';
+    return '<div class="sa-answer" dir="ltr" aria-live="polite" aria-label="' + (picking(state) ? 'בחרתם ' : 'הקשתם ') + taps + '">' + html + '</div>';
+  }
+
+  // The answer control of each type: the pad, or the number buttons.
+  function controlHtml(state, fin, tapAttr, icon) {
+    const total = sum(state.item);
+    if (picking(state)) {
+      const btns = choices(state.item, state.index).map(function (n) {
+        const out = state.wrong.indexOf(n) >= 0;
+        const c = 'sa-opt' + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
+        return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + tapAttr +
+          ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
+      }).join('');
+      return '<div class="sa-opts" dir="ltr" role="group" aria-label="בחרו מספר">' + btns + '</div>';
+    }
+    return '<button type="button" class="sa-pad" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="הקשה. הקשתם ' + state.taps + '">' + icon + ' <span>' + state.taps + '</span></button>';
   }
 
   function familiesHtml(state) {
@@ -266,11 +330,11 @@
       (showDots ? dotsHtml(state, lit, state.stage !== 'sound' || fin) : '') +
       (showEq ? '<p class="sa-eq">' + eq + '</p>' : '') +
       answerHtml(state) +
-      '<button type="button" class="sa-pad" data-act="tap"' + tapAttr + (fin ? ' disabled' : '') + ' aria-label="הקשה. הקשתם ' + state.taps + '">' + (tapSounds(state) ? f.icon : '👆') + ' <span>' + state.taps + '</span></button>' +
+      controlHtml(state, fin, tapAttr, tapSounds(state) ? f.icon : '👆') +
       '<div class="jam-row sa-row-btns">' +
       (tapSounds(state) ? '<button type="button" class="secondary sa-big" data-act="listen" aria-label="שמעו שוב">👂</button>' : '') +
-      '<button type="button" class="secondary sa-big" data-act="untap"' + (fin ? ' disabled' : '') + ' aria-label="מחקו הקשה">↩</button>' +
-      (fin ? '<button type="button" class="primary sa-big" data-act="next" aria-label="הבא">←</button>' : '<button type="button" class="primary sa-big sa-ok" data-act="check" aria-label="סיימתי">✔</button>') +
+      (picking(state) ? '' : '<button type="button" class="secondary sa-big" data-act="untap"' + (fin ? ' disabled' : '') + ' aria-label="מחקו הקשה">↩</button>') +
+      (fin ? '<button type="button" class="primary sa-big" data-act="next" aria-label="הבא">←</button>' : '<button type="button" class="primary sa-big sa-ok" data-act="check"' + (answered(state) ? '' : ' disabled') + ' aria-label="סיימתי">✔</button>') +
       '</div>' +
       (mastered(state) ? '<p class="sa-mastered">⭐</p>' : '');
   }
@@ -315,8 +379,10 @@
 
   function mount(el) {
     JAM.registerTapVoices();
-    let state = createState();
+    const q = root.location && /[?&]mode=(\w+)/.exec(root.location.search || '');
+    let state = createState({ mode: q && q[1] });
     let playing = null;
+    const answerSel = picking(state) ? '[data-act="pick"]:not([disabled])' : '[data-act="tap"]';
     function stop() { if (playing) playing.stop(); playing = null; }
     function draw(focusSel) {
       el.innerHTML = renderHtml(state);
@@ -360,11 +426,13 @@
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
       if (!b || b.disabled) return;
-      const act = b.getAttribute('data-act');
-      let focus = '[data-act="' + act + '"]';
+      run(b.getAttribute('data-act'), b);
+    });
+    function run(act, b) {
+      let focus = act === 'pick' ? '[data-n="' + b.getAttribute('data-n') + '"]' : '[data-act="' + act + '"]';
       if (act === 'start') {
         const me = root.musicEngine;
-        Promise.resolve(me && me.unlockAudio ? me.unlockAudio() : null).then(function () { draw('[data-act="tap"]'); open(); });
+        Promise.resolve(me && me.unlockAudio ? me.unlockAudio() : null).then(function () { draw(answerSel); open(); });
         return;
       }
       if (act === 'listen') {
@@ -375,14 +443,15 @@
       if (act === 'family') { state = setFamily(state, b.getAttribute('data-family')); focus = '[data-family="' + state.family + '"]'; }
       else if (act === 'tap') state = tap(state);
       else if (act === 'untap') state = untap(state);
-      else if (act === 'check') { state = check(state); save(); focus = state.status === 'retry' ? '[data-act="tap"]' : '[data-act="next"]'; }
-      else if (act === 'next') { stop(); state = next(state); focus = '[data-act="tap"]'; }
+      else if (act === 'pick') state = pick(state, Number(b.getAttribute('data-n')));
+      else if (act === 'check') { state = check(state); save(); focus = state.status === 'retry' ? answerSel : '[data-act="next"]'; }
+      else if (act === 'next') { stop(); state = next(state); focus = answerSel; }
       draw(focus);
       if (act === 'tap') light('[data-ans="' + (state.taps - 1) + '"]');
       if (act === 'next') { open(); return; }
       sound();
       state = Object.assign({}, state, { speak: null });
-    });
+    }
     draw();
     // Sound opens the exercise. A browser that blocks audio before the first
     // touch gets one big ▶ over the card; that touch starts the exercise.
@@ -398,9 +467,9 @@
 
   return {
     GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES,
-    numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan,
-    createState: createState, tap: tap, untap: untap, setFamily: setFamily, check: check, next: next,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS,
+    numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
+    createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,
     wordCount: wordCount, renderHtml: renderHtml, mount: mount,
   };

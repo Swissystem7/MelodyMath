@@ -11,6 +11,12 @@ taps the total on one big pad, one tap per sound. The same events play on four
 instrument families (drums, keys, strings, winds); the child can switch at any
 moment.
 
+**Answer types (#671):** the same sounds, stages and feedback, with another way
+to answer. Open the page with `?mode=`:
+- `exercise.html?mode=tap` (default): one tap on the pad per sound.
+- `exercise.html?mode=choice`: three numbers; a wrong one is crossed out for
+  the second try.
+
 **Opening:** the exercise speaks its instruction and plays its sound as soon
 as it opens. A browser that blocks audio before the first touch shows one big
 ▶ over the card; that touch starts the exercise. There is no worked example:

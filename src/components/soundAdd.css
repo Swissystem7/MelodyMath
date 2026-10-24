@@ -24,6 +24,12 @@
 .sa-answer.sa-win .sa-ans{background:var(--good)}
 .sa-pad{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:96px;border-radius:24px;border:3px solid var(--ink);background:var(--card);color:var(--ink);font-size:2.2rem;font-weight:bold}
 .sa-pad span{font-size:1.6rem;min-width:1.5em}
+/* #671 answer types. choice: three big numbers, a wrong one crossed out */
+.sa-opts{display:flex;justify-content:center;gap:12px}
+.sa-opt{flex:1;min-height:96px;border-radius:24px;border:3px solid var(--ink);background:var(--card);color:var(--ink);font-size:2.2rem;font-weight:bold}
+.sa-opt[aria-pressed="true"]{background:color-mix(in srgb, var(--mint) 60%, var(--card))}
+.sa-wrong{text-decoration:line-through;opacity:.4}
+.sa-right{outline:4px solid var(--good)}
 .sa-mastered{font-weight:bold;color:var(--good);text-align:center}
 .sa-card,#saCard{position:relative}
 .sa-families{display:flex;justify-content:center;gap:10px;margin:2px 0 8px}
