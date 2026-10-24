@@ -563,7 +563,16 @@
     const observation = String(o.observation || '').replace(/\s+/g, ' ').trim().slice(0, 280);
     const lastNotes = listNotes(student);
     const lastNote = lastNotes.length ? lastNotes[lastNotes.length - 1].text : '';
-    return {
+    // The one topic from buildLearnerPlan, when the caller has it. Older callers
+    // pass no plan and get the same note (and the same HTML) as before.
+    const plan = o.plan && o.plan.ok !== false && o.plan.topic ? {
+      planTopic: String(o.plan.topic),
+      planHook: String(o.plan.hook || ''),
+      paceDone: Number(o.plan.paceDone) || 0,
+      paceExpected: Number(o.plan.paceExpected) || 0,
+      homeTip: homeTipFor(o.plan.topic),
+    } : null;
+    return Object.assign({
       title: 'מכתב קצר להורה — MelodyMath',
       name: name,
       classCode: classCode,
@@ -573,7 +582,17 @@
       repeatingErrors: report.repeatingErrors,
       observation: observation || lastNote,
       disclaimer: 'המספרים הם ספירה של תשובות במכשיר הזה — לא ציון, לא אבחון, ולא הוכחה שהתרגול עוזר. MelodyMath הוא דף דפדפן בלי שרת. אין כאן טיפול ואין טענת יעילות.',
-    };
+    }, plan);
+  }
+
+  // A 5-minute thing to do at home, picked by a fragment of the plan topic.
+  // «כפל וחילוק שברים» is fractions, not the times table, so it gets the default.
+  function homeTipFor(topic) {
+    const t = String(topic || '');
+    if (/ספירה|מנייה/.test(t)) return 'ספרו יחד 10 פעימות בכפיים, ואז הלאה מ-10';
+    if (/כפל/.test(t) && !/שבר/.test(t)) return 'אמרו את הכפולות של 5 עם מחיאת כף';
+    if (/חיסור/.test(t)) return 'פרטו שטר של 10 למטבעות';
+    return '5 דקות תרגול במכשיר, בלי לחץ';
   }
 
   function buildCertificate(student, extras) {
@@ -628,6 +647,10 @@
       + '. זה דף סיכום להורה, לא מבחן.</p>'
       + '<p><b>במכשיר:</b> ' + n.correct + ' נכונות מתוך ' + n.total + '.</p>'
       + (skills ? '<p><b>לפי מיומנות</b></p><ul class="err-list">' + skills + '</ul>' : '')
+      + (n.planTopic ? '<section class="parent-plan"><h3>על מה ' + escapeHtml(n.name || 'הילד/ה') + ' עובד/ת עכשיו</h3>'
+        + '<p>' + escapeHtml(n.planTopic) + (n.planHook ? ' — <span class="parent-plan-hook">' + escapeHtml(n.planHook) + '</span>' : '')
+        + '. ' + n.paceDone + ' מתוך ' + n.paceExpected + ' מפגשים השבוע.</p>'
+        + '<p><b>5 דקות בבית:</b> ' + escapeHtml(n.homeTip) + '</p></section>' : '')
       + '<p><b>תרגילים שחזרו כשגיאה</b></p>'
       + (errs ? '<ul class="err-list">' + errs + '</ul>' : '<p>אין תרגיל שנפסל פעמיים או יותר במדגם הזה.</p>')
       + (n.observation ? '<p><b>הערת המורה:</b> ' + escapeHtml(n.observation) + '</p>' : '')

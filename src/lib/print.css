@@ -134,6 +134,9 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
 .class-board th{color:#706887;font-size:.78rem}
 .parent-note{max-width:40rem}
 .parent-note p{line-height:1.55}
+.parent-plan{break-inside:avoid}
+.parent-plan h3{font-size:1.05rem;margin:14px 0 4px}
+.parent-plan-hook{color:var(--muted,#534a6b)}
 .listen-dock{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
 .listen-dock button{min-height:48px}
 .mark-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}

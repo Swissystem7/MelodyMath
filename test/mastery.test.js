@@ -60,3 +60,12 @@ test('grade-ג practice borrows core facts of the same skill only', () => {
   }
   assert.ok(banks.coreFactItems().some((it) => it.skill === 'division'));
 });
+
+test('gateItemsOrAll falls back to every item when the gate hides them all (?topic= link)', () => {
+  const blocked = catalog.filter((it) => mastery.isBlockedItem(it)).slice(0, 5);
+  assert.ok(blocked.length > 0);
+  assert.equal(mastery.gateItems(blocked, [], catalog).length, 0);
+  assert.deepEqual(mastery.gateItemsOrAll(blocked, [], catalog), blocked);
+  const mixed = blocked.concat(catalog.filter((it) => !mastery.isBlockedItem(it)).slice(0, 2));
+  assert.equal(mastery.gateItemsOrAll(mixed, [], catalog).length, 2);
+});

@@ -87,3 +87,87 @@ test('index.html fits phones and tablets: no sideways scroll, 44px targets, audi
     server.close();
   }
 });
+
+// #469 demo smoke for #355 #356 #425 #426 #461 #465: one PASS / FAIL line per
+// check with the selector that failed. It hits the live site, so it only runs
+// when asked: `MM_SMOKE=1` (or `MM_SMOKE=local` to serve this checkout instead).
+const LIVE = 'https://swissystem7.github.io/MelodyMath/';
+const GRADE1_COVERED = 12; // «כיתה א׳ 12 מכוסה» after #356 task A; bump if task B lands.
+const SMOKE = process.env.MM_SMOKE;
+
+async function smokeChecks(page, base, check) {
+  const go = (p) => page.goto(base + p, { waitUntil: 'load' });
+  const count = (sel) => page.locator(sel).count();
+  const text = (sel) => page.locator(sel).first().innerText({ timeout: 3000 }).catch(() => '');
+  const tab = (id) => page.click(`#tab-${id}`);
+
+  await go('index.html');
+  await check('1 nav «סרטון הדגמה»', 'nav a[href*="demo.html"]:has-text("סרטון הדגמה")', async (s) => (await count(s)) > 0);
+  await go('demo.html');
+  await check('1 demo.html 4 scene buttons', '.demo-scene-btn', async (s) => (await count(s)) === 4);
+
+  await go('curriculum.html');
+  await check(`2 «כיתה א׳ ${GRADE1_COVERED} מכוסה»`, 'body',
+    async (s) => new RegExp(`כיתה א׳[^\\n]*\\b${GRADE1_COVERED}\\b[^\\n]*מכוסה`).test(await text(s)));
+
+  await go('index.html');
+  const tabs = await page.$$eval('.tabs [role="tab"]', (els) => els.map((el) => el.dataset.tab));
+  await check('3 plan card «טווח טיפוסי»', '.mm-plan-slot', async (s) =>
+    (await page.$$eval(s, (els) => els.map((el) => el.textContent))).some((t) => t.includes('טווח טיפוסי')));
+  for (const id of tabs) {
+    await tab(id);
+    await check(`3 tab ${id} why line`, `#${id} > .mm-plan-slot .mm-plan-why`, async (s) => (await count(s)) === 1);
+    await check(`7 tab ${id} no sideways scroll`, 'html',
+      () => page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth));
+  }
+
+  await tab('remediation');
+  for (const g of ['א', 'ב', 'ג', 'ד']) {
+    await page.click(`#gradePick [data-grade="${g}"]`);
+    await check(`4 grade ${g} start card ≤ 3 topics`, '#rmStart #rmStruggleList button', async (s) => (await count(s)) <= 3);
+  }
+
+  await page.click('#gradePick [data-grade="ג"]');
+  await page.fill('#classCode', 'smoke-469');
+  await page.fill('#studentName', 'בדיקה');
+  await page.click('#whoSave');
+  await tab('classMode');
+  await page.click('#classStart');
+  await check('5 grade ג׳ class item tag «כיתה ג׳»', '#classItemTag', async (s) => (await text(s)).trim().startsWith('כיתה ג׳'));
+  await page.click('#classCancel').catch(() => {});
+
+  await tab('beatMode');
+  const packed = await page.selectOption('#beatPack', { label: 'מעבר עשרת' }, { timeout: 2000 }).then(() => true, () => false);
+  if (packed) await page.click('#beatStart');
+  await check('6 beat pack «מעבר עשרת» duo widget', '#beatPack option:has-text("מעבר עשרת") → #beatWidget .vert',
+    async () => packed && page.locator('#beatWidget .vert').first().isVisible({ timeout: 4000 }).catch(() => false));
+}
+
+test('demo upgrades live smoke at 390x844 and 1280x800', { skip: !pw ? 'playwright not installed' : !SMOKE ? 'set MM_SMOKE=1 (live) or MM_SMOKE=local' : false }, async () => {
+  const server = SMOKE === 'local' ? await serve() : null;
+  const base = server ? `http://127.0.0.1:${server.address().port}/` : (process.env.MM_SMOKE_URL || LIVE);
+  const browser = await pw.chromium.launch();
+  const lines = [];
+  try {
+    for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+      const size = `${viewport.width}x${viewport.height}`;
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      const errors = [];
+      page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+      page.on('pageerror', (e) => errors.push(String(e)));
+      const check = async (label, selector, fn) => {
+        const ok = await Promise.resolve().then(() => fn(selector)).catch(() => false);
+        lines.push(`${ok ? 'PASS' : 'FAIL'} ${size} ${label}${ok ? '' : ` — ${selector}`}`);
+      };
+      await smokeChecks(page, base, check).catch((e) => lines.push(`FAIL ${size} aborted — ${String(e).split('\n')[0]}`));
+      lines.push(`${errors.length ? 'FAIL' : 'PASS'} ${size} 7 zero console.error${errors.length ? ` — ${errors[0]}` : ''}`);
+      await context.close();
+    }
+  } finally {
+    await browser.close();
+    if (server) server.close();
+  }
+  console.log(lines.join('\n'));
+  assert.deepEqual(lines.filter((l) => l.startsWith('FAIL')), [], `smoke against ${base}`);
+});

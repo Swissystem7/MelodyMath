@@ -23,8 +23,15 @@ test('a row is verified only when it carries a quote from the official PDF', () 
   });
   // Not found in the grade's PDF on 21.10.2026 — must stay unverified.
   const ids = cur.coverageMatrix().filter((r) => !r.verified).map((r) => r.grade + ':' + r.topic);
-  assert.ok(ids.includes('ב:כסף — ₪ ואגורות, קנייה ועודף'));
-  assert.ok(ids.some((id) => id.startsWith('ג:יחידות משקל ונפח')));
+  assert.ok(!ids.some((id) => id.startsWith('ב:')), 'every ב׳ row has a quote');
+  // אגורות are in the ג׳ PDF, not the ב׳ one; the ב׳ items drill the ב׳
+  // money row as a lead-in (#591), so they link to that row.
+  const agorot = banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MONEY);
+  assert.ok(agorot.length > 0 && agorot.every((it) => cur.sectionForItem(it).topic.startsWith('כסף')));
+  assert.ok(!ids.some((id) => id.startsWith('ג:')), 'every ג׳ row has a quote');
+  // ק״ג/ליטר are not in the ג׳ PDF: those items moved to ד׳ (#591).
+  const kg = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MASS_VOL);
+  assert.equal(kg.length, 0);
 });
 
 test('every bank item gets an official tag; unmapped or unverified says לא אומת', () => {

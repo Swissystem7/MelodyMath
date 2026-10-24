@@ -88,6 +88,7 @@
     }
     const elementary = '<span class="mm-prod' + (sonify ? '' : ' on') + '"><span class="mm-prod-label">תרגול יסודי</span>'
       + link('index.html', 'תרגול א׳–ד׳') + ' · '
+      + link('program.html', 'תוכנית הלימודים') + ' · '
       + link('curriculum.html', 'כיסוי תוכנית') + '</span>';
     const sonifyPart = sonify
       ? '<span class="mm-prod-split" aria-hidden="true">|</span>'
