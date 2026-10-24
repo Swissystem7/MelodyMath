@@ -87,6 +87,36 @@
     return 'משקל ' + m.timeSig + ': ' + m.beatsPerBar + ' פעמות בכל תיבה, וההדגשה על הפעמה הראשונה בכל תיבה.';
   }
 
+  // ---------- כפולות בקצב (#463) ----------
+  // The core tables 2/4/5/10 are said aloud on the beat, and one beat stays
+  // silent: the child fills the gap from memory, which is retrieval and not
+  // passive listening. Tables 3/6/7/8/9 stay with the mastery.js gate.
+  const CHANT_TABLES = [2, 4, 5, 10];
+
+  function chantSteps(table, upTo) {
+    const t = whole(table, 1, 10);
+    const n = whole(upTo, 1, 10);
+    if (t == null || n == null || CHANT_TABLES.indexOf(t) === -1) return [];
+    const out = [];
+    for (let i = 1; i <= n; i++) out.push({ beat: i, say: t * i });
+    return out;
+  }
+
+  // One beep per beat, except the pause: the silence is the cue to answer.
+  function chantEvents(table, upTo, bpm, pauseAt) {
+    const step = beatLength(bpm);
+    return chantSteps(table, upTo).filter(function (s) { return s.beat !== pauseAt; })
+      .map(function (s) {
+        return { at: (s.beat - 1) * step, dur: step * 0.6, hz: ACCENT_HZ, gain: 0.22, type: 'triangle' };
+      });
+  }
+
+  // Never names the missing multiple: it is on screen while the question is open.
+  function chantNarration(table, pauseAt) {
+    if (!chantSteps(table, 1).length || whole(pauseAt, 1, 10) == null) return '';
+    return 'אומרים את הכפולות של ' + table + ' עם הפעימה. כשהצליל עוצר — אומרים את הבאה.';
+  }
+
   // ---------- חילוק עם שארית ----------
   function barsAndRemainder(beats, perBar) {
     const b = whole(beats, 0, 200);
@@ -444,7 +474,48 @@
     return true;
   }
 
-  const DRAW = { meter: drawMeter, remainder: drawRemainder, pair: drawPair, grid: drawGrid };
+  // Voices the multiples on their beats when the read-aloud toggle is on. It is
+  // an extra on top of the beeps, so a muted tablet or a browser without
+  // speechSynthesis still gets the whole chant on screen and in sound.
+  function speakChant(steps, pauseAt, bpm) {
+    if (isQuiet() || typeof speakIfEnabled !== 'function' || typeof setTimeout !== 'function') return;
+    const step = beatLength(bpm);
+    steps.forEach(function (s) {
+      // Only the run-up is spoken; after the pause the beat returns as tone.
+      if (s.beat >= pauseAt) return;
+      setTimeout(function () { speakIfEnabled(String(s.say), null, { rate: 1.2 }); }, (s.beat - 1) * step * 1000);
+    });
+  }
+
+  // One pad per beat, labelled with the multiple up to the pause. The pause pad
+  // is yellow and holds its multiple back until the answer; the beats after it
+  // stay unlabelled, so the row never prints the missing number.
+  function drawChant(box, spec) {
+    const steps = chantSteps(spec.table, spec.upTo);
+    const pauseAt = whole(spec.pauseAt, 1, steps.length);
+    if (!steps.length || pauseAt == null) return false;
+    const row = node('div', 'g3-row');
+    row.dir = 'ltr';
+    const group = node('span', 'g3-bar');
+    steps.forEach(function (s) {
+      const gap = s.beat === pauseAt;
+      const pad = node('i', gap ? 'left' : 'on', s.beat < pauseAt ? String(s.say) : '');
+      if (gap) pad.setAttribute('data-reveal', String(s.say));
+      group.appendChild(pad);
+    });
+    row.appendChild(group);
+    box.appendChild(row);
+    const play = function () {
+      speakChant(steps, pauseAt, spec.bpm);
+      return chantEvents(spec.table, spec.upTo, spec.bpm, pauseAt);
+    };
+    addPlay(box, '▶ השמע שוב', play);
+    addNote(box, chantNarration(spec.table, pauseAt),
+      chantNarration(spec.table, pauseAt) + ' הכפולה שחסרה: ' + pauseAt + ' × ' + spec.table + ' = ' + (pauseAt * spec.table) + '.');
+    return true;
+  }
+
+  const DRAW = { meter: drawMeter, remainder: drawRemainder, pair: drawPair, grid: drawGrid, chant: drawChant };
 
   // Draws one grade-3 activity into `host`. The beat pads are a picture of the
   // narration, so they are hidden from the screen reader and the narration is
@@ -472,6 +543,8 @@
     METERS: METERS, MIN_CELL: MIN_CELL, CELL_GAP: CELL_GAP,
     meterForTable: meterForTable, meterBeats: meterBeats, meterEvents: meterEvents,
     meterNarration: meterNarration, meterCue: meterCue,
+    CHANT_TABLES: CHANT_TABLES, chantSteps: chantSteps, chantEvents: chantEvents,
+    chantNarration: chantNarration,
     barsAndRemainder: barsAndRemainder, remainderText: remainderText,
     parseRemainder: parseRemainder, isRemainderAnswer: isRemainderAnswer,
     remainderMiss: remainderMiss, remainderEvents: remainderEvents,

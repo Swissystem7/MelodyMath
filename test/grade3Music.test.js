@@ -332,11 +332,15 @@ test('every grade-ג music item agrees with the pure function behind it', () => 
   const rows = banks.itemsForGrade('ג').filter((it) => it.g3);
   assert.ok(rows.length >= 15, 'expected the #104 items, got ' + rows.length);
   const kinds = new Set(rows.map((it) => it.g3.kind));
-  assert.deepEqual([...kinds].sort(), ['grid', 'meter', 'pair', 'remainder']);
+  assert.deepEqual([...kinds].sort(), ['chant', 'grid', 'meter', 'pair', 'remainder']);
   rows.forEach((it) => {
     const s = it.g3;
     assert.equal(it.widget, 'g3', it.id);
-    if (s.kind === 'meter') {
+    if (s.kind === 'chant') {
+      const step = g3.chantSteps(s.table, s.upTo).find((x) => x.beat === s.pauseAt);
+      assert.equal(step.say, Number(it.answer), it.id);
+      assert.equal(it.table, s.table, it.id);
+    } else if (s.kind === 'meter') {
       const beats = g3.meterBeats(s.table, s.bars);
       assert.ok(beats.length, it.id + ' has no meter');
       // The prompt either asks for the beats or for the number of bars.
@@ -424,4 +428,49 @@ test('the gate note states its scope, since the diagnostic samples locked tables
   assert.match(note, /^בתרגול האישי/);
   assert.match(note, /<span id="gateNoteDiag" class="hidden"> האבחון[^.]*לוחות שעוד לא נפתחו/);
   assert.ok(indexHtml.includes('diagnosticItems(selectedGrade).some(isBlockedItem)'));
+});
+
+// #463: the chant voices the core tables and goes silent on one beat.
+test('chantSteps counts the core tables and leaves the gated ones to mastery.js', () => {
+  const steps = g3.chantSteps(5, 10);
+  assert.equal(steps.length, 10);
+  assert.deepEqual(steps.map((s) => s.say), [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+  assert.deepEqual(g3.chantSteps(7, 10), []);
+  assert.deepEqual(g3.chantSteps(3, 10), []);
+  assert.deepEqual(g3.chantSteps(2, 11), []);
+});
+
+test('chantEvents is silent on the pause beat, and the narration keeps the answer back', () => {
+  const step = 60 / 96;
+  const events = g3.chantEvents(4, 10, 96, 6);
+  assert.equal(events.length, 9);
+  assert.ok(!events.some((e) => Math.abs(e.at - 5 * step) < 1e-9), 'a beep on beat 6');
+  assert.doesNotMatch(g3.chantNarration(4, 6), /24/);
+  assert.match(g3.chantNarration(4, 6), /הכפולות של 4/);
+});
+
+test('the chant widget marks the pause pad and reveals its multiple only after answering', () => {
+  const el = (tag) => ({
+    tagName: tag, className: '', textContent: '', children: [], attrs: {},
+    appendChild(c) { this.children.push(c); return c; },
+    insertBefore(c) { this.children.unshift(c); return c; },
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return this.attrs[k] == null ? null : this.attrs[k]; },
+    addEventListener() {},
+    querySelector() { return null; },
+  });
+  globalThis.document = { createElement: el };
+  try {
+    const host = el('div');
+    assert.equal(g3.bindGrade3(host, { kind: 'chant', table: 4, upTo: 10, pauseAt: 6 }), true);
+    const pads = host.children[0].children[0].children[0].children;
+    assert.equal(pads.length, 10);
+    assert.equal(pads[5].className, 'left');
+    assert.equal(pads[5].textContent, '');
+    assert.equal(pads[5].getAttribute('data-reveal'), '24');
+    assert.deepEqual(pads.slice(0, 5).map((p) => p.textContent), ['4', '8', '12', '16', '20']);
+    assert.equal(g3.bindGrade3(el('div'), { kind: 'chant', table: 7, upTo: 10, pauseAt: 3 }), false);
+  } finally {
+    delete globalThis.document;
+  }
 });

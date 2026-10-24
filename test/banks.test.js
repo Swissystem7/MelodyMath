@@ -88,7 +88,9 @@ test('grade-ב multiplication is only 2/4/5/10; 3/6/7/8/9 live in grade ג', () 
   banks.rowsOf('multiplication', 'ב').forEach((it) => {
     assert.ok([2, 4, 5, 10].includes(it.table), it.prompt);
   });
-  const g3 = banks.rowsOf('multiplication', 'ג');
+  // The #463 chant items retrieve the core tables in grade ג on purpose; they
+  // are checked on their own below.
+  const g3 = banks.rowsOf('multiplication', 'ג').filter((x) => !(x.g3 && x.g3.kind === 'chant'));
   assert.ok(g3.some((x) => x.prompt === '7 × 8 = ?' && x.answer === 56 && x.table === 7));
   assert.ok(g3.every((x) => [3, 6, 7, 8, 9].includes(x.table)));
 });
@@ -217,4 +219,14 @@ test('classItems follows the selected grade and keeps the grade-1 default', () =
   assert.ok(g3.every((i) => i.grade === 'ג'));
   assert.ok(banks.classItems('ב').every((i) => i.grade === 'ב'));
   banks.GRADES.forEach((g) => assert.ok(banks.classItems(g).every((i) => !i.typed), g + ' has typed items'));
+});
+
+// #463: the skip-counting chant covers only the core tables 2/4/5/10.
+test('grade ג ships 8 chant items, all on the core tables', () => {
+  const chants = banks.itemsForGrade('ג').filter((it) => it.g3 && it.g3.kind === 'chant');
+  assert.equal(chants.length, 8);
+  chants.forEach((it) => {
+    assert.ok([2, 4, 5, 10].includes(it.g3.table), it.id);
+    assert.equal(Number(it.answer), it.g3.table * it.g3.pauseAt, it.id);
+  });
 });

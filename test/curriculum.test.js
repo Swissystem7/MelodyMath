@@ -94,7 +94,8 @@ test('grade ג has no partial topic left, and the multiplication table row is ba
   for (let a = 1; a <= 10; a++) for (let b = a; b <= 10; b++) if (!facts.has(a + '×' + b)) missing.push(a + '×' + b);
   assert.deepEqual(missing, []);
 
-  const g3 = banks.rowsOf('multiplication', 'ג');
+  // The #463 chant items are core-table (2/4/5/10) retrieval, tagged MUL_B.
+  const g3 = banks.rowsOf('multiplication', 'ג').filter((it) => !(it.g3 && it.g3.kind === 'chant'));
   assert.ok(g3.every((it) => it.standard === banks.ST.MUL_C));
   assert.ok(g3.some((it) => /חוק החילוף/.test(it.hint)));
   assert.ok(g3.some((it) => /חוק הפילוג/.test(it.hint)));
