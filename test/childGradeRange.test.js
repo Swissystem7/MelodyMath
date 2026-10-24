@@ -1,5 +1,5 @@
-// #693 (6): the elementary home covers grades א׳–ו׳ and says so, and the
-// child-facing copy carries no middle-school topics or product jargon.
+// #671 / #693 (6): the elementary home covers grades א׳–ו׳ and says so, and the
+// child-facing copy carries no middle-school topics, product jargon or age-inappropriate math.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -25,4 +25,15 @@ test('the child home has no middle-school topic or sonification jargon', () => {
   assert.doesNotMatch(indexHtml, /שיפוע פונקציה/);
   assert.doesNotMatch(indexHtml, /סוניפיקציית גרפים היא מוצר אחר/);
   assert.doesNotMatch(indexHtml, /לפסינג/);
+  assert.doesNotMatch(indexHtml, /המורה שולטת/);
+  assert.doesNotMatch(indexHtml, /<label>BPM <input/);
+});
+
+test('exercises in index.html are age-appropriate for elementary school (grades א–ו)', () => {
+  // Elementary school does not teach exponents (חזקות), negative operations, or complex tuning ratios
+  assert.doesNotMatch(indexHtml, /'חזקות'/);
+  assert.doesNotMatch(indexHtml, /75:64/);
+  assert.doesNotMatch(indexHtml, /45:32/);
+  assert.doesNotMatch(indexHtml, /64:45/);
+  assert.doesNotMatch(indexHtml, /,\s*-\d+\s*,/);
 });
