@@ -1,6 +1,16 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { nextLevel, isCorrect, normalizeAnswer, eligibleExercises, MIN_LEVEL, MAX_LEVEL } = require('../src/lib/adaptive');
+const { nextLevel, isCorrect, isWithinTolerance, normalizeAnswer, eligibleExercises, MIN_LEVEL, MAX_LEVEL } = require('../src/lib/adaptive');
+
+test('isWithinTolerance accepts a close estimate and rejects far or non-numeric answers', () => {
+  assert.equal(isWithinTolerance('35', 37, 4), true);
+  assert.equal(isWithinTolerance('41', 37, 4), true);
+  assert.equal(isWithinTolerance('31', 37, 4), false);
+  assert.equal(isWithinTolerance('abc', 37, 4), false);
+  assert.equal(isWithinTolerance('', 37, 4), false);
+  assert.equal(isWithinTolerance('0x10', 16, 4), false);
+  assert.equal(isCorrect('35', 37), false, 'isCorrect stays exact');
+});
 
 const right = { correct: true };
 const wrong = { correct: false };

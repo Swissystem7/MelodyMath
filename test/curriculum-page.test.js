@@ -57,7 +57,9 @@ test('curriculum.html page script runs without throwing and renders every matrix
   assert.equal((els.sum.innerHTML.match(/class="stat"/g) || []).length, cur.grades().length);
   assert.equal((els.tables.innerHTML.match(/<section class="grade-block">/g) || []).length, cur.grades().length);
   assert.equal((els.tables.innerHTML.match(/<tr><td>/g) || []).length, cur.coverageMatrix().length);
-  assert.match(els.tables.innerHTML, /class="st-gap"/);
+  // A gap row renders as st-gap; with every grade covered there is none to show.
+  const hasGap = cur.coverageMatrix().some((r) => r.status === cur.GAP);
+  assert.equal(/class="st-gap"/.test(els.tables.innerHTML), hasGap);
   assert.match(els.tables.innerHTML, /class="st-covered"/);
 });
 
@@ -85,4 +87,17 @@ test('curriculum.html wires metroLoop action for multiplication fluency remediat
   const freshPage = fs.readFileSync(path.join(root, 'curriculum.html'), 'utf8');
   assert.match(freshPage, /action\s*===\s*'metroLoop'/);
   assert.match(freshPage, /לולאת מקצב קבועה לשינון כפולות/);
+});
+
+test('curriculum.html shows % covered per grade and an official source link on every row (#525)', () => {
+  const els = runPage();
+  cur.grades().forEach(function (g) {
+    const p = cur.coveragePercent(g);
+    assert.ok(els.sum.innerHTML.includes(p.covered + '% מכוסה'), 'grade ' + g + ' percent');
+    assert.ok(els.tables.innerHTML.includes('כיתה ' + g + '׳ · ' + p.covered + '% מכוסה'));
+  });
+  const links = els.tables.innerHTML.match(/href="https:\/\/meyda\.education\.gov\.il\/[^"]+"/g) || [];
+  assert.equal(links.length, cur.coverageMatrix().length);
+  const unverified = cur.coverageMatrix().filter((r) => !r.verified).length;
+  assert.equal((els.tables.innerHTML.match(/class="unverified">לא אומת</g) || []).length, unverified);
 });

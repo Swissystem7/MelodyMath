@@ -19,6 +19,13 @@ test('check.html controls meet touch target, focus and hover criteria', () => {
   assert.match(page, /\.choices button:active\{[^}]*background:/);
   assert.match(page, /footer a:focus-visible/);
   assert.match(page, /:focus-visible\{[^}]*outline:/);
+  assert.match(page, /id="setupStatus"[^>]*role="status"[^>]*aria-live="polite"/);
+});
+
+test('check.html groups the answer choices and names the cancel action (#394)', () => {
+  assert.match(page, /id="quizChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  // The accessible name starts with the visible text, so voice control "ביטול הבדיקה" still works.
+  assert.match(page, /id="quizCancel"[^>]*aria-label="ביטול הבדיקה וחזרה למסך הראשי">ביטול הבדיקה וחזרה</);
 });
 
 test('check.html labels each answer choice and guards the first-choice focus', () => {
