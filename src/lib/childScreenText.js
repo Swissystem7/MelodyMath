@@ -1,6 +1,6 @@
 // MelodyMath — Child-Facing Screen Text Helpers (Refs #677, Refs #665).
 // Protects child screens from technical codes (M1-M6, BPM, Hz, Latin notes, evidence).
-// Teacher info is always placed inside <details class="teacher-info"> behind "למורה ▸".
+// Teacher info and research citations are hidden from children behind teacher-only gates.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory();
@@ -35,7 +35,7 @@
 
   function renderTeacherInfo(contentHtml) {
     if (!contentHtml) return '';
-    return '<details class="teacher-info" role="region" aria-label="מידע למורה" style="margin-top:8px">' +
+    return '<details class="teacher-info teacher-only hidden" role="region" aria-label="מידע למורה" style="display:none!important;margin-top:8px">' +
       '<summary style="cursor:pointer;color:var(--muted, #64748b);font-size:0.85rem;user-select:none">למורה ▸</summary>' +
       '<div class="teacher-body" style="padding:6px 0;font-size:0.85rem;color:var(--muted, #64748b)">' +
       contentHtml +

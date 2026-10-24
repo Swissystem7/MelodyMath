@@ -141,7 +141,7 @@ export function formatCrossInstrumentCard(preset, status) {
     + '<p>מחזור ' + bdi(p.cycleA) + ' ומחזור ' + bdi(p.cycleB) + '. מהי ' + bdi('lcm(' + p.cycleA + ', ' + p.cycleB + ')') + '?</p>'
     + '<div class="jam-row">' + answers + '</div>'
     + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>'
-    + '<details class="teacher-info" style="margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;padding:4px 0"><a href="' + escapeHtml(p.source) + '" target="_blank" rel="noopener">מקור מחקרי</a></div></details>'
+    + '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;padding:4px 0"><a href="' + escapeHtml(p.source) + '" target="_blank" rel="noopener">מקור מחקרי</a></div></details>'
     + '</article>';
 }
 

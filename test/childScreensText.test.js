@@ -60,6 +60,19 @@ test('teacher info is placed strictly under collapsible details with summary ×œ×
   });
 });
 
+test('teacher drawer and research citations are hidden from children by default', () => {
+  const screens = [
+    FBP.renderHtml(FBP.createState(0, true), 'drumLow'),
+    BC.renderHtml(BC.createState(0, true)),
+    ES.formatCrossInstrumentCard(ES.ENSEMBLE_PRESETS[0], '')
+  ];
+
+  screens.forEach((html) => {
+    assert.match(html, /class="[^"]*teacher-only\s+hidden[^"]*"/);
+    assert.match(html, /display:\s*none\s*!important/);
+  });
+});
+
 test('child-facing HTML structure never renders method tags M1-M6 outside teacher container', () => {
   const fbpClean = ChildText.stripTeacherSections(FBP.renderHtml(FBP.createState(0, true), 'drumLow'));
   const bcClean = ChildText.stripTeacherSections(BC.renderHtml(BC.createState(0, true)));
