@@ -40,6 +40,12 @@
 .pe-v4{background:color-mix(in srgb, var(--purple) 20%, var(--card))}
 .pe-v5{background:var(--bg)}
 .pe-free summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:bold}
+.dj-week{display:flex;gap:6px;margin:8px 0}
+.dj-day{flex:1;max-width:44px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px dashed var(--line);color:var(--muted);font-size:.85rem}
+.dj-day.full{border-style:solid;border-color:var(--good);background:color-mix(in srgb, var(--mint) 45%, var(--card));color:var(--ink)}
+.dj-topic{display:flex;align-items:center;gap:6px;min-height:48px;padding:0 12px;border:2px solid var(--line);border-radius:12px}
+.dj-topic input{width:24px;height:24px}
+.dj-dots{font-size:1.4rem;letter-spacing:4px}
 .ttg-beats{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;direction:ltr}
 .ttg-beat{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:32px;border-radius:8px;background:var(--bg);color:var(--muted);font-size:.85rem}
 .ttg-beat.acc{min-width:40px;background:color-mix(in srgb, var(--yellow) 60%, var(--card));color:var(--ink);font-weight:bold;font-size:1rem}
