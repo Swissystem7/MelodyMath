@@ -17,6 +17,15 @@ test('the privacy page exists, is Hebrew RTL, and says how to delete', () => {
   assert.match(html, /id="delete"/);
 });
 
+test('the privacy page exposes accessibility skip link, main landmark and core scripts', () => {
+  const html = read('privacy.html');
+  assert.match(html, /class="mm-skip"/);
+  assert.match(html, /href="#main"/);
+  assert.match(html, /<main[^>]*id="main"[^>]*tabindex="-1"/);
+  assert.match(html, /src="src\/lib\/access\.js"/);
+  assert.match(html, /src="src\/lib\/core\.js"/);
+});
+
 test('the teacher kit, the offer page and the about page link to it', () => {
   ['index.html', 'offer.html', 'landing.html'].forEach((page) => {
     assert.match(read(page), /href="privacy\.html"/, page + ' has no privacy link');
