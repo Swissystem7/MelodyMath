@@ -241,32 +241,37 @@ test('every answer type: silent plays nothing, the card stays short, every instr
   });
 });
 
-test('choice: five numbers with the sum in a moving place; a wrong one is crossed out', () => {
+test('choice: exactly three plausible options, shuffled into every position', () => {
   const places = new Set();
   SA.STAGES.filter((st) => st !== 'silent').forEach((st) => {
     SA.ITEMS.forEach(([a, b], i) => {
-      const c = SA.choices([a, b], i, st);
-      assert.ok(c.length >= 5, st + ' ' + a + ' + ' + b + ': ' + c.length + ' options (owner note on #700)');
+      const c = SA.choices([a, b], i, st, () => (i % 3) / 3);
+      assert.equal(c.length, 3, st + ' ' + a + ' + ' + b);
       assert.equal(new Set(c).size, c.length);
       assert.ok(c.includes(a + b));
       assert.ok(c.every((n) => n >= 1 && n <= Math.max(SA.CHOICE_MAX, a + b)));
+      assert.ok(c.filter((n) => n !== a + b).every((n) =>
+        [a, b, Math.abs(a - b), a + b - 1, a + b + 1].includes(n)));
       places.add(c.indexOf(a + b));
     });
   });
-  assert.ok(places.size >= 4, 'the right answer is not always in the same place: ' + [...places]);
-  const centre = SA.ITEMS.filter(([a, b], i) => SA.choices([a, b], i, 'sound').indexOf(a + b) === 2).length;
-  assert.ok(centre < SA.ITEMS.length / 2, 'the right answer is not mostly in the middle');
-  const s = SA.createState({ stage: 'picture', mode: 'choice', item: [3, 2], index: 0 });
+  assert.equal(places.size, 3, 'all positions are reachable: ' + [...places]);
+  const s = SA.createState({ stage: 'picture', mode: 'choice', item: [3, 2], index: 0, random: () => 0.99 });
   assert.equal(s.taps, null);
   assert.match(SA.renderHtml(s), /data-act="check" disabled/, 'nothing to check before a pick');
   assert.doesNotMatch(SA.renderHtml(s), /data-act="untap"|class="sa-pad"/);
   assert.equal(SA.check(s).status, 'ready');
   assert.equal(SA.speechKey(s), 'choice.picture');
-  const w = SA.check(SA.pick(s, 4));
+  const w = SA.check(SA.pick(s, 3));
   assert.match(w.message, /קטן מדי/);
-  assert.match(SA.renderHtml(w), /class="sa-opt sa-wrong" data-act="pick" data-n="4"[^>]* disabled/);
+  assert.match(SA.renderHtml(w), /class="sa-opt sa-wrong" data-act="pick" data-n="3"[^>]* disabled/);
+  assert.match(SA.renderHtml(w), /class="sa-opt sa-right" data-act="pick" data-n="5"/, 'show the correct answer after the first mistake');
+  assert.equal(w.sound, 'hint', 'replay with counting after the first mistake');
+  assert.deepEqual(w.options, s.options);
+  assert.deepEqual(SA.setFamily(w, 'keys').options, s.options);
+  assert.equal(SA.renderHtml(s), SA.renderHtml(s), 'rendering does not reshuffle');
   assert.match(SA.renderHtml(w), /data-act="check" disabled/, 'the crossed-out number cannot be checked again');
-  assert.equal(SA.pick(w, 4).taps, 4, 'a crossed-out number cannot be picked again');
+  assert.equal(SA.pick(w, 3).taps, 3, 'a crossed-out number cannot be picked again');
   assert.equal(SA.pick(w, 6).taps, 6);
   assert.match(SA.check(SA.pick(s, 6)).message, /גדול מדי/);
   const shown = SA.check(SA.pick(w, 6));
@@ -289,7 +294,7 @@ test('choice: the silent mastery check is not a 1-in-3 guess (owner note 24.10)'
   const html = SA.renderHtml(s);
   assert.match(html, /class="sa-opts sa-grid"/);
   assert.equal((html.match(/data-act="pick"/g) || []).length, SA.CHOICE_MAX);
-  assert.doesNotMatch(SA.renderHtml(SA.createState({ stage: 'symbol', mode: 'choice', item: [4, 3] })), /sa-grid/, 'the supported stages keep a row of five');
+  assert.doesNotMatch(SA.renderHtml(SA.createState({ stage: 'symbol', mode: 'choice', item: [4, 3] })), /sa-grid/, 'the supported stages keep three options');
   const w = SA.check(SA.pick(s, 9));
   assert.equal(w.plainTried, 1);
   assert.equal(w.plainRight, 0);

@@ -23,8 +23,8 @@
 //   musical version. Plain-stage tries and right answers are counted.
 // - The same sounds, stages and feedback carry several answer types (#671),
 //   picked with exercise.html?mode=...: 'tap' (the pad, default) and
-//   'choice' (five numbers; a wrong one is crossed out for the second try;
-//   the silent mastery check offers every number 1-10, not five).
+//   'choice' (three numbers; a wrong one is crossed out for the second try;
+//   the silent mastery check offers every number 1-10).
 // The state functions and renderHtml are pure and tested in Node; mount()
 // wires them to the page.
 (function (root, factory) {
@@ -65,7 +65,7 @@
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
   const MODES = ['tap', 'choice'];
   const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
-  const CHOICE_COUNT = 5; // the stages with sound offer five numbers, not three
+  const CHOICE_COUNT = 3;
   const MODE_PROMPTS = {
     choice: {
       sound: 'הקשיבו 👂 ובחרו מספר',
@@ -134,6 +134,7 @@
     // In a picking type taps is the picked number, null until there is one.
     return {
       index: index, item: o.item || ITEMS[index], stage: stage, family: family(o.family).id, mode: mode,
+      options: picks(mode) ? choices(o.item || ITEMS[index], index, stage, o.random) : null,
       taps: picks(mode) ? null : 0, wrong: [], tries: 0, status: 'ready', back: !!o.back,
       streak: o.streak || 0, silentRight: o.silentRight || 0,
       plainTried: o.plainTried || 0, plainRight: o.plainRight || 0,
@@ -160,21 +161,27 @@
     return Object.assign({}, state, { taps: state.taps - 1, sound: null });
   }
 
-  // Five numbers in a row around the sum (t-2..t+2, slid to stay inside
-  // 1..CHOICE_MAX); the row is rotated by the exercise index, so the right one
-  // moves between the five places and is not always in the middle (owner
-  // note on #700: three neighbours were a 1-in-3 guess, always the centre).
+  // Plausible counting errors: stop after one group, subtract instead of add,
+  // or miss/double-count one beat. Deduplicate before sampling two distractors.
+  // Shuffle once per exercise (stored in state), never during a re-render.
   // The silent stage is the no-music mastery check, so there the
   // child picks from every number 1..CHOICE_MAX (a grid of big buttons, a
   // guess is right 1 time in 10 and mastery needs two right first tries).
-  function choices(item, index, stage) {
+  function choices(item, index, stage, random) {
     const t = sum(item);
     if (stage === 'silent') return Array.from({ length: Math.max(CHOICE_MAX, t) }, function (_, i) { return i + 1; });
+    const rng = random || Math.random;
     const hi = Math.max(CHOICE_MAX, t);
-    const lo = Math.max(1, Math.min(t - 2, hi - (CHOICE_COUNT - 1)));
-    const opts = Array.from({ length: CHOICE_COUNT }, function (_, i) { return lo + i; });
-    const r = (index || 0) % CHOICE_COUNT;
-    return opts.slice(r).concat(opts.slice(0, r));
+    function shuffle(values) {
+      for (let i = values.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        const v = values[i]; values[i] = values[j]; values[j] = v;
+      }
+      return values;
+    }
+    const errors = [item[0], item[1], Math.abs(item[0] - item[1]), t - 1, t + 1]
+      .filter(function (n, i, all) { return n >= 1 && n <= hi && n !== t && all.indexOf(n) === i; });
+    return shuffle([t].concat(shuffle(errors).slice(0, CHOICE_COUNT - 1)));
   }
 
   // A picking type: choose a number; one already crossed out stays out.
@@ -306,9 +313,9 @@
     const total = sum(state.item);
     if (picking(state)) {
       const grid = state.stage === 'silent';
-      const btns = choices(state.item, state.index, state.stage).map(function (n) {
+      const btns = state.options.map(function (n) {
         const out = state.wrong.indexOf(n) >= 0;
-        const c = 'sa-opt' + (out ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '');
+        const c = 'sa-opt' + (out ? ' sa-wrong' : '') + ((fin || state.status === 'retry') && n === total ? ' sa-right' : '');
         return '<button type="button" class="' + c + '" data-act="pick" data-n="' + n + '"' + tapAttr +
           ' aria-pressed="' + (state.taps === n) + '"' + (fin || out ? ' disabled' : '') + '>' + n + '</button>';
       }).join('');

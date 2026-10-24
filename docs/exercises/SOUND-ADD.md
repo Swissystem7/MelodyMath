@@ -14,9 +14,14 @@ moment.
 **Answer types (#671):** the same sounds, stages and feedback, with another way
 to answer. Open the page with `?mode=`:
 - `exercise.html?mode=tap` (default): one tap on the pad per sound.
-- `exercise.html?mode=choice`: five numbers in a row around the sum, the right
-  one in a different place each exercise; a wrong one is crossed out for
-  the second try. In the silent stage (the no-music mastery check) the child
+- `exercise.html?mode=choice`: exactly three numbers in the sound, picture and
+  symbol stages. Two distinct distractors model counting only one group,
+  subtracting instead of adding, or missing/double-counting one beat. The
+  options are shuffled once per exercise, so the correct position is random
+  and stays fixed while choosing, replaying or switching instruments.
+  After a mistake the wrong number is crossed out, the correct one is highlighted,
+  and the counted exercise replays for the second try. In the silent stage
+  (the no-music mastery check, including its feedback) the child
   picks from every number 1-10 on a 5x2 grid instead, so a guess is right
   only 1 time in 10 and two right first tries by chance are 1 in 100.
 
