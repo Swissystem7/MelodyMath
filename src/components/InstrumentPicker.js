@@ -1,4 +1,4 @@
-// MelodyMath — InstrumentPicker UI Component (Refs #679, Refs #665).
+// MelodyMath — InstrumentPicker UI Component (Refs #679, Refs #711, Refs #665).
 // Free instrument selector: 4 families, 44x44px touch targets, zero locks.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -25,20 +25,12 @@
     families.forEach(function (fam) {
       html += '<div class="fam-row" role="group" aria-label="' + fam.labelHe + '" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">';
       html += '<span class="fam-badge" style="font-size:0.9rem;min-width:90px;color:var(--muted)">' + fam.icon + ' ' + fam.labelHe + ':</span>';
-      
       fam.instruments.forEach(function (instId) {
         const inst = instrumentById(instId);
-        const nameHe = (inst && inst.nameHe) || instId;
+        const nameHe = (inst && ((inst.instrument && inst.instrument.he) || inst.nameHe)) || instId;
         const isSel = instId === selectedId;
-
-        html += '<button type="button" class="inst-btn' + (isSel ? ' active' : '') + '" ';
-        html += 'data-instrument="' + instId + '" ';
-        html += 'aria-pressed="' + (isSel ? 'true' : 'false') + '" ';
-        html += 'style="min-width:44px;min-height:44px;padding:6px 12px;border-radius:10px;border:2px solid ' + (isSel ? 'var(--purple)' : 'var(--line)') + ';background:' + (isSel ? 'var(--card-lit, #ede9fe)' : 'var(--card, #fff)') + ';font-size:0.95rem;font-weight:600;cursor:pointer">';
-        html += nameHe;
-        html += '</button>';
+        html += '<button type="button" class="inst-btn' + (isSel ? ' active' : '') + '" data-instrument="' + instId + '" aria-pressed="' + (isSel ? 'true' : 'false') + '" style="min-width:44px;min-height:44px;padding:6px 12px;border-radius:10px;border:2px solid ' + (isSel ? 'var(--purple)' : 'var(--line)') + ';background:' + (isSel ? 'var(--card-lit, #ede9fe)' : 'var(--card, #fff)') + ';font-size:0.95rem;font-weight:600;cursor:pointer">' + nameHe + '</button>';
       });
-
       html += '</div>';
     });
 
@@ -53,18 +45,13 @@
 
     function render() {
       container.innerHTML = renderPickerHtml({ selectedId: currentId });
-      const btns = container.querySelectorAll('[data-instrument]');
-      btns.forEach(function (btn) {
+      container.querySelectorAll('[data-instrument]').forEach(function (btn) {
         btn.onclick = function () {
           const instId = btn.getAttribute('data-instrument');
           if (instId && instId !== currentId) {
             currentId = instId;
-            if (opts.childId) {
-              Logic.saveChildInstrument(opts.childId, instId);
-            }
-            if (typeof opts.onChange === 'function') {
-              opts.onChange(instId, Logic.resolveInstrumentVoice(instId, opts));
-            }
+            if (opts.childId) Logic.saveChildInstrument(opts.childId, instId);
+            if (typeof opts.onChange === 'function') opts.onChange(instId, Logic.resolveInstrumentVoice(instId, opts));
             render();
           }
         };
@@ -72,18 +59,11 @@
     }
 
     render();
-
     return {
       getSelectedId: function () { return currentId; },
-      setSelectedId: function (id) {
-        currentId = id;
-        render();
-      }
+      setSelectedId: function (id) { currentId = id; render(); }
     };
   }
 
-  return {
-    renderPickerHtml: renderPickerHtml,
-    mountInstrumentPicker: mountInstrumentPicker
-  };
+  return { renderPickerHtml: renderPickerHtml, mountInstrumentPicker: mountInstrumentPicker };
 });

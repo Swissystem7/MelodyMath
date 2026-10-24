@@ -36,6 +36,7 @@
     symmetry: { he: 'סימטריה', mechanism: 'M6' },
     lcm: { he: 'כפולה משותפת', mechanism: 'M4' },
     numberLine: { he: 'ישר המספרים וסדר', mechanism: 'M5' },
+    perimeter: { he: 'היקף', mechanism: 'M3' },
   };
 
   // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
@@ -47,7 +48,7 @@
 
   const INSTRUMENTS = [
     // ---------- percussion ----------
-    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals'], 'drumLow',
+    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals', 'perimeter'], 'drumLow',
       'Two basic strokes, a low dum in the centre of the head and a high tek on the rim; long and short strokes filling one bar voice note lengths as fractions (M3).',
       'https://eefc.org/wp-content/uploads/Doumbek-strokes-1.pdf'),
     e('djembe', 'ג׳מבה', 'Djembe (jembe)', 'Mande, West Africa (Mali, Guinea)', 'percussion', 'M2', ['multiplication', 'skipCounting'], 'drumHigh',
@@ -147,7 +148,7 @@
     e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division'], 'pluck',
       'A trapezoid zither with 81 strings stretched in groups of three, plus levers for microtones: 27 groups of 3 is a ready-made multiplication and division picture (M2).',
       'https://www.maqamworld.com/en/instr/qanun.php'),
-    e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions'], 'pluck',
+    e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions', 'perimeter'], 'pluck',
       'A small four-string guitar adopted in Hawaii in the 1880s from the machete; strumming quarters and eighths in one bar voices note lengths (M3).',
       'https://collections.vam.ac.uk/item/O372416/machete-unknown'),
     // ---------- winds ----------
@@ -163,7 +164,7 @@
     e('shakuhachi', 'שאקוהאצ׳י', 'Shakuhachi', 'Japan', 'winds', 'M6', ['patterns'], 'breathy',
       'An end-blown bamboo flute with 4 finger holes and 1 thumb hole; its few fingerings suit short call-and-echo melodic patterns (M6).',
       'https://collections.penn.museum/collections/object/240595'),
-    e('ney', 'נאי', 'Ney', 'Iran', 'winds', 'M3', ['fractions', 'decimals'], 'breathy',
+    e('ney', 'נאי', 'Ney', 'Iran', 'winds', 'M3', ['fractions', 'decimals', 'perimeter'], 'breathy',
       'An open end-blown reed flute with finger holes; its long breathy notes are a gentle voice for held note lengths in a bar (M3).',
       'https://horniman.ac.uk/object/M24.8.56/159'),
     e('recorder', 'חלילית', 'Recorder', 'Europe (Nuremberg)', 'winds', 'M3', ['fractions', 'decimals'], 'breathy',
@@ -179,7 +180,7 @@
     e('piano', 'פסנתר', 'Piano', 'Italy (Florence, c. 1700)', 'keys', 'M6', ['patterns'], 'keys',
       'Hammers strike the strings; 88 keys, 52 white and 36 black, with 12 equal semitones per octave, so the same group of keys repeats along the keyboard: a pattern to find and continue (M6).',
       'https://hyperphysics.gsu.edu/hbase/Music/pianof.html'),
-    e('accordion', 'אקורדיון', 'Accordion', 'Europe (Germany)', 'keys', 'M3', ['fractions'], 'organ',
+    e('accordion', 'אקורדיון', 'Accordion', 'Europe (Germany)', 'keys', 'M3', ['fractions', 'perimeter'], 'organ',
       'Free reeds sounded by a bellows; a note lasts as long as the bellows move, so it can hold a whole, half or quarter note exactly (M3).',
       'https://www.horniman.ac.uk/object/M25-1996'),
     e('harmonium', 'הרמוניום', 'Harmonium', 'India (Calcutta)', 'keys', 'M6', ['patterns'], 'organ',

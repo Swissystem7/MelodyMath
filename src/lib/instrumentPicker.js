@@ -1,4 +1,4 @@
-// MelodyMath — InstrumentPicker Core Logic (Refs #679, Refs #665).
+// MelodyMath — InstrumentPicker Core Logic (Refs #679, Refs #711, Refs #665).
 // Free instrument choice for children across 4 child-facing families.
 // Zero locked instruments, zero coins/levels, persistent per child.
 (function (root, factory) {
@@ -17,41 +17,15 @@
   };
 
   const CHILD_FAMILIES = [
-    {
-      id: 'drums',
-      labelHe: 'תופים',
-      icon: '🥁',
-      hasPitch: false,
-      instruments: ['darbuka', 'djembe', 'tabla', 'cajon']
-    },
-    {
-      id: 'strings',
-      labelHe: 'פריטה',
-      icon: '🎸',
-      hasPitch: true,
-      instruments: ['guitar', 'oud', 'kora', 'sitar']
-    },
-    {
-      id: 'keys',
-      labelHe: 'קלידים ומקושים',
-      icon: '🎹',
-      hasPitch: true,
-      instruments: ['piano', 'marimba', 'xylophone', 'kalimba']
-    },
-    {
-      id: 'winds',
-      labelHe: 'נשיפה וקשת',
-      icon: '🎷',
-      hasPitch: true,
-      instruments: ['recorder', 'panFlute', 'ney', 'violin']
-    }
+    { id: 'drums', labelHe: 'תופים', icon: '🥁', hasPitch: false, instruments: ['darbuka', 'djembe', 'tabla', 'cajon'] },
+    { id: 'strings', labelHe: 'פריטה', icon: '🎸', hasPitch: true, instruments: ['guitar', 'oud', 'kora', 'sitar'] },
+    { id: 'keys', labelHe: 'קלידים ומקושים', icon: '🎹', hasPitch: true, instruments: ['piano', 'marimba', 'xylophone', 'kalimba'] },
+    { id: 'winds', labelHe: 'נשיפה וקשת', icon: '🎷', hasPitch: true, instruments: ['recorder', 'panFlute', 'ney', 'violin'] }
   ];
 
   function getFamilyForInstrument(instrumentId) {
     for (let i = 0; i < CHILD_FAMILIES.length; i++) {
-      if (CHILD_FAMILIES[i].instruments.indexOf(instrumentId) >= 0) {
-        return CHILD_FAMILIES[i];
-      }
+      if (CHILD_FAMILIES[i].instruments.indexOf(instrumentId) >= 0) return CHILD_FAMILIES[i];
     }
     return null;
   }
@@ -96,12 +70,7 @@
       };
     }
 
-    return {
-      instrumentId: instrumentId,
-      voice: voice,
-      isSubstituted: false,
-      noticeHe: ''
-    };
+    return { instrumentId: instrumentId, voice: voice, isSubstituted: false, noticeHe: '' };
   }
 
   function pickEnsembleVoices(options) {
@@ -113,14 +82,38 @@
 
     if (count > 1) {
       for (let i = 0; i < CHILD_FAMILIES.length && picked.length < count; i++) {
-        const f = CHILD_FAMILIES[i];
-        if (f.id !== firstFam.id) {
-          picked.push(f.instruments[0]);
-        }
+        if (CHILD_FAMILIES[i].id !== firstFam.id) picked.push(CHILD_FAMILIES[i].instruments[0]);
       }
     }
-
     return picked;
+  }
+
+  // Grade-5 perimeter exercise plan (Refs #711, Refs #679, Refs #665):
+  // Percussion accent for corners, child-chosen instrument (or pitched substitute) for sides.
+  function perimeterExercisePlan(sides, options) {
+    const opts = options || {};
+    const sideInst = opts.instrumentId || getChildInstrument(opts.childId, 'recorder');
+    const sideVoice = resolveInstrumentVoice(sideInst, { needsPitch: true });
+    const cornerInst = opts.cornerInstrumentId || 'darbuka';
+    const cornerVoice = resolveInstrumentVoice(cornerInst, { needsPitch: false });
+    const unitDuration = opts.unitDuration || 0.25;
+
+    let t = 0;
+    const events = [];
+    (sides || []).forEach(function (len, idx) {
+      events.push({ type: 'corner', index: idx, at: t, voice: cornerVoice.voice, instrumentId: cornerVoice.instrumentId, accent: true });
+      const d = len * unitDuration;
+      events.push({ type: 'side', index: idx, length: len, at: t, duration: d, voice: sideVoice.voice, instrumentId: sideVoice.instrumentId, isSubstituted: sideVoice.isSubstituted });
+      t += d;
+    });
+
+    return {
+      events: events,
+      totalDuration: t,
+      totalPerimeter: (sides || []).reduce(function (a, b) { return a + b; }, 0),
+      sideVoice: sideVoice,
+      cornerVoice: cornerVoice
+    };
   }
 
   return {
@@ -129,6 +122,7 @@
     getChildInstrument: getChildInstrument,
     saveChildInstrument: saveChildInstrument,
     resolveInstrumentVoice: resolveInstrumentVoice,
-    pickEnsembleVoices: pickEnsembleVoices
+    pickEnsembleVoices: pickEnsembleVoices,
+    perimeterExercisePlan: perimeterExercisePlan
   };
 });
