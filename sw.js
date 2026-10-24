@@ -77,6 +77,8 @@ const ASSETS = [
   './src/lib/music/rhythmPolygon.js',
   './src/lib/music/polygonCheck.js',
   './src/components/RhythmPolygon.js',
+  './src/lib/music/beatCounter.js',
+  './src/components/BeatCounter.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/sefirot.css',
