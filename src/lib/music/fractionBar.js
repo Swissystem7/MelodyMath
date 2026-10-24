@@ -130,7 +130,7 @@
   // denominators up to 1/16 and at most one bar); otherwise null.
   function decimalToBarFraction(x) {
     const f = toFraction(typeof x === 'string' ? x : Number(x));
-    if (!f || f.n < 0 || cmp(f, frac(1, 1)) > 0 || 16 % f.d !== 0) return null;
+    if (!f || f.n < 0 || 16 % f.d !== 0) return null;
     return format(f);
   }
 

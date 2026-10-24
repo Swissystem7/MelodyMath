@@ -67,7 +67,9 @@ test('decimals and bar fractions convert both ways', () => {
   assert.equal(fb.decimalToBarFraction(0.375), '3/8');
   assert.equal(fb.decimalToBarFraction(1), '1');
   assert.equal(fb.decimalToBarFraction(0.2), null); // 1/5 is not a note length
-  assert.equal(fb.decimalToBarFraction(1.5), null); // more than one bar
+  assert.equal(fb.decimalToBarFraction(1.5), '3/2'); // fractions > 1 span multiple bars (0e, Refs #665)
+  assert.equal(fb.decimalToBarFraction(2.25), '9/4');
+  assert.equal(fb.barFractionToDecimal('3/2'), 1.5);
   assert.equal(fb.barFractionToDecimal('1/4'), 0.25);
   assert.equal(fb.barFractionToDecimal('3/8'), 0.375);
   assert.equal(fb.barFractionToDecimal('¾'), 0.75);
