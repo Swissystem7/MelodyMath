@@ -45,3 +45,14 @@ test('no grade ד׳ label is left on the groove or the screen', () => {
   assert.match(html, /כיתות ב׳–ג׳/);
   assert.equal(html.includes('ד׳'), false);
 });
+
+test('the child never sees the method/topic codes; they stay in data attributes', () => {
+  [0, 2].forEach((n) => {
+    const html = TTG.renderHtml(TTG.createState({ factor: 4, n: n }));
+    const text = html.replace(/<[^>]*>/g, ' ');
+    assert.equal(text.includes('M2'), false, 'no M2 in visible text');
+    assert.equal(text.includes('mm-cur'), false, 'no mm-cur code in visible text');
+    assert.match(html, /data-method="M2"/);
+    assert.match(html, /data-topic="mm-cur-1[56]"/);
+  });
+});

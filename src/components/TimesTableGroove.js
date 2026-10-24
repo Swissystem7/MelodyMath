@@ -142,7 +142,9 @@
       return '<button type="button" class="jam-pad" data-act="instrument" data-inst="' + e(id) + '" data-tap="' + e(x.voice) + '" aria-pressed="' + (id === state.instrument) + '">' + e(x.he) + '</button>';
     }).join('') + '</div>' : '';
     const layers = state.streak.layers.map(function (l) { return LAYER_HE[l]; }).join(' · ');
-    return '<div class="jam-head"><span class="tag">M2 · פעמות מודגשות · כיתות ב׳–ג׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
+    // Method/topic codes (M2, mm-cur-*) are for teachers and data only: kept
+    // as attributes, never shown to the child.
+    return '<div class="jam-head" data-method="M2" data-topic="' + e(q.topicId) + '"><span class="tag">פעמות מודגשות · כיתות ב׳–ג׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🪘 לוח הכפל כשיר קצבי' : 'ספירה בדילוגים') + '</h3>' +
       '<div class="jam-row" role="group" aria-label="עמודה בלוח הכפל">' + factors + '</div>' +
       row + '<p class="jam-prompt"><bdi dir="ltr">' + e(q.he) + '</bdi></p>' +
