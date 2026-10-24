@@ -4,11 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.join(__dirname, '..');
-<<<<<<< HEAD
-const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html', 'curriculum.html', 'frequency.html', 'check.html', 'privacy.html'];
-=======
-const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html', 'curriculum.html', 'frequency.html', 'check.html', 'demo.html'];
->>>>>>> origin/master
+const pages = ['index.html', 'functions.html', '807.html', 'landing.html', 'offer.html', 'curriculum.html', 'frequency.html', 'check.html', 'demo.html', 'privacy.html'];
 
 function html(name) {
   return fs.readFileSync(path.join(root, name), 'utf8');
