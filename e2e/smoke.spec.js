@@ -9,7 +9,7 @@
 const { test, expect } = require('@playwright/test');
 
 const PAGES = ['index', 'curriculum', 'landing', 'offer', 'frequency', 'functions', '807', 'check', 'demo'];
-const TABS = ['remediation', 'lessons', 'practice', 'playground', 'classMode', 'beatMode', 'teacherReport'];
+const TABS = ['remediation', 'lessons', 'practice', 'playground', 'musicGames', 'classMode', 'beatMode', 'teacherReport'];
 // Enough to reach every button a panel shows at first, without wandering
 // into a full exercise run.
 const MAX_CLICKS = 12;
