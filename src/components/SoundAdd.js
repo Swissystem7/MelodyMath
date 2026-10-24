@@ -23,8 +23,8 @@
 //   musical version. Plain-stage tries and right answers are counted.
 // - The same sounds, stages and feedback carry several answer types (#671),
 //   picked with exercise.html?mode=...: 'tap' (the pad, default) and
-//   'choice' (three numbers; a wrong one is crossed out for the second try;
-//   the silent mastery check offers every number 1-10, not three).
+//   'choice' (five numbers; a wrong one is crossed out for the second try;
+//   the silent mastery check offers every number 1-10, not five).
 // The state functions and renderHtml are pure and tested in Node; mount()
 // wires them to the page.
 (function (root, factory) {
@@ -65,6 +65,7 @@
   // the pad; what they say aloud is in SPEECH under 'mode.stage'.
   const MODES = ['tap', 'choice'];
   const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
+  const CHOICE_COUNT = 5; // the stages with sound offer five numbers, not three
   const MODE_PROMPTS = {
     choice: {
       sound: 'הקשיבו 👂 ובחרו מספר',
@@ -159,16 +160,20 @@
     return Object.assign({}, state, { taps: state.taps - 1, sound: null });
   }
 
-  // Three numbers: the sum and its two neighbours; the right one moves
-  // between the three places from exercise to exercise. The silent stage is
-  // the no-music mastery check, so it cannot be a 1-in-3 guess: there the
+  // Five numbers in a row around the sum (t-2..t+2, slid to stay inside
+  // 1..CHOICE_MAX); the row is rotated by the exercise index, so the right one
+  // moves between the five places and is not always in the middle (owner
+  // note on #700: three neighbours were a 1-in-3 guess, always the centre).
+  // The silent stage is the no-music mastery check, so there the
   // child picks from every number 1..CHOICE_MAX (a grid of big buttons, a
   // guess is right 1 time in 10 and mastery needs two right first tries).
   function choices(item, index, stage) {
     const t = sum(item);
     if (stage === 'silent') return Array.from({ length: Math.max(CHOICE_MAX, t) }, function (_, i) { return i + 1; });
-    const opts = [t - 1, t, t + 1];
-    const r = (index || 0) % 3;
+    const hi = Math.max(CHOICE_MAX, t);
+    const lo = Math.max(1, Math.min(t - 2, hi - (CHOICE_COUNT - 1)));
+    const opts = Array.from({ length: CHOICE_COUNT }, function (_, i) { return lo + i; });
+    const r = (index || 0) % CHOICE_COUNT;
     return opts.slice(r).concat(opts.slice(0, r));
   }
 
@@ -474,7 +479,7 @@
 
   return {
     GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
-    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX,
+    MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, CHOICE_COUNT: CHOICE_COUNT,
     numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,

@@ -14,7 +14,8 @@ moment.
 **Answer types (#671):** the same sounds, stages and feedback, with another way
 to answer. Open the page with `?mode=`:
 - `exercise.html?mode=tap` (default): one tap on the pad per sound.
-- `exercise.html?mode=choice`: three numbers; a wrong one is crossed out for
+- `exercise.html?mode=choice`: five numbers in a row around the sum, the right
+  one in a different place each exercise; a wrong one is crossed out for
   the second try. In the silent stage (the no-music mastery check) the child
   picks from every number 1-10 on a 5x2 grid instead, so a guess is right
   only 1 time in 10 and two right first tries by chance are 1 in 100.

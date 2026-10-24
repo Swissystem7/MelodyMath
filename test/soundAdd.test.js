@@ -241,15 +241,21 @@ test('every answer type: silent plays nothing, the card stays short, every instr
   });
 });
 
-test('choice: three numbers with the sum in a moving place; a wrong one is crossed out', () => {
+test('choice: five numbers with the sum in a moving place; a wrong one is crossed out', () => {
   const places = new Set();
-  SA.ITEMS.forEach(([a, b], i) => {
-    const c = SA.choices([a, b], i);
-    assert.equal(new Set(c).size, 3);
-    assert.ok(c.includes(a + b));
-    places.add(c.indexOf(a + b));
+  SA.STAGES.filter((st) => st !== 'silent').forEach((st) => {
+    SA.ITEMS.forEach(([a, b], i) => {
+      const c = SA.choices([a, b], i, st);
+      assert.ok(c.length >= 5, st + ' ' + a + ' + ' + b + ': ' + c.length + ' options (owner note on #700)');
+      assert.equal(new Set(c).size, c.length);
+      assert.ok(c.includes(a + b));
+      assert.ok(c.every((n) => n >= 1 && n <= Math.max(SA.CHOICE_MAX, a + b)));
+      places.add(c.indexOf(a + b));
+    });
   });
-  assert.equal(places.size, 3, 'the right answer is not always in the same place');
+  assert.ok(places.size >= 4, 'the right answer is not always in the same place: ' + [...places]);
+  const centre = SA.ITEMS.filter(([a, b], i) => SA.choices([a, b], i, 'sound').indexOf(a + b) === 2).length;
+  assert.ok(centre < SA.ITEMS.length / 2, 'the right answer is not mostly in the middle');
   const s = SA.createState({ stage: 'picture', mode: 'choice', item: [3, 2], index: 0 });
   assert.equal(s.taps, null);
   assert.match(SA.renderHtml(s), /data-act="check" disabled/, 'nothing to check before a pick');
@@ -283,7 +289,7 @@ test('choice: the silent mastery check is not a 1-in-3 guess (owner note 24.10)'
   const html = SA.renderHtml(s);
   assert.match(html, /class="sa-opts sa-grid"/);
   assert.equal((html.match(/data-act="pick"/g) || []).length, SA.CHOICE_MAX);
-  assert.doesNotMatch(SA.renderHtml(SA.createState({ stage: 'symbol', mode: 'choice', item: [4, 3] })), /sa-grid/, 'the supported stages keep three numbers');
+  assert.doesNotMatch(SA.renderHtml(SA.createState({ stage: 'symbol', mode: 'choice', item: [4, 3] })), /sa-grid/, 'the supported stages keep a row of five');
   const w = SA.check(SA.pick(s, 9));
   assert.equal(w.plainTried, 1);
   assert.equal(w.plainRight, 0);
