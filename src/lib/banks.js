@@ -105,6 +105,7 @@
     FRAC_OF_QTY: 'שבר כחלק מכמות — מציאת הכמות החלקית',
     FRAC_NAMES: 'שמות שונים לשבר והשוואה בין שברים',
     FRAC_ADD_D: 'חיבור וחיסור שברים במכנים שווים או כשמכנה אחד כפולה של השני',
+    FRAC_MIXED_D: 'מספרים מעורבים ושברים גדולים מ־1',
     BOX_AREA: 'שטח פנים של תיבה',
     PIE: 'קריאת דיאגרמת עוגה',
     NUM_BIG: 'מספרים גדולים ממיליון — מבנה עשרוני, קריאה, כתיבה והשוואה',
@@ -1965,6 +1966,21 @@
     MEAS('ב', 'מוכר קנה 10 מוצרים ב־4 ₪ כל אחד, ומכר כל אחד מהם ב־5 ₪. כמה ₪ הרוויח?', 10, 'על כל מוצר הוא הרוויח 1 ₪', 3, ST.MONEY_BILLS)
   );
 
+  // ---------- כיתה ד׳ · מספרים מעורבים ושברים גדולים מ־1 (#709, mm-cur-33) ----------
+  // Both directions: improper fraction → mixed number and back, comparing
+  // across the two forms, and one addition that crosses into the next whole.
+  // isCorrect keeps the forms apart, so each prompt names the form it wants.
+  // Appended last so existing ids stay put.
+  RAW.push(
+    G4('fractions', 'כתבו את 7/4 כמספר מעורב (שלמים ושבר).', '1 ו־3/4', 'ארבעה רבעים הם שלם אחד, ונשארים 3 רבעים', 1, ST.FRAC_MIXED_D),
+    G4('fractions', 'כמה רבעים יש ב־1 ו־1/4? כתבו כשבר.', '5/4', 'בשלם יש 4 רבעים, ועוד רבע אחד', 1, ST.FRAC_MIXED_D),
+    G4('fractions', 'כמה שלמים יש ב־8/4?', 2, 'כל ארבעה רבעים הם שלם אחד', 1, ST.FRAC_MIXED_D),
+    G4('fractions', 'כתבו את 11/4 כמספר מעורב (שלמים ושבר).', '2 ו־3/4', 'שני שלמים הם 8 רבעים, ונשארים 3 רבעים', 2, ST.FRAC_MIXED_D),
+    G4('fractions', 'כמה חצאים יש ב־2 ו־1/2? כתבו כשבר.', '5/2', 'בכל שלם יש 2 חצאים: 4 חצאים ועוד חצי אחד', 2, ST.FRAC_MIXED_D),
+    G4('fractions', 'איזה מספר גדול יותר: 9/4 או 1 ו־3/4? כתבו אותו כמו שהוא כתוב בשאלה.', '9/4', 'כמה שלמים יש ב־9/4? משווים קודם את השלמים, ורק אז את השבר', 3, ST.FRAC_MIXED_D),
+    G4('fractions', '1 ו־3/4 + 1/2 = ? (כתבו כמספר מעורב)', '2 ו־1/4', 'חצי הוא 2 רבעים; 3 רבעים ועוד 2 רבעים הם שלם ועוד רבע', 3, ST.FRAC_MIXED_D)
+  );
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -1978,6 +1994,10 @@
         const primary = primaryWays(ways); // dosage rule: weak ways stay optional
         const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+        const extra = ways.filter(isOptionalWay).map(function (w) {
+          return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
+        });
+        if (extra.length) raw.musicExtra = extra;
       });
     });
   }
