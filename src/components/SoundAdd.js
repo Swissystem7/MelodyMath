@@ -1,4 +1,28 @@
 // MelodyMath — SoundAdd: the #665 example exercise (addition, grades א׳–ב׳).
+//
+// The music is how the child solves it: 3 + 2 is heard as 3 low sounds, a
+// pause, 2 high sounds, and every sound lights its own circle. The child taps
+// the total on one big pad, one tap = one sound.
+// Child-eye rules (#665, #666 review 24.10):
+// - The exercise opens with its sound and a spoken instruction; the first
+//   exercise is real solving, no worked example. Nothing for the teacher is
+//   on the child screen (docs/exercises/SOUND-ADD.md has the notes).
+// - Every instruction is spoken: Hebrew speech when the device has a Hebrew
+//   voice, else a recorded clip from VOICE_CLIPS (tools/record-voice.html),
+//   else the icons and the numbers on the circles carry it.
+// - The same exercise plays on 4 instrument families (drums, keys, strings,
+//   winds); the child may switch at any moment and hears the same events.
+// - A right answer merges the two groups into one group of the total and
+//   counts it up on a rising scale. A wrong one says "almost", replays the
+//   exercise counting every circle, marks what is missing or extra and gives
+//   a second try; after two tries the solution is shown and the next
+//   exercise brings the support back, with a word of encouragement.
+// - Fading: sound and circles, circles only, the symbol, then the plain
+//   written exercise with no sound at all. Two right first tries move one
+//   stage on. Mastery needs the plain stage; a miss there goes back to the
+//   musical version. Plain-stage tries and right answers are counted.
+// The state functions and renderHtml are pure and tested in Node; mount()
+// wires them to the page.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
