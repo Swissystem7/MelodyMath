@@ -103,3 +103,20 @@ test('the sequencing gaps stay closed', () => {
   // Same direction in the bank: a grade ו׳ natural-numbers skill sits on topic 50.
   assert.equal(prog.linksForSkill('ו', 'G6_NAT_OPS', 'mm-cur-50').prereq.includes('mm-cur-31'), true);
 });
+
+// #710: the equality topics of grades א׳ and ב׳ prepare the ד׳ balance,
+// and that balance prepares ה׳.
+test('א׳-ב׳ equality leads to mm-cur-31, which leads to mm-cur-39', () => {
+  const edge = (a, b) => assert.ok(prog.PREREQ[b][0].includes(a) && before(a, b), a + ' → ' + b);
+  const topicId = (grade, key) => {
+    const s = curriculum.sectionForItem({ grade, standard: banks.ST[key] });
+    return curriculum.MATRIX.find((r) => r.grade === grade && r.topic === s.topic).topicId;
+  };
+  assert.equal(topicId('א', 'EQ_LEFT'), 'mm-cur-3');
+  assert.equal(topicId('ב', 'EQ_LEFT'), 'mm-cur-14');
+  edge('mm-cur-3', 'mm-cur-31');
+  edge('mm-cur-14', 'mm-cur-31');
+  edge('mm-cur-31', 'mm-cur-39');
+  assert.ok(prog.linksForTopic('mm-cur-3').buildsTo.includes('mm-cur-31'));
+  assert.ok(prog.linksForTopic('mm-cur-31').buildsTo.includes('mm-cur-39'));
+});

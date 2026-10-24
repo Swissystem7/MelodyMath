@@ -6,8 +6,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const cur = require('../src/lib/curriculum');
+const g1 = require('../src/lib/curriculum/grade1');
+const g2 = require('../src/lib/curriculum/grade2');
 const g4 = require('../src/lib/curriculum/grade4');
 const g5 = require('../src/lib/curriculum/grade5');
+
+// Wording restored from 855a184 (#595), where balanceBars was the equality way.
+const BALANCE_NOTE = 'סימן השוויון אומר: שני הצדדים נמשכים אותו זמן. נגנו את הצד השני והשלימו נקישות עד שהם שווים.';
 
 const ST = banks.ST;
 const TOPIC = { 'ד': 'mm-cur-31', 'ה': 'mm-cur-39' };
@@ -54,7 +59,31 @@ const calc = (s) => Function('return (' + s.replace(/,/g, '').replace(/×/g, '*'
   test('grade ' + grade + ': the balance is the primary way of level 1, fillBar follows', () => {
     const ways = (grade === 'ד' ? g4 : g5).music.EQ_INEQ;
     assert.deepEqual(ways.map((w) => w[0]), ['balanceBars', 'fillBar', 'sameLength']);
-    assert.equal(banks.mechanismOf('balanceBars'), banks.mechanismOf('fillBar'));
+    const eq = g1.music.EQ_LEFT.find((w) => w[0] === 'balanceBars');
+    assert.equal(eq[1], BALANCE_NOTE);
+    assert.equal(banks.mechanismOf('balanceBars'), banks.mechanismOf(eq[0]));
+    assert.equal(banks.mechanismOf('balanceBars'), banks.mechanismOf(g2.music.EQ_LEFT.find((w) => w[0] === 'balanceBars')[0]));
     mine(grade).forEach((it) => assert.equal(it.music, ways[it.level - 1][0], it.id));
   });
+});
+
+test('א׳ and ב׳ equality exercises use the restored balanceBars way', () => {
+  ['א', 'ב'].forEach((grade) => {
+    const items = banks.itemsForGrade(grade).filter((it) => it.standard === ST.EQ_LEFT);
+    assert.ok(items.length > 0, grade);
+    items.forEach((it) => {
+      assert.equal(it.music, 'balanceBars', it.id);
+      assert.equal(it.musicNote, BALANCE_NOTE, it.id);
+    });
+  });
+});
+
+test('each grade maps the equation standard in its own section, to a different topic', () => {
+  const section = (grade) => cur.sectionForItem({ grade, standard: banks.ST.EQ_INEQ });
+  const d = section('ד');
+  const h = section('ה');
+  assert.equal(d.topic, cur.MATRIX.find((r) => r.topicId === 'mm-cur-31').topic);
+  assert.equal(h.topic, cur.MATRIX.find((r) => r.topicId === 'mm-cur-39').topic);
+  assert.notEqual(d.topic, h.topic);
+  assert.equal(banks.ST.EQ_INEQ, 'משוואות ואי־שוויונות — שני צדדים שווים, או צד אחד גדול יותר');
 });
