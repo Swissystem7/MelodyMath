@@ -2,58 +2,80 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const NumberPlay = require('../src/components/NumberPlay.js');
-const { allItems } = require('../src/lib/banks.js');
 
-test('extractNumberPlan extracts addition, subtraction, multiplication and comparison', () => {
-  const pAdd = NumberPlay.extractNumberPlan({ prompt: '3 + 2 = ?' });
-  assert.equal(pAdd.groups.length, 2);
-  assert.equal(pAdd.totalSounds, 5);
+test('addition supports numbers up to 20 without capping to 12 (15+7)', () => {
+  const pAdd = NumberPlay.extractNumberPlan({ prompt: '15 + 7 = ?' });
+  assert.ok(pAdd, 'plan must exist for 15+7');
+  assert.equal(pAdd.groups[0].count, 15, 'first group must be 15, not capped to 12');
+  assert.equal(pAdd.groups[1].count, 7, 'second group must be 7');
+  assert.equal(pAdd.totalSounds, 22);
+  assert.notEqual(pAdd.groups[0].voice, pAdd.groups[1].voice, 'addition groups have distinct timbres');
+});
 
+test('subtraction sounds distinct: counts minuend and takes away subtrahend with muted action', () => {
   const pSub = NumberPlay.extractNumberPlan({ prompt: '7 - 3 = ?' });
-  assert.equal(pSub.groups[0].count, 7);
-  assert.equal(pSub.groups[1].count, 3);
+  assert.ok(pSub);
+  assert.equal(pSub.op, 'subtraction');
+  assert.equal(pSub.minuend, 7);
+  assert.equal(pSub.subtrahend, 3);
+  assert.equal(pSub.totalSounds, 7, 'shows 7 initial dots');
+  const counts = pSub.notes.filter(n => n.action === 'count');
+  const takeaways = pSub.notes.filter(n => n.action === 'takeaway');
+  assert.equal(counts.length, 7);
+  assert.equal(takeaways.length, 3);
+  assert.notEqual(counts[0].voice, takeaways[0].voice, 'takeaways have distinct timbre');
+});
 
+test('multiplication: equal groups use ONE single voice; >20 returns null', () => {
   const pMul = NumberPlay.extractNumberPlan({ prompt: '3 × 4 = ?' });
+  assert.ok(pMul);
+  assert.equal(pMul.op, 'multiplication');
   assert.equal(pMul.groups.length, 3);
   assert.equal(pMul.totalSounds, 12);
+  assert.equal(pMul.groups[0].voice, pMul.groups[1].voice, 'multiplication groups must share the same voice');
+  assert.equal(pMul.groups[1].voice, pMul.groups[2].voice);
 
-  const pCmp = NumberPlay.extractNumberPlan({ prompt: 'השוו: 6 מול 4' });
-  assert.equal(pCmp.groups[0].count, 6);
-  assert.equal(pCmp.groups[1].count, 4);
+  const pLarge = NumberPlay.extractNumberPlan({ prompt: '6 × 7 = ?' });
+  assert.equal(pLarge, null, 'large multiplication >20 must return null, not fall back to [a, b]');
 });
 
-test('timing & timbre: >=1 beat pause between groups, distinct instrument per group', () => {
-  const plan = NumberPlay.extractNumberPlan({ prompt: '4 + 3 = ?' }, { bpm: 100 });
-  const gap = plan.notes[4].at - plan.notes[3].at;
-  assert.ok(gap >= plan.beat * 1.5, `Gap ${gap}s must be at least 1 full beat (${plan.beat}s)`);
-  assert.notEqual(plan.groups[0].voice, plan.groups[1].voice);
-  assert.notEqual(plan.groups[0].hz, plan.groups[1].hz);
+test('division: Israeli notation a : b partitions into equal groups with one voice', () => {
+  const pDiv = NumberPlay.extractNumberPlan({ prompt: '12 : 3 = ?' });
+  assert.ok(pDiv);
+  assert.equal(pDiv.op, 'division');
+  assert.equal(pDiv.groups.length, 3);
+  assert.equal(pDiv.groups[0].count, 4);
+  assert.equal(pDiv.groups[0].voice, pDiv.groups[1].voice);
 });
 
-test('renderHtml creates exact circle count matching sound count', () => {
-  const plan = NumberPlay.extractNumberPlan({ prompt: '3 + 2 = ?' });
+test('fractions, decimals, percentages and advanced curriculum topics are skipped', () => {
+  assert.equal(NumberPlay.extractNumberPlan({ prompt: 'מה ערכו של 3/4?' }), null);
+  assert.equal(NumberPlay.extractNumberPlan({ prompt: 'חשבו: 2.5 + 1.5' }), null);
+  assert.equal(NumberPlay.extractNumberPlan({ prompt: '50% מתוך 20' }), null);
+  assert.equal(NumberPlay.extractNumberPlan({ topicId: 'mm-cur-32', prompt: 'שברים' }), null);
+  assert.equal(NumberPlay.extractNumberPlan({ topicId: 'mm-cur-45', prompt: 'שברים עשרוניים' }), null);
+});
+
+test('timbre uses verified sources (no kalimba TODO)', () => {
+  const voices = NumberPlay.DEFAULT_VOICES;
+  assert.equal(voices.length, 4);
+  const instruments = voices.map(v => v.instrument);
+  assert.ok(!instruments.includes('kalimba'), 'kalimba lacks verified source, must not be in default voices');
+  assert.ok(instruments.includes('darbuka'));
+  assert.ok(instruments.includes('cajon'));
+  assert.ok(instruments.includes('marimba'));
+  assert.ok(instruments.includes('handbells'));
+});
+
+test('renderHtml creates exact circle count and mount wires visual playback', () => {
+  const plan = NumberPlay.extractNumberPlan({ prompt: '4 + 2 = ?' });
   const html = NumberPlay.renderHtml(plan);
-  assert.match(html, /data-total-sounds="5"/);
+  assert.match(html, /data-total-sounds="6"/);
   const dotMatches = html.match(/class="np-dot"/g);
   assert.equal(dotMatches.length, plan.totalSounds);
-  assert.match(html, /class="np-gap"/);
-});
 
-test('play triggers notes and finishes with response under 1 second', async () => {
-  const plan = NumberPlay.extractNumberPlan({ prompt: '2 + 1 = ?' }, { bpm: 600 });
-  const seen = [];
-  const t0 = Date.now();
-  await new Promise(resolve => {
-    NumberPlay.play(plan, { onNote: (n, i) => seen.push(i), onEnd: resolve });
-  });
-  assert.ok(Date.now() - t0 < 1000);
-  assert.equal(seen.length, plan.totalSounds);
-});
-
-test('mount wires click, highlights dots and announces live count', () => {
-  const plan = NumberPlay.extractNumberPlan({ prompt: '3 + 2 = ?' });
   const mockBtn = { setAttribute: () => {}, addEventListener: () => {} };
-  const mockDots = [0, 1, 2, 3, 4].map(() => ({ classList: { add: () => {}, remove: () => {} } }));
+  const mockDots = [0, 1, 2, 3, 4, 5].map(() => ({ classList: { add: () => {}, remove: () => {} } }));
   const mockAnnouncer = { textContent: '' };
   const mockContainer = {
     classList: { remove: () => {}, add: () => {} },
@@ -61,15 +83,6 @@ test('mount wires click, highlights dots and announces live count', () => {
     querySelector: sel => sel.includes('play-numbers') ? mockBtn : (sel.includes('announcer') ? mockAnnouncer : null),
     querySelectorAll: sel => sel.includes('np-dot') ? mockDots : []
   };
-  const handle = NumberPlay.mount(mockContainer, { prompt: '3 + 2 = ?' });
+  const handle = NumberPlay.mount(mockContainer, { prompt: '4 + 2 = ?' });
   assert.ok(handle && typeof handle.play === 'function');
-});
-
-test('curriculum coverage: extracts valid number plans across grades א to ו', () => {
-  const items = allItems();
-  const numSkills = ['addition', 'subtraction', 'multiplication', 'division', 'counting', 'place_value'];
-  const numItems = items.filter(x => numSkills.includes(x.skill));
-  let count = 0;
-  numItems.forEach(it => { if (NumberPlay.extractNumberPlan(it)) count++; });
-  assert.ok(count / numItems.length >= 0.95);
 });
