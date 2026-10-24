@@ -26,8 +26,16 @@ const PERCUSSION = ['darbuka', 'djembe', 'tabla', 'cajon', 'taiko', 'marimba'];
 
 // Dose of the studio (#591 dosage rules): optional extra practice, weak evidence.
 export const DOSE = Object.freeze({ mechanism: 'M4', optional: true, evidence: 'weak', role: 'extra', mainScreen: false });
-export const EXTRA_TAG_HE = 'תרגול נוסף · ראיות חלשות';
+// The child sees only "extra practice"; the evidence grade stays in
+// data-evidence for teacher views (owner note 24.10 16:19).
+export const EXTRA_TAG_HE = 'תרגול נוסף';
 export const STAGES = ['music', 'silent', 'done'];
+// Place in the progression map: the common multiple is standard LCM of grade
+// ה׳, tagged by curriculum.sectionForItem with row mm-cur-40 (ראשוניים
+// ופריקים; פירוק לגורמים; סימני התחלקות), which progression.js links as
+// 'factors and common multiples'.
+export const TOPIC = Object.freeze({ id: 'mm-cur-40', grade: 'ה', standard: 'LCM' });
+const DOSE_ATTRS = ' data-dose="extra" data-evidence="weak" data-topic="' + TOPIC.id + '" data-grade="' + TOPIC.grade + '"';
 const TAP = 'min-width:44px;min-height:44px';
 
 // cycleA/cycleB are the exercise lengths. targetLcm is lcm(cycleA, cycleB).
@@ -144,7 +152,7 @@ export function formatCrossInstrumentCard(preset, status) {
   const answers = choices(p).map(function (n) {
     return button('data-ensemble-answer="' + n + '"', bdi(n));
   }).join('');
-  return '<article dir="rtl" lang="he" data-preset="' + escapeHtml(p.id) + '" data-stage="music" data-dose="extra">'
+  return '<article dir="rtl" lang="he" data-preset="' + escapeHtml(p.id) + '" data-stage="music"' + DOSE_ATTRS + '>'
     + '<span class="tag">' + EXTRA_TAG_HE + '</span>'
     + '<h2>' + escapeHtml(p.titleHe) + '</h2>'
     + '<p>' + factHe(p) + ' השבר המשותף הוא ' + bdi(frac) + '.</p>'
@@ -160,15 +168,28 @@ export function formatCrossInstrumentCard(preset, status) {
 
 // The last stage: the same common multiple with no instrument, no sound and
 // no story, symbols only. Solving it is what counts as mastery.
-export function formatSilentStage(preset, status) {
+// After an error the ensemble is replayed once and this hint is shown: where
+// each cycle lands, the common landing marked. Numbers only, no instrument.
+export function silentHintHtml(preset) {
+  const p = preset || ENSEMBLE_PRESETS[0];
+  function lands(c) {
+    const out = [];
+    for (let n = c; n <= p.targetLcm; n += c) out.push(n === p.targetLcm ? '<mark>' + bdi(n) + '</mark>' : bdi(n));
+    return 'מחזור של ' + bdi(c) + ' נוחת על ' + out.join(', ') + '.';
+  }
+  return '<p class="hint" data-hint>רמז: הקשבנו שוב. ' + lands(p.cycleA) + ' ' + lands(p.cycleB) + ' איפה הם נפגשים לראשונה?</p>';
+}
+
+export function formatSilentStage(preset, status, hint) {
   const p = preset || ENSEMBLE_PRESETS[0];
   const answers = choices(p).map(function (n) {
     return button('data-ensemble-answer="' + n + '"', bdi(n));
   }).join('');
-  return '<article dir="rtl" lang="he" data-preset="' + escapeHtml(p.id) + '" data-stage="silent" data-dose="extra">'
+  return '<article dir="rtl" lang="he" data-preset="' + escapeHtml(p.id) + '" data-stage="silent"' + DOSE_ATTRS + '>'
     + '<span class="tag">' + EXTRA_TAG_HE + '</span>'
     + '<h3>שלב אחרון: בלי צלילים</h3>'
     + '<p>' + bdi('lcm(' + p.cycleA + ', ' + p.cycleB + ') = ?') + '</p>'
+    + (hint ? silentHintHtml(p) : '')
     + '<div class="jam-row">' + answers + '</div>'
     + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>'
     + '</article>';
@@ -203,11 +224,19 @@ function playNote(id, onPlay) {
 export function mountEnsembleStudio(container, options = {}) {
   const opts = options || {};
   const preset = opts.preset || ENSEMBLE_PRESETS[opts.index || 0] || ENSEMBLE_PRESETS[0];
-  const view = { preset: preset, lastOk: null, played: [], stage: 'music', mastered: false, dose: DOSE };
+  const view = { preset: preset, lastOk: null, played: [], stage: 'music', mastered: false, dose: DOSE, replays: 0, hint: false };
   let status = '';
 
   function render() {
-    container.innerHTML = view.stage === 'music' ? formatCrossInstrumentCard(preset, status) : formatSilentStage(preset, status);
+    container.innerHTML = view.stage === 'music' ? formatCrossInstrumentCard(preset, status) : formatSilentStage(preset, status, view.hint);
+  }
+
+  // An error in the silent stage (like the plain check of #681): replay the
+  // ensemble once, show where the cycles meet, then the child retries.
+  function replayWithHint() {
+    view.replays += 1;
+    view.hint = true;
+    preset.instruments.forEach(function (id) { playNote(id, opts.onPlay); });
   }
 
   function onClick(event) {
@@ -224,7 +253,8 @@ export function mountEnsembleStudio(container, options = {}) {
     if (ans == null || ans === '') return;
     if (view.stage === 'done') return;
     view.lastOk = Number(ans) === preset.targetLcm;
-    if (!view.lastOk) status = 'עוד לא. נסו שוב.';
+    if (!view.lastOk && view.stage === 'silent') { replayWithHint(); status = 'עוד לא. הקשיבו שוב ונסו שוב.'; }
+    else if (!view.lastOk) status = 'עוד לא. נסו שוב.';
     else if (view.stage === 'music') { view.stage = 'silent'; status = 'נכון. עכשיו אותה שאלה בלי צלילים.'; }
     else { view.stage = 'done'; view.mastered = true; status = 'נכון. פתרתם גם בלי צלילים.'; }
     render();
