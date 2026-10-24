@@ -38,6 +38,18 @@ the plain stage. A miss in the plain stage goes back to the musical version;
 any other shown solution moves one stage back. The plain-stage success rate is
 kept in `localStorage` under `mm.soundAdd.plain` (`{ tried, right }`).
 
+**Steps (#703):** a mastered step opens the next one, again with sound:
+sums within 10, making ten, crossing ten, sums to 20, taking away within 10,
+taking away within 20. Two music ways carry the later steps, restored as they
+were before #635/#636 (`git show c133190^:src/lib/curriculum/grade3.js`):
+`tenExchange` (the 10th sound gets a gong, the bigger instrument of a full ten;
+the 10th circle is ringed) and `takeAwayBeats` (all of the first number, then
+the same phrase with the taken beats silent; what is still heard is the
+answer, and the taken circles are crossed out). Past ten the silent grid has
+1-20 and the line runs 0-20. Open a step directly with `?step=` (`add10`,
+`makeTen`, `crossTen`, `add20`, `sub10`, `sub20`). The items are a fixed list
+until the #687 variation engine generates them.
+
 **Feedback:** a right answer merges the two groups into one group of the total
 and counts it up on a rising scale. A wrong answer says "almost", replays the
 exercise counting every circle aloud, marks what is missing or extra and gives
