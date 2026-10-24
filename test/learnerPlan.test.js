@@ -23,7 +23,7 @@ test('the path runs א׳ through ו׳ and a finished grade opens the next one', 
   assert.equal(lastA.nextGrade, 'ב');
   assert.ok(lastA.nextTopic.indexOf('1,000') !== -1, lastA.nextTopic);
   const gaps = steps.filter((s) => s.status === cur.GAP);
-  assert.ok(gaps.length >= 1);
+  assert.equal(gaps.length, cur.coverageMatrix().filter((r) => r.status === cur.GAP).length);
   gaps.forEach((s) => assert.equal(s.playable, false));
   assert.match(plan.bridgeSentence(), /א׳ עד ו׳/);
   assert.match(plan.bridgeSentence(), /פער נשאר פער/);

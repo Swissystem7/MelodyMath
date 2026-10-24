@@ -7,6 +7,7 @@ const root = path.join(__dirname, '..');
 const pages = [
   'index.html',
   'curriculum.html',
+  'program.html',
   'check.html',
   'frequency.html',
   'offer.html',

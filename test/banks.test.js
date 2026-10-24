@@ -3,6 +3,20 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const { eligibleExercises } = require('../src/lib/adaptive');
 
+test('grade א has 8 approximate number-line items with tolerance 4 (#466)', () => {
+  const approx = banks.allItems().filter((it) => it.tolerance === 4);
+  assert.deepEqual(approx.map((it) => it.answer), [17, 23, 37, 48, 62, 71, 86, 94]);
+  approx.forEach((it) => {
+    assert.equal(banks.isShippable(it), true, it.id);
+    assert.equal(it.grade, 'א');
+    assert.equal(it.standard, banks.ST.NUMBER_LINE_APPROX);
+    assert.equal(it.level, 2);
+    assert.equal(it.widget, 'numberLine');
+    assert.equal(it.line.mark, undefined, it.id + ' must not mark the answer');
+  });
+  assert.equal(banks.diagnosticItems('א').length, 16);
+});
+
 test('every shipped item is tagged with grade, strand and a specific standard', () => {
   const all = banks.allItems();
   assert.ok(all.length >= 80, 'bank too thin: ' + all.length);
@@ -163,6 +177,29 @@ test('grade-א diagnostic keeps the five-drum hear cue', () => {
   assert.deepEqual(plus.hear, [3, 2]);
 });
 
+test('grade-ג word problems add two-step items and «בכמה» vs «פי כמה» contrasts (#467)', () => {
+  const words = banks.rowsOf('word_problems', 'ג');
+  const tagged = words.filter((it) => Array.isArray(it.tags));
+  assert.equal(tagged.length, 10);
+  tagged.forEach((it) => {
+    assert.equal(it.standard, banks.ST.WORD_TWO_STEP, it.id);
+    assert.ok(it.level === 2 || it.level === 3, it.id);
+    assert.equal(it.widget, undefined, it.id);
+  });
+  const contrast = tagged.filter((it) => it.tags.includes('contrast'));
+  assert.equal(contrast.length, 5);
+  const nums = (s) => (s.match(/\d+/g) || []).join(',');
+  contrast.forEach((it) => {
+    assert.match(it.prompt, /בכמה/, it.id);
+    const twin = words.find((w) => /פי כמה/.test(w.prompt) && nums(w.prompt) === nums(it.prompt));
+    assert.ok(twin, it.id + ' has no «פי כמה» twin');
+    assert.notEqual(it.answer, twin.answer, it.id);
+    assert.ok(it.hint.includes('פי כמה» היה ' + twin.answer), it.id);
+  });
+  const L2 = banks.itemsAtLevel('word_problems', 2, 'ג');
+  assert.ok(L2.some((it) => it.tags && it.tags.includes('two_step')));
+});
+
 test('a prototype-key grade falls back instead of crashing', () => {
   ['constructor', 'toString', '__proto__', 'hasOwnProperty'].forEach((g) => {
     assert.equal(banks.isGrade(g), false, g);
@@ -170,6 +207,17 @@ test('a prototype-key grade falls back instead of crashing', () => {
     assert.deepEqual(banks.diagnosticItems(g), banks.diagnosticItems('א'));
   });
   banks.GRADES.forEach((g) => assert.equal(banks.isGrade(g), true, g));
+});
+
+test('classItems follows the selected grade and keeps the grade-1 default', () => {
+  assert.deepEqual(banks.classItems(), banks.classItems('א'));
+  assert.deepEqual(banks.classItems('constructor'), banks.classItems('א'));
+  const g3 = banks.classItems('ג');
+  assert.ok(g3.length > 0);
+  assert.ok(g3.every((i) => i.grade === 'ג'));
+  assert.ok(banks.classItems('ב').every((i) => i.grade === 'ב'));
+  banks.GRADES.forEach((g) => assert.ok(banks.classItems(g).every((i) => !i.typed), g + ' has typed items'));
+
 });
 
 test('regroupItems is a whole beat-mode session of grade-ב carry/borrow duos', () => {
@@ -184,4 +232,5 @@ test('regroupItems is a whole beat-mode session of grade-ב carry/borrow duos', 
     assert.ok(it.g2.op === '+' ? a + b >= 10 : a < b, it.id + ' does not cross a ten');
   });
   assert.ok(!rows.some((it) => it.g2.a === 23 && it.g2.b === 14), 'no-regrouping warm-up leaked in');
+
 });
