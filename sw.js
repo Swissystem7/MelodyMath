@@ -70,6 +70,8 @@ const ASSETS = [
   './src/components/TimesTableGroove.js',
   './src/lib/instrumentVoices.js',
   './src/lib/instruments.js',
+  './src/lib/instrumentPicker.js',
+  './src/components/InstrumentPicker.js',
   './src/components/jamKit.js',
   './src/components/jam.css',
   './src/lib/music/fractionBar.js',
