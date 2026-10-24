@@ -26,6 +26,7 @@
     GROUP10: 'קיבוץ לעשרות; התאמת כמות למספר עד 100',
     NEXTPREV: 'סדר המספרים — הבא והקודם',
     COUNT_OBJ: 'מנייה — התאמת כמות למספר',
+    COUNT_ON: 'ספירה הלאה ממספר נתון — לא מתחילים מ־1',
     DECOMP10: 'פירוקי 10',
     EQ_LEFT: 'סימן השוויון כשוויון בין שני ביטויים',
     MULTIADD: 'חיבור עם יותר משני מחוברים',
@@ -1967,7 +1968,20 @@
 
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
+  // ---------- כיתה א׳ · ספירה הלאה (#462) ----------
+  // Appended last so older ids stay put. The child taps a pad on each beat,
+  // counting on from `from` instead of from 1, and types where the count landed.
+  [[4, 2, 1], [7, 3, 1], [12, 4, 1], [18, 5, 2], [23, 3, 2], [36, 4, 2], [48, 5, 2], [57, 2, 2]].forEach(function (r) {
+    const from = r[0], steps = r[1];
+    RAW.push(I('א', 'counting', 'מתחילים ב־' + from + ' ושומעים ' + steps + ' פעימות — לאן הגענו?', from + steps,
+      from + ' ואז ' + steps + ' קדימה',
+      { standard: ST.COUNT_ON, level: r[2], widget: 'g1', g1: { kind: 'countOn', from: from, steps: steps } }));
+  });
+
   function musicForLate() {
+    RAW.forEach(function (raw) {
+      if (raw.g1 && raw.g1.kind && !raw.music) raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
+    });
     GRADE_FILES.forEach(function (f) {
       if (!f || !Array.isArray(f.items)) return;
       const link = {};
@@ -2010,7 +2024,7 @@
   const MUSIC_MECHANISMS = {
     M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
       finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
-      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
+      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'g1CountOn'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
       tags: ['faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
@@ -2073,7 +2087,7 @@
   // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
   // that mechanism's study. Activity tag → [source id, evidence].
   const ACTIVITY_SOURCES = {
-    hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
+    hearBeats: ['mcdonel2015', 'A'], g1CountOn: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
     evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],

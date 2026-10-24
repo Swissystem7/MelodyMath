@@ -269,6 +269,35 @@
     return 'הדגם הוא ' + challenge.type + '. שמעתם: ' + heard + '. מה בא אחר כך?';
   }
 
+  // ---------- 5. ספירה הלאה (#462) ----------
+  // The count starts in the middle: one beat per number after `from`, and
+  // the last beat is accented — that is the number the child types.
+  function countOnBeats(from, steps) {
+    const f = whole(from, 0, 1000);
+    const k = whole(steps, 1, 20);
+    if (f == null || k == null) return [];
+    const beats = [];
+    for (let i = 1; i <= k; i++) beats.push({ count: f + i, accent: i === k });
+    return beats;
+  }
+
+  function countOnEvents(from, steps, bpm) {
+    const beat = beatLength(bpm);
+    return countOnBeats(from, steps).map(function (b, i) {
+      return b.accent
+        ? hit(i * beat, beat * 0.7, 660, 0.26, 'triangle')
+        : hit(i * beat, beat * 0.7, 330, 0.14, 'sine');
+    });
+  }
+
+  // Names the start and the number of beats only — never where the count
+  // lands, which is the answer (#457).
+  function countOnNarration(from, steps) {
+    const beats = countOnBeats(from, steps);
+    if (!beats.length) return '';
+    return 'מתחילים ב־' + (beats[0].count - 1) + ', ' + beats.length + ' פעימות קדימה.';
+  }
+
   // ---------- widgets (slice 2 of #102 / #328) ----------
   function doc() {
     return typeof document === 'undefined' ? null : document;
@@ -378,11 +407,34 @@
     box.appendChild(node('p', 'g3-note', patternNarration(spec.type, spec.length)));
   }
 
+  // One pad per beat (yellow), the last one accented. Tapping a pad sounds
+  // its beat, so the child can tap along while counting on from `from`.
+  function drawCountOn(box, spec) {
+    const beats = countOnBeats(spec.from, spec.steps);
+    if (!beats.length) return;
+    const row = padRow(box);
+    const group = node('span', 'g3-bar');
+    beats.forEach(function (b, i) {
+      const pad = node('i', b.accent ? 'on' : 'left');
+      pad.addEventListener('click', function () {
+        const e = countOnEvents(spec.from, spec.steps, spec.bpm)[i];
+        playIfAllowed([hit(0, e.dur, e.hz, e.gain, e.type)]);
+      });
+      group.appendChild(pad);
+    });
+    row.appendChild(group);
+    addPlay(box, '▶ השמע שוב', function () {
+      return countOnEvents(spec.from, spec.steps, spec.bpm);
+    });
+    box.appendChild(node('p', 'g3-note', countOnNarration(spec.from, spec.steps)));
+  }
+
   const DRAW = {
     beats: drawBeats,
     scale: drawScale,
     chart100: drawChart100,
     pattern: drawPattern,
+    countOn: drawCountOn,
   };
 
   function bindGrade1(host, spec) {
@@ -422,6 +474,9 @@
     createPatternChallenge: createPatternChallenge,
     patternEvents: patternEvents,
     patternNarration: patternNarration,
+    countOnBeats: countOnBeats,
+    countOnEvents: countOnEvents,
+    countOnNarration: countOnNarration,
     playEvents: playEvents,
     bindGrade1: bindGrade1
   };
