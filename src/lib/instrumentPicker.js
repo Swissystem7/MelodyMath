@@ -17,41 +17,15 @@
   };
 
   const CHILD_FAMILIES = [
-    {
-      id: 'drums',
-      labelHe: 'תופים',
-      icon: '🥁',
-      hasPitch: false,
-      instruments: ['darbuka', 'djembe', 'tabla', 'cajon']
-    },
-    {
-      id: 'strings',
-      labelHe: 'פריטה',
-      icon: '🎸',
-      hasPitch: true,
-      instruments: ['guitar', 'oud', 'kora', 'sitar']
-    },
-    {
-      id: 'keys',
-      labelHe: 'קלידים ומקושים',
-      icon: '🎹',
-      hasPitch: true,
-      instruments: ['piano', 'marimba', 'xylophone', 'kalimba']
-    },
-    {
-      id: 'winds',
-      labelHe: 'נשיפה וקשת',
-      icon: '🎷',
-      hasPitch: true,
-      instruments: ['recorder', 'panFlute', 'ney', 'violin']
-    }
+    { id: 'drums', labelHe: 'תופים', icon: '🥁', hasPitch: false, instruments: ['darbuka', 'djembe', 'tabla', 'cajon'] },
+    { id: 'strings', labelHe: 'פריטה', icon: '🎸', hasPitch: true, instruments: ['guitar', 'oud', 'kora', 'sitar'] },
+    { id: 'keys', labelHe: 'קלידים ומקושים', icon: '🎹', hasPitch: true, instruments: ['piano', 'marimba', 'xylophone', 'kalimba'] },
+    { id: 'winds', labelHe: 'נשיפה וקשת', icon: '🎷', hasPitch: true, instruments: ['recorder', 'panFlute', 'ney', 'violin'] }
   ];
 
   function getFamilyForInstrument(instrumentId) {
     for (let i = 0; i < CHILD_FAMILIES.length; i++) {
-      if (CHILD_FAMILIES[i].instruments.indexOf(instrumentId) >= 0) {
-        return CHILD_FAMILIES[i];
-      }
+      if (CHILD_FAMILIES[i].instruments.indexOf(instrumentId) >= 0) return CHILD_FAMILIES[i];
     }
     return null;
   }
@@ -95,13 +69,7 @@
         noticeHe: 'לצליל עם גובה משתמשים בצליל קסילופון מותאם'
       };
     }
-
-    return {
-      instrumentId: instrumentId,
-      voice: voice,
-      isSubstituted: false,
-      noticeHe: ''
-    };
+    return { instrumentId: instrumentId, voice: voice, isSubstituted: false, noticeHe: '' };
   }
 
   function pickEnsembleVoices(options) {
@@ -113,13 +81,9 @@
 
     if (count > 1) {
       for (let i = 0; i < CHILD_FAMILIES.length && picked.length < count; i++) {
-        const f = CHILD_FAMILIES[i];
-        if (f.id !== firstFam.id) {
-          picked.push(f.instruments[0]);
-        }
+        if (CHILD_FAMILIES[i].id !== firstFam.id) picked.push(CHILD_FAMILIES[i].instruments[0]);
       }
     }
-
     return picked;
   }
 
