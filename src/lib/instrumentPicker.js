@@ -18,9 +18,9 @@
 
   const CHILD_FAMILIES = [
     { id: 'drums', labelHe: 'תופים', icon: '🥁', hasPitch: false, instruments: ['darbuka', 'djembe', 'tabla', 'cajon'] },
-    { id: 'strings', labelHe: 'פריטה', icon: '🎸', hasPitch: true, instruments: ['guitar', 'oud', 'kora', 'sitar'] },
-    { id: 'keys', labelHe: 'קלידים ומקושים', icon: '🎹', hasPitch: true, instruments: ['piano', 'marimba', 'xylophone', 'kalimba'] },
-    { id: 'winds', labelHe: 'נשיפה וקשת', icon: '🎷', hasPitch: true, instruments: ['recorder', 'panFlute', 'ney', 'violin'] }
+    { id: 'strings', labelHe: 'פריטה וקשת', icon: '🎸', hasPitch: true, instruments: ['guitar', 'oud', 'kora', 'sitar', 'violin'] },
+    { id: 'keys', labelHe: 'קלידים ומקושים', icon: '🎹', hasPitch: true, instruments: ['piano', 'marimba', 'xylophone', 'accordion'] },
+    { id: 'winds', labelHe: 'נשיפה', icon: '🎷', hasPitch: true, instruments: ['recorder', 'panFlute', 'ney', 'shakuhachi'] }
   ];
 
   function getFamilyForInstrument(instrumentId) {
@@ -87,12 +87,34 @@
     return picked;
   }
 
+  function perimeterExercisePlan(sides, options) {
+    const opts = options || {};
+    const sideInst = opts.instrumentId || 'recorder';
+    const cornerInst = opts.cornerInstrumentId || 'darbuka';
+    const sideVoice = resolveInstrumentVoice(sideInst, { needsPitch: true });
+    const cornerVoice = resolveInstrumentVoice(cornerInst);
+    const events = [];
+    let total = 0;
+    (sides || []).forEach(function (len, idx) {
+      total += len;
+      events.push({ type: 'corner', cornerIndex: idx, voice: cornerVoice.voice });
+      events.push({ type: 'side', sideIndex: idx, length: len, voice: sideVoice.voice });
+    });
+    return {
+      totalPerimeter: total,
+      sideVoice: sideVoice,
+      cornerVoice: cornerVoice,
+      events: events
+    };
+  }
+
   return {
     CHILD_FAMILIES: CHILD_FAMILIES,
     getFamilyForInstrument: getFamilyForInstrument,
     getChildInstrument: getChildInstrument,
     saveChildInstrument: saveChildInstrument,
     resolveInstrumentVoice: resolveInstrumentVoice,
-    pickEnsembleVoices: pickEnsembleVoices
+    pickEnsembleVoices: pickEnsembleVoices,
+    perimeterExercisePlan: perimeterExercisePlan
   };
 });

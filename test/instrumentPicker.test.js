@@ -101,3 +101,16 @@ test('FractionBarPad wires InstrumentPicker and uses 2-family ensemble in barPla
   assert.equal(tiles[2].voice, 'drumLow');
   assert.equal(tiles[3].voice, 'breathy');
 });
+
+test('perimeterExercisePlan creates corner and side events with substituted voices if needed', () => {
+  const plan = Logic.perimeterExercisePlan([7, 9, 12], { instrumentId: 'recorder', cornerInstrumentId: 'darbuka' });
+  assert.equal(plan.totalPerimeter, 28);
+  assert.equal(plan.cornerVoice.voice, 'drumLow');
+  assert.equal(plan.sideVoice.voice, 'breathy');
+  assert.equal(plan.events.filter((e) => e.type === 'corner').length, 3);
+  assert.equal(plan.events.filter((e) => e.type === 'side').length, 3);
+
+  const drumSidePlan = Logic.perimeterExercisePlan([7, 9, 12], { instrumentId: 'darbuka' });
+  assert.equal(drumSidePlan.sideVoice.isSubstituted, true);
+  assert.equal(drumSidePlan.sideVoice.voice, 'woodBar');
+});
