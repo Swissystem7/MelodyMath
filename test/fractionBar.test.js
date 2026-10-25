@@ -125,3 +125,19 @@ test('end-of-topic no-music check items exist for Grade ד mm-cur-33 (#723, Refs
     assert.ok(it.answer);
   });
 });
+
+
+test('FractionBarPad exercises include multi-bar target >1 and render mixed number prompt (#723, Refs #665)', () => {
+  const FBP = require('../src/components/FractionBarPad.js');
+  const ex = FBP.EXERCISES.find(e => e.target === '1.5');
+  assert.ok(ex, 'multi-bar exercise 1.5 must exist in FractionBarPad');
+  const idx = FBP.EXERCISES.indexOf(ex);
+  const state = FBP.createState(idx, true);
+  const html = FBP.renderHtml(state, 'drumLow');
+  assert.match(html, /1\.5 = 3\/2 \/ 1 ו־1\/2/);
+
+  // Solvable by whole + half
+  const filled = FBP.tapTile(FBP.tapTile(state, 'whole'), 'half');
+  assert.equal(filled.status, 'exact');
+  assert.equal(filled.sound, 'cadence');
+});
