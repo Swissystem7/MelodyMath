@@ -7,17 +7,9 @@
   'use strict';
   function need(p) { try { return require(p); } catch (e) { return null; } }
   function getJam() { return (root && root.MM_JAM) || need('./jamKit.js'); }
-  function getInstruments() {
-    if (root && root.MM_INSTRUMENTS) return root.MM_INSTRUMENTS;
-    if (root && typeof root.forTopic === 'function') return root;
-    return need('../lib/instruments.js');
-  }
-  const DEFAULT_VOICES = [
-    { voice: 'drumLow', hz: 220, instrument: 'darbuka', he: 'דרבוקה' },
-    { voice: 'woodClick', hz: 330, instrument: 'cajon', he: 'קחון' },
-    { voice: 'woodBar', hz: 392, instrument: 'marimba', he: 'מרימבה' },
-    { voice: 'metalBell', hz: 440, instrument: 'handbells', he: 'פעמוני יד' }
-  ];
+  function getInstruments() { return (root && root.MM_INSTRUMENTS) || (root && typeof root.forTopic === 'function' ? root : need('../lib/instruments.js')); }
+  function getVariety() { return (root && root.MM_VARIETY) || need('../lib/exercises/variety.js'); }
+  const DEFAULT_VOICES = [{ voice: 'drumLow', hz: 220, instrument: 'darbuka', he: 'דרבוקה' }, { voice: 'woodClick', hz: 330, instrument: 'cajon', he: 'קחון' }, { voice: 'woodBar', hz: 392, instrument: 'marimba', he: 'מרימבה' }, { voice: 'metalBell', hz: 440, instrument: 'handbells', he: 'פעמוני יד' }];
   function cap(n) { return Math.max(1, Math.min(20, Math.round(Number(n) || 1))); }
   function hashStr(str) {
     let h = 0, s = String(str || '');
@@ -33,32 +25,23 @@
     if (raw.includes('line') || raw.includes('ישר')) return 'numberLine';
     return 'counting';
   }
-  function getPersistedInstrument(options) {
-    if (options && options.instrument) return options.instrument;
-    if (options && options.chosenInstrument) return options.chosenInstrument;
+  function getPersistedInstrument(opts) {
+    if (opts && (opts.instrument || opts.chosenInstrument)) return opts.instrument || opts.chosenInstrument;
     try {
       if (typeof localStorage !== 'undefined') {
         const direct = localStorage.getItem('mm_chosen_instrument') || localStorage.getItem('mm_instrument');
         if (direct) return direct;
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && k.startsWith('mm_child_inst_')) {
-            const v = localStorage.getItem(k);
-            if (v) return v;
-          }
+          if (k && k.startsWith('mm_child_inst_')) { const v = localStorage.getItem(k); if (v) return v; }
         }
       }
     } catch (_) {}
     return null;
   }
-  function savePersistedInstrument(instrumentId) {
-    if (!instrumentId) return false;
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('mm_chosen_instrument', instrumentId);
-        return true;
-      }
-    } catch (_) {}
+  function savePersistedInstrument(id) {
+    if (!id) return false;
+    try { if (typeof localStorage !== 'undefined') { localStorage.setItem('mm_chosen_instrument', id); return true; } } catch (_) {}
     return false;
   }
   function getVoicesForExercise(it, parsedOp, options) {
@@ -136,8 +119,20 @@
     const parsed = parseNumberGroups(it);
     if (!parsed || !parsed.groups || !parsed.groups.length) return null;
     const idSeed = (it && (it.id || it.prompt)) ? hashStr(it.id || it.prompt) : 0;
-    const rawBpm = (options && options.seed ? 86 + (options.seed % 34) : (idSeed ? 86 + (idSeed % 34) : 96));
-    const bpm = Number(options && options.bpm) || (rawBpm === 110 ? 108 : rawBpm);
+    const vMod = (options && options.variety) || getVariety();
+    const roundIdx = Number(options && options.roundIndex) || 0;
+    let bpm = Number(options && options.bpm) || (it && Number(it.bpm)) || 0;
+    let pattern = (options && options.rhythmPattern) || (it && it.rhythmPattern) || null;
+    if (!bpm && vMod && typeof vMod.pickTempo === 'function') {
+      bpm = vMod.pickTempo(roundIdx, idSeed || (options && options.seed));
+    }
+    if (!pattern && vMod && typeof vMod.pickPattern === 'function') {
+      pattern = vMod.pickPattern(roundIdx, idSeed || (options && options.seed));
+    }
+    if (!bpm) {
+      const rawBpm = (options && options.seed ? 86 + (options.seed % 34) : (idSeed ? 86 + (idSeed % 34) : 96));
+      bpm = (rawBpm === 110 ? 108 : rawBpm);
+    }
     const beat = 60 / bpm, pause = beat * 1.5;
     const groups = [], notes = [];
     let t = 0, gIdx = 0;
@@ -150,7 +145,7 @@
       for (let k = 0; k < a; k++) { notes.push({ index: gIdx++, at: t, groupIndex: 0, noteInGroup: k + 1, groupCount: a, voice: v.voice, hz: v.hz, action: 'count' }); t += beat; }
       t += pause;
       for (let k = 0; k < b; k++) { notes.push({ index: gIdx++, at: t, groupIndex: 0, targetDot: a - 1 - k, noteInGroup: k + 1, groupCount: b, voice: takeVoice.voice, hz: 220 - k * 15, action: 'takeaway' }); t += beat; }
-      return { op: parsed.op, bpm, beat, totalSounds: a, groups, notes, duration: t, minuend: a, subtrahend: b };
+      return { op: parsed.op, bpm, rhythmPattern: pattern, beat, totalSounds: a, groups, notes, duration: t, minuend: a, subtrahend: b };
     }
     const useSingleVoice = Boolean(parsed.singleVoice);
     const baseVoice = topicVoices[0] || DEFAULT_VOICES[parsed.op === 'multiplication' ? 2 : 0];
@@ -163,7 +158,7 @@
       for (let k = 0; k < ones; k++) { notes.push({ index: gIdx++, at: t, groupIndex: gi, noteInGroup: (tens ? '10+' : '') + (k + 1), groupCount: count, voice: v.voice, hz: v.hz, kind: 'one', isTen: false, action: 'count' }); t += beat; }
       if (gi < parsed.groups.length - 1) t += pause;
     });
-    return { op: parsed.op, bpm, beat, totalSounds: notes.length, groups, notes, duration: t };
+    return { op: parsed.op, bpm, rhythmPattern: pattern, beat, totalSounds: notes.length, groups, notes, duration: t };
   }
   function renderHtml(plan) {
     if (!plan || !plan.totalSounds) return '';
@@ -174,14 +169,12 @@
       for (let k = 0; k < ones; k++) dots.push('<span class="np-dot np-one" data-group="' + gi + '" data-note-idx="' + (g.startIndex + tens + k) + '" aria-hidden="true"></span>');
       return '<div class="np-group" data-group="' + gi + '" aria-label="קבוצה ' + (gi + 1) + '">' + dots.join('') + '</div>';
     }).join('<span class="np-gap" aria-hidden="true">|</span>');
-    return '<div class="number-play-strip np-strip" dir="rtl" data-total-sounds="' + plan.totalSounds + '" data-op="' + (plan.op || '') + '" role="region" aria-label="השמעת המספרים">'
-      + '<button type="button" class="number-play-btn np-btn" data-act="play-numbers" aria-label="השמעת המספרים" style="min-width:44px;min-height:44px">'
-      + '<span class="np-icon" aria-hidden="true">▶</span> <span class="np-label">השמעת המספרים</span></button>'
-      + '<div class="number-play-circles np-circles" aria-hidden="true">' + groupsHtml + '</div>'
-      + '<div class="sr-only np-announcer" role="status" aria-live="polite"></div></div>';
+    return '<div class="number-play-strip np-strip" dir="rtl" data-total-sounds="' + plan.totalSounds + '" data-op="' + (plan.op || '') + '" role="region" aria-label="השמעת המספרים">' +
+      '<button type="button" class="number-play-btn np-btn" data-act="play-numbers" aria-label="השמעת המספרים" style="min-width:44px;min-height:44px"><span class="np-icon" aria-hidden="true">▶</span> <span class="np-label">השמעת המספרים</span></button>' +
+      '<div class="number-play-circles np-circles" aria-hidden="true">' + groupsHtml + '</div><div class="sr-only np-announcer" role="status" aria-live="polite"></div></div>';
   }
   function play(plan, callbacks, options) {
-    if (!plan || !plan.notes || !plan.notes.length) return { stop: function () {} };
+    if (!plan || !plan.notes || !plan.notes.length) return { stop: () => {} };
     const cb = callbacks || {}, jam = getJam();
     if (jam && typeof jam.playNotes === 'function') return jam.playNotes(plan.notes, cb.onNote, cb.onEnd);
     let stopped = false, timers = [];
@@ -221,5 +214,5 @@
     if (btn) btn.addEventListener('click', handlePlay);
     return { plan, play: handlePlay, stop: () => { if (activeHandle && activeHandle.stop) activeHandle.stop(); } };
   }
-  return { parseNumberGroups, extractNumberPlan, renderHtml, play, mount, DEFAULT_VOICES, shouldSkip, getVoicesForExercise, resolveTopicKey, getPersistedInstrument, savePersistedInstrument };
+  return { parseNumberGroups, extractNumberPlan, renderHtml, play, mount, DEFAULT_VOICES, shouldSkip, getVoicesForExercise, resolveTopicKey, getPersistedInstrument, savePersistedInstrument, getVariety };
 });
