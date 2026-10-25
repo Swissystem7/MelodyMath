@@ -42,8 +42,9 @@ Object.keys(FILES).forEach((grade) => {
     Object.keys(file.music).forEach((k) => {
       assert.ok(banks.ST[k], grade + ' ' + k + ' is not a bank standard');
       const ways = file.music[k];
-      // One per level (1-3); a topic whose main way was replaced (#751) may
-      // keep the old ways as a fourth, optional one, never a fourth primary.
+      // One main way per level (1-3), plus an optional extra; a topic whose
+      // main way was replaced (#751) keeps the old ways as optional ones,
+      // never a fourth primary.
       assert.ok(ways.length >= 2 && ways.length <= 4, k);
       assert.ok(banks.primaryWays(ways).length <= 3, k);
       assert.equal(new Set(ways.map(([tag]) => tag)).size, ways.length, k + ' repeats a tag');
