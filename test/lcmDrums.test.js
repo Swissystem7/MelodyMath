@@ -26,6 +26,8 @@ test('grade ג׳ MUL_C: repeatedBars from grade 2 must stay the FIRST main metho
   assert.ok(repIdx !== -1 && lcmIdx !== -1, 'both repeatedBars and lcmDrums must be primary ways');
   assert.ok(repIdx < lcmIdx, 'repeatedBars must come before lcmDrums (lcmDrums must not come before it)');
   assert.equal(primary[1][0], 'lcmDrums');
+  assert.equal(lcmWay[2], 'rissman2005');
+  assert.equal(lcmWay[3], 'R');
   assert.equal(banks.isOptionalWay(lcmWay), false);
   assert.equal(lcmWay[4], undefined);
   // A primary way must use a strongly evidenced mechanism (dosage rule 1).
@@ -85,6 +87,8 @@ test('grades ב׳, ד׳ and ה׳ keep lcmDrums as optional extra practice only',
     const lcm = ways.find((w) => w[0] === 'lcmDrums');
     assert.ok(lcm, file.grade + ' ' + key);
     assert.equal(banks.isOptionalWay(lcm), true, file.grade + ' ' + key);
+    assert.equal(lcm[2], 'rissman2005', file.grade + ' ' + key);
+    assert.equal(lcm[3], 'R', file.grade + ' ' + key);
     assert.ok(!banks.primaryWays(ways).some((w) => w[0] === 'lcmDrums'), file.grade + ' ' + key);
   });
 });
