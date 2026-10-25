@@ -6,20 +6,32 @@ const path = require('node:path');
 const banks = require('../src/lib/banks.js');
 const explorers = require('../src/lib/exercises/interactiveExplorers.js');
 
-test('all three explorer exercise kinds exist in banks, tagged to official curriculum standards', () => {
+test('all explorer exercise kinds exist in banks, tagged to official curriculum standards', () => {
   const all = banks.allItems();
-  const singingLine = all.filter(it => it.kind === 'singing_line');
+  const singingLineD = all.filter(it => it.kind === 'singing_line' && it.grade === 'ד');
+  const singingLineV = all.filter(it => it.kind === 'singing_line' && it.grade === 'ו');
   const groupsMult = all.filter(it => it.kind === 'groups_mult');
   const evenOdd = all.filter(it => it.kind === 'even_odd');
 
-  assert.ok(singingLine.length >= 2, 'singing line exercises must exist in bank');
+  assert.ok(singingLineD.length >= 2, 'Grade ד singing line exercises must exist in bank');
+  assert.ok(singingLineV.length >= 2, 'Grade ו singing line exercises must exist in bank');
   assert.ok(groupsMult.length >= 2, 'groups multiplication exercises must exist in bank');
   assert.ok(evenOdd.length >= 2, 'even/odd exercises must exist in bank');
 
-  singingLine.forEach(it => {
+  singingLineD.forEach(it => {
     assert.equal(it.standard, banks.ST.FRAC_BAR);
     assert.equal(it.grade, 'ד');
     assert.ok(it.prompt.includes('ישר המספרים'));
+    assert.equal(it.prompt.includes('%'), false, 'Grade ד prompt must not contain %');
+    assert.equal(String(it.answer).includes('%'), false, 'Grade ד answer must not contain %');
+    assert.equal(it.hint.includes('%'), false, 'Grade ד hint must not contain %');
+  });
+
+  singingLineV.forEach(it => {
+    assert.equal(it.standard, banks.ST.PERCENT);
+    assert.equal(it.grade, 'ו');
+    assert.ok(it.prompt.includes('אחוז') || it.prompt.includes('%'));
+    assert.ok(String(it.answer).includes('%'));
   });
 
   groupsMult.forEach(it => {
@@ -35,9 +47,24 @@ test('all three explorer exercise kinds exist in banks, tagged to official curri
   });
 });
 
+test('percentages belong to grade ו per progression.js (mm-cur-53) and are not allowed in grade ד', () => {
+  const exD = explorers.createSingingLineExercise({ grade: 'ד', pct: 50 });
+  assert.equal(exD.grade, 'ד');
+  assert.equal(exD.skill, 'fractions');
+  assert.equal(exD.prompt.includes('%'), false);
+  assert.equal(exD.answer, '1/2');
+  assert.equal(exD.hint.includes('%'), false);
+
+  const exV = explorers.createSingingLineExercise({ grade: 'ו', pct: 50 });
+  assert.equal(exV.grade, 'ו');
+  assert.equal(exV.skill, 'percent');
+  assert.equal(exV.answer, '50%');
+  assert.ok(exV.prompt.includes('אחוז') || exV.prompt.includes('%'));
+});
+
 test('every explorer exercise has at most 15 words per card (kid screen requirement)', () => {
   const all = banks.allItems().filter(it => ['singing_line', 'groups_mult', 'even_odd'].includes(it.kind));
-  assert.ok(all.length >= 6);
+  assert.ok(all.length >= 8);
 
   all.forEach(ex => {
     const res = explorers.validateExerciseCard(ex);
@@ -49,6 +76,7 @@ test('every explorer exercise has at most 15 words per card (kid screen requirem
 test('interactiveExplorers module generates compliant exercise models', () => {
   const exLine = explorers.createSingingLineExercise({ pct: 50 });
   assert.equal(exLine.kind, 'singing_line');
+  assert.equal(exLine.grade, 'ד');
   assert.equal(exLine.answer, '1/2');
   assert.ok(exLine.wordCount <= 15);
   assert.equal(exLine.hasMusic, true);
@@ -103,10 +131,17 @@ test('renderExplorerWidget mounts reachable interactive elements with sound on t
   };
 
   try {
-    explorers.renderExplorerWidget(dummyContainer, { kind: 'singing_line', pct: 50 });
+    explorers.renderExplorerWidget(dummyContainer, { kind: 'singing_line', grade: 'ד', pct: 50 });
     assert.equal(dummyContainer.children.length, 1);
     assert.match(dummyContainer.children[0].className, /explorer-exercise-widget/);
     assert.match(dummyContainer.children[0].innerHTML, /data-tap="woodBar"/);
+    assert.match(dummyContainer.children[0].innerHTML, /data-val="1\/2"/);
+
+    // Grade ו renders percentage buttons
+    dummyContainer.children = [];
+    explorers.renderExplorerWidget(dummyContainer, { kind: 'singing_line', grade: 'ו', pct: 50 });
+    assert.equal(dummyContainer.children.length, 1);
+    assert.match(dummyContainer.children[0].innerHTML, /data-val="50%"/);
   } finally {
     delete globalThis.document;
   }
