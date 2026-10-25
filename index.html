@@ -450,7 +450,6 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <div class="card mm-game" id="fbpCard" aria-label="ממלאים תיבה במשכי תווים"></div>
 <div class="card mm-game" id="bcCard" aria-label="ספירה לפי פעמה"></div>
 <div class="card mm-game" id="ttgCard" aria-label="לוח הכפל כשיר קצבי"></div>
-<div class="card mm-game" id="ensCard" aria-label="מנגנים יחד: תזמורת קטנה"></div>
 <!-- #591 music games end -->
 </section><footer class="no-print"><div style="text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px"><a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a> · <a href="frequency.html">מעבדת תדרים</a><div style="margin-top:8px;font-size:.85rem">MelodyMath · תרגול יסודי א׳–ד׳ בעברית</div></div></footer></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
@@ -2049,7 +2048,7 @@ function renderStepAction(step) {
             </div>
           `).join('')}
         </div>
-        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
+        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">LCM(2, 3) = 6. אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
         <button type="button" class="primary" id="btnPlayPolyDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את רגע המפגש בפעימה 6 🎵'}</button>
       </div>
     `;
@@ -2636,7 +2635,7 @@ function renderPolyrhythmExplorerUI(box) {
         }).join('')}
       </div>
       <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
-        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (תוף כל ${polyrhythmCycleA} ותוף כל ${polyrhythmCycleB} נפגשים שוב אחרי ${stepLcm} פעימות)
+        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (LCM של ${polyrhythmCycleA} ו־${polyrhythmCycleB} הוא ${stepLcm})
       </div>
       <button type="button" class="primary" id="btnPlayPolyExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת שני התופים יחד</button>
     </div>
@@ -2755,6 +2754,5 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 <script src="src/lib/music/fractionBar.js"></script><script src="src/components/FractionBarPad.js"></script>
 <script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
 <script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/lib/music/unlocks.js"></script><script src="src/components/TimesTableGroove.js"></script>
-<script type="module" src="src/components/EnsembleStudio.js"></script>
 <!-- #591 music game scripts end -->
 </body></html>

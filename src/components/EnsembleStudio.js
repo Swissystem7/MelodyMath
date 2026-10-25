@@ -121,74 +121,26 @@ function button(attrs, label) {
   return '<button type="button" class="jam-pad" ' + attrs + ' style="' + TAP + '">' + label + '</button>';
 }
 
-// The app's one instrument choice (#679, src/lib/myInstrument.js, loaded as a
-// classic script); this screen keeps no instrument state of its own.
-function my() {
-  return globalThis.MM_MY_INSTRUMENT || null;
-}
-
-// No locks in MelodyMath (#717): every instrument is open to every child.
-function lockedIds() {
-  return [];
-}
-
-// Fractions start in grade ג׳ (curriculum.js). Grades א׳–ב׳ get the
-// one-beat-per-beat preset, with no fraction tile or fraction sentence.
-export const FRACTION_GRADES = ['ג', 'ד', 'ה', 'ו'];
-const YOUNG_PRESET = 'cajon-beat';
-
-export function fractionOffered(grade) {
-  // No grade chosen yet: hide the fraction tile until we know the child is in ג׳+.
-  return grade != null && FRACTION_GRADES.indexOf(grade) >= 0;
-}
-
-export function presetForGrade(preset, grade) {
-  if (fractionOffered(grade)) return preset;
-  return ENSEMBLE_PRESETS.find(function (p) { return p.id === YOUNG_PRESET; });
-}
-
-// The meeting-beat (LCM) question is grade ה׳–ו׳ material (banks.js ST.LCM,
-// curriculum/grade5.js); younger grades see the instruments without it.
-export const LCM_GRADES = ['ה', 'ו'];
-
-export function lcmOffered(grade) {
-  return LCM_GRADES.indexOf(grade) >= 0;
-}
-
-function storedGrade(storage) {
-  try {
-    const s = storage || globalThis.localStorage;
-    return s ? s.getItem('mm-grade') : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-export function formatCrossInstrumentCard(preset, status, mine, locked, offerLcm, offerFraction) {
+export function formatCrossInstrumentCard(preset, status) {
   const p = preset || ENSEMBLE_PRESETS[0];
-  const lock = locked || [];
   const frac = p.fraction[0] + '/' + p.fraction[1];
   const perc = p.instruments.filter(function (id) { return PERCUSSION.indexOf(id) >= 0; });
   const rest = p.instruments.filter(function (id) { return PERCUSSION.indexOf(id) < 0; });
   const taps = p.instruments.map(function (id) {
-    if (lock.indexOf(id) >= 0) return button('data-instrument="' + escapeHtml(id) + '" data-locked="true" disabled aria-pressed="false"', '🔒 ' + escapeHtml(nameOf(id)));
-    return button('data-instrument="' + escapeHtml(id) + '" aria-pressed="' + (id === mine) + '"', escapeHtml(nameOf(id)));
+    return button('data-instrument="' + escapeHtml(id) + '"', escapeHtml(nameOf(id)));
   }).join('');
   const answers = choices(p).map(function (n) {
     return button('data-ensemble-answer="' + n + '"', bdi(n));
   }).join('');
   return '<article dir="rtl" lang="he" data-preset="' + escapeHtml(p.id) + '">'
     + '<h2>' + escapeHtml(p.titleHe) + '</h2>'
-    + (offerFraction === false
-      ? '<p>' + 'מכה אחת לכל פעימה. כל הכלים מנגנים באותו קצב: ' + bdi(p.bpm) + ' פעימות לדקה.</p>'
-      : '<p>' + factHe(p) + ' השבר המשותף הוא ' + bdi(frac) + '.</p>')
+    + '<p>' + factHe(p) + ' השבר המשותף הוא ' + bdi(frac) + '.</p>'
     + '<p>הקשה: ' + escapeHtml(perc.map(nameOf).join(', ')) + '. יחד עם: ' + escapeHtml(rest.map(nameOf).join(', ')) + '.</p>'
     + '<div class="jam-row">' + taps + '</div>'
-    + '<p>מקישים כדי לשמוע. את הכלי שלכם בוחרים ב־🎻 הכלי שלי.</p>'
-    + (offerLcm === false ? '' : '<h3>שילוב כלים: כפולה משותפת</h3>'
-      + '<p>כלי אחד חוזר כל ' + bdi(p.cycleA) + ' פעימות וכלי שני כל ' + bdi(p.cycleB) + ' פעימות. אחרי כמה פעימות הכלים נפגשים שוב?</p>'
-      + '<div class="jam-row">' + answers + '</div>'
-      + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>')
+    + '<h3>שילוב כלים: כפולה משותפת</h3>'
+    + '<p>מחזור ' + bdi(p.cycleA) + ' ומחזור ' + bdi(p.cycleB) + '. מהי ' + bdi('lcm(' + p.cycleA + ', ' + p.cycleB + ')') + '?</p>'
+    + '<div class="jam-row">' + answers + '</div>'
+    + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>'
     + '<p><a href="' + escapeHtml(p.source) + '">מקור</a></p>'
     + '</article>';
 }
@@ -221,20 +173,12 @@ function playNote(id, onPlay) {
 
 export function mountEnsembleStudio(container, options = {}) {
   const opts = options || {};
-  const asked = opts.preset || ENSEMBLE_PRESETS[opts.index || 0] || ENSEMBLE_PRESETS[0];
-  const grade = opts.grade != null ? opts.grade : storedGrade(opts.storage);
-  const preset = presetForGrade(asked, grade);
-  const view = { preset: preset, lastOk: null };
+  const preset = opts.preset || ENSEMBLE_PRESETS[opts.index || 0] || ENSEMBLE_PRESETS[0];
+  const view = { preset: preset, lastOk: null, played: [] };
   let status = '';
 
-  function offer() {
-    return lcmOffered(grade);
-  }
-
   function render() {
-    const m = my();
-    const locked = lockedIds();
-    container.innerHTML = '<h3>🎶 מנגנים יחד: תזמורת קטנה</h3>' + formatCrossInstrumentCard(preset, status, m ? m.getMyInstrument(opts.storage) : null, locked, offer(), fractionOffered(grade));
+    container.innerHTML = formatCrossInstrumentCard(preset, status);
   }
 
   function onClick(event) {
@@ -242,12 +186,12 @@ export function mountEnsembleStudio(container, options = {}) {
     if (!el || typeof el.getAttribute !== 'function') return;
     const inst = el.getAttribute('data-instrument');
     if (inst) {
-      // A tap only previews the sound. The choice lives in #myInstCard alone.
+      view.played.push(inst);
       playNote(inst, opts.onPlay);
       return;
     }
     const ans = el.getAttribute('data-ensemble-answer');
-    if (ans == null || ans === '' || !offer()) return;
+    if (ans == null || ans === '') return;
     view.lastOk = Number(ans) === preset.targetLcm;
     status = view.lastOk ? 'נכון.' : 'עוד לא. נסו שוב.';
     render();
@@ -256,10 +200,5 @@ export function mountEnsembleStudio(container, options = {}) {
   view.onClick = onClick;
   render();
   if (typeof container.addEventListener === 'function') container.addEventListener('click', onClick);
-  const m = my();
-  if (m && typeof globalThis.addEventListener === 'function') globalThis.addEventListener(m.EVENT, render);
   return view;
 }
-
-// index.html loads this file as a module, after the classic music scripts.
-if (typeof document !== 'undefined' && document.getElementById('ensCard')) mountEnsembleStudio(document.getElementById('ensCard'));

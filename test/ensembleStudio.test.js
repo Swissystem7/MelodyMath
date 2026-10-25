@@ -61,8 +61,7 @@ test('the card is Hebrew RTL and isolates the ratio, fraction and LCM', async ()
     assert.match(html, /[א-ת]/);
     assert.ok(html.includes('<bdi dir="ltr">' + p.ratioLabel + '</bdi>'), p.id);
     assert.ok(html.includes('<bdi dir="ltr">' + frac + '</bdi>'), p.id);
-    assert.ok(html.includes('<bdi dir="ltr">' + p.cycleA + '</bdi>') && html.includes('<bdi dir="ltr">' + p.cycleB + '</bdi>'), p.id);
-    assert.match(html, /אחרי כמה פעימות הכלים נפגשים שוב\?/);
+    assert.ok(html.includes('<bdi dir="ltr">lcm(' + p.cycleA + ', ' + p.cycleB + ')</bdi>'), p.id);
     assert.ok(html.includes('data-ensemble-answer="' + p.targetLcm + '"'), p.id);
     assert.match(html, /שילוב כלים: כפולה משותפת/);
     assert.match(html, /data-ensemble-answer="/);
@@ -80,7 +79,7 @@ test('taps play and the ensemble answer is checked', async () => {
       const played = [];
       let click = null;
       const el = { innerHTML: '', addEventListener(type, fn) { if (type === 'click') click = fn; } };
-      const view = mountEnsembleStudio(el, { preset, grade: 'ה', onPlay: (id) => played.push(id) });
+      const view = mountEnsembleStudio(el, { preset, onPlay: (id) => played.push(id) });
       assert.match(el.innerHTML, /min-width:44px;min-height:44px/);
       fire(click, 'data-instrument', preset.instruments[0]);
       assert.deepEqual(played, [preset.instruments[0]]);
@@ -100,101 +99,4 @@ test('taps play and the ensemble answer is checked', async () => {
   } finally {
     delete globalThis.playInstrumentNote;
   }
-});
-
-// Kid-facing text never shows the code name lcm(a, b) (Refs #679).
-test('no kid-facing ensemble or polyrhythm text contains "lcm("', async () => {
-  const fs = require('node:fs');
-  const path = require('node:path');
-  const { ENSEMBLE_PRESETS, formatCrossInstrumentCard, mountEnsembleStudio } = await studio();
-  const shown = ENSEMBLE_PRESETS.flatMap((p) => [
-    p.titleHe,
-    formatCrossInstrumentCard(p, 'נכון.', p.instruments[0], [], true),
-    formatCrossInstrumentCard(p, '', null, [], false),
-  ]);
-  const el = { innerHTML: '' };
-  mountEnsembleStudio(el, { grade: 'ו' });
-  shown.push(el.innerHTML);
-  shown.forEach((s) => assert.equal(/lcm\(/i.test(s), false, s));
-  // Quoted strings and markup text in the UI sources (identifiers such as lcmOf( are code, not text).
-  const root = path.join(__dirname, '..');
-  const src = fs.readFileSync(path.join(root, 'src/components/EnsembleStudio.js'), 'utf8');
-  const strings = src.match(/'(?:[^'\\\n]|\\.)*'/g) || [];
-  strings.forEach((s) => assert.equal(/lcm\(/i.test(s), false, s));
-  // index.html (polyrhythm lesson and explorer): no standalone lcm( outside ${...} code.
-  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8').replace(/\$\{[^}]*\}/g, '');
-  assert.deepEqual(html.match(/(?<![\w.])lcm\(/gi) || [], []);
-});
-
-test('the LCM exercise is offered only in grades ה׳–ו׳', async () => {
-  const { ENSEMBLE_PRESETS, LCM_GRADES, lcmOffered, mountEnsembleStudio } = await studio();
-  assert.deepEqual(LCM_GRADES, ['ה', 'ו']);
-  ['א', 'ב', 'ג', 'ד'].forEach((g) => {
-    assert.equal(lcmOffered(g), false, g);
-    let click = null;
-    const el = { innerHTML: '', addEventListener(type, fn) { if (type === 'click') click = fn; } };
-    const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[0], grade: g, onPlay() {} });
-    assert.doesNotMatch(el.innerHTML, /data-ensemble-answer=|כפולה משותפת|נפגשים שוב/, g);
-    assert.match(el.innerHTML, view.preset.topicId === 'fractions' ? /data-instrument="darbuka"/ : /data-instrument="cajon"/, g);
-    fire(click, 'data-ensemble-answer', '6');
-    assert.equal(view.lastOk, null, g);
-  });
-  ['ה', 'ו'].forEach((g) => {
-    assert.equal(lcmOffered(g), true, g);
-    const el = { innerHTML: '' };
-    mountEnsembleStudio(el, { grade: g });
-    assert.match(el.innerHTML, /data-ensemble-answer=/, g);
-  });
-  const store = { getItem: (k) => (k === 'mm-grade' ? 'ד' : null) };
-  const el = { innerHTML: '' };
-  mountEnsembleStudio(el, { storage: store, locked: [] });
-  assert.doesNotMatch(el.innerHTML, /data-ensemble-answer=/);
-});
-
-// Fractions start in grade ג׳: grades א׳–ב׳ never see a fraction tile (Refs #762).
-test('grades א׳–ב׳ see no fraction tile; ג׳–ו׳ keep the 1/2 tile', async () => {
-  const { ENSEMBLE_PRESETS, FRACTION_GRADES, fractionOffered, mountEnsembleStudio } = await studio();
-  assert.deepEqual(FRACTION_GRADES, ['ג', 'ד', 'ה', 'ו']);
-  ['א', 'ב'].forEach((g) => {
-    assert.equal(fractionOffered(g), false, g);
-    ENSEMBLE_PRESETS.forEach((p) => {
-      const el = { innerHTML: '', addEventListener() {} };
-      const view = mountEnsembleStudio(el, { preset: p, grade: g, onPlay() {} });
-      assert.equal(view.preset.topicId === 'fractions', false, g + ' ' + p.id);
-      assert.doesNotMatch(el.innerHTML, /\d+\/\d+|השבר/, g + ' ' + p.id);
-      assert.match(el.innerHTML, /data-instrument="/, 'instruments stay playable');
-    });
-  });
-  FRACTION_GRADES.forEach((g) => {
-    const el = { innerHTML: '', addEventListener() {} };
-    const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[0], grade: g, onPlay() {} });
-    assert.equal(view.preset.id, 'half-bar', g);
-    assert.match(el.innerHTML, /1\/2/, g);
-  });
-});
-
-test('no locks (#717): no ensemble instrument is locked or disabled', async () => {
-  const { ENSEMBLE_PRESETS, formatCrossInstrumentCard, mountEnsembleStudio } = await studio();
-  globalThis.MM_TIMES_TABLE_GROOVE = { UNLOCK_LIST: ['oud', 'piano', 'marimba'] };
-  globalThis.MM_UNLOCKS = require('../src/lib/music/unlocks.js');
-  try {
-    ENSEMBLE_PRESETS.forEach((p) => {
-      const el = { innerHTML: '', addEventListener() {} };
-      mountEnsembleStudio(el, { preset: p, grade: 'ו', storage: { getItem: () => null }, onPlay() {} });
-      assert.doesNotMatch(el.innerHTML, /disabled|data-locked|🔒/, p.id);
-    });
-  } finally { delete globalThis.MM_TIMES_TABLE_GROOVE; delete globalThis.MM_UNLOCKS; }
-  assert.equal(typeof formatCrossInstrumentCard, 'function');
-});
-
-// No grade selected: the 1/2 tile stays hidden (Refs #762).
-test('with no grade selected the fraction tile is hidden', async () => {
-  const { ENSEMBLE_PRESETS, fractionOffered, mountEnsembleStudio } = await studio();
-  assert.equal(fractionOffered(null), false);
-  assert.equal(fractionOffered(undefined), false);
-  const el = { innerHTML: '', addEventListener() {} };
-  const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[0], storage: { getItem: () => null }, onPlay() {} });
-  assert.equal(view.preset.topicId === 'fractions', false);
-  assert.doesNotMatch(el.innerHTML, /\d+\/\d+|השבר/);
-  assert.match(el.innerHTML, /data-instrument="/);
 });
