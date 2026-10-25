@@ -143,8 +143,9 @@ test('division detection does not match clock times like 10:30 or punctuation co
   assert.equal(fb.getVisualMathAnimation(divItem3).kind, 'partition', 'explicit division skill is division');
 });
 
-test('mistake replays sound via maybeHear (#722, 0h, Refs #665)', () => {
+test('mistake replays sound via maybeHear for current exercise only (#722, 0h, Refs #665)', () => {
   const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(indexHtml.includes('maybeHear(current)'), 'check() triggers sound replay on first mistake');
+  assert.ok(indexHtml.includes('#quiz:not(.hidden)'), 'maybeHear scopes to current active exercise container');
   assert.ok(indexHtml.includes('np-btn'), 'maybeHear falls back to playing active sound button if no hear array');
 });
