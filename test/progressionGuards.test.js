@@ -1,7 +1,9 @@
 'use strict';
-// A topic may not sit in an earlier grade than one of its prerequisites, and
-// every topic needs a primary musical method (a non-optional way in the
-// grade file, mapped through banks.ST and curriculum.sectionForItem).
+// A topic may not sit in an earlier grade than one of its prerequisites, or
+// earlier in the same grade than a topic it depends on. A topic with no
+// entry in progression.js fails. Every topic also needs a primary musical
+// method (a non-optional way in the grade file, mapped through banks.ST
+// and curriculum.sectionForItem).
 //
 // Known failures stay in the maps below and run as todo tests. Do not edit
 // progression.js or the grade files to silence a failure here.
@@ -22,7 +24,8 @@ const KNOWN_EARLY = {};
 const KNOWN_NO_METHOD = {};
 
 const byId = {};
-curriculum.MATRIX.forEach((r) => { byId[r.topicId] = r; });
+const position = {};
+curriculum.MATRIX.forEach((r, i) => { byId[r.topicId] = r; position[r.topicId] = i; });
 
 function gradeOf(id) {
   return GRADES.indexOf(byId[id].grade);
@@ -51,12 +54,32 @@ function earlierThanPrereq() {
   const found = [];
   curriculum.MATRIX.forEach((row) => {
     const links = prog.linksForTopic(row.topicId);
-    if (!links) return;
-    links.prereq.forEach((p) => {
-      if (gradeOf(row.topicId) < gradeOf(p)) {
-        found.push(row.topicId + ' (' + row.grade + ') before ' + p + ' (' + byId[p].grade + ')');
-      }
-    });
+    if (!links) {
+      found.push(row.topicId + ' is missing from progression.js');
+    } else {
+      links.prereq.forEach((p) => {
+        if (gradeOf(row.topicId) < gradeOf(p)) {
+          found.push(row.topicId + ' (' + row.grade + ') before ' + p + ' (' + byId[p].grade + ')');
+        }
+      });
+    }
+  });
+  return found;
+}
+
+function sameGradeBeforeDependency() {
+  const found = [];
+  curriculum.MATRIX.forEach((row) => {
+    const links = prog.linksForTopic(row.topicId);
+    if (!links) {
+      found.push(row.topicId + ' is missing from progression.js');
+    } else {
+      links.prereq.forEach((p) => {
+        if (byId[p] && byId[p].grade === row.grade && position[row.topicId] < position[p]) {
+          found.push(row.topicId + ' appears before prerequisite ' + p + ' in grade ' + row.grade);
+        }
+      });
+    }
   });
   return found;
 }
@@ -73,6 +96,17 @@ test('no topic is in an earlier grade than one of its prerequisites', () => {
   Object.keys(KNOWN_EARLY).forEach((id) => {
     assert.ok(early.some((line) => line.startsWith(id + ' ')), id + ' is no longer an early-grade violation');
   });
+});
+
+test('within one grade, a topic does not appear before a topic it depends on', () => {
+  assert.deepEqual(sameGradeBeforeDependency(), []);
+});
+
+test('a topic missing from progression.js fails', () => {
+  const missing = curriculum.MATRIX
+    .filter((row) => !prog.linksForTopic(row.topicId))
+    .map((row) => row.topicId);
+  assert.deepEqual(missing, []);
 });
 
 test('every topic has a primary musical method', () => {
