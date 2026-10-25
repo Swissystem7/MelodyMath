@@ -18,7 +18,10 @@
     { id: 'half_quarters', he: 'מקצב חצאים ורבעים', meter: '4/4', subdivision: 'half_quarters', method: 'steady_beat', accents: [0] },
     { id: 'swing_dotted', he: 'מקצב מנוקד', meter: '4/4', subdivision: 'dotted', method: 'steady_beat', accents: [0, 2] }
   ];
-  const FRACTION_PAIRS = [[1, 2], [1, 4], [2, 4], [3, 4], [1, 3], [2, 3], [1, 6], [5, 6], [1, 8], [3, 8], [5, 8], [7, 8], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [3, 10], [7, 10], [9, 10]];
+  // Only parts that split a 4/4 bar evenly (halves, quarters, eighths), matching fillBar.
+  const FRACTION_PAIRS = [[1, 2], [1, 4], [2, 4], [3, 4], [1, 8], [3, 8], [5, 8], [7, 8]];
+  // Types this engine can regenerate; other types (missing_addend, word problems...) keep their own prompt.
+  const GENERATED_TYPES = ['addition', 'subtraction', 'nextPrev', 'multiplication', 'division', 'fractions', 'counting'];
   const GRADE_NAMES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
   const GRADE_BOUNDS = [{ g: 'א', m: 12 }, { g: 'ב', m: 21 }, { g: 'ג', m: 30 }, { g: 'ד', m: 37 }, { g: 'ה', m: 49 }, { g: 'ו', m: 58 }];
   const GRADE_RANGES = { 'א': { min: 1, max: 20 }, 'ב': { min: 1, max: 100 }, 'ג': { min: 1, max: 1000 }, 'ד': { min: 1, max: 10000 }, 'ה': { min: 1, max: 100000 }, 'ו': { min: 1, max: 1000000 } };
@@ -140,7 +143,7 @@
         const key = `${dividend}:${divisor}`;
         if (!seen.has(key) || tryIdx === 99) { candidate = { a: dividend, b: divisor, answer: quot, key, prompt: `${dividend} : ${divisor} = ?`, hint: `${dividend} לחלק ל־${divisor} הם ${quot}` }; break; }
       } else if (type === 'fractions') {
-        const pairs = isGrade1 ? [[1, 2], [2, 2], [1, 3], [2, 3], [1, 4], [2, 4], [3, 4], [4, 4]] : FRACTION_PAIRS;
+        const pairs = isGrade1 ? [[1, 2], [2, 2], [1, 4], [2, 4], [3, 4], [4, 4]] : FRACTION_PAIRS;
         const pair = pairs[step % pairs.length], num = pair[0], denom = pair[1], key = `${num}/${denom}`;
         if (!seen.has(key) || tryIdx === 99) { candidate = { a: num, b: denom, answer: `${num}/${denom}`, key, prompt: `איזה שבר מייצג ${num} מתוך ${denom} פעימות בתיבה?`, hint: `${num} חלקים מתוך ${denom}` }; break; }
       } else {
@@ -155,7 +158,10 @@
   function generateVariant(topicOrItem, roundIndex, options) {
     const opts = options || {}, topicKey = resolveTopicKey(topicOrItem), exerciseType = detectExerciseType(topicOrItem);
     const recentKeys = opts.recentNumbers || (opts.history && opts.history.slice(-5).map(x => x.numberKey)) || [];
-    const grade = resolveGrade(topicOrItem, opts), numSet = generateNumberSet(exerciseType, roundIndex, recentKeys, grade, topicOrItem);
+    const isItem = typeof topicOrItem === 'object' && topicOrItem !== null, keepOwn = isItem && GENERATED_TYPES.indexOf(exerciseType) < 0;
+    const grade = resolveGrade(topicOrItem, opts), numSet = keepOwn ? null : generateNumberSet(exerciseType, roundIndex, recentKeys, grade, topicOrItem);
+    // #665: the last round of a topic is a check without music.
+    const noMusic = Boolean(opts.noMusic) || (opts.totalRounds > 0 && roundIndex >= opts.totalRounds - 1);
     const tempo = pickTempo(roundIndex, opts.seed), pattern = pickPattern(roundIndex, opts.seed), inst = pickInstrument(topicKey, roundIndex, opts.seed);
     const basePrompt = typeof topicOrItem === 'object' && topicOrItem !== null ? topicOrItem.prompt : '';
     const baseId = typeof topicOrItem === 'object' && topicOrItem !== null ? (topicOrItem.id || 'ex') : String(topicKey);
@@ -164,9 +170,9 @@
       id: `${baseId}-var-r${roundIndex}`,
       topicId: (typeof topicOrItem === 'object' && topicOrItem && topicOrItem.topicId) || (typeof topicOrItem === 'string' && topicOrItem.startsWith('mm-cur-') ? topicOrItem : topicKey),
       mathTopic: topicKey, exerciseType: exerciseType, kind: (typeof topicOrItem === 'object' && topicOrItem && topicOrItem.kind) || exerciseType,
-      prompt: numSet ? numSet.prompt : basePrompt, answer: numSet ? numSet.answer : 1, hint: numSet ? numSet.hint : '',
+      prompt: numSet ? numSet.prompt : basePrompt, answer: numSet ? numSet.answer : (isItem && topicOrItem.answer != null ? topicOrItem.answer : 1), hint: numSet ? numSet.hint : ((isItem && topicOrItem.hint) || ''),
       numberKey: numSet ? numSet.key : `r${roundIndex}`, roundIndex: roundIndex, bpm: tempo, rhythmPattern: pattern,
-      instrument: inst.id, voice: inst.voice, instrumentHe: (inst.instrument && inst.instrument.he) || inst.id, hasMusic: true
+      instrument: inst.id, voice: inst.voice, instrumentHe: (inst.instrument && inst.instrument.he) || inst.id, hasMusic: !noMusic, noMusic: noMusic
     };
   }
 
@@ -186,6 +192,7 @@
 
   function renderVarietyHtml(variant) {
     if (!variant) return '';
+    if (variant.noMusic) return '<div class="mm-variety-badge" data-no-music="1">✏️ בדיקה בלי מוזיקה</div>';
     const bpm = variant.bpm || 96, inst = variant.instrumentHe || variant.instrument || 'דרבוקה', pat = (variant.rhythmPattern && variant.rhythmPattern.he) || 'מקצב רבעים';
     return `<div class="mm-variety-badge" data-bpm="${bpm}" data-instrument="${variant.instrument || ''}" data-pattern="${(variant.rhythmPattern && variant.rhythmPattern.id) || ''}"><span class="mm-var-inst">🎵 ${inst}</span> · <span class="mm-var-bpm">⏱️ ${bpm} BPM</span> · <span class="mm-var-pat">🥁 ${pat}</span></div>`;
   }
