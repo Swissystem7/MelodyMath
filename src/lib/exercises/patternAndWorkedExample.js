@@ -137,7 +137,7 @@
     }).join(' ➔ ');
 
     const choiceButtons = (ex.choices || []).map(function (c) {
-      return '<button type="button" class="secondary pattern-choice-btn" data-choice="' + c + '" style="min-width:44px;min-height:44px;padding:6px 16px;margin:4px;font-size:1.1rem;">' + c + '</button>';
+      return '<button type="button" class="secondary pattern-choice-btn" data-tap="metalBell" data-choice="' + c + '" style="min-width:44px;min-height:44px;padding:6px 16px;margin:4px;font-size:1.1rem;">' + c + '</button>';
     }).join('');
 
     wrapper.innerHTML = '<div class="pattern-sequence" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px;">' + visual + '</div>' +
@@ -172,7 +172,7 @@
     } else {
       contentHtml = '<div class="completion-display" style="padding:12px;background:#fdfaff;border:2px solid var(--pink);border-radius:14px;text-align:center;">' +
         '<div style="font-size:1.3rem;margin-bottom:8px;">השלימו את הפעימה החסרה</div>' +
-        '<button type="button" class="primary completion-tap-btn" style="min-width:64px;min-height:50px;font-size:1.25rem;">🥁 הקישו להשלמה</button>' +
+        '<button type="button" class="primary completion-tap-btn" data-tap="drumLow" style="min-width:64px;min-height:50px;font-size:1.25rem;">🥁 הקישו להשלמה</button>' +
         '</div>';
     }
 

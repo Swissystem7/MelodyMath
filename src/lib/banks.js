@@ -244,6 +244,13 @@
       grid: extra.grid,
       tags: extra.tags,
       tolerance: extra.tolerance,
+      kind: extra.kind,
+      pattern: extra.pattern,
+      choices: extra.choices,
+      stage: extra.stage,
+      a: extra.a,
+      b: extra.b,
+      total: extra.total,
     };
   }
 
@@ -1967,6 +1974,12 @@
     MEAS('ב', 'מוכר קנה 10 מוצרים ב־4 ₪ כל אחד, ומכר כל אחד מהם ב־5 ₪. כמה ₪ הרוויח?', 10, 'על כל מוצר הוא הרוויח 1 ₪', 3, ST.MONEY_BILLS)
   );
 
+  // ---------- תרגילי השלמת תבנית ודוגמה פתורה (#670, Refs #665) ----------
+  RAW.push(
+    I('א', 'counting', 'דו, מי, דו, מי — איזה צליל משלים את התבנית?', 'דו', 'התבנית חוזרת על דו ומי לסירוגין', { standard: ST.PATTERN, strand: STRAND.NUM, level: 1, kind: 'pattern_completion', pattern: ['דו', 'מי', 'דו', 'מי'], choices: ['דו', 'מי', 'סול'] }),
+    I('א', 'addition', 'ראו: 3 תופים ועוד 2 פעמונים הם 5 צלילים.', 5, '3 ועוד 2 הם 5 פעימות', { standard: ST.ADD10, strand: STRAND.OP, level: 1, kind: 'worked_example', a: 3, b: 2, total: 5, stage: 'demo' })
+  );
+
   // ---------- כיתה ד׳ · מספרים מעורבים ושברים גדולים מ־1 (#709, mm-cur-33) ----------
   // Both directions: improper fraction → mixed number and back, comparing
   // across the two forms, and one addition that crosses into the next whole.
@@ -2178,6 +2191,13 @@
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    if (raw.kind) it.kind = raw.kind;
+    if (raw.pattern) it.pattern = raw.pattern;
+    if (raw.choices) it.choices = raw.choices;
+    if (raw.stage) it.stage = raw.stage;
+    if (raw.a) it.a = raw.a;
+    if (raw.b) it.b = raw.b;
+    if (raw.total) it.total = raw.total;
     SHIPPED.push(it);
   });
 

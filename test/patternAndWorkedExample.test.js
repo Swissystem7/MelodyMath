@@ -112,3 +112,22 @@ test('render widgets generate accessible UI with minimum 44px buttons', () => {
   PW.renderWorkedExampleWidget(container, workedEx, {});
   assert.ok(container.children.length >= 2);
 });
+
+
+test('banks include pattern completion and worked example, and index.html wires them', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const banks = require('../src/lib/banks.js');
+  const all = banks.allItems();
+
+  const patternItems = all.filter(it => it.kind === 'pattern_completion');
+  const workedItems = all.filter(it => it.kind === 'worked_example');
+
+  assert.ok(patternItems.length >= 1, 'pattern completion item must exist in banks');
+  assert.ok(workedItems.length >= 1, 'worked example item must exist in banks');
+
+  const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(indexHtml.includes('src/lib/exercises/patternAndWorkedExample.js'), 'script must be loaded in index.html');
+  assert.ok(indexHtml.includes('MM_PATTERN_WORKED.renderPatternWidget'), 'pattern widget must be wired in renderWidget');
+  assert.ok(indexHtml.includes('MM_PATTERN_WORKED.renderWorkedExampleWidget'), 'worked example widget must be wired in renderWidget');
+});
