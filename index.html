@@ -494,6 +494,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/data/struggleTopics.js"></script>
 <script src="src/lib/struggleTopics.js"></script>
 <script src="src/lib/encouragingFeedback.js"></script>
+<script src="src/lib/exercises/tempoPercent.js"></script>
 <script src="src/lib/exercises/tapTempoMean.js"></script>
 <script>
 const exercises=[
@@ -822,7 +823,33 @@ function renderWidget(hostId, item, inputId){
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
+  } else if((item.music==='tempoPercent'||item.circles)&&typeof MM_TEMPO_PERCENT!=='undefined'&&typeof MM_TEMPO_PERCENT.mount==='function'){
+    MM_TEMPO_PERCENT.mount(host, item);
+  } else if(item.standard==='G6_MEAN'&&item.music==='tapTempo'&&!item.noMusic&&typeof MM_TAP_TEMPO_MEAN!=='undefined'){
+    // G6_MEAN tap screen (#750): every tap plays the instrument the child picked, read on each tap.
+    host.classList.remove('hidden');
+    host.innerHTML=tapPickerHtml()+MM_TAP_TEMPO_MEAN.renderTapTempoWidgetHtml(item);
+    bindTapPicker(host);
+    MM_TAP_TEMPO_MEAN.attachTapButton(host, { instrument: pickedInstrument });
   }
+}
+// The child's instrument for tap buttons, kept on this device (#750).
+const TAP_PICKS=['darbuka','marimba','recorder','guitar'];
+function pickedInstrument(){ try{ return localStorage.getItem('mm-tap-instrument')||null; }catch(e){ return null; } }
+function tapPickerHtml(){
+  const cur=pickedInstrument();
+  return '<div class="tap-inst-picker" role="group" aria-label="בחרו כלי להקשה">'+TAP_PICKS.map(function(id){
+    const x=typeof instrumentById==='function'?instrumentById(id):null;
+    return '<button type="button" class="choice'+(id===cur?' active':'')+'" data-instrument="'+id+'" aria-pressed="'+(id===cur)+'">'+(x?x.instrument.he:id)+'</button>';
+  }).join(' ')+'</div>';
+}
+function bindTapPicker(host){
+  host.querySelectorAll('[data-instrument]').forEach(function(b){
+    b.addEventListener('click', function(){
+      try{ localStorage.setItem('mm-tap-instrument', b.getAttribute('data-instrument')); }catch(e){}
+      host.querySelectorAll('[data-instrument]').forEach(function(o){ const on=o===b; o.classList.toggle('active', on); o.setAttribute('aria-pressed', String(on)); });
+    });
+  });
 }
 // A music widget keeps any text that names the answer in data-reveal while the
 // question is open (#457); the feedback step swaps it in, visible note and
