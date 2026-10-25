@@ -81,3 +81,31 @@ test('decimalToBarFraction handles values above one bar per PR #723 (Refs #665)'
   assert.equal(fb.decimalToBarFraction(1), '1');
   assert.equal(fb.decimalToBarFraction(1.5), '3/2');
 });
+
+test('estimation prompt and acceptance logic are consistent: 7/8 is filled exactly to show almost a whole bar', () => {
+  const tapAll = (state, ids) => ids.reduce((s, id) => PAD.tapTile(s, id), state);
+  const estWay = GRADE_FILES['ו'].music.G6_FRAC_EST.find((w) => w[0] === 'fillBar');
+  assert.ok(estWay, 'fillBar way exists in G6_FRAC_EST');
+  assert.match(estWay[1], /בדיוק/, 'prompt specifies exact fill to match screen acceptance logic');
+  assert.match(estWay[1], /7\/8/, 'prompt specifies 7/8 fill');
+  assert.equal(estWay[3], 'D', 'evidence level is unified as D');
+
+  const idx = PAD.EXERCISES.findIndex((ex) => ex.target === '7/8');
+  assert.ok(idx >= 0, 'an exercise for 7/8 almost-whole estimation exists');
+  const ex = PAD.EXERCISES[idx];
+  assert.match(ex.he, /בדיוק/, 'exercise prompt specifies exact fill');
+  assert.match(ex.he, /7\/8/, 'exercise specifies 7/8');
+
+  // Exact fill of 7/8 (half + quarter + eighth) is accepted with cadence
+  const s = tapAll(PAD.createState(idx), ['half', 'quarter', 'eighth']);
+  assert.equal(s.status, 'exact');
+  assert.equal(s.sound, 'cadence');
+  assert.match(s.message, /התיבה מלאה בדיוק/);
+
+  // Partial fill is under (screen accepts only exact fill)
+  const partial = tapAll(PAD.createState(idx), ['half', 'quarter']);
+  assert.equal(partial.status, 'filling');
+  const checked = PAD.check(partial);
+  assert.equal(checked.status, 'under');
+  assert.match(checked.message, /חסר 1\/8/);
+});

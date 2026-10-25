@@ -38,6 +38,7 @@
     { target: '0.5', allowed: ['quarter', 'eighth', 'sixteenth'], he: 'מלאו 0.5 של תיבה' },
     { target: '1', allowed: ['whole', 'half', 'quarter', 'eighth'], he: 'מלאו תיבה שלמה בדרך אחרת מהפעם הקודמת' },
     { target: '1', allowed: ['whole', 'half', 'quarter'], he: 'מלאו תיבה שלמה בתווי שלמה, חצי ורבע בלבד' },
+    { target: '7/8', allowed: ['half', 'quarter', 'eighth'], he: 'מלאו 7/8 תיבה בדיוק (אומדן: כמעט תיבה שלמה)' },
   ];
   const DEFAULT_PROPS = { instrument: 'darbuka' };
 
