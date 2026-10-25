@@ -270,3 +270,60 @@ test('#751 batch 4: grade ד׳ topics keep one main way, the others stay as EXTR
     items.forEach((it) => assert.equal(it.music, main, it.id));
   });
 });
+
+test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
+  const WAYS = {
+    'ה': {
+      DEC_PLACE: ['beatDecimal', 'tenthNotes', 'compareBeatParts'],
+      DEC_ADD: ['tenthsTogether', 'beatDecimal', 'beatsLeftOver'],
+      NUM_BIG: ['periodAccentLevels', 'millionTenGroups'],
+      OPS_MILLION: ['regroupAllLevels', 'repeatedBars', 'roundBigAccent'],
+      EQ_INEQ: ['balanceBars', 'fillBar', 'sameLength'],
+      PRIME_FACTOR: ['meterGroups', 'accentSkip'],
+      TRI_AREA: ['areaScore', 'anyBaseRows'],
+      PARA_AREA: ['areaScore', 'shiftedRowGroups'],
+      SOLIDS: ['solidFaceMotif', 'netFoldEcho', 'prismPyramidMotif'],
+      FREQ: ['tallyFives', 'frequencyGroupsCompare', 'allGroupsSum'],
+      PICTOGRAM: ['symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups'],
+      PIE: ['pieBarParts', 'twoSectorNotes'],
+    },
+    'ו': {
+      DEC_MUL: ['decimalNoteScale', 'beatDecimal', 'tenthBeatGroups'],
+      PERCENT: ['hundredBar', 'partOfHundredBar', 'sectionsFillBar'],
+      G6_DECIMAL_SYS: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero'],
+      G6_NAT_OPS: ['groupsFirstLongChain', 'ostinatoLayers', 'groupThenCut'],
+      G6_NAT_EST: ['roundToGroup', 'partGroupTimes', 'groupBoundsCheck'],
+      G6_DEC_EST: ['nearlyWholeNote', 'shortNoteBound'],
+      G6_DEC_LAWS: ['bracketBeatsFirst', 'tempoSwap', 'equalNotesDistribute'],
+      G6_PCT_WHOLE: ['wholeFromTenth', 'splitToHundred', 'quarterToWhole'],
+      G6_PCT_CHANGE: ['shortenByPercent', 'lengthenByPercent', 'changeOverOriginal'],
+      G6_CIRCLE_TERMS: ['sectorAsNote', 'diameterTwoRadii', 'chordShorterNote'],
+      G6_CIRCLE_CALC: ['piBarsAround', 'halfCircleBar', 'doubleRadiusBars'],
+      G6_COMP_TRI: ['partsRowGroups', 'outerSideGroups', 'areaScore'],
+      G6_BOX_VOL: ['layerByLayer', 'cubeEdgeLayers', 'layerCount'],
+      G6_VOL_UNITS: ['litreThousandGroups', 'cubicLayers', 'unitBySize'],
+      G6_MEAN: ['levelNotes', 'equalPhrases'],
+      G6_DATA_READ: ['columnsAsNotes', 'pieSectorRead', 'symbolNoteLength'],
+      G6_DATA_SHOW: ['showAsBar', 'symbolsPerKey', 'barToDegrees'],
+    },
+  };
+  Object.keys(WAYS).forEach((grade) => {
+    const file = FILES[grade];
+    Object.keys(WAYS[grade]).forEach((k) => {
+      const [main, ...extra] = WAYS[grade][k];
+      const ways = file.music[k];
+      const primary = banks.primaryWays(ways);
+      assert.deepEqual(primary.map(([tag]) => tag), [main], grade + ' ' + k);
+      assert.equal(ways[0], primary[0], grade + ' ' + k + ' main way first');
+      extra.forEach((tag) => {
+        const w = ways.find(([t]) => t === tag);
+        assert.ok(w && banks.isOptionalWay(w), grade + ' ' + k + ' ' + tag);
+        assert.equal(w[3], 'A', grade + ' ' + k + ' ' + tag + ' keeps its rating');
+      });
+      // Every item of the topic that takes a way (not a music activity)
+      // takes the main one.
+      const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST[k] && it.musicNote);
+      items.forEach((it) => assert.equal(it.music, main, it.id));
+    });
+  });
+});
