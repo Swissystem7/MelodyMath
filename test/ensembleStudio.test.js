@@ -135,7 +135,7 @@ test('the LCM exercise is offered only in grades ה׳–ו׳', async () => {
     const el = { innerHTML: '', addEventListener(type, fn) { if (type === 'click') click = fn; } };
     const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[0], grade: g, onPlay() {} });
     assert.doesNotMatch(el.innerHTML, /data-ensemble-answer=|כפולה משותפת|נפגשים שוב/, g);
-    assert.match(el.innerHTML, /data-instrument="darbuka"/, g);
+    assert.match(el.innerHTML, view.preset.topicId === 'fractions' ? /data-instrument="darbuka"/ : /data-instrument="cajon"/, g);
     fire(click, 'data-ensemble-answer', '6');
     assert.equal(view.lastOk, null, g);
   });
@@ -149,4 +149,40 @@ test('the LCM exercise is offered only in grades ה׳–ו׳', async () => {
   const el = { innerHTML: '' };
   mountEnsembleStudio(el, { storage: store, locked: [] });
   assert.doesNotMatch(el.innerHTML, /data-ensemble-answer=/);
+});
+
+// Fractions start in grade ג׳: grades א׳–ב׳ never see a fraction tile (Refs #762).
+test('grades א׳–ב׳ see no fraction tile; ג׳–ו׳ keep the 1/2 tile', async () => {
+  const { ENSEMBLE_PRESETS, FRACTION_GRADES, fractionOffered, mountEnsembleStudio } = await studio();
+  assert.deepEqual(FRACTION_GRADES, ['ג', 'ד', 'ה', 'ו']);
+  ['א', 'ב'].forEach((g) => {
+    assert.equal(fractionOffered(g), false, g);
+    ENSEMBLE_PRESETS.forEach((p) => {
+      const el = { innerHTML: '', addEventListener() {} };
+      const view = mountEnsembleStudio(el, { preset: p, grade: g, onPlay() {} });
+      assert.equal(view.preset.topicId === 'fractions', false, g + ' ' + p.id);
+      assert.doesNotMatch(el.innerHTML, /\d+\/\d+|השבר/, g + ' ' + p.id);
+      assert.match(el.innerHTML, /data-instrument="/, 'instruments stay playable');
+    });
+  });
+  FRACTION_GRADES.forEach((g) => {
+    const el = { innerHTML: '', addEventListener() {} };
+    const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[0], grade: g, onPlay() {} });
+    assert.equal(view.preset.id, 'half-bar', g);
+    assert.match(el.innerHTML, /1\/2/, g);
+  });
+});
+
+test('no locks (#717): no ensemble instrument is locked or disabled', async () => {
+  const { ENSEMBLE_PRESETS, formatCrossInstrumentCard, mountEnsembleStudio } = await studio();
+  globalThis.MM_TIMES_TABLE_GROOVE = { UNLOCK_LIST: ['oud', 'piano', 'marimba'] };
+  globalThis.MM_UNLOCKS = require('../src/lib/music/unlocks.js');
+  try {
+    ENSEMBLE_PRESETS.forEach((p) => {
+      const el = { innerHTML: '', addEventListener() {} };
+      mountEnsembleStudio(el, { preset: p, grade: 'ו', storage: { getItem: () => null }, onPlay() {} });
+      assert.doesNotMatch(el.innerHTML, /disabled|data-locked|🔒/, p.id);
+    });
+  } finally { delete globalThis.MM_TIMES_TABLE_GROOVE; delete globalThis.MM_UNLOCKS; }
+  assert.equal(typeof formatCrossInstrumentCard, 'function');
 });

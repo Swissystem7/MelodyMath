@@ -120,16 +120,24 @@ test('TimesTableGroove has no picker of its own; it follows the one choice and k
   });
 });
 
-test('TimesTableGroove respects locks: a locked pick is named, never sounded', () => {
-  const locked = TTG.UNLOCK_LIST[0];
-  withWindow(memStore({ [MY.KEY]: locked }), () => {
-    const el = fakeEl();
-    const h = TTG.mount(el);
-    assert.equal(h.state.instrument, 'tabla');
-    assert.equal(h.state.lockedPick, locked);
-    assert.match(el.innerHTML, /🔒/);
+test('no locks (#717): every times-table instrument plays from the start', () => {
+  TTG.UNLOCK_LIST.forEach((id) => {
+    withWindow(memStore({ [MY.KEY]: id }), () => {
+      const el = fakeEl();
+      const h = TTG.mount(el);
+      assert.equal(h.state.instrument, id, id);
+      assert.equal(h.state.lockedPick, null, id);
+      assert.doesNotMatch(el.innerHTML, /🔒/, id);
+    });
   });
-  assert.deepEqual(TTG.pick({ unlocked: [locked] }), { instrument: 'tabla', lockedPick: null }, 'no choice: tabla');
+  assert.deepEqual(TTG.pick({ unlocked: [] }), { instrument: 'tabla', lockedPick: null }, 'no choice: tabla');
+});
+
+test('no locks (#717): the #myInstCard picker offers every instrument, none locked or disabled', () => {
+  const D = require('../src/lib/instruments.js');
+  const out = MY.pickerHtml(null);
+  D.INSTRUMENTS.forEach((x) => assert.ok(out.includes('data-my-inst="' + x.id + '"'), x.id));
+  assert.doesNotMatch(out, /disabled|data-locked|🔒|aria-disabled="true"/);
 });
 
 test('EnsembleStudio follows the one choice; a tap only previews, it is no second picker', async () => {
@@ -149,7 +157,7 @@ test('EnsembleStudio follows the one choice; a tap only previews, it is no secon
   } finally { delete globalThis.MM_MY_INSTRUMENT; }
 });
 
-test('kids reach EnsembleStudio in the music games tab; it mounts there and keeps times-table locks', async () => {
+test('kids reach EnsembleStudio in the music games tab; it mounts there and every instrument sounds (#717)', async () => {
   const at = html.indexOf('id="ensCard"');
   assert.ok(at > html.indexOf('id="myInstCard"') && at < html.indexOf('<!-- #591 music games end -->'));
   assert.ok(html.indexOf('<script type="module" src="src/components/EnsembleStudio.js"></script>') > html.indexOf('src/components/TimesTableGroove.js'));
@@ -164,7 +172,8 @@ test('kids reach EnsembleStudio in the music games tab; it mounts there and keep
   } finally { ['document', 'MM_TIMES_TABLE_GROOVE', 'MM_UNLOCKS', 'playInstrumentNote'].forEach((k) => delete globalThis[k]); }
   assert.match(el.innerHTML, /מנגנים יחד/);
   assert.doesNotMatch(el.innerHTML, /data-my-inst|teacher|מורה/i, 'no picker and no teacher panel');
-  assert.deepEqual(played, [], 'a locked instrument is never sounded');
+  assert.deepEqual(played, ['oud'], 'no locks: every instrument sounds');
+  assert.doesNotMatch(el.innerHTML, /🔒|data-locked|disabled/);
 });
 
 test('one source of truth: no screen reads the old key or keeps its own key', () => {

@@ -59,11 +59,12 @@
     return set.slice(0, 4).sort(function (x, y) { return x - y; });
   }
 
-  // The child's instrument (#679) when this screen has it (tabla + unlocked);
-  // a locked pick is kept only to name it on screen, never sounded.
-  function pick(unlocks) {
+  // The child's instrument (#679) when this screen has it. No locks (#717):
+  // every times-table timbre is open from the start; an instrument this
+  // screen has no voice for is only named, and tabla plays instead.
+  function pick() {
     const id = MY.getMyInstrument();
-    const ok = !id || [START_INSTRUMENT].concat(unlocks.unlocked).indexOf(id) >= 0;
+    const ok = !id || [START_INSTRUMENT].concat(UNLOCK_LIST).indexOf(id) >= 0;
     return { instrument: ok && id ? id : START_INSTRUMENT, lockedPick: ok ? null : id };
   }
 
@@ -141,9 +142,9 @@
     const opts = choices(q).map(function (c) {
       return '<button type="button" class="jam-pad" data-act="answer" data-value="' + c + '"' + (on ? ' data-tap="' + e(inst.voice) + '"' : '') + '>' + c + '</button>';
     }).join('');
-    // The child picks in #myInstCard; this screen only says when the pick is locked here.
-    const lockNote = on && state.lockedPick ? '<p class="jam-free" role="note">🔒 ' + e(JAM.instrument(state.lockedPick).he) +
-      (UNLOCK_LIST.indexOf(state.lockedPick) >= 0 ? ' ייפתח כאן כשתשלימו עוד עמודות בלוח הכפל.' : ' לא מנגן בלוח הכפל.') + ' בינתיים מנגנת ' + e(inst.he) + '.</p>' : '';
+    // The child picks in #myInstCard; this screen only says when it has no voice for the pick.
+    const lockNote = on && state.lockedPick ? '<p class="jam-free" role="note">🎵 ' + e(JAM.instrument(state.lockedPick).he) +
+      ' לא מנגן בלוח הכפל. בינתיים מנגנת ' + e(inst.he) + '.</p>' : '';
     const layers = state.streak.layers.map(function (l) { return LAYER_HE[l]; }).join(' · ');
     return '<div class="jam-head"><span class="tag">M2 · פעמות מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🪘 לוח הכפל כשיר קצבי' : 'ספירה בדילוגים') + '</h3>' +
