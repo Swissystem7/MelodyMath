@@ -37,4 +37,14 @@
 .ttg-beat.ask{border:2px dashed var(--purple)}
 .ttg-plain{font-size:1.3rem;font-weight:bold;margin:8px 0}
 .mm-game [aria-pressed="true"]:not(.mm-music-toggle){border-color:var(--purple);box-shadow:0 0 0 3px color-mix(in srgb, var(--purple) 25%, transparent)}
-@media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+.anim-math-merge{animation:mathMerge .45s cubic-bezier(.2,.8,.2,1)}
+.anim-math-takeaway{animation:mathTakeaway .45s ease-out}
+.anim-math-repeat{animation:mathRepeat .45s ease-in-out}
+.anim-math-split{animation:mathSplit .45s ease-out}
+.anim-math-glow{animation:mathGlow .5s ease-out}
+@keyframes mathMerge{0%{transform:scale(.95)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes mathTakeaway{0%{opacity:1}50%{opacity:.4;transform:translateY(4px)}100%{opacity:1;transform:none}}
+@keyframes mathRepeat{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes mathSplit{0%{letter-spacing:normal}50%{letter-spacing:4px}100%{letter-spacing:normal}}
+@keyframes mathGlow{0%{box-shadow:none}50%{box-shadow:0 0 12px var(--mint)}100%{box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.fbp-seg.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-glow{animation:none}}
