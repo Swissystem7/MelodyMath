@@ -88,7 +88,7 @@ test('prerequisite check enforces progression requirements before starting a new
   });
   assert.equal(blocked.playableImmediately, false);
   assert.equal(blocked.prereqCheck.ok, false);
-  assert.equal(blocked.redirectTo, 'mm-cur-32');
+  assert.equal(blocked.redirectTo, 'mm-cur-0', 'when nothing is mastered, redirects to foundational root mm-cur-0');
 
   // With prerequisites mastered -> starts immediately
   const allowed = TopicDiag.openTopic({ id: topicId, grade: 'ד' }, {
@@ -104,5 +104,34 @@ test('index.html integrates topicDiagnostic on rmBegin and rmRender', () => {
   const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(indexHtml.includes('src/lib/topicDiagnostic.js'), 'topicDiagnostic.js script must be included');
   assert.ok(indexHtml.includes('MM_TOPIC_DIAGNOSTIC.openTopic'), 'rmBegin must wire MM_TOPIC_DIAGNOSTIC.openTopic');
+  assert.equal(indexHtml.includes("'mm-cur-diag-'+"), false, 'must not pass fake mm-cur-diag- id');
+  assert.ok(indexHtml.includes('realTopicId'), 'passes real topic id');
   assert.ok(indexHtml.includes('if(!q.noMusic'), 'rmRender must respect noMusic items');
+});
+
+
+test('checkPrerequisites locks unknown topic IDs and traces deepest missing prerequisite root (#721, Refs #591)', () => {
+  // 1. Unknown topic ID is locked
+  const unk = TopicDiag.checkPrerequisites('unknown-topic-id', null, progression);
+  assert.equal(unk.ok, false, 'unknown topic id must not return ok');
+  assert.equal(unk.missing.includes('unknown_topic'), true);
+
+  // 2. Deepest missing prerequisite: mm-cur-33 depends on mm-cur-32, which depends on mm-cur-25
+  // If mm-cur-32 and mm-cur-25 are both unmastered, redirectTo must reach mm-cur-25
+  const chainCheck = TopicDiag.checkPrerequisites('mm-cur-33', {
+    isMastered: (id) => ['mm-cur-16', 'mm-cur-18', 'mm-cur-22', 'mm-cur-24'].includes(id) // 32 and 25 are missing
+  }, progression);
+
+  assert.equal(chainCheck.ok, false);
+  assert.equal(chainCheck.redirectTo, 'mm-cur-25', 'redirectTo must trace to deepest missing prerequisite mm-cur-25');
+});
+
+test('single item diagnostic block includes unassisted pure math item (#721, Refs #591)', () => {
+  const single = [{ prompt: '5 + 5 = ?', answer: '10' }];
+  const blocks = TopicDiag.createDiagnosticBlocks(single, { grade: 'א' });
+  assert.equal(blocks.length, 1);
+  assert.equal(blocks[0].items.length, 1);
+  assert.equal(blocks[0].hasUnassistedItem, true);
+  assert.equal(blocks[0].items[0].noMusic, true);
+  assert.equal(blocks[0].items[0].plain, true);
 });

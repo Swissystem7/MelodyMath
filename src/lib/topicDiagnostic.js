@@ -35,8 +35,8 @@
     for (let i = 0; i < list.length; i += blockSize) {
       const slice = list.slice(i, i + blockSize).map(function (it, idx, arr) {
         const copy = Object.assign({}, it);
-        // Requirement: at least 1 item per block without music to test pure math unassisted
-        if (idx === arr.length - 1 && arr.length > 1) {
+        // Requirement: at least 1 item per block without music to test pure math unassisted (Refs #678, Refs #665)
+        if (idx === arr.length - 1) {
           copy.noMusic = true;
           copy.plain = true;
         }
@@ -63,8 +63,7 @@
     return blocks;
   }
 
-  function checkPrerequisites(topicId, tracker, progModule) {
-    if (!topicId) return { ok: true, prereq: [], missing: [], redirectTo: null };
+  function checkPrerequisites(topicIdOrSkill, tracker, progModule, skillKey) {
     let prog = progModule;
     if (!prog && typeof root !== 'undefined' && root.MM_PROGRESSION) {
       prog = root.MM_PROGRESSION;
@@ -72,21 +71,74 @@
     if (!prog && typeof require === 'function') {
       try { prog = require('./curriculum/progression.js'); } catch (_) {}
     }
-    if (!prog || typeof prog.linksForTopic !== 'function') return { ok: true, prereq: [], missing: [], redirectTo: null };
-    const links = prog.linksForTopic(topicId);
-    if (!links || !Array.isArray(links.prereq) || !links.prereq.length) return { ok: true, prereq: [], missing: [], redirectTo: null };
+    if (!prog) return { ok: false, topicId: topicIdOrSkill, prereq: [], missing: ['prog_missing'], redirectTo: null };
+
+    const first = String(topicIdOrSkill || '');
+    let links = null;
+    let actualTopicId = first;
+
+    if (skillKey && typeof prog.linksForSkill === 'function') {
+      links = prog.linksForSkill(first, skillKey);
+      actualTopicId = (links && links.topicId) || (first + ':' + skillKey);
+    } else if (first.includes(':') && typeof prog.linksForSkill === 'function') {
+      const parts = first.split(':');
+      links = prog.linksForSkill(parts[0], parts[1]);
+      actualTopicId = (links && links.topicId) || first;
+    } else if (typeof prog.linksForTopic === 'function') {
+      links = prog.linksForTopic(first);
+      actualTopicId = first;
+    }
+
+    // Unknown topic ID is locked and NOT ok (Refs #665)
+    if (!links) {
+      return { ok: false, topicId: actualTopicId, prereq: [], missing: ['unknown_topic'], redirectTo: null };
+    }
+
+    if (!Array.isArray(links.prereq) || !links.prereq.length) {
+      return { ok: true, topicId: actualTopicId, prereq: [], missing: [], redirectTo: null };
+    }
+
+    function isMastered(id) {
+      if (!tracker) return false;
+      if (typeof tracker.isMastered === 'function') return Boolean(tracker.isMastered(id));
+      return Boolean(tracker[id]);
+    }
 
     const missing = [];
     links.prereq.forEach(function (pId) {
-      const isMastered = tracker && typeof tracker.isMastered === 'function' ? tracker.isMastered(pId) : (tracker && tracker[pId]);
-      if (!isMastered) missing.push(pId);
+      if (!isMastered(pId)) missing.push(pId);
     });
 
+    if (missing.length === 0) {
+      return { ok: true, topicId: actualTopicId, prereq: links.prereq, missing: [], redirectTo: null };
+    }
+
+    // Trace down the prerequisite tree to the deepest missing root
+    function findDeepestMissing(currId, visited) {
+      const seen = visited || new Set();
+      if (seen.has(currId)) return currId;
+      seen.add(currId);
+      const currLinks = typeof prog.linksForTopic === 'function' ? prog.linksForTopic(currId) : null;
+      if (!currLinks || !Array.isArray(currLinks.prereq) || !currLinks.prereq.length) {
+        return currId;
+      }
+      for (let i = 0; i < currLinks.prereq.length; i++) {
+        const parentId = currLinks.prereq[i];
+        if (!isMastered(parentId)) {
+          return findDeepestMissing(parentId, seen);
+        }
+      }
+      return currId;
+    }
+
+    const deepest = findDeepestMissing(missing[0]);
+
     return {
-      ok: missing.length === 0,
+      ok: false,
+      topicId: actualTopicId,
       prereq: links.prereq,
       missing: missing,
-      redirectTo: missing[0] || null
+      redirectTo: deepest
     };
   }
 
