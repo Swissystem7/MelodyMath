@@ -33,8 +33,11 @@
     const skill = String(item.skill || item.mathTopic || '').toLowerCase();
     const p = String(item.prompt || '');
 
-    // Division checked before fractions to avoid mistaking 12/3 for a fraction
-    if (skill.includes('divis') || skill.includes('חילוק') || p.includes('÷') || p.includes(':')) {
+    // Division checked before fractions to avoid mistaking 12/3 for a fraction.
+    // Exclude clock times (e.g. 10:30, 3:00) and Hebrew punctuation colons (Refs #591).
+    const isClockTime = /\b\d{1,2}:\d{2}\b/.test(p);
+    const hasDivisionColon = (/\s+:\s+/.test(p) || /(?:^|\s|\()\d+\s*:\s*[1-9]\d*(?:\s*[:=]|\s*\?|$)/.test(p)) && !isClockTime;
+    if (skill.includes('divis') || skill.includes('חילוק') || p.includes('÷') || hasDivisionColon) {
       return ANIMATION_SPECS.division;
     }
     if (skill.includes('fraction') || skill.includes('שבר')) return ANIMATION_SPECS.fractions;

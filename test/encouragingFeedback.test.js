@@ -122,3 +122,23 @@ test('index.html integrates encouraging feedback into practice check()', () => {
   assert.ok(indexHtml.includes('!correct&&current&&!current._retryDone'), 'first mistake gives retry');
   assert.ok(indexHtml.includes('feedback soft'), 'applies soft feedback class');
 });
+
+test('division detection does not match clock times like 10:30 or punctuation colons (#722, Refs #591)', () => {
+  const clockItem1 = { topic: 'mm-cur-28', skill: 'measurement', prompt: 'השעון מראה 10:30. מה השעה?' };
+  const clockItem2 = { skill: 'measurement', prompt: '10:30' };
+  const clockItem3 = { skill: 'time', prompt: 'האימון התחיל ב־4:30 ונגמר ב־6:00. כמה דקות נמשך?' };
+  const punctItem1 = { skill: 'counting', prompt: 'סִפרו: 🥁🥁🥁 — כמה יש?' };
+  const punctItem2 = { skill: 'addition', prompt: 'חשבו במאונך: 47 + 25' };
+  const divItem1 = { prompt: '12 : 3 = ?' };
+  const divItem2 = { prompt: '84 : 4' };
+  const divItem3 = { skill: 'division', prompt: 'כמה קבוצות של 3 יש ב־12?' };
+
+  assert.notEqual(fb.getVisualMathAnimation(clockItem1).kind, 'partition', '10:30 in sentence is not division');
+  assert.notEqual(fb.getVisualMathAnimation(clockItem2).kind, 'partition', 'bare 10:30 is not division');
+  assert.notEqual(fb.getVisualMathAnimation(clockItem3).kind, 'partition', 'clock range 4:30 to 6:00 is not division');
+  assert.notEqual(fb.getVisualMathAnimation(punctItem1).kind, 'partition', 'counting prompt colon is not division');
+  assert.equal(fb.getVisualMathAnimation(punctItem2).kind, 'merge', 'vertical addition is addition');
+  assert.equal(fb.getVisualMathAnimation(divItem1).kind, 'partition', '12 : 3 = ? is division');
+  assert.equal(fb.getVisualMathAnimation(divItem2).kind, 'partition', '84 : 4 is division');
+  assert.equal(fb.getVisualMathAnimation(divItem3).kind, 'partition', 'explicit division skill is division');
+});
