@@ -10,8 +10,7 @@
   function need(p) { try { return require(p); } catch (e) { return null; } }
   function getJam() { return (root && root.MM_JAM) || need('./jamKit.js'); }
 
-  // 4 primary instruments with verified museum/literature sources in instruments.js:
-  // Darbuka (drumLow), Cajon (woodClick), Marimba (woodBar), Handbells (metalBell).
+  // 4 primary instruments with verified sources: Darbuka, Cajon, Marimba, Handbells.
   const DEFAULT_VOICES = [
     { voice: 'drumLow', hz: 220, instrument: 'darbuka', he: 'דרבוקה' },
     { voice: 'woodClick', hz: 330, instrument: 'cajon', he: 'קחון' },
@@ -28,8 +27,7 @@
     const tid = String((it && (it.topicId || it.id)) || '');
     if (/^mm-cur-(?:3[2-9]|[4-9]\d|\d{3,})/.test(tid)) return true;
     const skill = String((it && it.skill) || '');
-    if (skill.includes('fraction') || skill.includes('decimal') || skill.includes('percent')) return true;
-    return false;
+    return skill.includes('fraction') || skill.includes('decimal') || skill.includes('percent');
   }
 
   function parseNumberGroups(it) {
@@ -48,7 +46,6 @@
       if (vals.some(v => v > 20) || (vals[0] + vals[1] + (vals[2] || 0) > 30)) return null;
       return { op: 'addition', groups: vals.map(cap) };
     }
-
     // Subtraction: a - b (subtrahend taken away from minuend)
     const mSub = p.match(/(\d+)\s*[-−–]\s*(\d+)/);
     if (mSub) {
@@ -56,7 +53,6 @@
       if (a > 20 || b > 20 || b > a) return null;
       return { op: 'subtraction', minuend: cap(a), subtrahend: cap(b), groups: [cap(a)] };
     }
-
     // Multiplication: a × b (a equal groups of b; single voice; cap <= 20)
     const mMul = p.match(/(\d+)\s*[×*]\s*(\d+)/);
     if (mMul) {
@@ -66,7 +62,6 @@
       for (let i = 0; i < a; i++) res.push(cap(b));
       return { op: 'multiplication', groups: res, singleVoice: true };
     }
-
     // Division: a : b (partitioned into b equal groups; single voice)
     const mDiv = p.match(/(\d+)\s*:\s*(\d+)/);
     if (mDiv) {
@@ -76,7 +71,6 @@
       for (let i = 0; i < b; i++) res.push(cap(each));
       return { op: 'division', groups: res, singleVoice: true };
     }
-
     // Comparison: a vs b
     const mCmp = p.match(/(\d+)\s*(?:[><=]|מול|לעומת|או)\s*(\d+)/);
     if (mCmp) {
@@ -84,21 +78,15 @@
       if (a > 20 || b > 20) return null;
       return { op: 'compare', groups: [cap(a), cap(b)] };
     }
-
     // Emoji / counting symbols
     const emoji = p.match(/[🥁👏♪•]+/g);
     if (emoji && emoji.length) {
       const c = emoji.map(s => Array.from(s).length).filter(n => n > 0 && n <= 20);
       if (c.length) return { op: 'counting', groups: c.slice(0, 4).map(cap) };
     }
-
     // Single counting number
     const nums = p.match(/\b\d+\b/g);
-    if (nums && nums.length === 1) {
-      const n = +nums[0];
-      if (n <= 20) return { op: 'counting', groups: [cap(n)] };
-    }
-
+    if (nums && nums.length === 1 && +nums[0] <= 20) return { op: 'counting', groups: [cap(+nums[0])] };
     return null;
   }
 
@@ -106,8 +94,7 @@
     const parsed = parseNumberGroups(it);
     if (!parsed || !parsed.groups || !parsed.groups.length) return null;
     const bpm = Number(options && options.bpm) || (options && options.seed ? 90 + (options.seed % 35) : 105);
-    const beat = 60 / bpm;
-    const pause = beat * 1.5;
+    const beat = 60 / bpm, pause = beat * 1.5;
     const groups = [], notes = [];
     let t = 0, gIdx = 0;
 
@@ -132,9 +119,17 @@
 
     parsed.groups.forEach(function (count, gi) {
       const v = useSingleVoice ? baseVoice : DEFAULT_VOICES[gi % DEFAULT_VOICES.length];
-      groups.push({ index: gi, count: count, startIndex: gIdx, voice: v.voice, hz: v.hz, instrument: v.instrument, he: v.he });
-      for (let k = 0; k < count; k++) {
-        notes.push({ index: gIdx++, at: t, groupIndex: gi, noteInGroup: k + 1, groupCount: count, voice: v.voice, hz: v.hz, action: 'count' });
+      const hasTens = parsed.op === 'addition' && count >= 10;
+      const tens = hasTens ? Math.floor(count / 10) : 0;
+      const ones = hasTens ? (count % 10) : count;
+
+      groups.push({ index: gi, count: count, tens: tens, ones: ones, startIndex: gIdx, voice: v.voice, hz: v.hz, instrument: v.instrument, he: v.he });
+      for (let k = 0; k < tens; k++) {
+        notes.push({ index: gIdx++, at: t, groupIndex: gi, noteInGroup: (k + 1) * 10, groupCount: count, voice: 'drumLow', hz: 110, kind: 'ten', isTen: true, action: 'count' });
+        t += beat;
+      }
+      for (let k = 0; k < ones; k++) {
+        notes.push({ index: gIdx++, at: t, groupIndex: gi, noteInGroup: (tens ? '10+' : '') + (k + 1), groupCount: count, voice: v.voice, hz: v.hz, kind: 'one', isTen: false, action: 'count' });
         t += beat;
       }
       if (gi < parsed.groups.length - 1) t += pause;
@@ -147,7 +142,9 @@
     if (!plan || !plan.totalSounds) return '';
     const groupsHtml = plan.groups.map(function (g, gi) {
       const dots = [];
-      for (let k = 0; k < g.count; k++) dots.push('<span class="np-dot" data-group="' + gi + '" data-note-idx="' + (g.startIndex + k) + '" aria-hidden="true"></span>');
+      const tens = g.tens || 0, ones = (g.ones != null) ? g.ones : g.count;
+      for (let k = 0; k < tens; k++) dots.push('<span class="np-dot np-ten" data-group="' + gi + '" data-note-idx="' + (g.startIndex + k) + '" title="עשרת" aria-label="עשרת"></span>');
+      for (let k = 0; k < ones; k++) dots.push('<span class="np-dot np-one" data-group="' + gi + '" data-note-idx="' + (g.startIndex + tens + k) + '" aria-hidden="true"></span>');
       return '<div class="np-group" data-group="' + gi + '" aria-label="קבוצה ' + (gi + 1) + '">' + dots.join('') + '</div>';
     }).join('<span class="np-gap" aria-hidden="true">|</span>');
 
@@ -190,10 +187,7 @@
       activeHandle = play(plan, {
         onNote: (n, idx) => {
           if (n.action === 'takeaway') {
-            if (dots[n.targetDot]) {
-              dots[n.targetDot].classList.remove('lit');
-              dots[n.targetDot].classList.add('taken');
-            }
+            if (dots[n.targetDot]) { dots[n.targetDot].classList.remove('lit'); dots[n.targetDot].classList.add('taken'); }
             if (announcer) announcer.textContent = 'הפחתה: נלקח צליל ' + n.noteInGroup + ' מתוך ' + n.groupCount;
           } else {
             if (dots[idx]) dots[idx].classList.add('lit');

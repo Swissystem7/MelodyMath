@@ -49,5 +49,7 @@
 .np-dot[data-group="1"].lit{background:var(--pink)}
 .np-dot[data-group="2"].lit{background:var(--good)}
 .np-gap{display:inline-block;width:12px;text-align:center;color:var(--muted);font-weight:bold}
+.np-dot.np-ten{width:32px;border-radius:6px;background:#e2e8f0}
+.np-dot.np-ten.lit{background:#3b82f6}
 .np-dot.taken{opacity:0.35;border-style:dashed;transform:scale(0.85)}
 @media (prefers-reduced-motion:reduce){.np-dot.lit,.np-dot.taken{animation:none;transform:none}}

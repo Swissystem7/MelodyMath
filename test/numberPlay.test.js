@@ -3,12 +3,25 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const NumberPlay = require('../src/components/NumberPlay.js');
 
-test('addition supports numbers up to 20 without capping to 12 (15+7)', () => {
+test('addition above 10 plays as tens (deep bass) and ones (rhythmic clicks) (#720, Refs #591)', () => {
   const pAdd = NumberPlay.extractNumberPlan({ prompt: '15 + 7 = ?' });
   assert.ok(pAdd, 'plan must exist for 15+7');
-  assert.equal(pAdd.groups[0].count, 15, 'first group must be 15, not capped to 12');
+  assert.equal(pAdd.groups[0].count, 15, 'first group must be 15');
+  assert.equal(pAdd.groups[0].tens, 1, '15 has 1 ten');
+  assert.equal(pAdd.groups[0].ones, 5, '15 has 5 ones');
   assert.equal(pAdd.groups[1].count, 7, 'second group must be 7');
-  assert.equal(pAdd.totalSounds, 22);
+  assert.equal(pAdd.groups[1].tens, 0);
+  assert.equal(pAdd.groups[1].ones, 7);
+
+  // 1 ten (deep bass) + 5 ones + 7 ones = 13 sounds total
+  assert.equal(pAdd.totalSounds, 13);
+  const tenNotes = pAdd.notes.filter(n => n.isTen);
+  assert.equal(tenNotes.length, 1);
+  assert.equal(tenNotes[0].voice, 'drumLow');
+  assert.equal(tenNotes[0].hz, 110);
+
+  const html = NumberPlay.renderHtml(pAdd);
+  assert.match(html, /np-ten/);
   assert.notEqual(pAdd.groups[0].voice, pAdd.groups[1].voice, 'addition groups have distinct timbres');
 });
 
@@ -71,7 +84,7 @@ test('renderHtml creates exact circle count and mount wires visual playback', ()
   const plan = NumberPlay.extractNumberPlan({ prompt: '4 + 2 = ?' });
   const html = NumberPlay.renderHtml(plan);
   assert.match(html, /data-total-sounds="6"/);
-  const dotMatches = html.match(/class="np-dot"/g);
+  const dotMatches = html.match(/class="np-dot/g);
   assert.equal(dotMatches.length, plan.totalSounds);
 
   const mockBtn = { setAttribute: () => {}, addEventListener: () => {} };
@@ -85,4 +98,21 @@ test('renderHtml creates exact circle count and mount wires visual playback', ()
   };
   const handle = NumberPlay.mount(mockContainer, { prompt: '4 + 2 = ?' });
   assert.ok(handle && typeof handle.play === 'function');
+});
+
+test('timing & timbre: >=1.5 beat pause between groups, distinct instrument per group (#720, Refs #591)', () => {
+  const plan = NumberPlay.extractNumberPlan({ prompt: '4 + 3 = ?' }, { bpm: 100 });
+  const gap = plan.notes[4].at - plan.notes[3].at;
+  assert.ok(gap >= plan.beat * 1.5, `Gap ${gap}s must be at least 1.5 beats (${plan.beat * 1.5}s)`);
+  assert.notEqual(plan.groups[0].voice, plan.groups[1].voice);
+  assert.notEqual(plan.groups[0].hz, plan.groups[1].hz);
+});
+
+test('renderHtml creates exact circle count matching sound count (#720, Refs #591)', () => {
+  const plan = NumberPlay.extractNumberPlan({ prompt: '3 + 2 = ?' });
+  const html = NumberPlay.renderHtml(plan);
+  assert.match(html, /data-total-sounds="5"/);
+  const dotMatches = html.match(/class="np-dot/g);
+  assert.equal(dotMatches.length, plan.totalSounds);
+  assert.match(html, /class="np-gap"/);
 });
