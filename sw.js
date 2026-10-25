@@ -78,6 +78,7 @@ const ASSETS = [
   './src/components/BeatCounter.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
+  './src/lib/exercises/tempoPercent.js',
   './src/sefirot.css',
   './src/theme.css',
   './icons/icon.svg',
