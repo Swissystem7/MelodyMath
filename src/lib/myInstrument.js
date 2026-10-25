@@ -4,13 +4,16 @@
 //
 // - One storage key, validated against instrumentById of instruments.js, so
 //   any world instrument is allowed and an unknown id is never returned.
-// - One-time migration of the old per-screen key 'mm-tap-instrument'.
+// - Migration of the old per-screen key 'mm-tap-instrument' (#753): each
+//   pick written there moves here once, and the old key is removed.
+// - mountPicker() is the app's only instrument picker (#myInstCard).
 // - setMyInstrument() fires 'mm:instrument' on the window so an open screen
 //   can redraw in the new timbre without losing its progress.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_MY_INSTRUMENT = api;
+  if (typeof document !== 'undefined' && document.getElementById('myInstCard')) api.mountPicker(document.getElementById('myInstCard'));
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
@@ -35,14 +38,14 @@
     const s = store(storage);
     if (!s) return null;
     try {
-      let id = s.getItem(KEY);
-      if (id == null) {
-        const old = s.getItem(LEGACY_KEY);
-        if (old != null) {
-          s.removeItem(LEGACY_KEY);
-          if (valid(old)) { s.setItem(KEY, old); id = old; }
-        }
+      // #753's tap picker still writes the old key. Its pick is the newest
+      // one, so it moves here and the old key goes: read, write, remove.
+      const old = s.getItem(LEGACY_KEY);
+      if (old != null) {
+        s.removeItem(LEGACY_KEY);
+        if (valid(old)) s.setItem(KEY, old);
       }
+      const id = s.getItem(KEY);
       return valid(id) ? id : null;
     } catch (e) { return null; }
   }
@@ -68,5 +71,29 @@
     return fallbackId;
   }
 
-  return { KEY, LEGACY_KEY, EVENT, getMyInstrument, setMyInstrument, instrumentFor };
+  // The app's one instrument picker: every instrument, by family, the
+  // current choice pressed. Screens only read the choice; none has its own.
+  const FAMILY_HE = { percussion: 'כלי הקשה', strings: 'כלי מיתר', winds: 'כלי נשיפה', keys: 'כלי מקלדת' };
+  function esc(v) { return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function pickerHtml(current) {
+    const d = data();
+    if (!d || !d.INSTRUMENTS) return '';
+    return '<h3>🎻 הכלי שלי</h3><p>הכלי שתבחרו ינגן בכל משחקי המוזיקה.</p>' + d.FAMILIES.map(function (f) {
+      return '<div class="jam-row" role="group" aria-label="' + FAMILY_HE[f] + '">' + d.INSTRUMENTS.filter(function (x) { return x.family === f; }).map(function (x) {
+        return '<button type="button" class="jam-pad" data-my-inst="' + esc(x.id) + '" data-tap="' + esc(x.voice) + '" aria-pressed="' + (x.id === current) + '">' + esc(x.instrument.he) + '</button>';
+      }).join('') + '</div>';
+    }).join('');
+  }
+  function mountPicker(el, storage) {
+    function draw() { el.innerHTML = pickerHtml(getMyInstrument(storage)); }
+    el.addEventListener('click', function (ev) {
+      const b = ev.target && ev.target.closest ? ev.target.closest('[data-my-inst]') : null;
+      if (b) setMyInstrument(b.getAttribute('data-my-inst'), storage);
+    });
+    if (root && typeof root.addEventListener === 'function') root.addEventListener(EVENT, draw);
+    draw();
+    return { draw: draw };
+  }
+
+  return { KEY, LEGACY_KEY, EVENT, getMyInstrument, setMyInstrument, instrumentFor, pickerHtml, mountPicker };
 });

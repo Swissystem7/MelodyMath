@@ -121,13 +121,19 @@ function button(attrs, label) {
   return '<button type="button" class="jam-pad" ' + attrs + ' style="' + TAP + '">' + label + '</button>';
 }
 
-export function formatCrossInstrumentCard(preset, status) {
+// The app's one instrument choice (#679, src/lib/myInstrument.js, loaded as a
+// classic script); this screen keeps no instrument state of its own.
+function my() {
+  return globalThis.MM_MY_INSTRUMENT || null;
+}
+
+export function formatCrossInstrumentCard(preset, status, mine) {
   const p = preset || ENSEMBLE_PRESETS[0];
   const frac = p.fraction[0] + '/' + p.fraction[1];
   const perc = p.instruments.filter(function (id) { return PERCUSSION.indexOf(id) >= 0; });
   const rest = p.instruments.filter(function (id) { return PERCUSSION.indexOf(id) < 0; });
   const taps = p.instruments.map(function (id) {
-    return button('data-instrument="' + escapeHtml(id) + '"', escapeHtml(nameOf(id)));
+    return button('data-instrument="' + escapeHtml(id) + '" aria-pressed="' + (id === mine) + '"', escapeHtml(nameOf(id)));
   }).join('');
   const answers = choices(p).map(function (n) {
     return button('data-ensemble-answer="' + n + '"', bdi(n));
@@ -174,11 +180,12 @@ function playNote(id, onPlay) {
 export function mountEnsembleStudio(container, options = {}) {
   const opts = options || {};
   const preset = opts.preset || ENSEMBLE_PRESETS[opts.index || 0] || ENSEMBLE_PRESETS[0];
-  const view = { preset: preset, lastOk: null, played: [] };
+  const view = { preset: preset, lastOk: null };
   let status = '';
 
   function render() {
-    container.innerHTML = formatCrossInstrumentCard(preset, status);
+    const m = my();
+    container.innerHTML = formatCrossInstrumentCard(preset, status, m ? m.getMyInstrument(opts.storage) : null);
   }
 
   function onClick(event) {
@@ -186,7 +193,9 @@ export function mountEnsembleStudio(container, options = {}) {
     if (!el || typeof el.getAttribute !== 'function') return;
     const inst = el.getAttribute('data-instrument');
     if (inst) {
-      view.played.push(inst);
+      // A tap picks the instrument for the whole app; the store's event redraws.
+      const m = my();
+      if (m) m.setMyInstrument(inst, opts.storage);
       playNote(inst, opts.onPlay);
       return;
     }
@@ -200,5 +209,7 @@ export function mountEnsembleStudio(container, options = {}) {
   view.onClick = onClick;
   render();
   if (typeof container.addEventListener === 'function') container.addEventListener('click', onClick);
+  const m = my();
+  if (m && typeof globalThis.addEventListener === 'function') globalThis.addEventListener(m.EVENT, render);
   return view;
 }
