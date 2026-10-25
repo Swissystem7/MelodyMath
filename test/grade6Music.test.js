@@ -78,7 +78,7 @@ test('ratio, tempo and mean items are arithmetically right', () => {
     assert.ok(isCorrect(String(cof.meanOf(nums)), it.answer), it.prompt);
   });
   music('percent', 'tempo').forEach((it) => {
-    const up = /(\d+) BPM (עולה|יורד) ב־(\d+)%/.exec(it.prompt);
+    const up = /(\d+) פעימות בדקה (עולה|יורד) ב־(\d+)%/.exec(it.prompt);
     if (!up) return;
     const pct = Number(up[3]) * (up[2] === 'עולה' ? 1 : -1);
     assert.ok(isCorrect(String(engine.tempoChange(Number(up[1]), pct)), it.answer), it.prompt);

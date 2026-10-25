@@ -45,6 +45,7 @@ function boot() {
     normalizeAnswer,
     currentDiag: () => BANKS.diagnosticItems('א'),
     rmHe: s => s,
+    kidText: s => s,
     setItemTag() {}, renderWidget() {}, revealWidget() {}, maybeHear() {}, maybeSpeak() {}, noteMetro() {}, rmAdvance() {},
     setMath: (node, text) => { node.textContent = String(text); },
     mathHtml: s => String(s),

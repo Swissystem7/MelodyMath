@@ -42,9 +42,11 @@ test('index.html child-facing practice screens contain no visible clinical/diagn
 
   const blurbMatch = html.match(/<p id="rmStartBlurb">([\s\S]*?)<\/p>/);
   assert.ok(blurbMatch, 'rmStartBlurb exists');
-  assert.doesNotMatch(blurbMatch[1], /אבחון קליני/);
-  assert.match(blurbMatch[1], /מדגם קצר/);
-  assert.match(blurbMatch[1], /נענה בעזרת הצלילים/);
+  assert.doesNotMatch(blurbMatch[1], /אבחון|מדגם קצר/);
+  // rmQuiz takes a typed answer, so the blurb must not promise answering by sound.
+  assert.doesNotMatch(blurbMatch[1], /נענה בעזרת הצלילים/);
+  assert.match(blurbMatch[1], /כותבים במקלדת/);
+  assert.match(html, /id="rmAnswer"[^>]*placeholder="הקלידו תשובה"/);
 
   // Button text
   assert.match(html, /id="rmBegin"[^>]*>מתחילים לשחק/);
@@ -77,19 +79,52 @@ test('index.html child-facing practice screens contain no visible clinical/diagn
 test('lock test: statutory non-clinical notes restored and audience-scoped (FIX-737-NOTES, FIX-737-AUDIENCE)', () => {
   const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
 
-  // 1. rmStartBlurb has short sample and non-medical statement without clinical jargon
-  const blurbMatch = html.match(/<p id="rmStartBlurb">([\s\S]*?)<\/p>/);
-  assert.ok(blurbMatch, 'rmStartBlurb exists');
-  assert.match(blurbMatch[1], /מדגם קצר/);
-  assert.doesNotMatch(blurbMatch[1], /אבחון קליני/);
-  assert.match(html, /id="rmStartDisclaimer"[^>]*>זהו מדגם קצר, לא אבחון קליני/);
+  // The notes live on the teacher report panel, not on the cards the child sees.
+  const teacher = (html.match(/<section id="teacherReport"[\s\S]*?<\/section>/) || [])[0] || '';
+  const kid = (html.match(/<section id="remediation"[\s\S]*?<\/section>/) || [])[0] || '';
+  assert.ok(teacher && kid, 'teacherReport and remediation panels exist');
+  assert.match(teacher, /id="rmStartDisclaimer"[^>]*>זהו מדגם קצר, לא אבחון קליני\./);
+  assert.match(teacher, /id="rmDisclaimer"[^>]*>זהו מדגם למידה קצר, לא אבחון קליני ואין כאן טענת שליטה\./);
+  assert.doesNotMatch(kid, /id="rmStartDisclaimer"|id="rmDisclaimer"|אבחון קליני|טענת שליטה/);
+  const report = (kid.match(/<div id="rmReport"[^\n]*/) || [])[0] || '';
+  assert.ok(report, 'rmReport card exists');
+  assert.doesNotMatch(report, /rmDisclaimer/);
+  // The quiz summary the child reads drops the clinical clauses.
+  assert.doesNotMatch(html, /מדגם קצר במכשיר — לא אבחון/);
+});
 
-  // 2. Practice-plan text in rmReport contains 'לא אבחון קליני'
-  assert.match(html, /זהו מדגם קצר במכשיר — לא אבחון קליני/);
+test('every visible string on the child screens and in the exercise banks is child-friendly', () => {
+  const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+  const kid = (html.match(/<section id="remediation"[\s\S]*?<\/section>/) || [])[0] || '';
+  assert.ok(kid, 'remediation panel exists');
+  const shown = kid.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '')
+    .split(/<[^>]*>/).map((s) => s.trim()).filter((s) => /[א-ת]/.test(s));
+  const attrs = [...kid.matchAll(/\s(?:aria-label|placeholder|title)="([^"]*)"/g)].map((m) => m[1]);
+  assert.ok(shown.length > 10, 'extracted the child screen text');
+  [...shown, ...attrs].forEach((s) => assert.ok(childLang.isChildFriendly(s), 'not child-friendly: ' + s));
 
-  // 3. All-correct message in rmReport contains 'לא אבחון ואין כאן טענת שליטה'
-  assert.match(html, /זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה/);
+  const banks = require('../src/lib/banks.js');
+  const items = banks.allItems();
+  assert.ok(items.length > 100, 'bank items loaded');
+  items.forEach((it) => {
+    [it.prompt, it.hint, banks.skillHe(it.skill), banks.levelHe(it.level)].forEach((s) => {
+      if (typeof s === 'string') assert.ok(childLang.isChildFriendly(s), 'bank text not child-friendly: ' + s);
+    });
+  });
+});
 
-  // 4. Parents disclaimer on #rmReport maintains statutory note
-  assert.match(html, /id="rmDisclaimer"[^>]*>זהו מדגם למידה קצר, לא אבחון קליני ואין כאן טענת שליטה/);
+test('runtime kid text goes through simplifyForChild with an isChildFriendly dev guard', () => {
+  const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+  const fn = (html.match(/function kidText\(s\)\{[^\n]*/) || [])[0] || '';
+  assert.match(fn, /\.simplifyForChild\(s\)/);
+  assert.match(fn, /\.isChildFriendly\(t\)/);
+  assert.match(fn, /console\.warn/);
+  assert.match(html, /\$\('rmSkill'\)\.textContent=kidText\(/);
+  assert.match(html, /\$\('rmSummary'\)\.innerHTML=kidText\(/);
+  assert.match(html, /\$\('rmSummary'\)\.textContent=kidText\(/);
+  assert.match(html, /\$\('beatMeta'\)\.textContent=kidText\(/);
+  // kidText runs the real module in the browser; the same pass leaves kid summaries intact.
+  const s = childLang.simplifyForChild('כל הכבוד! בשאלות של הכיתה הזו כל התשובות היו נכונות.');
+  assert.equal(s, 'כל הכבוד! בשאלות של הכיתה הזו כל התשובות היו נכונות.');
+  assert.ok(childLang.isChildFriendly(s));
 });

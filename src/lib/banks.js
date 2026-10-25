@@ -925,7 +925,7 @@
     G56('ה', 'decimals', 'במספר 3.46, איזו ספרה במקום המאיות?', 6, 'הספרה השנייה אחרי הנקודה', 1, ST.DEC_PLACE),
     G56('ה', 'decimals', 'מה גדול יותר, 0.5 או 0.45? כתבו את הגדול.', 0.5, '0.50 מול 0.45', 2, ST.DEC_PLACE),
     G56('ה', 'decimals', 'כתבו כשבר עשרוני: 1/4', 0.25, '1/4 = 25/100', 2, ST.DEC_PLACE),
-    G56('ה', 'decimals', 'פעימה ב־120 BPM נמשכת 60/120 שנייה. כמה שניות זה כשבר עשרוני?', 0.5, '60 חלקי 120', 3, ST.DEC_PLACE, 'bpm'),
+    G56('ה', 'decimals', 'ב־120 פעימות בדקה, פעימה נמשכת 60/120 שנייה. כמה שניות זה כשבר עשרוני?', 0.5, '60 חלקי 120', 3, ST.DEC_PLACE, 'bpm'),
     G56('ה', 'decimals', '0.3 + 0.4 = ?', 0.7, 'שלוש עשיריות ועוד ארבע עשיריות', 1, ST.DEC_ADD),
     G56('ה', 'decimals', '2.5 + 1.25 = ?', 3.75, 'מיישרים את הנקודות: 2.50 + 1.25', 2, ST.DEC_ADD),
     G56('ה', 'decimals', '5 − 1.6 = ?', 3.4, '5.0 − 1.6', 2, ST.DEC_ADD),
@@ -959,7 +959,7 @@
     G56('ו', 'percent', 'כמה זה 10% מ־70?', 7, '10% הם עשירית', 1, ST.PERCENT),
     G56('ו', 'percent', 'כמה זה 25% מ־60?', 15, '25% הם רבע', 2, ST.PERCENT),
     G56('ו', 'percent', 'כתבו כאחוז (מספר בלבד): 3/4', 75, '3/4 = 75/100', 2, ST.PERCENT),
-    G56('ו', 'percent', 'קצב של 100 BPM עולה ב־20%. מה הקצב החדש?', 120, '20% מ־100 הם 20', 3, ST.PERCENT, 'tempo'),
+    G56('ו', 'percent', 'קצב של 100 פעימות בדקה עולה ב־20%. מה הקצב החדש?', 120, '20% מ־100 הם 20', 3, ST.PERCENT, 'tempo'),
     G56('ו', 'percent', 'מחיר 40 ₪ ירד ב־25%. מה המחיר החדש?', 30, '25% מ־40 הם 10', 3, ST.PERCENT)
   );
 
@@ -1177,16 +1177,16 @@
     MV('decimals', 'ratioHz', 'קווינטה מעל 330 הרץ: 330 × 1.5 = ?', 495, '330 ועוד 165', 2, ST.DEC_MUL),
     MV('decimals', 'ratioHz', 'צליל של 660 הרץ הוא קווינטה מעל איזה תדר? 660 : 1.5 = ?', 440, 'מה כפול 1.5 נותן 660?', 2, ST.DEC_MUL),
     MV('decimals', 'ratioHz', 'טרצה גדולה היא פי 1.25. 400 × 1.25 = ?', 500, '400 ועוד רבע מ־400', 3, ST.DEC_MUL),
-    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 90, 100, 110 ו־100 BPM. מה הקצב הממוצע?', 100, 'הסכום 400, חלקי 4', 1, ST.MEAN),
-    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 78, 82, 80 ו־84 BPM. מה הקצב הממוצע?', 81, 'הסכום 324, חלקי 4', 2, ST.MEAN),
-    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.75, 'הסכום 327, חלקי 4', 3, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 90, 100, 110 ו־100 פעימות בדקה. מה הקצב הממוצע?', 100, 'הסכום 400, חלקי 4', 1, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 78, 82, 80 ו־84 פעימות בדקה. מה הקצב הממוצע?', 81, 'הסכום 324, חלקי 4', 2, ST.MEAN),
+    MV('decimals', 'meanBpm', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 פעימות בדקה. מה הקצב הממוצע?', 81.75, 'הסכום 327, חלקי 4', 3, ST.MEAN),
 
-    MV('percent', 'tempo', 'קצב של 100 BPM עולה ב־10%. מה הקצב החדש?', 110, '10% מ־100 הם 10', 1, ST.PERCENT),
-    MV('percent', 'tempo', 'קצב של 80 BPM עולה ב־25%. מה הקצב החדש? (שמעו לפני ואחרי)', 100, '25% מ־80 הם 20', 2, ST.PERCENT),
-    MV('percent', 'tempo', 'קצב של 120 BPM יורד ב־25%. מה הקצב החדש?', 90, '25% מ־120 הם 30', 2, ST.PERCENT),
-    MV('percent', 'tempo', 'קצב של 90 BPM עולה ב־20%. מה הקצב החדש?', 108, '10% הם 9, אז 20% הם 18', 2, ST.PERCENT),
-    MV('percent', 'tempo', 'הקצב עלה מ־60 ל־90 BPM. בכמה אחוזים הוא עלה?', 50, 'העלייה 30, וזה חצי מ־60', 3, ST.PERCENT),
-    MV('percent', 'tempo', 'הקצב ירד מ־100 ל־80 BPM. בכמה אחוזים הוא ירד?', 20, 'הירידה 20 מתוך 100', 3, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 100 פעימות בדקה עולה ב־10%. מה הקצב החדש?', 110, '10% מ־100 הם 10', 1, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 80 פעימות בדקה עולה ב־25%. מה הקצב החדש? (שמעו לפני ואחרי)', 100, '25% מ־80 הם 20', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 120 פעימות בדקה יורד ב־25%. מה הקצב החדש?', 90, '25% מ־120 הם 30', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'קצב של 90 פעימות בדקה עולה ב־20%. מה הקצב החדש?', 108, '10% הם 9, אז 20% הם 18', 2, ST.PERCENT),
+    MV('percent', 'tempo', 'הקצב עלה מ־60 ל־90 פעימות בדקה. בכמה אחוזים הוא עלה?', 50, 'העלייה 30, וזה חצי מ־60', 3, ST.PERCENT),
+    MV('percent', 'tempo', 'הקצב ירד מ־100 ל־80 פעימות בדקה. בכמה אחוזים הוא ירד?', 20, 'הירידה 20 מתוך 100', 3, ST.PERCENT),
 
     MV('geometry', 'circleFifths', 'במעגל הקווינטות 12 נקודות במרחקים שווים. כמה מעלות בין שתי נקודות שכנות?', 30, '360 חלקי 12', 1, ST.CIRCLE),
     MV('geometry', 'circleFifths', 'מחברים את 12 הנקודות של מעגל הקווינטות בקווים ישרים. כמה צלעות למצולע?', 12, 'צלע אחת בין כל שתי נקודות שכנות', 1, ST.GEO_SORT),
@@ -1237,11 +1237,11 @@
     M5('fractions', 'mixedBar', 'בתיבה של 3/4 יש רבע ושתי שמיניות. כמה חסר עד תיבה מלאה? (כשבר)', '1/4', '1/4 + 2/8 = 1/2', 2, ST.FRAC_ADD),
     M5('fractions', 'mixedBar', 'בתיבה של 4/4 יש חצי, רבע, שמינית ושש־עשרית. כמה חסר עד תיבה מלאה? (כשבר)', '1/16', 'בשש־עשריות: 8 + 4 + 2 + 1 = 15', 3, ST.FRAC_ADD),
 
-    M5('decimals', 'secPerBeat', 'ב־100 BPM פעימה נמשכת 60/100 שנייה. כמה שניות זה כשבר עשרוני?', 0.6, '60 מאיות הן 6 עשיריות', 1, ST.DEC_PLACE),
-    M5('decimals', 'secPerBeat', 'ב־80 BPM פעימה נמשכת 60/80 שנייה. כמה שניות זה כשבר עשרוני?', 0.75, '60/80 = 3/4', 2, ST.DEC_PLACE),
-    M5('decimals', 'secPerBeat', 'ב־240 BPM פעימה נמשכת 60/240 שנייה. כמה שניות זה כשבר עשרוני?', 0.25, '60/240 = 1/4', 2, ST.DEC_PLACE),
-    M5('decimals', 'secPerBeat', 'ב־150 BPM פעימה נמשכת 60/150 שנייה. כמה שניות זה כשבר עשרוני?', 0.4, '60/150 = 2/5 = 4/10', 3, ST.DEC_PLACE),
-    M5('decimals', 'secPerBeat', 'פעימה נמשכת 0.5 שנייה. כמה פעימות בדקה (BPM)?', 120, 'בכל שנייה 2 פעימות, ובדקה 60 שניות', 3, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־100 פעימות בדקה, פעימה נמשכת 60/100 שנייה. כמה שניות זה כשבר עשרוני?', 0.6, '60 מאיות הן 6 עשיריות', 1, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־80 פעימות בדקה, פעימה נמשכת 60/80 שנייה. כמה שניות זה כשבר עשרוני?', 0.75, '60/80 = 3/4', 2, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־240 פעימות בדקה, פעימה נמשכת 60/240 שנייה. כמה שניות זה כשבר עשרוני?', 0.25, '60/240 = 1/4', 2, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'ב־150 פעימות בדקה, פעימה נמשכת 60/150 שנייה. כמה שניות זה כשבר עשרוני?', 0.4, '60/150 = 2/5 = 4/10', 3, ST.DEC_PLACE),
+    M5('decimals', 'secPerBeat', 'פעימה נמשכת 0.5 שנייה. כמה פעימות בדקה?', 120, 'בכל שנייה 2 פעימות, ובדקה 60 שניות', 3, ST.DEC_PLACE),
 
     M5('data', 'hzChart', 'הדיאגרמה מראה את התדר של דו, רה ומי בהרץ (בקירוב). מה התדר של רה?', 294, 'קראו את גובה העמודה של רה', 1, ST.BARCHART, DO_RE_MI),
     M5('data', 'hzChart', 'איזה צליל הכי גבוה? כתבו את התדר שלו בהרץ', 330, 'העמודה הגבוהה ביותר', 2, ST.BARCHART, DO_RE_MI),
@@ -1361,13 +1361,13 @@
 
   // השוואה כפלית: אוקטבה = פי 2 בתדר, והכפלת BPM = פי 2 בטמפו.
   RAW.push(
-    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. פי כמה גבוה התדר השני?', 2, 'אוקטבה היא יחס 2:1', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 220, b: 440, unit: 'hz' } }),
-    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. פי כמה מהיר הטמפו השני?', 2, '120 : 60', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 60, b: 120, unit: 'bpm' } }),
-    G3('word_problems', 'הצליל הראשון 220 Hz והשני 880 Hz. פי כמה גבוה התדר השני?', 4, 'שתי אוקטבות: 2 × 2', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 220, b: 880, unit: 'hz' } }),
-    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. פי כמה מהיר הטמפו השני?', 3, '150 : 50', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 50, b: 150, unit: 'bpm' } }),
+    G3('word_problems', 'הצליל הראשון רועד 220 פעמים בשנייה, והשני 440 פעמים בשנייה. פי כמה גבוה הצליל השני?', 2, 'אוקטבה היא יחס 2:1', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 220, b: 440, unit: 'hz' } }),
+    G3('word_problems', 'בקצב הראשון 60 פעימות בדקה, ובשני 120 פעימות בדקה. פי כמה מהיר הקצב השני?', 2, '120 : 60', { standard: ST.TIMES_MORE, level: 1, g3: { kind: 'pair', a: 60, b: 120, unit: 'bpm' } }),
+    G3('word_problems', 'הצליל הראשון רועד 220 פעמים בשנייה, והשני 880 פעמים בשנייה. פי כמה גבוה הצליל השני?', 4, 'שתי אוקטבות: 2 × 2', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 220, b: 880, unit: 'hz' } }),
+    G3('word_problems', 'בקצב הראשון 50 פעימות בדקה, ובשני 150 פעימות בדקה. פי כמה מהיר הקצב השני?', 3, '150 : 50', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 50, b: 150, unit: 'bpm' } }),
     G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. פי כמה יותר תיבות בשנייה?', 3, 'השוואה כפלית בלי צליל: 18 : 6', { standard: ST.TIMES_MORE, level: 3 }),
     G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. פי כמה ארוכה השנייה?', 3, '12 : 4', { standard: ST.TIMES_MORE, level: 1 }),
-    G3('word_problems', 'הצליל הראשון 330 Hz והשני 660 Hz. פי כמה גבוה התדר השני?', 2, 'גם כאן אוקטבה: 660 : 330', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 330, b: 660, unit: 'hz' } }),
+    G3('word_problems', 'הצליל הראשון רועד 330 פעמים בשנייה, והשני 660 פעמים בשנייה. פי כמה גבוה הצליל השני?', 2, 'גם כאן אוקטבה: 660 : 330', { standard: ST.TIMES_MORE, level: 2, g3: { kind: 'pair', a: 330, b: 660, unit: 'hz' } }),
     G3('word_problems', 'בלהקה 5 מתופפים, ובמקהלה פי 4 זמרים. כמה זמרים במקהלה?', 20, '«פי 4» הוא כפל: 5 × 4', { standard: ST.TIMES_MORE, level: 3 })
   );
 
@@ -1385,12 +1385,12 @@
 
   // מספרים עד 10,000: השוואת שני תדרים בשמיעה, ואז בלי צליל.
   RAW.push(
-    G3('place_value', 'איזה תדר גבוה יותר: 1200 Hz או 1020 Hz? כתבו את המספר.', 1200, 'משווים ספרה־ספרה ממקום האלפים', { standard: ST.NUM10K, level: 1, g3: { kind: 'pair', a: 1200, b: 1020, unit: 'hz' } }),
-    G3('place_value', 'איזה תדר גבוה יותר: 1480 Hz או 1740 Hz? כתבו את המספר.', 1740, 'במקום המאות: 7 גדול מ־4', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1480, b: 1740, unit: 'hz' } }),
-    G3('place_value', 'איזה תדר נמוך יותר: 1320 Hz או 1230 Hz? כתבו את המספר.', 1230, 'במקום המאות: 2 קטן מ־3', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1320, b: 1230, unit: 'hz' } }),
+    G3('place_value', 'איזה צליל גבוה יותר: 1200 או 1020 רעידות בשנייה? כתבו את המספר.', 1200, 'משווים ספרה־ספרה ממקום האלפים', { standard: ST.NUM10K, level: 1, g3: { kind: 'pair', a: 1200, b: 1020, unit: 'hz' } }),
+    G3('place_value', 'איזה צליל גבוה יותר: 1480 או 1740 רעידות בשנייה? כתבו את המספר.', 1740, 'במקום המאות: 7 גדול מ־4', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1480, b: 1740, unit: 'hz' } }),
+    G3('place_value', 'איזה צליל נמוך יותר: 1320 או 1230 רעידות בשנייה? כתבו את המספר.', 1230, 'במקום המאות: 2 קטן מ־3', { standard: ST.NUM10K, level: 2, g3: { kind: 'pair', a: 1320, b: 1230, unit: 'hz' } }),
     G3('place_value', 'מה הספרה במקום האלפים במספר 4705?', 4, 'הספרה השמאלית במספר ארבע־ספרתי', { standard: ST.NUM10K, level: 1 }),
     G3('place_value', 'איזה מספר גדול יותר: 3090 או 3900? כתבו את המספר.', 3900, 'אותן אלפים, ובמקום המאות 9 גדול מ־0', { standard: ST.NUM10K, level: 3 }),
-    G3('place_value', 'איזה תדר גבוה יותר: 1640 Hz או 1460 Hz? כתבו את המספר.', 1640, 'במקום המאות: 6 גדול מ־4', { standard: ST.NUM10K, level: 3, g3: { kind: 'pair', a: 1640, b: 1460, unit: 'hz' } }),
+    G3('place_value', 'איזה צליל גבוה יותר: 1640 או 1460 רעידות בשנייה? כתבו את המספר.', 1640, 'במקום המאות: 6 גדול מ־4', { standard: ST.NUM10K, level: 3, g3: { kind: 'pair', a: 1640, b: 1460, unit: 'hz' } }),
     G3('place_value', 'מה הספרה במקום העשרות במספר 3164?', 6, 'הספרה השנייה מימין', { standard: ST.NUM10K, level: 2 }),
     G3('place_value', 'איזה מספר קטן יותר: 7050 או 7500? כתבו את המספר.', 7050, 'אותן אלפים, ובמקום המאות 0 קטן מ־5', { standard: ST.NUM10K, level: 1 }),
     G3('place_value', 'כמה מאות שלמות יש במספר 2800?', 28, '2800 : 100', { standard: ST.NUM10K, level: 3 })
@@ -1953,10 +1953,10 @@
     G3('word_problems', 'במקהלה 3 שורות של 7 זמרים. 5 זמרים יצאו להפסקה. כמה זמרים נשארו?', 16, 'שלב א׳: 3 × 7 = 21; שלב ב׳: 21 − 5 = 16', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['two_step'] }),
     G3('word_problems', 'לנגן היו 40 ₪. הוא קנה 4 מיתרים ב־6 ₪ כל אחד. כמה כסף נשאר לו?', 16, 'שלב א׳: 4 × 6 = 24; שלב ב׳: 40 − 24 = 16', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
     G3('word_problems', 'הבית הראשון בשיר הוא 6 תיבות של 4 פעמות. הבית השני ארוך פי 2. כמה פעמות בבית השני?', 48, 'שלב א׳: 6 × 4 = 24; שלב ב׳: 24 × 2 = 48', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['two_step'] }),
-    G3('word_problems', 'הטמפו הראשון 60 BPM והשני 120 BPM. בכמה BPM מהיר הטמפו השני?', 60, '«בכמה» הוא הפרש: 120 − 60 = 60. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
-    G3('word_problems', 'הצליל הראשון 220 Hz והשני 440 Hz. בכמה Hz גבוה התדר השני?', 220, '«בכמה» הוא הפרש: 440 − 220 = 220. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'בקצב הראשון 60 פעימות בדקה, ובשני 120 פעימות בדקה. בכמה פעימות בדקה מהיר הקצב השני?', 60, '«בכמה» הוא הפרש: 120 − 60 = 60. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
+    G3('word_problems', 'הצליל הראשון רועד 220 פעמים בשנייה, והשני 440 פעמים בשנייה. בכמה רעידות בשנייה גבוה הצליל השני?', 220, '«בכמה» הוא הפרש: 440 − 220 = 220. «פי כמה» היה 2', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
     G3('word_problems', 'במנגינה הראשונה 6 תיבות ובשנייה 18 תיבות. בכמה תיבות יש יותר בשנייה?', 12, '«בכמה» הוא הפרש: 18 − 6 = 12. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 2, tags: ['contrast'] }),
-    G3('word_problems', 'הטמפו הראשון 50 BPM והשני 150 BPM. בכמה BPM מהיר הטמפו השני?', 100, '«בכמה» הוא הפרש: 150 − 50 = 100. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] }),
+    G3('word_problems', 'בקצב הראשון 50 פעימות בדקה, ובשני 150 פעימות בדקה. בכמה פעימות בדקה מהיר הקצב השני?', 100, '«בכמה» הוא הפרש: 150 − 50 = 100. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] }),
     G3('word_problems', 'מנגינה אחת נמשכת 4 תיבות והשנייה 12 תיבות. בכמה תיבות ארוכה השנייה?', 8, '«בכמה» הוא הפרש: 12 − 4 = 8. «פי כמה» היה 3', { standard: ST.WORD_TWO_STEP, level: 3, tags: ['contrast'] })
   );
 
@@ -2083,7 +2083,7 @@
       finding: 'Movement-based, not music alone: pupils learned angles through mindful body movement in cooperative groups (Shoval 2011) and body-scale angle actions (Smith et al. 2014); a third-grade dance and geometry unit (Moore & Linder 2012, practice report).',
       tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
         'floorWalkSides', 'turnCount', 'armQuarterTurn', 'joinWalk', 'heelToeSteps', 'clockWalk', 'barStepWalk', 'addWalkLine', 'subWalkBack', 'subColumnSteps', 'zeroStartSteps', 'handTurnBody', 'halfTurnBody', 'rowStepsCompare', 'barTowerSteps', 'splitWalk'] },
-    M8: { he: 'טמפו ו־BPM — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
+    M8: { he: 'טמפו ופעימות בדקה — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
       tags: ['sixtyBeats', 'tempoPercent', 'tapTempo', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
         'howManyTimes', 'tuneTime', 'bpm', 'secPerBeat', 'mean', 'meanBpm', 'tempo'] },
     M9: { he: 'יחסי תדרים — עשרוניים ואחוזים', sources: [], finding: null,

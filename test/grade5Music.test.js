@@ -78,7 +78,7 @@ test('seconds-per-beat items are decimal answers checked through isDecimalAnswer
   const rows = music('decimals', 'secPerBeat');
   assert.ok(rows.length >= 4);
   rows.forEach((it) => {
-    const m = /ב־(\d+) BPM/.exec(it.prompt);
+    const m = /ב־(\d+) פעימות בדקה/.exec(it.prompt);
     if (!m) return;
     const s = String(poly.secondsPerBeat(Number(m[1])));
     assert.ok(isDecimalAnswer(s), s);
