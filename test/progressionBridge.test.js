@@ -8,10 +8,10 @@ const assert = require('node:assert/strict');
 const prog = require('../src/lib/curriculum/progression');
 const bridges = require('../src/lib/curriculum/bridges');
 
-test('bridges module exports all 102 bridges matching progression BUILDS_TO links', () => {
-  assert.equal(bridges.RAW_BRIDGES.length, 102);
-  assert.equal(Object.keys(bridges.BRIDGES).length, 102);
-  assert.equal(Object.keys(prog.BRIDGES).length, 102);
+test('bridges module exports all 104 bridges matching progression BUILDS_TO links', () => {
+  assert.equal(bridges.RAW_BRIDGES.length, 104);
+  assert.equal(Object.keys(bridges.BRIDGES).length, 104);
+  assert.equal(Object.keys(prog.BRIDGES).length, 104);
 });
 
 test('every topic with buildsTo has a bridge for each outgoing link', () => {
@@ -35,7 +35,7 @@ test('every topic with buildsTo has a bridge for each outgoing link', () => {
       assert.ok(typeof bridge.hint === 'string' && bridge.hint.length > 3, 'bridge hint must be a non-empty string');
     }
   }
-  assert.equal(linkCount, 102, 'Total traversed buildsTo links must be exactly 102');
+  assert.equal(linkCount, 104, 'Total traversed buildsTo links must be exactly 104');
 });
 
 test('bridgesEnteringTopic returns all bridges whose prerequisite target is toId', () => {
