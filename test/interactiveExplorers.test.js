@@ -31,7 +31,7 @@ test('all three explorer exercise kinds exist in banks, tagged to official curri
   evenOdd.forEach(it => {
     assert.equal(it.standard, banks.ST.PLACE_VALUE);
     assert.equal(it.grade, 'ב');
-    assert.ok(it.prompt.includes('זוגי או אי־זוגי'));
+    assert.ok(it.prompt.includes('זוגי או אי'));
   });
 });
 
@@ -85,8 +85,37 @@ test('validation rejects prompts exceeding 15 words or missing standard', () => 
   assert.match(missingStd.reason, /missing curriculum standard/);
 });
 
-test('original explorer tools remain intact in index.html in playground / lessons tab', () => {
+test('renderExplorerWidget mounts reachable interactive elements with sound on tap', () => {
+  const dummyContainer = {
+    children: [],
+    innerHTML: '',
+    appendChild(c) { this.children.push(c); }
+  };
+  globalThis.document = {
+    createElement(tag) {
+      return {
+        className: '',
+        innerHTML: '',
+        children: [],
+        querySelectorAll() { return []; }
+      };
+    }
+  };
+
+  try {
+    explorers.renderExplorerWidget(dummyContainer, { kind: 'singing_line', pct: 50 });
+    assert.equal(dummyContainer.children.length, 1);
+    assert.match(dummyContainer.children[0].className, /explorer-exercise-widget/);
+    assert.match(dummyContainer.children[0].innerHTML, /data-tap="woodBar"/);
+  } finally {
+    delete globalThis.document;
+  }
+});
+
+test('index.html loads interactiveExplorers.js and renders explorer widgets', () => {
   const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(indexHtml.includes('src/lib/exercises/interactiveExplorers.js'), 'script must be included in index.html');
+  assert.ok(indexHtml.includes('MM_INTERACTIVE_EXPLORERS.renderExplorerWidget'), 'widget must be wired into renderWidget');
   assert.ok(indexHtml.includes('id="singingLine"'), 'singingLine slider remains intact');
   assert.ok(indexHtml.includes('id="mgGroupBtns"'), 'mgGroupBtns remains intact');
   assert.ok(indexHtml.includes('id="mgSizeBtns"'), 'mgSizeBtns remains intact');

@@ -37,7 +37,7 @@
     const o = opts || {};
     const pct = o.pct != null ? o.pct : 50;
     const fraction = o.fraction || (pct === 25 ? '1/4' : pct === 50 ? '1/2' : pct === 75 ? '3/4' : '1');
-    const prompt = 'איזה שבר נמצא בנקודה ' + pct + '% על ישר המספרים?';
+    const prompt = pct === 50 ? 'איזה שבר נמצא באמצע הדרך על ישר המספרים?' : pct === 25 ? 'איזה שבר נמצא ברבע הדרך על ישר המספרים?' : pct === 75 ? 'איזה שבר נמצא בשלושה רבעים מהדרך על ישר המספרים?' : 'איזה שבר נמצא בסוף ישר המספרים?';
     return {
       id: o.id || 'singing-line-' + pct,
       grade: o.grade || 'ד',
@@ -82,7 +82,7 @@
     const count = o.count != null ? o.count : 6;
     const isEven = count % 2 === 0;
     const answer = isEven ? 'זוגי' : 'אי-זוגי';
-    const prompt = 'האם ' + count + ' פעימות הן מספר זוגי או אי־זוגי?';
+    const prompt = 'האם ' + count + ' פעימות הן מספר זוגי או אי-זוגי?';
     return {
       id: o.id || 'even-odd-' + count,
       grade: o.grade || 'ב',
@@ -115,7 +115,7 @@
         <div class="nl-keys" role="group" aria-label="נקודות שבר על הישר" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
           ${[0, 25, 50, 75, 100].map(p => {
             const f = p === 0 ? '0' : p === 25 ? '1/4' : p === 50 ? '1/2' : p === 75 ? '3/4' : '1';
-            return `<button type="button" class="secondary line-tick-btn" data-pct="${p}" data-frac="${f}" style="min-width:44px;min-height:44px;">${f}</button>`;
+            return `<button type="button" class="secondary line-tick-btn" data-tap="woodBar" data-pct="${p}" data-frac="${f}" style="min-width:44px;min-height:44px;">${f}</button>`;
           }).join('')}
         </div>
       `;
@@ -132,7 +132,7 @@
       for (let i = 0; i < g; i++) {
         dotsHtml += `<div class="explorer-group" style="display:inline-flex;gap:4px;padding:6px;border:2px dashed var(--purple);border-radius:10px;margin:4px;">`;
         for (let j = 0; j < s; j++) {
-          dotsHtml += `<span class="explorer-dot" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--pink);"></span>`;
+          dotsHtml += `<button type="button" class="explorer-dot-btn" data-tap="drumLow" aria-label="פעימה" style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--pink);border:0;cursor:pointer;padding:0;"></button>`;
         }
         dotsHtml += `</div>`;
       }
