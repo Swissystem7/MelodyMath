@@ -18,6 +18,7 @@
        devices without a Hebrew voice (#665 rule 5). Every line downloads as
        <key>.<ext>; put the files in sounds/voice/he/, add them to VOICE_CLIPS
        in src/components/SoundAdd.js and to SOUNDS-LICENSES.md. -->
+  <p><a href="../index.html">← חזרה ל־MelodyMath</a></p>
   <h1>הקלטת ההוראות הקוליות</h1>
   <p>לחצו ● כדי להקליט שורה, ■ כדי לעצור. ▶ משמיע, ⬇ מוריד את הקובץ.</p>
   <ol id="lines"></ol>
@@ -25,9 +26,17 @@
   <script src="../src/components/SoundAdd.js"></script>
   <script>
     (function () {
-      const SA = window.MM_SOUND_ADD;
+      const SA = window.MM_SOUND_ADD || {
+        SPEECH: {
+          start: 'לחצו על הפעימות ששמעתם',
+          count: 'ספרו את הפעימות',
+          check: 'בדקו את התשובה',
+          good: 'מצוין, בדיוק!',
+          retry: 'כמעט, נסו שוב'
+        }
+      };
       const list = document.getElementById('lines');
-      const esc = window.MM_JAM.esc;
+      const esc = (window.MM_JAM && window.MM_JAM.esc) || function (s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
       Object.keys(SA.SPEECH).forEach(function (key) {
         const li = document.createElement('li');
         li.innerHTML = '<b>' + esc(SA.SPEECH[key]) + '</b><code>' + key + '</code>' +
