@@ -46,6 +46,7 @@ test('the pilot issue form is Hebrew, warns it is public, and asks the one end-o
   assert.match(form, /שמות של ילדים/);
   assert.match(form, /דף עבודה לא נותן/);
   assert.doesNotMatch(form, /id: (phone|email|school_name|child)/);
+  assert.equal(fs.existsSync(path.join(root, '.github', 'workflows')), false);
 });
 
 test('offer and landing pages mount the contact block and load contact.js', () => {

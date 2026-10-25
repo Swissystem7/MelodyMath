@@ -9,6 +9,11 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
+test('there is no GitHub Actions workflow in the repo', () => {
+  const wf = path.join(root, '.github', 'workflows');
+  assert.equal(fs.existsSync(wf), false, '.github/workflows must not exist');
+});
+
 test('the unused factory lib/ folder is gone', () => {
   const factory = path.join(root, 'lib');
   if (!fs.existsSync(factory)) return;
