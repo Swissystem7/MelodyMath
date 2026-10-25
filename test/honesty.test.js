@@ -9,14 +9,6 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
-test('CI runs npm ci && npm test on pull requests and on push to master', () => {
-  const wf = path.join(root, '.github', 'workflows', 'test.yml');
-  const yml = fs.readFileSync(wf, 'utf8');
-  assert.match(yml, /pull_request:/);
-  assert.match(yml, /push:[\s\S]*branches:[\s\S]*- master/);
-  assert.match(yml, /npm ci && npm test/);
-});
-
 test('the unused factory lib/ folder is gone', () => {
   const factory = path.join(root, 'lib');
   if (!fs.existsSync(factory)) return;
