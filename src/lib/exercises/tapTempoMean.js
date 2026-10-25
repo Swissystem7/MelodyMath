@@ -123,24 +123,39 @@
       '</div>';
   }
 
-  // The tap button plays a real instrument voice (instrumentVoices.js, wood
-  // click) on the page's shared AudioContext, not a bare beep, and every tap
-  // time goes into the intervals the child averages (#754).
+  // The tap button plays a real instrument voice (instrumentVoices.js) on the
+  // page's shared AudioContext, not a bare beep, and every tap time goes into
+  // the intervals the child averages (#754). The voice is the one of the
+  // instrument the child picked (an instruments.js id); with no pick, or an
+  // id without a voice, it is the wood click.
   const TAP_VOICE = 'woodClick';
+  function need(path) {
+    try { return require(path); } catch (e) { return null; }
+  }
+  function tapVoiceFor(instrumentId) {
+    const id = typeof instrumentId === 'function' ? instrumentId() : instrumentId;
+    if (!id) return TAP_VOICE;
+    const data = root && typeof root.instrumentById === 'function' ? root : need('../instruments.js');
+    const iv = root && root.VOICES ? root : need('../instrumentVoices.js');
+    const x = data && data.instrumentById ? data.instrumentById(id) : null;
+    return x && iv && iv.VOICES && iv.VOICES[x.voice] ? x.voice : TAP_VOICE;
+  }
   function playTap(voice) {
     if (!root || typeof root.playVoice !== 'function') return null;
     const ac = typeof root.getSharedAudioContext === 'function' ? root.getSharedAudioContext() : null;
     return root.playVoice(ac, voice || TAP_VOICE);
   }
 
-  // opts.now and opts.play let tests drive the clock and the sound.
+  // opts.instrument is the child's picked instrument id (or a function that
+  // returns it, read on every tap). opts.now and opts.play let tests drive
+  // the clock and the sound.
   function createTapSession(opts) {
     const o = opts || {};
     const now = o.now || function () { return Date.now(); };
     const play = o.play || playTap;
     const taps = [];
     return {
-      tap: function () { taps.push(now()); play(TAP_VOICE); return taps.length; },
+      tap: function () { taps.push(now()); play(tapVoiceFor(o.instrument)); return taps.length; },
       taps: function () { return taps.slice(); },
       intervals: function () { return tapsToIntervals(taps); },
       mean: function () { return meanOf(tapsToIntervals(taps)); },
@@ -170,6 +185,7 @@
     meanIntervalToBpm: meanIntervalToBpm,
     renderTapTempoWidgetHtml: renderTapTempoWidgetHtml,
     TAP_VOICE: TAP_VOICE,
+    tapVoiceFor: tapVoiceFor,
     createTapSession: createTapSession,
     attachTapButton: attachTapButton
   };

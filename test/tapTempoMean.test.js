@@ -179,3 +179,31 @@ test('simulated taps reach the mean: taps -> intervals -> mean, each tap plays a
   assert.strictEqual(session.mean(), 6);
   assert.strictEqual(tapTempoMean.meanIntervalToBpm(session.mean()), 100);
 });
+
+test('with a picked instrument each tap plays that instrument and still reaches the mean', () => {
+  const instruments = require('../src/lib/instruments');
+  const voices = require('../src/lib/instrumentVoices');
+  const djembe = instruments.instrumentById('djembe').voice;
+  assert.ok(voices.VOICES[djembe]);
+  assert.notStrictEqual(djembe, tapTempoMean.TAP_VOICE, 'the picked instrument is not the wood click');
+  assert.strictEqual(tapTempoMean.tapVoiceFor('djembe'), djembe);
+  assert.strictEqual(tapTempoMean.tapVoiceFor(null), tapTempoMean.TAP_VOICE, 'no pick: wood click');
+  assert.strictEqual(tapTempoMean.tapVoiceFor('noSuchInstrument'), tapTempoMean.TAP_VOICE);
+
+  const times = [0, 500, 1100, 1800];
+  const played = [];
+  let click = null;
+  const btn = { addEventListener: (ev, fn) => { click = fn; } };
+  const box = { querySelector: () => btn };
+  let picked = 'djembe';
+  const session = tapTempoMean.attachTapButton(box, { instrument: () => picked, now: () => times[played.length], play: (v) => played.push(v) });
+  click(); click(); click();
+  picked = 'darbuka';
+  click();
+
+  const darbuka = instruments.instrumentById('darbuka').voice;
+  assert.deepEqual(played, [djembe, djembe, djembe, darbuka], 'the voice follows the pick at each tap');
+  assert.deepEqual(session.intervals(), [5, 6, 7]);
+  assert.strictEqual(session.mean(), 6);
+  assert.strictEqual(tapTempoMean.meanIntervalToBpm(session.mean()), 100);
+});
