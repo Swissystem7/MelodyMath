@@ -24,6 +24,8 @@
 //   7  א׳ hundred chart before whole tens (mm-cur-5 → mm-cur-4); ה׳ fraction
 //      models before equivalence (mm-cur-42 → mm-cur-41) (#616).
 //   8  ג׳ remainder "1 out of 4" prepares ד׳ fractions: mm-cur-25 → mm-cur-32.
+//   9  א׳-ב׳ equality → ד׳ equations → ה׳ (#710): mm-cur-3 and mm-cur-14 →
+//      mm-cur-31 → mm-cur-39.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -66,7 +68,7 @@
     'mm-cur-29': [['mm-cur-19', 'mm-cur-25'], 'shekels as 100 agorot'],
     'mm-cur-30': [['mm-cur-21'], 'collecting and charting data'],
     // ד׳
-    'mm-cur-31': [['mm-cur-22', 'mm-cur-23', 'mm-cur-24', 'mm-cur-25'], 'place value to a million; order of operations'],
+    'mm-cur-31': [['mm-cur-3', 'mm-cur-14', 'mm-cur-22', 'mm-cur-23', 'mm-cur-24', 'mm-cur-25'], 'the א׳-ב׳ equality balance, then place value to a million'],
     'mm-cur-32': [['mm-cur-25', 'mm-cur-18'], 'note values as parts of a 4/4 bar'],
     'mm-cur-33': [['mm-cur-32', 'mm-cur-16'], 'fractions of a quantity, equal names'],
     'mm-cur-34': [['mm-cur-27', 'mm-cur-28', 'mm-cur-20'], 'quadrilaterals and surface area'],
