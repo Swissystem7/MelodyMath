@@ -1984,7 +1984,7 @@
     G4('fractions', '1 ו־3/4 + 1/2 = ? (כתבו כמספר מעורב)', '2 ו־1/4', 'חצי הוא 2 רבעים; 3 רבעים ועוד 2 רבעים הם שלם ועוד רבע', 3, ST.FRAC_MIXED_D)
   );
 
-// ---------- כיתות ד׳–ה׳ · משוואות ואי־שוויונות (#710) ----------
+  // ---------- כיתות ד׳–ה׳ · משוואות ואי־שוויונות (#710) ----------
   // The balance of grades א׳-ב׳ (EQ_LEFT) with bigger numbers: two sides that
   // must come out equal, or one side that is bigger. Answers are numbers or
   // נכון/לא נכון — a typed < or > flips in the RTL answer box. Appended after
