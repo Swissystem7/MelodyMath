@@ -92,12 +92,13 @@
   }
 
   // Notes for "נגן תיבה": one darbuka stroke per tile, one click per beat.
-  function barPlan(fill, bpm, voice) {
+  function barPlan(fill, bpm, voice, ensembleVoices) {
     const beat = 60 / (bpm || BPM);
     const notes = [];
     let pos = 0;
     fill.forEach(function (f, i) {
-      notes.push({ at: pos * BEATS_PER_BAR * beat, voice: voice || 'drumLow', kind: 'tile', tile: i });
+      const v = (ensembleVoices && ensembleVoices.length) ? ensembleVoices[i % ensembleVoices.length] : (voice || 'drumLow');
+      notes.push({ at: pos * BEATS_PER_BAR * beat, voice: v, kind: 'tile', tile: i });
       pos += FB.sumDurations([f]);
     });
     for (let b = 0; b < Math.ceil(pos * BEATS_PER_BAR - 1e-9); b++) notes.push({ at: b * beat, voice: 'woodClick', hz: 1800, kind: 'click' });
@@ -138,7 +139,7 @@
       '<p class="jam-prompt">' + e(state.ex.he) + (isDecimal ? ' (<bdi dir="ltr">' + e(state.ex.target) + ' = ' + targetText + (mixedText ? ' / ' + mixedText : '') + '</bdi>)' : '') + '</p>' +
       '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="' + (on ? 'תיבה' : 'רצועה') + ' מלאה ' + FB.formatFraction(sum) + ' מתוך ' + targetText + '">' + segs + rest + '</div>' + over +
       '<p class="fbp-sum">מילאתם: <bdi dir="ltr">' + FB.formatFraction(sum) + (sumDec != null ? ' = ' + sumDec : '') + '</bdi> מתוך <bdi dir="ltr">' + targetText + '</bdi></p>' +
-      '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div>' + free +
+      '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div>' + (on ? '<div class="fbp-picker-host"></div>' : '') + free +
       '<div class="jam-row">' + (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') +
       '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button><button type="button" class="primary" data-act="check">בדיקה</button>' +
       '<button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
@@ -149,10 +150,26 @@
     const inst = JAM.instrument((props && props.instrument) || DEFAULT_PROPS.instrument, 'drumLow');
     JAM.registerTapVoices();
     let state = createState(0, JAM.loadShowMusic(GAME), props);
+    state.instrument = (props && props.instrument) || DEFAULT_PROPS.instrument;
+    const Logic = root.InstrumentPickerLogic || (function () { try { return require('../lib/instrumentPicker.js'); } catch (_) { return null; } })();
+    const PickerUI = root.InstrumentPickerUI || (function () { try { return require('./InstrumentPicker.js'); } catch (_) { return null; } })();
+    const childId = (props && props.childId) || (typeof who !== 'undefined' && who && who.name) || 'fbp_child';
+    state.ensemble = (Logic && Logic.pickEnsembleVoices({ childId: childId, voices: 2, preferredInstrument: state.instrument })) || [state.instrument];
     let playing = null;
     function stop() { if (playing) playing.stop(); playing = null; }
     function draw(focusSel) {
       el.innerHTML = renderHtml(state, inst.voice);
+      const host = el.querySelector('.fbp-picker-host');
+      if (host && PickerUI && typeof PickerUI.mountInstrumentPicker === 'function') {
+        PickerUI.mountInstrumentPicker(host, {
+          childId: childId,
+          selectedId: state.instrument,
+          onChange: function (selInst) {
+            state.instrument = selInst;
+            state.ensemble = (Logic && Logic.pickEnsembleVoices({ childId: childId, voices: 2, preferredInstrument: state.instrument })) || [state.instrument];
+          }
+        });
+      }
       const f = focusSel && el.querySelector(focusSel);
       if (f && f.focus) f.focus();
     }
@@ -173,7 +190,8 @@
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic, sound: null }); JAM.saveShowMusic(GAME, state.showMusic); }
       else if (act === 'play') {
         stop();
-        playing = JAM.playNotes(barPlan(state.fill, BPM, inst.voice), function (n) {
+        const voices = (state.ensemble || []).map(function (id) { const x = JAM.instrument(id); return (x && x.voice) || 'drumLow'; });
+        playing = JAM.playNotes(barPlan(state.fill, BPM, inst.voice, voices), function (n) {
           if (n.kind !== 'tile') return;
           const s = el.querySelector('[data-seg="' + n.tile + '"]');
           if (s) { s.classList.remove('lit'); void s.offsetWidth; s.classList.add('lit'); }

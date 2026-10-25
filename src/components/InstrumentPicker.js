@@ -1,0 +1,87 @@
+// MelodyMath — InstrumentPicker UI Component (Refs #679, Refs #665).
+// Free instrument selector: 4 families, 44x44px touch targets, zero locks, audio preview on tap.
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    const Logic = require('../lib/instrumentPicker.js');
+    const I = require('../lib/instruments.js');
+    module.exports = factory(root, Logic, I);
+  } else {
+    root.InstrumentPickerUI = factory(root, root.InstrumentPickerLogic, root.MelodyMathInstruments || root);
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (root, Logic, I) {
+  'use strict';
+
+  const instrumentById = (I && I.instrumentById) || function () { return null; };
+
+  function playInstrumentSample(instrumentId) {
+    const inst = instrumentById(instrumentId);
+    if (!inst) return;
+    const voice = inst.voice || 'drumLow';
+    try {
+      if (root && root.musicEngine && typeof root.musicEngine.playTap === 'function') {
+        root.musicEngine.playTap(voice, { hz: 330 });
+      } else if (root && typeof root.playVoice === 'function') {
+        root.playVoice(voice, 0.4, 330);
+      }
+    } catch (_) {}
+  }
+
+  function renderPickerHtml(options) {
+    const opts = options || {};
+    const selectedId = opts.selectedId || 'darbuka';
+    const families = Logic.CHILD_FAMILIES || [];
+
+    let html = '<div class="mm-instrument-picker" role="region" aria-label="בחירת כלי נגינה" dir="rtl" style="margin:8px 0">';
+    html += '<p class="picker-title" style="font-weight:700;margin:0 0 6px">בחרו כלי נגינה לתרגול:</p>';
+    html += '<div class="picker-families" style="display:flex;flex-direction:column;gap:8px">';
+
+    families.forEach(function (fam) {
+      html += '<div class="fam-row" role="group" aria-label="' + fam.labelHe + '" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">';
+      html += '<span class="fam-badge" style="font-size:0.9rem;min-width:90px;color:var(--muted)">' + fam.icon + ' ' + fam.labelHe + ':</span>';
+      fam.instruments.forEach(function (instId) {
+        const inst = instrumentById(instId);
+        const nameHe = (inst && ((inst.instrument && inst.instrument.he) || inst.nameHe)) || instId;
+        const voice = (inst && inst.voice) || 'drumLow';
+        const isSel = instId === selectedId;
+        html += '<button type="button" class="inst-btn' + (isSel ? ' active' : '') + '" data-instrument="' + instId + '" data-tap="' + voice + '" data-hz="330" aria-pressed="' + (isSel ? 'true' : 'false') + '" style="min-width:44px;min-height:44px;padding:6px 12px;border-radius:10px;border:2px solid ' + (isSel ? 'var(--purple)' : 'var(--line)') + ';background:' + (isSel ? 'var(--card-lit, #ede9fe)' : 'var(--card, #fff)') + ';font-size:0.95rem;font-weight:600;cursor:pointer">' + nameHe + '</button>';
+      });
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+    return html;
+  }
+
+  function mountInstrumentPicker(container, options) {
+    if (!container) return null;
+    const opts = options || {};
+    let currentId = opts.selectedId || Logic.getChildInstrument(opts.childId, 'darbuka');
+
+    function render() {
+      container.innerHTML = renderPickerHtml({ selectedId: currentId });
+      container.querySelectorAll('[data-instrument]').forEach(function (btn) {
+        btn.onclick = function () {
+          const instId = btn.getAttribute('data-instrument');
+          if (instId) {
+            playInstrumentSample(instId);
+            if (instId !== currentId) {
+              currentId = instId;
+              if (opts.childId) Logic.saveChildInstrument(opts.childId, instId);
+              if (typeof opts.onChange === 'function') opts.onChange(instId, Logic.resolveInstrumentVoice(instId, opts));
+              render();
+            }
+          }
+        };
+      });
+    }
+
+    render();
+    return {
+      getSelectedId: function () { return currentId; },
+      setSelectedId: function (id) { currentId = id; render(); },
+      playSample: playInstrumentSample
+    };
+  }
+
+  return { renderPickerHtml: renderPickerHtml, mountInstrumentPicker: mountInstrumentPicker, playInstrumentSample: playInstrumentSample };
+});
