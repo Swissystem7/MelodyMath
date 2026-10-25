@@ -116,3 +116,18 @@ test('renderHtml creates exact circle count matching sound count (#720, Refs #59
   assert.equal(dotMatches.length, plan.totalSounds);
   assert.match(html, /class="np-gap"/);
 });
+
+test('instruments take from forTopic and tempo varies per exercise (0g, #720, Refs #665)', () => {
+  const p1 = NumberPlay.extractNumberPlan({ id: 'ex-add-1', prompt: '3 + 4 = ?' });
+  const p2 = NumberPlay.extractNumberPlan({ id: 'ex-add-2', prompt: '5 + 2 = ?' });
+  assert.ok(p1 && p2);
+  assert.notEqual(p1.bpm, 110, 'bpm is not fixed at 110');
+  assert.notEqual(p1.bpm, p2.bpm, 'tempo varies across exercises');
+  assert.ok(p1.bpm >= 85 && p1.bpm <= 125, 'tempo is within pedagogical range');
+
+  const pMul = NumberPlay.extractNumberPlan({ prompt: '2 × 5 = ?', mathTopic: 'multiplication' });
+  assert.ok(pMul);
+  const mulVoice = pMul.groups[0].voice;
+  // djembe/tabla use drumHigh or drumLow or frameDrum or jingle from forTopic('multiplication')
+  assert.ok(['drumHigh', 'drumLow', 'frameDrum', 'jingle', 'tine'].includes(mulVoice));
+});
