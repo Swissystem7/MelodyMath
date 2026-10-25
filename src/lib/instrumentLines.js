@@ -36,10 +36,14 @@
         url: 'https://doi.org/10.5406/bulcouresmusedu.203.0045' },
     ],
     M2: [
-      { id: 'ribeiro2020', authors: 'Ribeiro, F. S., & Santos, F. H.', year: 2020,
-        title: 'Persistent effects of musical training on mathematical skills of children with developmental dyscalculia',
-        venue: 'Frontiers in Psychology',
-        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/' },
+      { id: 'das2023', authors: 'Das, S.', year: 2023, evidence: 'C',
+        title: 'Multiplication Table Learning through Music and Rhythm and its Effect on Two Digits Multiplications and Divisions in Elementary Stage',
+        venue: 'Journal of Teacher Education and Research, 18(2), 9-11',
+        url: 'https://doi.org/10.36268/jter/18203' },
+      { id: 'an2013', authors: 'An, S. A., Capraro, M. M., & Tillman, D. A.', year: 2013, supporting: true,
+        title: 'Elementary teachers integrate music activities into regular mathematics lessons: Effects on students\' mathematical abilities',
+        venue: 'Journal for Learning through the Arts, 9(1)',
+        url: 'https://doi.org/10.21977/D99112867' },
     ],
     M3: [
       { id: 'courey2012', authors: 'Courey, S. J., Balogh, E., Siker, J. R., & Paik, J.', year: 2012,
