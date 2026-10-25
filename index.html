@@ -844,7 +844,7 @@ function poolForSkill(skill){
 let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
 function prefsNow(){return typeof loadAccess==='function'?loadAccess():{}}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
-function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null);if(!groups)return;if(prefsNow().quiet)return;if(typeof playCountClicks==='function')playCountClicks(groups,76)}
+function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null);if(!groups){const btn=typeof document!=='undefined'&&document.querySelector&&document.querySelector(".np-btn, [data-act=\"play-numbers\"], #btnPlayWay, .way-play-btn");if(btn&&!prefsNow().quiet&&typeof btn.click==='function')btn.click();return;}if(prefsNow().quiet)return;if(typeof playCountClicks==='function')playCountClicks(groups,76)}
 // «3 שארית 2» is not a number, so it goes through the pure validator in
 // grade3Music.js instead of the numeric isCorrect path, and a miss gets the
 // message that names the mistake (R5).
