@@ -104,6 +104,12 @@
       hint: 'חישוב טהור ללא צליל: הסכום 32, 32 חלקי 4 = 8',
       noMusic: true, plain: true, musicStage: 'no_music_check' }
   ];
+  // No peer-reviewed study tests tap tempo for teaching the mean;
+  // azaryahu2020 (fractions as note durations) is only an analogy (A),
+  // so the music items are weak, optional extras.
+  TAP_TEMPO_MEAN_ITEMS.forEach(function (it) {
+    if (!it.noMusic) { it.optional = true; it.evidence = 'weak'; }
+  });
 
   function renderTapTempoWidgetHtml(item) {
     if (!item) return '';

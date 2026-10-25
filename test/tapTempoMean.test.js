@@ -26,7 +26,7 @@ test('every item is a G6 mean item on mm-cur-57 with a real source and an exact 
     const s = curriculum.sectionForItem(item);
     assert.deepEqual([s.grade, s.topic, s.verified, s.label], ['ו', 'ממוצע', true, 'ממוצע'], item.id);
     assert.equal(curriculum.MATRIX.find((r) => r.grade === item.grade && r.topic === s.topic).topicId, 'mm-cur-57');
-    if (!item.noMusic) assert.deepEqual([item.music, item.musicSrc, item.musicEv], ['tapTempo', 'azaryahu2020', 'A'], item.id);
+    if (!item.noMusic) assert.deepEqual([item.music, item.musicSrc, item.musicEv, item.optional, item.evidence], ['tapTempo', 'azaryahu2020', 'A', true, 'weak'], item.id);
     const list = item.intervals;
     assert.equal(item.bpms, undefined, item.id + ' keeps its gaps in intervals only');
     assert.ok(list.length >= 3);
@@ -36,13 +36,13 @@ test('every item is a G6 mean item on mm-cur-57 with a real source and an exact 
   }
 });
 
-test('G6_MEAN: levelNotes is the one main way; tapTempo (M3) bridges to BPM; pitchMean stays weak EXTRA', () => {
+test('G6_MEAN: levelNotes is the one main way; tapTempo (M3) is a weak EXTRA bridge to BPM; pitchMean stays weak EXTRA', () => {
   const ways = g6.music.G6_MEAN;
   assert.deepEqual(ways.map((w) => w[0]), ['levelNotes', 'tapTempo', 'equalPhrases', 'pitchMean']);
   assert.deepEqual(banks.primaryWays(ways).map((w) => w[0]), ['levelNotes']);
   const [, tapNote, tapSrc, tapEv] = ways[1];
   assert.match(tapNote, /מרווח.*BPM/);
-  assert.deepEqual([tapSrc, tapEv, banks.isOptionalWay(ways[1])], ['azaryahu2020', 'A', true]);
+  assert.deepEqual([tapSrc, tapEv, banks.isOptionalWay(ways[1]), ways[1][4].evidence], ['azaryahu2020', 'A', true, 'weak']);
   assert.equal(banks.mechanismOf('tapTempo'), 'M3');
   const pitch = ways[3];
   assert.deepEqual([pitch[2], pitch[3], banks.isOptionalWay(pitch), pitch[4].evidence], ['rusconi2005', 'A', true, 'weak']);
