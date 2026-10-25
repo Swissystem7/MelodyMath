@@ -247,6 +247,70 @@
     };
   }
 
+  // End-of-topic no-music check items for missing_factor topics per #665 req 5.
+  // Fades scaffolding to silent, plain math check ("עכשיו בלי להקה, רק אתם!").
+  const MISSING_FACTOR_NO_MUSIC_CHECK = [
+    {
+      id: 'mf-nm-1',
+      topicId: 'mm-cur-24',
+      topic: 'לוח כפל 10×10 (אחרי 2/4/5/10)',
+      grade: 'ג',
+      exerciseType: 'missing_factor',
+      prompt: '7 × ☐ = 42. מהו המספר החסר?',
+      answer: 6,
+      noMusic: true,
+      plain: true,
+      musicStage: 'no_music_check'
+    },
+    {
+      id: 'mf-nm-2',
+      topicId: 'mm-cur-24',
+      topic: 'לוח כפל 10×10 (אחרי 2/4/5/10)',
+      grade: 'ג',
+      exerciseType: 'missing_factor',
+      prompt: '☐ × 8 = 56. מהו הגורם החסר?',
+      answer: 7,
+      noMusic: true,
+      plain: true,
+      musicStage: 'no_music_check'
+    },
+    {
+      id: 'mf-nm-3',
+      topicId: 'mm-cur-25',
+      topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000',
+      grade: 'ג',
+      exerciseType: 'missing_factor',
+      prompt: '70 × ☐ = 700. מהו המספר החסר?',
+      answer: 10,
+      noMusic: true,
+      plain: true,
+      musicStage: 'no_music_check'
+    },
+    {
+      id: 'mf-nm-4',
+      topicId: 'mm-cur-31',
+      topic: 'משוואות ואי־שוויונות',
+      grade: 'ד',
+      exerciseType: 'missing_factor',
+      prompt: '6 × ☐ = 42. מהו המספר החסר?',
+      answer: 7,
+      noMusic: true,
+      plain: true,
+      musicStage: 'no_music_check'
+    }
+  ];
+
+  function noMusicCheckForTopic(topicId) {
+    return MISSING_FACTOR_NO_MUSIC_CHECK.filter(function (it) {
+      return it.topicId === topicId;
+    });
+  }
+
+  function noMusicCheckForType(type) {
+    if (type === 'missing_factor') return MISSING_FACTOR_NO_MUSIC_CHECK.slice();
+    return [];
+  }
+
   return {
     EXERCISE_TYPES: EXERCISE_TYPES,
     TYPE_NAMES_HE: TYPE_NAMES_HE,
@@ -257,5 +321,8 @@
     allExercisesForGrade: allExercisesForGrade,
     verifyGradeTopics: verifyGradeTopics,
     musicalMethodForTopic: musicalMethodForTopic,
+    MISSING_FACTOR_NO_MUSIC_CHECK: MISSING_FACTOR_NO_MUSIC_CHECK,
+    noMusicCheckForTopic: noMusicCheckForTopic,
+    noMusicCheckForType: noMusicCheckForType,
   };
 });
