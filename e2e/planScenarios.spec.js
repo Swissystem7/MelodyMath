@@ -77,7 +77,7 @@ test('the same plan is on the teacher tab', async ({ page }) => {
   await page.locator('#tab-teacherReport').click();
   const [a, b] = (await page.locator('#adultGateQ').textContent()).match(/\d+/g).map(Number);
   await page.locator('#adultGateAnswer').fill(String(a * b));
-  await page.locator('#adultGateOk').click();
+  await page.locator('#adultGateOk').click({ delay: 3200 }); // hold 3 s
   await expect(page.locator('#teacherReport .mm-plan')).toHaveCount(1);
   await expect(page.locator('#teacherReport .mm-plan')).toHaveAttribute('data-grade', 'ב');
 });

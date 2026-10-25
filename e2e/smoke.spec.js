@@ -47,7 +47,7 @@ async function openTab(page, tab) {
     // Adult gate (#737): answer the two-digit product.
     const [a, b] = (await page.locator('#adultGateQ').textContent()).match(/\d+/g).map(Number);
     await page.locator('#adultGateAnswer').fill(String(a * b));
-    await page.locator('#adultGateOk').click();
+    await page.locator('#adultGateOk').click({ delay: 3200 }); // hold 3 s
   }
   await expect(page.locator('#tab-' + tab)).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#' + tab)).toBeVisible();

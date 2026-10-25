@@ -1,22 +1,25 @@
-// Adult gate in front of the teacher tab (#737): a two-digit × two-digit
-// product, past what the primary grades on this device practise. Not a lock —
-// it only keeps a child from wandering into the report by tapping a tab.
+// Adult gate in front of the teacher tab (#737): a new three-digit × two-digit
+// product every time, confirmed by holding the button for 3 seconds. A strong
+// grade-6 child can do 55 × 55 in their head; a long product plus a deliberate
+// hold is a nuisance for a child and easy for an adult. Not a lock — it only
+// keeps a child from wandering into the report by tapping a tab.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  // 11–99, skipping round tens (20 × 30 is easy to do in your head).
-  function twoDigit(rand) {
-    let n;
-    do { n = 11 + Math.floor(rand() * 89); } while (n % 10 === 0);
-    return n;
+  const HOLD_MS = 3000;
+
+  // lo..hi, never a round ten (340 × 20 is easy to do in your head).
+  function pickNum(rand, lo, hi) {
+    const n = lo + Math.floor(rand() * (hi - lo + 1));
+    return n % 10 === 0 ? n + 1 : n;
   }
 
   function adultQuestion(rand) {
     const r = typeof rand === 'function' ? rand : Math.random;
-    const a = twoDigit(r);
-    const b = twoDigit(r);
+    const a = pickNum(r, 101, 999);
+    const b = pickNum(r, 13, 99);
     return { a: a, b: b, answer: a * b, text: 'כמה זה ' + a + ' × ' + b + '?' };
   }
 
@@ -25,5 +28,10 @@
     return !!q && /^\d+$/.test(v) && Number(v) === q.answer;
   }
 
-  return { adultQuestion: adultQuestion, adultAnswerOk: adultAnswerOk };
+  // True only for a press that started and lasted at least HOLD_MS.
+  function holdLongEnough(startMs, endMs) {
+    return typeof startMs === 'number' && typeof endMs === 'number' && endMs - startMs >= HOLD_MS;
+  }
+
+  return { adultQuestion: adultQuestion, adultAnswerOk: adultAnswerOk, holdLongEnough: holdLongEnough, HOLD_MS: HOLD_MS };
 });
