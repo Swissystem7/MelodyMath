@@ -50,6 +50,7 @@ const ASSETS = [
   './src/lib/rhythmGame.js',
   './src/lib/interactiveLessons.js',
   './src/lib/polyrhythm.js',
+  './src/lib/polyChallenge.js',
   './src/lib/circleOfFifths.js',
   './src/lib/unitCheck.js',
   './src/lib/prepost.js',
