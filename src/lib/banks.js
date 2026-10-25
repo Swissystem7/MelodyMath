@@ -116,6 +116,7 @@
     PARA_AREA: 'גובה במקבילית ושטח מקבילית',
     SOLIDS: 'פירמידות ומנסרות ישרות — פאות, מקצועות, קודקודים ופריסות',
     FREQ: 'שכיחות, טבלת שכיחויות ושכיח',
+    EQ_INEQ: 'משוואות ואי־שוויונות — שני צדדים שווים, או צד אחד גדול יותר',
   };
 
   const SKILL_HE = {
@@ -1970,7 +1971,8 @@
   // Both directions: improper fraction → mixed number and back, comparing
   // across the two forms, and one addition that crosses into the next whole.
   // isCorrect keeps the forms apart, so each prompt names the form it wants.
-  // Appended last so existing ids stay put.
+  // Appended last so existing ids stay put. Stays ahead of the equation items
+  // so the ids already on master do not move.
   RAW.push(
     G4('fractions', 'כתבו את 7/4 כמספר מעורב (שלמים ושבר).', '1 ו־3/4', 'ארבעה רבעים הם שלם אחד, ונשארים 3 רבעים', 1, ST.FRAC_MIXED_D),
     G4('fractions', 'כמה רבעים יש ב־1 ו־1/4? כתבו כשבר.', '5/4', 'בשלם יש 4 רבעים, ועוד רבע אחד', 1, ST.FRAC_MIXED_D),
@@ -1979,6 +1981,32 @@
     G4('fractions', 'כמה חצאים יש ב־2 ו־1/2? כתבו כשבר.', '5/2', 'בכל שלם יש 2 חצאים: 4 חצאים ועוד חצי אחד', 2, ST.FRAC_MIXED_D),
     G4('fractions', 'איזה מספר גדול יותר: 9/4 או 1 ו־3/4? כתבו אותו כמו שהוא כתוב בשאלה.', '9/4', 'כמה שלמים יש ב־9/4? משווים קודם את השלמים, ורק אז את השבר', 3, ST.FRAC_MIXED_D),
     G4('fractions', '1 ו־3/4 + 1/2 = ? (כתבו כמספר מעורב)', '2 ו־1/4', 'חצי הוא 2 רבעים; 3 רבעים ועוד 2 רבעים הם שלם ועוד רבע', 3, ST.FRAC_MIXED_D)
+  );
+
+  // ---------- כיתות ד׳–ה׳ · משוואות ואי־שוויונות (#710) ----------
+  // The balance of grades א׳-ב׳ (EQ_LEFT) with bigger numbers: two sides that
+  // must come out equal, or one side that is bigger. Answers are numbers or
+  // נכון/לא נכון — a typed < or > flips in the RTL answer box. Appended after
+  // the grade files so no existing id moves.
+  RAW.push(
+    G4('addition', '☐ + 2,500 = 7,000' + NO_COMMA, 4500, 'מה משלים את 2,500 ל־7,000', 1, ST.EQ_INEQ),
+    G4('multiplication', 'השלימו: 6 × ☐ = 42', 7, '6 כפול כמה הוא 42', 1, ST.EQ_INEQ),
+    G4('addition', 'נכון או לא נכון: 300 + 200 = 600 − 100', 'נכון', 'בכל צד יוצא 500', 1, ST.EQ_INEQ),
+    G4('multiplication', 'השלימו: 25 × 4 = 50 × ☐', 2, 'קודם הצד הידוע: 25 × 4 = 100', 2, ST.EQ_INEQ),
+    G4('subtraction', 'השלימו: 1,000 − ☐ = 400 + 350', 250, 'הצד הידוע הוא 750', 2, ST.EQ_INEQ),
+    G4('multiplication', 'נכון או לא נכון: 8 × 7 > 50 + 5', 'נכון', '56 גדול מ־55', 2, ST.EQ_INEQ),
+    G4('multiplication', 'נכון או לא נכון: 3 × (20 + 5) = 3 × 20 + 5', 'לא נכון', 'בצד אחד 75 ובשני 65 — הסוגריים משנים', 3, ST.EQ_INEQ),
+    G4('multiplication', 'מהו המספר השלם הגדול ביותר שמתאים ל־☐: ☐ × 7 < 50', 7, '7 × 7 = 49, ו־8 × 7 = 56 כבר גדול מ־50', 3, ST.EQ_INEQ),
+    G4('addition', 'השלימו: 4,500 + ☐ = 3 × 2,000' + NO_COMMA, 1500, 'קודם הצד הידוע: 3 × 2,000 = 6,000', 3, ST.EQ_INEQ),
+    G5('subtraction', '☐ − 15,000 = 35,000' + NO_COMMA, 50000, 'פעולה הפוכה: 35,000 ועוד 15,000', 1, ST.EQ_INEQ),
+    G5('division', 'השלימו: ☐ : 8 = 125' + NO_COMMA, 1000, 'פעולה הפוכה: 125 × 8', 1, ST.EQ_INEQ),
+    G5('division', 'נכון או לא נכון: 48 : 6 = 2 × 4', 'נכון', 'בכל צד יוצא 8', 1, ST.EQ_INEQ),
+    G5('multiplication', 'השלימו: 36 × 25 = 9 × ☐', 100, '36 הוא 9 × 4, ולכן ☐ הוא 4 × 25', 2, ST.EQ_INEQ),
+    G5('multiplication', 'נכון או לא נכון: 999 × 0 > 1 × 1', 'לא נכון', 'כפל ב־0 נותן 0, ו־0 קטן מ־1', 2, ST.EQ_INEQ),
+    G5('multiplication', 'השלימו: 7 × ☐ + 6 = 90', 12, 'קודם 90 − 6 = 84, ואז 84 : 7', 2, ST.EQ_INEQ),
+    G5('multiplication', 'מהו המספר השלם הקטן ביותר שמתאים ל־☐: ☐ × 25 > 1,000', 41, '40 × 25 הוא בדיוק 1,000 — שווה, לא גדול', 3, ST.EQ_INEQ),
+    G5('multiplication', 'נכון או לא נכון: 3,980 × 21 < 80,000', 'לא נכון', 'אומדן: 4,000 × 20 = 80,000, אבל 3,980 × 21 = 83,580', 3, ST.EQ_INEQ),
+    G5('multiplication', 'השלימו: (☐ + 200) × 4 = 6,000' + NO_COMMA, 1300, '6,000 : 4 = 1,500, ואז פחות 200', 3, ST.EQ_INEQ)
   );
 
   // Items appended after the grade files learn their standard through music
@@ -2039,7 +2067,7 @@
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
       tags: ['decimalNoteScale', 'tenthBeatGroups', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
-        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar',
+        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar', 'balanceBars',
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
     M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
       finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
