@@ -10,29 +10,30 @@ function mockContainer() {
   return { innerHTML: '', classList: { classes: new Set(['hidden']), remove(c) { this.classes.delete(c); }, add(c) { this.classes.add(c); } } };
 }
 
-test('tempoPercent mounts onto screen container and tap triggers sound with chosen instrument', () => {
-  const box = mockContainer(), item = tempoPercent.getTempoPercentItems()[0];
-  const mounted = tempoPercent.mount(box, item);
+test('tempoPercent play buttons sound the instrument from the shared pick, no own picker', () => {
+  const buttons = [];
+  const box = Object.assign(mockContainer(), {
+    querySelectorAll: () => buttons.splice(0, buttons.length, ...[...box.innerHTML.matchAll(/data-act="([a-z-]+)"/g)].map((m) => ({
+      act: m[1], getAttribute() { return this.act; }, addEventListener(t, f) { this.click = f; } }))) && buttons,
+  });
+  const item = tempoPercent.getTempoPercentItems()[0];
+  let pick = null;
+  const played = [];
+  const mounted = tempoPercent.mount(box, item, { instrument: () => pick, play: (voice, pitch, when) => played.push({ voice, pitch, when }) });
   assert.ok(mounted && !box.classList.classes.has('hidden'));
   assert.ok(box.innerHTML.includes('tempo-circles-widget'));
+  assert.ok(!box.innerHTML.includes('data-instrument'), 'the picker is the shared one in index.html');
+  assert.deepEqual(buttons.map((b) => b.act), ['play-base', 'play-changed', 'play-both']);
 
-  // Percussion default
-  const t1 = mounted.tap();
-  assert.equal(t1.played, true);
-  assert.equal(t1.instrument, 'darbuka');
-  assert.equal(t1.voice, 'drumLow');
-
-  // Change to winds (recorder)
-  mounted.setInstrument('recorder');
-  const t2 = mounted.tap();
-  assert.equal(t2.instrument, 'recorder');
-  assert.equal(t2.voice, 'breathy');
-
-  // Change to keys (marimba)
-  mounted.setInstrument('marimba');
-  const t3 = mounted.tap();
-  assert.equal(t3.instrument, 'marimba');
-  assert.equal(t3.voice, 'woodBar');
+  buttons[0].click();
+  assert.equal(played.length, 8);
+  assert.ok(played.every((p) => p.voice === tapTempoMean.TAP_VOICE), 'no pick plays the wood click');
+  pick = 'darbuka';
+  played.length = 0;
+  buttons[2].click();
+  assert.equal(played.length, 16);
+  assert.ok(played.every((p) => p.voice === 'drumLow'));
+  assert.equal(mounted.play('changed').instrument, 'darbuka');
 });
 
 test('G6_MEAN screen wires attachTapButton to the instrument the child picked (#750)', () => {

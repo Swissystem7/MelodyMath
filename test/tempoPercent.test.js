@@ -34,3 +34,30 @@ test('end-of-topic no-music check item exists unassisted without musical cues (#
   assert.equal(check.plain, true); assert.equal(check.musicStage, 'no_music_check');
   assert.ok(check.answer != null); assert.match(check.prompt, /קצב/);
 });
+
+test('tempo percent is a weak optional extra that claims no research (Refs #755)', () => {
+  TempoPercent.getTempoPercentItems().forEach(it => {
+    assert.equal(it.musicOptional, true); assert.equal(it.musicEvidence, 'weak');
+    assert.ok(!['D', 'R'].includes(it.musicEv));
+  });
+  // M8 has no evidence, so tempo is not even an optional curriculum way (musicMechanisms.test.js).
+  const ways = require('../src/lib/curriculum/grade6.js').music.PERCENT;
+  assert.ok(!ways.some(w => w[0] === 'tempoPercent'));
+  assert.ok(banks.primaryWays(ways).every(w => banks.mechanismOf(w[0]) === 'M3'));
+});
+
+test('the path starts with an exact M3 bridge step from note lengths to tempo (Refs #755)', () => {
+  const path = TempoPercent.getTempoPercentPath(), bridge = path[0];
+  assert.equal(bridge.stage, 'bridge'); assert.equal(banks.mechanismOf(bridge.music), 'M3');
+  assert.equal(bridge.answer, 10 * (1 - 10 / 100)); assert.match(bridge.hint, /BPM/);
+  assert.equal(path[path.length - 1].musicStage, 'no_music_check');
+});
+
+test('the two tempos are played at their own timing and pitch (Refs #755)', () => {
+  const item = TempoPercent.getTempoPercentItems()[0]; // 100 -> 110 BPM
+  const both = TempoPercent.tempoSchedule(item, 'both');
+  const base = both.filter(s => s.row === 'base'), chg = both.filter(s => s.row === 'changed');
+  assert.equal(base.length, 8); assert.equal(chg.length, 8);
+  assert.ok(base[7].t - chg[7].t > 0.35, 'after 8 sounds the rows are clearly apart');
+  assert.notEqual(base[0].pitch, chg[0].pitch);
+});

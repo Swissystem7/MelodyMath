@@ -5,16 +5,13 @@
   else root.MM_TEMPO_PERCENT = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const INSTRUMENTS = [
-    { id: 'darbuka', he: 'דרבוקה', family: 'percussion', voice: 'drumLow' },
-    { id: 'marimba', he: 'מרימבה', family: 'keys', voice: 'woodBar' },
-    { id: 'recorder', he: 'חליל', family: 'winds', voice: 'breathy' },
-    { id: 'guitar', he: 'גיטרה', family: 'strings', voice: 'pluck' }
-  ];
+  // Tempo percent is a WEAK, optional EXTRA way (M8 has no evaluated study).
+  // wnetMathInMusic (WNET "Get the Math") is where the activity comes from:
+  // teaching material, not research, so no evidence is claimed for it.
   function it(id, baseBpm, pct, ans, kind, prompt, hint, lvl, newBpm) {
     const o = { id, grade: 'ו', strand: 'decimals', standard: 'PERCENT', skill: 'percent', baseBpm, percentChange: pct,
       kind, prompt, answer: ans, hint, level: lvl, music: 'tempoPercent', musicSrc: 'wnetMathInMusic', musicEv: 'A',
-      circles: { baseSounds: 4, changedSounds: 4 } };
+      musicOptional: true, musicEvidence: 'weak', circles: { baseSounds: 4, changedSounds: 4 } };
     if (newBpm != null) o.newBpm = newBpm;
     return o;
   }
@@ -29,50 +26,92 @@
     it('g6-tp-pct-down-25', 80, -25, 25, 'by_percent', 'הקצב ירד מ־80 ל־60 BPM. בכמה אחוזים ירד הקצב? (מספר בלבד)', 'הירידה היא 20 מתוך 80 (20/80 = 1/4), כלומר 25%', 3, 60),
     it('g6-tp-pct-down-10', 100, -10, 10, 'by_percent', 'הקצב ירד מ־100 ל־90 BPM. בכמה אחוזים ירד הקצב? (מספר בלבד)', 'הירידה היא 10 מתוך 100, כלומר 10%', 2, 90)
   ];
+  // Bridge from the main PERCENT way (M3, note lengths) to tempo: a shorter
+  // note is a faster tempo.
+  const BRIDGE_ITEM = { id: 'g6-tp-bridge-note', grade: 'ו', strand: 'decimals', standard: 'PERCENT', skill: 'percent',
+    prompt: 'תו נמשך 10 עשיריות שנייה. מקצרים אותו ב־10%. כמה עשיריות שנייה הוא נמשך עכשיו?', answer: 9,
+    hint: '10% מ־10 הם 1, ו־10 − 1 = 9. תו קצר יותר = קצב מהיר יותר; עכשיו עוברים לקצב ב־BPM.',
+    level: 1, music: 'shortenByPercent', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'bridge' };
   const NO_MUSIC_CHECK_ITEM = { id: 'g6-tp-nomusic-check', grade: 'ו', strand: 'decimals', standard: 'PERCENT', skill: 'percent',
     prompt: 'קצב של 120 פעימות בדקה הואט ב־25%. מה הקצב החדש ב־BPM?', answer: 90, hint: '25% מ־120 הם 30. 120 פחות 30 הם 90.',
     level: 2, noMusic: true, plain: true, musicStage: 'no_music_check' };
 
-  function renderTempoCirclesHtml(item, opts) {
+  // The instrument is the child's pick from the shared picker in index.html
+  // (an instruments.js id); its voice comes from the tap module, so the app
+  // has one instrument list and one picker.
+  function voiceFor(instrument) {
+    let tm = globalThis.MM_TAP_TEMPO_MEAN;
+    if (!tm) { try { tm = require('./tapTempoMean.js'); } catch (e) { tm = null; } }
+    return tm ? tm.tapVoiceFor(instrument) : 'woodClick';
+  }
+  function changedBpm(item) {
+    const base = item.baseBpm || 100;
+    return item.kind === 'new_tempo' ? item.answer : (item.newBpm || Math.round(base * (1 + (item.percentChange || 0) / 100)));
+  }
+
+  // Sound times for a row. The circles play twice so even a 10% change drifts
+  // far enough to hear, and the changed row sounds a fifth higher so the two
+  // tempos stay apart when played together.
+  const ROUNDS = 2, CHANGED_PITCH = 1.5;
+  function tempoSchedule(item, row) {
+    const n = ((item.circles && item.circles.baseSounds) || 4) * ROUNDS;
+    const out = [];
+    (row === 'both' ? ['base', 'changed'] : [row]).forEach(function (r) {
+      const bpm = r === 'base' ? (item.baseBpm || 100) : changedBpm(item);
+      for (let i = 0; i < n; i++) out.push({ row: r, t: i * 60 / bpm, pitch: r === 'base' ? 1 : CHANGED_PITCH });
+    });
+    return out;
+  }
+
+  function renderTempoCirclesHtml(item) {
     if (!item) return '';
-    const base = item.baseBpm || 100, chg = item.kind === 'new_tempo' ? item.answer : (item.newBpm || Math.round(base * (1 + (item.percentChange || 0) / 100)));
-    const inst = (opts && opts.instrument) || 'darbuka', cur = INSTRUMENTS.find(x => x.id === inst) || INSTRUMENTS[0];
+    const base = item.baseBpm || 100, chg = changedBpm(item);
     const n = (item.circles && item.circles.baseSounds) || 4;
     let bDots = '', cDots = '';
     for (let i = 0; i < n; i++) {
-      bDots += `<span class="tp-dot base-dot" data-beat="${i + 1}" data-tap="${cur.voice}" title="פעמת בסיס"></span>`;
-      cDots += `<span class="tp-dot changed-dot" data-beat="${i + 1}" data-tap="${cur.voice}" title="פעמת שינוי"></span>`;
+      bDots += `<span class="tp-dot base-dot" data-beat="${i + 1}" title="פעמת בסיס"></span>`;
+      cDots += `<span class="tp-dot changed-dot" data-beat="${i + 1}" title="פעמת שינוי"></span>`;
     }
-    const pills = INSTRUMENTS.map(x => `<button type="button" class="tp-inst-pill${x.id === cur.id ? ' active' : ''}" data-act="choose-instrument" data-instrument="${x.id}" data-tap="${x.voice}">${x.he}</button>`).join(' ');
-    return `<div class="tempo-circles-widget" dir="rtl" role="region" aria-label="המחשת קצב בעיגולים" data-instrument="${cur.id}" data-voice="${cur.voice}">` +
-      `<div class="tp-inst-picker" style="margin-bottom:8px;">כלי נגינה: ${pills}</div>` +
+    const btn = (act, label) => `<button type="button" class="choice tp-play-btn" data-act="${act}">${label}</button>`;
+    return `<div class="tempo-circles-widget" dir="rtl" role="region" aria-label="המחשת קצב בעיגולים">` +
       `<div class="tp-row tp-base-row" aria-label="קצב בסיס ${base} BPM"><span class="tp-tag">בסיס (${base} BPM):</span><div class="tp-dots">${bDots}</div></div>` +
       `<div class="tp-row tp-changed-row" aria-label="קצב חדש ${chg} BPM"><span class="tp-tag">קצב חדש (${chg} BPM):</span><div class="tp-dots">${cDots}</div></div>` +
-      `<button type="button" class="tp-play-btn" data-tap="${cur.voice}" data-instrument="${cur.id}" style="margin-top:8px;">🎵 נגן צליל כלי (${cur.he})</button></div>`;
+      `<div class="tp-play-row" style="margin-top:8px;">${btn('play-base', '🎵 בסיס')} ${btn('play-changed', '🎵 קצב חדש')} ${btn('play-both', '🎵 שניהם יחד')}</div></div>`;
   }
 
+  // Default sound: instrumentVoices.playVoice on the page's shared AudioContext.
+  function playOnPage(voice, pitch, when) {
+    const g = globalThis, ac = typeof g.getSharedAudioContext === 'function' ? g.getSharedAudioContext() : null;
+    if (!ac || typeof g.playVoice !== 'function') return null;
+    const hz = g.VOICES && g.VOICES[voice] ? g.VOICES[voice].hz * pitch : undefined;
+    return g.playVoice(ac, voice, hz, ac.currentTime + 0.05 + when);
+  }
+
+  // opts.instrument: the picked instrument id, or a function read on every
+  // play. opts.play(voice, pitch, when) lets tests capture the sound.
   function mount(container, item, opts) {
     if (!container) return null;
-    let currentInst = (opts && opts.instrument) || 'darbuka';
-    function update() {
-      container.innerHTML = renderTempoCirclesHtml(item, { instrument: currentInst });
-      if (container.classList) container.classList.remove('hidden');
+    const o = opts || {}, play = o.play || playOnPage;
+    container.innerHTML = renderTempoCirclesHtml(item);
+    if (container.classList) container.classList.remove('hidden');
+    const pick = () => (typeof o.instrument === 'function' ? o.instrument() : o.instrument) || null;
+    function playRow(row) {
+      const voice = voiceFor(pick()), plan = tempoSchedule(item, row);
+      plan.forEach(function (s) { play(voice, s.pitch, s.t); });
+      return { instrument: pick(), voice, plan };
     }
-    update();
-    function triggerSound(instId) {
-      const target = INSTRUMENTS.find(x => x.id === (instId || currentInst)) || INSTRUMENTS[0];
-      if (typeof globalThis.playInstrumentNote === 'function') globalThis.playInstrumentNote(target.id);
-      else if (typeof globalThis.playTap === 'function') globalThis.playTap(target.voice);
-      return { played: true, instrument: target.id, voice: target.voice };
+    const rows = { 'play-base': 'base', 'play-changed': 'changed', 'play-both': 'both' };
+    if (container.querySelectorAll) {
+      container.querySelectorAll('[data-act]').forEach(function (b) {
+        const row = rows[b.getAttribute('data-act')];
+        if (row) b.addEventListener('click', function () { playRow(row); });
+      });
     }
-    return {
-      container, item,
-      getInstrument: () => currentInst,
-      setInstrument: (id) => { currentInst = id; update(); return currentInst; },
-      tap: (id) => triggerSound(id || currentInst)
-    };
+    return { container, item, getInstrument: pick, play: playRow };
   }
 
-  return { INSTRUMENTS, TEMPO_PERCENT_ITEMS, NO_MUSIC_CHECK_ITEM, renderTempoCirclesHtml, mount,
-    getTempoPercentItems: () => TEMPO_PERCENT_ITEMS.slice(), getNoMusicCheck: () => Object.assign({}, NO_MUSIC_CHECK_ITEM) };
+  const getBridgeItem = () => Object.assign({}, BRIDGE_ITEM), getNoMusicCheck = () => Object.assign({}, NO_MUSIC_CHECK_ITEM);
+  return { TEMPO_PERCENT_ITEMS, BRIDGE_ITEM, NO_MUSIC_CHECK_ITEM, renderTempoCirclesHtml, tempoSchedule, mount,
+    getTempoPercentItems: () => TEMPO_PERCENT_ITEMS.slice(), getBridgeItem, getNoMusicCheck,
+    getTempoPercentPath: () => [getBridgeItem()].concat(TEMPO_PERCENT_ITEMS, [getNoMusicCheck()]) };
 });

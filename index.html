@@ -824,7 +824,10 @@ function renderWidget(hostId, item, inputId){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
   } else if((item.music==='tempoPercent'||item.circles)&&typeof MM_TEMPO_PERCENT!=='undefined'&&typeof MM_TEMPO_PERCENT.mount==='function'){
-    MM_TEMPO_PERCENT.mount(host, item);
+    // Same shared picker as the tap screen: one instrument choice for the child.
+    MM_TEMPO_PERCENT.mount(host, item, { instrument: pickedInstrument });
+    host.insertAdjacentHTML('afterbegin', tapPickerHtml());
+    bindTapPicker(host);
   } else if(item.standard==='G6_MEAN'&&item.music==='tapTempo'&&!item.noMusic&&typeof MM_TAP_TEMPO_MEAN!=='undefined'){
     // G6_MEAN tap screen (#750): every tap plays the instrument the child picked, read on each tap.
     host.classList.remove('hidden');
