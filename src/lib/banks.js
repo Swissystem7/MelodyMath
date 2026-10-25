@@ -243,6 +243,7 @@
       grid: extra.grid,
       tags: extra.tags,
       tolerance: extra.tolerance,
+      kind: extra.kind,
     };
   }
 
@@ -1981,6 +1982,20 @@
     G4('fractions', '1 ו־3/4 + 1/2 = ? (כתבו כמספר מעורב)', '2 ו־1/4', 'חצי הוא 2 רבעים; 3 רבעים ועוד 2 רבעים הם שלם ועוד רבע', 3, ST.FRAC_MIXED_D)
   );
 
+  // ---------- תרגילי חוקרים אינטראקטיביים (#688, Refs #665) ----------
+  // Turn exploratory tools into full exercises:
+  // 1. Singing number line (ישר מספרים מנגן לשברים, כיתה ד׳, ST.FRAC_BAR)
+  // 2. Groups × size (קבוצות כפל, כיתה ב׳, ST.MUL_B)
+  // 3. Even/odd rhythm (זוגי/אי-זוגי, כיתה ב׳, ST.PLACE_VALUE)
+  RAW.push(
+    I('ד', 'fractions', 'איזה שבר נמצא בנקודה 50% על ישר המספרים?', '1/2', 'חצי הדרך מ־0 עד 1', { standard: ST.FRAC_BAR, strand: STRAND.FRAC, level: 1, kind: 'singing_line' }),
+    I('ד', 'fractions', 'איזה שבר נמצא בנקודה 25% על ישר המספרים?', '1/4', 'רבע הדרך מ־0 עד 1', { standard: ST.FRAC_BAR, strand: STRAND.FRAC, level: 2, kind: 'singing_line' }),
+    I('ב', 'multiplication', 'יש 4 קבוצות של 2 פעימות. כמה פעימות בסך הכל?', 8, '4 כפול 2 שווה 8', { standard: ST.MUL_B, strand: STRAND.MUL, table: 2, level: 1, kind: 'groups_mult' }),
+    I('ב', 'multiplication', 'יש 3 קבוצות של 5 פעימות. כמה פעימות בסך הכל?', 15, '3 כפול 5 שווה 15', { standard: ST.MUL_B, strand: STRAND.MUL, table: 5, level: 2, kind: 'groups_mult' }),
+    I('ב', 'place_value', 'האם 6 פעימות הן מספר זוגי או אי־זוגי?', 'זוגי', '6 מתחלק לזוגות שווים', { standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 1, kind: 'even_odd' }),
+    I('ב', 'place_value', 'האם 7 פעימות הן מספר זוגי או אי־זוגי?', 'אי-זוגי', 'ב־7 נשארת פעימה אחת ללא זוג', { standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 1, kind: 'even_odd' })
+  );
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2150,6 +2165,7 @@
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    if (raw.kind) it.kind = raw.kind;
     SHIPPED.push(it);
   });
 
