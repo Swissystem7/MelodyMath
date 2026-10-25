@@ -51,3 +51,21 @@ test('classifyExerciseType classifies prompts accurately', () => {
   assert.equal(exerciseTypes.classifyExerciseType({ prompt: 'התבוננו בלוח המאה' }), 'representation');
   assert.equal(exerciseTypes.classifyExerciseType({ prompt: 'חשבו: 3 + 4' }), 'direct');
 });
+
+test('RESTORE-CUR-0-18-25: original exercises are preserved alongside replacements (Refs #665)', () => {
+  // mm-cur-0: both skip-5 number-line and tens number-line are present
+  const g1Items = exerciseTypes.GRADE_DATA['א'].filter(it => it.topicId === 'mm-cur-0');
+  assert.ok(g1Items.some(it => it.prompt.includes('דילוגים של 5')), 'Original mm-cur-0 skip-5 exercise must be preserved');
+  assert.ok(g1Items.some(it => it.prompt.includes('ספירה קדימה בעשרות')), 'Replacement mm-cur-0 tens exercise must be preserved');
+
+  // mm-cur-18: both original equilateral triangle 15/3 and perimeter addition/multiplication are present
+  const g2Items = exerciseTypes.GRADE_DATA['ב'].filter(it => it.topicId === 'mm-cur-18');
+  assert.ok(g2Items.some(it => it.prompt.includes('היקף משולש שווה־צלעות הוא 15 ס״מ')), 'Original mm-cur-18 exercise must be preserved');
+  assert.ok(g2Items.some(it => it.prompt.includes('5+5+5=☐')), 'Replacement mm-cur-18 addition exercise must be preserved');
+  assert.ok(g2Items.some(it => it.prompt.includes('4 × ☐ = 20')), 'Replacement mm-cur-18 missing factor exercise must be preserved');
+
+  // mm-cur-25: both missing_addend and missing_factor versions of 70 x [] = 700 are present
+  const g3Items = exerciseTypes.GRADE_DATA['ג'].filter(it => it.topicId === 'mm-cur-25');
+  assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_addend'), 'Original mm-cur-25 missing_addend exercise must be preserved');
+  assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_factor'), 'Replacement mm-cur-25 missing_factor exercise must be preserved');
+});

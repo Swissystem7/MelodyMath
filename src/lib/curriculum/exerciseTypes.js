@@ -43,6 +43,7 @@
       { topicId: 'mm-cur-0', topic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו', prompt: 'בספירה קדימה בעשרות: 20, 30, 40, ☐. מהו המספר הבא?', answer: 50, hint: '40 ועוד 10', exerciseType: 'number_line' },
       { topicId: 'mm-cur-0', topic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו', prompt: 'ספירה קדימה: 48, 49, ☐, 51. מהו המספר החסר?', answer: 50, hint: 'המספר שבא אחרי 49 ולפני 51', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-0', topic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו', prompt: 'השוו בין המספרים: 34 ☐ 43 (כתבו < או >)', answer: '<', hint: '34 קטן מ־43', exerciseType: 'compare' },
+      { topicId: 'mm-cur-0', topic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו', prompt: 'בספירה קדימה מ־10 בדילוגים של 5, איזה מספר בא אחרי 15?', answer: 20, hint: '15 ועוד 5', exerciseType: 'number_line' },
       { topicId: 'mm-cur-1', topic: 'מנייה עד 100, קיבוץ ל־10', prompt: 'מה מכיל יותר פריטים: 3 קבוצות של 10 או 25 יחידות?', answer: '3 קבוצות של 10', hint: '3 קבוצות של 10 הן 30, ו־30 גדול מ־25', exerciseType: 'compare' },
       { topicId: 'mm-cur-1', topic: 'מנייה עד 100, קיבוץ ל־10', prompt: 'בכיתה סדרו 2 קבוצות של 10 טושים ועוד 4 טושים בודדים. כמה טושים בסך הכל?', answer: 24, hint: '2 עשרות ו־4 יחידות', exerciseType: 'word_problem' },
       { topicId: 'mm-cur-2', topic: 'ישר המספרים — מיקום מדויק ומקורב עד 100', prompt: 'על ישר המספרים מ־0 עד 20: 14, ☐, 16. איזה מספר נמצא באמצע?', answer: 15, hint: 'המספר בין 14 ל־16', exerciseType: 'missing_addend' },
@@ -90,6 +91,7 @@
       { topicId: 'mm-cur-18', topic: 'ס״מ, היקף, חצאי שעות', prompt: 'משולש שווה־צלעות עם צלעות של 5 ס״מ. מה היקפו? (5+5+5=☐)', answer: 15, hint: '5+5+5', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-18', topic: 'ס״מ, היקף, חצאי שעות', prompt: 'היקף ריבוע 20 ס״מ. מה אורך כל צלע? (4 × ☐ = 20)', answer: 5, hint: '4 פעמים 5 הן 20', exerciseType: 'missing_factor' },
       { topicId: 'mm-cur-18', topic: 'ס״מ, היקף, חצאי שעות', prompt: 'השוו: היקף ריבוע עם צלע 4 ס״מ ☐ היקף משולש עם צלע 5 ס״מ', answer: '>', hint: '16 ס״מ לעומת 15 ס״מ', exerciseType: 'compare' },
+      { topicId: 'mm-cur-18', topic: 'ס״מ, היקף, חצאי שעות', prompt: 'היקף משולש שווה־צלעות הוא 15 ס״מ. מה אורך כל צלע בס״מ? (☐)', answer: 5, hint: '15 לחלק ל־3', exerciseType: 'missing_addend' },
     ],
     'ג': [
       { topicId: 'mm-cur-22', topic: 'מספרים עד 10,000, מבנה עשרוני', prompt: 'בספרייה יש 4 אלפים, 2 מאות ועוד 5 ספרים. כמה ספרים בסך הכל?', answer: 4205, hint: '4000 + 200 + 5', exerciseType: 'word_problem' },
@@ -97,6 +99,7 @@
       { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '23 : 5 = 4 (שארית ☐). מהי השארית?', answer: 3, hint: '5 כפול 4 שווה 20, ו־23 פחות 20 שווה 3', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '250 : 10 = ?', answer: 25, hint: 'חילוק ב־10 מוריד אפס אחד', exerciseType: 'direct' },
       { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '70 × ☐ = 700. מהו המספר החסר?', answer: 10, hint: 'כמה פעמים 70 נכנס ב־700?', exerciseType: 'missing_factor' },
+      { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '70 × ☐ = 700. מהו המספר החסר?', answer: 10, hint: 'כמה פעמים 70 נכנס ב־700?', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-26', topic: 'שאלות השוואה כפליות ודו־שלביות', prompt: 'השוו: פי 4 מ־6 ☐ פי 3 מ־8 (כתבו <, > או =)', answer: '=', hint: '4×6=24 ו־3×8=24', exerciseType: 'compare' },
       { topicId: 'mm-cur-26', topic: 'שאלות השוואה כפליות ודו־שלביות', prompt: 'המספר 35 גדול פי 5 מהמספר ☐. מהו המספר?', answer: 7, hint: '35 לחלק ל־5', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-26', topic: 'שאלות השוואה כפליות ודו־שלביות', prompt: 'כמה הוא פי 6 מ־8?', answer: 48, hint: '6 כפול 8', exerciseType: 'direct' },
