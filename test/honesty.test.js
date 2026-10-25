@@ -9,9 +9,12 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
-test('there is no GitHub Actions workflow in the repo', () => {
-  const wf = path.join(root, '.github', 'workflows');
-  assert.equal(fs.existsSync(wf), false, '.github/workflows must not exist');
+test('CI runs npm ci && npm test on pull requests and on push to master', () => {
+  const wf = path.join(root, '.github', 'workflows', 'test.yml');
+  const yml = fs.readFileSync(wf, 'utf8');
+  assert.match(yml, /pull_request:/);
+  assert.match(yml, /push:[\s\S]*branches:[\s\S]*- master/);
+  assert.match(yml, /npm ci && npm test/);
 });
 
 test('the unused factory lib/ folder is gone', () => {
