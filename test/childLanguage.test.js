@@ -52,6 +52,12 @@ test('index.html child-facing practice screens contain no visible clinical/diagn
   // Beat mode stats
   assert.match(html, /id="beatDoneStats"[\s\S]*?קצב בסיום/);
 
+  // Parents screen maintains statutory disclaimer note
+  assert.match(html, /זהו מדגם למידה קצר, לא אבחון קליני/);
+
+  // Wire check: simplifyForChild is wired into index.html
+  assert.match(html, /simplifyForChild/);
+
   // Script is precached in sw.js
   const sw = fs.readFileSync(path.resolve(__dirname, '../sw.js'), 'utf8');
   assert.ok(sw.includes('./src/lib/childLanguage.js'));
