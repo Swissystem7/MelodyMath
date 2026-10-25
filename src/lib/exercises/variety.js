@@ -1,11 +1,4 @@
 // MelodyMath — Exercise Variety Engine (Task V1, Refs #665).
-//
-// Rules:
-// 1. Per topic keeps the same exercise type (never changes exercise type).
-// 2. Each round varies numbers: no repeat within 5 rounds, no identical consecutive exercises.
-// 3. Instrument chosen dynamically via instruments.forTopic (never hardcoded).
-// 4. Tempo chosen within 80-130 BPM pedagogical range.
-// 5. Rhythm pattern varies across rounds.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     let inst;
@@ -19,21 +12,29 @@
 
   const BPM_STEPS = [84, 92, 96, 104, 112, 118, 124, 128];
 
+  // Rhythm patterns vary within the same musical method (M1 steady beat, 4/4 meter):
+  // varying subdivisions (quarters, eighths, half+quarters, dotted) without changing method or meter.
   const RHYTHM_PATTERNS = [
-    { id: 'straight_4', he: 'מקצב מרובע ישר', meter: '4/4', accents: [0] },
-    { id: 'swing_dotted', he: 'מקצב מנוקד', meter: '4/4', accents: [0, 2] },
-    { id: 'waltz_3', he: 'מקצב משולש', meter: '3/4', accents: [0] },
-    { id: 'syncopated', he: 'מקצב סינקופה', meter: '4/4', accents: [0, 3] },
-    { id: 'triplet', he: 'מקצב שלשות', meter: '6/8', accents: [0, 3] }
+    { id: 'quarters_4', he: 'מקצב רבעים', meter: '4/4', subdivision: 'quarters', method: 'steady_beat', accents: [0] },
+    { id: 'eighths_4', he: 'מקצב שמיניות', meter: '4/4', subdivision: 'eighths', method: 'steady_beat', accents: [0, 2] },
+    { id: 'half_quarters', he: 'מקצב חצאים ורבעים', meter: '4/4', subdivision: 'half_quarters', method: 'steady_beat', accents: [0] },
+    { id: 'swing_dotted', he: 'מקצב מנוקד', meter: '4/4', subdivision: 'dotted', method: 'steady_beat', accents: [0, 2] }
   ];
 
-  const FRACTION_PAIRS = [
-    [1, 2], [1, 4], [2, 4], [3, 4],
-    [1, 3], [2, 3], [1, 6], [5, 6],
-    [1, 8], [3, 8], [5, 8], [7, 8],
-    [1, 5], [2, 5], [3, 5], [4, 5],
-    [1, 10], [3, 10], [7, 10], [9, 10]
-  ];
+  const FRACTION_PAIRS = [[1, 2], [1, 4], [2, 4], [3, 4], [1, 3], [2, 3], [1, 6], [5, 6], [1, 8], [3, 8], [5, 8], [7, 8], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [3, 10], [7, 10], [9, 10]];
+
+  function resolveGrade(topicOrItem, options) {
+    if (options && options.grade != null) return String(options.grade);
+    if (typeof topicOrItem === 'object' && topicOrItem !== null) {
+      if (topicOrItem.grade != null) return String(topicOrItem.grade);
+      const tid = String(topicOrItem.topicId || topicOrItem.id || '');
+      if (tid.startsWith('mm-cur-')) {
+        const num = parseInt(tid.replace('mm-cur-', ''), 10);
+        if (num >= 0 && num <= 12) return 'א';
+      }
+    }
+    return null;
+  }
 
   function resolveTopicKey(topicOrItem) {
     if (!topicOrItem) return 'counting';
@@ -91,16 +92,11 @@
       if (p.includes('/') || (topicOrItem.skill && topicOrItem.skill.includes('fraction'))) return 'fractions';
     }
     const k = resolveTopicKey(topicOrItem);
-    if (k === 'multiplication') return 'multiplication';
-    if (k === 'division') return 'division';
-    if (k === 'nextPrev') return 'subtraction';
-    if (k === 'fractions') return 'fractions';
-    if (k === 'decimals') return 'decimals';
-    if (k === 'patterns') return 'patterns';
-    return 'addition';
+    return (k === 'multiplication' || k === 'division' || k === 'fractions' || k === 'decimals' || k === 'patterns') ? k : (k === 'nextPrev' ? 'subtraction' : 'addition');
   }
 
-  function generateNumberSet(type, roundIndex, recentKeys) {
+  function generateNumberSet(type, roundIndex, recentKeys, grade) {
+    const isGrade1 = grade === '1' || grade === 'א' || grade === 1;
     const seen = new Set(recentKeys || []);
     const maxTries = 100;
     let candidate = null;
@@ -109,28 +105,33 @@
     for (let tryIdx = 0; tryIdx < maxTries; tryIdx++) {
       const step = roundIndex * 3 + tryIdx;
       if (type === 'addition') {
-        const a = ((step * 7 + 3) % 18) + 2;
-        const b = ((step * 11 + 5) % 18) + 2;
+        let a, b;
+        if (isGrade1) {
+          a = ((step * 5 + 3) % 10) + 1;
+          b = ((step * 7 + 2) % (20 - a)) + 1;
+        } else {
+          a = ((step * 7 + 3) % 18) + 2;
+          b = ((step * 11 + 5) % 18) + 2;
+        }
         key = `${a}+${b}`;
         if (!seen.has(key)) {
-          candidate = {
-            a, b, answer: a + b, key,
-            prompt: `${a} + ${b} = ?`,
-            hint: `${a} ועוד ${b} הם ${a + b}`
-          };
+          candidate = { a, b, answer: a + b, key, prompt: `${a} + ${b} = ?`, hint: `${a} ועוד ${b} הם ${a + b}` };
           break;
         }
       } else if (type === 'subtraction') {
-        const b = ((step * 7 + 2) % 15) + 2;
-        const diff = ((step * 5 + 1) % 12) + 1;
-        const a = b + diff;
+        let a, b, diff;
+        if (isGrade1) {
+          a = ((step * 7 + 5) % 19) + 2;
+          b = ((step * 3 + 1) % (a - 1)) + 1;
+          diff = a - b;
+        } else {
+          b = ((step * 7 + 2) % 15) + 2;
+          diff = ((step * 5 + 1) % 12) + 1;
+          a = b + diff;
+        }
         key = `${a}-${b}`;
         if (!seen.has(key)) {
-          candidate = {
-            a, b, answer: diff, key,
-            prompt: `${a} - ${b} = ?`,
-            hint: `${a} פחות ${b} הם ${diff}`
-          };
+          candidate = { a, b, answer: diff, key, prompt: `${a} - ${b} = ?`, hint: `${a} פחות ${b} הם ${diff}` };
           break;
         }
       } else if (type === 'multiplication') {
@@ -138,11 +139,7 @@
         const b = ((step * 7 + 3) % 9) + 2;
         key = `${a}*${b}`;
         if (!seen.has(key)) {
-          candidate = {
-            a, b, answer: a * b, key,
-            prompt: `${a} × ${b} = ?`,
-            hint: `${a} כפול ${b} הם ${a * b}`
-          };
+          candidate = { a, b, answer: a * b, key, prompt: `${a} × ${b} = ?`, hint: `${a} כפול ${b} הם ${a * b}` };
           break;
         }
       } else if (type === 'division') {
@@ -151,11 +148,7 @@
         const dividend = divisor * quot;
         key = `${dividend}:${divisor}`;
         if (!seen.has(key)) {
-          candidate = {
-            a: dividend, b: divisor, answer: quot, key,
-            prompt: `${dividend} : ${divisor} = ?`,
-            hint: `${dividend} לחלק ל־${divisor} הם ${quot}`
-          };
+          candidate = { a: dividend, b: divisor, answer: quot, key, prompt: `${dividend} : ${divisor} = ?`, hint: `${dividend} לחלק ל־${divisor} הם ${quot}` };
           break;
         }
       } else if (type === 'fractions') {
@@ -163,22 +156,20 @@
         const num = pair[0], denom = pair[1];
         key = `${num}/${denom}`;
         if (!seen.has(key)) {
-          candidate = {
-            a: num, b: denom, answer: `${num}/${denom}`, key,
-            prompt: `איזה שבר מייצג ${num} מתוך ${denom} פעימות בתיבה?`,
-            hint: `${num} חלקים מתוך ${denom}`
-          };
+          candidate = { a: num, b: denom, answer: `${num}/${denom}`, key, prompt: `איזה שבר מייצג ${num} מתוך ${denom} פעימות בתיבה?`, hint: `${num} חלקים מתוך ${denom}` };
           break;
         }
       } else {
-        const n = ((step * 7 + 2) % 20) + 3;
+        let n;
+        if (isGrade1) {
+          n = ((step * 5 + 2) % 18) + 3;
+          if (n > 20) n = 20;
+        } else {
+          n = ((step * 7 + 2) % 20) + 3;
+        }
         key = `count:${n}`;
         if (!seen.has(key)) {
-          candidate = {
-            n, answer: n, key,
-            prompt: `כמה פעימות נשמעו?`,
-            hint: `ספרו את הפעימות: יש ${n}`
-          };
+          candidate = { n, answer: n, key, prompt: 'כמה פעימות נשמעו?', hint: `ספרו את הפעימות: יש ${n}` };
           break;
         }
       }
@@ -193,7 +184,8 @@
     const exerciseType = detectExerciseType(topicOrItem);
     const recentKeys = opts.recentNumbers || (opts.history && opts.history.slice(-5).map(x => x.numberKey)) || [];
 
-    const numSet = generateNumberSet(exerciseType, roundIndex, recentKeys);
+    const grade = resolveGrade(topicOrItem, opts);
+    const numSet = generateNumberSet(exerciseType, roundIndex, recentKeys, grade);
     const tempo = pickTempo(roundIndex, opts.seed);
     const pattern = pickPattern(roundIndex, opts.seed);
     const inst = pickInstrument(topicKey, roundIndex, opts.seed);
@@ -229,11 +221,10 @@
     return {
       next: function (overrideRound) {
         const round = overrideRound != null ? overrideRound : history.length;
-        const ex = generateVariant(topicOrItem, round, {
+        const ex = generateVariant(topicOrItem, round, Object.assign({}, opts, {
           recentNumbers: recentKeys,
-          history: history,
-          seed: opts.seed
-        });
+          history: history
+        }));
         history.push(ex);
         recentKeys.push(ex.numberKey);
         if (recentKeys.length > 5) recentKeys.shift();
@@ -249,6 +240,7 @@
     BPM_STEPS,
     RHYTHM_PATTERNS,
     FRACTION_PAIRS,
+    resolveGrade,
     resolveTopicKey,
     pickTempo,
     pickPattern,

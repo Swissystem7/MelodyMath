@@ -16,16 +16,8 @@ test('10 rounds of the same topic never repeat the same exercise twice in a row'
       const current = session.next();
       assert.ok(current, 'round ' + r + ' exercise exists');
       if (prev) {
-        assert.notEqual(
-          current.prompt,
-          prev.prompt,
-          `Topic ${topic} round ${r} has identical consecutive prompt: "${current.prompt}"`
-        );
-        assert.notEqual(
-          current.numberKey,
-          prev.numberKey,
-          `Topic ${topic} round ${r} has identical consecutive numberKey: "${current.numberKey}"`
-        );
+        assert.notEqual(current.prompt, prev.prompt, 'No duplicate prompt in ' + topic);
+        assert.notEqual(current.numberKey, prev.numberKey, 'No duplicate key in ' + topic);
       }
       prev = current;
     }
@@ -34,22 +26,14 @@ test('10 rounds of the same topic never repeat the same exercise twice in a row'
 
 test('per topic keeps the same exercise type across all rounds', () => {
   const specs = [
-    { topic: 'multiplication', expectedType: 'multiplication' },
-    { topic: 'division', expectedType: 'division' },
-    { topic: 'counting', expectedType: 'addition' },
-    { topic: 'nextPrev', expectedType: 'subtraction' },
-    { topic: 'fractions', expectedType: 'fractions' }
+    { topic: 'multiplication', expectedType: 'multiplication' }, { topic: 'division', expectedType: 'division' }, { topic: 'counting', expectedType: 'addition' }, { topic: 'nextPrev', expectedType: 'subtraction' }, { topic: 'fractions', expectedType: 'fractions' }
   ];
 
   for (const spec of specs) {
     const session = variety.createVarietySession(spec.topic);
     for (let r = 0; r < 10; r++) {
       const ex = session.next();
-      assert.equal(
-        ex.exerciseType,
-        spec.expectedType,
-        `Round ${r} exerciseType must stay ${spec.expectedType}, got ${ex.exerciseType}`
-      );
+      assert.equal(ex.exerciseType, spec.expectedType, 'exerciseType must stay ' + spec.expectedType);
     }
   }
 });
@@ -76,10 +60,7 @@ test('instrument is selected via instruments.forTopic and varies across rounds',
 
   for (let r = 0; r < 10; r++) {
     const ex = session.next();
-    assert.ok(
-      expectedInstruments.includes(ex.instrument),
-      `Instrument ${ex.instrument} must come from instruments.forTopic(${topic})`
-    );
+    assert.ok(expectedInstruments.includes(ex.instrument), 'Instrument must match topic');
     pickedInstruments.add(ex.instrument);
   }
 
@@ -110,4 +91,40 @@ test('rhythm patterns vary across rounds', () => {
   }
 
   assert.ok(patterns.size >= 3, 'Rhythm patterns vary across rounds');
+});
+
+test('grade 1 numbers are strictly capped at 20 in addition, subtraction, and counting (Refs #665)', () => {
+  ['addition', 'subtraction', 'counting'].forEach((type) => {
+    const session = variety.createVarietySession(type, { grade: 'א' });
+    for (let r = 0; r < 20; r++) {
+      const ex = session.next();
+      if (ex.exerciseType === 'addition') {
+        const parts = ex.numberKey.split('+').map(Number);
+        assert.ok(parts[0] <= 20 && parts[1] <= 20, `Operands ${ex.numberKey} must be <= 20`);
+        assert.ok(ex.answer <= 20, `Addition sum ${ex.answer} must be <= 20 in grade 1`);
+      } else if (ex.exerciseType === 'subtraction') {
+        const parts = ex.numberKey.split('-').map(Number);
+        assert.ok(parts[0] <= 20 && parts[1] <= 20, `Subtraction operands ${ex.numberKey} must be <= 20`);
+        assert.ok(parts[0] >= parts[1], `Minuend ${parts[0]} must be >= subtrahend ${parts[1]}`);
+      } else {
+        assert.ok(ex.answer <= 20, `Counting answer ${ex.answer} must be <= 20 in grade 1`);
+      }
+    }
+  });
+});
+
+test('rhythm patterns vary only within the same musical method (quarters/eighths) (Refs #665)', () => {
+  const session = variety.createVarietySession('counting');
+  const methods = new Set();
+  const subdivisions = new Set();
+
+  for (let r = 0; r < 10; r++) {
+    const ex = session.next();
+    assert.equal(ex.rhythmPattern.meter, '4/4', 'Meter must stay consistent in 4/4');
+    methods.add(ex.rhythmPattern.method);
+    subdivisions.add(ex.rhythmPattern.subdivision);
+  }
+
+  assert.equal(methods.size, 1, 'Rhythm varies strictly within one musical method (steady_beat)');
+  assert.ok(subdivisions.size >= 3, 'Rhythm subdivisions vary across rounds (quarters/eighths/etc.)');
 });
