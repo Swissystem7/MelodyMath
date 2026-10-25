@@ -81,3 +81,16 @@ test('the streak survives a reload through the injected storage', () => {
   assert.deepEqual(streak.loadStreak(null), streak.initialStreak());
 });
 
+
+test('every times-table instrument has a research source or TODO', () => {
+  const ttg = require('../src/components/TimesTableGroove');
+  const data = require('../src/lib/instruments.js');
+  const ids = ['tabla'].concat(ttg.INSTRUMENTS);
+  assert.ok(ttg.INSTRUMENTS.length > 0);
+  for (const id of ids) {
+    const x = data.instrumentById(id);
+    assert.ok(x, id + ' is missing from instruments.js');
+    const src = typeof x.source === 'string' ? x.source.trim() : '';
+    assert.ok(src === 'TODO' || /^https?:\/\/\S+$/.test(src), id + ' needs a source URL or TODO, got ' + JSON.stringify(x.source));
+  }
+});
