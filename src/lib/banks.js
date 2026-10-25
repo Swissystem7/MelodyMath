@@ -2141,6 +2141,20 @@
     if (s) { raw.musicSrc = s[0]; raw.musicEv = s[1]; }
   });
 
+  // Tempo percent items (#755): the circles screen (MM_TEMPO_PERCENT) gets its
+  // items from the bank, as grade 6 PERCENT activities. They stay a weak
+  // optional EXTRA (M8, no evaluated study) and take no way, so the M3 way
+  // stays the main one. Appended last so existing ids stay put; pages load
+  // tempoPercent.js before this file.
+  const TP = (typeof module === 'object' && module.exports) ? require('./exercises/tempoPercent') : G.MM_TEMPO_PERCENT;
+  const TP_KEEP = ['baseBpm', 'percentChange', 'kind', 'newBpm', 'circles', 'musicOptional', 'musicEvidence'];
+  (TP && typeof TP.getTempoPercentItems === 'function' ? TP.getTempoPercentItems() : []).forEach(function (x) {
+    const raw = I('ו', 'percent', x.prompt, x.answer, x.hint, { standard: ST.PERCENT, level: x.level, music: x.music });
+    raw.musicSrc = x.musicSrc; raw.musicEv = x.musicEv;
+    TP_KEEP.forEach(function (k) { if (x[k] != null) raw[k] = x[k]; });
+    RAW.push(raw);
+  });
+
   const SHIPPED = [];
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
@@ -2178,6 +2192,7 @@
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    TP_KEEP.forEach(function (k) { if (raw[k] != null) it[k] = raw[k]; });
     SHIPPED.push(it);
   });
 
