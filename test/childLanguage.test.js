@@ -55,6 +55,17 @@ test('index.html child-facing practice screens contain no visible clinical/diagn
   // Parents screen maintains statutory disclaimer note
   assert.match(html, /זהו מדגם למידה קצר, לא אבחון קליני/);
 
+  // Gate note and practice-plan buttons are shown to the child
+  const gateDiag = (html.match(/<span id="gateNoteDiag"[^>]*>([^<]*)<\/span>/) || [])[1] || '';
+  assert.ok(gateDiag && childLang.isChildFriendly(gateDiag) && !/אבחון/.test(gateDiag), 'gateNoteDiag uses child language');
+  const planActions = (html.match(/<div id="rmPlanDoneActions"[\s\S]*?<\/div>/) || [])[0] || '';
+  assert.ok(planActions, 'rmPlanDoneActions exists');
+  assert.doesNotMatch(planActions, /אבחון|דוח הפערים/);
+
+  // rmReport is shown to the child right after the quiz
+  assert.match(html, /<div id="rmReport"[^>]*><span class="tag">ההתקדמות שלי<\/span>/);
+  assert.doesNotMatch(html, /<span class="tag">דוח פערים להורה<\/span>/);
+
   // Wire check: simplifyForChild is wired into index.html
   assert.match(html, /simplifyForChild/);
 

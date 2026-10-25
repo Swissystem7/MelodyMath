@@ -422,6 +422,7 @@ test('the gate note states its scope, since the diagnostic samples locked tables
   assert.ok(!banks.diagnosticItems('ב').some((it) => mastery.isBlockedItem(it)));
   const note = (indexHtml.match(/<div id="gateNote"[^>]*>(.*?)<\/div>/) || [])[1] || '';
   assert.match(note, /^בתרגול האישי/);
-  assert.match(note, /<span id="gateNoteDiag" class="hidden"> האבחון[^.]*לוחות שעוד לא נפתחו/);
+  assert.match(note, /<span id="gateNoteDiag" class="hidden"> במשחק ההיכרות[^.]*לוחות שעוד לא נפתחו/);
+  assert.doesNotMatch(note, /אבחון/);
   assert.ok(indexHtml.includes('diagnosticItems(selectedGrade).some(isBlockedItem)'));
 });

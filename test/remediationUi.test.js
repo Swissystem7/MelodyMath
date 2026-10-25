@@ -16,8 +16,8 @@ test('rmReward provides accessible live region semantics for musical feedback', 
 
 test('rmPlan provides completion action buttons for a11y and seamless user navigation', () => {
   assert.match(indexHtml, /id="rmPlanDoneActions"[^>]*class="hidden"/);
-  assert.match(indexHtml, /id="rmPlanRestart"[^>]*class="primary"[^>]*>אבחון חדש<\/button>/);
-  assert.match(indexHtml, /id="rmPlanReport"[^>]*class="secondary"[^>]*>חזרה לדוח הפערים<\/button>/);
+  assert.match(indexHtml, /id="rmPlanRestart"[^>]*class="primary"[^>]*>משחק היכרות חדש<\/button>/);
+  assert.match(indexHtml, /id="rmPlanReport"[^>]*class="secondary"[^>]*>חזרה להתקדמות שלי<\/button>/);
 });
 
 test('rpAdvance activates rmPlanDoneActions and directs focus to rmPlanRestart on plan completion', () => {
