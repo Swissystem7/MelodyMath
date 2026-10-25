@@ -68,10 +68,10 @@ test('RESTORE-CUR-0-18-25: original exercises are preserved alongside replacemen
   assert.ok(g2Items.some(it => it.prompt.includes('5+5+5=☐')), 'Replacement mm-cur-18 addition exercise must be preserved');
   assert.ok(g2Items.some(it => it.prompt.includes('4 × ☐ = 20')), 'Replacement mm-cur-18 missing factor exercise must be preserved');
 
-  // mm-cur-25: both missing_addend and missing_factor versions of 70 x [] = 700 are present
+  // mm-cur-25: 70 x [] = 700 is classified as missing_factor without duplicate missing_addend
   const g3Items = exerciseTypes.GRADE_DATA['ג'].filter(it => it.topicId === 'mm-cur-25');
-  assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_addend'), 'Original mm-cur-25 missing_addend exercise must be preserved');
-  assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_factor'), 'Replacement mm-cur-25 missing_factor exercise must be preserved');
+  assert.equal(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_addend'), false, 'Duplicate mm-cur-25 missing_addend exercise must be removed');
+  assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_factor'), 'mm-cur-25 missing_factor exercise must be preserved');
 });
 
 test('progression: mm-cur-0 progresses gradually without skip-by-5 jump; skip counting is reached at mm-cur-15 (Refs #665)', () => {

@@ -99,7 +99,6 @@
       { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '23 : 5 = 4 (שארית ☐). מהי השארית?', answer: 3, hint: '5 כפול 4 שווה 20, ו־23 פחות 20 שווה 3', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '250 : 10 = ?', answer: 25, hint: 'חילוק ב־10 מוריד אפס אחד', exerciseType: 'direct' },
       { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '70 × ☐ = 700. מהו המספר החסר?', answer: 10, hint: 'כמה פעמים 70 נכנס ב־700?', exerciseType: 'missing_factor' },
-      { topicId: 'mm-cur-25', topic: 'חילוק עם שארית; כפל/חילוק ב־10, 100, 1,000', prompt: '70 × ☐ = 700. מהו המספר החסר?', answer: 10, hint: 'כמה פעמים 70 נכנס ב־700?', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-26', topic: 'שאלות השוואה כפליות ודו־שלביות', prompt: 'השוו: פי 4 מ־6 ☐ פי 3 מ־8 (כתבו <, > או =)', answer: '=', hint: '4×6=24 ו־3×8=24', exerciseType: 'compare' },
       { topicId: 'mm-cur-26', topic: 'שאלות השוואה כפליות ודו־שלביות', prompt: 'המספר 35 גדול פי 5 מהמספר ☐. מהו המספר?', answer: 7, hint: '35 לחלק ל־5', exerciseType: 'missing_addend' },
       { topicId: 'mm-cur-26', topic: 'שאלות השוואה כפליות ודו־שלביות', prompt: 'כמה הוא פי 6 מ־8?', answer: 48, hint: '6 כפול 8', exerciseType: 'direct' },
