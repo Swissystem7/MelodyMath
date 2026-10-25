@@ -132,7 +132,7 @@ test('TimesTableGroove respects locks: a locked pick is named, never sounded', (
   assert.deepEqual(TTG.pick({ unlocked: [locked] }), { instrument: 'tabla', lockedPick: null }, 'no choice: tabla');
 });
 
-test('EnsembleStudio reads and writes the one choice and keeps no instrument state', async () => {
+test('EnsembleStudio follows the one choice; a tap only previews, it is no second picker', async () => {
   const { ENSEMBLE_PRESETS, mountEnsembleStudio } = await import('../src/components/EnsembleStudio.js');
   const s = memStore({ [MY.KEY]: 'oud' });
   globalThis.MM_MY_INSTRUMENT = MY;
@@ -144,10 +144,27 @@ test('EnsembleStudio reads and writes the one choice and keeps no instrument sta
       assert.equal('played' in view, false);
       assert.match(el.innerHTML, /data-instrument="oud" aria-pressed="true"/);
       click({ target: { getAttribute: (k) => (k === 'data-instrument' ? 'piano' : null) } });
-      assert.equal(s.map.get(MY.KEY), 'piano');
-      assert.match(el.innerHTML, /data-instrument="piano" aria-pressed="true"/);
+      assert.equal(s.map.get(MY.KEY), 'oud', 'the choice lives in #myInstCard only');
     });
   } finally { delete globalThis.MM_MY_INSTRUMENT; }
+});
+
+test('kids reach EnsembleStudio in the music games tab; it mounts there and keeps times-table locks', async () => {
+  const at = html.indexOf('id="ensCard"');
+  assert.ok(at > html.indexOf('id="myInstCard"') && at < html.indexOf('<!-- #591 music games end -->'));
+  assert.ok(html.indexOf('<script type="module" src="src/components/EnsembleStudio.js"></script>') > html.indexOf('src/components/TimesTableGroove.js'));
+  assert.ok(sw.includes("'./src/components/EnsembleStudio.js'"));
+  const el = { innerHTML: '', addEventListener(t, fn) { if (t === 'click') el.onClick = fn; } };
+  const played = [];
+  Object.assign(globalThis, { MM_TIMES_TABLE_GROOVE: { UNLOCK_LIST: ['oud'] }, MM_UNLOCKS: require('../src/lib/music/unlocks.js'), playInstrumentNote: (id) => played.push(id) });
+  globalThis.document = { getElementById: (id) => (id === 'ensCard' ? el : null) };
+  try {
+    await import('../src/components/EnsembleStudio.js?entry');
+    el.onClick({ target: { getAttribute: (k) => (k === 'data-instrument' ? 'oud' : null) } });
+  } finally { ['document', 'MM_TIMES_TABLE_GROOVE', 'MM_UNLOCKS', 'playInstrumentNote'].forEach((k) => delete globalThis[k]); }
+  assert.match(el.innerHTML, /מנגנים יחד/);
+  assert.doesNotMatch(el.innerHTML, /data-my-inst|teacher|מורה/i, 'no picker and no teacher panel');
+  assert.deepEqual(played, [], 'a locked instrument is never sounded');
 });
 
 test('one source of truth: no screen reads the old key or keeps its own key', () => {

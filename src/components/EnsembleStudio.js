@@ -127,12 +127,24 @@ function my() {
   return globalThis.MM_MY_INSTRUMENT || null;
 }
 
-export function formatCrossInstrumentCard(preset, status, mine) {
+// Instruments the times table has not unlocked yet (src/lib/music/unlocks.js)
+// stay locked here too: shown with a lock, never sounded or pressed.
+function lockedIds(storage) {
+  const ttg = globalThis.MM_TIMES_TABLE_GROOVE;
+  const un = globalThis.MM_UNLOCKS;
+  if (!ttg || !un) return [];
+  const open = un.loadUnlocks(storage || globalThis.localStorage).unlocked;
+  return ttg.UNLOCK_LIST.filter(function (id) { return open.indexOf(id) < 0; });
+}
+
+export function formatCrossInstrumentCard(preset, status, mine, locked) {
   const p = preset || ENSEMBLE_PRESETS[0];
+  const lock = locked || [];
   const frac = p.fraction[0] + '/' + p.fraction[1];
   const perc = p.instruments.filter(function (id) { return PERCUSSION.indexOf(id) >= 0; });
   const rest = p.instruments.filter(function (id) { return PERCUSSION.indexOf(id) < 0; });
   const taps = p.instruments.map(function (id) {
+    if (lock.indexOf(id) >= 0) return button('data-instrument="' + escapeHtml(id) + '" data-locked="true" disabled aria-pressed="false"', '🔒 ' + escapeHtml(nameOf(id)));
     return button('data-instrument="' + escapeHtml(id) + '" aria-pressed="' + (id === mine) + '"', escapeHtml(nameOf(id)));
   }).join('');
   const answers = choices(p).map(function (n) {
@@ -143,6 +155,7 @@ export function formatCrossInstrumentCard(preset, status, mine) {
     + '<p>' + factHe(p) + ' השבר המשותף הוא ' + bdi(frac) + '.</p>'
     + '<p>הקשה: ' + escapeHtml(perc.map(nameOf).join(', ')) + '. יחד עם: ' + escapeHtml(rest.map(nameOf).join(', ')) + '.</p>'
     + '<div class="jam-row">' + taps + '</div>'
+    + '<p>מקישים כדי לשמוע. את הכלי שלכם בוחרים ב־🎻 הכלי שלי.</p>'
     + '<h3>שילוב כלים: כפולה משותפת</h3>'
     + '<p>מחזור ' + bdi(p.cycleA) + ' ומחזור ' + bdi(p.cycleB) + '. מהי ' + bdi('lcm(' + p.cycleA + ', ' + p.cycleB + ')') + '?</p>'
     + '<div class="jam-row">' + answers + '</div>'
@@ -185,7 +198,8 @@ export function mountEnsembleStudio(container, options = {}) {
 
   function render() {
     const m = my();
-    container.innerHTML = formatCrossInstrumentCard(preset, status, m ? m.getMyInstrument(opts.storage) : null);
+    const locked = opts.locked || lockedIds(opts.storage);
+    container.innerHTML = '<h3>🎶 מנגנים יחד: תזמורת קטנה</h3>' + formatCrossInstrumentCard(preset, status, m ? m.getMyInstrument(opts.storage) : null, locked);
   }
 
   function onClick(event) {
@@ -193,10 +207,8 @@ export function mountEnsembleStudio(container, options = {}) {
     if (!el || typeof el.getAttribute !== 'function') return;
     const inst = el.getAttribute('data-instrument');
     if (inst) {
-      // A tap picks the instrument for the whole app; the store's event redraws.
-      const m = my();
-      if (m) m.setMyInstrument(inst, opts.storage);
-      playNote(inst, opts.onPlay);
+      // A tap only previews the sound. The choice lives in #myInstCard alone.
+      if ((opts.locked || lockedIds(opts.storage)).indexOf(inst) < 0) playNote(inst, opts.onPlay);
       return;
     }
     const ans = el.getAttribute('data-ensemble-answer');
@@ -213,3 +225,6 @@ export function mountEnsembleStudio(container, options = {}) {
   if (m && typeof globalThis.addEventListener === 'function') globalThis.addEventListener(m.EVENT, render);
   return view;
 }
+
+// index.html loads this file as a module, after the classic music scripts.
+if (typeof document !== 'undefined' && document.getElementById('ensCard')) mountEnsembleStudio(document.getElementById('ensCard'));
