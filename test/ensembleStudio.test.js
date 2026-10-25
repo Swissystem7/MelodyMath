@@ -186,3 +186,15 @@ test('no locks (#717): no ensemble instrument is locked or disabled', async () =
   } finally { delete globalThis.MM_TIMES_TABLE_GROOVE; delete globalThis.MM_UNLOCKS; }
   assert.equal(typeof formatCrossInstrumentCard, 'function');
 });
+
+// No grade selected: the 1/2 tile stays hidden (Refs #762).
+test('with no grade selected the fraction tile is hidden', async () => {
+  const { ENSEMBLE_PRESETS, fractionOffered, mountEnsembleStudio } = await studio();
+  assert.equal(fractionOffered(null), false);
+  assert.equal(fractionOffered(undefined), false);
+  const el = { innerHTML: '', addEventListener() {} };
+  const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[0], storage: { getItem: () => null }, onPlay() {} });
+  assert.equal(view.preset.topicId === 'fractions', false);
+  assert.doesNotMatch(el.innerHTML, /\d+\/\d+|השבר/);
+  assert.match(el.innerHTML, /data-instrument="/);
+});

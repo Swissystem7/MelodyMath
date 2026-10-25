@@ -148,7 +148,7 @@ test('EnsembleStudio follows the one choice; a tap only previews, it is no secon
     withWindow(s, () => {
       let click = null;
       const el = { innerHTML: '', addEventListener(t, fn) { if (t === 'click') click = fn; } };
-      const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[1], onPlay: () => {} });
+      const view = mountEnsembleStudio(el, { preset: ENSEMBLE_PRESETS[1], grade: 'ה', onPlay: () => {} });
       assert.equal('played' in view, false);
       assert.match(el.innerHTML, /data-instrument="oud" aria-pressed="true"/);
       click({ target: { getAttribute: (k) => (k === 'data-instrument' ? 'piano' : null) } });

@@ -138,7 +138,8 @@ export const FRACTION_GRADES = ['ג', 'ד', 'ה', 'ו'];
 const YOUNG_PRESET = 'cajon-beat';
 
 export function fractionOffered(grade) {
-  return grade == null || FRACTION_GRADES.indexOf(grade) >= 0;
+  // No grade chosen yet: hide the fraction tile until we know the child is in ג׳+.
+  return grade != null && FRACTION_GRADES.indexOf(grade) >= 0;
 }
 
 export function presetForGrade(preset, grade) {
