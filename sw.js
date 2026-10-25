@@ -64,6 +64,7 @@ const ASSETS = [
   './src/lib/contact.js',
   './src/lib/offer.js',
   './src/lib/tabs.js',
+  './src/lib/adultGate.js',
   './src/lib/print.css',
   './src/lib/learnerPlanView.js',
   './src/lib/music/groove.js',

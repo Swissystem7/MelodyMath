@@ -43,6 +43,12 @@ for (const name of PAGES) {
 
 async function openTab(page, tab) {
   await page.locator('#tab-' + tab).click();
+  if (tab === 'teacherReport') {
+    // Adult gate (#737): answer the two-digit product.
+    const [a, b] = (await page.locator('#adultGateQ').textContent()).match(/\d+/g).map(Number);
+    await page.locator('#adultGateAnswer').fill(String(a * b));
+    await page.locator('#adultGateOk').click();
+  }
   await expect(page.locator('#tab-' + tab)).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#' + tab)).toBeVisible();
 }

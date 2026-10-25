@@ -24,7 +24,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#classMode,#beatMode,#firstRun{display:none!important}
   .panel{display:none!important}
-  #teacherReport.panel{display:block!important}
+  body.adult-ok #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
   #worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard{display:none!important}
   body.print-lesson #lessonCard{display:block!important}
@@ -301,6 +301,13 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <p id="beatDoneNote">המספרים האלה הם ספירה — כולל חלון שנסגר בלי תשובה. לא ציון ולא הוכחה שהקצב עוזר.</p>
   <button type="button" id="beatAgain" class="primary">סבב נוסף</button>
 </div></section>
+<div id="adultGate" class="card no-print hidden" role="group" aria-labelledby="adultGateTitle"><span class="tag">למבוגרים בלבד</span><h2 id="adultGateTitle">דוח המורה פתוח רק למבוגר</h2>
+  <label for="adultGateAnswer" id="adultGateQ">כמה זה ?</label>
+  <input id="adultGateAnswer" inputmode="numeric" autocomplete="off" aria-label="תשובה לשאלת המבוגר" aria-describedby="adultGateMsg">
+  <button type="button" id="adultGateOk" class="primary" aria-label="אישור ופתיחת דוח המורה">אישור</button>
+  <button type="button" id="adultGateCancel" class="secondary" aria-label="ביטול, חזרה לתרגול">ביטול</button>
+  <p id="adultGateMsg" class="feedback" role="status" aria-live="polite"></p>
+</div>
 <section id="teacherReport" class="panel" role="tabpanel" aria-labelledby="tab-teacherReport" hidden><div class="card" id="trialKit">
   <span class="tag">ערכת פיילוט · 4 שבועות · חינם</span>
   <h2>דף הפעלה למורה</h2>
@@ -493,6 +500,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/onboard.js"></script>
 <script src="src/lib/contact.js"></script>
 <script src="src/lib/tabs.js"></script>
+<script src="src/lib/adultGate.js"></script>
 <script src="src/lib/core.js"></script>
 <script src="src/lib/learnerPlan.js"></script>
 <script src="src/lib/pace.js"></script>
@@ -519,8 +527,15 @@ function check(){if(answered)return;if(!normalizeAnswer($('answer').value))retur
 function finish(){endTeacherSession();show('quiz',false);show('summary',true);const good=history.filter(x=>x.correct).length;const level=Math.max(...history.map(x=>exercises.find(e=>e.id===x.id).level));$('stats').innerHTML=`<div class="stat"><strong>${good}/${history.length}</strong>נכונות</div><div class="stat"><strong>${Math.round(good/history.length*100)||0}%</strong>דיוק בסבב</div><div class="stat"><strong>${level}</strong>רמה מרבית בסבב</div>`;$('summaryText').textContent='ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.';if($('again')&&typeof $('again').focus==='function')$('again').focus()}
 document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dataset.level;document.querySelectorAll('.level').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})});
 $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter'){if(!answered)check();else if($('next')&&!$('next').classList.contains('hidden'))renderExercise();else if($('finish')&&!$('finish').classList.contains('hidden'))finish()}};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true);if($('begin')&&typeof $('begin').focus==='function')$('begin').focus()};if($('quizCancel'))$('quizCancel').onclick=()=>{endTeacherSession();history=[];current=null;show('quiz',false);show('start',true);if($('begin')&&typeof $('begin').focus==='function')$('begin').focus()};
-function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
+// שער מבוגר לפני דוח המורה (#737). כל כניסה לטאב עוברת ב־activateHomeTab: לחיצה, מקלדת (tabs.js קורא ל־click) וקוד. ההדפסה מציגה את הדוח רק עם body.adult-ok.
+let adultOk=false,adultQ=null,adultTab=null;
+function askAdult(msg){adultQ=adultQuestion();$('adultGateQ').textContent=adultQ.text;$('adultGateAnswer').value='';$('adultGateMsg').textContent=msg||''}
+function openAdultGate(btn){adultTab=btn;askAdult('');show('adultGate',true);setTimeout(()=>{if(typeof $('adultGateAnswer').focus==='function')$('adultGateAnswer').focus()},0)}
+function confirmAdultGate(){const v=$('adultGateAnswer').value;if(!String(v).trim()){$('adultGateMsg').textContent='כתבו תשובה קודם.';return false}if(adultAnswerOk(adultQ,v)){adultOk=true;adultQ=null;show('adultGate',false);activateHomeTab(adultTab);return true}askAdult('לא נכון — הדוח נשאר סגור. הנה שאלה חדשה.');if(typeof $('adultGateAnswer').focus==='function')$('adultGateAnswer').focus();return false}
+function cancelAdultGate(){show('adultGate',false);adultQ=null;const cur=document.querySelector('.tabs [role="tab"][aria-selected="true"]');if(cur&&typeof cur.focus==='function')cur.focus()}
+function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;if(btn.dataset.tab==='teacherReport'&&!adultOk){openAdultGate(btn);return}adultOk=btn.dataset.tab==='teacherReport';document.body.classList.toggle('adult-ok',adultOk);show('adultGate',false);document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
+if($('adultGateOk'))$('adultGateOk').onclick=confirmAdultGate;if($('adultGateCancel'))$('adultGateCancel').onclick=cancelAdultGate;if($('adultGateAnswer'))$('adultGateAnswer').onkeydown=e=>{if(e.key==='Enter')confirmAdultGate();else if(e.key==='Escape')cancelAdultGate()};
 // playRhythmClicks מגיע מ-src/lib/sonify.js (פעימות אחרי מיומנות). מעבדת התדר הוצאה מהדף (CUT, 28.9.2026).
 let yAudioThrottle=null;
 function updateYFreq(val,play){const v=Math.max(0,Math.min(100,Math.round(Number(val)||0)));if($('y')){$('y').value=v;$('y').setAttribute('aria-valuenow',String(v))}if($('yLabel'))$('yLabel').textContent=String(v);const f=typeof yToFreq==='function'?Math.round(yToFreq(v,0,100)):370;if($('y'))$('y').setAttribute('aria-valuetext',`${v}% · ${f} Hz`);if($('freq'))$('freq').innerHTML=`<b>${f} Hz</b> · מיקום Y: ${v}%`;if(play&&typeof playFreq==='function'){if(yAudioThrottle)clearTimeout(yAudioThrottle);yAudioThrottle=setTimeout(()=>{playFreq(f,150)},30)}}
