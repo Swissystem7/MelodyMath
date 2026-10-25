@@ -83,7 +83,7 @@ test('lookups', () => {
 });
 
 test('instrument variety: each topic offers instruments from at least 2 of the 4 families (Refs #591)', () => {
-  const activeTopics = Object.keys(I.TOPICS).filter((t) => t !== 'lcm');
+  const activeTopics = Object.keys(I.TOPICS);
   activeTopics.forEach((topic) => {
     const instruments = I.forTopic(topic);
     assert.ok(instruments.length >= 2, topic + ' must offer at least 2 instruments');
