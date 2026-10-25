@@ -1,10 +1,9 @@
 'use strict';
-// #689 (Refs #665): lcmDrums restored as a primary interactive method for
-// its LCM / commutativity topic in grade ג׳ (MUL_C): repeatedBars stays the
-// first primary way from grade 2, lcmDrums comes after it as the second primary
-// way (a drum every 3 beats and a drum every 4 beats meet at 12, one circle
-// per sound), and the end-of-topic check is silent. In grades ב׳/ד׳/ה׳ lcmDrums
-// stays optional extra practice.
+// #689 (Refs #665): lcmDrums marked as an optional extra practice method
+// (EXTRA) across grades ב׳/ג׳/ד׳/ה׳ (with M2 mechanism and rissman2005 citation).
+// In grade ג׳ (MUL_C): repeatedBars stays the first primary way, accentSkip is
+// the second primary way, and lcmDrums is an EXTRA method (not main), matching
+// how other grades mark extras.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
@@ -18,28 +17,35 @@ const g5 = require('../src/lib/curriculum/grade5');
 const lcmWay = g3.music.MUL_C.find((w) => w[0] === 'lcmDrums');
 const NOTE = lcmWay[1];
 
-test('grade ג׳ MUL_C: repeatedBars from grade 2 must stay the FIRST main method; lcmDrums must not come before it', () => {
-  const primary = banks.primaryWays(g3.music.MUL_C);
-  assert.equal(primary[0][0], 'repeatedBars', 'repeatedBars must stay the first main method');
-  const repIdx = primary.findIndex((w) => w[0] === 'repeatedBars');
-  const lcmIdx = primary.findIndex((w) => w[0] === 'lcmDrums');
-  assert.ok(repIdx !== -1 && lcmIdx !== -1, 'both repeatedBars and lcmDrums must be primary ways');
-  assert.ok(repIdx < lcmIdx, 'repeatedBars must come before lcmDrums (lcmDrums must not come before it)');
-  assert.equal(primary[1][0], 'lcmDrums');
-  assert.equal(lcmWay[2], 'rissman2005');
-  assert.equal(lcmWay[3], 'R');
-  assert.equal(banks.isOptionalWay(lcmWay), false);
-  assert.equal(lcmWay[4], undefined);
-  // A primary way must use a strongly evidenced mechanism (dosage rule 1).
+test('grade ג׳ MUL_C: lcmDrums is marked as an EXTRA method (not main), matching other grades', () => {
+  const ways = g3.music.MUL_C;
+  const lcm = ways.find((w) => w[0] === 'lcmDrums');
+  assert.ok(lcm, 'lcmDrums must exist in MUL_C');
+  assert.equal(banks.isOptionalWay(lcm), true, 'lcmDrums must be marked as optional/extra');
+  assert.equal(lcm[2], 'rissman2005', 'must cite rissman2005');
+  assert.equal(lcm[3], 'R', 'evidence rating must be R');
+  assert.deepEqual(lcm[4], { optional: true });
+
+  // lcmDrums must NOT be a primary way
+  assert.ok(!banks.primaryWays(ways).some((w) => w[0] === 'lcmDrums'), 'lcmDrums must not be a primary/main method');
+
+  // repeatedBars is first and accentSkip is second
+  const primary = banks.primaryWays(ways);
+  assert.equal(primary[0][0], 'repeatedBars', 'repeatedBars must be the first main method');
+  assert.equal(primary[1][0], 'accentSkip', 'accentSkip must be the second main method');
+  assert.equal(primary.length, 2, 'MUL_C must have exactly 2 primary ways, not 3');
+
+  // lcmDrums mechanism is M2 (strongly evidenced dosage)
   assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('lcmDrums')), banks.mechanismOf('lcmDrums'));
   // The simultaneous polyrhythm activities stay in the weak mechanism.
   assert.ok(banks.MUSIC_DOSAGE.optionalOnly.includes(banks.mechanismOf('drumsMeet')));
   assert.match(NOTE, /3/);
   assert.match(NOTE, /4/);
   assert.match(NOTE, /12/);
+  assert.match(NOTE, /עיגול לכל צליל/);
 });
 
-test('grade ג׳ MUL_C: level-1 items use repeatedBars and level-2 items are solved through lcmDrums', () => {
+test('grade ג׳ MUL_C: items solve through primary ways and lcmDrums rides along as musicExtra', () => {
   const items = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MUL_C);
   assert.ok(items.length > 0);
   const level1 = items.filter((it) => it.level === 1 && it.musicNote);
@@ -50,11 +56,21 @@ test('grade ג׳ MUL_C: level-1 items use repeatedBars and level-2 items are sol
   const level2 = items.filter((it) => it.level === 2 && it.musicNote);
   assert.ok(level2.length > 0);
   level2.forEach((it) => {
-    assert.equal(it.music, 'lcmDrums', it.id);
-    assert.equal(it.musicNote, NOTE, it.id);
+    assert.equal(it.music, 'accentSkip', it.id);
   });
-  // lcmDrums is the way itself here, never an optional extra riding along.
-  items.forEach((it) => assert.ok(!(it.musicExtra || []).some((x) => x.music === 'lcmDrums'), it.id));
+  // lcmDrums is not a primary way on any item
+  items.forEach((it) => {
+    assert.notEqual(it.music, 'lcmDrums', it.id);
+  });
+  // lcmDrums rides along as an optional extra
+  const withExtra = items.filter((it) => (it.musicExtra || []).some((x) => x.music === 'lcmDrums'));
+  assert.ok(withExtra.length > 0, 'MUL_C items must have lcmDrums in musicExtra');
+  withExtra.forEach((it) => {
+    const extra = it.musicExtra.find((x) => x.music === 'lcmDrums');
+    assert.equal(extra.src, 'rissman2005');
+    assert.equal(extra.ev, 'R');
+    assert.equal(extra.note, NOTE);
+  });
 });
 
 test('drums every 3 and every 4 beats meet first at 12, one circle per sound', () => {
@@ -81,14 +97,15 @@ test('the grade ה׳ drum-meeting activities still agree with lcmOf', () => {
   assert.equal(Number(target.answer), 12);
 });
 
-test('grades ב׳, ד׳ and ה׳ keep lcmDrums as optional extra practice only', () => {
-  [[g2, 'MUL_B'], [g4, 'MUL_DIV_VERT'], [g5, 'PRIME_FACTOR']].forEach(([file, key]) => {
+test('grades ב׳, ג׳, ד׳ and ה׳ keep lcmDrums as optional extra practice only', () => {
+  [[g2, 'MUL_B'], [g3, 'MUL_C'], [g4, 'MUL_DIV_VERT'], [g5, 'PRIME_FACTOR']].forEach(([file, key]) => {
     const ways = file.music[key];
     const lcm = ways.find((w) => w[0] === 'lcmDrums');
     assert.ok(lcm, file.grade + ' ' + key);
     assert.equal(banks.isOptionalWay(lcm), true, file.grade + ' ' + key);
     assert.equal(lcm[2], 'rissman2005', file.grade + ' ' + key);
     assert.equal(lcm[3], 'R', file.grade + ' ' + key);
+    assert.deepEqual(lcm[4], { optional: true }, file.grade + ' ' + key);
     assert.ok(!banks.primaryWays(ways).some((w) => w[0] === 'lcmDrums'), file.grade + ' ' + key);
   });
 });
