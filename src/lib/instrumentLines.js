@@ -26,6 +26,33 @@
 
   const MECHANISM = { addition: 'M1', multiplication: 'M2', fractions: 'M3' };
 
+  // Peer-reviewed studies behind each primary way, same entries as
+  // EVIDENCE_SOURCES / grade6.js sources so the app shows one citation.
+  const SOURCES = {
+    M1: [
+      { id: 'mcdonel2015', authors: 'McDonel, J. S.', year: 2015,
+        title: 'Exploring learning connections between music and mathematics in early childhood',
+        venue: 'Bulletin of the Council for Research in Music Education, 203',
+        url: 'https://doi.org/10.5406/bulcouresmusedu.203.0045' },
+    ],
+    M2: [
+      { id: 'ribeiro2020', authors: 'Ribeiro, F. S., & Santos, F. H.', year: 2020,
+        title: 'Persistent effects of musical training on mathematical skills of children with developmental dyscalculia',
+        venue: 'Frontiers in Psychology',
+        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/' },
+    ],
+    M3: [
+      { id: 'courey2012', authors: 'Courey, S. J., Balogh, E., Siker, J. R., & Paik, J.', year: 2012,
+        title: 'Academic Music: music instruction to engage third-grade students in learning basic fraction concepts',
+        venue: 'Educational Studies in Mathematics, 81(2)',
+        url: 'https://doi.org/10.1007/s10649-012-9395-9' },
+      { id: 'azaryahu2020', authors: 'Azaryahu, L., Courey, S. J., Elkoshi, R., & Adi-Japha, E.', year: 2020,
+        title: '\'MusiMath\' and \'Academic Music\' – two music-based intervention programs for fractions learning in fourth grade students',
+        venue: 'Developmental Science, 23(4)',
+        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/' },
+    ],
+  };
+
   const LINES = {
     addition: {
       percussion: {
@@ -121,5 +148,29 @@
     return entry.instruments.map(I.instrumentById).filter(Boolean);
   }
 
-  return { FAMILIES, PARAMS, MECHANISM, LINES, lineFor, instrumentsFor };
+  // The same fact with no music at all, to check the child can do it unaided.
+  // #687's engine is not on master yet, so this takes the same topic and
+  // params as lineFor and works the answer out itself.
+  const NO_MUSIC = {
+    addition: { ask: 'כמה זה {a} + {b}?', answer: (p) => p.a + p.b },
+    multiplication: { ask: 'כמה זה {groups} × {size}?', answer: (p) => p.groups * p.size },
+    fractions: {
+      ask: 'שלם מחולק ל-{den} חלקים שווים. לוקחים {num} מהם. איזה חלק מהשלם לקחנו?',
+      answer: (p) => p.num + '/' + p.den,
+    },
+  };
+  const INPUTS = { addition: ['a', 'b'], multiplication: ['groups', 'size'], fractions: ['num', 'den'] };
+
+  function noMusicCheck(topic, params) {
+    const entry = NO_MUSIC[topic];
+    if (!entry) return null;
+    const p = params || {};
+    INPUTS[topic].forEach(function (k) {
+      if (!Number.isInteger(p[k]) || p[k] < 0) throw new Error('bad param ' + k);
+    });
+    if (topic === 'fractions' && (p.den < 1 || p.num > p.den)) throw new Error('bad fraction');
+    return { ask: fill(entry.ask, p), answer: entry.answer(p) };
+  }
+
+  return { FAMILIES, PARAMS, MECHANISM, SOURCES, LINES, lineFor, instrumentsFor, noMusicCheck };
 });
