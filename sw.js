@@ -68,7 +68,6 @@ const ASSETS = [
   './src/lib/learnerPlanView.js',
   './src/lib/music/groove.js',
   './src/lib/music/streak.js',
-  './src/lib/music/unlocks.js',
   './src/components/TimesTableGroove.js',
   './src/lib/instrumentVoices.js',
   './src/lib/instruments.js',

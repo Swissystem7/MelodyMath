@@ -2,7 +2,6 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const groove = require('../src/lib/music/groove');
 const streak = require('../src/lib/music/streak');
-const unlocks = require('../src/lib/music/unlocks');
 
 function memoryStorage() {
   const m = new Map();
@@ -82,42 +81,3 @@ test('the streak survives a reload through the injected storage', () => {
   assert.deepEqual(streak.loadStreak(null), streak.initialStreak());
 });
 
-test('completing a column unlocks the next instrument from the given list', () => {
-  const list = ['tabla', 'djembe'];
-  let s = unlocks.initialUnlocks();
-  let r;
-  for (let m = 1; m <= 9; m++) {
-    r = unlocks.recordCorrect(s, 4, m, list); s = r.state;
-    assert.equal(r.unlocked, null);
-  }
-  r = unlocks.recordCorrect(s, 4, 9, list); s = r.state; // repeat does not count twice
-  assert.equal(r.columnCompleted, null);
-  r = unlocks.recordCorrect(s, 4, 10, list); s = r.state;
-  assert.equal(r.columnCompleted, 4);
-  assert.equal(r.unlocked, 'tabla');
-  r = unlocks.recordCorrect(s, 4, 10, list);
-  assert.equal(r.unlocked, null); // a column unlocks once
-  for (let m = 1; m <= 10; m++) s = unlocks.recordCorrect(s, 3, m, list).state;
-  assert.deepEqual(s.unlocked, ['tabla', 'djembe']);
-  for (let m = 1; m <= 10; m++) r = unlocks.recordCorrect(s, 5, m, list);
-  assert.equal(r.unlocked, null); // nothing left to unlock
-});
-
-test('an unlockable instrument has a source or TODO', () => {
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'gamelan', source: 'TODO' }), true);
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'tabla', source: 'https://example.org/x' }), true);
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'oud' }), false);
-  assert.equal(unlocks.hasSourceOrTodo({ instrument: 'oud', source: ' ' }), false);
-  assert.throws(() => unlocks.recordCorrect(null, 2, 1, [{ instrument: 'oud' }]), /source/);
-  const r = unlocks.recordCorrect(null, 2, 1, [{ instrument: 'gamelan', source: 'TODO' }]);
-  assert.deepEqual(r.state.solved, { 2: [1] });
-});
-
-test('unlocks survive a reload through the injected storage', () => {
-  const store = memoryStorage();
-  let s = unlocks.initialUnlocks();
-  for (let m = 1; m <= 10; m++) s = unlocks.recordCorrect(s, 2, m, ['kalimba']).state;
-  unlocks.saveUnlocks(store, s);
-  assert.deepEqual(unlocks.loadUnlocks(store).unlocked, ['kalimba']);
-  assert.deepEqual(unlocks.loadUnlocks(memoryStorage()), unlocks.initialUnlocks());
-});

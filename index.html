@@ -1046,12 +1046,10 @@ function noteMetro(correct, topic){
   const won=typeof streakReward==='function'&&streakReward(topic,correct);
   // A wrong answer gets its own soft falling step; a right one climbs with the streak.
   if(!correct && typeof playTap==='function') playTap('wrong');
-  // #591 A.4: the streak melody grows a note per right answer; right answers unlock strip instruments.
+  // #591 A.4: the streak melody grows a note per right answer; right answers are counted; nothing is locked (#717).
   else if(correct && typeof playStreakMelody==='function'){
     if(!won) playStreakMelody(metroStreak + 1);
-    const u=typeof recordCorrect==='function'?recordCorrect():null;
-    // A strip instrument unlocked on the same answer waits until the phrase is over.
-    if(u&&u.unlocked&&typeof announceUnlock==='function'){ if(won) setTimeout(function(){ announceUnlock(u.unlocked); },2600); else announceUnlock(u.unlocked); }
+    if(typeof recordCorrect==='function') recordCorrect();
   }
   else if(typeof playHarmonicReward==='function'){
     playHarmonicReward(correct ? metroStreak + 1 : 0);
@@ -2781,6 +2779,6 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 <script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/components/jamKit.js"></script>
 <script src="src/lib/music/fractionBar.js"></script><script src="src/components/FractionBarPad.js"></script>
 <script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
-<script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/lib/music/unlocks.js"></script><script src="src/components/TimesTableGroove.js"></script>
+<script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/components/TimesTableGroove.js"></script>
 <!-- #591 music game scripts end -->
 </body></html>

@@ -5,8 +5,8 @@
 // The groove stops before the k-th accent and the child completes factor × k
 // by touch. Every third question is the same groove read as division (grade
 // ד׳): how many accented groups fill the beats. One method only: M2.
-// Tabla is the default timbre; a completed column unlocks another
-// instrument (timbre only). Every 3 right answers in a row add a layer to
+// Tabla is the default timbre; every M2 instrument is there from the
+// start (#717: no unlocks, timbre only). Every 3 right answers in a row add a layer to
 // the groove (bass, melody, harmony); a wrong answer restarts the count,
 // keeps the layers and plays no punishment sound. With the music switch off
 // the same question is a plain skip-counting row with no sound.
@@ -21,16 +21,15 @@
 
   const G = root.MM_GROOVE || require('../lib/music/groove.js');
   const STREAK = root.MM_STREAK || require('../lib/music/streak.js');
-  const UNLOCKS = root.MM_UNLOCKS || require('../lib/music/unlocks.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
   const GAME = 'timesTableGroove';
   const FACTORS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   const BPM = 100;
-  // Timbres the columns unlock, in order; tabla is there from the start.
+  // Tabla first; all the other M2 timbres are open from the start (#717).
   const START_INSTRUMENT = 'tabla';
   // Only instruments whose primary way for multiplication is M2 (dosage rule 4).
   const INST = typeof root.forTopic === 'function' ? root : require('../lib/instruments.js');
-  const UNLOCK_LIST = INST.forTopic('multiplication').map(function (x) { return x.id; }).filter(function (id) { return id !== START_INSTRUMENT; });
+  const INSTRUMENTS = INST.forTopic('multiplication').map(function (x) { return x.id; }).filter(function (id) { return id !== START_INSTRUMENT; });
   const LAYER_HE = { bass: 'בס', melody: 'מנגינה', harmony: 'הרמוניה' };
   const PENTA = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 783.99, 880];
 
@@ -63,7 +62,7 @@
     const factor = FACTORS.indexOf(o.factor) >= 0 ? o.factor : 4;
     return {
       factor: factor, n: o.n || 0, q: question(factor, o.n || 0), showMusic: o.showMusic !== false,
-      streak: o.streak || STREAK.initialStreak(), unlocks: o.unlocks || UNLOCKS.initialUnlocks(),
+      streak: o.streak || STREAK.initialStreak(),
       instrument: o.instrument || START_INSTRUMENT, status: 'asking', message: '', sound: null,
     };
   }
@@ -77,15 +76,9 @@
       const hint = q.division ? 'ספרו את הפעמות המודגשות: כל אחת סוגרת קבוצה של ' + q.factor + '.' : 'ספרו בדילוגים של ' + q.factor + ' עד הפעמה המודגשת ה־' + q.k + '.';
       return Object.assign({}, state, { streak: r.state, status: 'retry', message: 'עוד לא. ' + hint, sound: null });
     }
-    let unlocks = state.unlocks;
     let message = (q.division ? q.answer + ' קבוצות. ' : q.factor + ' × ' + q.k + ' = ' + q.answer + '. ') + 'נכון!';
-    if (!q.division) {
-      const u = UNLOCKS.recordCorrect(unlocks, q.factor, q.k, UNLOCK_LIST.map(function (id) { return { instrument: id, source: JAM.instrument(id).source || 'TODO' }; }));
-      unlocks = u.state;
-      if (u.unlocked) message += ' השלמתם את עמודת ×' + u.columnCompleted + ': נפתח כלי חדש, ' + JAM.instrument(u.unlocked).he + '.';
-    }
     if (r.layerAdded) message += ' נוספה שכבה לשיר: ' + LAYER_HE[r.layerAdded] + '.';
-    return Object.assign({}, state, { streak: r.state, unlocks: unlocks, status: 'right', message: message, sound: r.layerAdded ? 'layer' : 'right' });
+    return Object.assign({}, state, { streak: r.state, status: 'right', message: message, sound: r.layerAdded ? 'layer' : 'right' });
   }
 
   function next(state, factor) {
@@ -132,7 +125,7 @@
     const opts = choices(q).map(function (c) {
       return '<button type="button" class="jam-pad" data-act="answer" data-value="' + c + '"' + (on ? ' data-tap="' + e(inst.voice) + '"' : '') + '>' + c + '</button>';
     }).join('');
-    const owned = [START_INSTRUMENT].concat(state.unlocks.unlocked);
+    const owned = [START_INSTRUMENT].concat(INSTRUMENTS);
     const instRow = on ? '<div class="jam-free" role="group" aria-label="כלים">' + owned.map(function (id) {
       const x = JAM.instrument(id);
       return '<button type="button" class="jam-pad" data-act="instrument" data-inst="' + e(id) + '" data-tap="' + e(x.voice) + '" aria-pressed="' + (id === state.instrument) + '">' + e(x.he) + '</button>';
@@ -152,7 +145,7 @@
 
   function mount(el) {
     const store = root.localStorage;
-    let state = createState({ showMusic: JAM.loadShowMusic(GAME), streak: STREAK.loadStreak(store), unlocks: UNLOCKS.loadUnlocks(store) });
+    let state = createState({ showMusic: JAM.loadShowMusic(GAME), streak: STREAK.loadStreak(store) });
     let playing = null;
     JAM.registerTapVoices();
     function stop() { if (playing) playing.stop(); playing = null; }
@@ -178,7 +171,6 @@
       if (act === 'answer') {
         state = answer(state, b.getAttribute('data-value'));
         STREAK.saveStreak(store, state.streak);
-        UNLOCKS.saveUnlocks(store, state.unlocks);
       } else if (act === 'factor') state = next(state, Number(b.getAttribute('data-factor')));
       else if (act === 'next') state = next(state);
       else if (act === 'instrument') state = Object.assign({}, state, { instrument: b.getAttribute('data-inst') });
@@ -192,5 +184,5 @@
     return { get state() { return state; } };
   }
 
-  return { GAME: GAME, FACTORS: FACTORS, UNLOCK_LIST: UNLOCK_LIST, question: question, choices: choices, createState: createState, answer: answer, next: next, groovePlan: groovePlan, renderHtml: renderHtml, mount: mount };
+  return { GAME: GAME, FACTORS: FACTORS, INSTRUMENTS: INSTRUMENTS, question: question, choices: choices, createState: createState, answer: answer, next: next, groovePlan: groovePlan, renderHtml: renderHtml, mount: mount };
 });

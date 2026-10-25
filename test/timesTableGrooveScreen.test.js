@@ -44,16 +44,22 @@ test('a right answer to 4 × 7, three in a row add a layer, a wrong one keeps th
   assert.match(wrong.message, /^עוד לא\./);
 });
 
-test('completing a column (×1 to ×10) unlocks an M2 instrument: timbre only, with a source or TODO', () => {
-  let s = TTG.createState({ factor: 3 });
-  for (let i = 0; i < 30 && !s.unlocks.unlocked.length; i++) s = TTG.answer(TTG.next(s), TTG.next(s).q.answer);
-  assert.deepEqual(s.unlocks.completed, ['3']);
-  assert.equal(s.unlocks.unlocked.length, 1);
-  const x = INST.instrumentById(s.unlocks.unlocked[0]);
-  assert.equal(x.mechanism, 'M2', 'an unlocked instrument keeps the method');
-  assert.ok(x.source === 'TODO' || /^https:/.test(x.source));
-  assert.match(s.message, /נפתח כלי חדש/);
-  TTG.UNLOCK_LIST.forEach((id) => assert.ok(INST.forTopic('multiplication').some((y) => y.id === id), id));
+test('#717: every M2 instrument is available from the start, with no unlock state', () => {
+  const s = TTG.createState({ factor: 3 });
+  assert.equal(s.unlocks, undefined, 'no unlock state');
+  assert.equal(TTG.UNLOCK_LIST, undefined);
+  const html0 = TTG.renderHtml(s);
+  const m2 = INST.forTopic('multiplication').map((x) => x.id);
+  assert.ok(m2.length >= 2);
+  m2.forEach((id) => {
+    assert.ok(TTG.INSTRUMENTS.includes(id) || id === 'tabla', id);
+    assert.ok(html0.includes('data-inst="' + id + '"'), id + ' selectable with zero answers');
+  });
+  let t = s;
+  for (let i = 0; i < 30; i++) t = TTG.answer(TTG.next(t), TTG.next(t).q.answer);
+  assert.doesNotMatch(t.message, /נפתח כלי/);
+  assert.ok(!fs.existsSync(path.join(__dirname, '..', 'src/lib/music/unlocks.js')), 'unlocks.js removed');
+  assert.ok(!sw.includes('unlocks.js'), 'not precached');
 });
 
 test('the groove plan: a click per beat, the instrument on accents, one more voice per layer', () => {
@@ -97,7 +103,7 @@ test('mount(): the streak survives a reload through localStorage', () => {
 test('index.html mounts the groove card in the music-games panel, scripts in order and precached', () => {
   assert.match(html, /<section id="musicGames" [^>]*>[\s\S]*id="ttgCard"[\s\S]*<!-- #591 music games end -->/);
   const at = (src) => html.indexOf('<script src="' + src + '"></script>');
-  ['src/lib/music/groove.js', 'src/lib/music/streak.js', 'src/lib/music/unlocks.js'].forEach((s) => {
+  ['src/lib/music/groove.js', 'src/lib/music/streak.js'].forEach((s) => {
     assert.ok(at(s) > 0 && at(s) < at('src/components/TimesTableGroove.js'), s);
     assert.ok(sw.includes("'./" + s + "'"), s + ' precached');
   });
