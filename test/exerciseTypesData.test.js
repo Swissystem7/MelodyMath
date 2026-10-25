@@ -53,10 +53,14 @@ test('classifyExerciseType classifies prompts accurately', () => {
 });
 
 test('RESTORE-CUR-0-18-25: original exercises are preserved alongside replacements (Refs #665)', () => {
-  // mm-cur-0: both skip-5 number-line and tens number-line are present
+  // mm-cur-0: progresses gradually without skip-5 jump; tens number-line is preserved
   const g1Items = exerciseTypes.GRADE_DATA['א'].filter(it => it.topicId === 'mm-cur-0');
-  assert.ok(g1Items.some(it => it.prompt.includes('דילוגים של 5')), 'Original mm-cur-0 skip-5 exercise must be preserved');
+  assert.equal(g1Items.some(it => it.prompt.includes('דילוגים של 5')), false, 'mm-cur-0 must not have skip-5 jump');
   assert.ok(g1Items.some(it => it.prompt.includes('ספירה קדימה בעשרות')), 'Replacement mm-cur-0 tens exercise must be preserved');
+
+  // mm-cur-15: original skip-5 exercise preserved where kids reach skip counting
+  const g2Cur15 = exerciseTypes.GRADE_DATA['ב'].filter(it => it.topicId === 'mm-cur-15');
+  assert.ok(g2Cur15.some(it => it.prompt.includes('בספירה קדימה מ־10 בדילוגים של 5')), 'Original skip-5 exercise must be preserved in mm-cur-15');
 
   // mm-cur-18: both original equilateral triangle 15/3 and perimeter addition/multiplication are present
   const g2Items = exerciseTypes.GRADE_DATA['ב'].filter(it => it.topicId === 'mm-cur-18');
@@ -68,4 +72,18 @@ test('RESTORE-CUR-0-18-25: original exercises are preserved alongside replacemen
   const g3Items = exerciseTypes.GRADE_DATA['ג'].filter(it => it.topicId === 'mm-cur-25');
   assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_addend'), 'Original mm-cur-25 missing_addend exercise must be preserved');
   assert.ok(g3Items.some(it => it.prompt.includes('70 × ☐ = 700') && it.exerciseType === 'missing_factor'), 'Replacement mm-cur-25 missing_factor exercise must be preserved');
+});
+
+test('progression: mm-cur-0 progresses gradually without skip-by-5 jump; skip counting is reached at mm-cur-15 (Refs #665)', () => {
+  const g1Cur0 = exerciseTypes.GRADE_DATA['א'].filter(it => it.topicId === 'mm-cur-0');
+  // mm-cur-0 progresses gradually (step of 1 and tens), no jump by 5 before kids reach it
+  assert.equal(g1Cur0.some(it => it.prompt.includes('דילוגים של 5')), false, 'mm-cur-0 must not have skip-by-5 jump');
+  assert.equal(exerciseTypes.GRADE_DATA['א'].some(it => it.prompt.includes('דילוגים של 5')), false, 'Grade א must not have skip-counting by 5');
+  assert.ok(g1Cur0.some(it => it.prompt.includes('48, 49')), 'mm-cur-0 includes gradual step-of-1 counting');
+  assert.ok(g1Cur0.some(it => it.prompt.includes('ספירה קדימה בעשרות')), 'mm-cur-0 includes tens counting');
+
+  // Skip counting is introduced when kids reach mm-cur-15 in Grade ב
+  const g2Cur15 = exerciseTypes.GRADE_DATA['ב'].filter(it => it.topicId === 'mm-cur-15');
+  assert.ok(g2Cur15.some(it => it.prompt.includes('בספירה קדימה מ־10 בדילוגים של 5')), 'Preserves skip-5 prompt in mm-cur-15');
+  assert.ok(g2Cur15.some(it => it.prompt.includes('בספירה בדילוגים של 5: 5, 10, 15')), 'Preserves gradual skip-5 prompt in mm-cur-15');
 });
