@@ -136,8 +136,10 @@
       return '<span class="pattern-item" style="display:inline-block;padding:8px 12px;margin:4px;border-radius:12px;background:' + (isLast ? '#fef2f2;border:2px dashed var(--pink);' : '#f5f3ff;border:2px solid var(--purple);') + ';font-weight:bold;font-size:1.15rem;">' + (isLast ? '❓' : p) + '</span>';
     }).join(' ➔ ');
 
-    const choiceButtons = (ex.choices || []).map(function (c) {
-      return '<button type="button" class="secondary pattern-choice-btn" data-tap="metalBell" data-choice="' + c + '" style="min-width:44px;min-height:44px;padding:6px 16px;margin:4px;font-size:1.1rem;">' + c + '</button>';
+    const noteFreqs = { 'דו': 261.63, 'רה': 293.66, 'מי': 329.63, 'פה': 349.23, 'סול': 392.00, 'לה': 440.00, 'סי': 493.88 };
+    const choiceButtons = (ex.choices || []).map(function (c, idx) {
+      const hz = noteFreqs[c] || (261.63 * Math.pow(1.15, idx));
+      return '<button type="button" class="secondary pattern-choice-btn" data-tap="metalBell" data-step="' + idx + '" data-hz="' + hz + '" data-choice="' + c + '" style="min-width:44px;min-height:44px;padding:6px 16px;margin:4px;font-size:1.1rem;">' + c + '</button>';
     }).join('');
 
     wrapper.innerHTML = '<div class="pattern-sequence" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px;">' + visual + '</div>' +
