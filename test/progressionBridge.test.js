@@ -49,3 +49,24 @@ test('bridgeForLink returns null for invalid or non-existent links', () => {
   assert.equal(prog.bridgeForLink('mm-cur-0', 'mm-cur-999'), null);
   assert.equal(prog.bridgeForLink('unknown', 'unknown'), null);
 });
+
+
+test('every bridge exercise prompt integrates the prerequisite musical mechanism and terms', () => {
+  const musicalKeywords = [
+    'פעימ', 'צליל', 'מקצב', 'תוף', 'תיב', 'סולם',
+    'קצב', 'טמפו', 'מנגנ', 'נגינ', 'שיר', 'אקורד',
+    'הקש', 'נקיש', 'תווי', 'אוקטב'
+  ];
+
+  for (const bridge of Object.values(bridges.BRIDGES)) {
+    const hasMusic = musicalKeywords.some(keyword => bridge.prompt.includes(keyword));
+    assert.ok(
+      hasMusic,
+      `Bridge ${bridge.from} -> ${bridge.to} prompt must include musical terminology: "${bridge.prompt}"`
+    );
+    assert.ok(
+      typeof bridge.mechanism === 'string' && bridge.mechanism.length > 0,
+      `Bridge ${bridge.from} -> ${bridge.to} must specify the musical mechanism`
+    );
+  }
+});
