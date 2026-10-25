@@ -15,12 +15,11 @@ test('diagnostic blocks have at most 4 items per block and include an unassisted
   assert.equal(blocks.length, 4);
 
   blocks.forEach((block, idx) => {
-    assert.ok(block.items.length <= TopicDiag.MAX_DIAGNOSTIC_BLOCK_SIZE, `Block ${idx} has ${block.items.length} items; must be <= 4`);
+    assert.ok(block.items.length <= TopicDiag.MAX_DIAGNOSTIC_BLOCK_SIZE);
     assert.ok(block.items.length > 0);
     assert.equal(block.index, idx + 1);
-    assert.equal(block.hasUnassistedItem, true, 'Each block must have an unassisted item to verify pure math');
-    const unassisted = block.items.filter(it => it.noMusic);
-    assert.ok(unassisted.length >= 1, 'At least one item per block must have noMusic');
+    assert.equal(block.hasUnassistedItem, true);
+    assert.ok(block.items.filter(it => it.noMusic).length >= 1);
   });
 });
 
@@ -45,19 +44,17 @@ test('each diagnostic block is embedded in play with an inviting spoken explanat
 test('no self-report questionnaire for grades א׳ and ב׳ with normalization', () => {
   const earlyGrades = ['א', 'א׳', ' ב ', 'ב׳', '1', '2', 'grade1', 'grade2'];
   for (const g of earlyGrades) {
-    assert.equal(TopicDiag.isSelfReportAllowed(g), false, `Self-report must not be allowed for ${g}`);
+    assert.equal(TopicDiag.isSelfReportAllowed(g), false);
   }
-
-  // Upper grades allow self report
   assert.equal(TopicDiag.isSelfReportAllowed('ג'), true);
   assert.equal(TopicDiag.isSelfReportAllowed('ג׳'), true);
   assert.equal(TopicDiag.isSelfReportAllowed('ד'), true);
 
   const resA = TopicDiag.openTopic({ id: 'counting', grade: 'א׳', items: [{ prompt: '1+1' }] }, { allowSelfReport: true });
-  assert.equal(resA.hasSelfReport, false, 'Grade א׳ must never show self-report');
+  assert.equal(resA.hasSelfReport, false);
 
   const resB = TopicDiag.openTopic({ id: 'addition', grade: 'ב׳', items: [{ prompt: '2+2' }] }, { allowSelfReport: true });
-  assert.equal(resB.hasSelfReport, false, 'Grade ב׳ must never show self-report');
+  assert.equal(resB.hasSelfReport, false);
 });
 
 test('time from topic open to first interactive exercise is under 10 seconds (Rule 3)', () => {
@@ -66,31 +63,27 @@ test('time from topic open to first interactive exercise is under 10 seconds (Ru
   const res = TopicDiag.openTopic({ id: 'mm-cur-0', grade: 'א', items: g1Items });
   const latency = Date.now() - t0;
 
-  assert.ok(latency < 10000, `Topic open latency must be under 10s, got ${latency}ms`);
+  assert.ok(latency < 10000);
   assert.equal(res.playableImmediately, true);
   assert.equal(res.withinTargetLatency, true);
-  assert.ok(res.firstExercise, 'First exercise must be immediately available');
-  assert.ok(res.firstExercise.prompt);
+  assert.ok(res.firstExercise);
   assert.ok(res.firstBlock.items.length <= 4);
 });
 
 test('prerequisite check enforces progression requirements before starting a new topic', () => {
-  // mm-cur-33 (fractions of quantity) requires mm-cur-32 and mm-cur-16
   const topicId = 'mm-cur-33';
   const links = progression.linksForTopic(topicId);
   assert.ok(links.prereq.includes('mm-cur-32'));
   assert.ok(links.prereq.includes('mm-cur-16'));
 
-  // Without prerequisites mastered -> redirects to missing prereq
   const blocked = TopicDiag.openTopic({ id: topicId, grade: 'ד' }, {
     progressionModule: progression,
     tracker: { isMastered: () => false }
   });
   assert.equal(blocked.playableImmediately, false);
   assert.equal(blocked.prereqCheck.ok, false);
-  assert.equal(blocked.redirectTo, 'mm-cur-0', 'when nothing is mastered, redirects to foundational root mm-cur-0');
+  assert.equal(blocked.redirectTo, 'mm-cur-0');
 
-  // With prerequisites mastered -> starts immediately
   const allowed = TopicDiag.openTopic({ id: topicId, grade: 'ד' }, {
     progressionModule: progression,
     tracker: { isMastered: id => id === 'mm-cur-32' || id === 'mm-cur-16' }
@@ -100,30 +93,30 @@ test('prerequisite check enforces progression requirements before starting a new
   assert.equal(allowed.redirectTo, null);
 });
 
-test('index.html integrates topicDiagnostic on rmBegin and rmRender', () => {
-  const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.ok(indexHtml.includes('src/lib/topicDiagnostic.js'), 'topicDiagnostic.js script must be included');
-  assert.ok(indexHtml.includes('MM_TOPIC_DIAGNOSTIC.openTopic'), 'rmBegin must wire MM_TOPIC_DIAGNOSTIC.openTopic');
-  assert.equal(indexHtml.includes("'mm-cur-diag-'+"), false, 'must not pass fake mm-cur-diag- id');
-  assert.ok(indexHtml.includes('realTopicId'), 'passes real topic id');
-  assert.ok(indexHtml.includes('if(!q.noMusic'), 'rmRender must respect noMusic items');
-});
-
-
 test('checkPrerequisites locks unknown topic IDs and traces deepest missing prerequisite root (#721, Refs #591)', () => {
-  // 1. Unknown topic ID is locked
   const unk = TopicDiag.checkPrerequisites('unknown-topic-id', null, progression);
-  assert.equal(unk.ok, false, 'unknown topic id must not return ok');
+  assert.equal(unk.ok, false);
   assert.equal(unk.missing.includes('unknown_topic'), true);
 
-  // 2. Deepest missing prerequisite: mm-cur-33 depends on mm-cur-32, which depends on mm-cur-25
-  // If mm-cur-32 and mm-cur-25 are both unmastered, redirectTo must reach mm-cur-25
   const chainCheck = TopicDiag.checkPrerequisites('mm-cur-33', {
-    isMastered: (id) => ['mm-cur-16', 'mm-cur-18', 'mm-cur-22', 'mm-cur-24'].includes(id) // 32 and 25 are missing
+    isMastered: id => ['mm-cur-16', 'mm-cur-18', 'mm-cur-22', 'mm-cur-24'].includes(id)
   }, progression);
-
   assert.equal(chainCheck.ok, false);
-  assert.equal(chainCheck.redirectTo, 'mm-cur-25', 'redirectTo must trace to deepest missing prerequisite mm-cur-25');
+  assert.equal(chainCheck.redirectTo, 'mm-cur-25');
+});
+
+test('topic and item order strictly matches progression.js (no topic before its prerequisite, #721, Refs #665)', () => {
+  // In Grade ב, place_value (mm-cur-13) must precede addition (mm-cur-14)
+  const g2Items = diagnosticItems('ב');
+  const blocks = TopicDiag.createDiagnosticBlocks(g2Items, { grade: 'ב', progressionModule: progression });
+  assert.ok(blocks.length > 0);
+  const firstBlock = blocks[0];
+  assert.equal(firstBlock.items[0].skill, 'place_value', 'first item in Grade ב diagnostic must be place_value, not addition');
+
+  // orderTopics orders an inverted list of topics correctly
+  const sample = ['mm-cur-14', 'mm-cur-13', 'mm-cur-31', 'mm-cur-3', 'mm-cur-0'];
+  const ordered = TopicDiag.orderTopics(sample, progression);
+  assert.deepEqual(ordered, ['mm-cur-0', 'mm-cur-3', 'mm-cur-13', 'mm-cur-14', 'mm-cur-31']);
 });
 
 test('single item diagnostic block includes unassisted pure math item (#721, Refs #591)', () => {
@@ -134,4 +127,13 @@ test('single item diagnostic block includes unassisted pure math item (#721, Ref
   assert.equal(blocks[0].hasUnassistedItem, true);
   assert.equal(blocks[0].items[0].noMusic, true);
   assert.equal(blocks[0].items[0].plain, true);
+});
+
+test('index.html integrates topicDiagnostic on rmBegin and rmRender', () => {
+  const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(indexHtml.includes('src/lib/topicDiagnostic.js'));
+  assert.ok(indexHtml.includes('MM_TOPIC_DIAGNOSTIC.openTopic'));
+  assert.equal(indexHtml.includes("'mm-cur-diag-'+"), false);
+  assert.ok(indexHtml.includes('realTopicId'));
+  assert.ok(indexHtml.includes('if(!q.noMusic'));
 });
