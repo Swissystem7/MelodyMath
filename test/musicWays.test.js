@@ -235,3 +235,38 @@ test('#751 batch 3: grade ג׳ topics keep one main way, the others stay as EXTR
     items.forEach((it) => assert.equal(it.music, main, it.id));
   });
 });
+
+test('#751 batch 4: grade ד׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
+  const WAYS = {
+    QUAD_SORT: ['quadMotif', 'oppositeEcho', 'mirrorPattern'],
+    BOX: ['faceEdgeGroups', 'layerCount', 'cubeSameGroups'],
+    UNITS: ['metreHundredGroups', 'thousandGroups', 'piecesPerUnit'],
+    CALENDAR: ['weekBars', 'dayHourGroups', 'weeksThenDays'],
+    BARCHART: ['columnHeldNote', 'notesRatioCompare', 'barChartMelody'],
+    TABLE: ['rowCellGroups', 'twoCellsJoin', 'bigCellGap'],
+    NUM_MILLION: ['millionAccentLevels', 'compareTopAccent'],
+    ADD_SUB_MILLION: ['carryTenUp', 'borrowTenDown', 'roundThousandAccent'],
+    MUL_DIV_VERT: ['repeatedBars', 'phraseShare'],
+    ORDER_OPS: ['barCount', 'groupsBeforeSingles', 'bracketGroup'],
+    EQ_INEQ: ['balanceBars', 'fillBar', 'sameLength'],
+    BOX_AREA: ['faceAreaGroups', 'areaScore', 'cubeSixGroups'],
+    PIE: ['pieAsBar', 'sectorNoteShare'],
+  };
+  const g4 = FILES['ד'];
+  Object.keys(WAYS).forEach((k) => {
+    const [main, ...extra] = WAYS[k];
+    const ways = g4.music[k];
+    const primary = banks.primaryWays(ways);
+    assert.deepEqual(primary.map(([tag]) => tag), [main], k);
+    assert.equal(ways[0], primary[0], k + ' main way first');
+    extra.forEach((tag) => {
+      const w = ways.find(([t]) => t === tag);
+      assert.ok(w && banks.isOptionalWay(w), k + ' ' + tag);
+      assert.equal(w[3], 'A', k + ' ' + tag + ' keeps its rating');
+    });
+    // Only a topic with no grade ד׳ items is skipped here; every item of the
+    // others that takes a way (not a music activity) takes the main one.
+    const items = banks.itemsForGrade('ד').filter((it) => it.standard === banks.ST[k] && it.musicNote);
+    items.forEach((it) => assert.equal(it.music, main, it.id));
+  });
+});
