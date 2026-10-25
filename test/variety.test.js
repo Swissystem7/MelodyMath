@@ -84,13 +84,35 @@ test('rhythm patterns vary only within the same musical method (quarters/eighths
   assert.ok(subdivisions.size >= 3, 'Rhythm subdivisions vary across rounds');
 });
 
-test('grade 1 per-topic ranges and safe bounds across ALL exercise types (Refs #665)', () => {
-  // resolveGrade mapping tests
-  assert.equal(variety.resolveGrade('mm-cur-13'), 'א', 'mm-cur-13 resolves to grade א');
-  assert.equal(variety.resolveGrade({ topicId: 'mm-cur-13' }), 'א', 'object mm-cur-13 resolves to grade א');
-  assert.equal(variety.resolveGrade('g1-add'), 'א', 'g1-add resolves to grade א');
-  assert.equal(variety.resolveGrade({ id: 'g1-add' }), 'א', 'object g1-add resolves to grade א');
+test('resolveGrade maps curriculum topics per grade (mm-cur-12 in grade א, mm-cur-13 in grade ב) (Refs #665)', () => {
+  [['mm-cur-0', 'א'], ['mm-cur-12', 'א'], ['mm-cur-13', 'ב'], ['mm-cur-22', 'ג'], ['mm-cur-31', 'ד'], ['mm-cur-38', 'ה'], ['mm-cur-50', 'ו'], ['g1-add', 'א']].forEach(([id, g]) => {
+    assert.equal(variety.resolveGrade(id), g, `${id} resolves to grade ${g}`);
+    assert.equal(variety.resolveGrade({ topicId: id }), g, `object ${id} resolves to grade ${g}`);
+  });
+});
 
+test('number ranges are defined per topic, not per grade only (Refs #665)', () => {
+  assert.ok(variety.TOPIC_RANGES && variety.TOPIC_RANGES['mm-cur-3'], 'mm-cur-3 topic range defined');
+  assert.ok(variety.TOPIC_RANGES['mm-cur-4'], 'mm-cur-4 topic range defined');
+  assert.equal(variety.getTopicRange('mm-cur-3').max, 20, 'mm-cur-3 capped at 20');
+  assert.equal(variety.getTopicRange('mm-cur-4').max, 100, 'mm-cur-4 whole tens to 100 in grade א');
+  assert.equal(variety.getTopicRange('mm-cur-13').max, 1000, 'mm-cur-13 place value to 1000 in grade ב');
+  assert.equal(variety.getTopicRange('mm-cur-14').max, 100, 'mm-cur-14 addition to 100 in grade ב');
+
+  const s3 = variety.createVarietySession('mm-cur-3');
+  for (let r = 0; r < 10; r++) assert.ok(s3.next().answer <= 20, 'mm-cur-3 answers bounded by 20');
+
+  const s14 = variety.createVarietySession('mm-cur-14');
+  let hasOver20 = false;
+  for (let r = 0; r < 10; r++) {
+    const ex = s14.next();
+    assert.ok(ex.answer <= 100, 'mm-cur-14 answers bounded by 100');
+    if (ex.answer > 20) hasOver20 = true;
+  }
+  assert.ok(hasOver20, 'mm-cur-14 reaches into two-digit addition beyond 20');
+});
+
+test('grade 1 per-topic ranges and safe bounds across ALL exercise types (Refs #665)', () => {
   // mm-cur-4 whole tens to 100
   const tensSession = variety.createVarietySession('mm-cur-4');
   for (let r = 0; r < 10; r++) {
@@ -105,22 +127,17 @@ test('grade 1 per-topic ranges and safe bounds across ALL exercise types (Refs #
     const session = variety.createVarietySession(type, { grade: 'א' });
     for (let r = 0; r < 15; r++) {
       const ex = session.next();
-      if (type === 'addition') {
-        assert.ok(ex.answer <= 20, `Addition answer ${ex.answer} <= 20`);
-      } else if (type === 'subtraction') {
-        assert.ok(ex.answer <= 20, `Subtraction answer ${ex.answer} <= 20`);
+      if (type === 'addition' || type === 'subtraction' || type === 'counting') {
+        assert.ok(ex.answer <= 20, `${type} answer ${ex.answer} <= 20`);
       } else if (type === 'multiplication') {
-        assert.ok(ex.answer <= 20, `Multiplication ${ex.answer} <= 20 (no 10x8=80)`);
+        assert.ok(ex.answer <= 20, `Multiplication ${ex.answer} <= 20`);
         const parts = ex.numberKey.split('*').map(Number);
         assert.ok(parts[0] <= 10 && parts[1] <= 10, 'factors bounded');
       } else if (type === 'division') {
-        const [dividend, divisor] = ex.numberKey.split(':').map(Number);
-        assert.ok(dividend <= 20, `Division dividend ${dividend} <= 20 (no 56:7)`);
+        const [dividend] = ex.numberKey.split(':').map(Number);
+        assert.ok(dividend <= 20, `Division dividend ${dividend} <= 20`);
       } else if (type === 'fractions') {
-        const denom = Number(ex.answer.split('/')[1]);
-        assert.ok(denom <= 4, `Fraction denominator ${denom} <= 4`);
-      } else if (type === 'counting') {
-        assert.ok(ex.answer <= 20, `Counting answer ${ex.answer} <= 20`);
+        assert.ok(Number(ex.answer.split('/')[1]) <= 4, 'Fraction denom <= 4');
       }
     }
   });
