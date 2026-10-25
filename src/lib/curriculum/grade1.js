@@ -92,7 +92,9 @@
     ],
     EQ_LEFT: [
       ['sameLength', 'שני משפטי תיפוף נמשכים אותו זמן גם אם מחולקים אחרת: 3 ו־4 מול 5 ו־2. סימן השוויון אומר «אותו אורך».', 'azaryahu2020', 'A'],
-      ['fillBar', 'שני צדדים של שוויון הם שתי תיבות באותו אורך. מלאו את הפעימה החסרה כך ששתי התיבות יהיו שוות.', 'azaryahu2020', 'A'],
+      // balanceBars restored from 855a184 (#595). The wording is the archived
+      // one; the source is the M3 study a way on this mechanism may cite.
+      ['balanceBars', 'סימן השוויון אומר: שני הצדדים נמשכים אותו זמן. נגנו את הצד השני והשלימו נקישות עד שהם שווים.', 'azaryahu2020', 'A'],
       ['callResponse', 'הפכו את שני המשפטים — קודם התשובה ואז הקריאה. האורך הכולל לא משתנה: זה חוק החילוף.', 'mcdonel2015', 'A', EXTRA],
     ],
     MULTIADD: [
