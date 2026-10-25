@@ -137,7 +137,24 @@ function lockedIds(storage) {
   return ttg.UNLOCK_LIST.filter(function (id) { return open.indexOf(id) < 0; });
 }
 
-export function formatCrossInstrumentCard(preset, status, mine, locked) {
+// The meeting-beat (LCM) question is grade ה׳–ו׳ material (banks.js ST.LCM,
+// curriculum/grade5.js); younger grades see the instruments without it.
+export const LCM_GRADES = ['ה', 'ו'];
+
+export function lcmOffered(grade) {
+  return LCM_GRADES.indexOf(grade) >= 0;
+}
+
+function storedGrade(storage) {
+  try {
+    const s = storage || globalThis.localStorage;
+    return s ? s.getItem('mm-grade') : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function formatCrossInstrumentCard(preset, status, mine, locked, offerLcm) {
   const p = preset || ENSEMBLE_PRESETS[0];
   const lock = locked || [];
   const frac = p.fraction[0] + '/' + p.fraction[1];
@@ -156,10 +173,10 @@ export function formatCrossInstrumentCard(preset, status, mine, locked) {
     + '<p>הקשה: ' + escapeHtml(perc.map(nameOf).join(', ')) + '. יחד עם: ' + escapeHtml(rest.map(nameOf).join(', ')) + '.</p>'
     + '<div class="jam-row">' + taps + '</div>'
     + '<p>מקישים כדי לשמוע. את הכלי שלכם בוחרים ב־🎻 הכלי שלי.</p>'
-    + '<h3>שילוב כלים: כפולה משותפת</h3>'
-    + '<p>מחזור ' + bdi(p.cycleA) + ' ומחזור ' + bdi(p.cycleB) + '. מהי ' + bdi('lcm(' + p.cycleA + ', ' + p.cycleB + ')') + '?</p>'
-    + '<div class="jam-row">' + answers + '</div>'
-    + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>'
+    + (offerLcm === false ? '' : '<h3>שילוב כלים: כפולה משותפת</h3>'
+      + '<p>כלי אחד חוזר כל ' + bdi(p.cycleA) + ' פעימות וכלי שני כל ' + bdi(p.cycleB) + ' פעימות. אחרי כמה פעימות הכלים נפגשים שוב?</p>'
+      + '<div class="jam-row">' + answers + '</div>'
+      + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>')
     + '<p><a href="' + escapeHtml(p.source) + '">מקור</a></p>'
     + '</article>';
 }
@@ -196,10 +213,14 @@ export function mountEnsembleStudio(container, options = {}) {
   const view = { preset: preset, lastOk: null };
   let status = '';
 
+  function offer() {
+    return lcmOffered(opts.grade != null ? opts.grade : storedGrade(opts.storage));
+  }
+
   function render() {
     const m = my();
     const locked = opts.locked || lockedIds(opts.storage);
-    container.innerHTML = '<h3>🎶 מנגנים יחד: תזמורת קטנה</h3>' + formatCrossInstrumentCard(preset, status, m ? m.getMyInstrument(opts.storage) : null, locked);
+    container.innerHTML = '<h3>🎶 מנגנים יחד: תזמורת קטנה</h3>' + formatCrossInstrumentCard(preset, status, m ? m.getMyInstrument(opts.storage) : null, locked, offer());
   }
 
   function onClick(event) {
@@ -212,7 +233,7 @@ export function mountEnsembleStudio(container, options = {}) {
       return;
     }
     const ans = el.getAttribute('data-ensemble-answer');
-    if (ans == null || ans === '') return;
+    if (ans == null || ans === '' || !offer()) return;
     view.lastOk = Number(ans) === preset.targetLcm;
     status = view.lastOk ? 'נכון.' : 'עוד לא. נסו שוב.';
     render();

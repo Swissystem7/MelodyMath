@@ -2049,7 +2049,7 @@ function renderStepAction(step) {
             </div>
           `).join('')}
         </div>
-        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">LCM(2, 3) = 6. אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
+        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
         <button type="button" class="primary" id="btnPlayPolyDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את רגע המפגש בפעימה 6 🎵'}</button>
       </div>
     `;
@@ -2636,7 +2636,7 @@ function renderPolyrhythmExplorerUI(box) {
         }).join('')}
       </div>
       <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
-        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (LCM של ${polyrhythmCycleA} ו־${polyrhythmCycleB} הוא ${stepLcm})
+        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (תוף כל ${polyrhythmCycleA} ותוף כל ${polyrhythmCycleB} נפגשים שוב אחרי ${stepLcm} פעימות)
       </div>
       <button type="button" class="primary" id="btnPlayPolyExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת שני התופים יחד</button>
     </div>
