@@ -1,8 +1,8 @@
 'use strict';
 // #689 (Refs #665): lcmDrums marked as an optional extra practice method
 // (EXTRA) across grades ב׳/ג׳/ד׳/ה׳ (with M2 mechanism and rissman2005 citation).
-// In grade ג׳ (MUL_C): repeatedBars stays the first primary way, accentSkip is
-// the second primary way, and lcmDrums is an EXTRA method (not main), matching
+// In grade ג׳ (MUL_C): repeatedBars is the single primary way, accentSkip is
+// an EXTRA method, and lcmDrums is an EXTRA method (not main), matching
 // how other grades mark extras.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -29,11 +29,15 @@ test('grade ג׳ MUL_C: lcmDrums is marked as an EXTRA method (not main), matchi
   // lcmDrums must NOT be a primary way
   assert.ok(!banks.primaryWays(ways).some((w) => w[0] === 'lcmDrums'), 'lcmDrums must not be a primary/main method');
 
-  // repeatedBars is first and accentSkip is second
+  // Grade 3 MUL_C must keep exactly one main musical method
   const primary = banks.primaryWays(ways);
-  assert.equal(primary[0][0], 'repeatedBars', 'repeatedBars must be the first main method');
-  assert.equal(primary[1][0], 'accentSkip', 'accentSkip must be the second main method');
-  assert.equal(primary.length, 2, 'MUL_C must have exactly 2 primary ways, not 3');
+  assert.equal(primary.length, 1, 'MUL_C must keep exactly one main musical method');
+  assert.equal(primary[0][0], 'repeatedBars', 'repeatedBars must be the sole main method');
+
+  // accentSkip is also an EXTRA method
+  const accent = ways.find((w) => w[0] === 'accentSkip');
+  assert.ok(accent, 'accentSkip must exist in MUL_C');
+  assert.equal(banks.isOptionalWay(accent), true, 'accentSkip must be marked as optional/extra');
 
   // lcmDrums mechanism is M2 (strongly evidenced dosage)
   assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('lcmDrums')), banks.mechanismOf('lcmDrums'));
@@ -45,18 +49,19 @@ test('grade ג׳ MUL_C: lcmDrums is marked as an EXTRA method (not main), matchi
   assert.match(NOTE, /עיגול לכל צליל/);
 });
 
-test('grade ג׳ MUL_C: items solve through primary ways and lcmDrums rides along as musicExtra', () => {
+test('mechanism M2 does not cite rissman2005 (lcmDrums cites rissman2005 as its own source)', () => {
+  assert.ok(!banks.MUSIC_MECHANISMS.M2.sources.includes('rissman2005'), 'M2 must not cite rissman2005');
+  assert.ok(!banks.MUSIC_MECHANISMS.M2.finding.includes('Rissman'), 'M2 finding must not include Rissman');
+  assert.ok(banks.MUSIC_MECHANISMS.M4.sources.includes('rissman2005'), 'M4 sources must keep rissman2005');
+});
+
+test('grade ג׳ MUL_C: items solve through primary way repeatedBars and lcmDrums rides along as musicExtra', () => {
   const items = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MUL_C);
   assert.ok(items.length > 0);
-  const level1 = items.filter((it) => it.level === 1 && it.musicNote);
-  assert.ok(level1.length > 0);
-  level1.forEach((it) => {
+  const withNote = items.filter((it) => it.musicNote);
+  assert.ok(withNote.length > 0);
+  withNote.forEach((it) => {
     assert.equal(it.music, 'repeatedBars', it.id);
-  });
-  const level2 = items.filter((it) => it.level === 2 && it.musicNote);
-  assert.ok(level2.length > 0);
-  level2.forEach((it) => {
-    assert.equal(it.music, 'accentSkip', it.id);
   });
   // lcmDrums is not a primary way on any item
   items.forEach((it) => {
