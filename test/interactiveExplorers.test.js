@@ -156,3 +156,26 @@ test('index.html loads interactiveExplorers.js and renders explorer widgets', ()
   assert.ok(indexHtml.includes('id="mgSizeBtns"'), 'mgSizeBtns remains intact');
   assert.ok(indexHtml.includes('id="eoNumBtns"'), 'eoNumBtns remains intact');
 });
+
+test('groups multiplication and division wire into variety.js dynamic number generation (Task 23, Refs #665)', () => {
+  const mockVariety = {
+    generateNumberSet(type, round) {
+      if (type === 'multiplication') return { a: 5, b: 4, answer: 20 };
+      if (type === 'division') return { a: 18, b: 3, answer: 6 };
+      return null;
+    }
+  };
+
+  const exMult = explorers.createGroupsMultExercise({ variety: mockVariety, roundIndex: 1 });
+  assert.equal(exMult.groups, 5);
+  assert.equal(exMult.size, 4);
+  assert.equal(exMult.answer, 20);
+  assert.ok(exMult.wordCount <= 15);
+
+  const exDiv = explorers.createGroupsDivExercise({ variety: mockVariety, roundIndex: 1 });
+  assert.equal(exDiv.dividend, 18);
+  assert.equal(exDiv.divisor, 3);
+  assert.equal(exDiv.answer, 6);
+  assert.equal(exDiv.kind, 'groups_div');
+  assert.ok(exDiv.wordCount <= 15);
+});

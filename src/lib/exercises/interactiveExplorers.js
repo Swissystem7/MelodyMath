@@ -11,9 +11,12 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
+  function need(p) { try { return require(p); } catch (e) { return null; } }
+  function getVariety() { return (root && root.MM_VARIETY) || need('./variety.js'); }
   const EXERCISE_KINDS = {
     SINGING_LINE: 'singing_line',
     GROUPS_MULT: 'groups_mult',
+    GROUPS_DIV: 'groups_div',
     EVEN_ODD: 'even_odd'
   };
 
@@ -59,25 +62,37 @@
   }
 
   function createGroupsMultExercise(opts) {
-    const o = opts || {};
-    const groups = o.groups || 4;
-    const size = o.size || 3;
-    const total = groups * size;
+    const o = opts || {}, vMod = o.variety || getVariety();
+    let groups = o.groups, size = o.size;
+    if ((!groups || !size) && vMod && typeof vMod.generateNumberSet === 'function') {
+      const ns = vMod.generateNumberSet('multiplication', o.roundIndex || 0, o.recentKeys);
+      if (ns) { groups = ns.a; size = ns.b; }
+    }
+    groups = groups || 4; size = size || 3; const total = groups * size;
     const prompt = 'יש ' + groups + ' קבוצות של ' + size + ' פעימות. כמה בסך הכל?';
     return {
-      id: o.id || 'groups-mult-' + groups + 'x' + size,
-      grade: o.grade || 'ב',
-      skill: 'multiplication',
-      kind: EXERCISE_KINDS.GROUPS_MULT,
-      standard: o.standard || 'כפולות 2, 4, 5 ו־10 עד סוף כיתה ב׳',
-      groups: groups,
-      size: size,
-      prompt: prompt,
-      answer: total,
-      hint: groups + ' כפול ' + size + ' שווה ' + total,
-      wordCount: countWords(prompt),
-      hasMusic: true,
-      visualKind: 'repeat_group'
+      id: o.id || 'groups-mult-' + groups + 'x' + size, grade: o.grade || 'ב', skill: 'multiplication',
+      kind: EXERCISE_KINDS.GROUPS_MULT, standard: o.standard || 'כפולות 2, 4, 5 ו־10 עד סוף כיתה ב׳',
+      groups, size, prompt, answer: total, hint: groups + ' כפול ' + size + ' שווה ' + total,
+      wordCount: countWords(prompt), hasMusic: true, visualKind: 'repeat_group'
+    };
+  }
+
+  function createGroupsDivExercise(opts) {
+    const o = opts || {}, vMod = o.variety || getVariety();
+    let dividend = o.dividend, divisor = o.divisor, quotient = o.quotient;
+    if ((!dividend || !divisor) && vMod && typeof vMod.generateNumberSet === 'function') {
+      const ns = vMod.generateNumberSet('division', o.roundIndex || 0, o.recentKeys);
+      if (ns) { dividend = ns.a; divisor = ns.b; quotient = ns.answer; }
+    }
+    divisor = divisor || 3; quotient = quotient || 4; dividend = dividend || (divisor * quotient);
+    const prompt = dividend + ' פעימות מתחלקות ל־' + divisor + ' קבוצות שוות. כמה בכל קבוצה?';
+    return {
+      id: o.id || 'groups-div-' + dividend + 'div' + divisor, grade: o.grade || 'ג', skill: 'division',
+      kind: EXERCISE_KINDS.GROUPS_DIV, standard: o.standard || 'חילוק כחלוקה לחלקים שווים',
+      groups: divisor, size: quotient, dividend, divisor, answer: quotient,
+      prompt, hint: dividend + ' לחלק ל־' + divisor + ' הם ' + quotient,
+      wordCount: countWords(prompt), hasMusic: true, visualKind: 'repeat_group'
     };
   }
 
@@ -129,7 +144,7 @@
           if (typeof opts.playFreq === 'function') opts.playFreq(Number(btn.dataset.pct));
         };
       });
-    } else if (exercise.kind === EXERCISE_KINDS.GROUPS_MULT) {
+    } else if (exercise.kind === EXERCISE_KINDS.GROUPS_MULT || exercise.kind === EXERCISE_KINDS.GROUPS_DIV) {
       const g = exercise.groups || 3, s = exercise.size || 4;
       let dots = '';
       for (let i = 0; i < g; i++) {
@@ -162,6 +177,8 @@
     validateExerciseCard: validateExerciseCard,
     createSingingLineExercise: createSingingLineExercise,
     createGroupsMultExercise: createGroupsMultExercise,
+    createGroupsDivExercise: createGroupsDivExercise,
+    getVariety: getVariety,
     createEvenOddExercise: createEvenOddExercise,
     renderExplorerWidget: renderExplorerWidget
   };
