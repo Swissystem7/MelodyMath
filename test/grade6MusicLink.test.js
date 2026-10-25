@@ -11,7 +11,7 @@ const banks = require('../src/lib/banks');
 const g6 = require('../src/lib/curriculum/grade6');
 
 const six = banks.itemsForGrade('ו');
-const ACTIVITIES = ['dotted', 'triplet', 'durationDiv', 'ratioHz', 'meanBpm', 'tempo', 'circleFifths', 'mean', 'bars'];
+const ACTIVITIES = ['dotted', 'triplet', 'durationDiv', 'ratioHz', 'meanBpm', 'tempo', 'circleFifths', 'mean', 'bars', 'tempoPercent'];
 const wayOf = (it) => {
   const key = Object.keys(g6.music).find((k) => banks.ST[k] === it.standard);
   const ways = g6.music[key];
