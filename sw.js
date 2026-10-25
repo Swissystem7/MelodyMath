@@ -20,6 +20,7 @@ const ASSETS = [
   './privacy.html',
   './manifest.webmanifest',
   './src/lib/encouragingFeedback.js',
+  './src/lib/exercises/variety.js',
   './src/lib/core.js',
   './src/lib/sonify.js',
   './src/lib/grade3Music.js',

@@ -1,4 +1,5 @@
 // MelodyMath — Exercise Variety Engine (Task V1, Refs #665).
+// Research: Rohrer, D., & Taylor, K. (2007). The shuffling of mathematics problems improves learning. Instructional Science, 35(6), 481-498. doi:10.1007/s11251-007-9015-8
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     let inst;
@@ -18,59 +19,46 @@
     { id: 'swing_dotted', he: 'מקצב מנוקד', meter: '4/4', subdivision: 'dotted', method: 'steady_beat', accents: [0, 2] }
   ];
   const FRACTION_PAIRS = [[1, 2], [1, 4], [2, 4], [3, 4], [1, 3], [2, 3], [1, 6], [5, 6], [1, 8], [3, 8], [5, 8], [7, 8], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [3, 10], [7, 10], [9, 10]];
-
   const GRADE_NAMES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
   const GRADE_BOUNDS = [{ g: 'א', m: 12 }, { g: 'ב', m: 21 }, { g: 'ג', m: 30 }, { g: 'ד', m: 37 }, { g: 'ה', m: 49 }, { g: 'ו', m: 58 }];
   const GRADE_RANGES = { 'א': { min: 1, max: 20 }, 'ב': { min: 1, max: 100 }, 'ג': { min: 1, max: 1000 }, 'ד': { min: 1, max: 10000 }, 'ה': { min: 1, max: 100000 }, 'ו': { min: 1, max: 1000000 } };
   const TOPIC_RANGES = {
-    'mm-cur-0': { min: 1, max: 20 }, 'mm-cur-1': { min: 10, max: 100 }, 'mm-cur-2': { min: 0, max: 100 },
-    'mm-cur-3': { min: 1, max: 20 }, 'mm-cur-4': { min: 10, max: 100, step: 10, wholeTens: true },
-    'mm-cur-5': { min: 1, max: 100 }, 'mm-cur-6': { min: 1, max: 20 }, 'mm-cur-7': { min: 1, max: 20 },
-    'mm-cur-11': { min: 1, max: 20 }, 'mm-cur-12': { min: 1, max: 20 }, 'mm-cur-13': { min: 1, max: 1000 },
-    'mm-cur-14': { min: 10, max: 100 }, 'mm-cur-15': { min: 1, max: 100 }, 'mm-cur-16': { min: 1, max: 100 },
-    'mm-cur-18': { min: 1, max: 100 }, 'mm-cur-19': { min: 1, max: 100 }, 'mm-cur-22': { min: 100, max: 10000 },
-    'mm-cur-23': { min: 10, max: 1000 }, 'mm-cur-24': { min: 1, max: 100 }, 'mm-cur-25': { min: 1, max: 100 },
-    'mm-cur-31': { min: 100, max: 1000000 }, 'mm-cur-38': { min: 1000, max: 10000000 }, 'mm-cur-39': { min: 10, max: 1000000 },
-    'mm-cur-40': { min: 2, max: 100 }, 'mm-cur-50': { min: 1, max: 10000 }, 'mm-cur-53': { min: 1, max: 100 }
+    'mm-cur-0': { min: 1, max: 20 }, 'mm-cur-1': { min: 10, max: 100 }, 'mm-cur-2': { min: 0, max: 100 }, 'mm-cur-3': { min: 1, max: 20 },
+    'mm-cur-4': { min: 10, max: 100, step: 10, wholeTens: true }, 'mm-cur-5': { min: 1, max: 100 }, 'mm-cur-6': { min: 1, max: 20 },
+    'mm-cur-7': { min: 1, max: 20 }, 'mm-cur-11': { min: 1, max: 20 }, 'mm-cur-12': { min: 1, max: 20 }, 'mm-cur-13': { min: 1, max: 1000 },
+    'mm-cur-14': { min: 10, max: 100 }, 'mm-cur-15': { min: 1, max: 100 }, 'mm-cur-16': { min: 1, max: 100 }, 'mm-cur-18': { min: 1, max: 100 },
+    'mm-cur-19': { min: 1, max: 100 }, 'mm-cur-22': { min: 100, max: 10000 }, 'mm-cur-23': { min: 10, max: 1000 }, 'mm-cur-24': { min: 1, max: 100 },
+    'mm-cur-25': { min: 1, max: 100 }, 'mm-cur-31': { min: 100, max: 1000000 }, 'mm-cur-38': { min: 1000, max: 10000000 },
+    'mm-cur-39': { min: 10, max: 1000000 }, 'mm-cur-40': { min: 2, max: 100 }, 'mm-cur-50': { min: 1, max: 10000 }, 'mm-cur-53': { min: 1, max: 100 }
   };
 
   function isWholeTensTopic(topicOrItem) {
-    const raw = typeof topicOrItem === 'object' && topicOrItem !== null
-      ? (topicOrItem.topicId || topicOrItem.id || topicOrItem.skill || topicOrItem.topic || '')
-      : (topicOrItem || '');
+    const raw = typeof topicOrItem === 'object' && topicOrItem !== null ? (topicOrItem.topicId || topicOrItem.id || topicOrItem.skill || topicOrItem.topic || '') : (topicOrItem || '');
     const s = String(raw).toLowerCase();
     return s.includes('mm-cur-4') || s.includes('עשרות') || s.includes('tens') || Boolean(TOPIC_RANGES[raw] && TOPIC_RANGES[raw].wholeTens);
   }
 
   function resolveGrade(topicOrItem, options) {
     if (options && options.grade != null) {
-      const g = String(options.grade);
-      const idx = ['1', '2', '3', '4', '5', '6'].indexOf(g);
-      return idx >= 0 ? GRADE_NAMES[idx] : g;
+      const idx = ['1', '2', '3', '4', '5', '6'].indexOf(String(options.grade));
+      return idx >= 0 ? GRADE_NAMES[idx] : String(options.grade);
     }
-    const s = typeof topicOrItem === 'object' && topicOrItem !== null
-      ? String(topicOrItem.grade || topicOrItem.topicId || topicOrItem.id || topicOrItem.skill || topicOrItem.mathTopic || '')
-      : String(topicOrItem || '');
+    const s = typeof topicOrItem === 'object' && topicOrItem !== null ? String(topicOrItem.grade || topicOrItem.topicId || topicOrItem.id || topicOrItem.skill || topicOrItem.mathTopic || '') : String(topicOrItem || '');
     if (s.startsWith('mm-cur-')) {
-      const n = parseInt(s.slice(7), 10);
-      const b = GRADE_BOUNDS.find(x => n <= x.m);
+      const n = parseInt(s.slice(7), 10), b = GRADE_BOUNDS.find(x => n <= x.m);
       return b ? b.g : null;
     }
     for (let i = 0; i < 6; i++) {
-      const num = String(i + 1), he = GRADE_NAMES[i];
-      if (s === num || s === he || s.startsWith('g' + num) || s.includes('grade' + num)) return he;
+      if (s === String(i + 1) || s === GRADE_NAMES[i] || s.startsWith('g' + (i + 1)) || s.includes('grade' + (i + 1))) return GRADE_NAMES[i];
     }
     return null;
   }
 
   function getTopicRange(topicOrItem, options) {
-    const raw = typeof topicOrItem === 'object' && topicOrItem !== null
-      ? (topicOrItem.topicId || topicOrItem.id || topicOrItem.topic || '')
-      : String(topicOrItem || '');
+    const raw = typeof topicOrItem === 'object' && topicOrItem !== null ? (topicOrItem.topicId || topicOrItem.id || topicOrItem.topic || '') : String(topicOrItem || '');
     if (TOPIC_RANGES[raw]) return TOPIC_RANGES[raw];
     const grade = resolveGrade(topicOrItem, options);
-    if (grade && GRADE_RANGES[grade]) return GRADE_RANGES[grade];
-    return { min: 1, max: 100 };
+    return (grade && GRADE_RANGES[grade]) ? GRADE_RANGES[grade] : { min: 1, max: 100 };
   }
 
   function resolveTopicKey(topicOrItem) {
@@ -79,7 +67,8 @@
     if (s.includes('mult') || s.includes('כפל')) return 'multiplication';
     if (s.includes('div') || s.includes('חילוק')) return 'division';
     if (s.includes('skip') || s.includes('דילוג')) return 'skipCounting';
-    if (s.includes('next') || s.includes('עוקב') || s.includes('קודם') || s.includes('sub') || s.includes('חיסור')) return 'nextPrev';
+    if (s.includes('sub') || s.includes('חיסור')) return 'subtraction';
+    if (s.includes('next') || s.includes('prev') || s.includes('עוקב') || s.includes('קודם')) return 'nextPrev';
     if (s.includes('frac') || s.includes('שבר')) return 'fractions';
     if (s.includes('dec') || s.includes('עשרונ')) return 'decimals';
     if (s.includes('pat') || s.includes('דגם') || s.includes('סדר')) return 'patterns';
@@ -87,13 +76,8 @@
     return (s.includes('line') || s.includes('ישר')) ? 'numberLine' : 'counting';
   }
 
-  function pickTempo(roundIndex, seed) {
-    return BPM_STEPS[(Math.abs(Number(roundIndex) || 0) + (Number(seed) || 0)) % BPM_STEPS.length];
-  }
-
-  function pickPattern(roundIndex, seed) {
-    return RHYTHM_PATTERNS[(Math.abs(Number(roundIndex) || 0) + (Number(seed) || 0)) % RHYTHM_PATTERNS.length];
-  }
+  function pickTempo(roundIndex, seed) { return BPM_STEPS[(Math.abs(Number(roundIndex) || 0) + (Number(seed) || 0)) % BPM_STEPS.length]; }
+  function pickPattern(roundIndex, seed) { return RHYTHM_PATTERNS[(Math.abs(Number(roundIndex) || 0) + (Number(seed) || 0)) % RHYTHM_PATTERNS.length]; }
 
   function pickInstrument(topicKey, roundIndex, seed) {
     let list = (I && typeof I.forTopic === 'function') ? I.forTopic(topicKey) : [];
@@ -111,16 +95,15 @@
       if (p.includes('×') || p.includes('*')) return 'multiplication';
       if (p.includes(':') || p.includes('÷')) return 'division';
       if (p.includes('/') || (topicOrItem.skill && topicOrItem.skill.includes('fraction'))) return 'fractions';
+      if (p.includes('עוקב') || p.includes('קודם')) return 'nextPrev';
     }
     const k = resolveTopicKey(topicOrItem);
-    return (k === 'multiplication' || k === 'division' || k === 'fractions' || k === 'decimals' || k === 'patterns') ? k : (k === 'nextPrev' ? 'subtraction' : 'addition');
+    return (k === 'multiplication' || k === 'division' || k === 'fractions' || k === 'decimals' || k === 'patterns' || k === 'subtraction' || k === 'nextPrev') ? k : 'addition';
   }
 
   function generateNumberSet(type, roundIndex, recentKeys, grade, topicOrItem) {
-    const range = getTopicRange(topicOrItem, { grade });
-    const maxVal = range.max || 20;
-    const isGrade1 = grade === '1' || grade === 'א' || maxVal <= 20;
-    const wholeTens = isWholeTensTopic(topicOrItem) || Boolean(range.wholeTens);
+    const range = getTopicRange(topicOrItem, { grade }), maxVal = range.max || 20;
+    const isGrade1 = grade === '1' || grade === 'א' || maxVal <= 20, wholeTens = isWholeTensTopic(topicOrItem) || Boolean(range.wholeTens);
     const seen = new Set(recentKeys || []);
     let candidate = null;
 
@@ -128,44 +111,24 @@
       const step = roundIndex * 3 + tryIdx;
       if (type === 'addition') {
         let a, b;
-        if (wholeTens) {
-          const tMax = Math.max(2, Math.floor(maxVal / 10));
-          a = (((step * 3 + 1) % (tMax - 1)) + 1) * 10;
-          b = (((step * 7 + 2) % (tMax - a / 10)) + 1) * 10;
-        } else if (isGrade1) {
-          a = ((step * 5 + 3) % 10) + 1;
-          b = ((step * 7 + 2) % (maxVal - a)) + 1;
-        } else if (maxVal <= 100) {
-          a = ((step * 7 + 13) % 45) + 10;
-          b = ((step * 11 + 7) % (maxVal - a - 5)) + 5;
-        } else {
-          a = ((step * 7 + 3) % 18) + 2;
-          b = ((step * 11 + 5) % 18) + 2;
-        }
+        if (wholeTens) { const tMax = Math.max(2, Math.floor(maxVal / 10)); a = (((step * 3 + 1) % (tMax - 1)) + 1) * 10; b = (((step * 7 + 2) % (tMax - a / 10)) + 1) * 10; }
+        else if (isGrade1) { a = ((step * 5 + 3) % 10) + 1; b = ((step * 7 + 2) % (maxVal - a)) + 1; }
+        else if (maxVal <= 100) { a = ((step * 7 + 13) % 45) + 10; b = ((step * 11 + 7) % (maxVal - a - 5)) + 5; }
+        else { a = ((step * 7 + 3) % 18) + 2; b = ((step * 11 + 5) % 18) + 2; }
         const key = `${a}+${b}`;
         if (!seen.has(key) || tryIdx === 99) { candidate = { a, b, answer: a + b, key, prompt: `${a} + ${b} = ?`, hint: `${a} ועוד ${b} הם ${a + b}` }; break; }
       } else if (type === 'subtraction') {
         let a, b, diff;
-        if (wholeTens) {
-          const tMax = Math.max(2, Math.floor(maxVal / 10));
-          a = (((step * 3 + 3) % (tMax - 1)) + 2) * 10;
-          b = (((step * 5 + 1) % (a / 10 - 1)) + 1) * 10;
-          diff = a - b;
-        } else if (isGrade1) {
-          a = ((step * 7 + 5) % (maxVal - 1)) + 2;
-          b = ((step * 3 + 1) % (a - 1)) + 1;
-          diff = a - b;
-        } else if (maxVal <= 100) {
-          a = ((step * 13 + 17) % (maxVal - 15)) + 15;
-          b = ((step * 7 + 3) % (a - 5)) + 2;
-          diff = a - b;
-        } else {
-          b = ((step * 7 + 2) % 15) + 2;
-          diff = ((step * 5 + 1) % 12) + 1;
-          a = b + diff;
-        }
+        if (wholeTens) { const tMax = Math.max(2, Math.floor(maxVal / 10)); a = (((step * 3 + 3) % (tMax - 1)) + 2) * 10; b = (((step * 5 + 1) % (a / 10 - 1)) + 1) * 10; diff = a - b; }
+        else if (isGrade1) { a = ((step * 7 + 5) % (maxVal - 1)) + 2; b = ((step * 3 + 1) % (a - 1)) + 1; diff = a - b; }
+        else if (maxVal <= 100) { a = ((step * 13 + 17) % (maxVal - 15)) + 15; b = ((step * 7 + 3) % (a - 5)) + 2; diff = a - b; }
+        else { b = ((step * 7 + 2) % 15) + 2; diff = ((step * 5 + 1) % 12) + 1; a = b + diff; }
         const key = `${a}-${b}`;
         if (!seen.has(key) || tryIdx === 99) { candidate = { a, b, answer: diff, key, prompt: `${a} - ${b} = ?`, hint: `${a} פחות ${b} הם ${diff}` }; break; }
+      } else if (type === 'nextPrev') {
+        let n = isGrade1 ? ((step * 5 + 3) % Math.min(18, maxVal - 2)) + 2 : ((step * 7 + 5) % Math.min(90, maxVal - 5)) + 5;
+        const isNext = step % 2 === 0, target = isNext ? n + 1 : n - 1, key = `${isNext ? 'next' : 'prev'}:${n}`;
+        if (!seen.has(key) || tryIdx === 99) { candidate = { a: n, answer: target, key, prompt: isNext ? `מה המספר העוקב ל־${n}?` : `מה המספר הקודם ל־${n}?`, hint: isNext ? `המספר שבא מיד אחרי ${n} הוא ${target}` : `המספר שבא מיד לפני ${n} הוא ${target}` }; break; }
       } else if (type === 'multiplication') {
         let a = isGrade1 ? ((step * 3 + 1) % 4) + 2 : ((step * 5 + 2) % 9) + 2;
         let b = isGrade1 ? ((step * 5 + 2) % Math.floor(maxVal / a)) + 1 : ((step * 7 + 3) % 9) + 2;
@@ -173,8 +136,7 @@
         if (!seen.has(key) || tryIdx === 99) { candidate = { a, b, answer: a * b, key, prompt: `${a} × ${b} = ?`, hint: `${a} כפול ${b} הם ${a * b}` }; break; }
       } else if (type === 'division') {
         let divisor = isGrade1 ? ((step * 3 + 1) % 3) + 2 : ((step * 3 + 2) % 8) + 2;
-        let quot = isGrade1 ? ((step * 5 + 2) % Math.floor(maxVal / divisor)) + 1 : ((step * 5 + 1) % 8) + 2;
-        let dividend = divisor * quot;
+        let quot = isGrade1 ? ((step * 5 + 2) % Math.floor(maxVal / divisor)) + 1 : ((step * 5 + 1) % 8) + 2, dividend = divisor * quot;
         const key = `${dividend}:${divisor}`;
         if (!seen.has(key) || tryIdx === 99) { candidate = { a: dividend, b: divisor, answer: quot, key, prompt: `${dividend} : ${divisor} = ?`, hint: `${dividend} לחלק ל־${divisor} הם ${quot}` }; break; }
       } else if (type === 'fractions') {
@@ -201,8 +163,7 @@
     return {
       id: `${baseId}-var-r${roundIndex}`,
       topicId: (typeof topicOrItem === 'object' && topicOrItem && topicOrItem.topicId) || (typeof topicOrItem === 'string' && topicOrItem.startsWith('mm-cur-') ? topicOrItem : topicKey),
-      mathTopic: topicKey, exerciseType: exerciseType,
-      kind: (typeof topicOrItem === 'object' && topicOrItem && topicOrItem.kind) || exerciseType,
+      mathTopic: topicKey, exerciseType: exerciseType, kind: (typeof topicOrItem === 'object' && topicOrItem && topicOrItem.kind) || exerciseType,
       prompt: numSet ? numSet.prompt : basePrompt, answer: numSet ? numSet.answer : 1, hint: numSet ? numSet.hint : '',
       numberKey: numSet ? numSet.key : `r${roundIndex}`, roundIndex: roundIndex, bpm: tempo, rhythmPattern: pattern,
       instrument: inst.id, voice: inst.voice, instrumentHe: (inst.instrument && inst.instrument.he) || inst.id, hasMusic: true
@@ -215,8 +176,7 @@
       next: function (overrideRound) {
         const round = overrideRound != null ? overrideRound : history.length;
         const ex = generateVariant(topicOrItem, round, Object.assign({}, opts, { recentNumbers: recentKeys, history: history }));
-        history.push(ex);
-        recentKeys.push(ex.numberKey);
+        history.push(ex); recentKeys.push(ex.numberKey);
         if (recentKeys.length > 5) recentKeys.shift();
         return ex;
       },
@@ -224,10 +184,24 @@
     };
   }
 
+  function renderVarietyHtml(variant) {
+    if (!variant) return '';
+    const bpm = variant.bpm || 96, inst = variant.instrumentHe || variant.instrument || 'דרבוקה', pat = (variant.rhythmPattern && variant.rhythmPattern.he) || 'מקצב רבעים';
+    return `<div class="mm-variety-badge" data-bpm="${bpm}" data-instrument="${variant.instrument || ''}" data-pattern="${(variant.rhythmPattern && variant.rhythmPattern.id) || ''}"><span class="mm-var-inst">🎵 ${inst}</span> · <span class="mm-var-bpm">⏱️ ${bpm} BPM</span> · <span class="mm-var-pat">🥁 ${pat}</span></div>`;
+  }
+
+  function mount(container, topicOrVariant, options) {
+    if (!container) return null;
+    const v = (topicOrVariant && topicOrVariant.bpm && topicOrVariant.instrument) ? topicOrVariant : generateVariant(topicOrVariant, (options && options.roundIndex) || 0, options);
+    container.innerHTML = renderVarietyHtml(v);
+    if (container.classList && typeof container.classList.remove === 'function') container.classList.remove('hidden');
+    return v;
+  }
+
   return {
     BPM_STEPS, RHYTHM_PATTERNS, FRACTION_PAIRS, GRADE_RANGES, TOPIC_RANGES,
     resolveGrade, getTopicRange, resolveTopicKey, pickTempo, pickPattern,
     pickInstrument, detectExerciseType, generateNumberSet, generateVariant,
-    createVarietySession
+    createVarietySession, renderVarietyHtml, mount
   };
 });
