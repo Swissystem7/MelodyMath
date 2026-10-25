@@ -180,3 +180,24 @@ test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART
     assert.deepEqual(it.musicExtra.map((x) => x.music), ['melodyAb', 'mirrorPattern', 'composePattern'], it.id);
   });
 });
+
+test('#751 batch 2: one main way per topic; the others stay as EXTRA with their rating', () => {
+  const MAIN = {
+    'ב': { DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', WORD_COLLECT: 'callResponse', WORD_REMOVE: 'takeAwayBeats', MASS_VOL: 'layerBars' },
+    'ג': { MUL_C: 'repeatedBars', DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', TRI_SORT: 'triangleMotif', MINUTES: 'hourTwelveGroups' },
+  };
+  Object.keys(MAIN).forEach((grade) => {
+    Object.keys(MAIN[grade]).forEach((k) => {
+      const ways = FILES[grade].music[k];
+      const primary = banks.primaryWays(ways);
+      assert.deepEqual(primary.map(([tag]) => tag), [MAIN[grade][k]], grade + ' ' + k);
+      assert.equal(ways[0], primary[0], grade + ' ' + k + ' main way first');
+      // Nothing deleted: each topic still has every way, each with its rating.
+      assert.ok(ways.length >= 2, grade + ' ' + k);
+      ways.forEach((w) => assert.ok(['A', 'D', 'R'].includes(w[3]), grade + ' ' + k + ' ' + w[0]));
+      const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST[k] && it.musicNote);
+      assert.ok(items.length > 0, grade + ' ' + k);
+      items.forEach((it) => assert.equal(it.music, MAIN[grade][k], it.id));
+    });
+  });
+});
