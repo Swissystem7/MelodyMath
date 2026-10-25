@@ -2055,6 +2055,9 @@
 
   // Mechanism → its Hebrew name, the studies behind it (none for M8-M14), the
   // one-line finding, and the way and activity tags that use it.
+  // lcmDrums is M2, not M4 (#689): the child counts two accent cycles in
+  // sequence (every 3, every 4) and hears where they meet; the simultaneous
+  // polyrhythm activities (stepCycle, drumsMeet) stay M4, weak and optional.
   const MUSIC_MECHANISMS = {
     M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
       finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
@@ -2062,7 +2065,7 @@
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
       tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
-        'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
+        'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars', 'lcmDrums',
         'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
@@ -2071,7 +2074,7 @@
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
     M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
       finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
-      tags: ['lcmDrums', 'stepCycle', 'drumsMeet'] },
+      tags: ['stepCycle', 'drumsMeet'] },
     M5: { he: 'גובה צליל — ישר המספרים וסדר', sources: ['rusconi2005', 'mohring2016'],
       finding: 'Partial: low pitches map to down or left and high pitches to up or right even when pitch is irrelevant (SMARC, Rusconi et al. 2005); children map pitch onto space, but their pitch skill was not related to number-line skill (Möhring et al. 2016).',
       tags: ['scaleSteps', 'scaleJump', 'tenAsOctave', 'pitchBound', 'pitchMean'] },
