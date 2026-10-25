@@ -274,7 +274,7 @@ test('#751 batch 4: grade ד׳ topics keep one main way, the others stay as EXTR
 test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
   const WAYS = {
     'ה': {
-      DEC_PLACE: ['beatDecimal', 'tenthNotes', 'compareBeatParts'],
+      DEC_PLACE: ['tenthNotes', 'beatDecimal', 'compareBeatParts'],
       DEC_ADD: ['tenthsTogether', 'beatDecimal', 'beatsLeftOver'],
       NUM_BIG: ['periodAccentLevels', 'millionTenGroups'],
       OPS_MILLION: ['regroupAllLevels', 'repeatedBars', 'roundBigAccent'],
@@ -289,7 +289,7 @@ test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others sta
     },
     'ו': {
       DEC_MUL: ['decimalNoteScale', 'beatDecimal', 'tenthBeatGroups'],
-      PERCENT: ['hundredBar', 'partOfHundredBar', 'sectionsFillBar'],
+      PERCENT: ['sectionsFillBar', 'hundredBar', 'partOfHundredBar'],
       G6_DECIMAL_SYS: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero'],
       G6_NAT_OPS: ['groupsFirstLongChain', 'ostinatoLayers', 'groupThenCut'],
       G6_NAT_EST: ['roundToGroup', 'partGroupTimes', 'groupBoundsCheck'],
