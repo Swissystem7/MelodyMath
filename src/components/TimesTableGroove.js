@@ -23,6 +23,7 @@
   const STREAK = root.MM_STREAK || require('../lib/music/streak.js');
   const UNLOCKS = root.MM_UNLOCKS || require('../lib/music/unlocks.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
+  const MY = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
   const GAME = 'timesTableGroove';
   const FACTORS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   const BPM = 100;
@@ -152,7 +153,10 @@
 
   function mount(el) {
     const store = root.localStorage;
-    let state = createState({ showMusic: JAM.loadShowMusic(GAME), streak: STREAK.loadStreak(store), unlocks: UNLOCKS.loadUnlocks(store) });
+    const unlocks = UNLOCKS.loadUnlocks(store);
+    // The child's instrument (#679), if this screen offers it (tabla + unlocked).
+    function owned(u) { return [START_INSTRUMENT].concat(u.unlocked); }
+    let state = createState({ showMusic: JAM.loadShowMusic(GAME), streak: STREAK.loadStreak(store), unlocks: unlocks, instrument: MY.instrumentFor(START_INSTRUMENT, owned(unlocks)) });
     let playing = null;
     JAM.registerTapVoices();
     function stop() { if (playing) playing.stop(); playing = null; }
@@ -181,11 +185,15 @@
         UNLOCKS.saveUnlocks(store, state.unlocks);
       } else if (act === 'factor') state = next(state, Number(b.getAttribute('data-factor')));
       else if (act === 'next') state = next(state);
-      else if (act === 'instrument') state = Object.assign({}, state, { instrument: b.getAttribute('data-inst') });
+      else if (act === 'instrument') { state = Object.assign({}, state, { instrument: b.getAttribute('data-inst') }); MY.setMyInstrument(state.instrument); }
       else if (act === 'music') { state = Object.assign({}, state, { showMusic: !state.showMusic }); JAM.saveShowMusic(GAME, state.showMusic); }
       draw('[data-act="' + act + '"]');
       if (state.sound && state.showMusic) play(true);
       state = Object.assign({}, state, { sound: null });
+    });
+    if (typeof root.addEventListener === 'function') root.addEventListener(MY.EVENT, function (ev) {
+      const id = ev && ev.detail && ev.detail.id;
+      if (id && id !== state.instrument && owned(state.unlocks).indexOf(id) >= 0) { state = Object.assign({}, state, { instrument: id }); draw(); }
     });
     JAM.stopWhenHidden(el, stop);
     draw();
