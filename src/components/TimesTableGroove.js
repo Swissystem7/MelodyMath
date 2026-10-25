@@ -92,7 +92,7 @@
     if (!q.division) {
       const u = UNLOCKS.recordCorrect(unlocks, q.factor, q.k, UNLOCK_LIST.map(function (id) { return { instrument: id, source: JAM.instrument(id).source || 'TODO' }; }));
       unlocks = u.state;
-      if (u.unlocked) message += ' השלמתם את עמודת ×' + u.columnCompleted + ': נפתח כלי חדש, ' + JAM.instrument(u.unlocked).he + '. בוחרים אותו ב־🎻 הכלי שלי.';
+      // No unlock toast: per #717 every instrument is open from the start.
     }
     if (r.layerAdded) message += ' נוספה שכבה לשיר: ' + LAYER_HE[r.layerAdded] + '.';
     return Object.assign({}, state, { streak: r.state, unlocks: unlocks, status: 'right', message: message, sound: r.layerAdded ? 'layer' : 'right' });
