@@ -129,6 +129,13 @@
       ['noteValues', 'מכנים שונים: החליפו חצי בשני רבעים כדי שכל התווים יהיו באותו אורך — ואז חברו רבעים.', 'courey2012', 'D'],
       ['silenceQuarter', 'חיסור שברים: מתיבה של שלושה רבעים השתיקו רבע — כמה נשאר נשמע? כתבו שבר.', 'azaryahu2020', 'D'],
     ],
+    // #709 (mm-cur-33): fillBar over consecutive bars — the whole part is full
+    // bars, the fraction is the part of the next bar. Same mechanism (M3), so
+    // A: MusiMath filled one bar; carrying on into the next was not tested.
+    FRAC_MIXED_D: [
+      ['fillBar', 'תיבות ברצף: השלמים הם תיבות מלאות, והשבר הוא חלק מהתיבה הבאה. נגנו קודם את התיבות המלאות ואז את החלקית.', 'azaryahu2020', 'A'],
+      ['noteValues', 'שבר גדול מ־1 בתווי רבע: כל ארבעה רבעים סוגרים תיבה. מנו כמה תיבות נסגרו וכמה רבעים נשארו לתיבה הבאה.', 'courey2012', 'A', EXTRA],
+    ],
     BOX_AREA: [
       ['faceAreaGroups', 'שטח פנים בקבוצות: כל פאה היא שורות של משבצות, ופאות נגדיות הן זוג זהה. חשבו שלוש פאות, וכל אחת פעמיים.', 'das2023', 'A'],
       ['areaScore', 'לכל פאה נגנו צליל לכל משבצת, שורה אחרי שורה — ואז חברו את שש הפאות; פאות נגדיות נשמעות אותו דבר.', 'das2023', 'A'],

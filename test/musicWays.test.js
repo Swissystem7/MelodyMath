@@ -129,6 +129,7 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
 
 test('every item of every grade has a music side', () => {
   const all = banks.allItems();
+  // Not pinned to a total: mixed-number items (#709) and equation items (#710) both append.
   assert.ok(all.length > 0);
   assert.equal(all.filter((it) => it.music).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
