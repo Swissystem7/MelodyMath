@@ -42,7 +42,7 @@ Object.keys(FILES).forEach((grade) => {
     Object.keys(file.music).forEach((k) => {
       assert.ok(banks.ST[k], grade + ' ' + k + ' is not a bank standard');
       const ways = file.music[k];
-      assert.ok(ways.length >= 2 && ways.length <= 3, k);
+      assert.ok(ways.length >= 2 && ways.length <= 4 && banks.primaryWays(ways).length <= 3, k); // one main way per level, plus an optional extra
       assert.equal(new Set(ways.map(([tag]) => tag)).size, ways.length, k + ' repeats a tag');
       assert.equal(new Set(ways.map(([, note]) => note)).size, ways.length, k + ' repeats a note');
     });
