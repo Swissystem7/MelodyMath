@@ -72,3 +72,97 @@ test('streaks are tracked per topic independently and survive reload', () => {
   assert.equal(streakModule.getUnlocks('tB').length, 1);
   assert.equal(streakModule.playPhrase({ notes: [440] }), null);
 });
+
+// #739 (FIX-739 #756): one reward on every practice screen, on the child's instrument, kept in "השיר שלי".
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+function fakeAudio() {
+  const node = () => ({ connect(n) { return n || node(); }, start() {}, stop() {}, type: '', frequency: { setValueAtTime() {}, exponentialRampToValueAtTime() {} },
+    gain: { setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} } });
+  return { state: 'running', currentTime: 1, destination: {}, createOscillator: node, createGain: node };
+}
+
+test('getSharedAudioContext exists in musicEngine and loads before streak.js', () => {
+  const M = require('../src/lib/musicEngine');
+  assert.equal(typeof M.getSharedAudioContext, 'function');
+  const at = (s) => indexHtml.indexOf('<script src="' + s + '"></script>');
+  assert.ok(at('src/lib/musicEngine.js') > 0 && at('src/lib/musicEngine.js') < at('src/lib/streak.js'));
+});
+
+test('the phrase plays on the voice of the instrument the child picked', () => {
+  const storage = createMockStorage();
+  streakModule.setStorage(storage);
+  streakModule.resetAll();
+  const iv = require('../src/lib/instrumentVoices');
+  const ins = require('../src/lib/instruments');
+  const played = [];
+  Object.assign(globalThis, { instrumentById: ins.instrumentById, forTopic: ins.forTopic, VOICES: iv.VOICES, window: {},
+    playVoice: (ac, voice, hz, when) => played.push({ voice, hz, when }) });
+  try {
+    const flute = ins.INSTRUMENTS.find((x) => x.voice === 'breathy');
+    assert.equal(streakModule.instrumentFor('fractions'), ins.forTopic('fractions')[0].id, 'no pick: the topic instrument');
+    storage.setItem('mm-tap-instrument', flute.id);
+    assert.equal(streakModule.instrumentFor('fractions'), flute.id, 'the pick wins');
+    assert.equal(streakModule.voiceFor(flute.id), 'breathy');
+    assert.equal(streakModule.voiceFor('nope'), 'keys');
+    const r = streakModule.playPhrase(streakModule.PHRASES[0], flute.id, fakeAudio(), 0.4);
+    assert.equal(r.voice, 'breathy');
+    assert.equal(played.length, streakModule.PHRASES[0].notes.length);
+    assert.ok(played.every((p) => p.voice === 'breathy'));
+    assert.ok(played[0].when >= 1.4, 'starts after the right-answer sound');
+  } finally {
+    ['instrumentById', 'forTopic', 'VOICES', 'window', 'playVoice'].forEach((k) => delete globalThis[k]);
+  }
+});
+
+test('"השיר שלי" keeps every phrase from every topic in order and can replay it', () => {
+  const storage = createMockStorage();
+  streakModule.setStorage(storage);
+  streakModule.resetAll();
+  for (let i = 0; i < 5; i++) streakModule.recordAnswer('a', true, { audio: false });
+  for (let i = 0; i < 5; i++) streakModule.recordAnswer('b', true, { audio: false });
+  for (let i = 0; i < 5; i++) streakModule.recordAnswer('a', true, { audio: false });
+  streakModule.setStorage(storage); // reload
+  assert.deepEqual(streakModule.mySong().map((p) => p.id), ['phrase_1', 'phrase_1', 'phrase_2']);
+  const html = streakModule.mySongHtml();
+  assert.match(html, /data-song="all"/);
+  assert.equal((html.match(/data-song="\d"/g) || []).length, 3);
+  assert.ok(streakModule.playSong() > 0);
+  streakModule.resetAll();
+  assert.match(streakModule.mySongHtml(), /5 תשובות נכונות ברצף/);
+});
+
+test('index.html: exactly one streak reward, after the right-answer sound', () => {
+  const block = indexHtml.slice(indexHtml.indexOf('function noteMetro('), indexHtml.indexOf("if($('metroToggle'))$('metroToggle').onclick"))
+    + indexHtml.slice(indexHtml.indexOf('function streakReward('), indexHtml.indexOf('function paintMySong('));
+  const calls = [];
+  const sandbox = {
+    MM_MASTERY_STREAK: Object.assign({}, streakModule, {
+      instrumentFor: () => 'flute', playPhrase: (p, i, ac, delay) => calls.push('phrase@' + delay),
+    }),
+    metroStreak: 0, $: () => null, prefsNow: () => ({}), paintMySong: () => calls.push('song'),
+    playTap: (v) => calls.push('tap:' + v), playStreakMelody: () => calls.push('melody'),
+    recordCorrect: () => null, setMetroBpm() {}, nextBpm() {}, metroBpmNow: () => 80, setTimeout,
+  };
+  streakModule.setStorage(createMockStorage());
+  streakModule.resetAll();
+  vm.createContext(sandbox);
+  vm.runInContext(block + '\nthis.noteMetro=noteMetro;', sandbox);
+  for (let i = 0; i < 5; i++) sandbox.noteMetro(true, 'fractions');
+  assert.deepEqual(calls, ['melody', 'melody', 'melody', 'melody', 'tap:correct', 'phrase@0.4', 'song']);
+  assert.equal(streakModule.getUnlocks('fractions')[0].instrument, 'flute');
+});
+
+test('index.html: every practice screen feeds its topic into the streak', () => {
+  assert.match(indexHtml, /history\.push\(\{id:current\.id,correct\}\);noteMetro\(correct,current\.mathTopic\|\|current\.skill\)/, 'main practice');
+  assert.match(indexHtml, /noteMetro\(correct,st\.skill\|\|st\.he\)/, 'personal plan');
+  assert.match(indexHtml, /noteMetro\(correct,classCurrent\.skill\)/, 'class');
+  assert.match(indexHtml, /noteMetro\(correct,q\.skill\)/, 'diagnostic');
+  assert.match(indexHtml, /streakReward\(beatCurrent\.skill,correct && !late\)/, 'beat, paced');
+  assert.match(indexHtml, /noteMetro\(correct && !late,beatCurrent\.skill\)/, 'beat');
+  assert.doesNotMatch(indexHtml, /MM_MASTERY_STREAK\.recordAnswer\(st\./, 'no second hook in rpCheck');
+  assert.match(indexHtml, /id="mySong"[\s\S]{0,200}id="mySongList"/);
+});

@@ -60,7 +60,7 @@
     if (cur.streak === STREAK_TARGET || (cur.streak > STREAK_TARGET && cur.streak % STREAK_TARGET === 0)) {
       const base = PHRASES[cur.unlocks.length % PHRASES.length];
       unlocked = {
-        id: base.id, name: base.name, instrument: instrument,
+        id: base.id, name: base.name, instrument: instrument, seq: mySong().length + 1,
         notes: base.notes.slice(), durations: base.durations.slice(), unlockedAtStreak: cur.streak,
       };
       cur.unlocks.push(unlocked);
@@ -86,31 +86,85 @@
   }
   function setStorage(s) { storageRef = s; loadState(); }
 
-  function playPhrase(phrase, instrument, audioCtx) {
+  // The child's instrument: the pick saved by the tap-instrument chooser
+  // ('mm-tap-instrument', #750), else the topic's own instrument (instruments.js).
+  const PICK_KEY = 'mm-tap-instrument';
+  const FALLBACK_VOICE = 'keys';
+  function instrumentFor(topic) {
+    const s = getStorage();
+    try { const id = s && s.getItem(PICK_KEY); if (id) return id; } catch (e) { /* private */ }
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    const list = typeof g.forTopic === 'function' ? g.forTopic(topic) : [];
+    return list && list[0] ? list[0].id : null;
+  }
+  function voiceFor(instrumentId) {
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    const x = instrumentId && typeof g.instrumentById === 'function' ? g.instrumentById(instrumentId) : null;
+    return x && g.VOICES && g.VOICES[x.voice] ? x.voice : FALLBACK_VOICE;
+  }
+
+  // Plays a phrase on the instrument's voice (instrumentVoices.playVoice),
+  // starting `delay` seconds from now so it follows the right-answer sound.
+  function playPhrase(phrase, instrument, audioCtx, delay) {
     if (!phrase || !phrase.notes || typeof window === 'undefined') return null;
-    const ac = audioCtx || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
-    if (!ac || ac.state === 'suspended') return null;
+    const g = globalThis;
+    if (g.audioState && g.audioState.muted) return null;
+    const ac = audioCtx || (typeof g.getSharedAudioContext === 'function' ? g.getSharedAudioContext() : null);
+    if (!ac) return null;
+    if (ac.state === 'suspended') { try { ac.resume(); } catch (e) { /* autoplay policy */ } }
+    const voice = voiceFor(instrument || phrase.instrument);
     try {
-      let t = ac.currentTime + 0.05;
+      let t = ac.currentTime + 0.05 + (Number(delay) || 0);
       phrase.notes.forEach(function (hz, i) {
         const dur = (phrase.durations && phrase.durations[i]) || 0.15;
-        const osc = ac.createOscillator(), gain = ac.createGain();
-        osc.type = instrument === 'strings' ? 'sawtooth' : 'triangle';
-        osc.frequency.setValueAtTime(hz, t);
-        gain.gain.setValueAtTime(0.001, t);
-        gain.gain.linearRampToValueAtTime(0.12, t + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-        osc.connect(gain).connect(ac.destination);
-        osc.start(t); osc.stop(t + dur + 0.02);
+        if (typeof g.playVoice === 'function') g.playVoice(ac, voice, hz, t);
+        else {
+          const osc = ac.createOscillator(), gain = ac.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(hz, t);
+          gain.gain.setValueAtTime(0.001, t);
+          gain.gain.linearRampToValueAtTime(0.12, t + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          osc.connect(gain).connect(ac.destination);
+          osc.start(t); osc.stop(t + dur + 0.02);
+        }
         t += dur + 0.03;
       });
-      return { started: true, notes: phrase.notes.length };
+      return { started: true, notes: phrase.notes.length, voice: voice };
     } catch (e) { return null; }
+  }
+
+  // "השיר שלי": every unlocked phrase from every topic, in unlock order.
+  function mySong() {
+    const all = [];
+    Object.keys(topicState).forEach(function (k) { (topicState[k].unlocks || []).forEach(function (p) { all.push(p); }); });
+    return all.sort(function (a, b) { return (a.seq || 0) - (b.seq || 0); });
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function mySongHtml(list) {
+    const song = list || mySong();
+    if (!song.length) return '<p class="note">5 תשובות נכונות ברצף פותחות משפט מוזיקלי לשיר שלך.</p>';
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    return '<button type="button" data-song="all">▶ נגנו את כל השיר</button>' + song.map(function (p, i) {
+      const x = p.instrument && typeof g.instrumentById === 'function' ? g.instrumentById(p.instrument) : null;
+      const on = x && x.instrument ? ' · ' + x.instrument.he : '';
+      return '<button type="button" data-song="' + i + '">▶ ' + esc(p.name + on) + '</button>';
+    }).join('');
+  }
+  // Plays the whole song, phrase after phrase.
+  function playSong(list, audioCtx) {
+    let delay = 0;
+    (list || mySong()).forEach(function (p) {
+      playPhrase(p, null, audioCtx, delay);
+      delay += p.notes.length * 0.03 + (p.durations || []).reduce(function (a, b) { return a + b; }, 0) + 0.3;
+    });
+    return delay;
   }
 
   loadState();
 
   return {
     STREAK_TARGET, PHRASES, recordAnswer, getStreak, getUnlocks, softReset, resetAll, setStorage, playPhrase,
+    instrumentFor, voiceFor, mySong, mySongHtml, playSong,
   };
 });
