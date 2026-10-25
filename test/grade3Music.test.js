@@ -397,8 +397,8 @@ test('index.html draws the grade-ג widget, checks remainders and unlocks audio'
   assert.match(indexHtml, /src="src\/lib\/grade3Music\.js"/);
   assert.ok(indexHtml.includes("item.widget==='g3'"), 'renderWidget has no g3 branch');
   assert.ok(indexHtml.includes('bindGrade3(host, item.g3)'));
-  // Both typed flows go through the remainder validator, not through isCorrect.
-  assert.equal((indexHtml.match(/answerOk\(/g) || []).length, 3);
+  // Both typed flows, and the plan's no-music check (#747), go through the remainder validator, not through isCorrect.
+  assert.equal((indexHtml.match(/answerOk\(/g) || []).length, 4);
   assert.ok(indexHtml.includes('isRemainderAnswer(given,barsAndRemainder('));
   assert.ok(indexHtml.includes('remainderMiss(given,s)'));
   // Tap-to-answer modes never serve an item that needs typing.

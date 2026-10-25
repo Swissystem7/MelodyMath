@@ -2754,4 +2754,19 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 <script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
 <script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/lib/music/unlocks.js"></script><script src="src/components/TimesTableGroove.js"></script>
 <!-- #591 music game scripts end -->
+<script src="src/lib/noMusicCheck.js"></script>
+<script>
+// End-of-topic no-music check (#747): after a skill's practice items, three plain questions
+// with no sound and no picture. Two mistakes go back to the picture stage, cued on the child's instrument.
+(function(){
+const NM=MM_NO_MUSIC_CHECK,practiceAdvance=rpAdvance,practiceCheck=rpCheck;
+function nmRender(st){const it=st.nmRound.item();rpAnswered=false;$('rmPlanCounter').textContent=`עכשיו בלי להקה, רק אתם! · שאלה ${st.nmRound.index+1}/${st.nmRound.total}`;setMath($('rmPlanPrompt'),it.prompt);show('rmPlanWay',false);show('rmPlanWidget',false);show('rmReward',false);show('rmPlanFeedback',false);show('rmPlanNext',false);$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;setTimeout(()=>$('rmPlanAnswer').focus(),0)}
+rpAdvance=function(){const st=rmPlan&&rmPlan[rpStep];if(!st||st.nmDone||(st.history||[]).length<PLAN_PER_SKILL)return practiceAdvance();if(!st.nmRound){const items=NM.checkItemsFor(st.skill,selectedGrade,st.items);if(!items.length){st.nmDone=true;return practiceAdvance()}st.nmRound=NM.createRound(items)}nmRender(st)};
+rpCheck=function(){const st=rmPlan&&rmPlan[rpStep];if(!st||!st.nmRound)return practiceCheck();if(rpAnswered)return;if(!normalizeAnswer($('rmPlanAnswer').value))return askForAnswer('rmPlanAnswer','rmPlanFeedback');rpAnswered=true;const it=st.nmRound.item(),ok=answerOk(it,$('rmPlanAnswer').value),r=st.nmRound.answer(ok),fb=$('rmPlanFeedback');let msg=ok?'נכון!':'התשובה: '+it.answer+'.';
+if(r.done){st.nmRound=null;if(typeof mmMasteryTracker!=='undefined'&&mmMasteryTracker.record)mmMasteryTracker.record(it.topicId||st.skill,{stage:'plain',correct:r.passed});
+if(r.passed){st.nmDone=true;msg+=' אלופים! פתרתם לגמרי בעצמכם.'}else{st.history=st.history.slice(0,Math.max(0,PLAN_PER_SKILL-NM.ROUND));let store=null;try{store=localStorage}catch(e){}const inst=NM.childInstrument(store,st.skill);if(!prefsNow().quiet)NM.cueInstrument(inst);msg+=' חוזרים לתמונה עם הלהקה, ואז ננסה שוב.'}}
+fb.className=`feedback ${ok?'good':'bad'}`;fb.textContent=msg;show('rmPlanFeedback',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;$('rmPlanNext').textContent='הבא';show('rmPlanNext',true)};
+$('rmPlanCheck').onclick=rpCheck;$('rmPlanNext').onclick=rpAdvance;
+})();
+</script>
 </body></html>
