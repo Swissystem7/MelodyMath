@@ -214,6 +214,8 @@ test('#751 batch 3: grade ג׳ topics keep one main way, the others stay as EXTR
     TIME_MIN_SEC: ['minuteGroups', 'quarterMinuteGroups', 'minuteAndRest'],
     ADD_SUB_10K: ['carryAccentUp', 'borrowGroupDown', 'roundToAccent'],
     WORD_TWO_STEP: ['groupsThenMore', 'groupsTakeAway'],
+    TIMES_MORE: ['phraseFits', 'repeatedBars', 'phraseShare'],
+    MUL_DIV_10: ['tenfoldGroups', 'hundredTwoSteps'],
   };
   const g3 = FILES['ג'];
   Object.keys(WAYS).forEach((k) => {
