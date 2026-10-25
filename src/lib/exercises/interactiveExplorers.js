@@ -116,9 +116,11 @@
       wrapper.innerHTML = `
         <div class="nl-control" style="margin:8px 0;"><input type="range" class="explorer-line-slider" min="0" max="100" value="${exercise.pct}" aria-label="ישר מספרים מנגן" style="width:100%;min-height:44px;"></div>
         <div class="nl-keys" role="group" aria-label="נקודות ${isPct ? 'אחוז' : 'שבר'} על הישר" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
-          ${[0, 25, 50, 75, 100].map(p => {
+          ${[0, 25, 50, 75, 100].map((p, idx) => {
             const label = isPct ? (p + '%') : (p === 0 ? '0' : p === 25 ? '1/4' : p === 50 ? '1/2' : p === 75 ? '3/4' : '1');
-            return `<button type="button" class="secondary line-tick-btn" data-tap="woodBar" data-pct="${p}" data-val="${label}" style="min-width:44px;min-height:44px;">${label}</button>`;
+            const freqs = [261.63, 293.66, 329.63, 392.00, 523.25];
+            const hz = freqs[idx];
+            return `<button type="button" class="secondary line-tick-btn" data-tap="woodBar" data-step="${idx}" data-hz="${hz}" data-pct="${p}" data-val="${label}" style="min-width:44px;min-height:44px;">${label}</button>`;
           }).join('')}
         </div>`;
       wrapper.querySelectorAll('.line-tick-btn').forEach(btn => {
@@ -144,8 +146,8 @@
       wrapper.innerHTML = `
         <div class="pairs-container" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0;">${pairsHtml}</div>
         <div class="even-odd-choices" style="display:flex;gap:12px;justify-content:center;margin-top:10px;">
-          <button type="button" class="secondary eo-choice-btn" data-choice="זוגי" style="min-width:70px;min-height:44px;">זוגי</button>
-          <button type="button" class="secondary eo-choice-btn" data-choice="אי-זוגי" style="min-width:70px;min-height:44px;">אי-זוגי</button>
+          <button type="button" class="secondary eo-choice-btn" data-choice="זוגי" data-tap="metalBell" data-step="0" data-hz="329.63" style="min-width:70px;min-height:44px;">זוגי</button>
+          <button type="button" class="secondary eo-choice-btn" data-choice="אי-זוגי" data-tap="metalBell" data-step="2" data-hz="440.00" style="min-width:70px;min-height:44px;">אי-זוגי</button>
         </div>`;
       wrapper.querySelectorAll('.eo-choice-btn').forEach(btn => {
         btn.onclick = () => { if (typeof opts.onSelect === 'function') opts.onSelect(btn.dataset.choice); };
