@@ -493,6 +493,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/pace.js"></script>
 <script src="src/data/struggleTopics.js"></script>
 <script src="src/lib/struggleTopics.js"></script>
+<script src="src/lib/exercises/tempoPercent.js"></script>
 <script>
 const exercises=[
 [1,1,'שברים','קצב','רבע מנוקד שווה לכמה שמיניות?',3,'רבע רגיל = 2 שמיניות, והנקודה מוסיפה חצי מערך התו'],[2,1,'שברים','קצב','כמה רבעים יש בתיבה בזמן 4/4?',4,'המספר העליון מציין כמה רבעים בתיבה'],[3,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של סול במרווח קווינטה?','3:2','קווינטה נקייה היא יחס 3:2'],[4,1,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 3/4?',6,'כל רבע שווה 2 שמיניות'],[5,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של פה במרווח קוורטה?','4:3','קוורטה נקייה היא יחס 4:3'],[6,1,'שברים','קצב','כמה רבעים שווה חצי מנוקד?',3,'חצי רגיל = 2 רבעים, והנקודה מוסיפה רבע נוסף'],[7,1,'חזקות','טמפו','אם מהירות הקצב מוכפלת פי 2 בכל דקה, כמה פעמים תגדל המהירות אחרי 3 דקות?',8,'2 בחזקת 3'],[8,1,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 2/4?',8,'כל רבע שווה 4 שש־עשריות'],[9,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של דו באוקטבה?','2:1','אוקטבה היא הכפלת התדר פי 2'],[10,1,'שברים','קצב','משך תיבה במשקל 6/8 שווה לכמה רבעים?',3,'שש שמיניות שוות במשך לשלושה רבעים; בפועל מרגישים שתי פעימות של רבע מנוקד'],[11,1,'חזקות','טמפו','קצב מתחיל ב־60 BPM ומוכפל כל 2 דקות. מה הקצב אחרי 4 דקות?',240,'60 × 2² = 240'],[12,1,'שברים','קצב','כמה חצאים יש בתיבה בזמן 4/4?',2,'כל חצי שווה 2 רבעים'],
@@ -817,6 +818,9 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='pie' && item.chart && typeof renderPieChartHtml==='function'){
     host.classList.remove('hidden');
     host.innerHTML=renderPieChartHtml(item.chart);
+  } else if(item.widget==='tempoPercent' && typeof MM_TEMPO_PERCENT!=='undefined'){
+    host.classList.remove('hidden');
+    MM_TEMPO_PERCENT.bindTempoPercent(host, item);
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
@@ -838,6 +842,8 @@ function poolForSkill(skill){
   if((skill==='multiplication'||skill==='division') && selectedGrade==='ג' && typeof withCoreIfNeeded==='function'){
     rows=withCoreIfNeeded(rows, typeof coreFactItems==='function'?coreFactItems(skill):[]);
   }
+  // Tempo percents (#690): optional extra items after the bank's own, weak evidence (M8).
+  if(skill==='percent' && selectedGrade==='ו' && typeof MM_TEMPO_PERCENT!=='undefined') rows=rows.concat(MM_TEMPO_PERCENT.extraItems());
   return rows;
 }
 let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();

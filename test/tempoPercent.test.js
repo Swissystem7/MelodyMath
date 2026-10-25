@@ -1,67 +1,88 @@
 // MelodyMath — Unit tests for Grade 6 Tempo Percents (Issue #690, Refs #665).
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const TempoPercent = require('../src/lib/exercises/tempoPercent.js');
 const banks = require('../src/lib/banks.js');
+const instruments = require('../src/lib/instruments.js');
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
-test('tempo percent module exports at least 8 items with base tempo and +/- 10/25/50% (#690, Refs #665)', () => {
+test('tempo percent module exports 9 items with base tempo and +/- 10/25/50% (#690, Refs #665)', () => {
   const items = TempoPercent.getTempoPercentItems();
-  assert.ok(items.length >= 8, 'Must have at least 8 tempo percent items, got ' + items.length);
-
-  // Check percent changes include +/-10%, 25%, 50%
+  assert.equal(items.length, 9);
   const changes = items.map(it => it.percentChange);
-  assert.ok(changes.includes(10), 'Must include +10%');
-  assert.ok(changes.includes(-10), 'Must include -10%');
-  assert.ok(changes.includes(25), 'Must include +25%');
-  assert.ok(changes.includes(-25), 'Must include -25%');
-  assert.ok(changes.includes(50), 'Must include +50%');
-  assert.ok(changes.includes(-50), 'Must include -50%');
-
-  // Check both question formats exist
+  [10, -10, 25, -25, 50, -50].forEach(p => assert.ok(changes.includes(p), 'Must include ' + p + '%'));
   const kinds = items.map(it => it.kind);
-  assert.ok(kinds.includes('new_tempo'), 'Must have new_tempo items');
-  assert.ok(kinds.includes('by_percent'), 'Must have by_percent items');
-
-  // Verify mathematical correctness of all items
+  assert.ok(kinds.includes('new_tempo') && kinds.includes('by_percent'));
   items.forEach(it => {
     assert.equal(it.grade, 'ו');
     assert.equal(it.skill, 'percent');
     assert.equal(it.music, 'tempoPercent');
     assert.equal(banks.mechanismOf(it.music), 'M8');
-
     if (it.kind === 'new_tempo') {
-      const expected = Math.round(it.baseBpm * (1 + it.percentChange / 100));
-      assert.equal(it.answer, expected, 'Item ' + it.id + ' answer must match calculation');
+      assert.equal(it.answer, Math.round(it.baseBpm * (1 + it.percentChange / 100)), it.id);
       assert.match(it.prompt, /מה הקצב החדש/);
-    } else if (it.kind === 'by_percent') {
-      const expectedPct = Math.abs(Math.round(((it.newBpm - it.baseBpm) / it.baseBpm) * 100));
-      assert.equal(it.answer, expectedPct, 'Item ' + it.id + ' answer must match percent change');
+    } else {
+      assert.equal(it.answer, Math.abs(Math.round(((it.newBpm - it.baseBpm) / it.baseBpm) * 100)), it.id);
       assert.match(it.prompt, /בכמה אחוזים/);
     }
   });
 });
 
-test('circles per sound visual scaffolding is rendered for tempo items (#690, Refs #665)', () => {
-  const items = TempoPercent.getTempoPercentItems();
-  const sample = items[0];
-  assert.ok(sample.circles, 'Item must have circles metadata');
-  assert.equal(sample.circles.baseSounds, 4);
+test('M8 has no research, so every item is weak optional extra with no outcome-research source', () => {
+  assert.deepEqual(banks.MUSIC_MECHANISMS.M8.sources, []);
+  TempoPercent.extraItems().forEach(it => {
+    assert.equal(it.musicSrc, undefined, it.id + ' must not cite wnetMathInMusic');
+    if (!it.music) return;
+    assert.equal(it.musicEv, 'weak');
+    assert.equal(it.optional, true);
+    assert.equal(it.evidence, 'weak');
+  });
+  // Extras come after the bank's own percent items, never instead of them.
+  assert.match(html, /rows=rows\.concat\(MM_TEMPO_PERCENT\.extraItems\(\)\)/);
+  assert.ok(banks.rowsOf('percent', 'ו').length > 0);
+});
 
-  const html = TempoPercent.renderTempoCirclesHtml(sample);
-  assert.ok(html.includes('tempo-circles-widget'));
-  assert.ok(html.includes('base-dot'));
-  assert.ok(html.includes('changed-dot'));
-  assert.ok(html.includes('data-beat="4"'));
+test('circles differ before and after the change by exactly the percent, and the sound follows them', () => {
+  TempoPercent.getTempoPercentItems().forEach(it => {
+    const c = it.circles;
+    assert.notEqual(c.baseSounds, c.changedSounds, it.id);
+    assert.equal(c.changedSounds, Math.round(c.baseSounds * (100 + it.percentChange) / 100), it.id);
+    assert.ok(Number.isInteger(c.changedSounds) && c.changedSounds <= 12, it.id);
+    const notes = TempoPercent.tempoNotes(it, 'drumLow');
+    assert.equal(notes.filter(n => n.row === 'base').length, c.baseSounds);
+    assert.equal(notes.filter(n => n.row === 'changed').length, c.changedSounds);
+    const ch = notes.filter(n => n.row === 'changed');
+    if (ch.length > 1) assert.ok(Math.abs(ch[1].at - ch[0].at - 60 / (it.newBpm || it.answer)) < 1e-9, it.id + ' real tempo');
+    const out = TempoPercent.renderTempoCirclesHtml(it);
+    assert.equal((out.match(/base-dot/g) || []).length, c.baseSounds);
+    assert.equal((out.match(/changed-dot/g) || []).length, c.changedSounds);
+    assert.ok(out.includes('tp-play'));
+  });
+});
+
+test('instruments rotate over all 4 families without a store, and follow MM_MY_INSTRUMENT when loaded', () => {
+  const fams = new Set(TempoPercent.getTempoPercentItems().map(it => TempoPercent.instrumentFor(it, instruments).family));
+  assert.equal(fams.size, 4);
+  globalThis.MM_MY_INSTRUMENT = { getMyInstrument: () => ({ id: 'oud' }) };
+  try { assert.equal(TempoPercent.instrumentFor(TempoPercent.TEMPO_PERCENT_ITEMS[0], instruments).id, 'oud'); }
+  finally { delete globalThis.MM_MY_INSTRUMENT; }
+});
+
+test('index.html loads tempoPercent.js and renders it in the exercise widget', () => {
+  assert.match(html, /<script src="src\/lib\/exercises\/tempoPercent\.js"><\/script>/);
+  assert.match(html, /item\.widget==='tempoPercent'/);
 });
 
 test('end-of-topic no-music check item exists unassisted without musical cues (#690, Refs #665)', () => {
   const check = TempoPercent.getNoMusicCheck();
-  assert.ok(check);
   assert.equal(check.grade, 'ו');
   assert.equal(check.skill, 'percent');
   assert.equal(check.noMusic, true);
   assert.equal(check.plain, true);
   assert.equal(check.musicStage, 'no_music_check');
-  assert.ok(check.answer != null);
+  assert.equal(check.answer, 90);
+  assert.equal(check.widget, undefined);
   assert.match(check.prompt, /קצב/);
 });
