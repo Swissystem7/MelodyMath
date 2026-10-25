@@ -33,12 +33,50 @@
     if (raw.includes('line') || raw.includes('ישר')) return 'numberLine';
     return 'counting';
   }
-  function getVoicesForExercise(it, parsedOp) {
+  function getPersistedInstrument(options) {
+    if (options && options.instrument) return options.instrument;
+    if (options && options.chosenInstrument) return options.chosenInstrument;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const direct = localStorage.getItem('mm_chosen_instrument') || localStorage.getItem('mm_instrument');
+        if (direct) return direct;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('mm_child_inst_')) {
+            const v = localStorage.getItem(k);
+            if (v) return v;
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+  function savePersistedInstrument(instrumentId) {
+    if (!instrumentId) return false;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('mm_chosen_instrument', instrumentId);
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
+  function getVoicesForExercise(it, parsedOp, options) {
     const instMod = getInstruments();
     const key = resolveTopicKey(it, parsedOp);
     if (!instMod || typeof instMod.forTopic !== 'function') return DEFAULT_VOICES;
-    const list = instMod.forTopic(key);
-    if (!list || !list.length) return DEFAULT_VOICES;
+    let list = instMod.forTopic(key) || [];
+    if (!list.length) return DEFAULT_VOICES;
+    const chosen = getPersistedInstrument(options);
+    if (chosen) {
+      const idx = list.findIndex(x => x.id === chosen);
+      if (idx > 0) {
+        list = [list[idx]].concat(list.slice(0, idx), list.slice(idx + 1));
+      } else if (idx === -1 && typeof instMod.instrumentById === 'function') {
+        const inst = instMod.instrumentById(chosen);
+        if (inst) list = [inst].concat(list);
+      }
+    }
     const hzMap = { drumLow: 220, drumHigh: 330, woodClick: 330, woodBar: 392, metalBell: 440, jingle: 494, tine: 523, frameDrum: 247, drone: 165 };
     return list.map((x, i) => ({
       voice: x.voice || 'drumLow', hz: hzMap[x.voice] || (260 + (i * 45) % 200),
@@ -103,7 +141,7 @@
     const beat = 60 / bpm, pause = beat * 1.5;
     const groups = [], notes = [];
     let t = 0, gIdx = 0;
-    const topicVoices = getVoicesForExercise(it, parsed.op);
+    const topicVoices = getVoicesForExercise(it, parsed.op, options);
 
     if (parsed.op === 'subtraction') {
       const a = parsed.minuend, b = parsed.subtrahend;
@@ -183,5 +221,5 @@
     if (btn) btn.addEventListener('click', handlePlay);
     return { plan, play: handlePlay, stop: () => { if (activeHandle && activeHandle.stop) activeHandle.stop(); } };
   }
-  return { parseNumberGroups, extractNumberPlan, renderHtml, play, mount, DEFAULT_VOICES, shouldSkip, getVoicesForExercise, resolveTopicKey };
+  return { parseNumberGroups, extractNumberPlan, renderHtml, play, mount, DEFAULT_VOICES, shouldSkip, getVoicesForExercise, resolveTopicKey, getPersistedInstrument, savePersistedInstrument };
 });

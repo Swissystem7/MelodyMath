@@ -131,3 +131,27 @@ test('instruments take from forTopic and tempo varies per exercise (0g, #720, Re
   // djembe/tabla use drumHigh or drumLow or frameDrum or jingle from forTopic('multiplication')
   assert.ok(['drumHigh', 'drumLow', 'frameDrum', 'jingle', 'tine'].includes(mulVoice));
 });
+
+test('chosen instrument is persisted and prioritized in NumberPlay (Refs #665, Refs #686)', () => {
+  const dummyStore = {};
+  globalThis.localStorage = {
+    getItem: k => dummyStore[k] || null,
+    setItem: (k, v) => { dummyStore[k] = String(v); },
+    removeItem: k => { delete dummyStore[k]; },
+    clear: () => { for (const k in dummyStore) delete dummyStore[k]; },
+    get length() { return Object.keys(dummyStore).length; },
+    key: i => Object.keys(dummyStore)[i] || null
+  };
+
+  NumberPlay.savePersistedInstrument('handbells');
+  assert.equal(NumberPlay.getPersistedInstrument(), 'handbells');
+
+  const plan = NumberPlay.extractNumberPlan({ prompt: '3 + 4 = ?' });
+  assert.ok(plan);
+  assert.equal(plan.groups[0].instrument, 'handbells');
+  assert.equal(plan.groups[0].voice, 'metalBell');
+
+  // Option overrides
+  const planOverride = NumberPlay.extractNumberPlan({ prompt: '3 + 4 = ?' }, { chosenInstrument: 'cajon' });
+  assert.equal(planOverride.groups[0].instrument, 'cajon');
+});
