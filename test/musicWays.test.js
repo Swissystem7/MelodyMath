@@ -201,3 +201,35 @@ test('#751 batch 2: one main way per topic; the others stay as EXTRA with their 
     });
   });
 });
+
+test('#751 batch 3: grade ג׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
+  const WAYS = {
+    AREA: ['areaScore', 'repeatedBars'],
+    MASS_VOL: ['kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups'],
+    PICTOGRAM: ['keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare'],
+    BARCHART: ['columnNoteLength', 'twoNotesDifference', 'notesInARow'],
+    TABLE: ['cellGroups', 'tableGroupsSum'],
+    DIV_REM: ['phraseShare', 'repeatedBars'],
+    NUM10K: ['thousandAccents', 'tenGroupsUp'],
+    TIME_MIN_SEC: ['minuteGroups', 'quarterMinuteGroups', 'minuteAndRest'],
+    ADD_SUB_10K: ['carryAccentUp', 'borrowGroupDown', 'roundToAccent'],
+    WORD_TWO_STEP: ['groupsThenMore', 'groupsTakeAway'],
+  };
+  const g3 = FILES['ג'];
+  Object.keys(WAYS).forEach((k) => {
+    const [main, ...extra] = WAYS[k];
+    const ways = g3.music[k];
+    const primary = banks.primaryWays(ways);
+    assert.deepEqual(primary.map(([tag]) => tag), [main], k);
+    assert.equal(ways[0], primary[0], k + ' main way first');
+    extra.forEach((tag) => {
+      const w = ways.find(([t]) => t === tag);
+      assert.ok(w && banks.isOptionalWay(w), k + ' ' + tag);
+      assert.equal(w[3], 'A', k + ' ' + tag + ' keeps its rating');
+    });
+    // Some topics (e.g. MASS_VOL, DIV_REM) have no grade ג׳ items with a music
+    // note yet; only topics that do are checked against their main way.
+    const items = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST[k] && it.musicNote);
+    items.forEach((it) => assert.equal(it.music, main, it.id));
+  });
+});
