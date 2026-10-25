@@ -184,10 +184,13 @@
       ['columnPattern', 'בכל עמודה בלוח המאה ספרת היחידות חוזרת: 3, 13, 23… נגנו את העמודה כדגם שחוזר כל עשר פעימות ומצאו מה משתנה ומה נשאר.', 'azaryahuPatterns', 'A', EXTRA],
       ['tenAsOctave', 'ירידה שורה בלוח המאה היא עשר יותר — אוקטבה. צעד ימינה או שמאלה — יחידה. נגנו את המסלול.', 'rusconi2005', 'A', WEAK],
     ],
+    // #751: fixed accents (das2023) are the one main way, as in CHART100 that
+    // builds on patterns; the MusiMath ways stay as EXTRA and keep their D.
     PATTERN: [
-      ['melodyAb', 'דגם AB בצליל: גבוה, נמוך, גבוה, נמוך… שירו אותו והמשיכו — הצליל הבא הוא מה שהדגם מכתיב.', 'azaryahuPatterns', 'D'],
-      ['mirrorPattern', 'סדרו 8 פעימות בשורה וצרו דגם סימטרי; הפכו אותו ובדקו אם המוזיקה משתנה.', 'azaryahuPatterns', 'D'],
-      ['composePattern', 'הרכיבו דגם AAB או ABC בצלילים ובצורות: אותו דגם, פעם בצליל ופעם בצורה — מה חוזר ואיפה?', 'azaryahuPatterns', 'D'],
+      ['fixedAccents', 'שמרו פעימה קבועה, וההדגשה חוזרת תמיד באותו מקום בדגם. אחרי ההדגשה הדגם מתחיל מחדש — כך יודעים מה בא עכשיו.', 'das2023', 'A'],
+      ['melodyAb', 'דגם AB בצליל: גבוה, נמוך, גבוה, נמוך… שירו אותו והמשיכו — הצליל הבא הוא מה שהדגם מכתיב.', 'azaryahuPatterns', 'D', EXTRA],
+      ['mirrorPattern', 'סדרו 8 פעימות בשורה וצרו דגם סימטרי; הפכו אותו ובדקו אם המוזיקה משתנה.', 'azaryahuPatterns', 'D', EXTRA],
+      ['composePattern', 'הרכיבו דגם AAB או ABC בצלילים ובצורות: אותו דגם, פעם בצליל ופעם בצורה — מה חוזר ואיפה?', 'azaryahuPatterns', 'D', EXTRA],
     ],
   };
 

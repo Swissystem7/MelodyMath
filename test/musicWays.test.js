@@ -42,7 +42,10 @@ Object.keys(FILES).forEach((grade) => {
     Object.keys(file.music).forEach((k) => {
       assert.ok(banks.ST[k], grade + ' ' + k + ' is not a bank standard');
       const ways = file.music[k];
-      assert.ok(ways.length >= 2 && ways.length <= 3, k);
+      // One per level (1-3); a topic whose main way was replaced (#751) may
+      // keep the old ways as a fourth, optional one, never a fourth primary.
+      assert.ok(ways.length >= 2 && ways.length <= 4, k);
+      assert.ok(banks.primaryWays(ways).length <= 3, k);
       assert.equal(new Set(ways.map(([tag]) => tag)).size, ways.length, k + ' repeats a tag');
       assert.equal(new Set(ways.map(([, note]) => note)).size, ways.length, k + ' repeats a note');
     });
@@ -149,4 +152,31 @@ test('a music-side file adds no curriculum rows, loads before banks.js on every 
     assert.ok(read('sw.js').includes('curriculum/' + name + '.js'), name);
   });
   assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 27, 'a new asset, so CACHE moves');
+});
+
+test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART100 that builds on it starts the same way', () => {
+  const g1 = FILES['א'];
+  const ways = g1.music.PATTERN;
+  const primary = banks.primaryWays(ways);
+  assert.equal(primary.length, 1);
+  assert.deepEqual([primary[0][0], primary[0][2]], ['fixedAccents', 'das2023']);
+  assert.equal(ways[0], primary[0]);
+  // The MusiMath ways stay as extra practice and keep their D label.
+  ['melodyAb', 'mirrorPattern', 'composePattern'].forEach((tag) => {
+    const w = ways.find(([t]) => t === tag);
+    assert.ok(w && banks.isOptionalWay(w), tag);
+    assert.equal(w[3], 'D', tag);
+    assert.notEqual(w[4].evidence, 'weak', tag);
+  });
+  // The next topic in bank order builds on patterns and opens with das2023.
+  const order = Object.keys(banks.ST);
+  assert.equal(order[order.indexOf('PATTERN') + 1], 'CHART100');
+  assert.equal(g1.music.CHART100[0][2], 'das2023');
+  assert.equal(banks.primaryWays(g1.music.CHART100)[0][2], 'das2023');
+  const items = banks.itemsForGrade('א').filter((it) => it.standard === banks.ST.PATTERN && it.musicNote);
+  assert.ok(items.length > 0);
+  items.forEach((it) => {
+    assert.equal(it.music, 'fixedAccents', it.id);
+    assert.deepEqual(it.musicExtra.map((x) => x.music), ['melodyAb', 'mirrorPattern', 'composePattern'], it.id);
+  });
 });
