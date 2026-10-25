@@ -1,8 +1,10 @@
 'use strict';
-// #689 (Refs #665): lcmDrums restored as the primary interactive method for
-// its LCM / commutativity topic in grade ג׳ (MUL_C): a drum every 3 beats and
-// a drum every 4 beats meet at 12, one circle per sound, and the end-of-topic
-// check is silent. In grades ב׳/ד׳/ה׳ lcmDrums stays optional extra practice.
+// #689 (Refs #665): lcmDrums restored as a primary interactive method for
+// its LCM / commutativity topic in grade ג׳ (MUL_C): repeatedBars stays the
+// first primary way from grade 2, lcmDrums comes after it as the second primary
+// way (a drum every 3 beats and a drum every 4 beats meet at 12, one circle
+// per sound), and the end-of-topic check is silent. In grades ב׳/ד׳/ה׳ lcmDrums
+// stays optional extra practice.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
@@ -13,13 +15,19 @@ const g3 = require('../src/lib/curriculum/grade3');
 const g4 = require('../src/lib/curriculum/grade4');
 const g5 = require('../src/lib/curriculum/grade5');
 
-const NOTE = g3.music.MUL_C[0][1];
+const lcmWay = g3.music.MUL_C.find((w) => w[0] === 'lcmDrums');
+const NOTE = lcmWay[1];
 
-test('grade ג׳ MUL_C: lcmDrums is the first primary way, not optional or weak', () => {
+test('grade ג׳ MUL_C: repeatedBars from grade 2 must stay the FIRST main method; lcmDrums must not come before it', () => {
   const primary = banks.primaryWays(g3.music.MUL_C);
-  assert.equal(primary[0][0], 'lcmDrums');
-  assert.equal(banks.isOptionalWay(g3.music.MUL_C[0]), false);
-  assert.equal(g3.music.MUL_C[0][4], undefined);
+  assert.equal(primary[0][0], 'repeatedBars', 'repeatedBars must stay the first main method');
+  const repIdx = primary.findIndex((w) => w[0] === 'repeatedBars');
+  const lcmIdx = primary.findIndex((w) => w[0] === 'lcmDrums');
+  assert.ok(repIdx !== -1 && lcmIdx !== -1, 'both repeatedBars and lcmDrums must be primary ways');
+  assert.ok(repIdx < lcmIdx, 'repeatedBars must come before lcmDrums (lcmDrums must not come before it)');
+  assert.equal(primary[1][0], 'lcmDrums');
+  assert.equal(banks.isOptionalWay(lcmWay), false);
+  assert.equal(lcmWay[4], undefined);
   // A primary way must use a strongly evidenced mechanism (dosage rule 1).
   assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('lcmDrums')), banks.mechanismOf('lcmDrums'));
   // The simultaneous polyrhythm activities stay in the weak mechanism.
@@ -29,12 +37,17 @@ test('grade ג׳ MUL_C: lcmDrums is the first primary way, not optional or weak'
   assert.match(NOTE, /12/);
 });
 
-test('grade ג׳ MUL_C level-1 items are solved through lcmDrums', () => {
+test('grade ג׳ MUL_C: level-1 items use repeatedBars and level-2 items are solved through lcmDrums', () => {
   const items = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST.MUL_C);
   assert.ok(items.length > 0);
   const level1 = items.filter((it) => it.level === 1 && it.musicNote);
   assert.ok(level1.length > 0);
   level1.forEach((it) => {
+    assert.equal(it.music, 'repeatedBars', it.id);
+  });
+  const level2 = items.filter((it) => it.level === 2 && it.musicNote);
+  assert.ok(level2.length > 0);
+  level2.forEach((it) => {
     assert.equal(it.music, 'lcmDrums', it.id);
     assert.equal(it.musicNote, NOTE, it.id);
   });
