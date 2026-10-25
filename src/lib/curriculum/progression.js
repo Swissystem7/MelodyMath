@@ -51,7 +51,7 @@
     'mm-cur-15': [['mm-cur-0', 'mm-cur-6'], 'accented beats: skip counting as multiples'],
     'mm-cur-16': [['mm-cur-15'], 'beats shared into equal bars'],
     'mm-cur-17': [['mm-cur-8'], 'polygons and the right angle'],
-    'mm-cur-18': [['mm-cur-9', 'mm-cur-10', 'mm-cur-14'], 'perimeter and the half bar as half hour'],
+    'mm-cur-18': [['mm-cur-9', 'mm-cur-10', 'mm-cur-14', 'mm-cur-16'], 'perimeter and the half bar as half hour'],
     'mm-cur-19': [['mm-cur-11', 'mm-cur-14'], 'sums and change'],
     'mm-cur-20': [['mm-cur-15'], 'layers of cubes as repeated groups'],
     'mm-cur-21': [['mm-cur-12'], 'tables and bar charts'],
