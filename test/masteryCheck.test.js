@@ -1,3 +1,4 @@
+const fs = require('node:fs');
 // Tests for No-Music Mastery Check (Refs #681, Refs #665).
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -108,4 +109,51 @@ test('mountMasteryCheck mounts in screen and handles answers', () => {
     onAnswer: (val, ok) => { answered = { val, ok }; }
   });
   assert.ok(handle);
+});
+
+test('anti-skip guard: attempt passing stage plain is rejected when currentStage is picture even if soundSolvedCount is 3 (#718, Refs #591)', () => {
+  const m = Mastery.createTopicMastery('mm-cur-15');
+  // Complete 3 sound solves
+  Mastery.recordAttempt(m, { stage: 'sound', correct: true });
+  m.soundSolvedCount = 3;
+  m.currentStage = 'picture';
+
+  // Caller attempts to jump directly to plain
+  const res = Mastery.recordAttempt(m, { stage: 'plain', correct: true });
+  assert.equal(res.mastered, false, 'must not be marked mastered');
+  assert.equal(m.mastered, false);
+  assert.equal(m.currentStage, 'symbol', 'advances from picture to symbol, ignoring external plain stage');
+});
+
+test('isTopicUnlocked locks unknown ids and resolves grade:skill via linksForSkill (#718, Refs #591)', () => {
+  const tracker = Mastery.createMasteryTracker();
+
+  // Unknown topic id must be locked
+  assert.equal(tracker.isUnlocked('unknown-topic-id', prog), false, 'unknown topic id is locked');
+  assert.equal(tracker.isUnlocked('ב:nonexistent_skill', prog), false, 'unknown skill is locked');
+  assert.equal(tracker.isUnlocked('', prog), false, 'empty topic id is locked');
+
+  // Foundational topic with no prereqs is unlocked
+  assert.equal(tracker.isUnlocked('mm-cur-0', prog), true, 'foundational topic is unlocked');
+
+  // Skill with prereqs is locked until prereq is mastered
+  assert.equal(tracker.isUnlocked('א:NUMBER_LINE_APPROX', prog), false, 'locked before mm-cur-0 mastered');
+
+  // Master mm-cur-0
+  const t0 = tracker.get('mm-cur-0');
+  Mastery.recordAttempt(t0, { stage: 'sound', correct: true });
+  Mastery.recordAttempt(t0, { stage: 'picture', correct: true });
+  Mastery.recordAttempt(t0, { stage: 'symbol', correct: true });
+  Mastery.recordAttempt(t0, { stage: 'plain', correct: true });
+  assert.equal(tracker.isMastered('mm-cur-0'), true);
+
+  // Now א:NUMBER_LINE_APPROX is unlocked!
+  assert.equal(tracker.isUnlocked('א:NUMBER_LINE_APPROX', prog), true, 'unlocked once mm-cur-0 mastered');
+});
+
+test('index.html runs mastery check at the end of each topic without grade-1 fallback (#718, Refs #591)', () => {
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  assert.equal(indexHtml.includes("{prompt:'3 + 2 = ?',answer:5}"), false, 'fallback item removed');
+  assert.ok(indexHtml.includes('checkItem='), 'picks item from current topic');
+  assert.ok(indexHtml.includes("mountMasteryCheck($('masteryCheckHost'),checkItem"), 'mounts check at end of each topic');
 });

@@ -37,11 +37,8 @@
 
   function recordAttempt(state, attempt) {
     const att = attempt || {};
-    let stage = att.stage || state.currentStage;
-    // Enforce stage progression: cannot jump directly to plain without prior musical stages
-    if (stage === 'plain' && (state.soundSolvedCount === 0 && state.currentStage !== 'plain')) {
-      stage = state.currentStage;
-    }
+    // Strictly follow state.currentStage: ignore external stage parameter to prevent skipping
+    const stage = state.currentStage;
     const isCorrect = Boolean(att.correct);
     const isMuted = Boolean(att.muted);
 
@@ -159,10 +156,20 @@
     return { container, close: function () { container.classList.add('hidden'); } };
   }
 
-  function isTopicUnlocked(topicId, tracker, progModule) {
-    if (!progModule || typeof progModule.linksForTopic !== 'function') return true;
-    const links = progModule.linksForTopic(topicId);
-    if (!links || !Array.isArray(links.prereq) || links.prereq.length === 0) return true;
+  function isTopicUnlocked(topicIdOrGrade, tracker, progModule, skillKey) {
+    if (!progModule) return false;
+    let links = null;
+    const first = String(topicIdOrGrade || '');
+    if (skillKey && typeof progModule.linksForSkill === 'function') {
+      links = progModule.linksForSkill(first, skillKey);
+    } else if (first.includes(':') && typeof progModule.linksForSkill === 'function') {
+      const parts = first.split(':');
+      links = progModule.linksForSkill(parts[0], parts[1]);
+    } else if (typeof progModule.linksForTopic === 'function') {
+      links = progModule.linksForTopic(first);
+    }
+    if (!links) return false;
+    if (!Array.isArray(links.prereq) || links.prereq.length === 0) return true;
     return links.prereq.every(function (pId) {
       return tracker && tracker.isMastered(pId);
     });
@@ -181,8 +188,8 @@
       isMastered: function (id) {
         return Boolean(this.get(id).mastered);
       },
-      isUnlocked: function (id, progModule) {
-        return isTopicUnlocked(id, this, progModule);
+      isUnlocked: function (id, progModule, skillKey) {
+        return isTopicUnlocked(id, this, progModule, skillKey);
       },
       getReport: function (id) {
         return getTopicReport(this.get(id));
