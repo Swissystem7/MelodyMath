@@ -60,17 +60,19 @@ test('(a) all items link to curriculum item mm-cur-57 via sectionForItem', () =>
 test('(b) bridge step from levelNotes to BPM is registered in Grade 6 curriculum', () => {
   const ways = g6.music.G6_MEAN;
   assert.ok(Array.isArray(ways));
-  assert.strictEqual(ways.length, 3, 'G6_MEAN must have 3 ways');
+  assert.strictEqual(ways.length, 4, 'G6_MEAN must have 4 ways');
 
   assert.strictEqual(ways[0][0], 'levelNotes');
   assert.strictEqual(ways[1][0], 'tapTempo', 'tapTempo must be the second way bridging to BPM');
   assert.strictEqual(ways[2][0], 'equalPhrases');
+  assert.strictEqual(ways[3][0], 'pitchMean');
 
   const tapWay = ways[1];
   assert.match(tapWay[1], /מרווח/);
   assert.match(tapWay[1], /BPM/);
   assert.strictEqual(tapWay[2], 'azaryahu2020');
   assert.strictEqual(tapWay[3], 'A');
+  assert.strictEqual(banks.isOptionalWay(tapWay), true, 'tapTempo is EXTRA');
 
   // Verify mechanism mapping in banks.js
   assert.strictEqual(banks.mechanismOf('tapTempo'), 'M3', 'tapTempo belongs to M3 (durations)');
@@ -79,7 +81,8 @@ test('(b) bridge step from levelNotes to BPM is registered in Grade 6 curriculum
 test('(c) arithmetic mean computation is exact (mean = sum/count) and resolves BPM rate fallacy', () => {
   const items = tapTempoMean.getItems();
   for (const item of items) {
-    const list = item.intervals || item.bpms;
+    const list = item.intervals;
+    assert.strictEqual(item.bpms, undefined, `${item.id} keeps its gaps in intervals only`);
     assert.ok(Array.isArray(list) && list.length >= 3);
 
     let sum = 0;
@@ -141,4 +144,38 @@ test('widget rendering reflects tap and interval counts and button cue', () => {
   const htmlPlain = tapTempoMean.renderTapTempoWidgetHtml(items[items.length - 1]);
   assert.ok(htmlPlain.includes('tap-mean-plain'));
   assert.ok(htmlPlain.includes('שלב בדיקה'));
+});
+
+test('G6_MEAN has exactly one main (non-EXTRA) way, levelNotes; pitchMean is back as extra', () => {
+  const ways = g6.music.G6_MEAN;
+  const main = banks.primaryWays(ways);
+  assert.strictEqual(main.length, 1);
+  assert.strictEqual(main[0][0], 'levelNotes');
+  const pitch = ways.find((w) => w[0] === 'pitchMean');
+  assert.ok(pitch, 'pitchMean restored');
+  assert.strictEqual(pitch[2], 'rusconi2005');
+  assert.strictEqual(pitch[3], 'A');
+  assert.strictEqual(banks.isOptionalWay(pitch), true);
+  assert.strictEqual(pitch[4].evidence, 'weak', 'M5 pitch stays marked weak (dosage rule 2)');
+});
+
+test('simulated taps reach the mean: taps -> intervals -> mean, each tap plays an instrument voice', () => {
+  const voices = require('../src/lib/instrumentVoices');
+  assert.ok(voices.VOICES[tapTempoMean.TAP_VOICE], 'tap voice is a real instrumentVoices timbre');
+  const html = tapTempoMean.renderTapTempoWidgetHtml(tapTempoMean.getItems()[1]);
+  assert.ok(html.includes('data-voice="' + tapTempoMean.TAP_VOICE + '"'));
+
+  const times = [0, 500, 1100, 1800];
+  const played = [];
+  let click = null;
+  const btn = { addEventListener: (ev, fn) => { assert.strictEqual(ev, 'click'); click = fn; } };
+  const box = { querySelector: (sel) => (sel === '.btn-tap-cue' ? btn : null) };
+  const session = tapTempoMean.attachTapButton(box, { now: () => times[played.length], play: (v) => played.push(v) });
+  times.forEach(() => click());
+
+  assert.deepEqual(played, Array(4).fill(tapTempoMean.TAP_VOICE));
+  assert.deepEqual(session.taps(), times);
+  assert.deepEqual(session.intervals(), [5, 6, 7]);
+  assert.strictEqual(session.mean(), 6);
+  assert.strictEqual(tapTempoMean.meanIntervalToBpm(session.mean()), 100);
 });
