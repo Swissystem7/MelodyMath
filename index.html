@@ -1034,15 +1034,6 @@ function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
 // startMetro() plays a click at once and resets the interval phase, so
 // restarting on every answer put an off-beat click right after each pick.
 function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
-// After a mistake, hear the exercise's own musical phrase again (#665/#700).
-// Reuses the existing playback paths only: maybeHear/playCountClicks for the
-// active hear groups, else musicEngine's replaySequence for the last phrase.
-function replayPhraseAfterMistake(){
-  const groups=typeof getActiveHear==='function'?getActiveHear():null;
-  if(groups&&typeof maybeHear==='function'){ maybeHear({hear:groups}); return true; }
-  if(typeof canReplay==='function'&&canReplay()&&typeof replaySequence==='function'){ replaySequence(); return true; }
-  return false;
-}
 function noteMetro(correct){
   // A wrong answer gets its own soft falling step; a right one climbs with the streak.
   if(!correct && typeof playTap==='function') playTap('wrong');
@@ -1055,7 +1046,7 @@ function noteMetro(correct){
   else if(typeof playHarmonicReward==='function'){
     playHarmonicReward(correct ? metroStreak + 1 : 0);
   }
-  if(!correct){ metroStreak=0; if(typeof setTimeout==='function') setTimeout(replayPhraseAfterMistake,450); else replayPhraseAfterMistake(); return; }
+  if(!correct){ metroStreak=0; return; }
   metroStreak+=1;
   if($('metroAccel')&&$('metroAccel').checked){
     setMetroBpm(nextBpm(metroBpmNow(), metroStreak, true));
@@ -1234,7 +1225,6 @@ function finishBeatPick(value, correct, late){
     setMetroBpm(paced.bpm);
   } else noteMetro(correct && !late);
   if(paced && typeof playTap==='function') playTap(correct && !late ? 'correct' : 'wrong');
-  if(paced && !correct && !late && typeof replayPhraseAfterMistake==='function' && typeof setTimeout==='function') setTimeout(replayPhraseAfterMistake,450);
   logTeacherItem({kind:'beat',skill:beatCurrent.he||beatCurrent.skill,prompt:beatCurrent.prompt,answer:beatCurrent.answer,given:late?'מאוחר':value,correct:correct});
   [...$('beatChoices').children].forEach(b=>{ b.disabled=true; if(isCorrect(b.textContent,beatCurrent.answer)) b.classList.add('picked-good'); });
   $('beatFeedback').className='feedback '+(correct?'good':'bad');
