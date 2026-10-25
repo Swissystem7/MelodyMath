@@ -43,7 +43,7 @@ test('index.html child-facing practice screens contain no visible clinical/diagn
   const blurbMatch = html.match(/<p id="rmStartBlurb">([\s\S]*?)<\/p>/);
   assert.ok(blurbMatch, 'rmStartBlurb exists');
   assert.doesNotMatch(blurbMatch[1], /אבחון קליני/);
-  assert.doesNotMatch(blurbMatch[1], /מדגם קצר/);
+  assert.match(blurbMatch[1], /מדגם קצר/);
   assert.match(blurbMatch[1], /נענה בעזרת הצלילים/);
 
   // Button text
@@ -61,4 +61,24 @@ test('index.html child-facing practice screens contain no visible clinical/diagn
   // Script is precached in sw.js
   const sw = fs.readFileSync(path.resolve(__dirname, '../sw.js'), 'utf8');
   assert.ok(sw.includes('./src/lib/childLanguage.js'));
+});
+
+test('lock test: statutory non-clinical notes restored and audience-scoped (FIX-737-NOTES, FIX-737-AUDIENCE)', () => {
+  const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+
+  // 1. rmStartBlurb has short sample and non-medical statement without clinical jargon
+  const blurbMatch = html.match(/<p id="rmStartBlurb">([\s\S]*?)<\/p>/);
+  assert.ok(blurbMatch, 'rmStartBlurb exists');
+  assert.match(blurbMatch[1], /מדגם קצר/);
+  assert.doesNotMatch(blurbMatch[1], /אבחון קליני/);
+  assert.match(html, /id="rmStartDisclaimer"[^>]*>זהו מדגם קצר, לא אבחון קליני/);
+
+  // 2. Practice-plan text in rmReport contains 'לא אבחון קליני'
+  assert.match(html, /זהו מדגם קצר במכשיר — לא אבחון קליני/);
+
+  // 3. All-correct message in rmReport contains 'לא אבחון ואין כאן טענת שליטה'
+  assert.match(html, /זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה/);
+
+  // 4. Parents disclaimer on #rmReport maintains statutory note
+  assert.match(html, /id="rmDisclaimer"[^>]*>זהו מדגם למידה קצר, לא אבחון קליני ואין כאן טענת שליטה/);
 });
