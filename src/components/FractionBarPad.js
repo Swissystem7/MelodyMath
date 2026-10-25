@@ -151,11 +151,23 @@
     state.instrument = (props && props.instrument) || DEFAULT_PROPS.instrument;
     const Logic = root.InstrumentPickerLogic || (function () { try { return require('../lib/instrumentPicker.js'); } catch (_) { return null; } })();
     const PickerUI = root.InstrumentPickerUI || (function () { try { return require('./InstrumentPicker.js'); } catch (_) { return null; } })();
-    state.ensemble = (Logic && Logic.pickEnsembleVoices({ childId: 'fbp_child', voices: 2, preferredInstrument: state.instrument })) || [state.instrument];
+    const childId = (props && props.childId) || (typeof who !== 'undefined' && who && who.name) || 'fbp_child';
+    state.ensemble = (Logic && Logic.pickEnsembleVoices({ childId: childId, voices: 2, preferredInstrument: state.instrument })) || [state.instrument];
     let playing = null;
     function stop() { if (playing) playing.stop(); playing = null; }
     function draw(focusSel) {
       el.innerHTML = renderHtml(state, inst.voice);
+      const host = el.querySelector('.fbp-picker-host');
+      if (host && PickerUI && typeof PickerUI.mountInstrumentPicker === 'function') {
+        PickerUI.mountInstrumentPicker(host, {
+          childId: childId,
+          selectedId: state.instrument,
+          onChange: function (selInst) {
+            state.instrument = selInst;
+            state.ensemble = (Logic && Logic.pickEnsembleVoices({ childId: childId, voices: 2, preferredInstrument: state.instrument })) || [state.instrument];
+          }
+        });
+      }
       const f = focusSel && el.querySelector(focusSel);
       if (f && f.focus) f.focus();
     }

@@ -114,3 +114,25 @@ test('perimeterExercisePlan creates corner and side events with substituted voic
   assert.equal(drumSidePlan.sideVoice.isSubstituted, true);
   assert.equal(drumSidePlan.sideVoice.voice, 'woodBar');
 });
+
+
+test('FractionBarPad mount invokes InstrumentPicker and renders active instrument buttons into fbp-picker-host', () => {
+  let hostInner = '';
+  const hostEl = {
+    get innerHTML() { return hostInner; },
+    set innerHTML(v) { hostInner = v; },
+    querySelectorAll: () => []
+  };
+  let inner = '';
+  const element = {
+    get innerHTML() { return inner; },
+    set innerHTML(v) { inner = v; },
+    addEventListener: () => {},
+    querySelector: (sel) => (sel === '.fbp-picker-host' ? hostEl : null)
+  };
+  const mounted = FBP.mount(element, { childId: 'child_test_1', instrument: 'darbuka' });
+  assert.ok(mounted);
+  assert.match(hostInner, /mm-instrument-picker/);
+  assert.match(hostInner, /data-instrument="darbuka"/);
+  assert.match(hostInner, /aria-pressed="true"/);
+});
