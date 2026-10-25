@@ -24,10 +24,11 @@ test('addition above 10 plays as tens (deep bass) and ones (rhythmic clicks) (#7
 test('subtraction sounds distinct: counts minuend and takes away subtrahend with muted action', () => {
   const pSub = NumberPlay.extractNumberPlan({ prompt: '7 - 3 = ?' });
   assert.ok(pSub); assert.equal(pSub.op, 'subtraction');
-  assert.equal(pSub.minuend, 7); assert.equal(pSub.subtrahend, 3); assert.equal(pSub.totalSounds, 7);
+  assert.equal(pSub.minuend, 7); assert.equal(pSub.subtrahend, 3); assert.equal(pSub.totalSounds, 7, 'shows 7 initial dots');
   const counts = pSub.notes.filter(n => n.action === 'count'), takeaways = pSub.notes.filter(n => n.action === 'takeaway');
   assert.equal(counts.length, 7); assert.equal(takeaways.length, 3);
-  assert.notEqual(counts[0].voice, takeaways[0].voice);
+  assert.notEqual(counts[0].voice, takeaways[0].voice, 'takeaways have distinct timbre');
+  assert.ok(NumberPlay.extractNumberPlan({ prompt: '19 - 12 = ?' }).notes.filter(n => n.action === 'takeaway').every(n => n.hz >= 120), '19 - 12 takeaways stay >= 120 Hz');
 });
 
 test('multiplication: equal groups use ONE single voice; >20 returns null', () => {
@@ -107,14 +108,13 @@ test('chosen instrument is persisted and prioritized in NumberPlay (Refs #665, R
     get length() { return Object.keys(dummyStore).length; }, key: i => Object.keys(dummyStore)[i] || null
   };
 
-  NumberPlay.savePersistedInstrument('handbells');
-  assert.equal(NumberPlay.getPersistedInstrument(), 'handbells');
-
-  const plan = NumberPlay.extractNumberPlan({ prompt: '3 + 4 = ?' });
-  assert.ok(plan);
-  assert.equal(plan.groups[0].instrument, 'handbells');
+  const who = { classCode: 'X', name: 'dana' }; dummyStore['mm_child_inst_X:other'] = 'cajon';
+  assert.equal(NumberPlay.getPersistedInstrument({ who }), null, 'another child key is not read');
+  assert.equal(NumberPlay.savePersistedInstrument('handbells'), false, 'no child: nothing saved');
+  NumberPlay.savePersistedInstrument('handbells', { who }); assert.equal(NumberPlay.getPersistedInstrument({ who }), 'handbells');
+  const plan = NumberPlay.extractNumberPlan({ prompt: '3 + 4 = ?' }, { who });
+  assert.ok(plan); assert.equal(plan.groups[0].instrument, 'handbells');
   assert.equal(plan.groups[0].voice, 'metalBell');
-
   // Option overrides
   const planOverride = NumberPlay.extractNumberPlan({ prompt: '3 + 4 = ?' }, { chosenInstrument: 'cajon' });
   assert.equal(planOverride.groups[0].instrument, 'cajon');

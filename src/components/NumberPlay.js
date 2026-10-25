@@ -25,23 +25,23 @@
     if (raw.includes('line') || raw.includes('ישר')) return 'numberLine';
     return 'counting';
   }
+  // Shared "my instrument" store (#762) when loaded; else only the current child's key, never another child's.
+  function getMyInst() { return (root && root.MM_MY_INSTRUMENT) || need('../lib/myInstrument.js'); }
+  function childKey(opts) {
+    const ts = (root && typeof root.loadWho === 'function') ? root : need('../lib/teacherStore.js');
+    let who = opts && opts.who; try { who = who || (ts && ts.loadWho()); } catch (_) {}
+    return who && who.name ? 'mm_child_inst_' + encodeURIComponent(who.classCode || '') + ':' + encodeURIComponent(who.name) : null;
+  }
   function getPersistedInstrument(opts) {
     if (opts && (opts.instrument || opts.chosenInstrument)) return opts.instrument || opts.chosenInstrument;
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const direct = localStorage.getItem('mm_chosen_instrument') || localStorage.getItem('mm_instrument');
-        if (direct) return direct;
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('mm_child_inst_')) { const v = localStorage.getItem(k); if (v) return v; }
-        }
-      }
-    } catch (_) {}
-    return null;
+    const my = getMyInst(), k = childKey(opts);
+    try { return (my && typeof my.getMyInstrument === 'function' && my.getMyInstrument()) || (k && localStorage.getItem(k)) || null; } catch (_) { return null; }
   }
-  function savePersistedInstrument(id) {
+  function savePersistedInstrument(id, opts) {
+    const my = getMyInst(), k = childKey(opts);
     if (!id) return false;
-    try { if (typeof localStorage !== 'undefined') { localStorage.setItem('mm_chosen_instrument', id); return true; } } catch (_) {}
+    if (my && typeof my.setMyInstrument === 'function') return my.setMyInstrument(id);
+    try { if (k) { localStorage.setItem(k, id); return true; } } catch (_) {}
     return false;
   }
   function getVoicesForExercise(it, parsedOp, options) {
@@ -144,7 +144,7 @@
       groups.push({ index: 0, count: a, startIndex: 0, voice: v.voice, hz: v.hz, instrument: v.instrument, he: v.he });
       for (let k = 0; k < a; k++) { notes.push({ index: gIdx++, at: t, groupIndex: 0, noteInGroup: k + 1, groupCount: a, voice: v.voice, hz: v.hz, action: 'count' }); t += beat; }
       t += pause;
-      for (let k = 0; k < b; k++) { notes.push({ index: gIdx++, at: t, groupIndex: 0, targetDot: a - 1 - k, noteInGroup: k + 1, groupCount: b, voice: takeVoice.voice, hz: 220 - k * 15, action: 'takeaway' }); t += beat; }
+      for (let k = 0; k < b; k++) { notes.push({ index: gIdx++, at: t, groupIndex: 0, targetDot: a - 1 - k, noteInGroup: k + 1, groupCount: b, voice: takeVoice.voice, hz: Math.max(120, 220 - k * 5), action: 'takeaway' }); t += beat; }
       return { op: parsed.op, bpm, rhythmPattern: pattern, beat, totalSounds: a, groups, notes, duration: t, minuend: a, subtrahend: b };
     }
     const useSingleVoice = Boolean(parsed.singleVoice);
