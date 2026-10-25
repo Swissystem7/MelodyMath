@@ -88,7 +88,7 @@ test('estimation prompt and acceptance logic are consistent: 7/8 is filled exact
   assert.ok(estWay, 'fillBar way exists in G6_FRAC_EST');
   assert.match(estWay[1], /בדיוק/, 'prompt specifies exact fill to match screen acceptance logic');
   assert.match(estWay[1], /7\/8/, 'prompt specifies 7/8 fill');
-  assert.equal(estWay[3], 'D', 'evidence level is unified as D');
+  assert.equal(estWay[3], 'A', 'evidence level is A');
 
   const idx = PAD.EXERCISES.findIndex((ex) => ex.target === '7/8');
   assert.ok(idx >= 0, 'an exercise for 7/8 almost-whole estimation exists');
@@ -108,4 +108,10 @@ test('estimation prompt and acceptance logic are consistent: 7/8 is filled exact
   const checked = PAD.check(partial);
   assert.equal(checked.status, 'under');
   assert.match(checked.message, /חסר 1\/8/);
+});
+
+test('fillBar evidence rating in G6_FRAC_EST is A', () => {
+  const estWay = GRADE_FILES['ו'].music.G6_FRAC_EST.find((w) => w[0] === 'fillBar');
+  assert.ok(estWay, 'fillBar way exists in G6_FRAC_EST');
+  assert.equal(estWay[3], 'A', 'fillBar evidence rating is A');
 });
