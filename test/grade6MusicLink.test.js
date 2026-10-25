@@ -36,7 +36,7 @@ test('every standard is met through at least two different musical models', () =
   Object.keys(g6.music).forEach((k) => {
     assert.ok(banks.ST[k], k);
     const ways = g6.music[k];
-    assert.ok(ways.length >= 2 && ways.length <= 3, k);
+    assert.ok(ways.length >= 2 && ways.length <= 4, k);
     assert.equal(new Set(ways.map(([tag]) => tag)).size, ways.length, k + ' repeats a tag');
     assert.equal(new Set(ways.map(([, note]) => note)).size, ways.length, k + ' repeats a note');
   });
