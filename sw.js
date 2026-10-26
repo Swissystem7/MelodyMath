@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v27';
+const CACHE = 'melodymath-offline-v28';
 const ASSETS = [
   './',
   './index.html',
@@ -31,6 +31,7 @@ const ASSETS = [
   './src/lib/curriculum/grade5.js',
   './src/lib/curriculum/grade3.js',
   './src/lib/curriculum/grade2.js',
+  './src/lib/curriculum/evidenceMeta.js',
   './src/lib/banks.js',
   './src/lib/mastery.js',
   './src/lib/numberLine.js',
@@ -64,6 +65,7 @@ const ASSETS = [
   './src/lib/contact.js',
   './src/lib/offer.js',
   './src/lib/tabs.js',
+  './src/lib/adultGate.js',
   './src/lib/print.css',
   './src/lib/learnerPlanView.js',
   './src/lib/music/groove.js',
@@ -72,6 +74,7 @@ const ASSETS = [
   './src/components/TimesTableGroove.js',
   './src/lib/instrumentVoices.js',
   './src/lib/instruments.js',
+  './src/lib/myInstrument.js',
   './src/components/jamKit.js',
   './src/components/NumberPlay.js',
   './src/components/jam.css',
@@ -79,6 +82,7 @@ const ASSETS = [
   './src/components/FractionBarPad.js',
   './src/lib/music/beatCounter.js',
   './src/components/BeatCounter.js',
+  './src/components/EnsembleStudio.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/lib/exercises/tapTempoMean.js',
