@@ -92,6 +92,7 @@ const ASSETS = [
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/lib/exercises/tapTempoMean.js',
+  './src/lib/exercises/variety.js',
   './src/lib/exercises/explorerBank.js',
   './src/sefirot.css',
   './src/theme.css',

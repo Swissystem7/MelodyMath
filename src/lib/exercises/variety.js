@@ -224,10 +224,87 @@
     };
   }
 
+  // #757: variety for a whole curriculum topic, built on this engine (no
+  // copied tables). The pool is the topic's largest group of bank items
+  // sharing one exercise type (skill) and one main music way, in range.
+  function numbersOf(it) {
+    const text = String((it && it.prompt) || '') + ' ' + String(it && it.answer != null ? it.answer : '');
+    return (text.match(/\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/g) || []).map(function (s) { return Number(s.replace(/,/g, '')); });
+  }
+  function poolFor(row, items) {
+    const range = getTopicRange(row), groups = {}, order = [];
+    (Array.isArray(items) ? items : []).forEach(function (it) {
+      if (!it || !it.skill || !it.music) return;
+      if (!numbersOf(it).every(function (n) { return n >= 0 && n <= range.max; })) return;
+      const k = it.skill + '|' + it.music;
+      if (!groups[k]) { groups[k] = []; order.push(k); }
+      groups[k].push(it);
+    });
+    let best = [];
+    order.forEach(function (k) { if (groups[k].length > best.length) best = groups[k]; });
+    return best;
+  }
+  function topicInstruments(skill) {
+    const key = resolveTopicKey({ skill: skill || '' });
+    let list = (I && typeof I.forTopic === 'function' ? I.forTopic(key) : []).filter(function (x) { return !x.optional; });
+    if (!list.length && I && Array.isArray(I.INSTRUMENTS)) list = I.INSTRUMENTS.filter(function (x) { return !x.optional; });
+    return list.length ? list : [{ id: 'darbuka', voice: 'drumLow', instrument: { he: 'דרבוקה' } }];
+  }
+  function createTopicSession(row, items, options) {
+    const opts = options || {}, seed = Math.abs(Math.round(Number(opts.seed) || 0));
+    const range = getTopicRange(row), pool = poolFor(row, items), history = [];
+    function variant(it, round) {
+      // Resolved per round: in the browser instruments.js loads after this file.
+      const insts = topicInstruments(pool.length ? pool[0].skill : null);
+      const noMusic = Boolean(opts.noMusic) || Boolean(it.musicNote && opts.totalRounds > 0 && round >= opts.totalRounds - 1);
+      const inst = insts[(round + seed) % insts.length], pattern = pickPattern(round, seed), nums = numbersOf(it);
+      return {
+        id: (it.id || 'ex') + '-var-r' + round, round: round, item: it,
+        topicId: (row && row.topicId) || null, grade: resolveGrade(row) || it.grade,
+        prompt: it.prompt, answer: it.answer, hint: it.hint,
+        exerciseType: it.skill, mainWay: it.music, musicNote: it.musicNote || null,
+        numbers: nums, numberKey: nums.length ? nums.join(',') : String(it.id || it.prompt),
+        bpm: noMusic ? null : pickTempo(round * 3, seed), meter: pattern.meter || '4/4',
+        pattern: noMusic ? null : pattern.id, patternHe: noMusic ? null : pattern.he,
+        instrument: noMusic ? null : inst.id, voice: noMusic ? null : inst.voice,
+        instrumentHe: noMusic ? null : ((inst.instrument && inst.instrument.he) || inst.id),
+        hasMusic: !noMusic, noMusic: noMusic
+      };
+    }
+    function push(v) { history.push(v); return v; }
+    return {
+      range: range, size: pool.length,
+      exerciseType: pool.length ? pool[0].skill : null,
+      mainWay: pool.length ? pool[0].music : null,
+      next: function () {
+        if (!pool.length) return null;
+        const r = history.length;
+        return push(variant(pool[(r + seed) % pool.length], r));
+      },
+      decorate: function (it, round) {
+        if (!it) return null;
+        const r = round != null ? round : history.length;
+        let item = it;
+        const prev = history[history.length - 1];
+        if (prev && prev.item && prev.item.id === it.id && pool.length > 1) {
+          item = pool.find(function (x) { return x.id !== it.id; }) || item;
+        }
+        return push(variant(item, r));
+      },
+      getHistory: function () { return history.slice(); }
+    };
+  }
+  function badgeHtml(v) {
+    if (!v) return '';
+    if (v.noMusic) return '<span class="mm-variety-badge" data-no-music="1">✏️ בדיקה בלי מוזיקה</span>';
+    return '<span class="mm-variety-badge" data-bpm="' + v.bpm + '" data-instrument="' + v.instrument + '" data-pattern="' + v.pattern + '">'
+      + '🎵 ' + v.instrumentHe + ' · ⏱️ ' + v.bpm + ' BPM · 🥁 ' + v.patternHe + '</span>';
+  }
+
   return {
     BPM_STEPS, RHYTHM_PATTERNS, FRACTION_PAIRS, GRADE_RANGES, TOPIC_RANGES,
     resolveGrade, getTopicRange, resolveTopicKey, pickTempo, pickPattern,
     pickInstrument, detectExerciseType, generateNumberSet, generateVariant,
-    createVarietySession
+    createVarietySession, numbersOf, poolFor, topicInstruments, createTopicSession, badgeHtml
   };
 });
