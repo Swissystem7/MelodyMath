@@ -175,15 +175,11 @@ test('grades א׳–ב׳ see no fraction tile; ג׳–ו׳ keep the 1/2 tile', a
 
 test('no locks (#717): no ensemble instrument is locked or disabled', async () => {
   const { ENSEMBLE_PRESETS, formatCrossInstrumentCard, mountEnsembleStudio } = await studio();
-  globalThis.MM_TIMES_TABLE_GROOVE = { UNLOCK_LIST: ['oud', 'piano', 'marimba'] };
-  globalThis.MM_UNLOCKS = require('../src/lib/music/unlocks.js');
-  try {
-    ENSEMBLE_PRESETS.forEach((p) => {
-      const el = { innerHTML: '', addEventListener() {} };
-      mountEnsembleStudio(el, { preset: p, grade: 'ו', storage: { getItem: () => null }, onPlay() {} });
-      assert.doesNotMatch(el.innerHTML, /disabled|data-locked|🔒/, p.id);
-    });
-  } finally { delete globalThis.MM_TIMES_TABLE_GROOVE; delete globalThis.MM_UNLOCKS; }
+  ENSEMBLE_PRESETS.forEach((p) => {
+    const el = { innerHTML: '', addEventListener() {} };
+    mountEnsembleStudio(el, { preset: p, grade: 'ו', storage: { getItem: () => null }, onPlay() {} });
+    assert.doesNotMatch(el.innerHTML, /disabled|data-locked|🔒/, p.id);
+  });
   assert.equal(typeof formatCrossInstrumentCard, 'function');
 });
 
