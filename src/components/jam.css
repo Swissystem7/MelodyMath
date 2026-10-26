@@ -19,6 +19,8 @@
 .fbp-seg{display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--yellow) 60%, var(--card));color:var(--ink);border-inline-start:2px solid var(--ink);font-weight:bold;min-width:0;overflow:hidden}
 .fbp-seg:nth-child(even){background:color-mix(in srgb, var(--pink) 22%, var(--card))}
 .fbp-seg.lit{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 45%, var(--card))}
+.gg-cell{background:color-mix(in srgb, var(--yellow) 35%, var(--card));border:2px solid var(--ink);border-radius:6px}
+.gg-cell.on{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 55%, var(--card))}
 .fbp-out{margin-inline-start:auto;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-size:.8rem}
 .fbp-over{display:flex;align-items:center;gap:8px;margin:6px 0;color:var(--purple);font-weight:bold}
 .fbp-overbar{display:inline-block;height:20px;max-width:60%;background:color-mix(in srgb, var(--purple) 25%, var(--card));border:2px dashed var(--purple);border-radius:6px}
