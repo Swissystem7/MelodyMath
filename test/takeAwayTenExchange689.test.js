@@ -232,7 +232,7 @@ test('subtraction above 12 gives the beat a softer voice than the drum (Refs #66
   assert.ok(plan(vsClick.beat).noise < plan(vsClick.drum).noise);
 });
 
-test('a ten above 12 is a two-note figure on the chosen instrument (Refs #665)', () => {
+test('a ten above 12 is one longer sound on the chosen instrument (Refs #665)', () => {
   const MY = require('../src/lib/myInstrument');
   const INST = require('../src/lib/instruments');
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
@@ -247,21 +247,37 @@ test('a ten above 12 is a two-note figure on the chosen instrument (Refs #665)',
   assert.equal(start.filter((e) => e.v === 1).length, 3);
   const calls = [];
   const ac = { currentTime: 0, state: 'running', resume() {} };
-  const r = mod.play(spec, { audioContext: ac, storage: store, playVoice: (c, v, hz, t) => calls.push({ v: v, hz: hz, t: t }) });
+  const r = mod.play(spec, { audioContext: ac, storage: store, playVoice: (c, v, hz, t, dest, opts) => calls.push({ v: v, hz: hz, t: t, dur: opts && opts.dur, gain: opts && opts.gain }) });
+  const opening = calls.slice(0, start.length);
+  assert.equal(opening.length, 4); // 13 = 1 ten + 3 ones, one strike each
+  const tens = opening.filter((c) => c.v === chosen);
+  const ones = opening.filter((c) => c.v === 'woodClick');
+  assert.equal(tens.length, 1);
+  assert.equal(ones.length, 3);
+  assert.ok(Math.abs(tens[0].dur - 0.45) < 0.001);
+  assert.ok(tens[0].gain > 0.16);
+  assert.ok(ones.every((c) => c.hz > tens[0].hz));
+  assert.equal(calls.length, events.length);
   assert.equal(r.notes, events.length);
-  const drums = calls.filter((c) => c.v === chosen);
-  const clicks = calls.filter((c) => c.v !== chosen);
-  assert.equal(drums.length, 2);
-  assert.ok(drums[1].t > drums[0].t && drums[1].t - drums[0].t < 0.35);
-  assert.notEqual(drums[0].hz, drums[1].hz);
-  assert.equal(clicks.length, 3 + 12);
-  assert.ok(clicks.every((c) => c.v === 'woodClick'));
+  const seq = [];
+  mod.play(spec, { storage: store, playSequence: (ev) => { seq.push(...ev); return { notes: ev.length }; } });
+  assert.equal(seq.length, events.length);
+  assert.equal(seq.filter((n) => n.dur === 0.45).length, 1);
   const small = mod.takeAwayCircles(12, 2);
   const smallCalls = [];
-  const rs = mod.play(small, { audioContext: ac, storage: store, playVoice: (c, v) => smallCalls.push(v) });
+  const rs = mod.play(small, { audioContext: ac, storage: store, playVoice: (c, v, hz, t, dest, opts) => smallCalls.push({ v: v, dur: opts && opts.dur }) });
   assert.equal(smallCalls.length, mod.soundEvents(small).length);
   assert.equal(rs.notes, smallCalls.length);
-  assert.ok(smallCalls.every((v) => v === chosen));
+  assert.ok(smallCalls.every((c) => c.v === chosen && c.dur == null));
+  const tx = mod.tenExchange(27);
+  const txCalls = [];
+  mod.play(tx, { audioContext: ac, playVoice: () => txCalls.push(1) });
+  assert.equal(txCalls.length, tx.circles.length);
+  const param = () => ({ value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
+  const node = () => ({ gain: param(), frequency: param(), connect(n) { return n; }, start() {}, stop() {} });
+  const stub = { currentTime: 0, sampleRate: 8000, destination: {}, createGain: node, createOscillator: node, createBiquadFilter: node, createBufferSource: node, createBuffer: (c, len, sr) => ({ sampleRate: sr, getChannelData: () => new Float32Array(len) }) };
+  const end = require('../src/lib/instrumentVoices').playVoice(stub, chosen, 110, 0, null, { dur: 0.45, gain: 0.28 });
+  assert.ok(Math.abs(end - 0.45) < 0.001);
 });
 
 test('drum and bell have distinct voices, myInstrument drives one family', () => {
