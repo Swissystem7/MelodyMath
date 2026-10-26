@@ -2,7 +2,7 @@
 // Nothing loads, and nothing leaves the tablet, until a deploy replaces it.
 // No token is stored in the repo. sendDefaultPii stays off.
 // beforeSend still strips the user field and request body, and redacts child
-// names inside breadcrumb messages, in case a later event carries them.
+// names in breadcrumb messages and data, the event message, and exception text.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -110,6 +110,21 @@
     return null;
   }
 
+  // Console breadcrumbs keep arguments in arrays. Walk a few levels and redact
+  // strings only, so numbers and categories stay useful.
+  function redactData(value, names, depth) {
+    if (typeof value === 'string') return redactNames(value, names);
+    if (!value || typeof value !== 'object' || depth > 4) return value;
+    if (Array.isArray(value)) {
+      for (let i = 0; i < value.length; i++) value[i] = redactData(value[i], names, depth + 1);
+      return value;
+    }
+    Object.keys(value).forEach(function (key) {
+      value[key] = redactData(value[key], names, depth + 1);
+    });
+    return value;
+  }
+
   // Returns the same event with identity and typed text removed. A null event
   // stays null so the SDK drops it. Any other event is still sent.
   function scrubEvent(event, names) {
@@ -120,12 +135,21 @@
     if (req && typeof req === 'object') {
       try { delete req.data; } catch (e) { /* frozen request */ }
     }
+    if (typeof event.message === 'string') event.message = redactNames(event.message, list);
+    const failures = event.exception && event.exception.values;
+    if (Array.isArray(failures)) {
+      for (let i = 0; i < failures.length; i++) {
+        const item = failures[i];
+        if (item && typeof item.value === 'string') item.value = redactNames(item.value, list);
+      }
+    }
     const crumbs = crumbList(event);
     if (crumbs) {
       for (let i = 0; i < crumbs.length; i++) {
         const crumb = crumbs[i];
-        if (!crumb || typeof crumb !== 'object' || typeof crumb.message !== 'string') continue;
-        crumb.message = redactNames(crumb.message, list);
+        if (!crumb || typeof crumb !== 'object') continue;
+        if (typeof crumb.message === 'string') crumb.message = redactNames(crumb.message, list);
+        if (crumb.data) crumb.data = redactData(crumb.data, list, 0);
       }
     }
     return event;

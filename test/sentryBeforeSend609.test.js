@@ -1,6 +1,6 @@
 'use strict';
-// Refs #609: beforeSend strips the Sentry user, request body, and child names
-// in breadcrumb messages. Names stay on the tablet.
+// Refs #609: beforeSend strips the Sentry user and request body, and redacts
+// child names in messages, exception text, and breadcrumb data.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const sentry = require('../src/lib/sentryLoader');
@@ -40,7 +40,7 @@ test('scrubEvent removes the user and any request body', () => {
   assert.equal('data' in asText.request, false);
 });
 
-test('scrubEvent redacts child names only inside breadcrumb messages', () => {
+test('scrubEvent redacts child names inside breadcrumb messages', () => {
   const event = sentry.scrubEvent({
     breadcrumbs: [
       { category: 'ui', timestamp: 1, message: 'נועה כהן ענתה, ואז נועה שוב' },
@@ -58,6 +58,49 @@ test('scrubEvent redacts child names only inside breadcrumb messages', () => {
     breadcrumbs: { values: [{ message: 'דני לחץ' }] },
   }, ['דני']);
   assert.equal(wrapped.breadcrumbs.values[0].message, '[name] לחץ');
+});
+
+test('scrubEvent redacts child names in exception values', () => {
+  const event = sentry.scrubEvent({
+    exception: {
+      values: [
+        { type: 'ReferenceError', value: 'נועה is not defined' },
+        { type: 'Error', value: 'clicked play' },
+        { type: 'Error' },
+        null,
+      ],
+    },
+  }, ['נועה']);
+  assert.equal(event.exception.values[0].value, '[name] is not defined');
+  assert.equal(event.exception.values[0].type, 'ReferenceError');
+  assert.equal(event.exception.values[1].value, 'clicked play');
+  assert.equal('value' in event.exception.values[2], false);
+});
+
+test('scrubEvent redacts child names in the event message', () => {
+  const named = sentry.scrubEvent({ message: 'נועה ענתה 4' }, ['נועה']);
+  assert.equal(named.message, '[name] ענתה 4');
+  const plain = sentry.scrubEvent({ message: 'clicked play' }, ['נועה']);
+  assert.equal(plain.message, 'clicked play');
+});
+
+test('scrubEvent redacts string values in breadcrumb data', () => {
+  const event = sentry.scrubEvent({
+    breadcrumbs: [
+      {
+        category: 'console',
+        message: 'log',
+        data: { arguments: ['נועה', 4], logger: 'console', extra: { label: 'נועה' } },
+      },
+      { category: 'ui', data: { target: 'button' } },
+    ],
+  }, ['נועה']);
+  assert.equal(event.breadcrumbs[0].data.arguments[0], '[name]');
+  assert.equal(event.breadcrumbs[0].data.arguments[1], 4);
+  assert.equal(event.breadcrumbs[0].data.logger, 'console');
+  assert.equal(event.breadcrumbs[0].data.extra.label, '[name]');
+  assert.equal(event.breadcrumbs[0].message, 'log');
+  assert.equal(event.breadcrumbs[1].data.target, 'button');
 });
 
 test('scrubEvent ignores empty input and names that are not children', () => {
