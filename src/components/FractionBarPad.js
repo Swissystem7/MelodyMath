@@ -22,6 +22,7 @@
 
   const FB = root.MM_FRACTION_BAR || require('../lib/music/fractionBar.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
+  const MY = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
   const GAME = 'fractionBarPad';
   const BPM = 90;
   const BEATS_PER_BAR = 4;
@@ -146,13 +147,15 @@
   }
 
   function mount(el, props) {
-    const inst = JAM.instrument((props && props.instrument) || DEFAULT_PROPS.instrument, 'drumLow');
+    // The child's instrument (#679) wins over the screen default; read on every
+    // draw and play so a mid-session switch sounds at once.
+    function inst() { return JAM.instrument(MY.instrumentFor((props && props.instrument) || DEFAULT_PROPS.instrument), 'drumLow'); }
     JAM.registerTapVoices();
     let state = createState(0, JAM.loadShowMusic(GAME), props);
     let playing = null;
     function stop() { if (playing) playing.stop(); playing = null; }
     function draw(focusSel) {
-      el.innerHTML = renderHtml(state, inst.voice);
+      el.innerHTML = renderHtml(state, inst().voice);
       const f = focusSel && el.querySelector(focusSel);
       if (f && f.focus) f.focus();
     }
@@ -173,7 +176,7 @@
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic, sound: null }); JAM.saveShowMusic(GAME, state.showMusic); }
       else if (act === 'play') {
         stop();
-        playing = JAM.playNotes(barPlan(state.fill, BPM, inst.voice), function (n) {
+        playing = JAM.playNotes(barPlan(state.fill, BPM, inst().voice), function (n) {
           if (n.kind !== 'tile') return;
           const s = el.querySelector('[data-seg="' + n.tile + '"]');
           if (s) { s.classList.remove('lit'); void s.offsetWidth; s.classList.add('lit'); }
@@ -183,6 +186,7 @@
       draw(focus);
       sound();
     });
+    if (typeof root.addEventListener === 'function') root.addEventListener(MY.EVENT, function () { draw(); });
     JAM.stopWhenHidden(el, stop);
     draw();
     return { get state() { return state; } };
