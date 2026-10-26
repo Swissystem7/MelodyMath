@@ -62,6 +62,40 @@ test('a multiplication plays a×b as a groups of b (#686)', () => {
   });
 });
 
+test('multiplication heard as two factors plays a groups of b (#686)', () => {
+  const plan = NP.extractNumberPlan({ skill: 'multiplication', hear: [4, 4], prompt: 'כמה יצא?' }, { bpm: 60 });
+  assert.equal(plan.groups.length, 4);
+  assert.ok(plan.groups.every(function (g, i) { return g.count === 4 && g.each === 1 && (i === 0 || plan.notes[g.startIndex].at - plan.notes[g.startIndex - 1].at >= plan.beat * 2); }));
+  assert.equal(plan.totalSounds, 16);
+  assert.equal(plan.totalValue, 16);
+});
+
+test('comparison and counting above 12 play as tens and ones (#686)', () => {
+  const cmp = NP.extractNumberPlan({ prompt: 'איזה מספר גדול יותר: 15 או 18?', wordType: 'compare', skill: 'word_problems' });
+  assert.equal(cmp.totalValue, 33);
+  assert.equal(cmp.notes.filter(function (n) { return n.value === 10; }).length, 2);
+  assert.equal(cmp.notes.filter(function (n) { return n.value === 1; }).length, 13);
+  assert.equal(cmp.totalSounds, 15);
+  const count = NP.extractNumberPlan({ skill: 'counting', hear: [17], prompt: '17' });
+  assert.equal(count.totalValue, 17);
+  assert.equal(count.notes.filter(function (n) { return n.value === 10; }).length, 1);
+  assert.equal(count.notes.filter(function (n) { return n.value === 1; }).length, 7);
+  assert.equal(count.totalSounds, 8);
+  assert.equal(dots(NP.renderHtml(count)), 8);
+});
+
+test('a multiplication group above 12 plays as tens and ones (#686)', () => {
+  const big = NP.extractNumberPlan({ prompt: '5 × 20 = ?', skill: 'multiplication' });
+  assert.equal(big.totalValue, 100);
+  assert.equal(big.totalSounds, 10);
+  assert.ok(big.notes.every(function (n) { return n.value === 10; }));
+  const each = NP.extractNumberPlan({ prompt: '4 × 13 = ?', skill: 'multiplication' });
+  assert.equal(each.totalValue, 52);
+  assert.equal(each.notes.filter(function (n) { return n.value === 10; }).length, 4);
+  assert.equal(each.notes.filter(function (n) { return n.value === 1; }).length, 12);
+  assert.equal(each.totalSounds, 16);
+});
+
 test('a repeated instrument keeps one pitch (#686)', () => {
   const plan = NP.extractNumberPlan({ prompt: '6 × 2 = ?', skill: 'multiplication' });
   const hz = plan.groups.filter(function (g) { return g.instrument === 'handbells'; }).map(function (g) { return g.hz; });
@@ -82,6 +116,17 @@ test('the child instrument overrides forTopic (#686)', () => {
   assert.notEqual(via.groups[1].family, 'keys');
   delete mem['mm.myInstrument'];
   assert.equal(NP.extractNumberPlan({ prompt: '4 + 3 = ?' }, { storage: storage }).groups[0].instrument, 'handbells');
+  const src = require('fs').readFileSync(require('path').join(__dirname, '../src/components/NumberPlay.js'), 'utf8');
+  assert.match(src, /\.instrumentFor\(/);
+  assert.equal(src.includes('getMyInstrument'), false);
+  const prev = global.MM_MY_INSTRUMENT;
+  const box = { marker: true };
+  global.MM_MY_INSTRUMENT = { instrumentFor: function (fallback, allowed, given) { assert.equal(given, box); return 'recorder'; } };
+  try {
+    const viaFor = NP.extractNumberPlan({ prompt: '2 + 2 = ?' }, { storage: box });
+    assert.equal(viaFor.groups[0].instrument, 'recorder');
+    assert.equal(viaFor.groups[0].family, 'winds');
+  } finally { global.MM_MY_INSTRUMENT = prev; }
 });
 
 test('lower grades keep one tempo and it rises with the streak, not a prompt hash (#686)', () => {

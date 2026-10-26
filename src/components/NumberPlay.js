@@ -23,10 +23,9 @@
     if (ones) out.push({ n: ones, v: 1 });
     return out;
   }
-  function bundle(groups, op) {
-    const tens = op === 'addition' || op === 'subtraction';
+  function bundle(groups) {
     const out = [];
-    groups.forEach(function (c) { (tens && c > 12 ? asTens(c) : [{ n: c, v: 1 }]).forEach(function (g) { out.push(g); }); });
+    groups.forEach(function (c) { (c > 12 ? asTens(c) : [{ n: c, v: 1 }]).forEach(function (g) { out.push(g); }); });
     return out;
   }
   function skip(it) {
@@ -64,6 +63,7 @@
     const heard = Array.isArray(item.hear) ? item.hear.map(Number) : null;
     if (heard && heard.length && heard.every(inRange)) {
       const op = /mult/.test(skill) ? 'multiplication' : /sub/.test(skill) ? 'subtraction' : item.wordType === 'compare' ? 'compare' : heard.length > 1 ? 'addition' : 'counting';
+      if (op === 'multiplication' && heard.length >= 2) return heard[0] * heard[1] <= 100 ? { op: op, groups: groupsOf(heard[0], heard[1]) } : null;
       return { op: op, groups: heard.slice(0, 4) };
     }
     const nums = ints(p).filter(inRange);
@@ -78,7 +78,7 @@
     const explicit = opts && (opts.instrument || opts.chosenInstrument);
     if (explicit) return ok(explicit);
     const mine = (root && root.MM_MY_INSTRUMENT) || need('../lib/myInstrument.js');
-    try { if (mine && mine.getMyInstrument) return ok(mine.getMyInstrument(opts && opts.storage)); } catch (e) { /* store absent */ }
+    try { if (mine && mine.instrumentFor) return ok(mine.instrumentFor(null, null, opts && opts.storage)); } catch (e) { /* store absent */ }
     return null;
   }
   function voicesFor(count, opts) {
@@ -118,7 +118,7 @@
     const grade = opts.grade || item.grade || 'א';
     const bpm = tempoFor(grade, opts.streak, opts.bpm);
     const beat = 60 / bpm;
-    const counts = bundle(parsed.groups, parsed.op);
+    const counts = bundle(parsed.groups);
     const voices = voicesFor(counts.length, opts);
     const groups = [];
     const notes = [];
