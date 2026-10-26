@@ -35,8 +35,17 @@ test('the way itself is unchanged: its voices are the ones the plan counts as he
   assert.deepEqual([...new Set(Object.values(v).map(familyOf))].sort(), more.planFor(it, s).heard.slice().sort());
 });
 
+test('a round group (30, 90): the second family answers the same tens, so both sound', () => {
+  [30, 90].forEach((n) => {
+    const plan = more.planFor(above.find((x) => ten.specForItem(x).start === n), mem('piano'));
+    const [a, b] = plan.families.map((f) => plan.notes.filter((x) => x.family === f.family).map((x) => x.v));
+    assert.equal(a.length, n / 10);
+    assert.deepEqual(b, a);
+  });
+});
+
 test('the whole group of the story: tens on the first new family, ones on the second', () => {
-  above.forEach((it) => {
+  above.filter((it) => ten.specForItem(it).start % 10).forEach((it) => {
     const n = ten.specForItem(it).start;
     const plan = more.planFor(it, mem('balalaika'));
     assert.equal(plan.number, n);
