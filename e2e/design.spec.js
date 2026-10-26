@@ -112,6 +112,9 @@ for (const c of [
   test(`pace meter, ${c.who} student: «${c.word}»`, async ({ page }, testInfo) => {
     const errors = await open(page, { kid: c.kid });
     await page.locator('#tab-teacherReport').click();
+    const [a, b] = (await page.locator('#adultGateQ').textContent()).match(/\d+/g).map(Number);
+    await page.locator('#adultGateAnswer').fill(String(a * b));
+    await page.locator('#adultGateOk').click({ delay: 3200 }); // hold 3 s
     const meter = page.locator('#reportPace .mm-pace');
     await expect(meter).toHaveAttribute('data-status', c.status);
     await expect(meter.locator('.mm-pace-status b')).toHaveText(c.word);

@@ -82,6 +82,7 @@
     'אחוזים — אחוז מכמות, שבר כאחוז, שינוי באחוזים': 'אחוזים',
     'מעגל — רדיוס, קוטר, היקף וזווית מרכזית': 'מעגל ועיגול',
     'ממוצע — סכום הערכים חלקי מספרם': 'ממוצע',
+    G6_MEAN: 'ממוצע',
     // Circle-of-fifths items (polygon of 12 points, 30° per step) (#591).
     'מיון מצולעים לפי מספר צלעות וקודקודים': 'מעגל ועיגול',
     'זווית חדה, ישרה, קהה ושטוחה': 'מעגל ועיגול',
@@ -234,6 +235,7 @@
   // own. Nothing here claims more than its label.
   const sources = {
     azaryahu2020: ['Azaryahu et al. 2020 — MusiMath and Academic Music', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/'],
+    vanDenHeuvel2003: ['Van den Heuvel-Panhuizen 2003 — The didactical use of models in Realistic Mathematics Education: an example from a longitudinal trajectory on percentage (Educ. Stud. Math. 54, 9-35)', 'https://doi.org/10.1023/B:EDUC.0000005212.03219.dc'],
     interplay2024: ['Interplay between music and mathematics (Humanit. Soc. Sci. Commun., 2024)', 'https://www.nature.com/articles/s41599-024-03631-z'],
     kcConnections: ['Kennedy Center — Connections: Math and Music', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/media-and-interactives/media/music/connections/connections/math--music/'],
     kcMath: ['Kennedy Center — math collection', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/collections/collections/math/'],
@@ -275,7 +277,8 @@
       ['tenthBeatGroups', 'חילוק עשרוני כתווים: כמה תווים של עשירית פעימה נכנסים במשך הנתון? מרחיבים את שניהם פי 10 — אותה שאלה בשלמים.', 'azaryahu2020', 'A', EXTRA],
     ],
     PERCENT: [
-      ['sectionsFillBar', 'חלקים שממלאים תיבה שלמה מסתכמים ב־100%: חצי תיבה — 50%, רבע — 25%. בדקו שכל החלקים ממלאים בדיוק את התיבה.', 'azaryahu2020', 'A'],
+      ['percentBar', 'תיבה אחת היא 100%. מחלקים אותה ל־4, 10 או 20 פעמות, ממלאים באריחי 50%, 25% ו־10% ומנגנים: כל פעמה היא חלק שווה מהשלם.', 'vanDenHeuvel2003', 'A'],
+      ['sectionsFillBar', 'חלקים שממלאים תיבה שלמה מסתכמים ב־100%: חצי תיבה — 50%, רבע — 25%. בדקו שכל החלקים ממלאים בדיוק את התיבה.', 'azaryahu2020', 'A', EXTRA],
       ['hundredBar', 'אחוז הוא תיבה של 100 תווים שווים: אחוז אחד הוא תו אחד ממנה. אחוז מכמות — מחלקים את הכמות ל־100 תווים ולוקחים כמה מהם.', 'azaryahu2020', 'A', EXTRA],
       ['partOfHundredBar', 'איזה אחוז: החלק מתוך השלם הוא חלק מתיבה. מרחיבים את התיבה ל־100 תווים וקוראים כמה תווים תופס החלק.', 'azaryahu2020', 'A', EXTRA],
     ],
@@ -371,6 +374,7 @@
     ],
     G6_MEAN: [
       ['levelNotes', 'ממוצע הוא יישור תווים: מנגנים כל נתון כתו באורכו, ואז מחלקים את כל המשך מחדש לתווים שווים. אורך כל אחד הוא הממוצע.', 'azaryahu2020', 'A'],
+      ['tapTempo', 'הקשות יוצרות מרווחי זמן: מודדים את אורך המרווחים ומיישרים למרווח ממוצע — שממנו מחשבים את הקצב (BPM).', 'azaryahu2020', 'A', WEAK],
       ['equalPhrases', 'הממוצע הוא אורך של משפט שווה. מנגנים משפט כזה לכל נתון וסופרים את כל הפעימות — זה הסכום. משפט שקט נמשך אפס ועדיין נספר.', 'azaryahu2020', 'A', EXTRA],
       ['pitchMean', 'הממוצע יושב על הסולם בין הצליל הנמוך לגבוה, ולא חייב להיות צליל שנוגן. שומעים את שני הקצוות, ואז מחשבים.', 'rusconi2005', 'A', WEAK],
     ],

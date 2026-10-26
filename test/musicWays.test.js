@@ -21,7 +21,7 @@ const wayOf = (file, it) => {
 
 Object.keys(FILES).forEach((grade) => {
   const file = FILES[grade];
-  const items = banks.itemsForGrade(grade);
+  const items = banks.itemsForGrade(grade).filter((it) => !it.noMusic);
 
   test('grade ' + grade + ': every item has a music side, activity or way', () => {
     assert.ok(items.length > 100);
@@ -42,8 +42,9 @@ Object.keys(FILES).forEach((grade) => {
     Object.keys(file.music).forEach((k) => {
       assert.ok(banks.ST[k], grade + ' ' + k + ' is not a bank standard');
       const ways = file.music[k];
-      // One per level (1-3); a topic whose main way was replaced (#751) may
-      // keep the old ways as a fourth, optional one, never a fourth primary.
+      // One main way per level (1-3), plus an optional extra; a topic whose
+      // main way was replaced (#751) keeps the old ways as optional ones,
+      // never a fourth primary.
       assert.ok(ways.length >= 2 && ways.length <= 4, k);
       assert.ok(banks.primaryWays(ways).length <= 3, k);
       assert.equal(new Set(ways.map(([tag]) => tag)).size, ways.length, k + ' repeats a tag');
@@ -85,7 +86,7 @@ Object.keys(FILES).forEach((grade) => {
 });
 
 test('grade א׳: a prompt that plays sound is a music activity, not a way', () => {
-  const items = banks.itemsForGrade('א');
+  const items = banks.itemsForGrade('א').filter((it) => !it.noMusic);
   const hear = items.filter((it) => it.hear && it.hear.length);
   const g1 = items.filter((it) => it.g1);
   assert.ok(hear.length >= 10 && g1.length >= 3);
@@ -123,17 +124,17 @@ test('grade ג׳: the #105 activities keep their tag and the g3 widgets become a
 });
 
 test('grade ב׳: the #103 activities keep their tag and take no way', () => {
-  const items = banks.itemsForGrade('ב');
+  const items = banks.itemsForGrade('ב').filter((it) => !it.noMusic);
   const acts = items.filter((it) => !it.musicNote);
   assert.ok(acts.length >= 50);
   acts.forEach((it) => assert.ok(['beatsBars', 'twoInstruments', 'evenOdd', 'registers', 'halfBar'].includes(it.music), it.id + ' ' + it.music));
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1229/1229', () => {
+test('every item of every grade has a music side: 1235/1235', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1229); // + 10 two-step and contrast items (#467) + the seller-profit money item (#569) + 7 mixed-number items (#709) + 18 equations and inequalities (#710)
-  assert.equal(all.filter((it) => it.music).length, all.length);
+  assert.equal(all.length, 1235); // + 3 explorer exercises and 3 silent checks (#688)
+  assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
 });
@@ -152,6 +153,27 @@ test('a music-side file adds no curriculum rows, loads before banks.js on every 
     assert.ok(read('sw.js').includes('curriculum/' + name + '.js'), name);
   });
   assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 27, 'a new asset, so CACHE moves');
+});
+
+test('#710: grades ד׳-ה׳ EQ_INEQ cite Knuth et al. 2006 next to azaryahu2020, without a DOI, on every item', () => {
+  [['ד', 'grade4'], ['ה', 'grade5']].forEach(([grade, name]) => {
+    const file = FILES[grade];
+    const [label, url] = file.sources.knuth2006;
+    assert.match(label, /Knuth et al\. 2006 — Does Understanding the Equal Sign Matter\?/, name);
+    assert.ok(!/doi|10\.2307/i.test(url), name + ' ' + url);
+    file.music.EQ_INEQ.forEach((w) => {
+      assert.equal(w[2], 'azaryahu2020', name + ' ' + w[0]);
+      assert.deepEqual(w[4].also, ['knuth2006'], name + ' ' + w[0]);
+      assert.equal(banks.isOptionalWay(w), w[0] !== 'balanceBars', name + ' ' + w[0]);
+    });
+    const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST.EQ_INEQ);
+    assert.ok(items.length >= 9, name);
+    items.forEach((it) => {
+      assert.equal(it.musicSrc, 'azaryahu2020', it.id);
+      assert.deepEqual(it.musicSrcAlso, ['knuth2006'], it.id);
+    });
+  });
+  assert.equal(banks.allItems().filter((it) => it.musicSrcAlso && it.standard !== banks.ST.EQ_INEQ).length, 0);
 });
 
 test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART100 that builds on it starts the same way', () => {
@@ -192,7 +214,6 @@ test('#751 batch 2: one main way per topic; the others stay as EXTRA with their 
       const primary = banks.primaryWays(ways);
       assert.deepEqual(primary.map(([tag]) => tag), [MAIN[grade][k]], grade + ' ' + k);
       assert.equal(ways[0], primary[0], grade + ' ' + k + ' main way first');
-      // Nothing deleted: each topic still has every way, each with its rating.
       assert.ok(ways.length >= 2, grade + ' ' + k);
       ways.forEach((w) => assert.ok(['A', 'D', 'R'].includes(w[3]), grade + ' ' + k + ' ' + w[0]));
       const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST[k] && it.musicNote);
@@ -229,8 +250,6 @@ test('#751 batch 3: grade ג׳ topics keep one main way, the others stay as EXTR
       assert.ok(w && banks.isOptionalWay(w), k + ' ' + tag);
       assert.equal(w[3], 'A', k + ' ' + tag + ' keeps its rating');
     });
-    // Some topics (e.g. MASS_VOL, DIV_REM) have no grade ג׳ items with a music
-    // note yet; only topics that do are checked against their main way.
     const items = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST[k] && it.musicNote);
     items.forEach((it) => assert.equal(it.music, main, it.id));
   });
@@ -289,7 +308,7 @@ test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others sta
     },
     'ו': {
       DEC_MUL: ['decimalNoteScale', 'beatDecimal', 'tenthBeatGroups'],
-      PERCENT: ['sectionsFillBar', 'hundredBar', 'partOfHundredBar'],
+      PERCENT: ['percentBar', 'sectionsFillBar', 'hundredBar', 'partOfHundredBar'],
       G6_DECIMAL_SYS: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero'],
       G6_NAT_OPS: ['groupsFirstLongChain', 'ostinatoLayers', 'groupThenCut'],
       G6_NAT_EST: ['roundToGroup', 'partGroupTimes', 'groupBoundsCheck'],
@@ -326,4 +345,10 @@ test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others sta
       items.forEach((it) => assert.equal(it.music, main, it.id));
     });
   });
+});
+
+test('PERCENT has exactly one primary way: percentBar', () => {
+  const ways = FILES['ו'].music.PERCENT;
+  assert.deepEqual(banks.primaryWays(ways).map(([tag]) => tag), ['percentBar']);
+  assert.equal(banks.isOptionalWay(ways.find(([tag]) => tag === 'sectionsFillBar')), true);
 });
