@@ -65,6 +65,31 @@ test('a missed goal is saved as it is, and the next day starts fresh', () => {
   assert.equal(G.songPhrase(h[0]).notes.length, 2);
 });
 
+test('only an answer in a step with music adds a box; the no-music check does not (#665)', () => {
+  G.setStorage(mockStorage());
+  G.start('short', { day: '2026-10-26' });
+  [{ noMusic: true, musicStage: 'no_music_check' }, { plain: true }, { stage: 'plain' }, { musicStage: 'no_music_check' }]
+    .forEach((item) => assert.equal(G.recordAnswer(true, { item }).counted, false, JSON.stringify(item)));
+  assert.equal(G.getActive().count, 0);
+  assert.equal(G.recordAnswer(true, { item: { prompt: '3 + 4', hear: [3, 4] } }).active.count, 1);
+  const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+  assert.match(html, /setlistNote\(correct,topic,won,item\)/);
+  assert.match(html, /recordAnswer\(correct,\{item:item,/);
+});
+
+test('the day turns over at midnight in Israel (IDT +3, IST +2), not in UTC', () => {
+  assert.equal(G.dayKey('2026-07-14T20:59:00Z'), '2026-07-14');
+  assert.equal(G.dayKey('2026-07-14T21:30:00Z'), '2026-07-15');
+  assert.equal(G.dayKey('2026-12-01T21:30:00Z'), '2026-12-01');
+  assert.equal(G.dayKey('2026-12-01T22:30:00Z'), '2026-12-02'); // UTC still says 12-01
+  G.setStorage(mockStorage());
+  G.start('song', { day: G.dayKey('2026-12-01T21:30:00Z') });
+  G.recordAnswer(true);
+  assert.notEqual(G.rollover(G.dayKey('2026-12-01T21:59:00Z')), null);
+  assert.equal(G.rollover(G.dayKey('2026-12-01T22:01:00Z')), null);
+  assert.equal(G.getHistory()[0].count, 1);
+});
+
 test('saved goals survive a reload through storage', () => {
   const s = mockStorage();
   G.setStorage(s);

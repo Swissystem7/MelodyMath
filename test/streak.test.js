@@ -157,12 +157,12 @@ test('index.html: exactly one streak reward, after the right-answer sound', () =
 });
 
 test('index.html: every practice screen feeds its topic into the streak', () => {
-  assert.match(indexHtml, /history\.push\(\{id:current\.id,correct\}\);noteMetro\(correct,current\.mathTopic\|\|current\.skill\)/, 'main practice');
-  assert.match(indexHtml, /noteMetro\(correct,st\.skill\|\|st\.he\)/, 'personal plan');
-  assert.match(indexHtml, /noteMetro\(correct,classCurrent\.skill\)/, 'class');
-  assert.match(indexHtml, /noteMetro\(correct,q\.skill\)/, 'diagnostic');
+  assert.match(indexHtml, /history\.push\(\{id:current\.id,correct\}\);noteMetro\(correct,current\.mathTopic\|\|current\.skill,current\)/, 'main practice');
+  assert.match(indexHtml, /noteMetro\(correct,st\.skill\|\|st\.he,it\)/, 'personal plan');
+  assert.match(indexHtml, /noteMetro\(correct,classCurrent\.skill,classCurrent\)/, 'class');
+  assert.match(indexHtml, /noteMetro\(correct,q\.skill,q\)/, 'diagnostic');
   assert.match(indexHtml, /streakReward\(beatCurrent\.skill,correct && !late\)/, 'beat, paced');
-  assert.match(indexHtml, /noteMetro\(correct && !late,beatCurrent\.skill\)/, 'beat');
+  assert.match(indexHtml, /noteMetro\(correct && !late,beatCurrent\.skill,beatCurrent\)/, 'beat');
   assert.doesNotMatch(indexHtml, /MM_MASTERY_STREAK\.recordAnswer\(st\./, 'no second hook in rpCheck');
   assert.match(indexHtml, /id="mySong"[\s\S]{0,200}id="mySongList"/);
 });

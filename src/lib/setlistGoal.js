@@ -2,7 +2,7 @@
 //
 // Proximal goals (Bandura & Schunk 1981, https://doi.org/10.1037/0022-3514.41.3.586):
 // the child picks a short song (4), a song (8) or a long song (12). Every right
-// answer, solved in the topic's main way, adds one box to the song. Meeting the
+// answer in a step with music (the topic's main way) adds one box to the song. Meeting the
 // goal plays the whole song on the child's instrument and saves it; a missed goal
 // is saved as it is, with no failure message. No timer, no points, nothing locked.
 // The next suggestion: two goals met in a row → the next size, two missed → the
@@ -47,7 +47,21 @@
     if (s) { try { s.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ } }
   }
   function setStorage(s) { storageRef = s; load(); }
-  function today() { return new Date().toISOString().slice(0, 10); }
+  // The day turns over at midnight in Israel, not UTC (a UTC key splits an evening session at 02:00/03:00).
+  const TZ = 'Asia/Jerusalem';
+  function dayKey(now) {
+    const d = now == null ? new Date() : new Date(now);
+    // en-CA formats as YYYY-MM-DD.
+    try { return new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); }
+    catch (e) { return d.toISOString().slice(0, 10); }
+  }
+  function today() { return dayKey(); }
+
+  // #665: only a step with music adds a box. The no-music check at the end (or any plain item) does not.
+  function isMusicStep(item) {
+    if (!item) return true;
+    return !(item.noMusic || item.plain || item.stage === 'plain' || item.musicStage === 'no_music_check');
+  }
 
   function goalById(id) { return GOALS.find(function (g) { return g.id === id; }) || null; }
   function indexOf(id) { return Math.max(0, GOALS.findIndex(function (g) { return g.id === id; })); }
@@ -92,11 +106,11 @@
     return Object.assign({}, state.active);
   }
 
-  // Only right answers count. The answer that reaches the target closes the goal as met.
+  // Only right answers in a step with music count. The answer that reaches the target closes the goal as met.
   function recordAnswer(correct, opts) {
     const a = state.active;
     if (!a) return { counted: false, active: null, justMet: false };
-    if (!correct) return { counted: false, active: Object.assign({}, a), justMet: false };
+    if (!correct || !isMusicStep(opts && opts.item)) return { counted: false, active: Object.assign({}, a), justMet: false };
     a.count += 1;
     if (opts && opts.instrument) a.instrument = opts.instrument;
     if (a.count >= a.target) {
@@ -139,7 +153,7 @@
   load();
 
   return {
-    GOALS, MELODY, suggestNextGoal, start, recordAnswer, rollover, close, songPhrase,
+    GOALS, MELODY, TZ, dayKey, isMusicStep, suggestNextGoal, start, recordAnswer, rollover, close, songPhrase,
     boxesHtml, pickerHtml, getActive, getHistory, resetAll, setStorage,
   };
 });

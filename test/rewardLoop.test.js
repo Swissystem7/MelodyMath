@@ -118,7 +118,7 @@ test('index.html: right answers play the streak melody and count toward unlocks;
   assert.match(html, /if\(!correct && typeof playTap==='function'\) playTap\('wrong'\)/, 'a wrong answer keeps its soft step');
   assert.match(html, /else if\(correct && typeof playStreakMelody==='function'\)\{\s*if\(!won\) playStreakMelody\(metroStreak \+ 1\);/);
   assert.match(html, /const u=typeof recordCorrect==='function'\?recordCorrect\(\):null;[\s\S]{0,120}if\(u&&u\.unlocked&&typeof announceUnlock==='function'\)\{[^\n]*announceUnlock\(u\.unlocked\);/);
-  assert.match(html, /const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);/);
+  assert.match(html, /const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he,it\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);/);
   assert.match(html, /if\(beatLevel>lv0 && typeof playLevelTune==='function'\) playLevelTune\(\);/);
   assert.match(html, /\.mm-unlock\{position:fixed/);
 });
