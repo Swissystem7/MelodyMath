@@ -52,7 +52,7 @@ test('completing a column (×1 to ×10) unlocks an M2 instrument: timbre only, w
   const x = INST.instrumentById(s.unlocks.unlocked[0]);
   assert.equal(x.mechanism, 'M2', 'an unlocked instrument keeps the method');
   assert.ok(x.source === 'TODO' || /^https:/.test(x.source));
-  assert.match(s.message, /נפתח כלי חדש/);
+  assert.doesNotMatch(s.message, /נפתח|כלי חדש/, 'no unlock message (#717: no locks)');
   TTG.UNLOCK_LIST.forEach((id) => assert.ok(INST.forTopic('multiplication').some((y) => y.id === id), id));
 });
 
