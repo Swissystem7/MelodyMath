@@ -14,12 +14,14 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 const keyOf = (file, it) => Object.keys(file.music).find((k) => banks.ST[k] === it.standard);
-const solvingOf = (ways) => {
-  const primary = banks.primaryWays(ways);
-  return primary.length ? primary : (ways || []);
-};
+const cubeItem = (it) => /תיבה|קובי/.test(it.prompt);
 const wayOf = (file, it) => {
-  const ways = solvingOf(file.music[keyOf(file, it)]);
+  const listed = file.music[keyOf(file, it)] || [];
+  // Grade ד׳ only: a cube item is solved with the volume way, not the kg one.
+  if (file.grade === 'ד' && it.standard === banks.ST.MASS_VOL && cubeItem(it)) {
+    return listed.find((w) => w[0] === 'cubeLayerGroups');
+  }
+  const ways = banks.primaryWays(listed);
   return ways.length ? ways[Math.min(it.level, ways.length) - 1] : undefined;
 };
 
@@ -62,11 +64,15 @@ Object.keys(FILES).forEach((grade) => {
     });
     Object.keys(byStd).forEach((std) => {
       // Dosage rule 4: one consistent way per topic, so a standard may have a
-      // single primary way; with more, levels take different ones. An entirely
-      // EXTRA topic (grade ד׳ MASS_VOL) uses those ways, one per level.
+      // single primary way; with more, levels take different ones.
       const key = Object.keys(file.music).find((k) => banks.ST[k] === std);
-      const n = solvingOf(file.music[key]).length;
-      assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, grade + ' ' + std);
+      const n = banks.primaryWays(file.music[key]).length;
+      if (grade === 'ד' && key === 'MASS_VOL') {
+        assert.equal(n, 1, 'MASS_VOL has one main way');
+        assert.ok(byStd[std].tags.has('kiloGroupsTen') && byStd[std].tags.has('cubeLayerGroups'), grade + ' ' + std);
+      } else {
+        assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, grade + ' ' + std);
+      }
     });
     // A way tag is never an activity tag of the same grade.
     const activityTags = new Set(items.filter((it) => !it.musicNote).map((it) => it.music));
@@ -187,7 +193,7 @@ test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART
   });
 });
 
-test('#751: MASS_VOL is EXTRA in grade ד׳ beside UNITS, and grade ג׳ has neither the ways nor the exercises', () => {
+test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ has neither the ways nor the exercises', () => {
   const g3 = FILES['ג'];
   const g4 = FILES['ד'];
   assert.equal(g3.music.MASS_VOL, undefined);
@@ -196,10 +202,24 @@ test('#751: MASS_VOL is EXTRA in grade ד׳ beside UNITS, and grade ג׳ has nei
   assert.equal(order[order.indexOf('UNITS') + 1], 'MASS_VOL');
   const ways = g4.music.MASS_VOL;
   assert.deepEqual(ways.map((w) => w[0]), ['kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups']);
+  const primary = banks.primaryWays(ways);
+  assert.equal(primary.length, 1);
+  assert.equal(primary[0][0], 'kiloGroupsTen');
+  assert.equal(banks.isOptionalWay(primary[0]), false);
   ways.forEach((w) => {
-    assert.equal(banks.isOptionalWay(w), true, w[0]);
-    assert.equal(banks.primaryWays(ways).length, 0);
     assert.deepEqual([w[2], w[3]], ['das2023', 'A'], w[0]);
+    if (w[0] !== 'kiloGroupsTen') assert.equal(banks.isOptionalWay(w), true, w[0]);
+  });
+  const vol = banks.itemsForGrade('ד').filter((it) => it.standard === banks.ST.MASS_VOL && cubeItem(it));
+  const mass = banks.itemsForGrade('ד').filter((it) => it.standard === banks.ST.MASS_VOL && !cubeItem(it));
+  assert.ok(vol.length >= 12 && mass.length >= 6);
+  vol.forEach((it) => {
+    assert.equal(it.music, 'cubeLayerGroups', it.prompt);
+    assert.match(it.musicNote, /נפח תיבה/, it.prompt);
+  });
+  mass.forEach((it) => {
+    assert.equal(it.music, 'kiloGroupsTen', it.prompt);
+    assert.match(it.musicNote, /ק״ג/, it.prompt);
   });
   // All 21 prompts from 847674c, grade adapted to ד׳. A prompt already in ד׳
   // is not copied again. None of them is in ג׳.

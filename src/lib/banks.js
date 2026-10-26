@@ -1932,9 +1932,8 @@
     RAW.forEach(function (raw) {
       const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
       if (!ways) return;
-      const solving = solvingWays(ways);
-      if (!solving.length) return;
-      const m = solving[Math.min(clampLevel(raw.level), solving.length) - 1];
+      const m = shownWay(raw, ways);
+      if (!m) return;
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
       const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
         return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
@@ -2040,9 +2039,8 @@
       RAW.forEach(function (raw) {
         const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
         if (!ways) return;
-        const solving = solvingWays(ways); // dosage: weak ways stay optional
-        if (!solving.length) return;
-        const m = solving[Math.min(clampLevel(raw.level), solving.length) - 1];
+        const m = shownWay(raw, ways); // dosage: a primary way solves the item
+        if (!m) return;
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
         const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
           return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
@@ -2136,11 +2134,17 @@
   const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
   function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
   function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
-  // Primary ways solve the item. A topic whose every way is EXTRA (grade ד׳
-  // MASS_VOL beside UNITS) has no main way; each level still takes its way.
-  function solvingWays(ways) {
+  // The way an item is solved with. Primary ways only: an all-EXTRA topic does
+  // not invent a main way. Grade ד׳ cube items show cubeLayerGroups (#751) so
+  // a box is not explained as kilograms; kg and liters keep the one MAIN way.
+  function shownWay(raw, ways) {
     const primary = primaryWays(ways);
-    return primary.length ? primary : (ways || []);
+    if (!primary.length) return null;
+    if (raw.grade === 'ד' && raw.standard === ST.MASS_VOL && /תיבה|קובי/.test(raw.prompt || '')) {
+      const vol = (ways || []).find(function (w) { return w[0] === 'cubeLayerGroups'; });
+      if (vol) return vol;
+    }
+    return primary[Math.min(clampLevel(raw.level), primary.length) - 1];
   }
 
   // A music activity (the prompt itself plays or reads music) cites the same

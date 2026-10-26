@@ -67,10 +67,12 @@
       ['thousandGroups', 'ק״מ, ק״ג וליטר הם 1,000 יחידות קטנות: 10 קבוצות של 100. כל יחידה גדולה היא הדגשה; ספרו הדגשות וכפלו ב־1,000.', 'das2023', 'A'],
       ['piecesPerUnit', 'מיחידה גדולה לחתיכות: כמה קבוצות בגודל החתיכה נכנסות ביחידה אחת? ספרו קבוצות ביחידה וכפלו במספר היחידות.', 'das2023', 'A'],
     ],
-    // #751: these ways moved from ג׳, which has no ק״ג/ליטר exercises. None is
-    // deleted; rating and source stay. All are EXTRA beside UNITS.
+    // #751: moved from ג׳. All three keep their rating and source (das2023, A).
+    // kiloGroupsTen is the one MAIN way: it is the grouped-beat method Das 2023
+    // evaluated. The other two stay EXTRA beside UNITS. A cube item is shown
+    // cubeLayerGroups, so a box is not explained as kilograms.
     MASS_VOL: [
-      ['kiloGroupsTen', 'ק״ג הוא 10 קבוצות של 100 גרם, וליטר — 10 קבוצות של 100 מ״ל. מחיאה לכל 100 והדגשה כל עשר: כל הדגשה היא ק״ג או ליטר.', 'das2023', 'A', EXTRA],
+      ['kiloGroupsTen', 'ק״ג הוא 10 קבוצות של 100 גרם, וליטר — 10 קבוצות של 100 מ״ל. מחיאה לכל 100 והדגשה כל עשר: כל הדגשה היא ק״ג או ליטר.', 'das2023', 'A'],
       ['halfKiloAccents', 'חצי ק״ג הוא חצי מהקבוצות: 5 קבוצות של 100 גרם מתוך 10. ספרו קבוצות עד ההדגשה, וכך גם חצי ליטר במ״ל.', 'das2023', 'A', EXTRA],
       ['cubeLayerGroups', 'נפח תיבה: כל שכבה היא קבוצת פעימות, פעימה לכל קובייה. כמה שכבות — כמה קבוצות; ספרו בקפיצות של שכבה.', 'das2023', 'A', EXTRA],
     ],
