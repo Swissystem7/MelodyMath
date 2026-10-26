@@ -182,7 +182,7 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
   body.print-lesson #trialKit,body.print-lesson #reportCard,body.print-lesson #classBoardCard,body.print-lesson #parentCard,body.print-lesson #worksheetCard,body.print-lesson #certCard,body.print-lesson #ramaCard{display:none!important}
   body.print-rama #ramaCard,body.print-rama #ramaSheet{display:block!important}
   body.print-rama #trialKit,body.print-rama #reportCard,body.print-rama #classBoardCard,body.print-rama #parentCard,body.print-rama #worksheetCard,body.print-rama #certCard,body.print-rama #lessonCard{display:none!important}
-  #teacherReport.panel{display:block!important}
+  body.adult-ok #teacherReport.panel{display:block!important}
   #firstRun,.first-run{display:none!important}
   .sheet-item{border-color:#999}
 }

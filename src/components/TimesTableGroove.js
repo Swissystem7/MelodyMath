@@ -22,6 +22,7 @@
   const G = root.MM_GROOVE || require('../lib/music/groove.js');
   const STREAK = root.MM_STREAK || require('../lib/music/streak.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
+  const MY = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
   const GAME = 'timesTableGroove';
   const FACTORS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   const BPM = 100;
@@ -57,13 +58,22 @@
     return set.slice(0, 4).sort(function (x, y) { return x - y; });
   }
 
+  // The child's instrument (#679) when this screen has it. No locks (#717):
+  // every times-table timbre is open from the start; an instrument this
+  // screen has no voice for is only named, and tabla plays instead.
+  function pick() {
+    const id = MY.getMyInstrument();
+    const ok = !id || [START_INSTRUMENT].concat(INSTRUMENTS).indexOf(id) >= 0;
+    return { instrument: ok && id ? id : START_INSTRUMENT, lockedPick: ok ? null : id };
+  }
+
   function createState(opts) {
     const o = opts || {};
     const factor = FACTORS.indexOf(o.factor) >= 0 ? o.factor : 4;
     return {
       factor: factor, n: o.n || 0, q: question(factor, o.n || 0), showMusic: o.showMusic !== false,
       streak: o.streak || STREAK.initialStreak(),
-      instrument: o.instrument || START_INSTRUMENT, status: 'asking', message: '', sound: null,
+      instrument: o.instrument || START_INSTRUMENT, lockedPick: o.lockedPick || null, status: 'asking', message: '', sound: null,
     };
   }
 
@@ -125,11 +135,9 @@
     const opts = choices(q).map(function (c) {
       return '<button type="button" class="jam-pad" data-act="answer" data-value="' + c + '"' + (on ? ' data-tap="' + e(inst.voice) + '"' : '') + '>' + c + '</button>';
     }).join('');
-    const owned = [START_INSTRUMENT].concat(INSTRUMENTS);
-    const instRow = on ? '<div class="jam-free" role="group" aria-label="כלים">' + owned.map(function (id) {
-      const x = JAM.instrument(id);
-      return '<button type="button" class="jam-pad" data-act="instrument" data-inst="' + e(id) + '" data-tap="' + e(x.voice) + '" aria-pressed="' + (id === state.instrument) + '">' + e(x.he) + '</button>';
-    }).join('') + '</div>' : '';
+    // The child picks in #myInstCard; this screen only says when it has no voice for the pick.
+    const lockNote = on && state.lockedPick ? '<p class="jam-free" role="note">🎵 ' + e(JAM.instrument(state.lockedPick).he) +
+      ' לא מנגן בלוח הכפל. בינתיים מנגנת ' + e(inst.he) + '.</p>' : '';
     const layers = state.streak.layers.map(function (l) { return LAYER_HE[l]; }).join(' · ');
     return '<div class="jam-head"><span class="tag">M2 · פעמות מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🪘 לוח הכפל כשיר קצבי' : 'ספירה בדילוגים') + '</h3>' +
@@ -138,14 +146,14 @@
       '<div class="jam-row" role="group" aria-label="תשובות">' + opts + '</div>' +
       (on ? '<div class="jam-row"><button type="button" class="secondary" data-act="play">▶ נגן את ה־groove</button>' +
         '<button type="button" class="jam-pad" data-tap="' + e(inst.voice) + '" aria-label="הקשה חופשית">🥁 הקישו</button></div>' : '') +
-      instRow + (on && layers ? '<p class="jam-free">שכבות בשיר: ' + e(layers) + '</p>' : '') +
+      lockNote + (on && layers ? '<p class="jam-free">שכבות בשיר: ' + e(layers) + '</p>' : '') +
       '<div class="jam-row"><button type="button" class="secondary" data-act="next">שאלה הבאה ←</button></div>' +
       '<p class="jam-msg ' + (state.status === 'right' ? 'good' : state.status === 'retry' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
   }
 
   function mount(el) {
     const store = root.localStorage;
-    let state = createState({ showMusic: JAM.loadShowMusic(GAME), streak: STREAK.loadStreak(store) });
+    let state = createState(Object.assign({ showMusic: JAM.loadShowMusic(GAME), streak: STREAK.loadStreak(store) }, pick()));
     let playing = null;
     JAM.registerTapVoices();
     function stop() { if (playing) playing.stop(); playing = null; }
@@ -171,18 +179,19 @@
       if (act === 'answer') {
         state = answer(state, b.getAttribute('data-value'));
         STREAK.saveStreak(store, state.streak);
+        state = Object.assign({}, state, pick());
       } else if (act === 'factor') state = next(state, Number(b.getAttribute('data-factor')));
       else if (act === 'next') state = next(state);
-      else if (act === 'instrument') state = Object.assign({}, state, { instrument: b.getAttribute('data-inst') });
       else if (act === 'music') { state = Object.assign({}, state, { showMusic: !state.showMusic }); JAM.saveShowMusic(GAME, state.showMusic); }
       draw('[data-act="' + act + '"]');
       if (state.sound && state.showMusic) play(true);
       state = Object.assign({}, state, { sound: null });
     });
+    if (typeof root.addEventListener === 'function') root.addEventListener(MY.EVENT, function () { state = Object.assign({}, state, pick()); draw(); });
     JAM.stopWhenHidden(el, stop);
     draw();
     return { get state() { return state; } };
   }
 
-  return { GAME: GAME, FACTORS: FACTORS, INSTRUMENTS: INSTRUMENTS, question: question, choices: choices, createState: createState, answer: answer, next: next, groovePlan: groovePlan, renderHtml: renderHtml, mount: mount };
+  return { GAME: GAME, FACTORS: FACTORS, INSTRUMENTS: INSTRUMENTS, question: question, choices: choices, createState: createState, pick: pick, answer: answer, next: next, groovePlan: groovePlan, renderHtml: renderHtml, mount: mount };
 });

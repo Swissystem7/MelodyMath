@@ -48,15 +48,18 @@ test('#717: every M2 instrument is available from the start, with no unlock stat
   const s = TTG.createState({ factor: 3 });
   assert.equal(s.unlocks, undefined, 'no unlock state');
   assert.equal(TTG.UNLOCK_LIST, undefined);
+  assert.equal(s.lockedPick, null);
   const html0 = TTG.renderHtml(s);
   const m2 = INST.forTopic('multiplication').map((x) => x.id);
   assert.ok(m2.length >= 2);
   m2.forEach((id) => {
     assert.ok(TTG.INSTRUMENTS.includes(id) || id === 'tabla', id);
-    assert.ok(html0.includes('data-inst="' + id + '"'), id + ' selectable with zero answers');
   });
+  // #762: the child picks in #myInstCard, so this screen has no instrument buttons of its own.
+  assert.doesNotMatch(html0, /data-act="instrument"|data-locked|🔒|נפתח כלי/);
   let t = s;
   for (let i = 0; i < 30; i++) t = TTG.answer(TTG.next(t), TTG.next(t).q.answer);
+  assert.equal(t.unlocks, undefined);
   assert.doesNotMatch(t.message, /נפתח כלי/);
   assert.ok(!fs.existsSync(path.join(__dirname, '..', 'src/lib/music/unlocks.js')), 'unlocks.js removed');
   assert.ok(!sw.includes('unlocks.js'), 'not precached');
