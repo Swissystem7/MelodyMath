@@ -9,7 +9,19 @@
 
   const PM = root.MM_PERCENT_MIX || require('../lib/music/percentMix.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
-  const GAME = 'percentMixPad', BPM = 90;
+  const INST = typeof root.instrumentById === 'function' ? root : require('../lib/instruments.js');
+  const GAME = 'percentMixPad', BPM = 90, DEFAULT_INSTRUMENT = 'darbuka';
+
+  function myInstrument() {
+    const my = root.MM_MY_INSTRUMENT;
+    return my && typeof my.instrumentFor === 'function' ? my.instrumentFor(DEFAULT_INSTRUMENT) : DEFAULT_INSTRUMENT;
+  }
+  function voicesFor(id) {
+    const main = INST.instrumentById(id) || INST.instrumentById(DEFAULT_INSTRUMENT);
+    const partner = INST.instrumentById(PM.partnerInstrument(main.family));
+    const melodic = main.family !== 'percussion';
+    return { id: main.id, family: main.family, voice: melodic ? partner.voice : main.voice, melody: melodic ? main.voice : partner.voice, partnerId: partner.id, partnerFamily: partner.family };
+  }
 
   function createState(index, showMusic, split) {
     const n = PM.TARGETS.length, i = Number(index) || 0;
@@ -40,7 +52,7 @@
     return Object.assign({}, state, { message: right + ' מתוך ' + PM.NO_MUSIC_CHECK_ITEMS.length + ' נכונות.', sound: null });
   }
 
-  function renderHtml(state, voice) {
+  function renderHtml(state, voice, melody) {
     const e = JAM.esc, on = state.showMusic, head ='<div class="jam-head"><span class="tag">M3 · אחוזים כתיבה · כיתה ו׳</span>' + JAM.musicToggleHtml(on) + '</div>';
     if (!state.ex) {
       return head + '<h3>בדיקה בלי מוזיקה</h3>' + PM.NO_MUSIC_CHECK_ITEMS.map(function (it) {
@@ -52,11 +64,15 @@
       return '<button type="button" class="secondary" data-act="split" data-split="' + s + '" aria-pressed="' + (s === state.split) + '">' + s + ' פעמות</button>';
     }).join('');
     const segs = state.fill.map(function (f, i) { return '<span class="fbp-seg" data-seg="' + i + '" style="width:' + PM.tile(f).n + '%">' + PM.tile(f).n + '%</span>'; }).join('');
+    const noTen = melody && !state.ex.allowed.some(function (a) { return PM.tile(a).n === 10; });
+    const tens = state.fill.filter(function (id) { return PM.tile(id).n === 10; }).length;
     const tiles = state.ex.allowed.map(function (id) {
-      return '<button type="button" class="fbp-tile" data-act="tile" data-tile="' + id + '"' + (on ? ' data-tap="' + e(voice) + '"' : '') + '><b>' +
-        e(PM.tile(id).he) + '</b>' + (on ? '<span>' + e(PM.tileLabel(id, state.split)) + '</span>' : '') + '</button>';
+      const t = PM.tile(id), climb = melody && t.n === 10, spare = noTen && (t.n === 25 || t.n === 50);
+      const tap = climb ? e(melody) + '" data-hz="' + PM.TEN_STEPS_HZ[tens % PM.TEN_STEPS_HZ.length] : (spare ? e(melody) : e(voice));
+      return '<button type="button" class="fbp-tile" data-act="tile" data-tile="' + id + '"' + (on ? ' data-tap="' + tap + '"' : '') + '><b>' +
+        e(t.he) + '</b>' + (on ? '<span>' + e(PM.tileLabel(id, state.split)) + '</span>' : '') + '</button>';
     }).join('');
-    return head + '<h3>' + (on ? '🪘 תיבה אחת = 100%' : 'רצועה אחת = 100%') + '</h3><p class="jam-prompt">' + e(state.ex.he) + '</p>' +
+    return head + '<h3>' + (on ? 'תיבה אחת = 100%' : 'רצועה אחת = 100%') + '</h3><p class="jam-prompt">' + e(state.ex.he) + '</p>' +
       (on ? '<div class="jam-row" role="group" aria-label="חלוקת התיבה">' + splits + '</div>' : '') +
       '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="מלא ' + PM.filled(state.fill) + '% מתוך 100%">' + segs + '</div>' +
       '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div><div class="jam-row">' +
@@ -66,11 +82,11 @@
   }
 
   function mount(el) {
-    const inst = JAM.instrument('darbuka', 'drumLow');
+    function inst() { return voicesFor(myInstrument()); }
     JAM.registerTapVoices();
     let state = createState(0, JAM.loadShowMusic(GAME)), playing = null;
     function stop() { if (playing) playing.stop(); playing = null; }
-    function draw() { el.innerHTML = renderHtml(state, inst.voice); }
+    function draw() { const v = inst(); el.innerHTML = renderHtml(state, v.voice, v.melody); }
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
       if (!b) return;
@@ -88,14 +104,15 @@
         state = checkPlain(state, answers);
       } else if (act === 'next' || act === 'restart') { stop(); state = createState(act === 'next' ? state.index + 1 : 0, state.showMusic, state.split); }
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic, sound: null }); JAM.saveShowMusic(GAME, state.showMusic); }
-      else if (act === 'play') { stop(); playing = JAM.playNotes(PM.barPlan(state.fill, BPM, inst.voice, state.split)); return; }
+      else if (act === 'play') { stop(); const v = inst(); playing = JAM.playNotes(PM.barPlan(state.fill, BPM, v.voice, state.split, v.melody)); return; }
       draw();
       if (state.showMusic && state.sound) JAM.feedback(state.sound === 'cadence');
     });
+    if (typeof root.addEventListener === 'function') root.addEventListener('mm:instrument', function () { draw(); });
     JAM.stopWhenHidden(el, stop);
     draw();
     return { get state() { return state; } };
   }
 
-  return { GAME: GAME, BPM: BPM, createState: createState, tapTile: tapTile, check: check, checkPlain: checkPlain, renderHtml: renderHtml, mount: mount };
+  return { GAME: GAME, BPM: BPM, DEFAULT_INSTRUMENT: DEFAULT_INSTRUMENT, myInstrument: myInstrument, voicesFor: voicesFor, createState: createState, tapTile: tapTile, check: check, checkPlain: checkPlain, renderHtml: renderHtml, mount: mount };
 });
