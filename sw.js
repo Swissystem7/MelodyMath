@@ -79,6 +79,7 @@ const ASSETS = [
   './src/components/FractionBarPad.js',
   './src/lib/music/beatCounter.js',
   './src/components/BeatCounter.js',
+  './src/components/EnsembleStudio.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/lib/exercises/tapTempoMean.js',
