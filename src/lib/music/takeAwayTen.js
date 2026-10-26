@@ -1,5 +1,5 @@
-// MelodyMath — takeAwayBeats & tenExchange, the primary interactive methods
-// of subtraction and place value (Refs #689, Refs #665).
+// MelodyMath — takeAwayBeats & tenExchange, interactive additions (Refs #689). takeAwayBeats is primary only for SUB10, SUB20 and WORD_REMOVE; tenExchange is EXTRA for place value (alternateDrums stays primary), as tensBarsBack stays primary for SUB2D
+// (Refs #665).
 //
 // takeAwayBeats: a row of beats sounds, then beats disappear one by one
 // (silence in their place); what still sounds is the difference.

@@ -1,6 +1,6 @@
 'use strict';
-// Refs #689, Refs #665: takeAwayBeats (subtraction) and tenExchange (place
-// value) are the primary interactive methods of their topics. One circle per
+// Refs #689, Refs #665: takeAwayBeats is primary only for SUB10, SUB20 and
+// WORD_REMOVE; SUB2D primary is tensBarsBack, even/odd primary is alternateDrums, and tenExchange stays EXTRA there. One circle per
 // sound; the end-of-topic check carries no music.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -36,7 +36,7 @@ test('tenExchange: 10 bells become one drum, one circle per sound-object', () =>
   assert.equal(mod.tenExchange(-1), null);
 });
 
-test('specForItem builds a widget spec only for the two primary methods', () => {
+test('specForItem builds a widget spec only for takeAwayBeats and tenExchange', () => {
   const sub = mod.specForItem({ music: 'takeAwayBeats', prompt: '8 − 3 = ?' });
   assert.equal(sub.kind, 'takeAway');
   assert.equal(sub.remaining, 5);
@@ -50,33 +50,57 @@ test('specForItem builds a widget spec only for the two primary methods', () => 
   // Real shipped prompts, not only toy ones: two-digit subtraction and a
   // three-digit place-value question both get circles from their own numbers.
   const shipped = banks.allItems();
-  const sub2d = shipped.find((it) => it.music === 'takeAwayBeats' && it.prompt === '58 − 23 = ?');
-  assert.ok(sub2d, 'shipped two-digit takeAwayBeats item exists');
-  assert.equal(mod.specForItem(sub2d).remaining, 35);
-  assert.equal(mod.specForItem(sub2d).circles.length, 58);
-  const pv356 = shipped.find((it) => it.music === 'tenExchange' && /356/.test(it.prompt) && /עשרות/.test(it.prompt));
+  const sub2d = shipped.find((it) => it.prompt === '58 − 23 = ?');
+  assert.ok(sub2d, 'shipped two-digit subtraction item exists');
+  assert.equal(sub2d.music, 'tensBarsBack');
+  assert.ok(sub2d.musicExtra.some((w) => w.music === 'takeAwayBeats'));
+  assert.equal(mod.specForItem({ music: 'takeAwayBeats', prompt: sub2d.prompt }).remaining, 35);
+  assert.equal(mod.specForItem({ music: 'takeAwayBeats', prompt: sub2d.prompt }).circles.length, 58);
+  const pv356 = shipped.find((it) => /356/.test(it.prompt) && /עשרות/.test(it.prompt));
   assert.ok(pv356, 'shipped 356 place-value item exists');
-  assert.equal(mod.specForItem(pv356).drums, 5);
+  assert.equal(pv356.music, 'alternateDrums');
+  assert.ok(pv356.musicExtra.some((w) => w.music === 'tenExchange'));
+  assert.equal(mod.specForItem({ music: 'tenExchange', prompt: '356' }).drums, 5);
   assert.equal(mod.specForItem({ music: 'tenExchange', prompt: '200 + 30 + 4 = ?' }), null);
   const html = mod.circlesHtml(sub);
   assert.equal((html.match(/class="snd-circle /g) || []).length, 8); // one circle per sound in the DOM string
 });
 
-test('takeAwayBeats is the primary way of subtraction, tenExchange of place value', () => {
+test('SUB2D primary is tensBarsBack, even/odd primary is alternateDrums, takeAwayBeats primary only in SUB10/SUB20/WORD_REMOVE', () => {
   const g1 = require('../src/lib/curriculum/grade1');
   const g2 = require('../src/lib/curriculum/grade2');
   assert.equal(banks.primaryWays(g1.music.SUB10)[0][0], 'takeAwayBeats');
   assert.equal(banks.primaryWays(g1.music.SUB20)[0][0], 'takeAwayBeats');
-  assert.equal(banks.primaryWays(g2.music.SUB2D)[0][0], 'takeAwayBeats');
+  assert.equal(banks.primaryWays(g2.music.SUB2D)[0][0], 'tensBarsBack');
+  assert.equal(banks.primaryWays(g1.music.WORD_REMOVE)[0][0], 'takeAwayBeats');
   assert.equal(banks.primaryWays(g2.music.WORD_REMOVE)[0][0], 'takeAwayBeats');
-  assert.equal(banks.primaryWays(g2.music.PLACE_VALUE)[0][0], 'tenExchange');
+  assert.equal(banks.primaryWays(g2.music.PLACE_VALUE)[0][0], 'alternateDrums');
+  // takeAwayBeats and tenExchange stay EXTRA wherever they would demote a primary.
+  const sub2dTakeAway = g2.music.SUB2D.find((w) => w[0] === 'takeAwayBeats');
+  assert.ok(banks.isOptionalWay(sub2dTakeAway));
+  assert.match(sub2dTakeAway[1], /תופים \(עשרות\) ושייקרים \(יחידות\)/);
+  assert.ok(banks.isOptionalWay(g2.music.PLACE_VALUE.find((w) => w[0] === 'tenExchange')));
+  assert.ok(!banks.isOptionalWay(g2.music.SUB2D.find((w) => w[0] === 'tensBarsBack')));
+  assert.ok(!banks.isOptionalWay(g2.music.PLACE_VALUE.find((w) => w[0] === 'alternateDrums')));
+  // takeAwayBeats is primary in no other topic, in any grade; tenExchange is primary nowhere.
+  for (let g = 1; g <= 6; g++) {
+    const modG = require('../src/lib/curriculum/grade' + g);
+    for (const [topic, ways] of Object.entries(modG.music || {})) {
+      const prim = banks.primaryWays(ways).map((w) => w[0]);
+      if (prim.includes('takeAwayBeats')) assert.ok(['SUB10', 'SUB20', 'WORD_REMOVE'].includes(topic), 'grade' + g + ' ' + topic);
+      assert.ok(!prim.includes('tenExchange'), 'grade' + g + ' ' + topic);
+    }
+  }
   // Primary ways must come from a strongly evidenced mechanism (dosage rules).
   assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('takeAwayBeats')));
-  assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('tenExchange')));
-  // Shipped items actually carry the two methods.
+  assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('tensBarsBack')));
+  assert.ok(banks.MUSIC_DOSAGE.primary.includes(banks.mechanismOf('alternateDrums')));
+  // Shipped items carry the restored primaries; tenExchange stays an extra.
   const items = banks.allItems();
   assert.ok(items.some((it) => it.music === 'takeAwayBeats' && it.skill === 'subtraction'));
-  assert.ok(items.some((it) => it.music === 'tenExchange' && it.skill === 'place_value'));
+  assert.ok(items.some((it) => it.music === 'tensBarsBack' && it.skill === 'subtraction'));
+  assert.ok(items.some((it) => it.music === 'alternateDrums' && it.skill === 'place_value'));
+  assert.ok(items.some((it) => it.musicExtra && it.musicExtra.some((w) => w.music === 'tenExchange') && it.skill === 'place_value'));
 });
 
 test('end-of-topic check for subtraction and place value has no music', () => {
