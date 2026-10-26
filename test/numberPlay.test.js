@@ -24,15 +24,13 @@ test('3 + 2: one circle per sound, a beat of rest, two families, sound at 0 (#68
   assert.match(html, /▶/);
 });
 
-test('counts 13–20: sounds equal circles (#686)', () => {
-  for (let n = 13; n <= 20; n++) {
-    const plan = NP.extractNumberPlan({ skill: 'counting', hear: [n], prompt: 'כמה?' });
-    assert.equal(plan.notes.length, n);
-    assert.equal(dots(NP.renderHtml(plan)), n);
-  }
-  const edge = NP.extractNumberPlan({ prompt: '15 + 5 = ?', grade: 'ב' });
-  assert.equal(edge.totalSounds, 20);
-  assert.equal(dots(NP.renderHtml(edge)), 20);
+test('numbers above 12 play as tens and ones (#686)', () => {
+  [13, 14, 15, 16, 17, 18, 19, 20].forEach(function (n) {
+    const plan = NP.extractNumberPlan({ skill: 'counting', hear: [n], prompt: String(n) });
+    const tens = plan.notes.filter(function (x) { return x.value === 10; }).length;
+    const ones = plan.notes.filter(function (x) { return x.value === 1; }).length;
+    assert.ok(tens === Math.floor(n / 10) && ones === n % 10 && plan.totalValue === n && plan.totalSounds < n && dots(NP.renderHtml(plan)) === plan.totalSounds, String(n));
+  });
 });
 
 test('subtraction, compare and multiplication (#686)', () => {
@@ -51,7 +49,7 @@ test('subtraction, compare and multiplication (#686)', () => {
   assert.equal(dots(NP.renderHtml(mul)), 12);
   assert.ok(new Set(mul.groups.map((g) => g.family)).size >= 2);
   assert.ok(mul.notes[4].at - mul.notes[3].at >= mul.beat * 2);
-  [['7 × 8 = ?', 7, 8, 5, 6], ['9 × 9 = ?', 9, 9, 8, 1]].forEach(function (row) {
+  [['7 × 8 = ?', 7, 8, 5, 6], ['9 × 9 = ?', 9, 9, 8, 1], ['4 × 4 = ?', 4, 4, 1, 6], ['2 × 10 = ?', 2, 10, 2, 0]].forEach(function (row) {
     const plan = NP.extractNumberPlan({ prompt: row[0], skill: 'multiplication' });
     const html = NP.renderHtml(plan);
     const heard = plan.notes.reduce(function (s, n) { return s + n.value; }, 0);
@@ -70,21 +68,20 @@ test('a repeated instrument keeps one pitch (#686)', () => {
   assert.ok(hz.length >= 2 && hz.every(function (h) { return h === 494; }) && plan.notes.every(function (n) { return n.voice !== 'metalBell' || n.hz === 494; }));
 });
 
-test('the child instrument overrides forTopic (#686, #717)', () => {
+test('the child instrument overrides forTopic (#686)', () => {
   assert.ok(!inst.forTopic('counting').some((x) => x.id === 'guitar'));
-  const mem = { 'mm.myInstrument': 'guitar', 'mm_child_inst_other': 'cajon' };
-  const storage = { getItem: (k) => (Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null) };
-  const plan = NP.extractNumberPlan({ prompt: '4 + 3 = ?', grade: 'א' }, { storage: storage, who: { name: 'dana', classCode: 'X' } });
+  const mem = { 'mm.myInstrument': 'guitar' };
+  const storage = { getItem: (k) => (Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null), removeItem: (k) => { delete mem[k]; }, setItem: (k, v) => { mem[k] = v; } };
+  const plan = NP.extractNumberPlan({ prompt: '4 + 3 = ?', grade: 'א' }, { storage: storage });
   assert.equal(plan.groups[0].instrument, 'guitar');
   assert.equal(plan.groups[0].family, 'strings');
   assert.notEqual(plan.groups[1].family, 'strings');
+  mem['mm.myInstrument'] = 'piano';
+  const via = NP.extractNumberPlan({ prompt: '4 + 3 = ?' }, { storage: storage });
+  assert.equal(via.groups[0].instrument, 'piano');
+  assert.notEqual(via.groups[1].family, 'keys');
   delete mem['mm.myInstrument'];
-  mem['mm_child_inst_dana'] = 'piano';
-  const via717 = NP.extractNumberPlan({ prompt: '4 + 3 = ?' }, { storage: storage, who: { name: 'dana', classCode: 'X' } });
-  assert.equal(via717.groups[0].instrument, 'piano');
-  assert.notEqual(via717.groups[1].family, 'keys');
-  const other = NP.extractNumberPlan({ prompt: '4 + 3 = ?' }, { storage: storage, who: { name: 'noa', classCode: 'X' } });
-  assert.equal(other.groups[0].instrument, 'handbells');
+  assert.equal(NP.extractNumberPlan({ prompt: '4 + 3 = ?' }, { storage: storage }).groups[0].instrument, 'handbells');
 });
 
 test('lower grades keep one tempo and it rises with the streak, not a prompt hash (#686)', () => {

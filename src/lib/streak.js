@@ -86,14 +86,14 @@
   }
   function setStorage(s) { storageRef = s; loadState(); }
 
-  // The child's instrument: the pick saved by the tap-instrument chooser
-  // ('mm-tap-instrument', #750), else the topic's own instrument (instruments.js).
-  const PICK_KEY = 'mm-tap-instrument';
   const FALLBACK_VOICE = 'keys';
   function instrumentFor(topic) {
-    const s = getStorage();
-    try { const id = s && s.getItem(PICK_KEY); if (id) return id; } catch (e) { /* private */ }
     const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    try {
+      const mine = g.MM_MY_INSTRUMENT || (typeof require === 'function' ? require('./myInstrument.js') : null);
+      const id = mine && mine.getMyInstrument && mine.getMyInstrument(getStorage());
+      if (id) return id;
+    } catch (e) { /* private */ }
     const list = typeof g.forTopic === 'function' ? g.forTopic(topic) : [];
     return list && list[0] ? list[0].id : null;
   }

@@ -17,12 +17,17 @@
   function inRange(n) { return Number.isInteger(n) && n >= 1 && n <= 20; }
   function ints(p) { const m = String(p).match(/\d+/g); return m ? m.map(Number) : []; }
   function groupsOf(n, size) { return Array.from({ length: n }, function () { return size; }); }
-  function bundle(groups) {
-    const sum = groups.reduce(function (a, b) { return a + b; }, 0);
-    if (sum <= 20) return groups.map(function (c) { return { n: c, v: 1 }; });
-    const tens = Math.floor(sum / 10), ones = sum % 10, out = [];
+  function asTens(total) {
+    const tens = Math.floor(total / 10), ones = total % 10, out = [];
     for (let i = 0; i < tens; i++) out.push({ n: 1, v: 10 });
     if (ones) out.push({ n: ones, v: 1 });
+    return out;
+  }
+  function bundle(groups, op) {
+    const sum = groups.reduce(function (a, b) { return a + b; }, 0);
+    if (op === 'multiplication' && sum > 12) return asTens(sum);
+    const out = [];
+    groups.forEach(function (c) { (c > 12 ? asTens(c) : [{ n: c, v: 1 }]).forEach(function (g) { out.push(g); }); });
     return out;
   }
   function skip(it) {
@@ -30,7 +35,6 @@
     if (/fraction|decimal|percent/.test(String(it.skill || ''))) return true;
     return /\d+\s*\/\s*\d+/.test(p) || /%/.test(p) || /\d+\.\d+/.test(p) || /\d{1,2}:\d{2}/.test(p);
   }
-  // Each sounded number is 1–20. A longer product is tens (value 10) plus leftover ones.
   function parseNumberGroups(it) {
     const item = itemOf(it);
     if (item.noMusic) return null;
@@ -75,19 +79,7 @@
     const explicit = opts && (opts.instrument || opts.chosenInstrument);
     if (explicit) return ok(explicit);
     const mine = (root && root.MM_MY_INSTRUMENT) || need('../lib/myInstrument.js');
-    try {
-      if (mine && mine.getMyInstrument) { const hit = ok(mine.getMyInstrument(opts && opts.storage)); if (hit) return hit; }
-    } catch (e) { /* store absent */ }
-    let ls = opts && opts.storage;
-    if (!ls) { try { ls = root.localStorage; } catch (e) { ls = null; } }
-    if (!ls || !ls.getItem) return null;
-    const direct = ok(ls.getItem('mm.myInstrument') || ls.getItem('mm-tap-instrument'));
-    if (direct) return direct;
-    const who = (opts && opts.who) || {};
-    const name = who.name ? String(who.name) : '';
-    const code = String(who.classCode || '');
-    const keys = [opts && opts.childId ? 'mm_child_inst_' + opts.childId : '', name ? 'mm_child_inst_' + name : '', name ? 'mm_child_inst_' + code + ':' + name : '', name ? 'mm_child_inst_' + encodeURIComponent(code) + ':' + encodeURIComponent(name) : ''];
-    for (let i = 0; i < keys.length; i++) { const hit = keys[i] && ok(ls.getItem(keys[i])); if (hit) return hit; }
+    try { if (mine && mine.getMyInstrument) return ok(mine.getMyInstrument(opts && opts.storage)); } catch (e) { /* store absent */ }
     return null;
   }
   function voicesFor(count, opts) {
@@ -127,7 +119,7 @@
     const grade = opts.grade || item.grade || 'א';
     const bpm = tempoFor(grade, opts.streak, opts.bpm);
     const beat = 60 / bpm;
-    const counts = parsed.op === 'multiplication' ? bundle(parsed.groups) : parsed.groups.map(function (c) { return { n: c, v: 1 }; });
+    const counts = bundle(parsed.groups, parsed.op);
     const voices = voicesFor(counts.length, opts);
     const groups = [];
     const notes = [];
