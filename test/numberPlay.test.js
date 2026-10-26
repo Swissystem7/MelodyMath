@@ -51,13 +51,17 @@ test('subtraction, compare and multiplication (#686)', () => {
   assert.equal(dots(NP.renderHtml(mul)), 12);
   assert.ok(new Set(mul.groups.map((g) => g.family)).size >= 2);
   assert.ok(mul.notes[4].at - mul.notes[3].at >= mul.beat * 2);
-  ['5 × 10 = ?', '10 × 10 = ?', '4 × 6 = ?', '9 × 9 = ?'].forEach(function (p) {
-    const big = NP.extractNumberPlan({ prompt: p, skill: 'multiplication' });
-    assert.ok(big.totalSounds <= 20 && big.totalSounds >= 1, p);
-    assert.equal(dots(NP.renderHtml(big)), big.totalSounds, p);
+  [['7 × 8 = ?', 7, 8, 5, 6], ['9 × 9 = ?', 9, 9, 8, 1]].forEach(function (row) {
+    const plan = NP.extractNumberPlan({ prompt: row[0], skill: 'multiplication' });
+    const html = NP.renderHtml(plan);
+    const heard = plan.notes.reduce(function (s, n) { return s + n.value; }, 0);
+    const shown = (html.match(/data-value="10"/g) || []).length * 10 + (html.match(/data-value="1"/g) || []).length;
+    assert.equal(heard, row[1] * row[2], row[0]);
+    assert.equal(shown, row[1] * row[2], row[0]);
+    assert.equal(plan.groups.filter(function (g) { return g.each === 10; }).length, row[3], row[0]);
+    assert.equal(plan.notes.filter(function (n) { return n.value === 1; }).length, row[4], row[0]);
+    assert.ok(plan.totalSounds <= 20, row[0]);
   });
-  const tens = NP.extractNumberPlan({ prompt: '5 × 10 = ?', skill: 'multiplication' });
-  assert.deepEqual(tens.groups.map(function (g) { return g.count; }), [1, 1, 1, 1, 1]);
 });
 
 test('a repeated instrument keeps one pitch (#686)', () => {
