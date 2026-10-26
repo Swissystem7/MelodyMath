@@ -21,6 +21,9 @@
   // Same ids and values as in grade6.js, so one id means one source everywhere.
   const sources = {
     azaryahu2020: ['Azaryahu et al. 2020 — MusiMath and Academic Music', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/'],
+    // Knuth, Stephens, McNeil & Alibali (2006), JRME 37(4), 297-312. No DOI:
+    // 10.2307/30034852 no longer resolves (#710).
+    knuth2006: ['Knuth et al. 2006 — Does Understanding the Equal Sign Matter? (JRME 37(4), 297–312)', 'https://www.jstor.org/stable/30034852'],
     interplay2024: ['Interplay between music and mathematics (Humanit. Soc. Sci. Commun., 2024)', 'https://www.nature.com/articles/s41599-024-03631-z'],
     kcConnections: ['Kennedy Center — Connections: Math and Music', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/media-and-interactives/media/music/connections/connections/math--music/'],
     kcMath: ['Kennedy Center — math collection', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/collections/collections/math/'],
@@ -43,6 +46,8 @@
   // which are never primary. banks.js gives the item a primary way.
   const EXTRA = Object.freeze({ optional: true });
   const WEAK = Object.freeze({ optional: true, evidence: 'weak' });
+  // A second source cited next to the first (#710): research on the equal sign.
+  const EQ_SIGN = Object.freeze({ also: ['knuth2006'] });
   const music = {
     FRAC_BAR: [
       ['noteValues', 'תיבה של 4/4 היא השלם: חצי תו ממלא חצי תיבה, רבע — רבע, שמינית — שמינית. נגנו ומנו.', 'courey2012', 'D'],
@@ -119,9 +124,9 @@
     // #710: the balance of א׳-ב׳ (EQ_LEFT) grows up. balanceBars extends
     // fillBar: both sides are bars played at once, and the ear judges them.
     EQ_INEQ: [
-      ['balanceBars', 'מאזן של שתי תיבות: כל צד הוא תיבה, ושני נגנים מתחילים יחד. נגמרות יחד — שוות; אחת ממשיכה לבד — הצד שלה גדול יותר.', 'azaryahu2020', 'A'],
-      ['fillBar', 'משוואה היא תיבה עם תו חסר: נגנו את הצד הידוע, ואז מלאו בתיבה השנייה את מה שחסר עד ששתיהן נשמעות באותו אורך.', 'azaryahu2020', 'A'],
-      ['sameLength', 'אותו אורך, חלוקה אחרת: צד אחד מתופף בקבוצות גדולות, השני בקטנות. אם המשפטים נגמרים יחד — יש שוויון.', 'azaryahu2020', 'A'],
+      ['balanceBars', 'מאזן של שתי תיבות: כל צד הוא תיבה, ושני נגנים מתחילים יחד. נגמרות יחד — שוות; אחת ממשיכה לבד — הצד שלה גדול יותר.', 'azaryahu2020', 'A', EQ_SIGN],
+      ['fillBar', 'משוואה היא תיבה עם תו חסר: נגנו את הצד הידוע, ואז מלאו בתיבה השנייה את מה שחסר עד ששתיהן נשמעות באותו אורך.', 'azaryahu2020', 'A', EQ_SIGN],
+      ['sameLength', 'אותו אורך, חלוקה אחרת: צד אחד מתופף בקבוצות גדולות, השני בקטנות. אם המשפטים נגמרים יחד — יש שוויון.', 'azaryahu2020', 'A', EQ_SIGN],
     ],
     FRAC_OF_QTY: [
       ['quantityAsBar', 'הכמות כולה היא תיבה: מחלקים אותה לתווים שווים כמספר המכנה, בכל תו אותו מספר פריטים, ולוקחים תווים כמו המונה.', 'azaryahu2020', 'D'],

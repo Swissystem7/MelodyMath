@@ -1417,11 +1417,8 @@
     MEAS('ב', 'קנינו שתי מחברות ב־12 ₪ כל אחת ושילמנו ב־30 ₪. כמה ₪ עודף?', 6, 'קודם 12 ועוד 12', 3, ST.MONEY),
 
     MEAS('ב', 'תיבה בנויה מ־2 שכבות של 6 קוביות. כמה קוביות יש בה?', 12, 'פעמיים 6', 1, ST.MASS_VOL),
-    MEAS('ב', 'שק אחד שוקל 3 ק״ג ושק שני 5 ק״ג. בכמה ק״ג השני כבד יותר?', 2, '5 פחות 3', 1, ST.MASS_VOL),
     MEAS('ב', 'תיבה בנויה מ־3 שכבות של 5 קוביות. כמה קוביות יש בה?', 15, 'שלוש פעמים 5', 2, ST.MASS_VOL),
-    MEAS('ב', 'בקבוק מחזיק 1 ליטר. כמה כוסות של חצי ליטר ממלאות אותו?', 2, 'שני חצאים הם שלם', 2, ST.MASS_VOL),
     MEAS('ב', 'תיבה בנויה מ־2 שכבות, ובכל שכבה 3 שורות של 4 קוביות. כמה קוביות יש בה?', 24, 'בכל שכבה 12 קוביות', 3, ST.MASS_VOL),
-    MEAS('ב', 'מזגנו 2 ליטר מים לכוסות של חצי ליטר. כמה כוסות מילאנו?', 4, 'בכל ליטר שני חצאים', 3, ST.MASS_VOL),
 
     MEAS('ג', 'כמה אגורות יש ב־5 ₪?', 500, 'בכל שקל 100 אגורות', 1, ST.MONEY),
     MEAS('ג', 'שלוש מחברות ב־7 ₪ כל אחת. כמה ₪ בסך הכול?', 21, 'שלוש פעמים 7', 1, ST.MONEY),
@@ -1911,7 +1908,8 @@
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
     // standard, one per level, and the item takes the way of its level —
-    // older builders (G56, MV) included. A way is [tag, note, source, evidence].
+    // older builders (G56, MV) included. A way is [tag, note, source, evidence],
+    // then optional flags; `also` lists more sources cited next to the first.
     const link = {};
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
@@ -1935,6 +1933,7 @@
       const m = shownWay(raw, ways);
       if (!m) return;
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+      if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
       const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
         return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
       });
@@ -2042,6 +2041,7 @@
         const m = shownWay(raw, ways); // dosage: a primary way solves the item
         if (!m) return;
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+        if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
         const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
           return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
         });
@@ -2207,6 +2207,7 @@
     if (raw.music) it.music = raw.music;
     if (raw.musicNote) it.musicNote = raw.musicNote;
     if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
+    if (raw.musicSrcAlso) it.musicSrcAlso = raw.musicSrcAlso.slice();
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();

@@ -132,6 +132,9 @@ test('the way and source helpers render the note, the source link and the eviden
   assert.ok(src.includes(label.replace(/&/g, '&amp;')), src);
   assert.ok(src.includes(ctx.musicEvHe(way.musicEv)), src);
   assert.ok(ctx.musicSourceHtml(activity).includes(banks.MUSIC_SOURCES[activity.musicSrc][1]), 'an activity shows its source too (#591)');
+  const eq = banks.allItems().find((it) => it.musicSrcAlso);
+  const both = ctx.musicSourceHtml(eq);
+  assert.ok(both.includes(banks.MUSIC_SOURCES[eq.musicSrc][1]) && both.includes(banks.MUSIC_SOURCES[eq.musicSrcAlso[0]][1]), 'a second source shows next to the first (#710)');
   assert.equal(ctx.musicSourceHtml(null), '');
   assert.notEqual(ctx.musicEvHe('D'), ctx.musicEvHe('A'));
   assert.match(ctx.musicEvHe('R'), /[א-ת]/);

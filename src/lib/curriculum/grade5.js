@@ -24,6 +24,9 @@
   // Same ids and values as in grade6.js, so one id means one source everywhere.
   const sources = {
     azaryahu2020: ['Azaryahu et al. 2020 — MusiMath and Academic Music', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/'],
+    // Knuth, Stephens, McNeil & Alibali (2006), JRME 37(4), 297-312. No DOI:
+    // 10.2307/30034852 no longer resolves (#710).
+    knuth2006: ['Knuth et al. 2006 — Does Understanding the Equal Sign Matter? (JRME 37(4), 297–312)', 'https://www.jstor.org/stable/30034852'],
     interplay2024: ['Interplay between music and mathematics (Humanit. Soc. Sci. Commun., 2024)', 'https://www.nature.com/articles/s41599-024-03631-z'],
     kcConnections: ['Kennedy Center — Connections: Math and Music', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/media-and-interactives/media/music/connections/connections/math--music/'],
     kcMath: ['Kennedy Center — math collection', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/collections/collections/math/'],
@@ -45,6 +48,8 @@
   // which are never primary. banks.js gives the item a primary way.
   const EXTRA = Object.freeze({ optional: true });
   const WEAK = Object.freeze({ optional: true, evidence: 'weak' });
+  // A second source cited next to the first (#710): research on the equal sign.
+  const EQ_SIGN = Object.freeze({ also: ['knuth2006'] });
   const music = {
     FRAC_EQUIV: [
       ['noteValues', 'חצי תו = שני רבעים = ארבע שמיניות: אותו זמן, שמות שונים. הרחבה היא החלפת תו בכמה תווים קצרים יותר.', 'courey2012', 'D'],
@@ -89,9 +94,9 @@
     // #710: the two-bar balance of ד׳ (balanceBars, extending fillBar), now
     // with all four operations on each side.
     EQ_INEQ: [
-      ['balanceBars', 'שני הצדדים מתנגנים יחד, כל אחד בתיבה משלו. אם התיבות נגמרות באותו רגע — סימן שוויון; אם אחת עוד נשמעת — היא הצד הגדול.', 'azaryahu2020', 'A'],
-      ['fillBar', 'נעלם במשוואה הוא החלק השקט בתיבה: חשבו את הצד השלם, ומלאו את השקט בפעולה ההפוכה עד ששני הצדדים מתאזנים.', 'azaryahu2020', 'A'],
-      ['sameLength', 'חלוקה אחרת לאותו משך: כפל בצד אחד וחיבור בצד השני יכולים להימשך אותו זמן. מנו את שני המשפטים והשוו.', 'azaryahu2020', 'A'],
+      ['balanceBars', 'שני הצדדים מתנגנים יחד, כל אחד בתיבה משלו. אם התיבות נגמרות באותו רגע — סימן שוויון; אם אחת עוד נשמעת — היא הצד הגדול.', 'azaryahu2020', 'A', EQ_SIGN],
+      ['fillBar', 'נעלם במשוואה הוא החלק השקט בתיבה: חשבו את הצד השלם, ומלאו את השקט בפעולה ההפוכה עד ששני הצדדים מתאזנים.', 'azaryahu2020', 'A', EQ_SIGN],
+      ['sameLength', 'חלוקה אחרת לאותו משך: כפל בצד אחד וחיבור בצד השני יכולים להימשך אותו זמן. מנו את שני המשפטים והשוו.', 'azaryahu2020', 'A', EQ_SIGN],
     ],
     PRIME_FACTOR: [
       ['meterGroups', 'תיבה של 12 פעימות נחלקת ל־2, 3, 4 או 6 קבוצות שוות; תיבה של 7 — רק ל־1 ול־7. ראשוני = אין חלוקה.', 'das2023', 'A'],
