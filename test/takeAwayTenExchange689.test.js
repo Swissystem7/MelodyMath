@@ -45,6 +45,19 @@ test('specForItem builds a widget spec only for the two primary methods', () => 
   assert.equal(pv.drums, 3);
   assert.equal(mod.specForItem({ music: 'fillBar', prompt: '8 − 3 = ?' }), null);
   assert.equal(mod.specForItem(null), null);
+  assert.equal(mod.tenExchange(356).hundreds, 3);
+  assert.equal(mod.tenExchange(356).drums, 5);
+  // Real shipped prompts, not only toy ones: two-digit subtraction and a
+  // three-digit place-value question both get circles from their own numbers.
+  const shipped = banks.allItems();
+  const sub2d = shipped.find((it) => it.music === 'takeAwayBeats' && it.prompt === '58 − 23 = ?');
+  assert.ok(sub2d, 'shipped two-digit takeAwayBeats item exists');
+  assert.equal(mod.specForItem(sub2d).remaining, 35);
+  assert.equal(mod.specForItem(sub2d).circles.length, 58);
+  const pv356 = shipped.find((it) => it.music === 'tenExchange' && /356/.test(it.prompt) && /עשרות/.test(it.prompt));
+  assert.ok(pv356, 'shipped 356 place-value item exists');
+  assert.equal(mod.specForItem(pv356).drums, 5);
+  assert.equal(mod.specForItem({ music: 'tenExchange', prompt: '200 + 30 + 4 = ?' }), null);
   const html = mod.circlesHtml(sub);
   assert.equal((html.match(/class="snd-circle /g) || []).length, 8); // one circle per sound in the DOM string
 });

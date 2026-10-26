@@ -14,7 +14,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const MAX_CIRCLES = 20; // bigger numbers keep the method as text, not a wall of circles
+  const MAX_CIRCLES = 99; // two-digit exercises included; past this the method stays text
 
   function wholeIn(v, lo, hi) {
     const n = Number(v);
@@ -42,14 +42,16 @@
 
   // `bells` single bells regroup: each full 10 becomes one drum.
   function tenExchange(bells) {
-    const b = wholeIn(bells, 0, 99);
+    const b = wholeIn(bells, 0, 999);
     if (b == null) return null;
-    const drums = Math.floor(b / 10);
+    const hundreds = Math.floor(b / 100);
+    const drums = Math.floor((b % 100) / 10);
     const left = b % 10;
     const circles = [];
+    for (let i = 0; i < hundreds; i++) circles.push({ index: circles.length, kind: 'hundred', gone: false });
     for (let i = 0; i < drums; i++) circles.push({ index: circles.length, kind: 'drum', gone: false });
     for (let i = 0; i < left; i++) circles.push({ index: circles.length, kind: 'bell', gone: false });
-    return { kind: 'tenExchange', bells: b, drums: drums, left: left, circles: circles };
+    return { kind: 'tenExchange', bells: b, hundreds: hundreds, drums: drums, left: left, circles: circles };
   }
 
   function numbersOf(prompt) {
@@ -62,15 +64,15 @@
     if (!item || typeof item !== 'object') return null;
     const nums = numbersOf(item.prompt);
     if (item.music === 'takeAwayBeats' && nums.length >= 2) return takeAwayCircles(nums[0], nums[1]);
-    if (item.music === 'tenExchange' && nums.length >= 1) {
+    if (item.music === 'tenExchange' && nums.length === 1) {
       const x = tenExchange(nums[0]);
       return x && x.bells >= 10 ? x : null;
     }
     return null;
   }
 
-  const GLYPH = { beat: '🥁', bell: '🔔', drum: '🪘' };
-  const NAME = { beat: 'פעימה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים' };
+  const GLYPH = { beat: '🥁', bell: '🔔', drum: '🪘', hundred: '🛢️' };
+  const NAME = { beat: 'פעימה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
 
   // One circle per sound. Gone beats stay visible but silent (data-gone),
   // so the child sees what disappeared and counts what still sounds.
@@ -81,7 +83,7 @@
       const label = NAME[c.kind] + (c.gone ? ' — שקט' : '');
       return '<span class="' + cls + '" role="img" aria-label="' + label + '" data-gone="' + (c.gone ? '1' : '0') + '">' + GLYPH[c.kind] + '</span>';
     });
-    return '<div class="snd-circles" dir="ltr">' + parts.join('') + '</div>';
+    return '<div class="snd-circles' + (spec.circles.length > 20 ? ' snd-many' : '') + '" dir="ltr">' + parts.join('') + '</div>';
   }
 
   return {
