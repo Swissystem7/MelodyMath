@@ -95,14 +95,14 @@
     try { return require('./myInstrument.js'); } catch (e) { return null; }
   }
   function instrumentFor(topic) {
-    try {
-      const mine = myInstrument();
-      const id = mine && mine.getMyInstrument(getStorage());
-      if (id) return id;
-    } catch (e) { /* chooser not loaded */ }
     const g = typeof globalThis !== 'undefined' ? globalThis : {};
     const list = typeof g.forTopic === 'function' ? g.forTopic(topic) : [];
-    return list && list[0] ? list[0].id : null;
+    const fallback = list && list[0] ? list[0].id : null;
+    try {
+      const mine = myInstrument();
+      if (mine && typeof mine.instrumentFor === 'function') return mine.instrumentFor(fallback, null, getStorage());
+    } catch (e) { /* chooser not loaded */ }
+    return fallback;
   }
   function voiceFor(instrumentId) {
     const g = typeof globalThis !== 'undefined' ? globalThis : {};

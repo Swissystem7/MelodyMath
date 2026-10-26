@@ -27,7 +27,7 @@ const wayOf = (file, it) => {
 
 Object.keys(FILES).forEach((grade) => {
   const file = FILES[grade];
-  const items = banks.itemsForGrade(grade);
+  const items = banks.itemsForGrade(grade).filter((it) => !it.noMusic);
 
   test('grade ' + grade + ': every item has a music side, activity or way', () => {
     assert.ok(items.length > 100);
@@ -97,7 +97,7 @@ Object.keys(FILES).forEach((grade) => {
 });
 
 test('grade א׳: a prompt that plays sound is a music activity, not a way', () => {
-  const items = banks.itemsForGrade('א');
+  const items = banks.itemsForGrade('א').filter((it) => !it.noMusic);
   const hear = items.filter((it) => it.hear && it.hear.length);
   const g1 = items.filter((it) => it.g1);
   assert.ok(hear.length >= 10 && g1.length >= 3);
@@ -135,17 +135,17 @@ test('grade ג׳: the #105 activities keep their tag and the g3 widgets become a
 });
 
 test('grade ב׳: the #103 activities keep their tag and take no way', () => {
-  const items = banks.itemsForGrade('ב');
+  const items = banks.itemsForGrade('ב').filter((it) => !it.noMusic);
   const acts = items.filter((it) => !it.musicNote);
   assert.ok(acts.length >= 50);
   acts.forEach((it) => assert.ok(['beatsBars', 'twoInstruments', 'evenOdd', 'registers', 'halfBar'].includes(it.music), it.id + ' ' + it.music));
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1241/1241', () => {
+test('every item of every grade has a music side: 1247/1247', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1241); // + 10 two-step (#467) + seller-profit (#569) + 7 mixed numbers (#709) + 18 equations (#710) + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751)
-  assert.equal(all.filter((it) => it.music).length, all.length);
+  assert.equal(all.length, 1247); // + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688)
+  assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
 });
@@ -247,6 +247,7 @@ test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ ha
     assert.equal(it.music, 'kiloGroupsTen', it.prompt);
     assert.match(it.musicNote, /ק״ג/, it.prompt);
     assert.ok((it.musicExtra || []).some((x) => x.music === 'gramGroups' && x.note === gram[1] && x.ev === 'A'), it.prompt);
+    assert.ok(!(it.musicExtra || []).some((x) => x.music === 'cubeLayerGroups'), it.prompt);
   });
   // All 21 prompts from 847674c, grade adapted to ד׳. A prompt already in ד׳
   // is not copied again. None of them is in ג׳.

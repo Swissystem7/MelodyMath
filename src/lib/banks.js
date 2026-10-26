@@ -48,6 +48,7 @@
     PATTERN: 'סדרות דגמים צורניים וצליליים',
     CHART100: 'לוח המאה — עשרות ויחידות',
     PLACE_VALUE: 'מבנה עשרוני עד 1,000 — מאות/עשרות/יחידות, זוגי/אי־זוגי, השוואה',
+    EVEN_ODD: 'זוגי/אי־זוגי',
     WORD_COLLECT: 'שאלת מילים — איסוף (צירוף שתי קבוצות)',
     WORD_REMOVE: 'שאלת מילים — הפרדה (הסרה מקבוצה)',
     WORD_COMPARE: 'שאלת מילים — השוואה בין שתי כמויות',
@@ -2026,6 +2027,23 @@
     MEAS('ד', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
   );
 
+  SKILL_HE.even_odd = 'זוגי/אי־זוגי';
+  // The original tools stay in index.html. Specs live in explorerBank.js.
+  const EXPLORER = (typeof module === 'object' && module.exports)
+    ? require('./exercises/explorerBank')
+    : (typeof globalThis !== 'undefined' ? globalThis.MM_EXPLORER_BANK : null);
+  if (EXPLORER && typeof EXPLORER.bankSpecs === 'function') {
+    EXPLORER.bankSpecs().forEach(function (s) {
+      const raw = I(s.grade, s.skill, s.prompt, s.answer, s.hint, {
+        standard: ST[s.standard], level: s.level, table: s.table, widget: s.widget, line: s.line,
+      });
+      if (s.explorer) raw.explorer = s.explorer;
+      if (s.noMusic) raw.noMusic = true;
+      if (s.music) raw.music = s.music;
+      RAW.push(raw);
+    });
+  }
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2034,7 +2052,7 @@
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
-        const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+        const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
         if (!ways) return;
         const m = shownWay(raw, ways); // dosage: a primary way solves the item
         if (!m) return;
@@ -2143,11 +2161,15 @@
     return primary[Math.min(clampLevel(raw.level), primary.length) - 1];
   }
   // A cube-volume item is solved by counting layers. It does not also carry
-  // a kg explanation (gramGroups, half a kilo) as extra practice (#751).
+  // a kg explanation (gramGroups, half a kilo) as extra practice. The other
+  // way: a kg or liter item does not carry the box-volume way (#751).
   function extraFor(raw, ways, shown) {
     const cube = /תיבה|קובי/.test(raw.prompt || '');
+    const mass = raw.grade === 'ד' && raw.standard === ST.MASS_VOL && !cube;
     return (ways || []).filter(function (w) {
-      return isOptionalWay(w) && w[0] !== shown[0] && !(cube && /ק״ג|גרם/.test(w[1] || ''));
+      return isOptionalWay(w) && w[0] !== shown[0]
+        && !(cube && /ק״ג|גרם/.test(w[1] || ''))
+        && !(mass && w[0] === 'cubeLayerGroups');
     }).map(function (w) {
       return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
     });
@@ -2217,6 +2239,8 @@
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    if (raw.explorer) it.explorer = raw.explorer;
+    if (raw.noMusic) it.noMusic = true;
     SHIPPED.push(it);
   });
 
