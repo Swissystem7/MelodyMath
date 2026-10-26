@@ -232,6 +232,38 @@ test('subtraction above 12 gives the beat a softer voice than the drum (Refs #66
   assert.ok(plan(vsClick.beat).noise < plan(vsClick.drum).noise);
 });
 
+test('a ten above 12 is a two-note figure on the chosen instrument (Refs #665)', () => {
+  const MY = require('../src/lib/myInstrument');
+  const INST = require('../src/lib/instruments');
+  const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
+  const store = mem();
+  MY.setMyInstrument('djembe', store);
+  const chosen = INST.instrumentById('djembe').voice;
+  const spec = mod.takeAwayCircles(13, 1);
+  const events = mod.soundEvents(spec);
+  const start = events.filter((e) => e.phase === 'start');
+  assert.equal(spec.circles.length, start.length);
+  assert.equal(start.filter((e) => e.kind === 'drum').length, 1);
+  assert.equal(start.filter((e) => e.v === 1).length, 3);
+  const calls = [];
+  const ac = { currentTime: 0, state: 'running', resume() {} };
+  const r = mod.play(spec, { audioContext: ac, storage: store, playVoice: (c, v, hz, t) => calls.push({ v: v, hz: hz, t: t }) });
+  assert.equal(r.notes, events.length);
+  const drums = calls.filter((c) => c.v === chosen);
+  const clicks = calls.filter((c) => c.v !== chosen);
+  assert.equal(drums.length, 2);
+  assert.ok(drums[1].t > drums[0].t && drums[1].t - drums[0].t < 0.35);
+  assert.notEqual(drums[0].hz, drums[1].hz);
+  assert.equal(clicks.length, 3 + 12);
+  assert.ok(clicks.every((c) => c.v === 'woodClick'));
+  const small = mod.takeAwayCircles(12, 2);
+  const smallCalls = [];
+  const rs = mod.play(small, { audioContext: ac, storage: store, playVoice: (c, v) => smallCalls.push(v) });
+  assert.equal(smallCalls.length, mod.soundEvents(small).length);
+  assert.equal(rs.notes, smallCalls.length);
+  assert.ok(smallCalls.every((v) => v === chosen));
+});
+
 test('drum and bell have distinct voices, myInstrument drives one family', () => {
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
   const vs = mod.voicesFor(mod.tenExchange(27), mem()); assert.notEqual(vs.drum, vs.bell);

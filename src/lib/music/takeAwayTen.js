@@ -92,6 +92,16 @@
     if (!spec || spec.kind !== 'tenExchange') return { beat: chosen, drum: chosen, bell: chosen, hundred: chosen };
     return /[Dd]rum/.test(chosen) ? { beat: chosen, drum: chosen, hundred: chosen, bell: 'metalBell' } : { beat: chosen, bell: chosen, drum: 'drumLow', hundred: 'drumLow' };
   }
+  // One circle stays one sound. Above 12 the ten is still that one sound, but it
+  // speaks as two notes on the child's instrument so a lone ten (as in 13) is
+  // a short figure, not a single hit lost among the clicks. 12 and below, and
+  // tenExchange, stay one note per sound.
+  function strikesOf(spec, ev) {
+    if (spec && spec.kind === 'takeAway' && spec.start > 12 && ev && ev.kind === 'drum' && ev.v === 10) {
+      return [{ at: ev.at, hz: ev.hz }, { at: ev.at + 0.12, hz: ev.hz * 3 / 2 }];
+    }
+    return [{ at: ev.at, hz: ev.hz }];
+  }
   function play(spec, env) {
     const e = env || {}; const events = soundEvents(spec, e); if (!events.length) return null;
     const voices = e.voices || voicesFor(spec, e.storage); const voice = e.voice || voiceFor(spec, e.storage); const id = instrumentIdFor(spec, e.storage);
@@ -100,11 +110,23 @@
     if (typeof pv === 'function' && ac) {
       if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
       const t0 = ac.currentTime + 0.05;
-      events.forEach(function (ev) { pv(ac, e.voice || voices[ev.kind] || voice, ev.hz, t0 + ev.at); });
+      events.forEach(function (ev) {
+        const v = e.voice || voices[ev.kind] || voice;
+        strikesOf(spec, ev).forEach(function (n) { pv(ac, v, n.hz, t0 + n.at); });
+      });
       return { instrument: id, voice: voice, notes: events.length };
     }
     const ps = e.playSequence || (root && root.playSequence) || (root && root.musicEngine && root.musicEngine.playSequence);
-    if (typeof ps === 'function') { const r = ps(events.map(function (ev) { return { at: ev.at, dur: 0.18, hz: ev.hz, gain: 0.16, type: 'triangle', voice: voices[ev.kind] || voice, v: ev.v }; })); return r ? { instrument: id, voice: voice, notes: events.length } : null; }
+    if (typeof ps === 'function') {
+      const seq = [];
+      events.forEach(function (ev) {
+        strikesOf(spec, ev).forEach(function (n) {
+          seq.push({ at: n.at, dur: 0.18, hz: n.hz, gain: 0.16, type: 'triangle', voice: voices[ev.kind] || voice, v: ev.v });
+        });
+      });
+      const r = ps(seq);
+      return r ? { instrument: id, voice: voice, notes: events.length } : null;
+    }
     return null;
   }
 
