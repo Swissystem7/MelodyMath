@@ -121,7 +121,7 @@ test('TimesTableGroove has no picker of its own; it follows the one choice and k
 });
 
 test('no locks (#717): every times-table instrument plays from the start', () => {
-  TTG.UNLOCK_LIST.forEach((id) => {
+  TTG.INSTRUMENTS.forEach((id) => {
     withWindow(memStore({ [MY.KEY]: id }), () => {
       const el = fakeEl();
       const h = TTG.mount(el);

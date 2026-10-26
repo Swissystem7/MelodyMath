@@ -507,8 +507,8 @@
   };
   const PAD_DEFAULT = { he: 'קסילופון', keys: ladder('xylo', 5) };
 
-  // The strip for a mechanism: its own keys, then any extra voices (unlocked
-  // later by progress) that the strip does not have yet.
+  // The strip for a mechanism: its own keys, then any extra voices the strip
+  // does not have yet. #717: every voice is there from the start, no locks.
   function padFor(mechanism, extra) {
     const base = PAD_SETS[mechanism] || PAD_DEFAULT;
     const keys = base.keys.slice();
@@ -549,7 +549,7 @@
     const off = !!(o.quiet || audioState.muted);
     box.classList.toggle('hidden', off);
     if (off) { box.innerHTML = ''; return box; }
-    const set = padFor(o.mechanism, o.extra != null ? o.extra : unlockedVoices(loadTapProgress().count));
+    const set = padFor(o.mechanism, o.extra != null ? o.extra : ALL_TAP_VOICES);
     box.setAttribute('aria-label', 'נגנו חופשי לפני שעונים: ' + set.he);
     box.innerHTML = padHtml(set);
     return box;
@@ -561,7 +561,7 @@
   // feature 2/5 cites Deci, Koestner & Ryan 1999 for this). Three parts:
   // a streak melody that grows one note per right answer in a row and gains a
   // layer every 3, a short tune when a level is completed, and instruments for
-  // the free-play strip unlocked by the number of right answers so far.
+  // the free-play strip, all of them available from the start (#717).
   const STREAK_TUNE = [0, 1, 2, 3, 2, 3, 4, 5]; // steps on the pentatonic ladder
   const STREAK_GAP = 0.09;
 
@@ -628,18 +628,10 @@
   function playStreakMelody(streak) { return playReward(streakMelody(streak)); }
   function playLevelTune() { return playReward(levelTune()); }
 
-  // Instruments for the free-play strip, unlocked by right answers on this
-  // device. They change the timbre only, never the method.
-  const TAP_UNLOCKS = [
-    { voice: 'clap', at: 5 }, { voice: 'bell', at: 10 }, { voice: 'snare', at: 20 },
-    { voice: 'kick', at: 30 }, { voice: 'xylo', at: 45 }, { voice: 'hihat', at: 60 },
-  ];
+  // #717: no unlocks. Every free-play voice is on the strip from the start;
+  // right answers are still counted (recordCorrect) but open nothing.
+  const ALL_TAP_VOICES = ['clap', 'bell', 'snare', 'kick', 'xylo', 'hihat'];
   const PROGRESS_KEY = 'mm.tapProgress.v1';
-
-  function unlockedVoices(count) {
-    const c = Number(count) || 0;
-    return TAP_UNLOCKS.filter(function (u) { return c >= u.at; }).map(function (u) { return u.voice; });
-  }
 
   function defaultStore() {
     try { return typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { return null; }
@@ -652,32 +644,12 @@
     return { count: Math.max(0, Math.floor(count)) };
   }
 
-  // One more right answer. Returns the new count and the voice it unlocked
-  // (null most of the time). Nothing is ever taken away.
+  // One more right answer. Returns the new count; nothing is locked or opened.
   function recordCorrect(store) {
     const s = store || defaultStore();
     const count = loadTapProgress(s).count + 1;
     try { if (s) s.setItem(PROGRESS_KEY, JSON.stringify({ count: count })); } catch (e) { /* private mode */ }
-    const hit = TAP_UNLOCKS.filter(function (u) { return u.at === count; })[0];
-    return { count: count, unlocked: hit ? hit.voice : null };
-  }
-
-  // A short polite note on screen and the new instrument's own sound.
-  function announceUnlock(voice) {
-    if (!TAP_VOICES[voice] || typeof document === 'undefined' || !document.body) return null;
-    let box = document.getElementById('mmUnlock');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'mmUnlock';
-      box.className = 'mm-unlock';
-      box.setAttribute('role', 'status');
-      document.body.appendChild(box);
-    }
-    box.textContent = '🎁 כלי חדש נפתח: ' + VOICE_HE[voice] + '. נסו אותו בפס הנגינה.';
-    box.classList.remove('hidden');
-    setTimeout(function () { box.classList.add('hidden'); }, 3500);
-    playTap(voice, { step: 2 });
-    return box;
+    return { count: count };
   }
 
   // ---------- the shared AudioContext ----------
@@ -800,7 +772,7 @@
     canReplay, replaySequence, TAP_VOICES, tapPlan, playTap, audioState, setMuted,
     tapFeedback, installTapFeedback, PAD_SETS, padFor, padHtml, mountFreePad,
     streakMelody, streakLayers, levelTune, playStreakMelody, playLevelTune,
-    TAP_UNLOCKS, unlockedVoices, loadTapProgress, recordCorrect, announceUnlock,
+    ALL_TAP_VOICES, loadTapProgress, recordCorrect,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.
