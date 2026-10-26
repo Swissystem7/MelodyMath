@@ -1934,9 +1934,7 @@
       if (!m) return;
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
       if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
-      const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
-        return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
-      });
+      const extra = extraFor(raw, ways, m);
       if (extra.length) raw.musicExtra = extra;
     });
   });
@@ -2042,9 +2040,7 @@
         if (!m) return;
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
         if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
-        const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
-          return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
-        });
+        const extra = extraFor(raw, ways, m);
         if (extra.length) raw.musicExtra = extra;
       });
     });
@@ -2145,6 +2141,16 @@
       if (vol) return vol;
     }
     return primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+  }
+  // A cube-volume item is solved by counting layers. It does not also carry
+  // a kg explanation (gramGroups, half a kilo) as extra practice (#751).
+  function extraFor(raw, ways, shown) {
+    const cube = /תיבה|קובי/.test(raw.prompt || '');
+    return (ways || []).filter(function (w) {
+      return isOptionalWay(w) && w[0] !== shown[0] && !(cube && /ק״ג|גרם/.test(w[1] || ''));
+    }).map(function (w) {
+      return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
+    });
   }
 
   // A music activity (the prompt itself plays or reads music) cites the same

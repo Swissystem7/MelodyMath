@@ -241,7 +241,7 @@ test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ ha
   vol.forEach((it) => {
     assert.equal(it.music, 'cubeLayerGroups', it.prompt);
     assert.match(it.musicNote, /נפח תיבה/, it.prompt);
-    assert.ok((it.musicExtra || []).some((x) => x.music === 'gramGroups'), it.prompt);
+    assert.ok(!(it.musicExtra || []).some((x) => x.music === 'gramGroups' || /ק״ג|גרם/.test(x.note)), it.prompt);
   });
   mass.forEach((it) => {
     assert.equal(it.music, 'kiloGroupsTen', it.prompt);
@@ -302,4 +302,24 @@ test('#751: grade ב׳ has no kg/liter method as primary', () => {
     assert.equal(it.music, 'layerBars', it.prompt);
     assert.doesNotMatch(it.musicNote, /ק״ג|ליטר/);
   });
+});
+
+test('#751: no cube-volume item references kg', () => {
+  const kg = /ק״ג|גרם|gramGroups|kiloGroupsTen|halfKiloAccents/;
+  const cubes = banks.allItems().filter((it) => it.standard === banks.ST.MASS_VOL && cubeItem(it));
+  assert.ok(cubes.length >= 24);
+  cubes.forEach((it) => {
+    assert.doesNotMatch(it.music || '', kg, it.prompt);
+    assert.doesNotMatch(it.musicNote || '', kg, it.prompt);
+    (it.musicExtra || []).forEach((x) => assert.doesNotMatch(x.music + '\n' + x.note, kg, it.prompt));
+  });
+  banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MASS_VOL).forEach((it) => {
+    assert.equal(it.music, 'layerBars', it.prompt);
+  });
+  const g4 = FILES['ד'].music.MASS_VOL;
+  assert.equal(g4[0][0], 'kiloGroupsTen');
+  assert.equal(banks.isOptionalWay(g4[0]), false);
+  const gram = g4.find((w) => w[0] === 'gramGroups');
+  assert.equal(gram[1], 'ק״ג הוא 1,000 גרם, עשר קבוצות של 100. מחיאה לכל 100 גרם והדגשה כל עשר מחיאות — כל הדגשה היא ק״ג שלם.');
+  assert.equal(banks.isOptionalWay(gram), true);
 });
