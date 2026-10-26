@@ -48,3 +48,11 @@
 @keyframes mathSplit{0%{letter-spacing:normal}50%{letter-spacing:4px}100%{letter-spacing:normal}}
 @keyframes mathGlow{0%{box-shadow:none}50%{box-shadow:0 0 12px var(--mint)}100%{box-shadow:none}}
 @media (prefers-reduced-motion:reduce){.fbp-seg.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-glow{animation:none}}
+.np-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.np-btn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--ink);background:var(--purple);color:#fff;font-size:1.3rem;touch-action:manipulation}
+.np-circles,.np-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
+.np-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);background:var(--card)}
+.np-dot.lit{background:var(--yellow)}
+.np-dot[data-group="1"].lit{background:var(--pink)}
+.np-dot[data-group="2"].lit{background:var(--mint)}
+.np-gap{display:inline-block;width:12px}

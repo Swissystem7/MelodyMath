@@ -73,6 +73,7 @@ const ASSETS = [
   './src/lib/instrumentVoices.js',
   './src/lib/instruments.js',
   './src/components/jamKit.js',
+  './src/components/NumberPlay.js',
   './src/components/jam.css',
   './src/lib/music/fractionBar.js',
   './src/components/FractionBarPad.js',
