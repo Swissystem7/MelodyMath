@@ -123,6 +123,36 @@ test('play() uses jamKit at once, and the button lights one circle per sound (#6
   global.MM_JAM = prev;
 });
 
+test('the no-music check shows no play button (#686)', () => {
+  const item = { prompt: '4 + 2 = ?', skill: 'addition', answer: 6, noMusic: true };
+  assert.equal(NP.extractNumberPlan(item), null);
+  const box = { innerHTML: '<button class="np-btn">', className: '', classList: { add: function (c) { box.className += c; }, remove: function () {} } };
+  assert.equal(NP.mount(box, item), null);
+  assert.equal(box.innerHTML, '');
+  assert.match(box.className, /hidden/);
+  const html = require('fs').readFileSync(require('path').join(__dirname, '../index.html'), 'utf8');
+  const body = html.match(/function setNumberPlay\(id,it\)\{.*\}/)[0];
+  assert.match(body, /it&&it\.noMusic/);
+  const slot = { innerHTML: '<button class="np-btn">', classList: { add: function (c) { slot.className = c; } } };
+  let mounted = 0;
+  const setNumberPlay = new Function('$', 'MM_NUMBER_PLAY', 'selectedGrade', 'metroStreak', 'who', body + '\nreturn setNumberPlay;')(
+    function () { return slot; }, { mount: function () { mounted += 1; } }, 'א', 0, null);
+  setNumberPlay('rmNumberPlay', item);
+  assert.equal(mounted, 0);
+  assert.equal(slot.innerHTML, '');
+  assert.equal(slot.className, 'hidden');
+  setNumberPlay('rmNumberPlay', { prompt: '3 + 2 = ?' });
+  assert.equal(mounted, 1);
+});
+
+test('one sound per unit cites Gelman & Gallistel 1978 (#686)', () => {
+  const src = NP.sources.gelman1978;
+  assert.equal(src[0], 'Gelman & Gallistel 1978 — The Child\'s Understanding of Number (Harvard University Press)');
+  assert.equal(src[1], 'https://www.hup.harvard.edu/books/9780674116375');
+  const html = NP.renderHtml(NP.extractNumberPlan({ prompt: '3 + 2 = ?', grade: 'א' }));
+  assert.match(html, /class="music-src"[\s\S]*href="https:\/\/www\.hup\.harvard\.edu\/books\/9780674116375"[\s\S]*rel="noopener"[\s\S]*התאמה שעדיין לא נבדקה בנפרד/);
+});
+
 test('fractions, decimals, percents and numbers above 20 are left alone (#686)', () => {
   ['1/2 + 1/4', '0.5 + 0.25', '50% מ-20', '80 + 20 = ?', 'מה השעה 10:30?'].forEach(function (p) {
     assert.equal(NP.extractNumberPlan({ prompt: p, skill: /%/.test(p) ? 'percent' : /0\.5/.test(p) ? 'decimals' : /\//.test(p) ? 'fractions' : '' }), null);

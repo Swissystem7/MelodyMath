@@ -14,6 +14,8 @@
   const HZ = { drumLow: 120, drumHigh: 180, frameDrum: 150, woodClick: 330, metalBell: 494, woodBar: 392, pluck: 220, breathy: 523, keys: 262, organ: 294, bowed: 330, reed: 349, horn: 233, drone: 130, jingle: 660, tine: 440 };
   const ORDER = ['handbells', 'balalaika', 'recorder', 'piano'];
   const LOW = { 'א': 72, 'ב': 72, 'ג': 76, 'ד': 84, 'ה': 92, 'ו': 96 };
+  // One-one principle: one distinct tag per item (Gelman & Gallistel 1978, Harvard University Press).
+  const sources = { gelman1978: ['Gelman & Gallistel 1978 — The Child\'s Understanding of Number (Harvard University Press)', 'https://www.hup.harvard.edu/books/9780674116375'] };
 
   function itemOf(it) { return typeof it === 'string' ? { prompt: it } : (it || {}); }
   function inRange(n) { return Number.isInteger(n) && n >= 1 && n <= 20; }
@@ -29,6 +31,7 @@
   // Each sounded number is 1–20. A product may run up to 100 (the 10×10 table).
   function parseNumberGroups(it) {
     const item = itemOf(it);
+    if (item.noMusic) return null;
     if (skip(item)) return null;
     const p = String(item.prompt || '');
     const skill = String(item.skill || '');
@@ -159,10 +162,12 @@
       for (let k = 0; k < g.count; k++) dots += '<span class="np-dot" data-group="' + gi + '" data-i="' + (g.startIndex + k) + '"></span>';
       return '<span class="np-group" data-group="' + gi + '">' + dots + '</span>' + (gi < plan.groups.length - 1 ? '<span class="np-gap" aria-hidden="true"></span>' : '');
     }).join('');
+    const src = sources.gelman1978;
     return '<div class="np-strip" dir="rtl" data-total-sounds="' + plan.totalSounds + '" data-op="' + plan.op + '">'
       + '<button type="button" class="np-btn" data-act="play-numbers" aria-label="השמעת המספרים" style="min-width:48px;min-height:48px"><span aria-hidden="true">▶</span></button>'
       + '<span class="np-circles" aria-hidden="true">' + groups + '</span>'
-      + '<span class="sr-only np-live" role="status" aria-live="polite" aria-atomic="true"></span></div>';
+      + '<span class="sr-only np-live" role="status" aria-live="polite" aria-atomic="true"></span>'
+      + '<div class="music-src">מקור הדרך המוזיקלית: <a href="' + src[1] + '" target="_blank" rel="noopener">' + src[0].replace(/&/g, '&amp;') + '</a> · התאמה שעדיין לא נבדקה בנפרד</div></div>';
   }
 
   function play(plan, onNote, onEnd) {
@@ -197,5 +202,5 @@
     return { plan: plan, play: go, stop: function () { if (handle && handle.stop) handle.stop(); } };
   }
 
-  return { parseNumberGroups: parseNumberGroups, extractNumberPlan: extractNumberPlan, renderHtml: renderHtml, play: play, mount: mount, tempoFor: tempoFor, chosenInstrument: chosenInstrument };
+  return { parseNumberGroups: parseNumberGroups, extractNumberPlan: extractNumberPlan, renderHtml: renderHtml, play: play, mount: mount, tempoFor: tempoFor, chosenInstrument: chosenInstrument, sources: sources };
 });
