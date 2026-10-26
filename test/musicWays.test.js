@@ -155,6 +155,27 @@ test('a music-side file adds no curriculum rows, loads before banks.js on every 
   assert.ok(Number(read('sw.js').match(/melodymath-offline-v(\d+)/)[1]) >= 27, 'a new asset, so CACHE moves');
 });
 
+test('#710: grades ד׳-ה׳ EQ_INEQ cite Knuth et al. 2006 next to azaryahu2020, without a DOI, on every item', () => {
+  [['ד', 'grade4'], ['ה', 'grade5']].forEach(([grade, name]) => {
+    const file = FILES[grade];
+    const [label, url] = file.sources.knuth2006;
+    assert.match(label, /Knuth et al\. 2006 — Does Understanding the Equal Sign Matter\?/, name);
+    assert.ok(!/doi|10\.2307/i.test(url), name + ' ' + url);
+    file.music.EQ_INEQ.forEach((w) => {
+      assert.equal(w[2], 'azaryahu2020', name + ' ' + w[0]);
+      assert.deepEqual(w[4].also, ['knuth2006'], name + ' ' + w[0]);
+      assert.ok(!banks.isOptionalWay(w), name + ' ' + w[0] + ' stays primary');
+    });
+    const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST.EQ_INEQ);
+    assert.ok(items.length >= 9, name);
+    items.forEach((it) => {
+      assert.equal(it.musicSrc, 'azaryahu2020', it.id);
+      assert.deepEqual(it.musicSrcAlso, ['knuth2006'], it.id);
+    });
+  });
+  assert.equal(banks.allItems().filter((it) => it.musicSrcAlso && it.standard !== banks.ST.EQ_INEQ).length, 0);
+});
+
 test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART100 that builds on it starts the same way', () => {
   const g1 = FILES['א'];
   const ways = g1.music.PATTERN;
