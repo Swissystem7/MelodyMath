@@ -209,6 +209,29 @@ test('specForItem detects the tenExchange widget, not only item.music', () => {
   assert.ok(banks.allItems().filter((i) => i.skill === 'place_value').some((i) => mod.specForItem(i)), 'widget reaches shipped place-value items');
 });
 
+test('subtraction above 12 gives the beat a softer voice than the drum (Refs #665)', () => {
+  const plan = require('../src/lib/instrumentVoices').planVoice;
+  const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
+  const spec = mod.takeAwayCircles(15, 3);
+  const vs = mod.voicesFor(spec, mem());
+  assert.ok(spec.start > 12);
+  assert.notEqual(vs.beat, vs.drum);
+  const beat = plan(vs.beat), drum = plan(vs.drum);
+  assert.ok(beat.decay < drum.decay && beat.noise < drum.noise, 'beat is shorter and quieter than the drum');
+  const heard = new Set();
+  const ac = { currentTime: 0, state: 'running', resume() {} };
+  mod.play(spec, { audioContext: ac, storage: mem(), playVoice: (c, v) => heard.add(v) });
+  assert.ok(heard.has(vs.beat) && heard.has(vs.drum));
+  const small = mod.voicesFor(mod.takeAwayCircles(8, 3), mem());
+  assert.equal(small.beat, small.drum);
+  const MY = require('../src/lib/myInstrument');
+  const click = mem();
+  MY.setMyInstrument('claves', click);
+  const vsClick = mod.voicesFor(mod.takeAwayCircles(18, 4), click);
+  assert.notEqual(vsClick.beat, vsClick.drum);
+  assert.ok(plan(vsClick.beat).noise < plan(vsClick.drum).noise);
+});
+
 test('drum and bell have distinct voices, myInstrument drives one family', () => {
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
   const vs = mod.voicesFor(mod.tenExchange(27), mem()); assert.notEqual(vs.drum, vs.bell);

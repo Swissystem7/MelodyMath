@@ -82,7 +82,16 @@
   function instData() { if (root && typeof root.instrumentById === 'function') return root; try { return require('../instruments.js'); } catch (e) { return null; } }
   function instrumentIdFor(spec, storage) { const mi = myInst(); const fb = spec && spec.kind === 'tenExchange' ? 'handbells' : 'taiko'; return mi ? mi.instrumentFor(fb, null, storage) : fb; }
   function voiceFor(spec, storage) { const d = instData(); const x = d && d.instrumentById(instrumentIdFor(spec, storage)); return x && x.voice ? x.voice : (spec && spec.kind === 'tenExchange' ? 'metalBell' : 'drumLow'); }
-  function voicesFor(spec, storage) { const chosen = voiceFor(spec, storage); if (!spec || spec.kind !== 'tenExchange') return { beat: chosen, drum: chosen, bell: chosen, hundred: chosen }; return /[Dd]rum/.test(chosen) ? { beat: chosen, drum: chosen, hundred: chosen, bell: 'metalBell' } : { beat: chosen, bell: chosen, drum: 'drumLow', hundred: 'drumLow' }; }
+  // Above 12 a ten is a drum and a one is a beat. The beat uses the short click
+  // already in the repo (woodClick), which is quieter and shorter than a drum.
+  // If the drum is already that click, the beat falls back to the soft tine.
+  function beatVoice(drumVoice) { return drumVoice === 'woodClick' ? 'tine' : 'woodClick'; }
+  function voicesFor(spec, storage) {
+    const chosen = voiceFor(spec, storage);
+    if (spec && spec.kind === 'takeAway' && spec.start > 12) return { beat: beatVoice(chosen), drum: chosen, bell: chosen, hundred: chosen };
+    if (!spec || spec.kind !== 'tenExchange') return { beat: chosen, drum: chosen, bell: chosen, hundred: chosen };
+    return /[Dd]rum/.test(chosen) ? { beat: chosen, drum: chosen, hundred: chosen, bell: 'metalBell' } : { beat: chosen, bell: chosen, drum: 'drumLow', hundred: 'drumLow' };
+  }
   function play(spec, env) {
     const e = env || {}; const events = soundEvents(spec, e); if (!events.length) return null;
     const voices = e.voices || voicesFor(spec, e.storage); const voice = e.voice || voiceFor(spec, e.storage); const id = instrumentIdFor(spec, e.storage);
