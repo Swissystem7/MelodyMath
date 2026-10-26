@@ -39,6 +39,8 @@
     mixed_fractions: 'שברים מעורבים',
     // Grade ו
     ratios: 'יחסים והרחבה',
+    subtraction_check: 'חיסור',
+    place_value_check: 'ערך מקום',
     percents: 'אחוזים וחישוב חלק',
     circle_angles: 'זוויות ומעגל',
     mean_calc: 'ממוצע חשבוני',
@@ -177,6 +179,28 @@
           { skill: 'primes', level: 2, prompt: 'האם המספר 15 הוא ראשוני או פריק?', answer: 'פריק', choices: ['ראשוני', 'פריק'] },
           { skill: 'mixed_fractions', level: 2, prompt: 'איך כותבים 9/4 כשבר מעורב?', answer: '2 ו־1/4', choices: ['1 ו־3/4', '2 ו־1/4', '2 ו־3/4', '3 ו־1/4'] },
           { skill: 'mixed_fractions', level: 3, prompt: 'כמה זה 2 ו־1/2 ועוד 1 ו־1/4?', answer: '3 ו־3/4', choices: ['3 ו־1/2', '3 ו־3/4', '4', '3 ו־2/6'] },
+        ],
+      },
+    },
+    'takeaway-place-2': {
+      he: 'חיסור וערך מקום · כיתה ב׳',
+      grade: 'ב',
+      forms: {
+        pre: [
+          { skill: 'subtraction_check', level: 1, prompt: '9 − 4 = ?', answer: '5', choices: ['4', '5', '6', '7'] },
+          { skill: 'subtraction_check', level: 2, prompt: '14 − 6 = ?', answer: '8', choices: ['6', '7', '8', '9'] },
+          { skill: 'place_value_check', level: 1, prompt: 'כמה עשרות שלמות יש במספר 30?', answer: '3', choices: ['2', '3', '4', '10'] },
+          { skill: 'place_value_check', level: 2, prompt: '47 = כמה עשרות ועוד כמה יחידות? בחרו את מספר העשרות.', answer: '4', choices: ['3', '4', '7', '47'] },
+          { skill: 'subtraction_check', level: 3, prompt: '52 − 24 = ?', answer: '28', choices: ['26', '28', '32', '38'] },
+          { skill: 'place_value_check', level: 3, prompt: 'איזה מספר גדול יותר: 63 או 36?', answer: '63', choices: ['36', '63', 'שווים'] },
+        ],
+        post: [
+          { skill: 'subtraction_check', level: 1, prompt: '8 − 3 = ?', answer: '5', choices: ['3', '4', '5', '6'] },
+          { skill: 'subtraction_check', level: 2, prompt: '15 − 7 = ?', answer: '8', choices: ['6', '7', '8', '9'] },
+          { skill: 'place_value_check', level: 1, prompt: 'כמה עשרות שלמות יש במספר 50?', answer: '5', choices: ['3', '4', '5', '10'] },
+          { skill: 'place_value_check', level: 2, prompt: '58 = כמה עשרות ועוד כמה יחידות? בחרו את מספר העשרות.', answer: '5', choices: ['4', '5', '8', '58'] },
+          { skill: 'subtraction_check', level: 3, prompt: '63 − 35 = ?', answer: '28', choices: ['26', '28', '32', '38'] },
+          { skill: 'place_value_check', level: 3, prompt: 'איזה מספר גדול יותר: 71 או 17?', answer: '71', choices: ['17', '71', 'שווים'] },
         ],
       },
     },
