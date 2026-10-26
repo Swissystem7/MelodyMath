@@ -53,9 +53,17 @@
     return GRADES.indexOf(Number(grade)) !== -1;
   }
 
+  // A new choice order each time, so the right one is not always first.
+  function shuffleReason(reason, rand) {
+    const r = typeof rand === 'function' ? rand : Math.random;
+    const order = reason.choices.map(function (c, k) { return k; });
+    for (let k = order.length - 1, j, t; k > 0; k--) { j = Math.floor(r() * (k + 1)); t = order[k]; order[k] = order[j]; order[j] = t; }
+    return { question: reason.question, choices: order.map(function (k) { return reason.choices[k]; }), answer: order.indexOf(reason.answer) };
+  }
+
   // Level i (0-based): voices with colour and side, the meeting beat, the
-  // reason question and the silent check. null when out of range.
-  function level(i) {
+  // reason question (shuffled by rand) and the silent check, or null.
+  function level(i, rand) {
     const steps = LEVELS[i];
     if (!steps) return null;
     const meet = POLY.lcmOf.apply(null, steps);
@@ -72,7 +80,7 @@
       optional: true,
       voices: voices,
       meet: meet,
-      reason: {
+      reason: shuffleReason({
         question: 'בחרו סיבה: למה התופים נפגשים בפעימה ' + meet + '?',
         choices: [
           meet + ' היא הכפולה הקטנה ביותר של ' + list,
@@ -80,18 +88,18 @@
           'כי התוף המהיר תמיד מחכה לאיטי',
         ],
         answer: 0,
-      },
+      }, rand),
       check: { music: false, question: 'מהי הכפולה המשותפת הקטנה ביותר של ' + list + '?', answer: meet },
     };
   }
 
-  function levels() {
-    return LEVELS.map(function (s, i) { return level(i); });
+  function levels(rand) {
+    return LEVELS.map(function (s, i) { return level(i, rand); });
   }
 
   // The track for a child: every level in order, null outside grades ה׳-ו׳.
-  function track(grade) {
-    return isAvailable(grade) ? levels() : null;
+  function track(grade, rand) {
+    return isAvailable(grade) ? levels(rand) : null;
   }
 
   return {
@@ -103,6 +111,7 @@
     SOURCES: SOURCES,
     MAX_REASON_WORDS: MAX_REASON_WORDS,
     wordCount: wordCount,
+    shuffleReason: shuffleReason,
     isAvailable: isAvailable,
     level: level,
     levels: levels,

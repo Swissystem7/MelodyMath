@@ -68,6 +68,19 @@ test('the "pick the reason" question and each choice are at most 15 words', () =
   });
 });
 
+test('the right reason is not always first: choices are shuffled', () => {
+  const seeded = (seed) => () => { const x = Math.sin(++seed * 12.9898) * 43758.5453; return x - Math.floor(x); };
+  const fixed = [...pc.level(0).reason.choices].sort();
+  const positions = new Set();
+  for (let s = 1; s <= 30; s++) {
+    const l = pc.level(0, seeded(s));
+    positions.add(l.reason.answer);
+    assert.deepEqual([...l.reason.choices].sort(), fixed, 'same choices, new order');
+    assert.match(l.reason.choices[l.reason.answer], /הכפולה הקטנה ביותר/);
+  }
+  assert.equal(positions.size, 3, 'the answer lands in every position');
+});
+
 test('the track ends with a check with no music', () => {
   pc.levels().forEach((l) => {
     assert.equal(l.check.music, false);
