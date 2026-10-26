@@ -129,6 +129,14 @@ test('playReplay plays the same exercise, and the enrichment explorers stay', ()
   assert.match(html, /function renderEvenOddExplorerUI/);
 });
 
+test('regular practice check replays an explorer miss, then accepts a dashed second try', () => {
+  const vm = require('node:vm'); const item = ex.evenOddSpec(9); const els = {};
+  const ctx = { answered: false, current: item, history: [], $: (id) => els[id] || (els[id] = { value: '', style: {}, focus() {} }), show() {}, normalizeAnswer: (v) => String(v).trim(), isCorrect: require('../src/lib/adaptive').isCorrect, noteMetro() {}, logTeacherItem() {}, mathHtml: (s) => s, MM_EXPLORER_BANK: ex };
+  vm.createContext(ctx); const run = (v) => { ctx.$('answer').value = v; vm.runInContext(html.match(/^function check\(.*$/m)[0] + ';check()', ctx); };
+  ['-', '\u05BE', '\u2013', '\u2011'].forEach((d) => assert.equal(ctx.isCorrect('אי' + d + 'זוגי', 'אי-זוגי'), true));
+  run('זוגי'); assert.equal(ctx.answered, false); assert.equal(item._exState.secondTry, true); run('אי\u2011זוגי'); assert.equal(ctx.answered, true); assert.equal(item._exState.phase, 'correct');
+});
+
 test('each explorer type is followed by a silent check with no music', () => {
   const silent = banks.allItems().filter((it) => it.noMusic);
   assert.deepEqual(ex.bankSpecs().map((s) => !!s.noMusic), [false, true, false, true, false, true]);
