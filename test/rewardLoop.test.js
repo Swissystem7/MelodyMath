@@ -60,28 +60,19 @@ test('the level tune is a rising cadence that ends on a chord', () => {
   assert.equal(t.filter((n) => n.at === 0.5).length, 4, 'the chord plays together');
 });
 
-test('instruments unlock by right answers and are never taken away', () => {
+test('#717: every strip voice is available from the start, with no unlock state', () => {
+  assert.equal(M.TAP_UNLOCKS, undefined, 'no unlock table');
+  assert.equal(M.unlockedVoices, undefined);
+  assert.equal(M.announceUnlock, undefined, 'no "new instrument" popup');
+  for (const v of M.ALL_TAP_VOICES) assert.ok(M.TAP_VOICES[v], v + ' is a real voice');
+  const voices = M.padFor('M6', M.ALL_TAP_VOICES).keys.map((k) => k.voice);
+  for (const v of M.ALL_TAP_VOICES) assert.ok(voices.includes(v), v + ' on the strip with zero right answers');
+  // Right answers are still counted, but open nothing.
   const store = memStore();
-  assert.deepEqual(M.unlockedVoices(0), []);
   assert.equal(M.loadTapProgress(store).count, 0);
-  const got = [];
-  for (let i = 0; i < 60; i++) {
-    const r = M.recordCorrect(store);
-    assert.equal(r.count, i + 1);
-    if (r.unlocked) got.push(r.unlocked);
-  }
-  assert.deepEqual(got, M.TAP_UNLOCKS.map((u) => u.voice), 'each unlocks exactly once, in order');
-  assert.deepEqual(M.unlockedVoices(60), got);
-  assert.equal(M.loadTapProgress(store).count, 60, 'stored');
-  for (const v of got) assert.ok(M.TAP_VOICES[v], v + ' is a real voice');
-  // Broken storage is read as no progress, not an error.
+  for (let i = 0; i < 60; i++) assert.deepEqual(M.recordCorrect(store), { count: i + 1 });
   assert.equal(M.loadTapProgress({ getItem: () => '{oops' }).count, 0);
   assert.equal(M.recordCorrect({ getItem: () => null, setItem: () => { throw new Error('full'); } }).count, 1);
-});
-
-test('unlocked voices join the free-play strip as new keys', () => {
-  const keys = M.padFor('M6', M.unlockedVoices(10)).keys;
-  assert.deepEqual(keys.filter((k) => k.extra).map((k) => k.voice), ['clap', 'bell']);
 });
 
 function fakeAudioWindow(log) {
@@ -114,10 +105,11 @@ test('a level tune waits for the streak melody instead of cutting it; mute silen
   }
 });
 
-test('index.html: right answers play the streak melody and count toward unlocks; level-ups play the tune', () => {
+test('index.html: right answers play the streak melody and open no unlock popup; level-ups play the tune', () => {
   assert.match(html, /if\(!correct && typeof playTap==='function'\) playTap\('wrong'\)/, 'a wrong answer keeps its soft step');
   assert.match(html, /else if\(correct && typeof playStreakMelody==='function'\)\{\s*if\(!won\) playStreakMelody\(metroStreak \+ 1\);/);
-  assert.match(html, /const u=typeof recordCorrect==='function'\?recordCorrect\(\):null;[\s\S]{0,120}if\(u&&u\.unlocked&&typeof announceUnlock==='function'\)\{[^\n]*announceUnlock\(u\.unlocked\);/);
+  assert.match(html, /if\(typeof recordCorrect==='function'\) recordCorrect\(\);/);
+  assert.doesNotMatch(html, /announceUnlock|unlocks\.js/, '#717: no unlock popup, no unlock script');
   assert.match(html, /const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);/);
   assert.match(html, /if\(beatLevel>lv0 && typeof playLevelTune==='function'\) playLevelTune\(\);/);
   assert.match(html, /\.mm-unlock\{position:fixed/);
