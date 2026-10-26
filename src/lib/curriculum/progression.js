@@ -102,7 +102,8 @@
 
   // Music standards that curriculum.js does not tag with a row yet.
   // 'grade:KEY' → topic id, or [prereq ids, buildsTo ids] for a standard
-  // outside its grade's program (ג׳ ק״ג/ליטר: not in Newprogramgrade3.pdf).
+  // outside its grade's program. ג׳ MASS_VOL is not here (#751): the ways
+  // moved to ד׳ beside UNITS, and the kg/liter items sit on that grade's row.
   const SKILL_TOPIC = {
     'א:NUMBER_LINE_APPROX': 'mm-cur-2',
     'א:RIGHT_ANGLE': 'mm-cur-8',
@@ -114,7 +115,6 @@
     'ב:WORD_REMOVE': 'mm-cur-14',
     'ב:WORD_COMPARE': 'mm-cur-14',
     'ב:MONEY': 'mm-cur-19',
-    'ג:MASS_VOL': [['mm-cur-20'], ['mm-cur-35']],
   };
 
   const BUILDS_TO = {};
