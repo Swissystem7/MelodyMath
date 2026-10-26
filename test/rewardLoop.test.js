@@ -110,7 +110,7 @@ test('index.html: right answers play the streak melody and open no unlock popup;
   assert.match(html, /else if\(correct && typeof playStreakMelody==='function'\)\{\s*if\(!won\) playStreakMelody\(metroStreak \+ 1\);/);
   assert.match(html, /if\(typeof recordCorrect==='function'\) recordCorrect\(\);/);
   assert.doesNotMatch(html, /announceUnlock|unlocks\.js/, '#717: no unlock popup, no unlock script');
-  assert.match(html, /const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);/);
+  assert.match(html, /const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he,it\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);/);
   assert.match(html, /if\(beatLevel>lv0 && typeof playLevelTune==='function'\) playLevelTune\(\);/);
   assert.match(html, /\.mm-unlock\{position:fixed/);
 });
