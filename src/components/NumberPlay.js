@@ -24,10 +24,9 @@
     return out;
   }
   function bundle(groups, op) {
-    const sum = groups.reduce(function (a, b) { return a + b; }, 0);
-    if (op === 'multiplication' && sum > 12) return asTens(sum);
+    const tens = op === 'addition' || op === 'subtraction';
     const out = [];
-    groups.forEach(function (c) { (c > 12 ? asTens(c) : [{ n: c, v: 1 }]).forEach(function (g) { out.push(g); }); });
+    groups.forEach(function (c) { (tens && c > 12 ? asTens(c) : [{ n: c, v: 1 }]).forEach(function (g) { out.push(g); }); });
     return out;
   }
   function skip(it) {

@@ -24,12 +24,12 @@ test('3 + 2: one circle per sound, a beat of rest, two families, sound at 0 (#68
   assert.match(html, /▶/);
 });
 
-test('numbers above 12 play as tens and ones (#686)', () => {
-  [13, 14, 15, 16, 17, 18, 19, 20].forEach(function (n) {
-    const plan = NP.extractNumberPlan({ skill: 'counting', hear: [n], prompt: String(n) });
+test('addition and subtraction above 12 play as tens and ones (#686)', () => {
+  [[13, '+'], [15, '-'], [20, '+'], [20, '-']].forEach(function (row) {
+    const plan = NP.extractNumberPlan({ prompt: row[0] + ' ' + row[1] + ' 1 = ?' });
     const tens = plan.notes.filter(function (x) { return x.value === 10; }).length;
     const ones = plan.notes.filter(function (x) { return x.value === 1; }).length;
-    assert.ok(tens === Math.floor(n / 10) && ones === n % 10 && plan.totalValue === n && plan.totalSounds < n && dots(NP.renderHtml(plan)) === plan.totalSounds, String(n));
+    assert.ok(tens === Math.floor(row[0] / 10) && ones === row[0] % 10 + 1 && plan.totalValue === row[0] + 1 && dots(NP.renderHtml(plan)) === plan.totalSounds, row.join(''));
   });
 });
 
@@ -49,16 +49,16 @@ test('subtraction, compare and multiplication (#686)', () => {
   assert.equal(dots(NP.renderHtml(mul)), 12);
   assert.ok(new Set(mul.groups.map((g) => g.family)).size >= 2);
   assert.ok(mul.notes[4].at - mul.notes[3].at >= mul.beat * 2);
-  [['7 × 8 = ?', 7, 8, 5, 6], ['9 × 9 = ?', 9, 9, 8, 1], ['4 × 4 = ?', 4, 4, 1, 6], ['2 × 10 = ?', 2, 10, 2, 0]].forEach(function (row) {
-    const plan = NP.extractNumberPlan({ prompt: row[0], skill: 'multiplication' });
-    const html = NP.renderHtml(plan);
-    const heard = plan.notes.reduce(function (s, n) { return s + n.value; }, 0);
-    const shown = (html.match(/data-value="10"/g) || []).length * 10 + (html.match(/data-value="1"/g) || []).length;
-    assert.equal(heard, row[1] * row[2], row[0]);
-    assert.equal(shown, row[1] * row[2], row[0]);
-    assert.equal(plan.groups.filter(function (g) { return g.each === 10; }).length, row[3], row[0]);
-    assert.equal(plan.notes.filter(function (n) { return n.value === 1; }).length, row[4], row[0]);
-    assert.ok(plan.totalSounds <= 20, row[0]);
+});
+
+test('a multiplication plays a×b as a groups of b (#686)', () => {
+  [[4, 4], [7, 8], [9, 9], [2, 10]].forEach(function (ab) {
+    const plan = NP.extractNumberPlan({ prompt: ab[0] + ' × ' + ab[1] + ' = ?', skill: 'multiplication' }, { bpm: 60 });
+    assert.equal(plan.groups.length, ab[0], ab.join('×'));
+    assert.ok(plan.groups.every(function (g, i) { return g.count === ab[1] && g.each === 1 && (i === 0 || plan.notes[g.startIndex].at - plan.notes[g.startIndex - 1].at >= plan.beat * 2); }), ab.join('×'));
+    assert.equal(plan.totalSounds, ab[0] * ab[1]);
+    assert.equal(plan.totalValue, ab[0] * ab[1]);
+    assert.equal(dots(NP.renderHtml(plan)), plan.totalSounds);
   });
 });
 
