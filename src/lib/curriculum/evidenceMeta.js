@@ -5,12 +5,14 @@
 // every such topic is marked evidence 'experimental' and names the earlier
 // topics it builds on. Keys and links are curriculum.js MATRIX topic ids
 // ('mm-cur-N'); the links are the progression.js prereqs, written out here so
-// the teacher sees them next to the evidence label. Teacher metadata only:
-// nothing here changes what the child sees, and nothing is locked (#717).
+// the teacher sees them next to the evidence label. Nothing is locked (#717).
 //
 // The curriculum has no row of its own for ratio yet; frequency ratios
 // (440 × 1.5) live inside decimal multiplication (mm-cur-52) and share its
 // entry. A future ratio row must be added here (test/evidenceMeta.test.js).
+//
+// representationFor, showsStaffByDefault and matchPitch are what the exercise
+// screen draws and hears (gradeView.js). Nothing is locked (#717).
 //
 // Kept apart from grade1-6.js and progression.js so the one-primary work
 // (#751) can edit those files without conflicts.

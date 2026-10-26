@@ -349,6 +349,16 @@ summary:focus-visible {
   .navcard:hover strong::after, .navcard:focus-visible strong::after { transform: none; }
 }
 
+/* Grade picture on the exercise strip: blocks, staff only when asked. */
+.gv { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-block-start: var(--s-3); }
+.gv-label, .gv-read { margin: 0; }
+.gv-read { flex-basis: 100%; min-height: 1.2em; }
+.gv-blocks { display: inline-flex; gap: var(--s-1); }
+.gv-block { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); }
+.gv-staff { display: none; flex-direction: column; justify-content: space-between; width: 88px; height: 36px; }
+.gv-staff.gv-on { display: inline-flex; }
+.gv-line { display: block; height: 1px; background: var(--ink); }
+
 @media print {
   body { background: none; font-family: var(--font); }
   .progress span::after { display: none; }
