@@ -1,6 +1,6 @@
 'use strict';
 // Refs #689, Refs #665: takeAwayBeats is primary only for SUB10, SUB20 and
-// WORD_REMOVE; SUB2D primary is tensBarsBack, even/odd primary is alternateDrums, and tenExchange stays EXTRA there. One circle per
+// WORD_REMOVE; PLACE_VALUE primary is tenExchange, SUB2D primary is tensBarsBack, even/odd primary is alternateDrums. One circle per
 // sound; the end-of-topic check carries no music.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -58,15 +58,15 @@ test('specForItem builds a widget spec only for takeAwayBeats and tenExchange', 
   assert.equal(mod.specForItem({ music: 'takeAwayBeats', prompt: sub2d.prompt }).circles.length, 58);
   const pv356 = shipped.find((it) => /356/.test(it.prompt) && /עשרות/.test(it.prompt));
   assert.ok(pv356, 'shipped 356 place-value item exists');
-  assert.equal(pv356.music, 'alternateDrums');
-  assert.ok(pv356.musicExtra.some((w) => w.music === 'tenExchange'));
+  assert.equal(pv356.music, 'tenExchange');
+  assert.ok(!pv356.musicExtra.some((w) => w.music === 'tenExchange'));
   assert.equal(mod.specForItem({ music: 'tenExchange', prompt: '356' }).drums, 5);
   assert.equal(mod.specForItem({ music: 'tenExchange', prompt: '200 + 30 + 4 = ?' }), null);
   const html = mod.circlesHtml(sub);
   assert.equal((html.match(/class="snd-circle /g) || []).length, 8); // one circle per sound in the DOM string
 });
 
-test('SUB2D primary is tensBarsBack, even/odd primary is alternateDrums, takeAwayBeats primary only in SUB10/SUB20/WORD_REMOVE', () => {
+test('PLACE_VALUE primary is tenExchange, SUB2D primary is tensBarsBack, even/odd primary is alternateDrums', () => {
   const g1 = require('../src/lib/curriculum/grade1');
   const g2 = require('../src/lib/curriculum/grade2');
   assert.equal(banks.primaryWays(g1.music.SUB10)[0][0], 'takeAwayBeats');
@@ -74,21 +74,23 @@ test('SUB2D primary is tensBarsBack, even/odd primary is alternateDrums, takeAwa
   assert.equal(banks.primaryWays(g2.music.SUB2D)[0][0], 'tensBarsBack');
   assert.equal(banks.primaryWays(g1.music.WORD_REMOVE)[0][0], 'takeAwayBeats');
   assert.equal(banks.primaryWays(g2.music.WORD_REMOVE)[0][0], 'takeAwayBeats');
-  assert.equal(banks.primaryWays(g2.music.PLACE_VALUE)[0][0], 'alternateDrums');
-  // takeAwayBeats and tenExchange stay EXTRA wherever they would demote a primary.
+  assert.equal(banks.primaryWays(g2.music.PLACE_VALUE)[0][0], 'tenExchange');
+  assert.equal(banks.primaryWays(g2.music.EVEN_ODD)[0][0], 'alternateDrums');
+  // takeAwayBeats stays EXTRA wherever it would demote a primary.
   const sub2dTakeAway = g2.music.SUB2D.find((w) => w[0] === 'takeAwayBeats');
   assert.ok(banks.isOptionalWay(sub2dTakeAway));
   assert.match(sub2dTakeAway[1], /תופים \(עשרות\) ושייקרים \(יחידות\)/);
-  assert.ok(banks.isOptionalWay(g2.music.PLACE_VALUE.find((w) => w[0] === 'tenExchange')));
+  assert.ok(!banks.isOptionalWay(g2.music.PLACE_VALUE.find((w) => w[0] === 'tenExchange')));
   assert.ok(!banks.isOptionalWay(g2.music.SUB2D.find((w) => w[0] === 'tensBarsBack')));
-  assert.ok(!banks.isOptionalWay(g2.music.PLACE_VALUE.find((w) => w[0] === 'alternateDrums')));
-  // takeAwayBeats is primary in no other topic, in any grade; tenExchange is primary nowhere.
+  assert.ok(!g2.music.PLACE_VALUE.some((w) => w[0] === 'alternateDrums'), 'alternateDrums removed from PLACE_VALUE only');
+  // takeAwayBeats primary only in SUB10/SUB20/WORD_REMOVE; tenExchange primary only in PLACE_VALUE; alternateDrums primary only in EVEN_ODD.
   for (let g = 1; g <= 6; g++) {
     const modG = require('../src/lib/curriculum/grade' + g);
     for (const [topic, ways] of Object.entries(modG.music || {})) {
       const prim = banks.primaryWays(ways).map((w) => w[0]);
       if (prim.includes('takeAwayBeats')) assert.ok(['SUB10', 'SUB20', 'WORD_REMOVE'].includes(topic), 'grade' + g + ' ' + topic);
-      assert.ok(!prim.includes('tenExchange'), 'grade' + g + ' ' + topic);
+      if (prim.includes('tenExchange')) assert.equal(topic, 'PLACE_VALUE', 'grade' + g + ' ' + topic);
+      if (prim.includes('alternateDrums')) assert.equal(topic, 'EVEN_ODD', 'grade' + g + ' ' + topic);
     }
   }
   // Primary ways must come from a strongly evidenced mechanism (dosage rules).
@@ -99,8 +101,9 @@ test('SUB2D primary is tensBarsBack, even/odd primary is alternateDrums, takeAwa
   const items = banks.allItems();
   assert.ok(items.some((it) => it.music === 'takeAwayBeats' && it.skill === 'subtraction'));
   assert.ok(items.some((it) => it.music === 'tensBarsBack' && it.skill === 'subtraction'));
-  assert.ok(items.some((it) => it.music === 'alternateDrums' && it.skill === 'place_value'));
-  assert.ok(items.some((it) => it.musicExtra && it.musicExtra.some((w) => w.music === 'tenExchange') && it.skill === 'place_value'));
+  assert.ok(items.some((it) => it.music === 'tenExchange' && it.skill === 'place_value'));
+  assert.ok(items.some((it) => it.music === 'alternateDrums'));
+  assert.ok(!items.some((it) => it.music === 'alternateDrums' && it.skill === 'place_value'));
 });
 
 test('end-of-topic check for subtraction and place value has no music', () => {
@@ -136,8 +139,8 @@ test('sound: play schedules every sounding beat on the shared engine voice calls
   assert.equal(r.notes, 13);
   const seq = [];
   const r2 = mod.play(mod.tenExchange(27), { playSequence: (ev) => { seq.push(...ev); return { notes: ev.length }; } });
-  assert.equal(seq.length, 27 + 9); // bells one by one, then drums + leftover bells
-  assert.equal(r2.notes, 36);
+  assert.equal(seq.length, 9 + 9); // 27 as tens+ones (2 drums + 7 bells), then drums + leftover bells
+  assert.equal(r2.notes, 18);
 });
 
 test('hide: circles do not reveal the answer until revealed', () => {
@@ -170,4 +173,38 @@ test('myInstrument: the child choice (incl. legacy mm-tap-instrument) sets the v
   const other = mem(); MY.setMyInstrument('kora', other);
   assert.notEqual(mod.voiceFor(mod.takeAwayCircles(5, 2), other), INST.instrumentById('djembe').voice);
   assert.equal(mod.voiceFor(mod.takeAwayCircles(5, 2), mem()), INST.instrumentById('taiko').voice); // no choice: screen default
+});
+
+test('every topic has exactly one primary mechanism, this PR topics exactly one primary way, shared primaries allow-listed', () => {
+  const ALLOW = ['accentSkip', 'callResponse', 'twoDrums', 'balanceBars', 'tenThenMore', 'takeAwayBeats', 'repeatedBars', 'phraseShare', 'twoDivisions', 'fillBar', 'areaScore', 'noteValues', 'layerCount', 'sameLength', 'splitNotes', 'roundBars', 'beatDecimal', 'dottedBeats', 'barsAndHalf', 'barFill'];
+  const share = {};
+  for (let g = 1; g <= 6; g++) { const mg = require('../src/lib/curriculum/grade' + g); for (const [t, ways] of Object.entries(mg.music || {})) { const prim = banks.primaryWays(ways); assert.ok(prim.length >= 1, 'g' + g + ' ' + t); assert.equal(new Set(prim.map((w) => banks.mechanismOf(w[0]))).size, 1, 'g' + g + ' ' + t + ' one primary mechanism'); prim.forEach((w) => { (share[w[0]] = share[w[0]] || new Set()).add('g' + g + ':' + t); }); } }
+  for (const [tag, topics] of Object.entries(share)) if (topics.size > 1) assert.ok(ALLOW.includes(tag), tag + ' shared: ' + [...topics].join(','));
+  for (const tag of ALLOW) assert.ok(share[tag] && share[tag].size > 1, 'allow-list minimal: ' + tag);
+  const g2 = require('../src/lib/curriculum/grade2');
+  assert.deepEqual(banks.primaryWays(g2.music.PLACE_VALUE).map((w) => w[0]), ['tenExchange']); assert.deepEqual(banks.primaryWays(g2.music.EVEN_ODD).map((w) => w[0]), ['alternateDrums']); assert.deepEqual(banks.primaryWays(g2.music.SUB2D).map((w) => w[0]), ['tensBarsBack']);
+});
+
+test('asTens playback: tens are one sound each, no number plays more than 12 unit sounds', () => {
+  assert.deepEqual(mod.asTens(58), [{ n: 1, v: 10 }, { n: 1, v: 10 }, { n: 1, v: 10 }, { n: 1, v: 10 }, { n: 1, v: 10 }, { n: 8, v: 1 }]);
+  for (let n = 0; n <= 199; n++) assert.ok(mod.asTens(n).filter((g) => g.v === 1).reduce((s, g) => s + g.n, 0) <= 12, 'units of ' + n);
+  const maxRun = (ev) => { let r = 0, m = 0; ev.forEach((e) => { r = e.v === 1 ? r + 1 : 0; m = Math.max(m, r); }); return m; };
+  const ev58 = mod.soundEvents(mod.takeAwayCircles(58, 23)); assert.equal(ev58.length, 21); assert.ok(maxRun(ev58) <= 12, 'no 58 beats for 58-23');
+  const ev99 = mod.soundEvents(mod.tenExchange(99)); assert.ok(ev99.length < 99 && maxRun(ev99) <= 12, 'no 99 bells in tenExchange');
+  const soundsOf = (n) => (n > 12 ? mod.asTens(n).reduce((s, g) => s + g.n, 0) : n);
+  for (const it of banks.allItems().filter((i) => i.skill === 'subtraction')) { const s = mod.specForItem({ music: 'takeAwayBeats', prompt: it.prompt }); if (s) assert.equal(mod.soundEvents(s).length, soundsOf(s.start) + soundsOf(s.remaining), it.prompt); }
+});
+
+test('specForItem detects the tenExchange widget, not only item.music', () => {
+  assert.equal(mod.specForItem({ widget: 'tenExchange', prompt: '34' }).kind, 'tenExchange');
+  assert.equal(mod.specForItem({ music: 'alternateDrums', musicExtra: [{ music: 'tenExchange' }], prompt: '356' }).drums, 5);
+  assert.ok(banks.allItems().filter((i) => i.skill === 'place_value').some((i) => mod.specForItem(i)), 'widget reaches shipped place-value items');
+});
+
+test('drum and bell have distinct voices, myInstrument drives one family', () => {
+  const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
+  const vs = mod.voicesFor(mod.tenExchange(27), mem()); assert.notEqual(vs.drum, vs.bell);
+  const MY = require('../src/lib/myInstrument'); const dj = mem(); MY.setMyInstrument('djembe', dj);
+  assert.equal(mod.voicesFor(mod.tenExchange(27), dj).drum, require('../src/lib/instruments').instrumentById('djembe').voice); assert.notEqual(mod.voicesFor(mod.tenExchange(27), dj).bell, vs.drum);
+  const heard = new Set(); const ac = { currentTime: 0, state: 'running', resume() {} }; mod.play(mod.tenExchange(27), { audioContext: ac, storage: mem(), playVoice: (c, v) => heard.add(v) }); assert.ok(heard.size >= 2, 'two instrument families');
 });
