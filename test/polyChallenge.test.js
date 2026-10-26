@@ -6,32 +6,30 @@ const banks = require('../src/lib/banks');
 const grade5 = require('../src/lib/curriculum/grade5');
 const pc = require('../src/lib/polyChallenge');
 
-function memoryStorage() {
-  const data = {};
-  return { getItem: (k) => (k in data ? data[k] : null), setItem: (k, v) => { data[k] = String(v); } };
-}
-
-test('locked until the M2 mastery flag is set', () => {
-  assert.equal(pc.isUnlocked(5, {}), false);
-  assert.equal(pc.isUnlocked(5, { M2: false }), false);
-  assert.equal(pc.isUnlocked(5, null), false);
-  assert.equal(pc.track(6, {}), null);
-  assert.equal(pc.isUnlocked(5, { M2: true }), true);
-  assert.equal(pc.isUnlocked(6, { M2: true }), true);
-  assert.ok(Array.isArray(pc.track(5, { M2: true })));
+test('no lock (#717): grades ה׳-ו׳ always get the track', () => {
+  assert.equal(pc.isAvailable(5), true);
+  assert.equal(pc.isAvailable(6), true);
+  assert.equal(pc.isAvailable('6'), true);
+  assert.ok(Array.isArray(pc.track(5)));
+  assert.equal(pc.track(6).length, pc.levels().length);
+  assert.equal(pc.isUnlocked, undefined);
+  assert.equal(pc.markM2Mastered, undefined);
 });
 
-test('only grades ה׳-ו׳ get the track, even with M2 mastered', () => {
-  [1, 2, 3, 4, 7].forEach((g) => assert.equal(pc.isUnlocked(g, { M2: true }), false, 'grade ' + g));
+test('only grades ה׳-ו׳ get the track', () => {
+  [1, 2, 3, 4, 7].forEach((g) => {
+    assert.equal(pc.isAvailable(g), false, 'grade ' + g);
+    assert.equal(pc.track(g), null, 'grade ' + g);
+  });
 });
 
-test('the M2 flag round-trips through storage and unlocks the track', () => {
-  const s = memoryStorage();
-  assert.equal(pc.isUnlocked(5, pc.readFlags(s)), false);
-  assert.equal(pc.markM2Mastered(s), true);
-  assert.equal(pc.isUnlocked(5, pc.readFlags(s)), true);
-  assert.deepEqual(pc.readFlags(null), { M2: false });
-  assert.deepEqual(pc.readFlags({ getItem: () => { throw new Error('blocked'); } }), { M2: false });
+test('every level cites M4 research sources that exist', () => {
+  pc.SOURCES.forEach((id) => {
+    assert.ok(banks.MUSIC_SOURCES[id], id);
+    assert.ok(banks.MUSIC_MECHANISMS.M4.sources.includes(id), id + ' in M4');
+    assert.match(banks.MUSIC_SOURCES[id][1], /^https:\/\/doi\.org\//);
+  });
+  pc.levels().forEach((l) => assert.deepEqual(l.sources, pc.SOURCES));
 });
 
 test('the first level is 2:3 and 2:3:5 is kept for the end', () => {
