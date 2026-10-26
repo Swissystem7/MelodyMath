@@ -15,7 +15,7 @@ const BY_GRADE = {
   // so the grade-ג׳ music items keep standards of their own (#177).
   // ק״ג/ליטר moved to ד׳ (#591): they are not in the ג׳ programme.
   'ג': [ST.MINUTES, ST.AREA, ST.AREA_RECT, ST.TIME_MIN_SEC, ST.MONEY],
-  'ד': [ST.UNITS, ST.CALENDAR, ST.MONEY],
+  'ד': [ST.UNITS, ST.CALENDAR, ST.MONEY, ST.MASS_VOL],
 };
 // A few items answer with a clock reading ("2:30") rather than a count.
 const CLOCK_ANSWER = /^\d{1,2}:\d{2}$/;
