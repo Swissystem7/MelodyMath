@@ -88,6 +88,7 @@ const ASSETS = [
   './src/lib/music/dataBeats.js',
   './src/lib/music/percentMix.js',
   './src/components/PercentMixPad.js',
+  './src/lib/music/moreFamilies.js',
   './src/components/EnsembleStudio.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
