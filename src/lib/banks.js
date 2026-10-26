@@ -2009,6 +2009,21 @@
     G5('multiplication', 'השלימו: (☐ + 200) × 4 = 6,000' + NO_COMMA, 1300, '6,000 : 4 = 1,500, ואז פחות 200', 3, ST.EQ_INEQ)
   );
 
+  // #688: the enrichment explorers also ship as three exercise types.
+  // The original tools stay in index.html. Specs live in explorerBank.js.
+  const EXPLORER = (typeof module === 'object' && module.exports)
+    ? require('./exercises/explorerBank')
+    : (typeof globalThis !== 'undefined' ? globalThis.MM_EXPLORER_BANK : null);
+  if (EXPLORER && typeof EXPLORER.bankSpecs === 'function') {
+    EXPLORER.bankSpecs().forEach(function (s) {
+      const raw = I(s.grade, s.skill, s.prompt, s.answer, s.hint, {
+        standard: ST[s.standard], level: s.level, table: s.table, widget: s.widget, line: s.line,
+      });
+      raw.explorer = s.explorer;
+      RAW.push(raw);
+    });
+  }
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2178,6 +2193,7 @@
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    if (raw.explorer) it.explorer = raw.explorer;
     SHIPPED.push(it);
   });
 
