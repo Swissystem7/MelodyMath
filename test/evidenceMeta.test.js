@@ -81,3 +81,35 @@ test('grades א׳-ב׳ do not use staff notation by default', () => {
     });
   });
 });
+
+test('grades below ג׳ use blocks, and staff notation is never the default renderer', () => {
+  ['א', 'ב'].forEach((grade) => {
+    const r = meta.representationFor(grade);
+    assert.equal(r.kind, 'blocks');
+    assert.equal(r.optionalStaff, false);
+    assert.equal(r.addon, null);
+    assert.equal(meta.showsStaffByDefault(grade), false);
+  });
+  ['ג', 'ד', 'ה', 'ו'].forEach((grade) => {
+    const r = meta.representationFor(grade);
+    assert.equal(r.kind, 'blocks');
+    assert.equal(r.staff, false);
+    assert.equal(r.optionalStaff, true);
+    assert.equal(r.addon, 'staffLines');
+    assert.equal(meta.showsStaffByDefault(grade), false);
+  });
+  assert.equal(meta.representationFor('ז'), null);
+});
+
+test('pitch matching uses a wide tolerance and can be skipped', () => {
+  const target = 440;
+  const wholeStep = target * Math.pow(2, 2 / 12);
+  const fourth = target * Math.pow(2, 5 / 12);
+  assert.equal(meta.WIDE_CENTS, 200);
+  assert.equal(meta.matchPitch(wholeStep, target).ok, true);
+  assert.equal(meta.matchPitch(fourth, target).matched, false);
+  assert.equal(meta.matchPitch(fourth, target, { cents: 600 }).ok, true);
+  const skipped = meta.matchPitch(80, target, { skip: true });
+  assert.deepEqual([skipped.ok, skipped.skipped, skipped.matched], [true, true, false]);
+  assert.equal(meta.matchPitch(0, target).ok, false);
+});
