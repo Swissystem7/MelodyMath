@@ -49,7 +49,7 @@ test('kids reach EnsembleStudio in the music games tab; it mounts there and ever
   assert.ok(sw.includes("'./src/components/EnsembleStudio.js'"));
   const el = { innerHTML: '', addEventListener(t, fn) { if (t === 'click') el.onClick = fn; } };
   const played = [];
-  Object.assign(globalThis, { MM_TIMES_TABLE_GROOVE: { UNLOCK_LIST: ['oud'] }, MM_UNLOCKS: require('../src/lib/music/unlocks.js'), playInstrumentNote: (id) => played.push(id) });
+  Object.assign(globalThis, { playInstrumentNote: (id) => played.push(id) });
   globalThis.document = { getElementById: (id) => (id === 'ensCard' ? el : null) };
   try {
     await import('../src/components/EnsembleStudio.js?entry');

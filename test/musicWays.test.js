@@ -14,9 +14,15 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 const keyOf = (file, it) => Object.keys(file.music).find((k) => banks.ST[k] === it.standard);
+const cubeItem = (it) => /תיבה|קובי/.test(it.prompt);
 const wayOf = (file, it) => {
-  const ways = banks.primaryWays(file.music[keyOf(file, it)]);
-  return ways && ways[Math.min(it.level, ways.length) - 1];
+  const listed = file.music[keyOf(file, it)] || [];
+  // Grade ד׳ only: a cube item is solved with the volume way, not the kg one.
+  if (file.grade === 'ד' && it.standard === banks.ST.MASS_VOL && cubeItem(it)) {
+    return listed.find((w) => w[0] === 'cubeLayerGroups');
+  }
+  const ways = banks.primaryWays(listed);
+  return ways.length ? ways[Math.min(it.level, ways.length) - 1] : undefined;
 };
 
 Object.keys(FILES).forEach((grade) => {
@@ -61,7 +67,12 @@ Object.keys(FILES).forEach((grade) => {
       // single primary way; with more, levels take different ones.
       const key = Object.keys(file.music).find((k) => banks.ST[k] === std);
       const n = banks.primaryWays(file.music[key]).length;
-      assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, grade + ' ' + std);
+      if (grade === 'ד' && key === 'MASS_VOL') {
+        assert.equal(n, 1, 'MASS_VOL has one main way');
+        assert.ok(byStd[std].tags.has('kiloGroupsTen') && byStd[std].tags.has('cubeLayerGroups'), grade + ' ' + std);
+      } else {
+        assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, grade + ' ' + std);
+      }
     });
     // A way tag is never an activity tag of the same grade.
     const activityTags = new Set(items.filter((it) => !it.musicNote).map((it) => it.music));
@@ -131,9 +142,9 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1235/1235', () => {
+test('every item of every grade has a music side: 1247/1247', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1235); // + 3 explorer exercises and 3 silent checks (#688)
+  assert.equal(all.length, 1247); // + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688)
   assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
@@ -226,7 +237,6 @@ test('#751 batch 2: one main way per topic; the others stay as EXTRA with their 
 test('#751 batch 3: grade ג׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
   const WAYS = {
     AREA: ['areaScore', 'repeatedBars'],
-    MASS_VOL: ['kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups'],
     PICTOGRAM: ['keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare'],
     BARCHART: ['columnNoteLength', 'twoNotesDifference', 'notesInARow'],
     TABLE: ['cellGroups', 'tableGroupsSum'],
@@ -351,4 +361,115 @@ test('PERCENT has exactly one primary way: percentBar', () => {
   const ways = FILES['ו'].music.PERCENT;
   assert.deepEqual(banks.primaryWays(ways).map(([tag]) => tag), ['percentBar']);
   assert.equal(banks.isOptionalWay(ways.find(([tag]) => tag === 'sectionsFillBar')), true);
+});
+
+test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ has neither the ways nor the exercises', () => {
+  const g3 = FILES['ג'];
+  const g4 = FILES['ד'];
+  assert.equal(g3.music.MASS_VOL, undefined);
+  Object.keys(g3.music).forEach((k) => assert.ok(banks.primaryWays(g3.music[k]).length >= 1, k));
+  const order = Object.keys(g4.music);
+  assert.equal(order[order.indexOf('UNITS') + 1], 'MASS_VOL');
+  const ways = g4.music.MASS_VOL;
+  assert.deepEqual(ways.map((w) => w[0]), ['kiloGroupsTen', 'gramGroups', 'halfKiloAccents', 'cubeLayerGroups']);
+  const gram = ways[1];
+  assert.equal(gram[0], 'gramGroups');
+  assert.equal(gram[1], 'ק״ג הוא 1,000 גרם, עשר קבוצות של 100. מחיאה לכל 100 גרם והדגשה כל עשר מחיאות — כל הדגשה היא ק״ג שלם.');
+  assert.equal(banks.isOptionalWay(gram), true);
+  const primary = banks.primaryWays(ways);
+  assert.equal(primary.length, 1);
+  assert.equal(primary[0][0], 'kiloGroupsTen');
+  assert.equal(banks.isOptionalWay(primary[0]), false);
+  ways.forEach((w) => {
+    assert.deepEqual([w[2], w[3]], ['das2023', 'A'], w[0]);
+    if (w[0] !== 'kiloGroupsTen') assert.equal(banks.isOptionalWay(w), true, w[0]);
+  });
+  const vol = banks.itemsForGrade('ד').filter((it) => it.standard === banks.ST.MASS_VOL && cubeItem(it));
+  const mass = banks.itemsForGrade('ד').filter((it) => it.standard === banks.ST.MASS_VOL && !cubeItem(it));
+  assert.ok(vol.length >= 12 && mass.length >= 6);
+  vol.forEach((it) => {
+    assert.equal(it.music, 'cubeLayerGroups', it.prompt);
+    assert.match(it.musicNote, /נפח תיבה/, it.prompt);
+    assert.ok(!(it.musicExtra || []).some((x) => x.music === 'gramGroups' || /ק״ג|גרם/.test(x.note)), it.prompt);
+  });
+  mass.forEach((it) => {
+    assert.equal(it.music, 'kiloGroupsTen', it.prompt);
+    assert.match(it.musicNote, /ק״ג/, it.prompt);
+    assert.ok((it.musicExtra || []).some((x) => x.music === 'gramGroups' && x.note === gram[1] && x.ev === 'A'), it.prompt);
+    assert.ok(!(it.musicExtra || []).some((x) => x.music === 'cubeLayerGroups'), it.prompt);
+  });
+  // All 21 prompts from 847674c, grade adapted to ד׳. A prompt already in ד׳
+  // is not copied again. None of them is in ג׳.
+  const PROMPTS = [
+    'תיבה בנויה מ־2 שכבות של 6 קוביות. כמה קוביות יש בה?',
+    'שק אחד שוקל 3 ק״ג ושק שני 5 ק״ג. בכמה ק״ג השני כבד יותר?',
+    'תיבה בנויה מ־3 שכבות של 5 קוביות. כמה קוביות יש בה?',
+    'בקבוק מחזיק 1 ליטר. כמה כוסות של חצי ליטר ממלאות אותו?',
+    'תיבה בנויה מ־2 שכבות, ובכל שכבה 3 שורות של 4 קוביות. כמה קוביות יש בה?',
+    'מזגנו 2 ליטר מים לכוסות של חצי ליטר. כמה כוסות מילאנו?',
+    'כמה גרם יש בחצי ק״ג?',
+    'כמה מ״ל יש ב־1 ליטר?',
+    'כמה גרם יש ב־2 ק״ג?',
+    'כמה מ״ל יש ב־3 ליטר?',
+    'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?',
+    'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?',
+    'תיבה בנויה מ־4 שכבות של 4 קוביות. כמה קוביות יש בה?',
+    'תיבה בנויה משכבה אחת של 3 שורות, ובכל שורה 3 קוביות. כמה קוביות יש בה?',
+    'בתיבה 10 קוביות. הוצאנו 3. כמה קוביות נשארו?',
+    'תיבה בנויה מ־5 שכבות של 2 קוביות. כמה קוביות יש בה?',
+    'תיבה בנויה מ־2 שכבות של 10 קוביות. כמה קוביות יש בה?',
+    'בתיבה 12 קוביות, ובכל שכבה 4 קוביות. מכמה שכבות היא בנויה?',
+    'תיבה בנויה מ־2 שכבות של 5 קוביות. הוסיפו לה עוד שכבה כזאת. כמה קוביות יש בה עכשיו?',
+    'תיבה בנויה מ־3 שכבות, ובכל שכבה 2 שורות של 3 קוביות. כמה קוביות יש בה?',
+    'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?',
+  ];
+  const inGrade = (grade) => banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST.MASS_VOL);
+  const g2 = inGrade('ב');
+  assert.equal(g2.length, 12);
+  assert.ok(g2.every(cubeItem), 'grade ב keeps cube counting only');
+  assert.equal(banks.itemsForGrade('ב').filter((it) => /ק״ג|ליטר/.test(it.prompt)).length, 0);
+  assert.equal(inGrade('ג').length, 0);
+  assert.deepEqual(banks.itemsForGrade('ג').filter((it) => PROMPTS.includes(it.prompt)).map((it) => it.prompt), []);
+  const mine = inGrade('ד').filter((it) => PROMPTS.includes(it.prompt));
+  assert.equal(mine.length, PROMPTS.length);
+  assert.deepEqual(mine.map((it) => it.prompt).sort(), PROMPTS.slice().sort());
+  mine.forEach((it) => assert.equal(it.grade, 'ד', it.prompt));
+});
+
+test('#751: grade ב׳ has no kg/liter method as primary', () => {
+  const g2 = FILES['ב'];
+  Object.keys(g2.music).forEach((k) => {
+    banks.primaryWays(g2.music[k]).forEach((w) => {
+      assert.doesNotMatch(w[0], /gram|kilo|litre|liter/i, k + ' ' + w[0]);
+      assert.doesNotMatch(w[1], /ק״ג|ליטר/, k + ' ' + w[0]);
+    });
+  });
+  Object.values(g2.music).forEach((list) => assert.ok(!list.some((w) => w[0] === 'gramGroups')));
+  const ways = g2.music.MASS_VOL;
+  assert.deepEqual(ways.map((w) => w[0]), ['layerBars', 'cubeRowPattern']);
+  assert.deepEqual(banks.primaryWays(ways).map((w) => w[0]), ['layerBars']);
+  banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MASS_VOL).forEach((it) => {
+    assert.equal(it.music, 'layerBars', it.prompt);
+    assert.doesNotMatch(it.musicNote, /ק״ג|ליטר/);
+  });
+});
+
+test('#751: no cube-volume item references kg', () => {
+  const kg = /ק״ג|גרם|gramGroups|kiloGroupsTen|halfKiloAccents/;
+  const cubes = banks.allItems().filter((it) => it.standard === banks.ST.MASS_VOL && cubeItem(it));
+  assert.ok(cubes.length >= 24);
+  cubes.forEach((it) => {
+    assert.doesNotMatch(it.music || '', kg, it.prompt);
+    assert.doesNotMatch(it.musicNote || '', kg, it.prompt);
+    (it.musicExtra || []).forEach((x) => assert.doesNotMatch(x.music + '\n' + x.note, kg, it.prompt));
+  });
+  banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MASS_VOL).forEach((it) => {
+    assert.equal(it.music, 'layerBars', it.prompt);
+  });
+  const g4 = FILES['ד'].music.MASS_VOL;
+  assert.equal(g4[0][0], 'kiloGroupsTen');
+  assert.equal(banks.isOptionalWay(g4[0]), false);
+  const gram = g4.find((w) => w[0] === 'gramGroups');
+  assert.equal(gram[1], 'ק״ג הוא 1,000 גרם, עשר קבוצות של 100. מחיאה לכל 100 גרם והדגשה כל עשר מחיאות — כל הדגשה היא ק״ג שלם.');
+  assert.equal(banks.isOptionalWay(gram), true);
 });
