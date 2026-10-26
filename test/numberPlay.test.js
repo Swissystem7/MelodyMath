@@ -51,9 +51,19 @@ test('subtraction, compare and multiplication (#686)', () => {
   assert.equal(dots(NP.renderHtml(mul)), 12);
   assert.ok(new Set(mul.groups.map((g) => g.family)).size >= 2);
   assert.ok(mul.notes[4].at - mul.notes[3].at >= mul.beat * 2);
-  const table = NP.extractNumberPlan({ prompt: '5 × 10 = ?', skill: 'multiplication' });
-  assert.equal(table.totalSounds, 50);
-  assert.equal(dots(NP.renderHtml(table)), 50);
+  ['5 × 10 = ?', '10 × 10 = ?', '4 × 6 = ?', '9 × 9 = ?'].forEach(function (p) {
+    const big = NP.extractNumberPlan({ prompt: p, skill: 'multiplication' });
+    assert.ok(big.totalSounds <= 20 && big.totalSounds >= 1, p);
+    assert.equal(dots(NP.renderHtml(big)), big.totalSounds, p);
+  });
+  const tens = NP.extractNumberPlan({ prompt: '5 × 10 = ?', skill: 'multiplication' });
+  assert.deepEqual(tens.groups.map(function (g) { return g.count; }), [1, 1, 1, 1, 1]);
+});
+
+test('a repeated instrument keeps one pitch (#686)', () => {
+  const plan = NP.extractNumberPlan({ prompt: '6 × 2 = ?', skill: 'multiplication' });
+  const hz = plan.groups.filter(function (g) { return g.instrument === 'handbells'; }).map(function (g) { return g.hz; });
+  assert.ok(hz.length >= 2 && hz.every(function (h) { return h === 494; }) && plan.notes.every(function (n) { return n.voice !== 'metalBell' || n.hz === 494; }));
 });
 
 test('the child instrument overrides forTopic (#686, #717)', () => {

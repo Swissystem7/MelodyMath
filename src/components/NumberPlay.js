@@ -14,13 +14,17 @@
   const HZ = { drumLow: 120, drumHigh: 180, frameDrum: 150, woodClick: 330, metalBell: 494, woodBar: 392, pluck: 220, breathy: 523, keys: 262, organ: 294, bowed: 330, reed: 349, horn: 233, drone: 130, jingle: 660, tine: 440 };
   const ORDER = ['handbells', 'balalaika', 'recorder', 'piano'];
   const LOW = { 'א': 72, 'ב': 72, 'ג': 76, 'ד': 84, 'ה': 92, 'ו': 96 };
-  // One-one principle: one distinct tag per item (Gelman & Gallistel 1978, Harvard University Press).
   const sources = { gelman1978: ['Gelman & Gallistel 1978 — The Child\'s Understanding of Number (Harvard University Press)', 'https://www.hup.harvard.edu/books/9780674116375'] };
 
   function itemOf(it) { return typeof it === 'string' ? { prompt: it } : (it || {}); }
   function inRange(n) { return Number.isInteger(n) && n >= 1 && n <= 20; }
   function ints(p) { const m = String(p).match(/\d+/g); return m ? m.map(Number) : []; }
   function groupsOf(n, size) { return Array.from({ length: n }, function () { return size; }); }
+  function bundle(groups) {
+    const sum = function (xs) { return xs.reduce(function (a, b) { return a + b; }, 0); };
+    const tens = groups.map(function (c) { return Math.floor(c / 10) + (c % 10); });
+    return sum(groups) <= 20 ? groups : sum(tens) <= 20 ? tens : groups.map(function () { return 1; }).slice(0, 20);
+  }
 
   function skip(it) {
     const p = String(it.prompt || '');
@@ -28,7 +32,7 @@
     return /\d+\s*\/\s*\d+/.test(p) || /%/.test(p) || /\d+\.\d+/.test(p) || /\d{1,2}:\d{2}/.test(p);
   }
 
-  // Each sounded number is 1–20. A product may run up to 100 (the 10×10 table).
+  // Each sounded number is 1–20. A long product is bundled so playback stays ≤ 20 notes.
   function parseNumberGroups(it) {
     const item = itemOf(it);
     if (item.noMusic) return null;
@@ -68,8 +72,6 @@
     return null;
   }
 
-  // The child's instrument (#762, then the #717 key) leads, even when forTopic
-  // would not offer it. No lock check.
   function chosenInstrument(opts) {
     const byId = instruments() && instruments().instrumentById;
     function ok(id) { return byId && id ? byId(id) : null; }
@@ -87,12 +89,7 @@
     const who = (opts && opts.who) || {};
     const name = who.name ? String(who.name) : '';
     const code = String(who.classCode || '');
-    const keys = [
-      opts && opts.childId ? 'mm_child_inst_' + opts.childId : '',
-      name ? 'mm_child_inst_' + name : '',
-      name ? 'mm_child_inst_' + code + ':' + name : '',
-      name ? 'mm_child_inst_' + encodeURIComponent(code) + ':' + encodeURIComponent(name) : ''
-    ];
+    const keys = [opts && opts.childId ? 'mm_child_inst_' + opts.childId : '', name ? 'mm_child_inst_' + name : '', name ? 'mm_child_inst_' + code + ':' + name : '', name ? 'mm_child_inst_' + encodeURIComponent(code) + ':' + encodeURIComponent(name) : ''];
     for (let i = 0; i < keys.length; i++) { const hit = keys[i] && ok(ls.getItem(keys[i])); if (hit) return hit; }
     return null;
   }
@@ -113,14 +110,11 @@
         const alt = seq.find(function (s) { return s.family !== out[out.length - 1].family; });
         if (alt) x = alt;
       }
-      const reuse = out.filter(function (v) { return v.instrument === x.id; }).length;
-      out.push({ instrument: x.id, family: x.family, voice: x.voice, he: x.instrument.he, hz: Math.max(120, Math.round((HZ[x.voice] || 330) * Math.pow(1.25, reuse))) });
+      out.push({ instrument: x.id, family: x.family, voice: x.voice, he: x.instrument.he, hz: Math.max(120, HZ[x.voice] || 330) });
     }
     return out;
   }
 
-  // One tempo per grade. It rises with the mastery streak (metro.nextBpm),
-  // never from a hash of the prompt.
   function tempoFor(grade, streak, explicit) {
     if (Number(explicit) > 0) return Math.min(140, Math.max(40, Math.round(Number(explicit))));
     const g = LOW[grade] ? grade : 'ד';
@@ -139,11 +133,12 @@
     const grade = opts.grade || item.grade || 'א';
     const bpm = tempoFor(grade, opts.streak, opts.bpm);
     const beat = 60 / bpm;
-    const voices = voicesFor(parsed.groups.length, opts);
+    const counts = parsed.op === 'multiplication' ? bundle(parsed.groups) : parsed.groups;
+    const voices = voicesFor(counts.length, opts);
     const groups = [];
     const notes = [];
     let t = 0;
-    parsed.groups.forEach(function (count, gi) {
+    counts.forEach(function (count, gi) {
       const v = voices[gi] || voices[0];
       groups.push({ index: gi, count: count, startIndex: notes.length, instrument: v.instrument, family: v.family, voice: v.voice, hz: v.hz, he: v.he });
       for (let k = 0; k < count; k++) {
