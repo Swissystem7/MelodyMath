@@ -7,14 +7,11 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const PLACEHOLDER = '__CODECOV_TOKEN__';
+const secrets = require('./secrets');
+const PLACEHOLDER = secrets.PLACEHOLDER.CODECOV_TOKEN;
 
 function tokenOf(env) {
-  const t = env && env.CODECOV_TOKEN;
-  if (t == null) return '';
-  const s = String(t).trim();
-  if (!s || s === PLACEHOLDER) return '';
-  return s;
+  return secrets.secretOf('CODECOV_TOKEN', env);
 }
 
 function writeCoverage(root) {
