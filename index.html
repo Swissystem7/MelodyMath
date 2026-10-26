@@ -154,6 +154,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 @keyframes mmTap{0%{transform:scale(.9)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.mm-tap{animation:none!important;transform:none!important;outline:3px solid #ffd600}}
 .mm-pad{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 14px}.mm-pad-title{font-size:.88rem;color:var(--muted);font-weight:700}
+.sg-body{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.sg-boxes{display:flex;flex-wrap:wrap;gap:4px}.sg-box{width:18px;height:18px;border-radius:5px;border:2px solid var(--purple);background:#fff}.sg-box.on{background:var(--purple)}
 .mm-unlock{position:fixed;inset-inline:12px;bottom:16px;margin:auto;max-width:420px;z-index:60;background:#fff5ce;color:var(--ink);border:2px solid var(--yellow);border-radius:16px;padding:12px 16px;font-weight:800;text-align:center;box-shadow:0 10px 30px #4638702e}
 .mm-pad-key{min-width:48px;min-height:48px;padding:6px 10px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--purple);font-weight:800}.mm-pad-new{border:2px solid var(--yellow)}
 .nl-control{margin:10px 0}
@@ -211,6 +212,11 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <div id="mySongList" role="group" aria-label="השיר שלי"></div>
 </details>
 <p id="mySongNew" class="mm-unlock hidden" role="status"></p>
+<div class="metro-bar no-print" id="setlistGoal" role="group" aria-label="היעד שלי להיום">
+  <strong>🎤 היעד שלי להיום — כל תשובה נכונה מוסיפה תיבה לשיר</strong>
+  <div id="setlistBody" class="sg-body"></div>
+  <span id="setlistSay" class="note" role="status"></span>
+</div>
 <p class="mm-product-banner"><b>תרגול יסודי א׳–ד׳.</b> כיתה נבחרת למטה. <a href="curriculum.html" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
 <div class="who-bar" id="gradeBar">
   <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
@@ -497,6 +503,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/learnerPlan.js"></script>
 <script src="src/lib/pace.js"></script>
 <script src="src/lib/streak.js"></script>
+<script src="src/lib/setlistGoal.js"></script>
 <script src="src/data/struggleTopics.js"></script>
 <script src="src/lib/struggleTopics.js"></script>
 <script src="src/lib/encouragingFeedback.js"></script>
@@ -1044,6 +1051,7 @@ function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); i
 function noteMetro(correct, topic){
   // #739: 5 in a row in a topic plays one phrase for "השיר שלי" instead of the streak melody (one reward, not two).
   const won=typeof streakReward==='function'&&streakReward(topic,correct);
+  if(typeof setlistNote==='function') setlistNote(correct,topic,won);
   // A wrong answer gets its own soft falling step; a right one climbs with the streak.
   if(!correct && typeof playTap==='function') playTap('wrong');
   // #591 A.4: the streak melody grows a note per right answer; right answers unlock strip instruments.
@@ -1084,7 +1092,33 @@ function paintMySong(fresh){
   host.querySelectorAll('[data-song]').forEach(function(b){ b.onclick=function(){ const k=b.getAttribute('data-song'); if(k==='all') S.playSong(song); else S.playPhrase(song[+k]); }; });
   if(fresh){ const box=$('mySongNew'); if(box){ box.textContent='🎶 משפט חדש נכנס לשיר שלי: '+fresh.name; box.classList.remove('hidden'); setTimeout(function(){ box.classList.add('hidden'); },3500); } }
 }
-window.addEventListener('load',function(){ paintMySong(); }); // instruments.js loads at the end of the page
+window.addEventListener('load',function(){ paintMySong(); paintSetlist(); });
+// #591 SetlistGoal: the child's goal for today. Only right answers add a box; meeting it plays the whole song
+// on the child's instrument (the same pick as "השיר שלי"). No timer, no failure message; "בלי מוזיקה" shows boxes only.
+function setlistNote(correct,topic,afterPhrase){
+  if(typeof MM_SETLIST_GOAL==='undefined') return;
+  const G=MM_SETLIST_GOAL, S=typeof MM_MASTERY_STREAK!=='undefined'?MM_MASTERY_STREAK:null;
+  G.rollover();
+  const r=G.recordAnswer(correct,{instrument:S?S.instrumentFor(topic):null});
+  if(!r.counted) return;
+  if(r.justMet&&S&&!prefsNow().quiet) S.playPhrase(G.songPhrase(r.song),null,null,afterPhrase?2.6:0.6);
+  paintSetlist(r.justMet);
+}
+function paintSetlist(done){
+  const host=$('setlistBody'); if(!host||typeof MM_SETLIST_GOAL==='undefined') return;
+  const G=MM_SETLIST_GOAL, a=G.rollover(), say=$('setlistSay');
+  if(a){
+    host.innerHTML=G.boxesHtml(a)+'<span class="note">'+a.count+' מתוך '+a.target+'</span><button type="button" data-goal-change>יעד אחר</button>';
+    host.querySelector('[data-goal-change]').onclick=function(){ G.close(); if(say) say.textContent='השיר נשמר כמו שהוא. בוחרים יעד חדש.'; paintSetlist(); };
+  } else {
+    const hist=G.getHistory(), last=hist[hist.length-1];
+    host.innerHTML=(last&&last.count&&!prefsNow().quiet?'<button type="button" data-goal-replay>▶ השיר האחרון</button>':'')+G.pickerHtml(G.suggestNextGoal(hist));
+    host.querySelectorAll('[data-goal]').forEach(function(b){ b.onclick=function(){ G.start(b.getAttribute('data-goal')); if(say) say.textContent='בחרתם: '+b.textContent.replace(' ⭐ מוצע',''); paintSetlist(); }; });
+    const rp=host.querySelector('[data-goal-replay]');
+    if(rp) rp.onclick=function(){ if(typeof MM_MASTERY_STREAK!=='undefined') MM_MASTERY_STREAK.playPhrase(G.songPhrase(last)); };
+  }
+  if(done&&say) say.textContent='🎶 השיר הושלם ונשמר!';
+} // instruments.js loads at the end of the page
 // One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
 if(typeof installAudioUnlock==='function') installAudioUnlock(document);
 // Every [data-tap] element sounds on pointerdown with animation and a short buzz (#591).
@@ -1251,7 +1285,8 @@ function finishBeatPick(value, correct, late){
   if(paced){
     metroStreak=paced.streak;
     setMetroBpm(paced.bpm);
-    if(typeof streakReward==='function') streakReward(beatCurrent.skill,correct && !late);
+    const won=typeof streakReward==='function'&&streakReward(beatCurrent.skill,correct && !late);
+    if(typeof setlistNote==='function') setlistNote(correct && !late,beatCurrent.skill,won);
   } else noteMetro(correct && !late,beatCurrent.skill);
   logTeacherItem({kind:'beat',skill:beatCurrent.he||beatCurrent.skill,prompt:beatCurrent.prompt,answer:beatCurrent.answer,given:late?'מאוחר':value,correct:correct});
   [...$('beatChoices').children].forEach(b=>{ b.disabled=true; if(isCorrect(b.textContent,beatCurrent.answer)) b.classList.add('picked-good'); });
