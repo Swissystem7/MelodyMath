@@ -59,14 +59,71 @@ test('M3 fraction answers ask whether the bar fills exactly, falls short or over
   assert.deepEqual(p.options.map((o) => o.label), ['יחסר', 'בדיוק', 'תעלה על גדותיה']);
 });
 
-test('numeric predictions: 3 distinct options, one of them true, none negative for a positive answer', () => {
-  ['M1', 'M2', 'M6'].forEach((m) => [0, 1, 7, 21, 100].forEach((a) => {
+// Bounds named by a range option: [lower, upper] of the range it covers.
+// The hyphen in "מ-5" / "ל-5" joins the prefix; it is not a minus sign.
+const nums = (label) => (label.replace(/([מל])-/g, '$1 ').match(/-?\d+(\.\d+)?/g) || []).map(Number);
+function covers(p, v) {
+  const lo = nums(p.options[0].label)[0], hi = nums(p.options[2].label)[0];
+  return { low: v < lo, mid: v > lo && v < hi, high: v > hi }[p.truth];
+}
+
+test('numeric predictions show a range or direction, never the exact answer', () => {
+  const values = [0, 1, 2, 3, 7, 12, 21, 48, 100, 2.5, 3.75, 13.4];
+  ['M1', 'M2', 'M3', 'M6'].forEach((m) => values.forEach((a) => {
     const p = predict.build(item(tagOf(m), a, m + a), banks.mechanismOf);
-    const ids = p.options.map((o) => o.id);
-    assert.equal(new Set(ids).size, 3, m + ' ' + a);
-    assert.ok(ids.includes(p.truth));
-    assert.ok(ids.every((x) => Number(x) >= 0), m + ' ' + a + ' ' + ids);
+    if (m === 'M3' && !Number.isInteger(a) && a <= 2) return;
+    const tag = m + ' ' + a + ' ' + p.options.map((o) => o.label);
+    assert.deepEqual(p.options.map((o) => o.id), ['low', 'mid', 'high'], tag);
+    assert.match(p.options[0].label, /^פחות מ-/);
+    assert.match(p.options[1].label, /^בין /);
+    assert.match(p.options[2].label, /^יותר מ-/);
+    p.options.forEach((o) => assert.ok(!nums(o.label).includes(a), 'exact answer shown: ' + tag));
+    assert.notEqual(p.truth, String(a));
+    assert.ok(covers(p, a), 'truth range holds the answer: ' + tag);
+    p.options.forEach((o) => nums(o.label).forEach((n) => assert.ok(Math.abs(n - a) >= 2, 'bound too close to the answer: ' + tag)));
+    p.options.forEach((o) => assert.ok(nums(o.label).every((n) => n >= 1), 'no "less than 0": ' + tag));
   }));
+});
+
+// Minimal DOM, enough for mount().
+function fakeEl(tag) {
+  const cls = new Set();
+  const el = {
+    tag, children: [], listeners: {}, disabled: false, textContent: '', parent: null,
+    classList: { add: (c) => cls.add(c), remove: (c) => cls.delete(c), contains: (c) => cls.has(c), toggle: (c, on) => (on ? cls.add(c) : cls.delete(c)) },
+    addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); },
+    fire(t) { (this.listeners[t] || []).forEach((f) => f()); },
+    appendChild(c) { c.parent = this; this.children.push(c); return c; },
+    focus() {},
+    set innerHTML(_) { this.children = []; if (_) ['p', 'div', 'p'].forEach((t) => this.appendChild(fakeEl(t))); },
+    get firstChild() { return this.children[0]; },
+    get nextSibling() { const s = this.parent && this.parent.children; return s ? s[s.indexOf(this) + 1] : null; },
+  };
+  el.ownerDocument = { createElement: fakeEl };
+  return el;
+}
+
+test('the prediction step cannot be skipped: answer and the way stay locked until a pick', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  predict.setStorage(memStorage());
+  const host = fakeEl('div'), input = fakeEl('input'), check = fakeEl('button'), way = fakeEl('p');
+  let played = 0;
+  const it = item(tagOf('M2'), 21, 'skip1');
+  assert.equal(predict.mount(host, it, 't', 2, () => { played += 1; }, banks.mechanismOf, { lock: [input, check], hide: [way] }), true);
+  assert.equal(input.disabled, true, 'answer box locked');
+  assert.equal(check.disabled, true, 'check button locked');
+  assert.ok(way.classList.contains('hidden'), "the way's play button hidden");
+  t.mock.timers.tick(5000);
+  assert.equal(played, 0, 'nothing plays without a prediction');
+  const btns = host.children[1].children;
+  assert.equal(btns.length, 3);
+  btns[1].fire('click');
+  assert.equal(input.disabled, false);
+  assert.equal(check.disabled, false);
+  assert.ok(!way.classList.contains('hidden'));
+  t.mock.timers.tick(600);
+  assert.equal(played, 1, 'the way plays after the pick');
+  assert.ok(btns.every((b) => b.disabled), 'no second pick');
 });
 
 test('weak or unevidenced ways get no prediction step', () => {
@@ -114,5 +171,8 @@ test('index.html loads predict.js and the personal plan mounts it before playing
   assert.ok(html.includes('<script src="src/lib/predict.js"></script>'));
   assert.ok(html.includes('id="rmPlanPredict"'));
   assert.match(html, /MM_PREDICT\.mount\(\$\('rmPlanPredict'\),it,[^;]*\)\)\)maybeHear\(it\)/);
+  // Not skippable: answer and check are gated on the panel, and rpCheck refuses while gated.
+  assert.match(html, /MM_PREDICT\.mount\([^;]*\{lock:\[\$\('rmPlanAnswer'\),\$\('rmPlanCheck'\)\],hide:\[\$\('rmPlanWay'\)\]\}/);
+  assert.match(html, /function rpCheck\(\)\{if\(rpAnswered\|\|\$\('rmPlanAnswer'\)\.disabled\)return;/);
   assert.ok(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8').includes("'./src/lib/predict.js'"));
 });
