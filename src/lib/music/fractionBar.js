@@ -57,17 +57,49 @@
 
   const GLYPHS = { '½': [1, 2], '¼': [1, 4], '¾': [3, 4], '⅛': [1, 8] };
 
-  // Accepts {n, d}, a duration id ('quarter'), '1/4', '¼', '0.25' or 0.25.
+  // Accepts {n, d}, a duration id ('quarter'), '1/4', '¼', '0.25', 0.25, or mixed number '1 1/2' / '1 ו־1/2'.
   function toFraction(v) {
     if (v && typeof v === 'object' && 'n' in v && 'd' in v) return frac(Number(v.n), Number(v.d));
     if (typeof v === 'number') return fromNumber(v);
-    const s = String(v == null ? '' : v).replace(/\s/g, '');
+    const raw = String(v == null ? '' : v).trim();
+    // Mixed number with space or Hebrew ו: "1 1/2", "1 ו־1/2", "1 ו-1/2"
+    const mixed = /^(\d+)(?:\s+|\s*ו[־\-]?\s*)(\d+)\/(\d+)$/.exec(raw);
+    if (mixed) {
+      const whole = Number(mixed[1]);
+      const num = Number(mixed[2]);
+      const den = Number(mixed[3]);
+      if (den === 0) return null;
+      return frac(whole * den + num, den);
+    }
+    const s = raw.replace(/\s/g, '');
     if (BY_ID[s]) return frac(BY_ID[s].n, BY_ID[s].d);
     if (GLYPHS[s]) return frac(GLYPHS[s][0], GLYPHS[s][1]);
     const m = /^(-?\d+)\/(\d+)$/.exec(s);
     if (m) return frac(Number(m[1]), Number(m[2]));
     if (/^-?\d+(\.\d+)?$/.test(s)) return fromNumber(Number(s));
     return null;
+  }
+
+  // Convert improper fraction or decimal to mixed number representation (Refs #665)
+  // e.g. '3/2' -> '1 1/2' (or '1 ו־1/2' when hebrew: true)
+  function toMixed(v, options) {
+    const f = toFraction(v);
+    if (!f || f.n < 0) return null;
+    const opts = options || {};
+    const useHebrew = Boolean(opts.hebrew);
+    if (f.d === 1) return String(f.n);
+    if (f.n < f.d) return f.n + '/' + f.d;
+    const whole = Math.floor(f.n / f.d);
+    const rem = f.n % f.d;
+    if (rem === 0) return String(whole);
+    if (useHebrew) return whole + ' ו־' + rem + '/' + f.d;
+    return whole + ' ' + rem + '/' + f.d;
+  }
+
+  // Convert mixed number string back to improper fraction format (e.g. '1 1/2' -> '3/2')
+  function fromMixed(s) {
+    const f = toFraction(s);
+    return format(f);
   }
 
   function add(a, b) { return frac(a.n * b.d + b.n * a.d, a.d * b.d); }
@@ -126,13 +158,45 @@
     return { accepted: true, fill: next, check: check, over: null };
   }
 
-  // 0.25 -> '1/4'; 0.375 -> '3/8'. Only durations a bar can hold (power-of-two
-  // denominators up to 1/16 and at most one bar); otherwise null.
-  function decimalToBarFraction(x) {
-    const f = toFraction(typeof x === 'string' ? x : Number(x));
-    if (!f || f.n < 0 || cmp(f, frac(1, 1)) > 0 || 16 % f.d !== 0) return null;
+  const MAX_BARS = 4; // Upper bound: up to 4 bars can be heard/seen in Grade ד (Refs #665)
+
+  // 0.25 -> '1/4'; 1.5 -> '3/2'. Spans up to 4 bars (≤ 4, Grade ד mm-cur-33/mm-cur-44).
+  // Power-of-two denominators up to 1/16; values > 4 or non-note lengths return null.
+  function decimalToBarFraction(x, options) {
+    const num = typeof x === 'string' ? Number(x) : x;
+    if (typeof num === 'number' && (num > MAX_BARS || num < 0)) return null;
+    const f = toFraction(x);
+    if (!f || f.n < 0 || 16 % f.d !== 0) return null;
+    if (f.n / f.d > MAX_BARS) return null;
+    const opts = options || {};
+    if (opts.mixed) {
+      return toMixed(f, opts);
+    }
     return format(f);
   }
+
+  // End-of-topic no-music check items for Grade ד mm-cur-33 (mixed numbers & improper fractions)
+  const NO_MUSIC_CHECK_ITEMS = [
+    {
+      id: 'mm-cur-33-nm-1',
+      topic: 'mm-cur-33',
+      grade: 'ד',
+      prompt: 'כתבו את 3/2 כמספר מעורב (למשל: 1 1/2 או 1 ו־1/2)',
+      answer: '1 1/2',
+      altAnswers: ['1 ו־1/2', '1 ו-1/2', '1 1/2'],
+      noMusic: true,
+      plain: true
+    },
+    {
+      id: 'mm-cur-33-nm-2',
+      topic: 'mm-cur-33',
+      grade: 'ד',
+      prompt: 'כתבו את 1 ו־1/4 כשבר מדומה (למשל: 5/4)',
+      answer: '5/4',
+      noMusic: true,
+      plain: true
+    }
+  ];
 
   // '3/8' -> 0.375; the decimal the same part of the bar is written as.
   function barFractionToDecimal(v) {
@@ -144,13 +208,17 @@
   return {
     MECHANISM: MECHANISM,
     DURATIONS: DURATIONS,
+    MAX_BARS: MAX_BARS,
     toFraction: toFraction,
     formatFraction: format,
+    toMixed: toMixed,
+    fromMixed: fromMixed,
     sumFraction: sumFraction,
     sumDurations: sumDurations,
     checkFill: checkFill,
     addTile: addTile,
     decimalToBarFraction: decimalToBarFraction,
     barFractionToDecimal: barFractionToDecimal,
+    NO_MUSIC_CHECK_ITEMS: NO_MUSIC_CHECK_ITEMS,
   };
 });

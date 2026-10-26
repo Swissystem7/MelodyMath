@@ -73,6 +73,20 @@ npm test
 
 אין בדיקת WCAG מול NVDA/VoiceOver בכיתה אמיתית. אין GitHub Actions בריפו.
 
+## Sentry ו־Codecov
+
+אין DSN ואין טוקן בקוד. ב־`index.html` הערך הוא `__SENTRY_DSN__`. בלי החלפה בזמן פריסה, Sentry לא נטען ואין שגיאה בקונסול, והטאבלט לא שולח דבר. סוד המאגר `SENTRY_DSN` מוחלף במקום הזה רק בפריסה; אז נטען ה־SDK עם `sendDefaultPii: false`.
+
+`node tools/codecov.js` (או `npm run coverage`) מריץ את הבדיקות וכותב `coverage/lcov.info`. אם `CODECOV_TOKEN` חסר, ההעלאה ל־Codecov מדולגת והפקודה מצליחה. הריפו לא מוסיף workflow של GitHub Actions.
+
+## Doppler
+
+הסודות נקראים רק מהסביבה ש־Doppler מזריק (`doppler run -- node tools/codecov.js`). אין ערכים בקוד וב־`doppler.yaml`.
+
+שמות נדרשים: `SENTRY_DSN`, `CODECOV_TOKEN`.
+
+בלי הזרקה נשאר `__SENTRY_DSN__` בעמוד, ו־Codecov מדלג. בדיקות הריפו רצות מקומית עם `npm test`.
+
 ## כמה תלמידים בו־זמנית
 אין שרת, ולכן «כמה משתמשים» עובד כך:
 

@@ -69,14 +69,18 @@
   }
 
   // Renders one note. Returns the stop time, or null without an AudioContext.
-  function playVoice(ac, voice, hz, when, dest) {
+  // opts.dur (seconds) holds that one note longer; opts.gain above 0.16
+  // raises the envelope, still capped at 1. Omitted opts keep the voice plan.
+  function playVoice(ac, voice, hz, when, dest, opts) {
     const plan = planVoice(voice, hz);
     if (!ac || !plan) return null;
     const t = typeof when === 'number' ? when : ac.currentTime;
-    const end = t + plan.attack + plan.decay;
+    const held = opts && Number(opts.dur) > 0 ? Number(opts.dur) : 0;
+    const end = t + (held || plan.attack + plan.decay);
+    const peak = held && Number(opts.gain) > 0 ? Math.min(1, Number(opts.gain) / 0.16) : 1;
     const out = ac.createGain();
     out.gain.setValueAtTime(0.0001, t);
-    out.gain.linearRampToValueAtTime(1, t + plan.attack);
+    out.gain.linearRampToValueAtTime(peak, t + (held ? Math.min(plan.attack, held) : plan.attack));
     out.gain.exponentialRampToValueAtTime(0.0001, end);
     let bus = out;
     if (plan.filter) {

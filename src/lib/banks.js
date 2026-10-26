@@ -48,6 +48,7 @@
     PATTERN: 'סדרות דגמים צורניים וצליליים',
     CHART100: 'לוח המאה — עשרות ויחידות',
     PLACE_VALUE: 'מבנה עשרוני עד 1,000 — מאות/עשרות/יחידות, זוגי/אי־זוגי, השוואה',
+    EVEN_ODD: 'זוגי/אי־זוגי',
     WORD_COLLECT: 'שאלת מילים — איסוף (צירוף שתי קבוצות)',
     WORD_REMOVE: 'שאלת מילים — הפרדה (הסרה מקבוצה)',
     WORD_COMPARE: 'שאלת מילים — השוואה בין שתי כמויות',
@@ -116,6 +117,7 @@
     PARA_AREA: 'גובה במקבילית ושטח מקבילית',
     SOLIDS: 'פירמידות ומנסרות ישרות — פאות, מקצועות, קודקודים ופריסות',
     FREQ: 'שכיחות, טבלת שכיחויות ושכיח',
+    EQ_INEQ: 'משוואות ואי־שוויונות — שני צדדים שווים, או צד אחד גדול יותר',
   };
 
   const SKILL_HE = {
@@ -1416,11 +1418,8 @@
     MEAS('ב', 'קנינו שתי מחברות ב־12 ₪ כל אחת ושילמנו ב־30 ₪. כמה ₪ עודף?', 6, 'קודם 12 ועוד 12', 3, ST.MONEY),
 
     MEAS('ב', 'תיבה בנויה מ־2 שכבות של 6 קוביות. כמה קוביות יש בה?', 12, 'פעמיים 6', 1, ST.MASS_VOL),
-    MEAS('ב', 'שק אחד שוקל 3 ק״ג ושק שני 5 ק״ג. בכמה ק״ג השני כבד יותר?', 2, '5 פחות 3', 1, ST.MASS_VOL),
     MEAS('ב', 'תיבה בנויה מ־3 שכבות של 5 קוביות. כמה קוביות יש בה?', 15, 'שלוש פעמים 5', 2, ST.MASS_VOL),
-    MEAS('ב', 'בקבוק מחזיק 1 ליטר. כמה כוסות של חצי ליטר ממלאות אותו?', 2, 'שני חצאים הם שלם', 2, ST.MASS_VOL),
     MEAS('ב', 'תיבה בנויה מ־2 שכבות, ובכל שכבה 3 שורות של 4 קוביות. כמה קוביות יש בה?', 24, 'בכל שכבה 12 קוביות', 3, ST.MASS_VOL),
-    MEAS('ב', 'מזגנו 2 ליטר מים לכוסות של חצי ליטר. כמה כוסות מילאנו?', 4, 'בכל ליטר שני חצאים', 3, ST.MASS_VOL),
 
     MEAS('ג', 'כמה אגורות יש ב־5 ₪?', 500, 'בכל שקל 100 אגורות', 1, ST.MONEY),
     MEAS('ג', 'שלוש מחברות ב־7 ₪ כל אחת. כמה ₪ בסך הכול?', 21, 'שלוש פעמים 7', 1, ST.MONEY),
@@ -1429,14 +1428,14 @@
     MEAS('ג', 'חילקנו 60 ₪ שווה בשווה בין 4 ילדים. כמה ₪ לכל אחד?', 15, '60 חלקי 4', 3, ST.MONEY),
     MEAS('ג', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 40, 'שני חצאי שקל משלימים שקל', 3, ST.MONEY),
 
-    // ק״ג/ליטר are not in the ג׳ programme; ד׳ teaches them (המרת יחידות),
-    // so these items moved there (#591). Kept in place so no other id shifts.
-    MEAS('ד', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.UNITS),
-    MEAS('ד', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.UNITS),
-    MEAS('ד', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.UNITS),
-    MEAS('ד', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.UNITS),
-    MEAS('ד', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.UNITS),
-    MEAS('ד', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.UNITS),
+    // ק״ג/ליטר are grade ד׳ only (#591, #751), never ג׳. Wording reused from
+    // 847674c (then grade ג׳, ST.MASS_VOL). Kept in place so no other id shifts.
+    MEAS('ד', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.MASS_VOL),
+    MEAS('ד', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.MASS_VOL),
+    MEAS('ד', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.MASS_VOL),
+    MEAS('ד', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.MASS_VOL),
 
     MEAS('ד', 'כמה אגורות יש ב־8 ₪?', 800, 'בכל שקל 100 אגורות', 1, ST.MONEY),
     MEAS('ד', 'שילמנו 100 ₪ על קנייה של 64 ₪. כמה ₪ עודף?', 36, '100 פחות 64', 1, ST.MONEY),
@@ -1910,7 +1909,8 @@
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
     // standard, one per level, and the item takes the way of its level —
-    // older builders (G56, MV) included. A way is [tag, note, source, evidence].
+    // older builders (G56, MV) included. A way is [tag, note, source, evidence],
+    // then optional flags; `also` lists more sources cited next to the first.
     const link = {};
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
@@ -1931,13 +1931,11 @@
     RAW.forEach(function (raw) {
       const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
       if (!ways) return;
-      const primary = primaryWays(ways);
-      if (!primary.length) return;
-      const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+      const m = shownWay(raw, ways);
+      if (!m) return;
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
-      const extra = ways.filter(isOptionalWay).map(function (w) {
-        return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
-      });
+      if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
+      const extra = extraFor(raw, ways, m);
       if (extra.length) raw.musicExtra = extra;
     });
   });
@@ -1970,7 +1968,8 @@
   // Both directions: improper fraction → mixed number and back, comparing
   // across the two forms, and one addition that crosses into the next whole.
   // isCorrect keeps the forms apart, so each prompt names the form it wants.
-  // Appended last so existing ids stay put.
+  // Appended last so existing ids stay put. Stays ahead of the equation items
+  // so the ids already on master do not move.
   RAW.push(
     G4('fractions', 'כתבו את 7/4 כמספר מעורב (שלמים ושבר).', '1 ו־3/4', 'ארבעה רבעים הם שלם אחד, ונשארים 3 רבעים', 1, ST.FRAC_MIXED_D),
     G4('fractions', 'כמה רבעים יש ב־1 ו־1/4? כתבו כשבר.', '5/4', 'בשלם יש 4 רבעים, ועוד רבע אחד', 1, ST.FRAC_MIXED_D),
@@ -1981,6 +1980,70 @@
     G4('fractions', '1 ו־3/4 + 1/2 = ? (כתבו כמספר מעורב)', '2 ו־1/4', 'חצי הוא 2 רבעים; 3 רבעים ועוד 2 רבעים הם שלם ועוד רבע', 3, ST.FRAC_MIXED_D)
   );
 
+  // ---------- כיתות ד׳–ה׳ · משוואות ואי־שוויונות (#710) ----------
+  // The balance of grades א׳-ב׳ (EQ_LEFT) with bigger numbers: two sides that
+  // must come out equal, or one side that is bigger. Answers are numbers or
+  // נכון/לא נכון — a typed < or > flips in the RTL answer box. Appended after
+  // the grade files so no existing id moves.
+  RAW.push(
+    G4('addition', '☐ + 2,500 = 7,000' + NO_COMMA, 4500, 'מה משלים את 2,500 ל־7,000', 1, ST.EQ_INEQ),
+    G4('multiplication', 'השלימו: 6 × ☐ = 42', 7, '6 כפול כמה הוא 42', 1, ST.EQ_INEQ),
+    G4('addition', 'נכון או לא נכון: 300 + 200 = 600 − 100', 'נכון', 'בכל צד יוצא 500', 1, ST.EQ_INEQ),
+    G4('multiplication', 'השלימו: 25 × 4 = 50 × ☐', 2, 'קודם הצד הידוע: 25 × 4 = 100', 2, ST.EQ_INEQ),
+    G4('subtraction', 'השלימו: 1,000 − ☐ = 400 + 350', 250, 'הצד הידוע הוא 750', 2, ST.EQ_INEQ),
+    G4('multiplication', 'נכון או לא נכון: 8 × 7 > 50 + 5', 'נכון', '56 גדול מ־55', 2, ST.EQ_INEQ),
+    G4('multiplication', 'נכון או לא נכון: 3 × (20 + 5) = 3 × 20 + 5', 'לא נכון', 'בצד אחד 75 ובשני 65 — הסוגריים משנים', 3, ST.EQ_INEQ),
+    G4('multiplication', 'מהו המספר השלם הגדול ביותר שמתאים ל־☐: ☐ × 7 < 50', 7, '7 × 7 = 49, ו־8 × 7 = 56 כבר גדול מ־50', 3, ST.EQ_INEQ),
+    G4('addition', 'השלימו: 4,500 + ☐ = 3 × 2,000' + NO_COMMA, 1500, 'קודם הצד הידוע: 3 × 2,000 = 6,000', 3, ST.EQ_INEQ),
+    G5('subtraction', '☐ − 15,000 = 35,000' + NO_COMMA, 50000, 'פעולה הפוכה: 35,000 ועוד 15,000', 1, ST.EQ_INEQ),
+    G5('division', 'השלימו: ☐ : 8 = 125' + NO_COMMA, 1000, 'פעולה הפוכה: 125 × 8', 1, ST.EQ_INEQ),
+    G5('division', 'נכון או לא נכון: 48 : 6 = 2 × 4', 'נכון', 'בכל צד יוצא 8', 1, ST.EQ_INEQ),
+    G5('multiplication', 'השלימו: 36 × 25 = 9 × ☐', 100, '36 הוא 9 × 4, ולכן ☐ הוא 4 × 25', 2, ST.EQ_INEQ),
+    G5('multiplication', 'נכון או לא נכון: 999 × 0 > 1 × 1', 'לא נכון', 'כפל ב־0 נותן 0, ו־0 קטן מ־1', 2, ST.EQ_INEQ),
+    G5('multiplication', 'השלימו: 7 × ☐ + 6 = 90', 12, 'קודם 90 − 6 = 84, ואז 84 : 7', 2, ST.EQ_INEQ),
+    G5('multiplication', 'מהו המספר השלם הקטן ביותר שמתאים ל־☐: ☐ × 25 > 1,000', 41, '40 × 25 הוא בדיוק 1,000 — שווה, לא גדול', 3, ST.EQ_INEQ),
+    G5('multiplication', 'נכון או לא נכון: 3,980 × 21 < 80,000', 'לא נכון', 'אומדן: 4,000 × 20 = 80,000, אבל 3,980 × 21 = 83,580', 3, ST.EQ_INEQ),
+    G5('multiplication', 'השלימו: (☐ + 200) × 4 = 6,000' + NO_COMMA, 1300, '6,000 : 4 = 1,500, ואז פחות 200', 3, ST.EQ_INEQ)
+  );
+
+  // The other 15 ST.MASS_VOL items from 847674c (then grade ב׳). Same wording,
+  // grade ד׳ only (#751). Prompts already in ד׳ are not repeated. Appended
+  // last so existing ids stay put.
+  RAW.push(
+    MEAS('ד', 'תיבה בנויה מ־2 שכבות של 6 קוביות. כמה קוביות יש בה?', 12, 'פעמיים 6', 1, ST.MASS_VOL),
+    MEAS('ד', 'שק אחד שוקל 3 ק״ג ושק שני 5 ק״ג. בכמה ק״ג השני כבד יותר?', 2, '5 פחות 3', 1, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־3 שכבות של 5 קוביות. כמה קוביות יש בה?', 15, 'שלוש פעמים 5', 2, ST.MASS_VOL),
+    MEAS('ד', 'בקבוק מחזיק 1 ליטר. כמה כוסות של חצי ליטר ממלאות אותו?', 2, 'שני חצאים הם שלם', 2, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־2 שכבות, ובכל שכבה 3 שורות של 4 קוביות. כמה קוביות יש בה?', 24, 'בכל שכבה 12 קוביות', 3, ST.MASS_VOL),
+    MEAS('ד', 'מזגנו 2 ליטר מים לכוסות של חצי ליטר. כמה כוסות מילאנו?', 4, 'בכל ליטר שני חצאים', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־4 שכבות של 4 קוביות. כמה קוביות יש בה?', 16, 'ארבע פעמים 4', 1, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה משכבה אחת של 3 שורות, ובכל שורה 3 קוביות. כמה קוביות יש בה?', 9, '3 כפול 3', 2, ST.MASS_VOL),
+    MEAS('ד', 'בתיבה 10 קוביות. הוצאנו 3. כמה קוביות נשארו?', 7, '10 פחות 3', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־5 שכבות של 2 קוביות. כמה קוביות יש בה?', 10, 'חמש פעמים 2', 1, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־2 שכבות של 10 קוביות. כמה קוביות יש בה?', 20, 'פעמיים 10', 1, ST.MASS_VOL),
+    MEAS('ד', 'בתיבה 12 קוביות, ובכל שכבה 4 קוביות. מכמה שכבות היא בנויה?', 3, 'כמה פעמים 4 ב־12', 2, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־2 שכבות של 5 קוביות. הוסיפו לה עוד שכבה כזאת. כמה קוביות יש בה עכשיו?', 15, 'עכשיו יש 3 שכבות של 5', 2, ST.MASS_VOL),
+    MEAS('ד', 'תיבה בנויה מ־3 שכבות, ובכל שכבה 2 שורות של 3 קוביות. כמה קוביות יש בה?', 18, 'בכל שכבה 6 קוביות', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
+  );
+
+  SKILL_HE.even_odd = 'זוגי/אי־זוגי';
+  // The original tools stay in index.html. Specs live in explorerBank.js.
+  const EXPLORER = (typeof module === 'object' && module.exports)
+    ? require('./exercises/explorerBank')
+    : (typeof globalThis !== 'undefined' ? globalThis.MM_EXPLORER_BANK : null);
+  if (EXPLORER && typeof EXPLORER.bankSpecs === 'function') {
+    EXPLORER.bankSpecs().forEach(function (s) {
+      const raw = I(s.grade, s.skill, s.prompt, s.answer, s.hint, {
+        standard: ST[s.standard], level: s.level, table: s.table, widget: s.widget, line: s.line,
+      });
+      if (s.explorer) raw.explorer = s.explorer;
+      if (s.noMusic) raw.noMusic = true;
+      if (s.music) raw.music = s.music;
+      RAW.push(raw);
+    });
+  }
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -1989,14 +2052,13 @@
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
-        const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+        const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
         if (!ways) return;
-        const primary = primaryWays(ways); // dosage rule: weak ways stay optional
-        const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+        const m = shownWay(raw, ways); // dosage: a primary way solves the item
+        if (!m) return;
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
-        const extra = ways.filter(isOptionalWay).map(function (w) {
-          return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
-        });
+        if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
+        const extra = extraFor(raw, ways, m);
         if (extra.length) raw.musicExtra = extra;
       });
     });
@@ -2033,13 +2095,13 @@
       tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
-      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
+      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
-        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid'] },
-    M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012'],
-      finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012).',
-      tags: ['decimalNoteScale', 'tenthBeatGroups', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
-        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar',
+        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
+    M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
+      finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012); the bar is the model for percent (Van den Heuvel-Panhuizen 2003).',
+      tags: ['decimalNoteScale', 'tenthBeatGroups', 'percentBar', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'tapTempo', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
+        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar', 'balanceBars',
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
     M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
       finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
@@ -2056,12 +2118,12 @@
       tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
         'floorWalkSides', 'turnCount', 'armQuarterTurn', 'joinWalk', 'heelToeSteps', 'clockWalk', 'barStepWalk', 'addWalkLine', 'subWalkBack', 'subColumnSteps', 'zeroStartSteps', 'handTurnBody', 'halfTurnBody', 'rowStepsCompare', 'barTowerSteps', 'splitWalk'] },
     M8: { he: 'טמפו ו־BPM — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
-      tags: ['sixtyBeats', 'tempoPercent', 'tapTempo', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
+      tags: ['sixtyBeats', 'tempoPercent', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
         'howManyTimes', 'tuneTime', 'bpm', 'secPerBeat', 'mean', 'meanBpm', 'tempo'] },
     M9: { he: 'יחסי תדרים — עשרוניים ואחוזים', sources: [], finding: null,
       tags: ['intervalRatio', 'pitchPercent', 'hzCompare', 'g3Pair', 'hzChart', 'ratioHz'] },
     M10: { he: 'ערך המקום בכלי נגינה', sources: [], finding: null,
-      tags: ['tenExchange', 'placeScore', 'baseTenDrums', 'noteNames', 'g1Chart100', 'twoInstruments', 'registers'] },
+      tags: ['placeScore', 'baseTenDrums', 'noteNames', 'g1Chart100', 'twoInstruments', 'registers'] },
     M11: { he: 'נתוני כלים ופיקטוגרמות', sources: [], finding: null,
       tags: ['instrumentSurvey', 'rowRhythm', 'pictoBeats', 'barDifference', 'pipePlot'] },
     M12: { he: 'אורך צינורות וכוסות מים — אורך ונפח', sources: [], finding: null,
@@ -2086,6 +2148,32 @@
   const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
   function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
   function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
+  // The way an item is solved with. Primary ways only: an all-EXTRA topic does
+  // not invent a main way. Grade ד׳ cube items show cubeLayerGroups (#751) so
+  // a box is not explained as kilograms; kg and liters keep the one MAIN way.
+  function shownWay(raw, ways) {
+    const primary = primaryWays(ways);
+    if (!primary.length) return null;
+    if (raw.grade === 'ד' && raw.standard === ST.MASS_VOL && /תיבה|קובי/.test(raw.prompt || '')) {
+      const vol = (ways || []).find(function (w) { return w[0] === 'cubeLayerGroups'; });
+      if (vol) return vol;
+    }
+    return primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+  }
+  // A cube-volume item is solved by counting layers. It does not also carry
+  // a kg explanation (gramGroups, half a kilo) as extra practice. The other
+  // way: a kg or liter item does not carry the box-volume way (#751).
+  function extraFor(raw, ways, shown) {
+    const cube = /תיבה|קובי/.test(raw.prompt || '');
+    const mass = raw.grade === 'ד' && raw.standard === ST.MASS_VOL && !cube;
+    return (ways || []).filter(function (w) {
+      return isOptionalWay(w) && w[0] !== shown[0]
+        && !(cube && /ק״ג|גרם/.test(w[1] || ''))
+        && !(mass && w[0] === 'cubeLayerGroups');
+    }).map(function (w) {
+      return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
+    });
+  }
 
   // A music activity (the prompt itself plays or reads music) cites the same
   // source and label as the way that uses the same relationship (#591 audit,
@@ -2147,9 +2235,12 @@
     if (raw.music) it.music = raw.music;
     if (raw.musicNote) it.musicNote = raw.musicNote;
     if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
+    if (raw.musicSrcAlso) it.musicSrcAlso = raw.musicSrcAlso.slice();
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    if (raw.explorer) it.explorer = raw.explorer;
+    if (raw.noMusic) it.noMusic = true;
     SHIPPED.push(it);
   });
 
