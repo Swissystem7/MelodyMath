@@ -62,7 +62,7 @@ test('answer check: the singing line, the product, and even or odd', () => {
   assert.equal(ex.groupsSpec(3, 3), null);
 
   assert.equal(even.standard, banks.ST.EVEN_ODD);
-  assert.notEqual(even.standard, banks.ST.PLACE_VALUE);
+  assert.equal(even.skill, 'even_odd');
   assert.match(cur.sectionForItem(even).topic, /זוגי\/אי־זוגי/);
   assert.equal(ex.checkAnswer(even, 'זוגי'), true);
   assert.equal(ex.checkAnswer(even, 'אי־זוגי'), false);
@@ -140,8 +140,8 @@ test('regular practice check replays an explorer miss, then accepts a dashed sec
 test('each explorer type is followed by a silent check with no music', () => {
   const silent = banks.allItems().filter((it) => it.noMusic);
   assert.deepEqual(ex.bankSpecs().map((s) => !!s.noMusic), [false, true, false, true, false, true]);
-  assert.deepEqual(silent.map((it) => [it.answer, it.music, it.musicNote, it.explorer, cur.sectionForItem(it).verified]), [
-    [9, undefined, undefined, undefined, true], [10, undefined, undefined, undefined, true], ['אי-זוגי', undefined, undefined, undefined, true],
+  assert.deepEqual(silent.map((it) => [it.answer, it.skill, it.music, it.musicNote, it.explorer, cur.sectionForItem(it).verified]), [
+    [9, 'number_line', undefined, undefined, undefined, true], [10, 'multiplication', undefined, undefined, undefined, true], ['אי-זוגי', 'even_odd', undefined, undefined, undefined, true],
   ]);
   silent.forEach((it) => assert.ok(ex.cardWords(it.prompt).length <= ex.MAX_WORDS && ex.checkAnswer(it, it.answer)));
 });

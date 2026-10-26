@@ -159,7 +159,7 @@
     if (n < 2 || n > 10) return null;
     const odd = n % 2 !== 0;
     return {
-      type: 'evenOdd', grade: 'ב', skill: 'place_value', standard: 'EVEN_ODD', level: 1,
+      type: 'evenOdd', grade: 'ב', skill: 'even_odd', standard: 'EVEN_ODD', level: 1,
       topicId: 'mm-cur-13', prompt: n + ' זוגי או אי־זוגי?', answer: odd ? 'אי-זוגי' : 'זוגי',
       hint: odd ? 'נשאר צליל בודד' : 'כולם בזוגות',
       explorer: { type: 'evenOdd', topicId: 'mm-cur-13', n: n },

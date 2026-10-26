@@ -2010,7 +2010,7 @@
     G5('multiplication', 'השלימו: (☐ + 200) × 4 = 6,000' + NO_COMMA, 1300, '6,000 : 4 = 1,500, ואז פחות 200', 3, ST.EQ_INEQ)
   );
 
-  // #688: the enrichment explorers also ship as three exercise types.
+  SKILL_HE.even_odd = 'זוגי/אי־זוגי';
   // The original tools stay in index.html. Specs live in explorerBank.js.
   const EXPLORER = (typeof module === 'object' && module.exports)
     ? require('./exercises/explorerBank')
