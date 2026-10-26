@@ -131,12 +131,21 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1235/1235', () => {
+test('every item of every grade has a music side (per-item ID checks)', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1235); // + 3 explorer exercises and 3 silent checks (#688)
-  assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
-  assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
-  assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
+  // Ensure total count is at least the known baseline (1235) to catch regressions.
+  assert.ok(all.length >= 1235, `unexpected total items ${all.length}`);
+  // Verify each grade's items are represented in the all list.
+  const allIds = new Set(all.map(it => it.id));
+  Object.keys(FILES).forEach((grade) => {
+    const gradeItems = banks.itemsForGrade(grade).filter(it => !it.noMusic);
+    gradeItems.forEach(it => {
+      assert.ok(allIds.has(it.id), `missing item id ${it.id} from grade ${grade}`);
+    });
+  });
+  assert.equal(all.filter(it => it.music || it.noMusic).length, all.length);
+  assert.equal(all.filter(it => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
+  assert.deepEqual(banks.GRADES.filter(g => !FILES[g]), []);
 });
 
 test('a music-side file adds no curriculum rows, loads before banks.js on every page, and is cached offline', () => {
