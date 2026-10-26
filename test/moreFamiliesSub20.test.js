@@ -46,6 +46,13 @@ test('tens on the first new family, ones on the second, from the start number', 
   plan.notes.forEach((x) => assert.equal(x.family, x.v === 1 ? plan.families[1].family : plan.families[0].family));
 });
 
+test('a round start (20 - 6): the second family answers the same tens, so both sound', () => {
+  const plan = more.planFor(above.find((x) => ten.specForItem(x).start === 20), mem('taiko'));
+  const [a, b] = plan.families.map((f) => plan.notes.filter((x) => x.family === f.family).map((x) => x.v));
+  assert.deepEqual(a, [10, 10]);
+  assert.deepEqual(b, a);
+});
+
 test('a family is played by the child\'s instrument when it is in that family', () => {
   const it = above[0];
   const plan = more.planFor(it, mem('piano'));

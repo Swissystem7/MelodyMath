@@ -1,7 +1,8 @@
 // MelodyMath — two more instrument families for a topic whose numbers above
 // 12 are heard on only two (Refs #665). EXTRA only: the topic's own way still
 // plays first and is unchanged; this adds a "more instruments" button beside
-// it. The hundreds and tens go to one new family, the ones to another. Each
+// it. The hundreds and tens go to one new family, the ones to another (or,
+// for a round number, the same hundreds and tens answered again). Each
 // family is played by the child's instrument when it belongs to that family
 // (myInstrument.instrumentFor), else by a default from that family.
 (function (root, factory) {
@@ -74,10 +75,16 @@
     function push(count, x, hz, dur, gain, v, step) {
       for (let i = 0; i < count; i++) { notes.push({ at: t, hz: hz || ONE_HZ[i % 8], dur: dur, gain: gain, voice: x.voice, family: x.family, v: v }); t += step; }
     }
-    push(Math.floor(n / 100), fams[0], 98, 0.6, 0.3, 100, 0.7);
-    push(Math.floor((n % 100) / 10), fams[0], 131, 0.45, 0.28, 10, 0.55);
+    function big(x) {
+      push(Math.floor(n / 100), x, 98, 0.6, 0.3, 100, 0.7);
+      push(Math.floor((n % 100) / 10), x, 131, 0.45, 0.28, 10, 0.55);
+    }
+    big(fams[0]);
     t += 0.4;
-    push(n % 10, fams[1], 0, 0.18, 0.16, 1, 0.3);
+    // A round number has no ones, so the second family answers the same
+    // hundreds and tens instead of staying silent.
+    if (n % 10) push(n % 10, fams[1], 0, 0.18, 0.16, 1, 0.3);
+    else big(fams[1]);
     return { number: n, heard: heard, families: fams, notes: notes };
   }
 
