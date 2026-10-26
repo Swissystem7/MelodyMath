@@ -1911,7 +1911,8 @@
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
     // standard, one per level, and the item takes the way of its level —
-    // older builders (G56, MV) included. A way is [tag, note, source, evidence].
+    // older builders (G56, MV) included. A way is [tag, note, source, evidence],
+    // then optional flags; `also` lists more sources cited next to the first.
     const link = {};
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
@@ -1936,6 +1937,7 @@
       if (!primary.length) return;
       const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+      if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
       const extra = ways.filter(isOptionalWay).map(function (w) {
         return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
       });
@@ -2022,6 +2024,7 @@
         const primary = primaryWays(ways); // dosage rule: weak ways stay optional
         const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+        if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
         const extra = ways.filter(isOptionalWay).map(function (w) {
           return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
         });
@@ -2175,6 +2178,7 @@
     if (raw.music) it.music = raw.music;
     if (raw.musicNote) it.musicNote = raw.musicNote;
     if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
+    if (raw.musicSrcAlso) it.musicSrcAlso = raw.musicSrcAlso.slice();
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
