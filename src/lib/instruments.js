@@ -149,7 +149,7 @@
     e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division'], 'pluck',
       'A trapezoid zither with 81 strings stretched in groups of three, plus levers for microtones: 27 groups of 3 is a ready-made multiplication and division picture (M2).',
       'https://www.maqamworld.com/en/instr/qanun.php'),
-    e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions'], 'pluck',
+    e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions', 'percent'], 'pluck',
       'A small four-string guitar adopted in Hawaii in the 1880s from the machete; strumming quarters and eighths in one bar voices note lengths (M3).',
       'https://collections.vam.ac.uk/item/O372416/machete-unknown'),
     // ---------- winds ----------

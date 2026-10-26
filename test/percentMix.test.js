@@ -117,3 +117,40 @@ test('a grade ו PERCENT item shows one circle per beat (splits 4/10/20)', () =>
     assert.equal(scheduled.length, split);
   });
 });
+
+test('every target sounds in two families, including a split of 4 with no 10% tile', () => {
+  I.FAMILIES.forEach((f) => assert.notEqual(I.instrumentById(PM.partnerInstrument(f)).family, f, f));
+  const fills = { 25: ['quarter'], 50: ['half'], 75: ['half', 'quarter'], 10: ['ten'], 40: ['ten', 'ten', 'ten', 'ten'], 60: ['half', 'ten'] };
+  PM.TARGETS.forEach((t) => {
+    [4, 10, 20].forEach((split) => {
+      const plan = PM.barPlan(fills[t.percent], 90, 'drumLow', split, 'pluck');
+      const families = new Set(plan.map((n) => (n.voice === 'pluck' ? 'strings' : 'percussion')));
+      assert.ok(families.size >= 2, t.percent + ' split ' + split);
+      plan.forEach((n) => assert.ok(n.durMs >= 80, n.kind));
+    });
+  });
+  const climb = PM.barPlan(['ten', 'ten'], 90, 'drumLow', 10, 'keys').filter((n) => n.kind === 'tile');
+  assert.deepEqual(climb.map((n) => n.voice), ['keys', 'keys']);
+  assert.deepEqual(climb.map((n) => n.hz), PM.TEN_STEPS_HZ.slice(0, 2));
+  assert.ok(PM.barPlan(['ten'], 90, 'drumLow', 10).every((n) => n.voice !== 'pluck'));
+  assert.ok(I.forTopic('percent').some((x) => x.id === 'ukulele'));
+});
+
+test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', () => {
+  assert.equal(P.myInstrument(), 'darbuka');
+  const d = P.voicesFor('darbuka');
+  assert.deepEqual([d.voice, d.melody, d.partnerId], ['drumLow', 'pluck', 'ukulele']);
+  const piano = P.voicesFor('piano');
+  assert.deepEqual([piano.id, piano.voice, piano.melody, piano.partnerId], ['piano', 'drumLow', 'keys', 'darbuka']);
+  assert.notEqual(piano.family, piano.partnerFamily);
+  const html = P.renderHtml(P.createState(0, true, 10), piano.voice, piano.melody);
+  assert.match(html, /data-tile="ten" data-tap="keys" data-hz="261.63"/);
+  assert.match(html, /data-tile="half" data-tap="drumLow"/);
+  assert.match(html, /<h3>תיבה אחת = 100%/);
+  assert.doesNotMatch(html, /🪘/);
+  const four = P.renderHtml(P.createState(0, true, 4), 'drumLow', 'pluck');
+  assert.match(four, /data-tile="ten" data-tap="pluck" data-hz="261.63"/);
+  assert.match(four, /data-tile="quarter" data-tap="drumLow"/);
+  const onlyQuarter = PM.barPlan(['quarter'], 90, 'drumLow', 4, 'pluck');
+  assert.ok(onlyQuarter.some((n) => n.voice === 'pluck') && onlyQuarter.some((n) => n.voice === 'drumLow'));
+});
