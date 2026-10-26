@@ -48,6 +48,7 @@
     PATTERN: 'סדרות דגמים צורניים וצליליים',
     CHART100: 'לוח המאה — עשרות ויחידות',
     PLACE_VALUE: 'מבנה עשרוני עד 1,000 — מאות/עשרות/יחידות, זוגי/אי־זוגי, השוואה',
+    EVEN_ODD: 'זוגי/אי־זוגי',
     WORD_COLLECT: 'שאלת מילים — איסוף (צירוף שתי קבוצות)',
     WORD_REMOVE: 'שאלת מילים — הפרדה (הסרה מקבוצה)',
     WORD_COMPARE: 'שאלת מילים — השוואה בין שתי כמויות',
@@ -2011,6 +2012,23 @@
     G5('multiplication', 'השלימו: (☐ + 200) × 4 = 6,000' + NO_COMMA, 1300, '6,000 : 4 = 1,500, ואז פחות 200', 3, ST.EQ_INEQ)
   );
 
+  SKILL_HE.even_odd = 'זוגי/אי־זוגי';
+  // The original tools stay in index.html. Specs live in explorerBank.js.
+  const EXPLORER = (typeof module === 'object' && module.exports)
+    ? require('./exercises/explorerBank')
+    : (typeof globalThis !== 'undefined' ? globalThis.MM_EXPLORER_BANK : null);
+  if (EXPLORER && typeof EXPLORER.bankSpecs === 'function') {
+    EXPLORER.bankSpecs().forEach(function (s) {
+      const raw = I(s.grade, s.skill, s.prompt, s.answer, s.hint, {
+        standard: ST[s.standard], level: s.level, table: s.table, widget: s.widget, line: s.line,
+      });
+      if (s.explorer) raw.explorer = s.explorer;
+      if (s.noMusic) raw.noMusic = true;
+      if (s.music) raw.music = s.music;
+      RAW.push(raw);
+    });
+  }
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2019,7 +2037,7 @@
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
-        const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
+        const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
         if (!ways) return;
         const primary = primaryWays(ways); // dosage rule: weak ways stay optional
         const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
@@ -2182,6 +2200,8 @@
     if (raw.musicExtra) it.musicExtra = raw.musicExtra;
     if (raw.grid) it.grid = raw.grid;
     if (raw.tags) it.tags = raw.tags.slice();
+    if (raw.explorer) it.explorer = raw.explorer;
+    if (raw.noMusic) it.noMusic = true;
     SHIPPED.push(it);
   });
 
