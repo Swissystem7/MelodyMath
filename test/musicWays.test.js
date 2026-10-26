@@ -222,7 +222,11 @@ test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ ha
   const order = Object.keys(g4.music);
   assert.equal(order[order.indexOf('UNITS') + 1], 'MASS_VOL');
   const ways = g4.music.MASS_VOL;
-  assert.deepEqual(ways.map((w) => w[0]), ['kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups']);
+  assert.deepEqual(ways.map((w) => w[0]), ['kiloGroupsTen', 'gramGroups', 'halfKiloAccents', 'cubeLayerGroups']);
+  const gram = ways[1];
+  assert.equal(gram[0], 'gramGroups');
+  assert.equal(gram[1], 'ק״ג הוא 1,000 גרם, עשר קבוצות של 100. מחיאה לכל 100 גרם והדגשה כל עשר מחיאות — כל הדגשה היא ק״ג שלם.');
+  assert.equal(banks.isOptionalWay(gram), true);
   const primary = banks.primaryWays(ways);
   assert.equal(primary.length, 1);
   assert.equal(primary[0][0], 'kiloGroupsTen');
@@ -237,10 +241,12 @@ test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ ha
   vol.forEach((it) => {
     assert.equal(it.music, 'cubeLayerGroups', it.prompt);
     assert.match(it.musicNote, /נפח תיבה/, it.prompt);
+    assert.ok((it.musicExtra || []).some((x) => x.music === 'gramGroups'), it.prompt);
   });
   mass.forEach((it) => {
     assert.equal(it.music, 'kiloGroupsTen', it.prompt);
     assert.match(it.musicNote, /ק״ג/, it.prompt);
+    assert.ok((it.musicExtra || []).some((x) => x.music === 'gramGroups' && x.note === gram[1] && x.ev === 'A'), it.prompt);
   });
   // All 21 prompts from 847674c, grade adapted to ד׳. A prompt already in ד׳
   // is not copied again. None of them is in ג׳.
@@ -288,6 +294,7 @@ test('#751: grade ב׳ has no kg/liter method as primary', () => {
       assert.doesNotMatch(w[1], /ק״ג|ליטר/, k + ' ' + w[0]);
     });
   });
+  Object.values(g2.music).forEach((list) => assert.ok(!list.some((w) => w[0] === 'gramGroups')));
   const ways = g2.music.MASS_VOL;
   assert.deepEqual(ways.map((w) => w[0]), ['layerBars', 'cubeRowPattern']);
   assert.deepEqual(banks.primaryWays(ways).map((w) => w[0]), ['layerBars']);
