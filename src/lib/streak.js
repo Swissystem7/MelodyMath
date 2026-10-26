@@ -86,16 +86,23 @@
   }
   function setStorage(s) { storageRef = s; loadState(); }
 
-  // The child's instrument: the pick saved by the tap-instrument chooser
+  // The child's instrument: the one app-wide choice (myInstrument.js, #679),
   // else the topic's own instrument (instruments.js).
-  // The choice itself lives in myInstrument.js, the one source of truth (#679).
   const FALLBACK_VOICE = 'keys';
+  function myInstrument() {
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    if (g.MM_MY_INSTRUMENT) return g.MM_MY_INSTRUMENT;
+    try { return require('./myInstrument.js'); } catch (e) { return null; }
+  }
   function instrumentFor(topic) {
-    const s = getStorage(); const g = typeof globalThis !== 'undefined' ? globalThis : {};
-    try { const mi = g.MM_MY_INSTRUMENT || (typeof require === 'function' ? require('./myInstrument.js') : null); const id = mi && mi.getMyInstrument(s); if (id) return id; } catch (e) { /* private */ }
-    // g resolved above: globals win, Node falls back to the module.
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
     const list = typeof g.forTopic === 'function' ? g.forTopic(topic) : [];
-    return list && list[0] ? list[0].id : null;
+    const fallback = list && list[0] ? list[0].id : null;
+    try {
+      const mine = myInstrument();
+      if (mine && typeof mine.instrumentFor === 'function') return mine.instrumentFor(fallback, null, getStorage());
+    } catch (e) { /* chooser not loaded */ }
+    return fallback;
   }
   function voiceFor(instrumentId) {
     const g = typeof globalThis !== 'undefined' ? globalThis : {};

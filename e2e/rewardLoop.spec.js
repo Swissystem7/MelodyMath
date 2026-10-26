@@ -1,10 +1,9 @@
-// #591 goal A.4: the reward loop in the real page. A right answer plays the
-// streak melody and counts toward the next strip instrument; the fifth right
-// answer on this device unlocks the clap, announced politely, and the strip
-// of the next exercise has it as a new key.
+// #591 goal A.4 + #717: a right answer plays the streak melody and is
+// counted, but no instrument is locked: the strip has every voice from the
+// first exercise and no "new instrument" popup ever shows.
 const { test, expect } = require('@playwright/test');
 
-test('a right answer plays the streak melody and unlocks an instrument for the strip', async ({ page }) => {
+test('a right answer plays the streak melody; every strip voice is there from the start', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.addInitScript(() => {
@@ -17,7 +16,8 @@ test('a right answer plays the streak melody and unlocks an instrument for the s
   await page.waitForFunction(() => typeof window.playStreakMelody === 'function');
   await page.locator('#rmBegin').click();
   await expect(page.locator('#rmQuiz')).toBeVisible();
-  await expect(page.locator('#rmQuiz .mm-pad .mm-pad-new')).toHaveCount(0);
+  const all = await page.evaluate(() => ALL_TAP_VOICES);
+  for (const v of all) await expect(page.locator('#rmQuiz .mm-pad [data-tap="' + v + '"]').first()).toBeAttached();
 
   // Wrap the engine call (the page calls the global) to see what it played.
   await page.evaluate(() => {
@@ -33,14 +33,8 @@ test('a right answer plays the streak melody and unlocks an instrument for the s
   const rewards = await page.evaluate(() => window.__rewards);
   expect(rewards.length).toBe(1);
   expect(rewards[0].notes).toBeGreaterThan(0);
-  await expect(page.locator('#mmUnlock')).toBeVisible();
-  await expect(page.locator('#mmUnlock')).toHaveAttribute('role', 'status');
-  await expect(page.locator('#mmUnlock')).toContainText('מחיאת כף');
+  await expect(page.locator('#mmUnlock')).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('mm.tapProgress.v1')).count)).toBe(5);
 
-  await page.locator('#rmNext').click();
-  const fresh = page.locator('#rmQuiz .mm-pad .mm-pad-new');
-  await expect(fresh).toHaveCount(1);
-  await expect(fresh).toHaveAttribute('data-tap', 'clap');
   expect(errors).toEqual([]);
 });

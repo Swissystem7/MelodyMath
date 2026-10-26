@@ -54,8 +54,10 @@ test('specForItem builds a widget spec only for takeAwayBeats and tenExchange', 
   assert.ok(sub2d, 'shipped two-digit subtraction item exists');
   assert.equal(sub2d.music, 'tensBarsBack');
   assert.ok(sub2d.musicExtra.some((w) => w.music === 'takeAwayBeats'));
-  assert.equal(mod.specForItem({ music: 'takeAwayBeats', prompt: sub2d.prompt }).remaining, 35);
-  assert.equal(mod.specForItem({ music: 'takeAwayBeats', prompt: sub2d.prompt }).circles.length, 58);
+  const subSpec = mod.specForItem({ music: 'takeAwayBeats', prompt: sub2d.prompt });
+  assert.equal(subSpec.remaining, 35);
+  assert.equal(subSpec.circles.length, 5 + 8); // one circle per sound, not 58 dots
+  assert.equal(subSpec.circles.length, mod.soundEvents(subSpec).filter((e) => e.phase === 'start').length);
   const pv356 = shipped.find((it) => /356/.test(it.prompt) && /עשרות/.test(it.prompt));
   assert.ok(pv356, 'shipped 356 place-value item exists');
   assert.equal(pv356.music, 'tenExchange');
@@ -126,6 +128,7 @@ test('index.html wires the circles widget and loads the module', () => {
   assert.match(html, /MM_TAKEAWAY_TEN/);
   assert.match(html, /MM_TAKEAWAY_TEN\.play\(sndSpec\)/);
   assert.match(html, /circlesHtml\(host\._sndSpec,\{revealed:true\}\)/);
+  assert.match(html, /play\(host\._sndSpec,\{revealed:true\}\)/);
 });
 
 test('sound: play schedules every sounding beat on the shared engine voice calls', () => {
@@ -139,8 +142,9 @@ test('sound: play schedules every sounding beat on the shared engine voice calls
   assert.equal(r.notes, 13);
   const seq = [];
   const r2 = mod.play(mod.tenExchange(27), { playSequence: (ev) => { seq.push(...ev); return { notes: ev.length }; } });
-  assert.equal(seq.length, 9 + 9); // 27 as tens+ones (2 drums + 7 bells), then drums + leftover bells
-  assert.equal(r2.notes, 18);
+  assert.equal(seq.length, 9); // before the answer: one pass, 2 drums + 7 bells, not the exchange twice
+  assert.equal(r2.notes, 9);
+  assert.equal(seq.filter((e) => e.phase === 'group').length, 0);
 });
 
 test('hide: circles do not reveal the answer until revealed', () => {
@@ -152,8 +156,9 @@ test('hide: circles do not reveal the answer until revealed', () => {
   assert.equal((shown.match(/snd-gone/g) || []).length, 3);
   assert.match(shown, /נשארו 5/);
   const hx = mod.circlesHtml(mod.tenExchange(34));
-  assert.doesNotMatch(hx, /snd-drum|snd-hundred/);
+  assert.equal((hx.match(/snd-drum/g) || []).length, 3); // drum circle per ten, matching the sounds
   assert.doesNotMatch(hx.replace(/data-reveal="[^"]*"/, ''), /עשרות/);
+  assert.ok((mod.circlesHtml(mod.tenExchange(99)).match(/snd-bell/g) || []).length <= 12);
   const sx = mod.circlesHtml(mod.tenExchange(34), { revealed: true });
   assert.equal((sx.match(/snd-drum/g) || []).length, 3);
 });
@@ -176,7 +181,7 @@ test('myInstrument: the child choice (incl. legacy mm-tap-instrument) sets the v
 });
 
 test('every topic has exactly one primary mechanism, this PR topics exactly one primary way, shared primaries allow-listed', () => {
-  const ALLOW = ['accentSkip', 'callResponse', 'twoDrums', 'balanceBars', 'tenThenMore', 'takeAwayBeats', 'repeatedBars', 'phraseShare', 'twoDivisions', 'fillBar', 'areaScore', 'noteValues', 'layerCount', 'sameLength', 'splitNotes', 'roundBars', 'beatDecimal', 'dottedBeats', 'barsAndHalf', 'barFill'];
+  const ALLOW = ['accentSkip', 'callResponse', 'twoDrums', 'balanceBars', 'tenThenMore', 'takeAwayBeats', 'repeatedBars', 'phraseShare', 'fillBar', 'areaScore', 'noteValues', 'splitNotes', 'roundBars', 'dottedBeats', 'barsAndHalf', 'barFill'];
   const share = {};
   for (let g = 1; g <= 6; g++) { const mg = require('../src/lib/curriculum/grade' + g); for (const [t, ways] of Object.entries(mg.music || {})) { const prim = banks.primaryWays(ways); assert.ok(prim.length >= 1, 'g' + g + ' ' + t); assert.equal(new Set(prim.map((w) => banks.mechanismOf(w[0]))).size, 1, 'g' + g + ' ' + t + ' one primary mechanism'); prim.forEach((w) => { (share[w[0]] = share[w[0]] || new Set()).add('g' + g + ':' + t); }); } }
   for (const [tag, topics] of Object.entries(share)) if (topics.size > 1) assert.ok(ALLOW.includes(tag), tag + ' shared: ' + [...topics].join(','));
@@ -190,7 +195,10 @@ test('asTens playback: tens are one sound each, no number plays more than 12 uni
   for (let n = 0; n <= 199; n++) assert.ok(mod.asTens(n).filter((g) => g.v === 1).reduce((s, g) => s + g.n, 0) <= 12, 'units of ' + n);
   const maxRun = (ev) => { let r = 0, m = 0; ev.forEach((e) => { r = e.v === 1 ? r + 1 : 0; m = Math.max(m, r); }); return m; };
   const ev58 = mod.soundEvents(mod.takeAwayCircles(58, 23)); assert.equal(ev58.length, 21); assert.ok(maxRun(ev58) <= 12, 'no 58 beats for 58-23');
-  const ev99 = mod.soundEvents(mod.tenExchange(99)); assert.ok(ev99.length < 99 && maxRun(ev99) <= 12, 'no 99 bells in tenExchange');
+  const ev99 = mod.soundEvents(mod.tenExchange(99)); assert.equal(ev99.length, mod.tenExchange(99).circles.length); assert.ok(ev99.length < 99 && maxRun(ev99) <= 12, 'no 99 bells in tenExchange');
+  const grouped = mod.soundEvents(mod.tenExchange(27), { revealed: true });
+  assert.ok(grouped.slice(0, 10).every((e) => e.kind === 'bell') && grouped[10].kind === 'drum', '10 bells then one drum, only after the answer');
+  assert.ok(maxRun(grouped) <= 12);
   const soundsOf = (n) => (n > 12 ? mod.asTens(n).reduce((s, g) => s + g.n, 0) : n);
   for (const it of banks.allItems().filter((i) => i.skill === 'subtraction')) { const s = mod.specForItem({ music: 'takeAwayBeats', prompt: it.prompt }); if (s) assert.equal(mod.soundEvents(s).length, soundsOf(s.start) + soundsOf(s.remaining), it.prompt); }
 });

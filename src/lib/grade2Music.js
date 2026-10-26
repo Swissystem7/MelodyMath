@@ -302,6 +302,45 @@
       + 'ספרו כמה צלילים מנגן כל כלי.';
   }
 
+  // A cube layer is one beat per cube while it holds at most 12 cubes.
+  // A larger layer (24) is tens and ones: one low tone per ten, then the
+  // leftover ones. It never schedules one unit sound per cube past 12.
+  const LAYER_UNIT_MAX = 12;
+  const LAYER_TEN_HZ = 110;
+  const LAYER_ONE_HZ = 880;
+
+  function cubeLayerSounds(count) {
+    const n = whole(count, 1, 100);
+    if (n == null) return null;
+    if (n <= LAYER_UNIT_MAX) return { count: n, tens: 0, ones: n, units: true };
+    const tens = Math.floor(n / 10);
+    return { count: n, tens: tens, ones: n - tens * 10, units: false };
+  }
+
+  function cubeLayerEvents(count, bpm) {
+    const s = cubeLayerSounds(count);
+    if (!s) return [];
+    const step = beatLength(bpm);
+    const out = [];
+    if (s.units) {
+      for (let i = 0; i < s.count; i++) {
+        out.push({ at: i * step, dur: step * 0.55, hz: BAR_BEAT_HZ, gain: 0.16, type: 'sine', place: 'unit' });
+      }
+      return out;
+    }
+    let at = 0;
+    for (let i = 0; i < s.tens; i++) {
+      out.push({ at: at, dur: step * 0.75, hz: LAYER_TEN_HZ, gain: 0.24, type: 'triangle', place: 'ten' });
+      at += step;
+    }
+    if (s.tens && s.ones) at += step * 0.4;
+    for (let j = 0; j < s.ones; j++) {
+      out.push({ at: at, dur: step * 0.28, hz: LAYER_ONE_HZ, gain: 0.14, type: 'square', place: 'one' });
+      at += step * 0.45;
+    }
+    return out;
+  }
+
   // ---------- widgets ----------
   function doc() {
     return typeof document === 'undefined' ? null : document;
@@ -456,6 +495,7 @@
     evenOddBeats: evenOddBeats, evenOddEvents: evenOddEvents, evenOddNarration: evenOddNarration,
     verticalVoices: verticalVoices, phaseEvents: phaseEvents, phaseNarration: phaseNarration,
     barsBeats: barsBeats, barsBeatsEvents: barsBeatsEvents, barsBeatsNarration: barsBeatsNarration,
+    cubeLayerSounds: cubeLayerSounds, cubeLayerEvents: cubeLayerEvents,
     halfBarSpec: halfBarSpec, halfBarEvents: halfBarEvents, halfBarNarration: halfBarNarration,
     registerVoices: registerVoices, registerNarration: registerNarration, registerCue: registerCue,
     bindGrade2: bindGrade2,
