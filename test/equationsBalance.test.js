@@ -57,13 +57,15 @@ const calc = (s) => Function('return (' + s.replace(/,/g, '').replace(/×/g, '*'
   });
 
   test('grade ' + grade + ': the balance is the primary way of level 1, fillBar follows', () => {
-    const ways = (grade === 'ד' ? g4 : g5).music.EQ_INEQ;
-    assert.deepEqual(ways.map((w) => w[0]), ['balanceBars', 'fillBar', 'sameLength']);
+    const all = (grade === 'ד' ? g4 : g5).music.EQ_INEQ;
+    assert.deepEqual(all.map((w) => w[0]), ['balanceBars', 'fillBar', 'sameLength']);
+    // #751: the ways an item takes are the primary (non-EXTRA) ones.
+    const ways = banks.primaryWays(all);
     const eq = g1.music.EQ_LEFT.find((w) => w[0] === 'balanceBars');
     assert.equal(eq[1], BALANCE_NOTE);
     assert.equal(banks.mechanismOf('balanceBars'), banks.mechanismOf(eq[0]));
     assert.equal(banks.mechanismOf('balanceBars'), banks.mechanismOf(g2.music.EQ_LEFT.find((w) => w[0] === 'balanceBars')[0]));
-    mine(grade).forEach((it) => assert.equal(it.music, ways[it.level - 1][0], it.id));
+    mine(grade).forEach((it) => assert.equal(it.music, ways[Math.min(it.level, ways.length) - 1][0], it.id));
   });
 });
 
