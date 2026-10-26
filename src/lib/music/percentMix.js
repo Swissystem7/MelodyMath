@@ -121,20 +121,28 @@
     const raw = (percent * split) / 100, n = Number.isInteger(raw) && raw > 0 ? raw : split;
     return { kind: 'percentBar', percent: percent, split: split, beats: n, circles: n };
   }
+  // Groups of 5, like DataBeats, except a 4-beat bar which is one group.
+  // The melody accents the first beat of a group. The other beats stay on the
+  // drum, so the child can count beat by beat. One circle is that first beat
+  // and still hears the drum with the melody.
+  function groupBeats(split) { return splitOf(split) === 4 ? 4 : 5; }
   function soundsOf(spec, storage) {
-    const v = familyVoices(storage), notes = [];
-    for (let i = 0; i < (spec && spec.circles || 0); i++) {
-      const mel = i % 2 === 1;
-      const note = { at: i * 0.2, dur: MIN_NOTE_SEC, durMs: MIN_NOTE_MS, voice: mel ? v.melody : v.drum, kind: 'beat', circle: i };
-      if (mel) note.hz = TEN_STEPS_HZ[Math.floor(i / 2) % TEN_STEPS_HZ.length];
+    const v = familyVoices(storage), count = spec && spec.circles || 0, group = groupBeats(spec && spec.split), notes = [];
+    for (let i = 0; i < count; i++) {
+      const accent = i % group === 0;
+      const note = { at: i * 0.2, dur: MIN_NOTE_SEC, durMs: MIN_NOTE_MS, voice: accent ? v.melody : v.drum, kind: 'beat', circle: i };
+      if (accent) note.hz = TEN_STEPS_HZ[Math.floor(i / group) % TEN_STEPS_HZ.length];
       notes.push(note);
+      if (count === 1) notes.push({ at: 0, dur: MIN_NOTE_SEC, durMs: MIN_NOTE_MS, voice: v.drum, kind: 'beat', circle: i });
     }
     return notes;
   }
   function circlesHtml(spec, storage) {
-    return '<div class="percent-bar" data-split="' + spec.split + '">' + soundsOf(spec, storage).map(function (n, i) {
-      return '<button type="button" class="snd-dot" data-tap="' + n.voice + '"' + (n.hz ? ' data-hz="' + n.hz + '"' : '') + ' data-i="' + i + '"></button>';
-    }).join('') + '<button type="button" class="snd-play">▶</button></div>';
+    const seen = {};
+    const dots = soundsOf(spec, storage).filter(function (n) { if (seen[n.circle]) return false; seen[n.circle] = true; return true; }).map(function (n) {
+      return '<button type="button" class="snd-dot" data-tap="' + n.voice + '"' + (n.hz ? ' data-hz="' + n.hz + '"' : '') + ' data-i="' + n.circle + '"></button>';
+    }).join('');
+    return '<div class="percent-bar" data-split="' + spec.split + '">' + dots + '<button type="button" class="snd-play">▶</button></div>';
   }
   function play(spec, env) {
     const jam = (env && env.jam) || (typeof globalThis !== 'undefined' && globalThis.MM_JAM);
@@ -147,5 +155,5 @@
     TARGETS: TARGETS, NO_MUSIC_CHECK_ITEMS: NO_MUSIC_CHECK_ITEMS, getNoMusicCheck: getNoMusicCheck, tile: tile, tileLabel: tileLabel,
     filled: filled, percentBar: percentBar, percentToSubbeats: percentToSubbeats, addTile: addTile, checkFill: checkFill, barPlan: barPlan,
     specForItem: specForItem, soundsOf: soundsOf, circlesHtml: circlesHtml, play: play,
-    TEN_STEPS_HZ: TEN_STEPS_HZ, partnerInstrument: partnerInstrument, familyVoices: familyVoices };
+    TEN_STEPS_HZ: TEN_STEPS_HZ, partnerInstrument: partnerInstrument, familyVoices: familyVoices, groupBeats: groupBeats };
 });

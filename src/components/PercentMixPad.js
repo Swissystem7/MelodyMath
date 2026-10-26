@@ -65,9 +65,10 @@
     }).join('');
     const segs = state.fill.map(function (f, i) { return '<span class="fbp-seg" data-seg="' + i + '" style="width:' + PM.tile(f).n + '%">' + PM.tile(f).n + '%</span>'; }).join('');
     const noTen = melody && !state.ex.allowed.some(function (a) { return PM.tile(a).n === 10; });
+    const tens = state.fill.filter(function (id) { return PM.tile(id).n === 10; }).length;
     const tiles = state.ex.allowed.map(function (id) {
       const t = PM.tile(id), climb = melody && t.n === 10, spare = noTen && (t.n === 25 || t.n === 50);
-      const tap = climb ? e(melody) + '" data-hz="' + PM.TEN_STEPS_HZ[0] : (spare ? e(melody) : e(voice));
+      const tap = climb ? e(melody) + '" data-hz="' + PM.TEN_STEPS_HZ[tens % PM.TEN_STEPS_HZ.length] : (spare ? e(melody) : e(voice));
       return '<button type="button" class="fbp-tile" data-act="tile" data-tile="' + id + '"' + (on ? ' data-tap="' + tap + '"' : '') + '><b>' +
         e(t.he) + '</b>' + (on ? '<span>' + e(PM.tileLabel(id, state.split)) + '</span>' : '') + '</button>';
     }).join('');

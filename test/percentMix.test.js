@@ -145,6 +145,10 @@ test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', 
   assert.notEqual(piano.family, piano.partnerFamily);
   const html = P.renderHtml(P.createState(0, true, 10), piano.voice, piano.melody);
   assert.match(html, /data-tile="ten" data-tap="keys" data-hz="261.63"/);
+  const climbed = Object.assign({}, P.createState(4, true, 10), { fill: ['ten', 'ten', 'ten'] });
+  assert.match(P.renderHtml(climbed, 'drumLow', 'keys'), /data-tile="ten" data-tap="keys" data-hz="392"/);
+  const played = PM.barPlan(climbed.fill.concat(['ten']), 90, 'drumLow', 10, 'keys').filter((n) => n.kind === 'tile');
+  assert.equal(played[3].hz, 392);
   assert.match(html, /data-tile="half" data-tap="drumLow"/);
   assert.match(html, /<h3>תיבה אחת = 100%/);
   assert.doesNotMatch(html, /🪘/);

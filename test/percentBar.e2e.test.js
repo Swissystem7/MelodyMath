@@ -37,5 +37,29 @@ test('splits 4/10/20: circles equal sounds, and the sounds use two families from
     assert.ok(families.has('keys') && families.has('percussion'), 'split ' + split);
     assert.ok(notes.some((n) => n.voice === 'keys' && n.hz));
     assert.ok(notes.some((n) => n.voice === 'drumLow' && !n.hz));
+    notes.forEach((n, i) => {
+      const accent = i % PM.groupBeats(split) === 0;
+      assert.equal(n.voice, accent ? 'keys' : 'drumLow', 'split ' + split + ' beat ' + i);
+    });
+    assert.equal(notes[1].voice, notes[2].voice);
+  });
+});
+
+test('one circle (25% of 4, 10% of 10) plays the melody with the drum', () => {
+  const storage = memoryStorage({ 'mm.myInstrument': 'piano' });
+  [[25, 4], [10, 10]].forEach(([percent, split]) => {
+    const spec = PM.specForItem({ music: 'percentBar', prompt: percent + '%', split: split });
+    assert.equal(spec.circles, 1);
+    const html = PM.circlesHtml(spec, storage);
+    assert.equal((html.match(/snd-dot/g) || []).length, 1);
+    assert.match(html, /data-tap="keys"/);
+    const notes = [];
+    PM.play(spec, { jam: { playNotes: (n) => { notes.push(...n); return { stop() {} }; } }, storage: storage });
+    assert.equal(notes.length, 2);
+    assert.equal(notes[0].at, notes[1].at);
+    const families = new Set(notes.map((n) => I.INSTRUMENTS.find((x) => x.voice === n.voice).family));
+    assert.ok(families.has('keys') && families.has('percussion'), percent + '% of ' + split);
+    assert.ok(notes.some((n) => n.voice === 'keys' && n.hz === PM.TEN_STEPS_HZ[0]));
+    assert.ok(notes.some((n) => n.voice === 'drumLow' && !n.hz));
   });
 });
