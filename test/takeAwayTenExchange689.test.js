@@ -121,4 +121,53 @@ test('index.html wires the circles widget and loads the module', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(html, /src\/lib\/music\/takeAwayTen\.js/);
   assert.match(html, /MM_TAKEAWAY_TEN/);
+  assert.match(html, /MM_TAKEAWAY_TEN\.play\(sndSpec\)/);
+  assert.match(html, /circlesHtml\(host\._sndSpec,\{revealed:true\}\)/);
+});
+
+test('sound: play schedules every sounding beat on the shared engine voice calls', () => {
+  const spec = mod.takeAwayCircles(8, 3);
+  assert.equal(mod.soundEvents(spec).length, 8 + 5); // all beats, then only what remains sounds
+  const calls = [];
+  const ac = { currentTime: 10, state: 'running', resume() {} };
+  const r = mod.play(spec, { audioContext: ac, playVoice: (c, v, hz, t) => calls.push({ v, hz, t }) });
+  assert.equal(calls.length, 13);
+  assert.ok(calls.every((c) => c.t >= 10 && typeof c.hz === 'number'));
+  assert.equal(r.notes, 13);
+  const seq = [];
+  const r2 = mod.play(mod.tenExchange(27), { playSequence: (ev) => { seq.push(...ev); return { notes: ev.length }; } });
+  assert.equal(seq.length, 27 + 9); // bells one by one, then drums + leftover bells
+  assert.equal(r2.notes, 36);
+});
+
+test('hide: circles do not reveal the answer until revealed', () => {
+  const hidden = mod.circlesHtml(mod.takeAwayCircles(8, 3));
+  assert.doesNotMatch(hidden, /snd-gone/);
+  assert.doesNotMatch(hidden.replace(/data-reveal="[^"]*"/, ''), /נשארו 5/);
+  assert.match(hidden, /data-reveal="נשארו 5"/); // held back like #457, swapped in after submit
+  const shown = mod.circlesHtml(mod.takeAwayCircles(8, 3), { revealed: true });
+  assert.equal((shown.match(/snd-gone/g) || []).length, 3);
+  assert.match(shown, /נשארו 5/);
+  const hx = mod.circlesHtml(mod.tenExchange(34));
+  assert.doesNotMatch(hx, /snd-drum|snd-hundred/);
+  assert.doesNotMatch(hx.replace(/data-reveal="[^"]*"/, ''), /עשרות/);
+  const sx = mod.circlesHtml(mod.tenExchange(34), { revealed: true });
+  assert.equal((sx.match(/snd-drum/g) || []).length, 3);
+});
+
+test('myInstrument: the child choice (incl. legacy mm-tap-instrument) sets the voice', () => {
+  const MY = require('../src/lib/myInstrument');
+  const INST = require('../src/lib/instruments');
+  const mem = (init) => { const m = new Map(Object.entries(init || {})); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
+  const legacy = mem({ 'mm-tap-instrument': 'djembe' });
+  assert.equal(mod.instrumentIdFor(mod.takeAwayCircles(8, 3), legacy), 'djembe'); // legacy key migrated by myInstrument
+  const calls = [];
+  const ac = { currentTime: 0, state: 'running', resume() {} };
+  const chosen = mem(); MY.setMyInstrument('djembe', chosen);
+  const r = mod.play(mod.takeAwayCircles(5, 2), { audioContext: ac, storage: chosen, playVoice: (c, v) => calls.push(v) });
+  assert.equal(r.instrument, 'djembe');
+  assert.ok(calls.length > 0 && calls.every((v) => v === INST.instrumentById('djembe').voice));
+  const other = mem(); MY.setMyInstrument('kora', other);
+  assert.notEqual(mod.voiceFor(mod.takeAwayCircles(5, 2), other), INST.instrumentById('djembe').voice);
+  assert.equal(mod.voiceFor(mod.takeAwayCircles(5, 2), mem()), INST.instrumentById('taiko').voice); // no choice: screen default
 });

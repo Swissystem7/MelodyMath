@@ -850,7 +850,7 @@ function renderWidget(hostId, item, inputId){
     host.innerHTML=renderPieChartHtml(item.chart);
   } else if(typeof MM_TAKEAWAY_TEN!=='undefined' && MM_TAKEAWAY_TEN.specForItem(item)){
     host.classList.remove('hidden');
-    host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(MM_TAKEAWAY_TEN.specForItem(item));
+    const sndSpec=MM_TAKEAWAY_TEN.specForItem(item); host._sndSpec=sndSpec; host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(sndSpec); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_TAKEAWAY_TEN.play(sndSpec)}; MM_TAKEAWAY_TEN.play(sndSpec);
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
@@ -860,7 +860,7 @@ function renderWidget(hostId, item, inputId){
 // question is open (#457); the feedback step swaps it in, visible note and
 // sr-only copy alike.
 function revealWidget(hostId){
-  const host=$(hostId); if(!host || !host.querySelectorAll) return;
+  const host=$(hostId); if(!host || !host.querySelectorAll) return; if(host._sndSpec && typeof MM_TAKEAWAY_TEN!=='undefined'){ host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(host._sndSpec,{revealed:true}); return; }
   host.querySelectorAll('[data-reveal]').forEach(function(el){
     el.textContent=el.getAttribute('data-reveal');
     el.removeAttribute('data-reveal');

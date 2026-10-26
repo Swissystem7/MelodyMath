@@ -87,13 +87,13 @@
   function setStorage(s) { storageRef = s; loadState(); }
 
   // The child's instrument: the pick saved by the tap-instrument chooser
-  // ('mm-tap-instrument', #750), else the topic's own instrument (instruments.js).
-  const PICK_KEY = 'mm-tap-instrument';
+  // else the topic's own instrument (instruments.js).
+  // The choice itself lives in myInstrument.js, the one source of truth (#679).
   const FALLBACK_VOICE = 'keys';
   function instrumentFor(topic) {
-    const s = getStorage();
-    try { const id = s && s.getItem(PICK_KEY); if (id) return id; } catch (e) { /* private */ }
-    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    const s = getStorage(); const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    try { const mi = g.MM_MY_INSTRUMENT || (typeof require === 'function' ? require('./myInstrument.js') : null); const id = mi && mi.getMyInstrument(s); if (id) return id; } catch (e) { /* private */ }
+    // g resolved above: globals win, Node falls back to the module.
     const list = typeof g.forTopic === 'function' ? g.forTopic(topic) : [];
     return list && list[0] ? list[0].id : null;
   }

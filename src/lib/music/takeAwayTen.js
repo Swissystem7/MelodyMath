@@ -8,10 +8,10 @@
 // so the child counts circles, not a picture of a count. Pure logic — the
 // page plays the sounds and greys the circles in step with them.
 (function (root, factory) {
-  const api = factory();
+  const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_TAKEAWAY_TEN = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
   const MAX_CIRCLES = 99; // two-digit exercises included; past this the method stays text
@@ -76,14 +76,50 @@
 
   // One circle per sound. Gone beats stay visible but silent (data-gone),
   // so the child sees what disappeared and counts what still sounds.
-  function circlesHtml(spec) {
+  function circlesHtml(spec, opts) { const revealed = !!(opts && opts.revealed);
     if (!spec || !Array.isArray(spec.circles)) return '';
-    const parts = spec.circles.map(function (c) {
-      const cls = 'snd-circle snd-' + c.kind + (c.gone ? ' snd-gone' : '');
-      const label = NAME[c.kind] + (c.gone ? ' — שקט' : '');
-      return '<span class="' + cls + '" role="img" aria-label="' + label + '" data-gone="' + (c.gone ? '1' : '0') + '">' + GLYPH[c.kind] + '</span>';
+    const shown = revealed || spec.kind !== 'tenExchange' ? spec.circles : Array.from({ length: Math.min(spec.bells, 99) }, function (_, i) { return { index: i, kind: 'bell', gone: false }; }); const parts = shown.map(function (c) {
+      const cls = 'snd-circle snd-' + (revealed ? c.kind : 'beat') + (revealed && c.gone ? ' snd-gone' : '');
+      const label = revealed ? NAME[c.kind] + (c.gone ? ' — שקט' : '') : 'צליל';
+      return '<span class="' + cls + '" role="img" aria-label="' + label + '" data-gone="' + (revealed && c.gone ? '1' : '0') + '"' + (!revealed && c.gone ? ' data-reveal-gone="1"' : '') + '>' + (revealed ? GLYPH[c.kind] : '🎵') + '</span>';
     });
-    return '<div class="snd-circles' + (spec.circles.length > 20 ? ' snd-many' : '') + '" dir="ltr">' + parts.join('') + '</div>';
+    const ans = answerText(spec); return '<div class="snd-wrap"><button type="button" class="snd-play">▶ האזינו וספרו</button><div class="snd-circles' + (shown.length > 20 ? ' snd-many' : '') + '" dir="ltr">' + parts.join('') + '</div>' + (revealed ? '<span class="snd-answer">' + ans + '</span>' : '<span class="snd-answer" data-reveal="' + ans + '">?</span>') + '</div>';
+  }
+  function answerText(spec) { if (!spec) return ''; if (spec.kind === 'takeAway') return 'נשארו ' + spec.remaining; return (spec.hundreds ? spec.hundreds + ' מאות, ' : '') + spec.drums + ' עשרות ו־' + spec.left + ' יחידות'; }
+  const STEP_HZ = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+  function soundEvents(spec) {
+    if (!spec || !Array.isArray(spec.circles)) return [];
+    const ev = [];
+    if (spec.kind === 'takeAway') {
+      spec.circles.forEach(function (c, i) { ev.push({ at: i * 0.35, hz: STEP_HZ[i % 8], kind: 'beat' }); });
+      const off = spec.circles.length * 0.35 + 0.4;
+      spec.circles.forEach(function (c, i) { if (!c.gone) ev.push({ at: off + i * 0.35, hz: STEP_HZ[i % 8], kind: 'beat' }); });
+      return ev;
+    }
+    const step = spec.bells > 50 ? 0.05 : 0.22;
+    for (let i = 0; i < spec.bells; i++) ev.push({ at: i * step, hz: STEP_HZ[i % 8], kind: 'bell' });
+    const off2 = spec.bells * step + 0.3;
+    spec.circles.forEach(function (c, i) { ev.push({ at: off2 + i * 0.3, hz: c.kind === 'bell' ? STEP_HZ[i % 8] : 130, kind: c.kind }); });
+    return ev;
+  }
+  function myInst() { if (root && root.MM_MY_INSTRUMENT) return root.MM_MY_INSTRUMENT; try { return require('../myInstrument.js'); } catch (e) { return null; } }
+  function instData() { if (root && typeof root.instrumentById === 'function') return root; try { return require('../instruments.js'); } catch (e) { return null; } }
+  function instrumentIdFor(spec, storage) { const mi = myInst(); const fb = spec && spec.kind === 'tenExchange' ? 'handbells' : 'taiko'; return mi ? mi.instrumentFor(fb, null, storage) : fb; }
+  function voiceFor(spec, storage) { const d = instData(); const x = d && d.instrumentById(instrumentIdFor(spec, storage)); return x && x.voice ? x.voice : (spec && spec.kind === 'tenExchange' ? 'metalBell' : 'drumLow'); }
+  function play(spec, env) {
+    const e = env || {}; const events = soundEvents(spec); if (!events.length) return null;
+    const voice = e.voice || voiceFor(spec, e.storage); const id = instrumentIdFor(spec, e.storage);
+    const pv = e.playVoice || (root && root.playVoice);
+    const ac = e.audioContext || (root && typeof root.getSharedAudioContext === 'function' ? root.getSharedAudioContext() : null);
+    if (typeof pv === 'function' && ac) {
+      if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
+      const t0 = ac.currentTime + 0.05;
+      events.forEach(function (ev) { pv(ac, voice, ev.hz, t0 + ev.at); });
+      return { instrument: id, voice: voice, notes: events.length };
+    }
+    const ps = e.playSequence || (root && root.playSequence) || (root && root.musicEngine && root.musicEngine.playSequence);
+    if (typeof ps === 'function') { const r = ps(events.map(function (ev) { return { at: ev.at, dur: 0.18, hz: ev.hz, gain: 0.16, type: 'triangle' }; })); return r ? { instrument: id, voice: voice, notes: events.length } : null; }
+    return null;
   }
 
   return {
@@ -92,6 +128,6 @@
     takeAwaySteps: takeAwaySteps,
     tenExchange: tenExchange,
     specForItem: specForItem,
-    circlesHtml: circlesHtml,
+    circlesHtml: circlesHtml, answerText: answerText, soundEvents: soundEvents, instrumentIdFor: instrumentIdFor, voiceFor: voiceFor, play: play,
   };
 });
