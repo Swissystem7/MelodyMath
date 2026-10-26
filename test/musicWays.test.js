@@ -175,7 +175,7 @@ test('#710: grades ד׳-ה׳ EQ_INEQ cite Knuth et al. 2006 next to azaryahu2020
     file.music.EQ_INEQ.forEach((w) => {
       assert.equal(w[2], 'azaryahu2020', name + ' ' + w[0]);
       assert.deepEqual(w[4].also, ['knuth2006'], name + ' ' + w[0]);
-      assert.ok(!banks.isOptionalWay(w), name + ' ' + w[0] + ' stays primary');
+      assert.equal(banks.isOptionalWay(w), w[0] !== 'balanceBars', name + ' ' + w[0]);
     });
     const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST.EQ_INEQ);
     assert.ok(items.length >= 9, name);
@@ -212,6 +212,155 @@ test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART
     assert.equal(it.music, 'fixedAccents', it.id);
     assert.deepEqual(it.musicExtra.map((x) => x.music), ['melodyAb', 'mirrorPattern', 'composePattern'], it.id);
   });
+});
+
+test('#751 batch 2: one main way per topic; the others stay as EXTRA with their rating', () => {
+  const MAIN = {
+    'ב': { DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', WORD_COLLECT: 'callResponse', WORD_REMOVE: 'takeAwayBeats', MASS_VOL: 'layerBars' },
+    'ג': { MUL_C: 'repeatedBars', DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', TRI_SORT: 'triangleMotif', MINUTES: 'hourTwelveGroups' },
+  };
+  Object.keys(MAIN).forEach((grade) => {
+    Object.keys(MAIN[grade]).forEach((k) => {
+      const ways = FILES[grade].music[k];
+      const primary = banks.primaryWays(ways);
+      assert.deepEqual(primary.map(([tag]) => tag), [MAIN[grade][k]], grade + ' ' + k);
+      assert.equal(ways[0], primary[0], grade + ' ' + k + ' main way first');
+      assert.ok(ways.length >= 2, grade + ' ' + k);
+      ways.forEach((w) => assert.ok(['A', 'D', 'R'].includes(w[3]), grade + ' ' + k + ' ' + w[0]));
+      const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST[k] && it.musicNote);
+      assert.ok(items.length > 0, grade + ' ' + k);
+      items.forEach((it) => assert.equal(it.music, MAIN[grade][k], it.id));
+    });
+  });
+});
+
+test('#751 batch 3: grade ג׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
+  const WAYS = {
+    AREA: ['areaScore', 'repeatedBars'],
+    PICTOGRAM: ['keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare'],
+    BARCHART: ['columnNoteLength', 'twoNotesDifference', 'notesInARow'],
+    TABLE: ['cellGroups', 'tableGroupsSum'],
+    DIV_REM: ['phraseShare', 'repeatedBars'],
+    NUM10K: ['thousandAccents', 'tenGroupsUp'],
+    TIME_MIN_SEC: ['minuteGroups', 'quarterMinuteGroups', 'minuteAndRest'],
+    ADD_SUB_10K: ['carryAccentUp', 'borrowGroupDown', 'roundToAccent'],
+    WORD_TWO_STEP: ['groupsThenMore', 'groupsTakeAway'],
+    TIMES_MORE: ['phraseFits', 'repeatedBars', 'phraseShare'],
+    MUL_DIV_10: ['tenfoldGroups', 'hundredTwoSteps'],
+  };
+  const g3 = FILES['ג'];
+  Object.keys(WAYS).forEach((k) => {
+    const [main, ...extra] = WAYS[k];
+    const ways = g3.music[k];
+    const primary = banks.primaryWays(ways);
+    assert.deepEqual(primary.map(([tag]) => tag), [main], k);
+    assert.equal(ways[0], primary[0], k + ' main way first');
+    extra.forEach((tag) => {
+      const w = ways.find(([t]) => t === tag);
+      assert.ok(w && banks.isOptionalWay(w), k + ' ' + tag);
+      assert.equal(w[3], 'A', k + ' ' + tag + ' keeps its rating');
+    });
+    const items = banks.itemsForGrade('ג').filter((it) => it.standard === banks.ST[k] && it.musicNote);
+    items.forEach((it) => assert.equal(it.music, main, it.id));
+  });
+});
+
+test('#751 batch 4: grade ד׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
+  const WAYS = {
+    QUAD_SORT: ['quadMotif', 'oppositeEcho', 'mirrorPattern'],
+    BOX: ['faceEdgeGroups', 'layerCount', 'cubeSameGroups'],
+    UNITS: ['metreHundredGroups', 'thousandGroups', 'piecesPerUnit'],
+    CALENDAR: ['weekBars', 'dayHourGroups', 'weeksThenDays'],
+    BARCHART: ['columnHeldNote', 'notesRatioCompare', 'barChartMelody'],
+    TABLE: ['rowCellGroups', 'twoCellsJoin', 'bigCellGap'],
+    NUM_MILLION: ['millionAccentLevels', 'compareTopAccent'],
+    ADD_SUB_MILLION: ['carryTenUp', 'borrowTenDown', 'roundThousandAccent'],
+    MUL_DIV_VERT: ['repeatedBars', 'phraseShare'],
+    ORDER_OPS: ['barCount', 'groupsBeforeSingles', 'bracketGroup'],
+    EQ_INEQ: ['balanceBars', 'fillBar', 'sameLength'],
+    BOX_AREA: ['faceAreaGroups', 'areaScore', 'cubeSixGroups'],
+    PIE: ['pieAsBar', 'sectorNoteShare'],
+  };
+  const g4 = FILES['ד'];
+  Object.keys(WAYS).forEach((k) => {
+    const [main, ...extra] = WAYS[k];
+    const ways = g4.music[k];
+    const primary = banks.primaryWays(ways);
+    assert.deepEqual(primary.map(([tag]) => tag), [main], k);
+    assert.equal(ways[0], primary[0], k + ' main way first');
+    extra.forEach((tag) => {
+      const w = ways.find(([t]) => t === tag);
+      assert.ok(w && banks.isOptionalWay(w), k + ' ' + tag);
+      assert.equal(w[3], 'A', k + ' ' + tag + ' keeps its rating');
+    });
+    // Only a topic with no grade ד׳ items is skipped here; every item of the
+    // others that takes a way (not a music activity) takes the main one.
+    const items = banks.itemsForGrade('ד').filter((it) => it.standard === banks.ST[k] && it.musicNote);
+    items.forEach((it) => assert.equal(it.music, main, it.id));
+  });
+});
+
+test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others stay as EXTRA with their rating', () => {
+  const WAYS = {
+    'ה': {
+      DEC_PLACE: ['tenthNotes', 'beatDecimal', 'compareBeatParts'],
+      DEC_ADD: ['tenthsTogether', 'beatDecimal', 'beatsLeftOver'],
+      NUM_BIG: ['periodAccentLevels', 'millionTenGroups'],
+      OPS_MILLION: ['regroupAllLevels', 'repeatedBars', 'roundBigAccent'],
+      EQ_INEQ: ['balanceBars', 'fillBar', 'sameLength'],
+      PRIME_FACTOR: ['meterGroups', 'accentSkip'],
+      TRI_AREA: ['areaScore', 'anyBaseRows'],
+      PARA_AREA: ['areaScore', 'shiftedRowGroups'],
+      SOLIDS: ['solidFaceMotif', 'netFoldEcho', 'prismPyramidMotif'],
+      FREQ: ['tallyFives', 'frequencyGroupsCompare', 'allGroupsSum'],
+      PICTOGRAM: ['symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups'],
+      PIE: ['pieBarParts', 'twoSectorNotes'],
+    },
+    'ו': {
+      DEC_MUL: ['decimalNoteScale', 'beatDecimal', 'tenthBeatGroups'],
+      PERCENT: ['percentBar', 'sectionsFillBar', 'hundredBar', 'partOfHundredBar'],
+      G6_DECIMAL_SYS: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero'],
+      G6_NAT_OPS: ['groupsFirstLongChain', 'ostinatoLayers', 'groupThenCut'],
+      G6_NAT_EST: ['roundToGroup', 'partGroupTimes', 'groupBoundsCheck'],
+      G6_DEC_EST: ['nearlyWholeNote', 'shortNoteBound'],
+      G6_DEC_LAWS: ['bracketBeatsFirst', 'tempoSwap', 'equalNotesDistribute'],
+      G6_PCT_WHOLE: ['wholeFromTenth', 'splitToHundred', 'quarterToWhole'],
+      G6_PCT_CHANGE: ['shortenByPercent', 'lengthenByPercent', 'changeOverOriginal'],
+      G6_CIRCLE_TERMS: ['sectorAsNote', 'diameterTwoRadii', 'chordShorterNote'],
+      G6_CIRCLE_CALC: ['piBarsAround', 'halfCircleBar', 'doubleRadiusBars'],
+      G6_COMP_TRI: ['partsRowGroups', 'outerSideGroups', 'areaScore'],
+      G6_BOX_VOL: ['layerByLayer', 'cubeEdgeLayers', 'layerCount'],
+      G6_VOL_UNITS: ['litreThousandGroups', 'cubicLayers', 'unitBySize'],
+      G6_MEAN: ['levelNotes', 'equalPhrases'],
+      G6_DATA_READ: ['columnsAsNotes', 'pieSectorRead', 'symbolNoteLength'],
+      G6_DATA_SHOW: ['showAsBar', 'symbolsPerKey', 'barToDegrees'],
+    },
+  };
+  Object.keys(WAYS).forEach((grade) => {
+    const file = FILES[grade];
+    Object.keys(WAYS[grade]).forEach((k) => {
+      const [main, ...extra] = WAYS[grade][k];
+      const ways = file.music[k];
+      const primary = banks.primaryWays(ways);
+      assert.deepEqual(primary.map(([tag]) => tag), [main], grade + ' ' + k);
+      assert.equal(ways[0], primary[0], grade + ' ' + k + ' main way first');
+      extra.forEach((tag) => {
+        const w = ways.find(([t]) => t === tag);
+        assert.ok(w && banks.isOptionalWay(w), grade + ' ' + k + ' ' + tag);
+        assert.equal(w[3], 'A', grade + ' ' + k + ' ' + tag + ' keeps its rating');
+      });
+      // Every item of the topic that takes a way (not a music activity)
+      // takes the main one.
+      const items = banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST[k] && it.musicNote);
+      items.forEach((it) => assert.equal(it.music, main, it.id));
+    });
+  });
+});
+
+test('PERCENT has exactly one primary way: percentBar', () => {
+  const ways = FILES['ו'].music.PERCENT;
+  assert.deepEqual(banks.primaryWays(ways).map(([tag]) => tag), ['percentBar']);
+  assert.equal(banks.isOptionalWay(ways.find(([tag]) => tag === 'sectionsFillBar')), true);
 });
 
 test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ has neither the ways nor the exercises', () => {
