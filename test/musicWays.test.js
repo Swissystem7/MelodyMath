@@ -14,9 +14,13 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 const keyOf = (file, it) => Object.keys(file.music).find((k) => banks.ST[k] === it.standard);
+const solvingOf = (ways) => {
+  const primary = banks.primaryWays(ways);
+  return primary.length ? primary : (ways || []);
+};
 const wayOf = (file, it) => {
-  const ways = banks.primaryWays(file.music[keyOf(file, it)]);
-  return ways && ways[Math.min(it.level, ways.length) - 1];
+  const ways = solvingOf(file.music[keyOf(file, it)]);
+  return ways.length ? ways[Math.min(it.level, ways.length) - 1] : undefined;
 };
 
 Object.keys(FILES).forEach((grade) => {
@@ -58,9 +62,10 @@ Object.keys(FILES).forEach((grade) => {
     });
     Object.keys(byStd).forEach((std) => {
       // Dosage rule 4: one consistent way per topic, so a standard may have a
-      // single primary way; with more, levels take different ones.
+      // single primary way; with more, levels take different ones. An entirely
+      // EXTRA topic (grade ד׳ MASS_VOL) uses those ways, one per level.
       const key = Object.keys(file.music).find((k) => banks.ST[k] === std);
-      const n = banks.primaryWays(file.music[key]).length;
+      const n = solvingOf(file.music[key]).length;
       assert.equal(byStd[std].tags.size, new Set([...byStd[std].levels].map((l) => Math.min(l, n))).size, grade + ' ' + std);
     });
     // A way tag is never an activity tag of the same grade.
@@ -180,4 +185,35 @@ test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART
     assert.equal(it.music, 'fixedAccents', it.id);
     assert.deepEqual(it.musicExtra.map((x) => x.music), ['melodyAb', 'mirrorPattern', 'composePattern'], it.id);
   });
+});
+
+test('#751: MASS_VOL is EXTRA in grade ד׳ beside UNITS, and grade ג׳ has neither the ways nor the exercises', () => {
+  const g3 = FILES['ג'];
+  const g4 = FILES['ד'];
+  assert.equal(g3.music.MASS_VOL, undefined);
+  Object.keys(g3.music).forEach((k) => assert.ok(banks.primaryWays(g3.music[k]).length >= 1, k));
+  const order = Object.keys(g4.music);
+  assert.equal(order[order.indexOf('UNITS') + 1], 'MASS_VOL');
+  const ways = g4.music.MASS_VOL;
+  assert.deepEqual(ways.map((w) => w[0]), ['kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups']);
+  ways.forEach((w) => {
+    assert.equal(banks.isOptionalWay(w), true, w[0]);
+    assert.equal(banks.primaryWays(ways).length, 0);
+    assert.deepEqual([w[2], w[3]], ['das2023', 'A'], w[0]);
+  });
+  // Wording from 847674c, grade adapted to ד׳. None of it stays in ג׳.
+  const PROMPTS = [
+    'כמה גרם יש בחצי ק״ג?',
+    'כמה מ״ל יש ב־1 ליטר?',
+    'כמה גרם יש ב־2 ק״ג?',
+    'כמה מ״ל יש ב־3 ליטר?',
+    'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?',
+    'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?',
+  ];
+  const inGrade = (grade) => banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST.MASS_VOL);
+  assert.equal(inGrade('ג').length, 0);
+  assert.deepEqual(banks.itemsForGrade('ג').filter((it) => PROMPTS.includes(it.prompt)).map((it) => it.prompt), []);
+  const mine = inGrade('ד').filter((it) => PROMPTS.includes(it.prompt));
+  assert.deepEqual(mine.map((it) => it.prompt).sort(), PROMPTS.slice().sort());
+  mine.forEach((it) => assert.equal(it.grade, 'ד', it.prompt));
 });

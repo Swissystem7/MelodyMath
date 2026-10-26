@@ -1430,14 +1430,14 @@
     MEAS('ג', 'חילקנו 60 ₪ שווה בשווה בין 4 ילדים. כמה ₪ לכל אחד?', 15, '60 חלקי 4', 3, ST.MONEY),
     MEAS('ג', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 40, 'שני חצאי שקל משלימים שקל', 3, ST.MONEY),
 
-    // ק״ג/ליטר are not in the ג׳ programme; ד׳ teaches them (המרת יחידות),
-    // so these items moved there (#591). Kept in place so no other id shifts.
-    MEAS('ד', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.UNITS),
-    MEAS('ד', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.UNITS),
-    MEAS('ד', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.UNITS),
-    MEAS('ד', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.UNITS),
-    MEAS('ד', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.UNITS),
-    MEAS('ד', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.UNITS),
+    // ק״ג/ליטר are grade ד׳ only (#591, #751), never ג׳. Wording reused from
+    // 847674c (then grade ג׳, ST.MASS_VOL). Kept in place so no other id shifts.
+    MEAS('ד', 'כמה גרם יש בחצי ק״ג?', 500, 'בקילוגרם אחד 1,000 גרם', 1, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל יש ב־1 ליטר?', 1000, 'ליטר אחד הוא 1,000 מ״ל', 1, ST.MASS_VOL),
+    MEAS('ד', 'כמה גרם יש ב־2 ק״ג?', 2000, 'פעמיים 1,000 גרם', 2, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל יש ב־3 ליטר?', 3000, 'שלוש פעמים 1,000 מ״ל', 2, ST.MASS_VOL),
+    MEAS('ד', 'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?', 4, 'כמה פעמים 250 ב־1,000', 3, ST.MASS_VOL),
+    MEAS('ד', 'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?', 1500, '1,000 ועוד 500', 3, ST.MASS_VOL),
 
     MEAS('ד', 'כמה אגורות יש ב־8 ₪?', 800, 'בכל שקל 100 אגורות', 1, ST.MONEY),
     MEAS('ד', 'שילמנו 100 ₪ על קנייה של 64 ₪. כמה ₪ עודף?', 36, '100 פחות 64', 1, ST.MONEY),
@@ -1932,11 +1932,11 @@
     RAW.forEach(function (raw) {
       const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
       if (!ways) return;
-      const primary = primaryWays(ways);
-      if (!primary.length) return;
-      const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+      const solving = solvingWays(ways);
+      if (!solving.length) return;
+      const m = solving[Math.min(clampLevel(raw.level), solving.length) - 1];
       raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
-      const extra = ways.filter(isOptionalWay).map(function (w) {
+      const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
         return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
       });
       if (extra.length) raw.musicExtra = extra;
@@ -2019,10 +2019,11 @@
       RAW.forEach(function (raw) {
         const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
         if (!ways) return;
-        const primary = primaryWays(ways); // dosage rule: weak ways stay optional
-        const m = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+        const solving = solvingWays(ways); // dosage: weak ways stay optional
+        if (!solving.length) return;
+        const m = solving[Math.min(clampLevel(raw.level), solving.length) - 1];
         raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
-        const extra = ways.filter(isOptionalWay).map(function (w) {
+        const extra = ways.filter(function (w) { return isOptionalWay(w) && w[0] !== m[0]; }).map(function (w) {
           return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
         });
         if (extra.length) raw.musicExtra = extra;
@@ -2114,6 +2115,12 @@
   const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
   function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
   function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
+  // Primary ways solve the item. A topic whose every way is EXTRA (grade ד׳
+  // MASS_VOL beside UNITS) has no main way; each level still takes its way.
+  function solvingWays(ways) {
+    const primary = primaryWays(ways);
+    return primary.length ? primary : (ways || []);
+  }
 
   // A music activity (the prompt itself plays or reads music) cites the same
   // source and label as the way that uses the same relationship (#591 audit,

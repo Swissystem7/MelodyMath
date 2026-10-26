@@ -31,8 +31,11 @@ test('rule 1: every standard has a primary way, and every primary way is M1, M2,
   const wrong = [];
   each((f, key, ways) => {
     const primary = banks.primaryWays(ways);
-    if (!primary.length) wrong.push(f.grade + ' ' + key + ' has no primary way');
-    primary.forEach(([tag]) => {
+    // An entirely EXTRA topic (grade ד׳ MASS_VOL beside UNITS) has no main way.
+    // Every way it does have is still a strong mechanism.
+    const checked = primary.length ? primary : ways;
+    if (!checked.length) wrong.push(f.grade + ' ' + key + ' has no primary way');
+    checked.forEach(([tag]) => {
       if (!STRONG.includes(banks.mechanismOf(tag))) wrong.push(f.grade + ' ' + key + ' ' + tag + ' ' + banks.mechanismOf(tag));
     });
   });
@@ -53,7 +56,9 @@ test('rule 2: an M4, M5 or M7 way is never primary and is always marked optional
 test('rule 4 in a standard: its primary ways share one mechanism', () => {
   const wrong = [];
   each((f, key, ways) => {
-    const mechs = new Set(banks.primaryWays(ways).map(([tag]) => banks.mechanismOf(tag)));
+    const primary = banks.primaryWays(ways);
+    const solving = primary.length ? primary : ways;
+    const mechs = new Set(solving.map(([tag]) => banks.mechanismOf(tag)));
     if (mechs.size !== 1) wrong.push(f.grade + ' ' + key + ' ' + [...mechs].join('+'));
   });
   assert.deepEqual(wrong, []);
@@ -63,7 +68,9 @@ test('rule 4 across grades: a standard taught in several grades keeps its primar
   const seen = {};
   const wrong = [];
   each((f, key, ways) => {
-    const m = banks.mechanismOf(banks.primaryWays(ways)[0][0]);
+    const primary = banks.primaryWays(ways);
+    const head = primary[0] || ways[0];
+    const m = banks.mechanismOf(head[0]);
     if (seen[key] && seen[key][1] !== m) wrong.push(key + ': ' + seen[key].join(' ') + ' → ' + f.grade + ' ' + m);
     if (!seen[key]) seen[key] = [f.grade, m];
   });
