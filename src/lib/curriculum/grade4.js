@@ -72,6 +72,17 @@
       ['thousandGroups', 'ק״מ, ק״ג וליטר הם 1,000 יחידות קטנות: 10 קבוצות של 100. כל יחידה גדולה היא הדגשה; ספרו הדגשות וכפלו ב־1,000.', 'das2023', 'A'],
       ['piecesPerUnit', 'מיחידה גדולה לחתיכות: כמה קבוצות בגודל החתיכה נכנסות ביחידה אחת? ספרו קבוצות ביחידה וכפלו במספר היחידות.', 'das2023', 'A'],
     ],
+    // #751: moved from ג׳. Every way keeps its rating and source (das2023, A).
+    // kiloGroupsTen is the one MAIN way: it is the grouped-beat method Das 2023
+    // evaluated. gramGroups is the same kg wording that was primary in ב׳, kept
+    // here as EXTRA. halfKiloAccents and cubeLayerGroups stay EXTRA too.
+    // A cube item is shown cubeLayerGroups, so a box is not explained as kilograms.
+    MASS_VOL: [
+      ['kiloGroupsTen', 'ק״ג הוא 10 קבוצות של 100 גרם, וליטר — 10 קבוצות של 100 מ״ל. מחיאה לכל 100 והדגשה כל עשר: כל הדגשה היא ק״ג או ליטר.', 'das2023', 'A'],
+      ['gramGroups', 'ק״ג הוא 1,000 גרם, עשר קבוצות של 100. מחיאה לכל 100 גרם והדגשה כל עשר מחיאות — כל הדגשה היא ק״ג שלם.', 'das2023', 'A', EXTRA],
+      ['halfKiloAccents', 'חצי ק״ג הוא חצי מהקבוצות: 5 קבוצות של 100 גרם מתוך 10. ספרו קבוצות עד ההדגשה, וכך גם חצי ליטר במ״ל.', 'das2023', 'A', EXTRA],
+      ['cubeLayerGroups', 'נפח תיבה: שכבה עד 12 — פעימה לכל קובייה. שכבה מעל 12, כמו 24, נשמעת כעשרות ויחידות ולא כפעימות יחידה. כמה שכבות — כמה קבוצות.', 'das2023', 'A', EXTRA],
+    ],
     CALENDAR: [
       ['weekBars', 'שבוע הוא קבוצה של 7 ימים, הדגשה בראש כל שבוע. ספרו שבועות בקפיצות של 7, ואז הוסיפו את הימים הבודדים.', 'das2023', 'A'],
       ['dayHourGroups', 'יממה היא 24 שעות, שתי קבוצות של 12 כמו שני סיבובי שעון. שנה היא 12 קבוצות של חודש. ספרו קבוצות, לא שעות.', 'das2023', 'A'],
