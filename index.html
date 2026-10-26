@@ -474,6 +474,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <div class="card mm-game" id="bcCard" aria-label="ספירה לפי פעמה"></div>
 <div class="card mm-game" id="ttgCard" aria-label="לוח הכפל כשיר קצבי"></div>
 <div class="card mm-game" id="ensCard" aria-label="מנגנים יחד: תזמורת קטנה"></div>
+<div class="card mm-game" id="pmCard" aria-label="אחוזים כתיבה"></div>
 <!-- #591 music games end -->
 </section><footer class="no-print"><div style="text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px"><a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a> · <a href="frequency.html">מעבדת תדרים</a><div style="margin-top:8px;font-size:.85rem">MelodyMath · תרגול יסודי א׳–ד׳ בעברית</div></div></footer></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
@@ -863,6 +864,7 @@ function renderWidget(hostId, item, inputId){
   } else if(typeof MM_TAKEAWAY_TEN!=='undefined' && MM_TAKEAWAY_TEN.specForItem(item)){
     host.classList.remove('hidden');
     const sndSpec=MM_TAKEAWAY_TEN.specForItem(item); host._sndSpec=sndSpec; host._sndRevealed=false; host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(sndSpec); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_TAKEAWAY_TEN.play(sndSpec, host._sndRevealed?{revealed:true}:null)}; MM_TAKEAWAY_TEN.play(sndSpec);
+  } else if(typeof MM_PERCENT_MIX!=='undefined' && MM_PERCENT_MIX.specForItem(item)){ host.classList.remove('hidden'); const ps=MM_PERCENT_MIX.specForItem(item); host.innerHTML=MM_PERCENT_MIX.circlesHtml(ps); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_PERCENT_MIX.play(ps);}; MM_PERCENT_MIX.play(ps);
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
@@ -2848,5 +2850,6 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 <script src="src/lib/music/takeAwayTen.js"></script><script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
 <script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/components/TimesTableGroove.js"></script>
 <script type="module" src="src/components/EnsembleStudio.js"></script>
+<script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/components/PercentMixPad.js"></script>
 <!-- #591 music game scripts end -->
 </body></html>
