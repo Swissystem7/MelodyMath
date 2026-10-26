@@ -89,11 +89,42 @@ test('a multiplication group above 12 plays as tens and ones (#686)', () => {
   assert.equal(big.totalValue, 100);
   assert.equal(big.totalSounds, 10);
   assert.ok(big.notes.every(function (n) { return n.value === 10; }));
-  const each = NP.extractNumberPlan({ prompt: '4 × 13 = ?', skill: 'multiplication' });
+  const each = NP.extractNumberPlan({ prompt: '4 × 13 = ?', skill: 'multiplication' }, { bpm: 60 });
   assert.equal(each.totalValue, 52);
   assert.equal(each.notes.filter(function (n) { return n.value === 10; }).length, 4);
   assert.equal(each.notes.filter(function (n) { return n.value === 1; }).length, 12);
   assert.equal(each.totalSounds, 16);
+  assert.equal(each.groups.length, 4);
+  each.groups.forEach(function (g, i) {
+    const slice = each.notes.slice(g.startIndex, g.startIndex + g.count);
+    assert.equal(g.value, 13);
+    assert.equal(slice.filter(function (n) { return n.value === 10; }).length, 1);
+    assert.equal(slice.filter(function (n) { return n.value === 1; }).length, 3);
+    assert.ok(slice.every(function (n) { return n.voice === g.voice; }));
+    assert.equal(slice[1].at - slice[0].at, each.beat);
+    if (i) assert.ok(slice[0].at - each.notes[g.startIndex - 1].at >= each.beat * 2);
+  });
+});
+
+test('5×20 yields five groups of two tens each (#686)', () => {
+  const plan = NP.extractNumberPlan({ prompt: '5 × 20 = ?', skill: 'multiplication' }, { bpm: 60 });
+  assert.equal(plan.groups.length, 5);
+  plan.groups.forEach(function (g, i) {
+    const slice = plan.notes.slice(g.startIndex, g.startIndex + g.count);
+    assert.equal(g.count, 2);
+    assert.equal(g.each, 10);
+    assert.equal(g.value, 20);
+    assert.ok(slice.every(function (n) { return n.value === 10 && n.voice === g.voice && n.hz === g.hz; }));
+    assert.equal(slice[1].at - slice[0].at, plan.beat);
+    if (i) {
+      assert.ok(slice[0].at - plan.notes[g.startIndex - 1].at >= plan.beat * 2);
+      assert.notEqual(g.instrument, plan.groups[i - 1].instrument);
+    }
+  });
+  const html = NP.renderHtml(plan);
+  assert.equal((html.match(/class="np-group"/g) || []).length, 5);
+  assert.equal((html.match(/np-ten/g) || []).length, 10);
+  assert.equal((html.match(/np-gap/g) || []).length, 4);
 });
 
 test('a repeated instrument keeps one pitch (#686)', () => {
