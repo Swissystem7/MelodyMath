@@ -19,15 +19,14 @@
   function groupsOf(n, size) { return Array.from({ length: n }, function () { return size; }); }
   function asTens(total) {
     const tens = Math.floor(total / 10), ones = total % 10, out = [];
-    for (let i = 0; i < tens; i++) out.push({ n: 1, v: 10 });
+    if (tens) out.push({ n: tens, v: 10 });
     if (ones) out.push({ n: ones, v: 1 });
     return out;
   }
-  function bundle(groups, op) {
-    const tens = op === 'addition' || op === 'subtraction';
-    const out = [];
-    groups.forEach(function (c) { (tens && c > 12 ? asTens(c) : [{ n: c, v: 1 }]).forEach(function (g) { out.push(g); }); });
-    return out;
+  // One entry per original group. Tens and ones stay inside that group so a
+  // product such as 5×20 is five groups of two tens, not ten loose tens.
+  function bundle(groups) {
+    return groups.map(function (c) { return c > 12 ? asTens(c) : [{ n: c, v: 1 }]; });
   }
   function skip(it) {
     const p = String(it.prompt || '');
@@ -64,6 +63,7 @@
     const heard = Array.isArray(item.hear) ? item.hear.map(Number) : null;
     if (heard && heard.length && heard.every(inRange)) {
       const op = /mult/.test(skill) ? 'multiplication' : /sub/.test(skill) ? 'subtraction' : item.wordType === 'compare' ? 'compare' : heard.length > 1 ? 'addition' : 'counting';
+      if (op === 'multiplication' && heard.length >= 2) return heard[0] * heard[1] <= 100 ? { op: op, groups: groupsOf(heard[0], heard[1]) } : null;
       return { op: op, groups: heard.slice(0, 4) };
     }
     const nums = ints(p).filter(inRange);
@@ -78,7 +78,7 @@
     const explicit = opts && (opts.instrument || opts.chosenInstrument);
     if (explicit) return ok(explicit);
     const mine = (root && root.MM_MY_INSTRUMENT) || need('../lib/myInstrument.js');
-    try { if (mine && mine.getMyInstrument) return ok(mine.getMyInstrument(opts && opts.storage)); } catch (e) { /* store absent */ }
+    try { if (mine && mine.instrumentFor) return ok(mine.instrumentFor(null, null, opts && opts.storage)); } catch (e) { /* store absent */ }
     return null;
   }
   function voicesFor(count, opts) {
@@ -118,19 +118,27 @@
     const grade = opts.grade || item.grade || 'א';
     const bpm = tempoFor(grade, opts.streak, opts.bpm);
     const beat = 60 / bpm;
-    const counts = bundle(parsed.groups, parsed.op);
+    const counts = bundle(parsed.groups);
     const voices = voicesFor(counts.length, opts);
     const groups = [];
     const notes = [];
     let t = 0;
-    counts.forEach(function (g, gi) {
+    counts.forEach(function (parts, gi) {
       const v = voices[gi] || voices[0];
-      const hz = g.v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
-      groups.push({ index: gi, count: g.n, each: g.v, value: g.n * g.v, startIndex: notes.length, instrument: v.instrument, family: v.family, voice: v.voice, hz: hz, he: v.he });
-      for (let k = 0; k < g.n; k++) {
-        notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: g.v, inGroup: k + 1, groupCount: g.n });
-        t += beat;
-      }
+      const sounds = parts.reduce(function (s, p) { return s + p.n; }, 0);
+      const value = parts.reduce(function (s, p) { return s + p.n * p.v; }, 0);
+      const pure = parts.length === 1;
+      const hzGroup = pure && parts[0].v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
+      groups.push({ index: gi, count: pure ? parts[0].n : sounds, each: pure ? parts[0].v : 1, value: value, startIndex: notes.length, instrument: v.instrument, family: v.family, voice: v.voice, hz: hzGroup, he: v.he });
+      let heard = 0;
+      parts.forEach(function (p) {
+        const hz = p.v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
+        for (let k = 0; k < p.n; k++) {
+          heard += 1;
+          notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: p.v, inGroup: heard, groupCount: sounds });
+          t += beat;
+        }
+      });
       if (gi < counts.length - 1) t += beat;
     });
     const totalValue = notes.reduce(function (s, n) { return s + n.value; }, 0);
@@ -140,7 +148,10 @@
     if (!plan || !plan.totalSounds) return '';
     const groups = plan.groups.map(function (g, gi) {
       let dots = '';
-      for (let k = 0; k < g.count; k++) dots += '<span class="np-dot' + (g.each === 10 ? ' np-ten' : '') + '" data-value="' + g.each + '" data-group="' + gi + '" data-i="' + (g.startIndex + k) + '">' + (g.each === 10 ? '10' : '') + '</span>';
+      plan.notes.forEach(function (n) {
+        if (n.groupIndex !== gi) return;
+        dots += '<span class="np-dot' + (n.value === 10 ? ' np-ten' : '') + '" data-value="' + n.value + '" data-group="' + gi + '" data-i="' + n.index + '">' + (n.value === 10 ? '10' : '') + '</span>';
+      });
       return '<span class="np-group" data-group="' + gi + '">' + dots + '</span>' + (gi < plan.groups.length - 1 ? '<span class="np-gap" aria-hidden="true"></span>' : '');
     }).join('');
     const src = sources.gelman1978;
