@@ -166,7 +166,8 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 .mm-official{display:inline-block;margin-top:4px;font-size:.8rem;color:var(--ink)}.mm-official a{color:var(--purple);font-weight:700;margin-inline-start:6px}
 .music-way{margin:-8px 0 18px;padding:10px 14px;border-radius:12px;background:#fff7d6;color:var(--ink);font-size:1.02rem;line-height:1.5}.music-way b{color:var(--purple)}
 .music-src{margin-top:8px;font-size:.85rem;color:var(--muted)}.music-src a{color:var(--purple);font-weight:700}.mm-official.unverified{color:var(--bad)}
-</style><link rel="stylesheet" href="src/sefirot.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/components/jam.css">    <meta name="sentry-dsn" content="__SENTRY_DSN__">
+</style><link rel="stylesheet" href="src/sefirot.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/components/jam.css">
+<meta name="sentry-dsn" content="__SENTRY_DSN__">
 </head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
@@ -515,6 +516,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/tabs.js"></script>
 <script src="src/lib/adultGate.js"></script>
 <script src="src/lib/core.js"></script>
+<script src="src/lib/sentryLoader.js"></script>
 <script src="src/lib/learnerPlan.js"></script>
 <script src="src/lib/pace.js"></script>
 <script src="src/lib/streak.js"></script>
