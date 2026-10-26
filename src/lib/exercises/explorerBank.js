@@ -1,10 +1,4 @@
-// MelodyMath — three enrichment explorers as exercise types (#688, Refs #665).
-//
-// #singingLine, mgGroupBtns/mgSizeBtns and eoNumBtns stay in the enrichment
-// tab. Each also ships as a bank exercise: a question, an answer check, and
-// the #680 retry — a miss replays that exercise, then one second try.
-// A hit plays an animation and a scale. Card text is at most 15 words.
-// No locks (#717).
+// #688: singing line, groups×size and even/odd as bank exercises. The explorers stay in the enrichment tab.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -14,12 +8,7 @@
 
   const MAX_WORDS = 15;
   const SCALE = [262, 294, 330, 349, 392, 440, 494, 523];
-  const FRACTIONS = { '1/4': 25, '1/2': 50, '3/4': 75 };
-  const ANIM = {
-    singingLine: { kind: 'glow_total', className: 'anim-math-glow', label: 'הדגשת הנקודה' },
-    groupsSize: { kind: 'repeat_group', className: 'anim-math-repeat', label: 'קבוצות שוות' },
-    evenOdd: { kind: 'bar_split', className: 'anim-math-split', label: 'זוגות' },
-  };
+  const ANIM = { singingLine: 'anim-math-glow', groupsSize: 'anim-math-repeat', evenOdd: 'anim-math-split' };
 
   function cardWords(text) {
     const s = String(text == null ? '' : text).trim();
@@ -36,18 +25,14 @@
     return isCorrectFn(g, expected);
   }
 
-  function bellForPercent(pct) {
-    const p = Number(pct) / 100;
-    return {
-      percent: pct,
-      frequency: Math.round(130.81 * Math.pow(4, p) * 10) / 10,
-    };
+  function hzOnLine(n, span) {
+    return Math.round(130.81 * Math.pow(4, Number(n) / Number(span)) * 10) / 10;
   }
 
   function expectedOf(item) {
     const e = item && item.explorer;
-    if (!e) return undefined;
-    if (e.type === 'singingLine') return e.percent;
+    if (!e) return item ? item.answer : undefined;
+    if (e.type === 'singingLine') return e.n;
     if (e.type === 'groupsSize') return e.groups * e.size;
     if (e.type === 'evenOdd') return e.n % 2 === 0 ? 'זוגי' : 'אי-זוגי';
     return undefined;
@@ -62,10 +47,7 @@
   function replayPlan(item) {
     const e = item && item.explorer;
     if (!e) return null;
-    if (e.type === 'singingLine') {
-      const bell = bellForPercent(e.percent);
-      return { tool: 'singingLine', percent: e.percent, fraction: e.fraction, frequency: bell.frequency };
-    }
+    if (e.type === 'singingLine') return { tool: 'singingLine', n: e.n, frequency: hzOnLine(e.n, 20) };
     if (e.type === 'groupsSize') {
       const beats = [];
       for (let g = 0; g < e.groups; g++) {
@@ -101,7 +83,7 @@
     if (checkAnswer(item, given)) {
       return Object.assign({}, base, shared, {
         phase: 'correct', tone: 'good', message: 'בדיוק!',
-        animation: item && item.explorer ? ANIM[item.explorer.type] : null,
+        animation: item && item.explorer ? { className: ANIM[item.explorer.type] } : null,
         scale: SCALE.slice(), replay: null,
       });
     }
@@ -134,10 +116,6 @@
   function playReplay(plan, schedule) {
     if (!plan || !root) return false;
     const at = schedule || function (fn, ms) { setTimeout(fn, ms); };
-    if (plan.tool === 'singingLine' && typeof root.updateSingingLine === 'function') {
-      root.updateSingingLine(plan.percent, true);
-      return true;
-    }
     if (plan.tool === 'singingLine' && typeof root.playFreq === 'function') {
       root.playFreq(plan.frequency, 280);
       return true;
@@ -153,14 +131,14 @@
     return false;
   }
 
-  function singingSpec(fraction) {
-    const percent = FRACTIONS[fraction];
-    if (percent == null) return null;
+  function singingSpec(n) {
+    n = Number(n);
+    if (!(n >= 0 && n <= 20)) return null;
     return {
       type: 'singingLine', grade: 'א', skill: 'number_line', standard: 'NLINE', level: 1,
-      topicId: 'mm-cur-2', prompt: 'איפה ' + fraction + ' על הישר?', answer: percent,
-      hint: 'פעמון השבר על הישר', widget: 'numberLine', line: { min: 0, max: 100, step: 25 },
-      explorer: { type: 'singingLine', topicId: 'mm-cur-2', fraction: fraction, percent: percent },
+      topicId: 'mm-cur-2', prompt: 'איפה ' + n + '?', answer: n,
+      hint: 'סופרים קווים מ־0', widget: 'numberLine', line: { min: 0, max: 20, step: 1 },
+      explorer: { type: 'singingLine', topicId: 'mm-cur-2', n: n },
     };
   }
 
@@ -181,7 +159,7 @@
     if (n < 2 || n > 10) return null;
     const odd = n % 2 !== 0;
     return {
-      type: 'evenOdd', grade: 'ב', skill: 'place_value', standard: 'PLACE_VALUE', level: 1,
+      type: 'evenOdd', grade: 'ב', skill: 'place_value', standard: 'EVEN_ODD', level: 1,
       topicId: 'mm-cur-13', prompt: n + ' זוגי או אי־זוגי?', answer: odd ? 'אי-זוגי' : 'זוגי',
       hint: odd ? 'נשאר צליל בודד' : 'כולם בזוגות',
       explorer: { type: 'evenOdd', topicId: 'mm-cur-13', n: n },
@@ -189,14 +167,19 @@
   }
 
   function bankSpecs() {
-    return [singingSpec('3/4'), groupsSpec(4, 3), evenOddSpec(6)];
+    const out = [];
+    [[singingSpec(7), singingSpec(9)], [groupsSpec(4, 3), groupsSpec(2, 5)], [evenOddSpec(6), evenOddSpec(9)]].forEach(function (pair) {
+      pair[1].noMusic = true; pair[1].explorer = null; pair[1].music = null; pair[1].hint = 'בלי צליל';
+      out.push(pair[0], pair[1]);
+    });
+    return out;
   }
 
   return {
     MAX_WORDS: MAX_WORDS,
     SCALE: SCALE,
     cardWords: cardWords,
-    bellForPercent: bellForPercent,
+    hzOnLine: hzOnLine,
     expectedOf: expectedOf,
     checkAnswer: checkAnswer,
     replayPlan: replayPlan,

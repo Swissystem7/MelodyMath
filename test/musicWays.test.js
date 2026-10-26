@@ -21,7 +21,7 @@ const wayOf = (file, it) => {
 
 Object.keys(FILES).forEach((grade) => {
   const file = FILES[grade];
-  const items = banks.itemsForGrade(grade);
+  const items = banks.itemsForGrade(grade).filter((it) => !it.noMusic);
 
   test('grade ' + grade + ': every item has a music side, activity or way', () => {
     assert.ok(items.length > 100);
@@ -86,7 +86,7 @@ Object.keys(FILES).forEach((grade) => {
 });
 
 test('grade א׳: a prompt that plays sound is a music activity, not a way', () => {
-  const items = banks.itemsForGrade('א');
+  const items = banks.itemsForGrade('א').filter((it) => !it.noMusic);
   const hear = items.filter((it) => it.hear && it.hear.length);
   const g1 = items.filter((it) => it.g1);
   assert.ok(hear.length >= 10 && g1.length >= 3);
@@ -124,17 +124,17 @@ test('grade ג׳: the #105 activities keep their tag and the g3 widgets become a
 });
 
 test('grade ב׳: the #103 activities keep their tag and take no way', () => {
-  const items = banks.itemsForGrade('ב');
+  const items = banks.itemsForGrade('ב').filter((it) => !it.noMusic);
   const acts = items.filter((it) => !it.musicNote);
   assert.ok(acts.length >= 50);
   acts.forEach((it) => assert.ok(['beatsBars', 'twoInstruments', 'evenOdd', 'registers', 'halfBar'].includes(it.music), it.id + ' ' + it.music));
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1232/1232', () => {
+test('every item of every grade has a music side: 1235/1235', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1232); // + 10 two-step and contrast items (#467) + the seller-profit money item (#569) + 7 mixed-number items (#709) + 18 equations and inequalities (#710) + 3 explorer exercises (#688)
-  assert.equal(all.filter((it) => it.music).length, all.length);
+  assert.equal(all.length, 1235); // + 3 explorer exercises and 3 silent checks (#688)
+  assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
 });
