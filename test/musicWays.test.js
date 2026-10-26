@@ -279,3 +279,20 @@ test('#751: grade ד׳ MASS_VOL has one main way beside UNITS, and grade ג׳ ha
   assert.deepEqual(mine.map((it) => it.prompt).sort(), PROMPTS.slice().sort());
   mine.forEach((it) => assert.equal(it.grade, 'ד', it.prompt));
 });
+
+test('#751: grade ב׳ has no kg/liter method as primary', () => {
+  const g2 = FILES['ב'];
+  Object.keys(g2.music).forEach((k) => {
+    banks.primaryWays(g2.music[k]).forEach((w) => {
+      assert.doesNotMatch(w[0], /gram|kilo|litre|liter/i, k + ' ' + w[0]);
+      assert.doesNotMatch(w[1], /ק״ג|ליטר/, k + ' ' + w[0]);
+    });
+  });
+  const ways = g2.music.MASS_VOL;
+  assert.deepEqual(ways.map((w) => w[0]), ['layerBars', 'cubeRowPattern']);
+  assert.deepEqual(banks.primaryWays(ways).map((w) => w[0]), ['layerBars']);
+  banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MASS_VOL).forEach((it) => {
+    assert.equal(it.music, 'layerBars', it.prompt);
+    assert.doesNotMatch(it.musicNote, /ק״ג|ליטר/);
+  });
+});
