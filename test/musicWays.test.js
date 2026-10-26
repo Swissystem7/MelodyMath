@@ -136,9 +136,9 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1229/1229', () => {
+test('every item of every grade has a music side: 1244/1244', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1229); // + 10 two-step and contrast items (#467) + the seller-profit money item (#569) + 7 mixed-number items (#709) + 18 equations and inequalities (#710)
+  assert.equal(all.length, 1244); // + 10 two-step and contrast items (#467) + the seller-profit money item (#569) + 7 mixed-number items (#709) + 18 equations and inequalities (#710) + 15 MASS_VOL items adapted to ד׳ (#751)
   assert.equal(all.filter((it) => it.music).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
@@ -201,19 +201,36 @@ test('#751: MASS_VOL is EXTRA in grade ד׳ beside UNITS, and grade ג׳ has nei
     assert.equal(banks.primaryWays(ways).length, 0);
     assert.deepEqual([w[2], w[3]], ['das2023', 'A'], w[0]);
   });
-  // Wording from 847674c, grade adapted to ד׳. None of it stays in ג׳.
+  // All 21 prompts from 847674c, grade adapted to ד׳. A prompt already in ד׳
+  // is not copied again. None of them is in ג׳.
   const PROMPTS = [
+    'תיבה בנויה מ־2 שכבות של 6 קוביות. כמה קוביות יש בה?',
+    'שק אחד שוקל 3 ק״ג ושק שני 5 ק״ג. בכמה ק״ג השני כבד יותר?',
+    'תיבה בנויה מ־3 שכבות של 5 קוביות. כמה קוביות יש בה?',
+    'בקבוק מחזיק 1 ליטר. כמה כוסות של חצי ליטר ממלאות אותו?',
+    'תיבה בנויה מ־2 שכבות, ובכל שכבה 3 שורות של 4 קוביות. כמה קוביות יש בה?',
+    'מזגנו 2 ליטר מים לכוסות של חצי ליטר. כמה כוסות מילאנו?',
     'כמה גרם יש בחצי ק״ג?',
     'כמה מ״ל יש ב־1 ליטר?',
     'כמה גרם יש ב־2 ק״ג?',
     'כמה מ״ל יש ב־3 ליטר?',
     'שקית סוכר שוקלת 250 גרם. כמה שקיות נכנסות ב־1 ק״ג?',
     'בבקבוק 1 ליטר ועוד 500 מ״ל. כמה מ״ל בסך הכול?',
+    'תיבה בנויה מ־4 שכבות של 4 קוביות. כמה קוביות יש בה?',
+    'תיבה בנויה משכבה אחת של 3 שורות, ובכל שורה 3 קוביות. כמה קוביות יש בה?',
+    'בתיבה 10 קוביות. הוצאנו 3. כמה קוביות נשארו?',
+    'תיבה בנויה מ־5 שכבות של 2 קוביות. כמה קוביות יש בה?',
+    'תיבה בנויה מ־2 שכבות של 10 קוביות. כמה קוביות יש בה?',
+    'בתיבה 12 קוביות, ובכל שכבה 4 קוביות. מכמה שכבות היא בנויה?',
+    'תיבה בנויה מ־2 שכבות של 5 קוביות. הוסיפו לה עוד שכבה כזאת. כמה קוביות יש בה עכשיו?',
+    'תיבה בנויה מ־3 שכבות, ובכל שכבה 2 שורות של 3 קוביות. כמה קוביות יש בה?',
+    'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?',
   ];
   const inGrade = (grade) => banks.itemsForGrade(grade).filter((it) => it.standard === banks.ST.MASS_VOL);
   assert.equal(inGrade('ג').length, 0);
   assert.deepEqual(banks.itemsForGrade('ג').filter((it) => PROMPTS.includes(it.prompt)).map((it) => it.prompt), []);
   const mine = inGrade('ד').filter((it) => PROMPTS.includes(it.prompt));
+  assert.equal(mine.length, PROMPTS.length);
   assert.deepEqual(mine.map((it) => it.prompt).sort(), PROMPTS.slice().sort());
   mine.forEach((it) => assert.equal(it.grade, 'ד', it.prompt));
 });
