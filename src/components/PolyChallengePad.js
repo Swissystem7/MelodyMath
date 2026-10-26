@@ -1,6 +1,6 @@
 // MelodyMath — PolyChallengePad (#683, Refs #665): optional polyrhythm (M4,
 // weak) for grades ה׳-ו׳ only, hidden elsewhere; the topic is taught with M2.
-// Voice 1 is the child's instrument, voice 2 keys (two families), each in its
+// Voice 1 is the child's instrument, voice 2 another family, each in its
 // colour and side. Shuffled "pick the reason", then a check with no music.
 (function (root, factory) {
   const api = factory(root);
@@ -11,10 +11,10 @@
   'use strict';
   const PC = root.MM_POLY_CHALLENGE || require('../lib/polyChallenge.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
-  const GAME = 'polyChallenge';
-  const BPM = 90;
+  const IN = typeof root.instrumentById === 'function' ? root : require('../lib/instruments.js');
+  const GAME = 'polyChallenge', BPM = 90;
   const GRADE_NUM = { 'ה': 5, 'ו': 6 };
-  const OTHER_VOICES = ['keys', 'woodBar'];
+  const PARTNER = { percussion: 'keys', keys: 'pluck', strings: 'breathy', winds: 'pluck' }; // never the child's family
   const VOICE_HZ = [330, 392, 659.25];
   const FLEX = { right: 'flex-start', center: 'center', left: 'flex-end' };
 
@@ -38,7 +38,7 @@
     const index = (state.index + 1) % PC.levels().length;
     return Object.assign({}, state, { index: index, lvl: PC.level(index, rand), stage: 'reason', status: '', message: '' });
   }
-  function voicesFor(state) { return [JAM.instrument(state.instrument, 'drumLow').voice].concat(OTHER_VOICES); }
+  function voicesFor(state) { const x = IN.instrumentById(state.instrument) || { family: 'percussion', voice: 'drumLow' }; return [x.voice, PARTNER[x.family] || 'keys', 'woodBar']; }
 
   // Beats 0..meet; each voice sounds on its multiples, all of them on `meet`.
   function playPlan(lvl, voices) {

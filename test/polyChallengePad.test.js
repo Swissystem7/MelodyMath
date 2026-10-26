@@ -1,7 +1,7 @@
 // #683: the polyrhythm challenge screen (M4, optional, grades ה׳-ו׳), Refs #665.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const PAD = require('../src/components/PolyChallengePad.js');
+const PAD = require('../src/components/PolyChallengePad.js'), IN = require('../src/lib/instruments.js');
 const read = (f) => require('node:fs').readFileSync(require('node:path').join(__dirname, '..', f), 'utf8');
 
 test('shown in grades ה׳-ו׳ only, as an optional extra, with voices in colour and shuffled reasons', () => {
@@ -26,10 +26,10 @@ test('reason, then a check with no music, then the next level', () => {
   assert.deepEqual([s.lvl.id, s.stage], ['3:4', 'reason']);
 });
 
-test("two families: the child's instrument, then keys; all voices land on the meeting beat", () => {
-  const s = PAD.createState({ grade: 'ה', instrument: 'darbuka' });
-  const voices = PAD.voicesFor(s);
-  assert.ok(voices[1] === 'keys' && voices[0] !== 'keys');
+test("voice 2 is never the child's family, not always keys; all voices land on the meeting beat", () => {
+  const fam = (v) => IN.INSTRUMENTS.find((x) => x.voice === v).family, s = PAD.createState({ grade: 'ה', instrument: 'darbuka' });
+  IN.INSTRUMENTS.forEach((x) => assert.notEqual(fam(PAD.voicesFor({ instrument: x.id })[1]), x.family, x.id));
+  const voices = PAD.voicesFor(s); assert.ok(voices[1] === 'keys' && PAD.voicesFor({ instrument: 'piano' })[1] !== 'keys');
   const plan = PAD.playPlan(s.lvl, voices);
   assert.ok(plan.filter((n) => n.beat === 6).length === 2 && plan.filter((n) => n.meet).length === 2);
   assert.equal(plan.filter((n) => n.voice === 'keys').length, 3, 'beats 0, 3, 6');
