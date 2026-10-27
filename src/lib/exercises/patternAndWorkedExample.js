@@ -94,15 +94,32 @@
     return ev;
   }
 
+  // env.timers (optional array) collects each waiting note's timer, so
+  // stopDemo() can cancel the rest of the demo melody (#591, redo of #831).
   function playDemo(ex, env) {
     const e = env || {};
     const events = (ex && ex.demoEvents) || demoPlan(ex);
     const play = e.playTap || (root && root.playTap);
-    const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
+    const later = e.later || function (fn, ms) { return setTimeout(fn, ms); };
     if (typeof play === 'function') events.forEach(function (ev) {
-      later(function () { play(ev.voice, { hz: ev.hz, step: 0 }); }, Math.round((ev.at || 0) * 1000));
+      const id = later(function () { play(ev.voice, { hz: ev.hz, step: 0 }); }, Math.round((ev.at || 0) * 1000));
+      if (Array.isArray(e.timers) && id != null) e.timers.push(id);
     });
     return events;
+  }
+  // Cancels every demo note of this widget that has not sounded yet. Called
+  // before the exercise opens (הבנתי), before עכשיו לבד, and by the page
+  // before the next exercise mounts. Returns how many notes were cancelled.
+  function stopDemo(container) {
+    const timers = container && container._timers;
+    if (!Array.isArray(timers)) return 0;
+    const n = timers.length;
+    timers.splice(0).forEach(function (id) { clearTimeout(id); });
+    return n;
+  }
+  function demoEnv(container, opts) {
+    if (!Array.isArray(container._timers)) container._timers = [];
+    return Object.assign({}, opts, { timers: container._timers });
   }
   function docOf(container, opts) {
     return (opts && opts.document) || (container && container.ownerDocument) || (typeof document !== 'undefined' ? document : null);
@@ -133,10 +150,13 @@
     const row = d.createElement('div');
     row.className = 'pattern-choices';
     const answer = answerForShown(ex.pattern);
+    const silent = !!ex.noMusic;
+    stopDemo(container);
     (ex.choices || ['דו', 'מי', 'סול']).forEach(function (c) {
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
+        stopDemo(container);
         const play = opts.playTap || (root && root.playTap);
-        if (typeof play === 'function') play('xylo', { hz: NOTE_HZ[c] || 330, step: 0 });
+        if (!silent && typeof play === 'function') play('xylo', { hz: NOTE_HZ[c] || 330, step: 0 });
         const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
         hint.hidden = !!res.correct;
         hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
@@ -145,7 +165,7 @@
       }));
     });
     wrap.appendChild(seq);
-    wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+    if (!silent) wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { stopDemo(container); container._heard = playDemo(ex, demoEnv(container, opts)); }));
     wrap.appendChild(row);
     wrap.appendChild(hint);
     container.appendChild(wrap);
@@ -155,27 +175,32 @@
     const opts = options || {};
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
-    let stage = ex.stage || 'demo';
+    // A music-free round (the last round of a topic) opens straight at עכשיו לבד.
+    let stage = ex.noMusic ? 'independent' : (ex.stage || 'demo');
     let filled = false;
     function paint() {
+      // The demo melody never runs on into the next stage (#591, redo of #831).
+      stopDemo(container);
       container.innerHTML = '';
       if (container.children) container.children.length = 0;
       container._stage = stage;
       container._filled = filled;
+      container._silent = stage === 'independent';
       const wrap = d.createElement('div');
       wrap.className = 'worked-example-box';
       if (stage === 'demo') {
         const line = d.createElement('p');
         line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total;
         wrap.appendChild(line);
-        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { stopDemo(container); container._heard = playDemo(ex, demoEnv(container, opts)); }));
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
       } else if (stage === 'completion') {
         const line = d.createElement('p');
         line.textContent = 'השלימו את הפעימה החסרה';
         wrap.appendChild(line);
         wrap.appendChild(btn(d, 'primary completion-tap-btn', '🥁 הקישו להשלמה', function () {
-          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, opts);
+          // The child's own tap sounds now, before עכשיו לבד opens; nothing is left waiting.
+          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, Object.assign({}, opts, { later: function (fn) { fn(); } }));
           stage = 'independent'; paint();
         }));
       } else {
@@ -190,7 +215,7 @@
 
   return {
     EXERCISE_KINDS: EXERCISE_KINDS, countWords: countWords, validateExerciseCard: validateExerciseCard,
-    shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo,
+    shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo, stopDemo: stopDemo,
     createPatternCompletionExercise: createPatternCompletionExercise,
     createWorkedExampleExercise: createWorkedExampleExercise,
     renderPatternWidget: renderPatternWidget, renderWorkedExampleWidget: renderWorkedExampleWidget
