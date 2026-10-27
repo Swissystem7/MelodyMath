@@ -74,7 +74,7 @@ test('a bank item shows the bridge of its topic when the next topic opens', () =
   assert.equal(sandbox.topicBridge.textContent, bridges.bridgeForLink('mm-cur-0', 'mm-cur-1').prompt);
 });
 
-test('the next topic comes from getNextUnlockedTopics, and a locked topic stays on screen', () => {
+test('the next topic comes from getNextUnlockedTopics, and practice is not labeled locked', () => {
   const sandbox = pageFns();
   sandbox.topicById = (id) => cur.topicById(id);
   sandbox.MelodyMathMasteryCheck = {
@@ -85,17 +85,21 @@ test('the next topic comes from getNextUnlockedTopics, and a locked topic stays 
   sandbox.showTopicBridge({ topicId: 'mm-cur-0' }, { topicId: 'mm-cur-1' });
   assert.equal(sandbox.topicBridge.textContent, bridges.bridgeForLink('mm-cur-0', 'mm-cur-2').prompt);
   sandbox.showTopicBridge({ topicId: 'mm-cur-0' }, { topicId: 'mm-cur-5' });
-  assert.match(sandbox.topicBridge.textContent, /נושא נעול/);
-  assert.match(sandbox.topicBridge.textContent, /לוח מאה/);
-  assert.equal(sandbox.topicBridge.classList.hidden, false);
+  assert.equal(/נושא נעול|🔒/.test(sandbox.topicBridge.textContent), false);
+  assert.equal(sandbox.topicBridge.textContent, '');
+  assert.equal(sandbox.topicBridge.classList.hidden, true);
 });
 
 test('every bridge has a sound, an answer check, and a real source', () => {
   const heard = [];
   bridges.RAW_BRIDGES.forEach((row) => {
     const b = bridges.bridgeForLink(row[0], row[1]);
-    assert.ok(b.sound.length >= 1, row[0] + '->' + row[1]);
-    assert.ok(b.sound[b.sound.length - 1].at < 1, row[0]);
+    const n = Number(row[4]);
+    const whole = n > 0 && n === Math.round(n);
+    const want = whole && n <= 12 ? n : whole ? Math.min(12, Math.floor(n / 10)) : 3;
+    assert.equal(b.sound.length, want, row[0] + '->' + row[1] + ' beats');
+    assert.equal(b.sound[b.sound.length - 1].at < 1, true, row[0]);
+    assert.equal(/BPM|אוקטבה/.test(b.prompt + ' ' + b.hint), false, row[0]);
     assert.equal(b.check(row[4]), true, row[0] + '->' + row[1]);
     assert.equal(b.check('___nope___'), false);
     assert.equal(b.source.doi, '10.1007/s10648-014-9249-3');
@@ -106,4 +110,20 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   const played = bridges.play(one, { playTap: (v) => heard.push(v), later: (fn) => fn() });
   assert.equal(played.length, one.sound.length);
   assert.equal(heard.length, one.sound.length);
+  assert.equal(one.sound.length, 10);
+});
+
+test('a bridge question can be answered, and a miss shows the hint', () => {
+  const entry = bridges.bridgeForLink('mm-cur-0', 'mm-cur-1');
+  const made = [];
+  const d = { createElement: (tag) => { const node = { tag: tag, className: '', hidden: true, textContent: '', value: '', children: [], setAttribute() {}, onclick: null }; made.push(node); return node; } };
+  const box = { ownerDocument: d, _bridgeOk: null, appendChild(ch) { this.children = this.children || []; this.children.push(ch); } };
+  const ui = bridges.mountAnswer(box, entry);
+  ui.input.value = '3'; ui.button.onclick();
+  assert.equal(box._bridgeOk, false);
+  assert.equal(ui.hint.hidden, false);
+  assert.match(ui.hint.textContent, /10/);
+  ui.input.value = '10'; ui.button.onclick();
+  assert.equal(box._bridgeOk, true);
+  assert.equal(ui.hint.hidden, true);
 });

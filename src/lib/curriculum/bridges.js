@@ -1,7 +1,4 @@
-// MelodyMath — Curriculum progression bridge exercises (Refs #665 req 5, Task R2).
-//
-// For every topic in progression.js with buildsTo, a bridge exercise at the start
-// of the next topic reuses the earlier topic's musical mechanism with the new math.
+// Bridge exercise for every buildsTo link (Refs #665 #718).
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -13,7 +10,7 @@
   const RAW_BRIDGES = [
     ['mm-cur-0', 'mm-cur-1', 'steady beat', '10 פעימות קצובות בתוף יוצרות עשרת אחת: כמה פעימות יש בעשרת אחת?', 10, 'עשרת אחת שווה בדיוק 10 פעימות'],
     ['mm-cur-0', 'mm-cur-2', 'steady beat', 'כל צעד על הישר נשמע בפעימה: מ־0 עד 7, כמה פעימות שמענו?', 7, 'סופרים 7 צעדים מהאפס'],
-    ['mm-cur-0', 'mm-cur-15', 'steady beat', 'בספירה בדילוגי 2 מדגישים כל פעימה שנייה: כמה פעמות מודגשות ב־6 פעימות?', 3, 'מדגישים ב־2, 4, 6'],
+    ['mm-cur-0', 'mm-cur-15', 'steady beat', 'בספירה בדילוגי 2 מדגישים כל פעימה שנייה: כמה פעימות מודגשות ב־6 פעימות?', 3, 'מדגישים ב־2, 4, 6'],
     ['mm-cur-1', 'mm-cur-3', 'beats in tens', 'עשרת אחת של 10 פעימות ועוד 4 פעימות בודדות: כמה פעימות בסך הכל?', 14, '10 ועוד 4'],
     ['mm-cur-1', 'mm-cur-5', 'beats in tens', 'בלוח המאה כל שורה היא תיבה של 10 פעימות: כמה פעימות נשמעות ב־3 שורות שלמות?', 30, '3 עשרות של פעימות הן 30'],
     ['mm-cur-1', 'mm-cur-12', 'beats in tens', 'בפיקטוגרם כל תו שווה 10 פעימות: כמה פעימות מייצגים 2 תווים?', 20, '2 עשרות שוות 20'],
@@ -23,7 +20,7 @@
     ['mm-cur-3', 'mm-cur-7', 'joining beats', 'היו 8 צלילים בתוף ונוספו עוד 5 צלילי פעמון: כמה צלילים נוגנו בסך הכל?', 13, '8 ועוד 5'],
     ['mm-cur-3', 'mm-cur-11', 'joining beats', 'משמיעים 5 פעימות בתוף למטבע של 5 ש״ח ועוד 10 פעימות למטבע של 10 ש״ח: כמה שקלים שמענו בסך הכל?', 15, '5 ועוד 10'],
     ['mm-cur-3', 'mm-cur-31', 'joining beats balance', 'במאזני צלילים שני הצדדים מאוזנים: 12 פעימות במקצב אחד שוות ל־9 פעימות ועוד כמה?', 3, '12 פחות 9 שווה 3 פעימות'],
-    ['mm-cur-5', 'mm-cur-4', 'hundred chart tens', 'יורדים 2 שורות בלוח המאה (כל שורה אוקטבה של 10 צלילים) מ־40: לאיזה צליל-מספר מגיעים?', 60, 'כל שורה למטה מוסיפה 10'],
+    ['mm-cur-5', 'mm-cur-4', 'hundred chart tens', 'יורדים 2 שורות בלוח המאה (כל שורה תיבה של 10 פעימות) מ־40: לאיזה מספר מגיעים?', 60, 'כל שורה למטה מוסיפה 10'],
     ['mm-cur-5', 'mm-cur-13', 'hundred chart tens', 'לוח מאה מנגן 100 פעימות. כמה לוחות כאלה צריך כדי להשמיע 400 פעימות?', 4, '4 מאות הן 400'],
     ['mm-cur-4', 'mm-cur-14', 'whole tens groups', 'בחיבור 30+24 מנגנים צלילי בס לעשרות (30+20) וצלילי תוף ליחידות: מה הסכום הכולל?', 54, '50 ועוד 4'],
     ['mm-cur-6', 'mm-cur-15', 'repeating pattern', 'דגם מקצב חוזר כל 4 פעימות: באיזו פעימה יסתיים המחזור השלישי?', 12, '3 כפול 4'],
@@ -34,7 +31,7 @@
     ['mm-cur-11', 'mm-cur-19', 'coin sums', 'קונים חלילית נגינה ב־14 ש״ח ומשלמים בשטר של 20 ש״ח: כמה צלילי שקלים נקבל בעודף?', 6, '20 פחות 14'],
     ['mm-cur-12', 'mm-cur-21', 'counted data', 'בדיאגרמת מקצב עמודת התופים מגיעה ל־8 פעימות ועמודת המצלתיים ל־5: מה הפרש הפעימות?', 3, '8 פחות 5'],
     ['mm-cur-13', 'mm-cur-14', 'place value regrouping', 'בחיבור צלילי 48+35: 8 פעימות ועוד 5 פעימות הן 13. כמה צלילי עשרת עוברים לעמודת העשרות?', 1, '10 יחידות הופכות לעשרת אחת'],
-    ['mm-cur-13', 'mm-cur-22', 'place value', '10 אקורדים של מאה יוצרים אלף אחד בצליל. כמה אקורדים כאלה יש ב־3,000?', 30, '30 מאות הן 3,000'],
+    ['mm-cur-13', 'mm-cur-22', 'place value', '10 קבוצות של מאה פעימות יוצרות אלף אחד. כמה קבוצות כאלה יש ב־3,000?', 30, '30 מאות הן 3,000'],
     ['mm-cur-14', 'mm-cur-18', 'addition regrouping', 'מנגנים פעימות להיקף משולש שצלעותיו 25, 35 ו־20 ס״מ: כמה פעימות בסך הכל נשמעו?', 80, '25 + 35 + 20'],
     ['mm-cur-14', 'mm-cur-19', 'addition and subtraction', 'קנינו מפרט לגיטרה ב־15 ש״ח ומיתר מנגן ב־45 ש״ח. שילמנו 100 ש״ח: כמה צלילי שקלים נותרו בעודף?', 40, '100 פחות 60'],
     ['mm-cur-14', 'mm-cur-23', 'addition regrouping', 'בחיבור צלילי 3,500+2,800: 5 מאות פעימות ועוד 8 הן 13. לאיזה מקום צלילי מועבר ה־1?', 'אלפים', '10 מאות הן אלף אחד'],
@@ -113,12 +110,10 @@
     ['mm-cur-47', 'mm-cur-54', 'polygon perimeter to circle circumference', 'במעגל מקצבים, מקישים היקף לפי קוטר 10 כפול π (3.14): כמה נקישות נקבל בקירוב?', 31.4, '10 כפול 3.14'],
     ['mm-cur-47', 'mm-cur-55', 'triangle area to composite shapes', 'מצולע צלילים מורכב ממלבן של 30 פעימות ומשולש של 12 פעימות: מה סך הפעימות?', 42, '30 ועוד 12'],
     ['mm-cur-48', 'mm-cur-56', 'prism geometry to volume units', 'נפח תיבה שממדיה 2 ס״מ, 3 ס״מ ו־5 ס״מ: מה נפחה בסמ״ק?', 30, '2 כפול 3 כפול 5'],
-    ['mm-cur-49', 'mm-cur-57', 'frequency data to mean calculation', 'טמפו ממוצע של 3 מקצבים: 80, 90 ו־100 BPM. מהו ממוצע הטמפו שנשמע?', 90, '270 לחלק ל־3'],
+    ['mm-cur-49', 'mm-cur-57', 'frequency data to mean calculation', 'טמפו ממוצע של 3 מקצבים: 80, 90 ו־100 פעימות בדקה. מהו ממוצע הפעימות שנשמע?', 90, '270 לחלק ל־3'],
     ['mm-cur-49', 'mm-cur-58', 'data interpretation to multiple views', 'בטבלת נגינה 10 תלמידים בחרו כינור. כמה תווי כינור של 2 תלמידים יופיעו בפיקטוגרם?', 5, '10 לחלק ל־2'],
   ];
 
-  // Fyfe et al. 2014 is the concreteness-fading step this bridge is (#718).
-  // Azaryahu & Adi-Japha 2020 is the musical pattern the sound uses.
   const RESEARCH = Object.freeze({
     id: 'fyfe2014',
     citation: 'Fyfe, E. R., McNeil, N. M., Son, J. Y., & Goldstone, R. L. (2014). Concreteness fading in mathematics and science instruction. Educational Psychology Review, 26(1), 9–25.',
@@ -129,24 +124,40 @@
 
   function soundPlan(mechanism, answer) {
     const n = Number(answer);
-    const count = n > 0 && n <= 6 && n === Math.round(n) ? n : 3;
+    const whole = n > 0 && n === Math.round(n);
+    const tens = whole && n > 12;
+    const count = whole && n <= 12 ? n : tens ? Math.min(12, Math.floor(n / 10)) : 3;
     const voice = /bell|coin|angle|clock|data/.test(String(mechanism)) ? 'bell' : 'drum';
     const step = count <= 1 ? 0 : Math.min(0.22, 0.9 / (count - 1));
     const out = [];
-    for (let i = 0; i < count; i++) out.push({ at: Math.round(i * step * 1000) / 1000, voice: voice });
+    for (let i = 0; i < count; i++) out.push({ at: Math.round(i * step * 1000) / 1000, voice: voice, held: tens });
     return out;
   }
-
   function play(entry, env) {
     const events = (entry && entry.sound) || [];
     const e = env || {};
     const tap = e.playTap || (typeof playTap === 'function' ? playTap : null);
     if (typeof tap !== 'function') return events;
     const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
-    events.forEach(function (ev) { later(function () { tap(ev.voice, { step: 0 }); }, Math.round(ev.at * 1000)); });
+    events.forEach(function (ev) { later(function () { tap(ev.voice, { step: 0, hz: ev.held ? 110 : undefined }); }, Math.round(ev.at * 1000)); });
     return events;
   }
-
+  function mountAnswer(container, entry) {
+    if (!container || !entry || typeof container.appendChild !== 'function') return null;
+    const d = container.ownerDocument;
+    if (!d || typeof d.createElement !== 'function') return null;
+    const input = d.createElement('input');
+    input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
+    const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;
+    const go = d.createElement('button'); go.type = 'button'; go.className = 'topic-bridge-check'; go.textContent = 'עניתי';
+    go.onclick = function () {
+      const ok = entry.check(input.value);
+      hint.hidden = !!ok; hint.textContent = ok ? '' : (entry.hint || '');
+      container._bridgeOk = ok;
+    };
+    container.appendChild(input); container.appendChild(go); container.appendChild(hint);
+    return { input: input, button: go, hint: hint };
+  }
   const BRIDGES = {};
   const BY_FROM = {};
   const BY_TO = {};
@@ -170,15 +181,12 @@
     if (!BY_TO[entry.to]) BY_TO[entry.to] = [];
     BY_TO[entry.to].push(entry);
   });
-
   function bridgeForLink(fromId, toId) {
     return BRIDGES[fromId + '->' + toId] || null;
   }
-
   function bridgesForTopic(fromId) {
     return (BY_FROM[fromId] || []).slice();
   }
-
   function bridgesEnteringTopic(toId) {
     return (BY_TO[toId] || []).slice();
   }
@@ -190,6 +198,6 @@
     bridgeForLink: bridgeForLink,
     bridgesForTopic: bridgesForTopic,
     bridgesEnteringTopic: bridgesEnteringTopic,
-    play: play,
+    play: play, mountAnswer: mountAnswer,
   };
 });
