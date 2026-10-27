@@ -49,8 +49,7 @@ test('mechanism exists in MUSIC_MECHANISMS and is evidenced', () => {
 
 test('no weak mechanism without the optional mark (dosage rule 2)', () => {
   ALL.forEach((x) => {
-    const hasWeak = I.WEAK.includes(x.mechanism) || (x.topicMechanisms && Object.values(x.topicMechanisms).some((m) => I.WEAK.includes(m)));
-    if (hasWeak) {
+    if (I.WEAK.includes(x.mechanism)) {
       assert.equal(x.optional, true, x.id);
       assert.equal(x.evidence, 'weak', x.id);
     } else {
@@ -63,8 +62,7 @@ test('no weak mechanism without the optional mark (dosage rule 2)', () => {
 test('one way per topic: every math topic is served by its own primary mechanism', () => {
   ALL.forEach((x) => x.mathTopics.forEach((t) => {
     assert.ok(I.TOPICS[t], x.id + ' unknown topic ' + t);
-    const m = (x.topicMechanisms && x.topicMechanisms[t]) || x.mechanism;
-    assert.equal(I.TOPICS[t].mechanism, m, x.id + ' ' + t);
+    assert.equal(I.TOPICS[t].mechanism, x.mechanism, x.id + ' ' + t);
   }));
   Object.keys(I.TOPICS).forEach((t) => {
     const m = I.TOPICS[t].mechanism;
@@ -80,7 +78,7 @@ test('lookups', () => {
   I.FAMILIES.forEach((f) => assert.ok(I.byFamily(f).every((x) => x.family === f)));
   const t = first.mathTopics[0];
   assert.ok(I.forTopic(t).includes(first));
-  assert.ok(I.forTopic(t).every((x) => ((x.topicMechanisms && x.topicMechanisms[t]) || x.mechanism) === I.TOPICS[t].mechanism));
+  assert.ok(I.forTopic(t).every((x) => x.mechanism === I.TOPICS[t].mechanism));
   assert.deepEqual(I.forTopic('nope'), []);
 });
 
@@ -97,7 +95,10 @@ test('instrument variety: each topic offers instruments from at least 2 of the 4
   });
 });
 
-test('regression guard: no topic loses instruments vs master (FIX-740-PATTERNS)', () => {
+test('regression guard: topics keep their instruments, except gankogui and kora leave patterns (Refs #740)', () => {
+  // Snapshot of what master offered. gankogui and kora are the exception:
+  // their method is polyrhythm (M4), so they voice lcm only. Patterns keeps
+  // one main method, melodic and rhythmic patterns (M6).
   const MASTER_TOPIC_INSTRUMENTS = {
     counting: ['taiko', 'cajon', 'tof', 'surdo', 'handbells', 'udu', 'balalaika', 'didgeridoo'],
     nextPrev: ['cajon', 'tof', 'handbells'],
@@ -108,12 +109,14 @@ test('regression guard: no topic loses instruments vs master (FIX-740-PATTERNS)'
     decimals: ['darbuka', 'erhu', 'ney', 'recorder'],
     patterns: [
       'conga', 'gamelan', 'kalimba', 'marimba', 'balafon', 'steelPan',
-      'claves', 'gankogui', 'oud', 'sitar', 'kora', 'guzheng',
+      'claves', 'oud', 'sitar', 'guzheng',
       'violin', 'shakuhachi', 'bagpipes', 'dizi', 'piano', 'harmonium'
     ],
     symmetry: ['marimba', 'dizi'],
     lcm: [],
-    numberLine: ['xylophone', 'koto', 'guitar', 'panFlute', 'pipeOrgan']
+    numberLine: ['xylophone', 'koto', 'guitar', 'panFlute', 'pipeOrgan'],
+    data: ['cajon'],
+    percent: ['darbuka', 'erhu']
   };
 
   for (const [topic, masterList] of Object.entries(MASTER_TOPIC_INSTRUMENTS)) {
@@ -126,10 +129,13 @@ test('regression guard: no topic loses instruments vs master (FIX-740-PATTERNS)'
     }
   }
 
-  const patternIds = I.forTopic('patterns').map((x) => x.id);
-  const lcmIds = I.forTopic('lcm').map((x) => x.id);
-  assert.ok(patternIds.includes('gankogui'), 'patterns must include gankogui');
-  assert.ok(patternIds.includes('kora'), 'patterns must include kora');
-  assert.ok(lcmIds.includes('gankogui'), 'lcm must include gankogui');
-  assert.ok(lcmIds.includes('kora'), 'lcm must include kora');
+  ['gankogui', 'kora'].forEach((id) => {
+    const x = I.instrumentById(id);
+    assert.equal(x.mechanism, 'M4', id + ' is the lcm polyrhythm, not a patterns method');
+    assert.equal(x.optional, true, id);
+    assert.equal(x.evidence, 'weak', id);
+    assert.deepEqual(x.mathTopics, ['lcm'], id + ' voices lcm only');
+    assert.equal(I.forTopic('patterns').some((y) => y.id === id), false, id + ' stays off patterns');
+    assert.equal(I.forTopic('lcm').some((y) => y.id === id), true, id + ' voices lcm');
+  });
 });

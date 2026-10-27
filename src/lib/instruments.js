@@ -40,15 +40,10 @@
     percent: { he: 'אחוזים', mechanism: 'M3' },
   };
 
-  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, topicMechanisms)
-  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, topicMechanisms) {
+  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
+  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source) {
     const x = { id, instrument: { he, en }, origin, family, mathTopics, mechanism, why, source, voice };
-    if (topicMechanisms) x.topicMechanisms = topicMechanisms;
-    const mechs = topicMechanisms ? Object.values(topicMechanisms) : [mechanism];
-    if (mechs.some(function (m) { return WEAK.indexOf(m) >= 0; })) {
-      x.optional = true;
-      x.evidence = 'weak';
-    }
+    if (WEAK.indexOf(mechanism) >= 0) { x.optional = true; x.evidence = 'weak'; }
     return x;
   }
 
@@ -111,10 +106,9 @@
     e('claves', 'קלאבס', 'Claves (son clave)', 'Cuba', 'percussion', 'M6', ['patterns'], 'woodClick',
       'The two-bar son clave [x..x..x...x.x...] begins with the tresillo, 3 onsets spread as evenly as possible over 8 pulses (Toussaint 2005, Bridges): a rhythmic pattern (M6).',
       'https://archive.bridgesmathart.org/2005/bridges2005-47.html'),
-    e('gankogui', 'גנקוגוי', 'Gankogui bell', 'Ewe, Ghana', 'percussion', 'M6', ['patterns', 'lcm'], 'metalBell',
-      'The double bell plays the timeline against the drum pulses (Pressing 1983): a repeating pattern (M6) and cross-rhythms meeting at their least common multiple (M4).',
-      'https://doi.org/10.21504/amj.v6i3.1165',
-      { patterns: 'M6', lcm: 'M4' }),
+    e('gankogui', 'גנקוגוי', 'Gankogui bell', 'Ewe, Ghana', 'percussion', 'M4', ['lcm'], 'metalBell',
+      'The double bell plays the timeline against the drum pulses (Pressing 1983): the cycles meet again at their least common multiple. Optional play only (M4, weak evidence).',
+      'https://doi.org/10.21504/amj.v6i3.1165'),
     e('xylophone', 'קסילופון', 'Xylophone', 'Europe (orchestral)', 'percussion', 'M5', ['numberLine'], 'woodBar',
       'Each bar is tuned by its length, and a shorter bar sounds higher. Optional play only: bars in order as a line from low to high (M5, weak evidence).',
       'https://old.physics.wfu.edu/demolabs/demos/3/3d/3D4010.html'),
@@ -128,10 +122,9 @@
     e('sitar', 'סיטאר', 'Sitar', 'North India (Hindustani music)', 'strings', 'M6', ['patterns'], 'pluck',
       'A long-necked lute with movable frets and sympathetic strings, played with tabla in a chosen taal: its repeating raag phrases voice melodic patterns (M6).',
       'https://www.swarganga.org/instruments/3/Sitar'),
-    e('kora', 'קוֹרָה', 'Kora', 'Mande, West Africa (Senegal, The Gambia)', 'strings', 'M6', ['patterns', 'lcm'], 'pluck',
-      'A 21-string harp whose kumbengo theme repeats (M6), with interlocking hands in 3 against 2 polyrhythms aligning at their least common multiple (M4) (Racanelli 2012).',
-      'https://oldaawmjournal.iftawm.org/articles/2012a/Racanelli_AAWM_Vol_2_1.pdf',
-      { patterns: 'M6', lcm: 'M4' }),
+    e('kora', 'קוֹרָה', 'Kora', 'Mande, West Africa (Senegal, The Gambia)', 'strings', 'M4', ['lcm'], 'pluck',
+      'A 21-string harp whose hands interlock in 3 against 2, so the parts meet again at their least common multiple (Racanelli 2012). Optional play only (M4, weak evidence).',
+      'https://oldaawmjournal.iftawm.org/articles/2012a/Racanelli_AAWM_Vol_2_1.pdf'),
     e('koto', 'קוֹטוֹ', 'Koto', 'Japan (from China, 8th century)', 'strings', 'M5', ['numberLine'], 'pluck',
       'A long zither, most often with 13 bridges; where each bridge stands sets the pitch of its string. Optional play only: sliding a bridge to order low and high (M5, weak evidence).',
       'https://collections.ed.ac.uk/mimed/record/18373'),
@@ -150,7 +143,7 @@
     e('charango', 'צָ׳רַנְגּוֹ', 'Charango', 'Andes (Bolivia, Argentina)', 'strings', 'M2', ['multiplication', 'skipCounting'], 'pluck',
       'A small Andean lute with 10 strings in 5 double courses: 5 groups of 2, so counting its strings in pairs is a times-table group (M2).',
       'https://www.horniman.ac.uk/object/M23-1987/json'),
-    e('balalaika', 'בָּלָלַייקָה', 'Balalaika', 'Russia', 'strings', 'M1', ['counting', 'nextPrev'], 'pluck',
+    e('balalaika', 'בָּלָלַייקָה', 'Balalaika', 'Russia', 'strings', 'M1', ['counting', 'nextPrev', 'data'], 'pluck',
       'A Russian lute with a triangular body and three strings; one strum on each steady beat is a simple timbre for counting one-to-one (M1).',
       'https://collections.ed.ac.uk/mimed/record/112439'),
     e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division'], 'pluck',
@@ -210,11 +203,7 @@
   function forTopic(topic) {
     const t = TOPICS[topic];
     if (!t) return [];
-    return INSTRUMENTS.filter(function (x) {
-      if (x.mathTopics.indexOf(topic) < 0) return false;
-      const m = (x.topicMechanisms && x.topicMechanisms[topic]) || x.mechanism;
-      return m === t.mechanism;
-    });
+    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && x.mechanism === t.mechanism; });
   }
 
   return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, forTopic };
