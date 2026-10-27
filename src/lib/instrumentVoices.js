@@ -35,6 +35,7 @@
     lowFlute: { wave: 'sine', partials: [[1, 0.8], [2, 0.06]], sweep: 1, noise: 0.03, filter: ['lowpass', 700], attack: 0.06, decay: 0.9, hz: 196, vibrato: [4, 2] },
     lowClarinet: { wave: 'square', partials: [[1, 0.35], [3, 0.12], [5, 0.05]], sweep: 1, noise: 0.02, filter: ['lowpass', 1600], attack: 0.04, decay: 0.85, hz: 146 },
     musicBox: { wave: 'sine', partials: [[1, 0.75], [2.4, 0.18], [4.1, 0.06]], sweep: 1, noise: 0.01, filter: ['highpass', 800], attack: 0.002, decay: 0.35, hz: 1318.5 },
+    fingerCymbal: { wave: 'sine', partials: [[1, 0.7], [3.1, 0.2], [6.4, 0.05]], sweep: 1, noise: 0.04, filter: ['highpass', 2500], attack: 0.001, decay: 0.22, hz: 2093 },
     reed: { wave: 'square', partials: [[1, 0.3]], sweep: 1, noise: 0.03, filter: ['lowpass', 2500], attack: 0.03, decay: 0.8, hz: 349 },
     horn: { wave: 'sawtooth', partials: [[1, 0.5], [1.5, 0.1]], sweep: 1, noise: 0.05, filter: ['lowpass', 1400], attack: 0.06, decay: 0.9, hz: 233 },
     drone: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.2]], sweep: 1, noise: 0.08, filter: ['lowpass', 700], attack: 0.1, decay: 1.2, hz: 73, vibrato: [6, 2] },

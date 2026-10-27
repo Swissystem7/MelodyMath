@@ -141,9 +141,11 @@
   // Above that, ten of one place is one of the next: 10 tenths = 1 one,
   // 10 ones = 1 ten, 10 tens = 1 hundred. Each place has its own instrument.
   // Ones stay a short percussion tap. Tenths are always a music box
-  // (musicBox): one fixed voice, because voiceFor already uses the xylophone
-  // for ones in some topics. Tens are a low clarinet (lowClarinet) and
-  // hundreds are a low flute (lowFlute). No topic lists those three voices.
+  // (musicBox), because voiceFor already uses the xylophone for ones in some
+  // topics. Hundredths are a finger cymbal (fingerCymbal). Digits come from
+  // the written number, so 3.55 is not rounded to 3.6. Tens are a low
+  // clarinet (lowClarinet) and hundreds are a low flute (lowFlute). No topic
+  // lists those voices.
   // Not the ukulele, and not a sung note.
   // Notes are spaced so each one finishes before the next starts.
   // A word, a clock time, or a number past 12 hundreds plays one soft listen
@@ -158,6 +160,7 @@
       ten: { voice: 'lowClarinet', held: true, hz: 146, place: 'ten' },
       one: { voice: one, held: false, place: 'one' },
       tenth: { voice: 'musicBox', held: false, hz: 1318.5, place: 'tenth' },
+      hundredth: { voice: 'fingerCymbal', held: false, hz: 2093, place: 'hundredth' },
     };
   }
   function soundPlan(mechanism, answer) {
@@ -165,15 +168,18 @@
     if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return listenTone();
     const n = Number(s);
     if (!(n > 0) || !Number.isFinite(n)) return listenTone();
-    let whole = Math.floor(n + 1e-9);
-    let tenths = Math.round((n - whole) * 10);
-    if (tenths >= 10) { whole += Math.floor(tenths / 10); tenths %= 10; }
+    const bits = s.replace(/^[+-]/, '').split('.');
+    let whole = parseInt(bits[0] || '0', 10);
+    if (!whole) whole = 0;
+    const frac = (bits[1] || '').replace(/0+$/, '');
+    const tenths = frac.length ? frac.charCodeAt(0) - 48 : 0;
+    const hundredths = frac.length > 1 ? frac.charCodeAt(1) - 48 : 0;
     const places = placeVoices(mechanism);
     const events = [];
     function add(count, spec) {
       for (let i = 0; i < count; i++) events.push(spec);
     }
-    if (tenths === 0 && whole <= 12) add(whole, places.one);
+    if (tenths === 0 && hundredths === 0 && whole <= 12) add(whole, places.one);
     else if (whole < 100) {
       add(Math.floor(whole / 10), places.ten);
       add(whole % 10, places.one);
@@ -183,6 +189,7 @@
       add(whole % 10, places.one);
     } else return listenTone();
     add(tenths, places.tenth);
+    add(hundredths, places.hundredth);
     // 0.7s is longer than a held note (0.5s) and a bell tap (0.6s), so the
     // places are heard one after another instead of as one chord.
     const STEP = 0.7;
@@ -234,7 +241,7 @@
     if (!d || typeof d.createElement !== 'function') return null;
     const key = d.createElement('p');
     key.className = 'topic-bridge-key';
-    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, תיבת נגינה = עשיריות (למשל 7.70).';
+    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, תיבת נגינה = עשיריות, צילצל = מאיות (למשל 3.55).';
     const input = d.createElement('input');
     input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
     const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;

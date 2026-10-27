@@ -97,12 +97,16 @@ function soundCount(answer) {
   if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return 0;
   const n = Number(s);
   if (!(n > 0) || !Number.isFinite(n)) return 0;
-  let whole = Math.floor(n + 1e-9);
-  let tenths = Math.round((n - whole) * 10);
-  if (tenths >= 10) { whole += Math.floor(tenths / 10); tenths %= 10; }
-  if (tenths === 0 && whole <= 12) return whole;
-  if (whole < 100) return Math.floor(whole / 10) + (whole % 10) + tenths;
-  if (Math.floor(whole / 100) <= 12) return Math.floor(whole / 100) + (Math.floor(whole / 10) % 10) + (whole % 10) + tenths;
+  const bits = s.replace(/^[+-]/, '').split('.');
+  let whole = parseInt(bits[0] || '0', 10);
+  if (!whole) whole = 0;
+  const frac = (bits[1] || '').replace(/0+$/, '');
+  const tenths = frac.length ? Number(frac[0]) : 0;
+  const hundredths = frac.length > 1 ? Number(frac[1]) : 0;
+  const fracSounds = tenths + hundredths;
+  if (tenths === 0 && hundredths === 0 && whole <= 12) return whole;
+  if (whole < 100) return Math.floor(whole / 10) + (whole % 10) + fracSounds;
+  if (Math.floor(whole / 100) <= 12) return Math.floor(whole / 100) + (Math.floor(whole / 10) % 10) + (whole % 10) + fracSounds;
   return 0;
 }
 
@@ -176,9 +180,9 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   assert.equal(mixed[0].voice === 'pluck' || mixed[1].voice === 'breathy', false);
   assert.equal(mixed[1].voice === 'breathy', false);
   const carried = bridges.soundPlan('steady beat', 0.999);
-  assert.equal(carried.length, 1);
-  assert.equal(carried[0].place, 'one');
-  assert.equal(carried[0].voice === 'xylo', false);
+  assert.equal(carried.filter((ev) => ev.place === 'one').length, 0);
+  assert.equal(carried.filter((ev) => ev.place === 'tenth').length, 9);
+  assert.equal(carried.filter((ev) => ev.place === 'hundredth').length, 9);
   const money = bridges.bridgeForLink('mm-cur-36', 'mm-cur-46');
   assert.equal(money.answer, '7.70');
   assert.equal(money.check('7.7'), true);
@@ -224,6 +228,7 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   assert.equal(/יוקללה|ukulele|pluck|זמרה|breathy/.test(ui.key.textContent), false);
   assert.match(ui.key.textContent, /נקישה קצרה = 1/);
   assert.match(ui.key.textContent, /תיבת נגינה = עשיריות/);
+  assert.match(ui.key.textContent, /צילצל = מאיות/);
   assert.equal(ui.again.textContent, 'שמע שוב');
   const replayed = [];
   const origTimeout = global.setTimeout;
@@ -239,7 +244,7 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   }
   assert.equal(replayed.length, entry.sound.length);
   assert.equal(replayed.every(function (v) { return v === 'drum'; }), true);
-  assert.match(ui.key.textContent, /7\.70/);
+  assert.match(ui.key.textContent, /3\.55/);
   ui.input.value = '3'; ui.button.onclick();
   assert.equal(box._bridgeOk, false);
   assert.equal(ui.hint.hidden, false);
@@ -250,28 +255,30 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
 });
 
 test('each place value has its own instrument, and voiceFor never returns the tenths voice', () => {
-  const places = { hundred: new Set(), ten: new Set(), one: new Set(), tenth: new Set() };
+  const places = { hundred: new Set(), ten: new Set(), one: new Set(), tenth: new Set(), hundredth: new Set() };
   bridges.RAW_BRIDGES.forEach((row) => {
-    assert.notEqual(bridges.voiceFor(row[2]), 'musicBox', row[2]);
-    [111.1, 4, 4.2].forEach((n) => {
+    assert.equal(bridges.voiceFor(row[2]) === 'musicBox' || bridges.voiceFor(row[2]) === 'fingerCymbal', false, row[2]);
+    [111.1, 4, 4.2, 3.55].forEach((n) => {
       bridges.soundPlan(row[2], n).forEach((ev) => {
         if (ev.place) places[ev.place].add(ev.voice);
       });
     });
   });
   ['', 'bell', 'coin', 'angle', 'clock', 'data', 'length', 'line', 'area', 'grid', 'fraction', 'shape', 'perimeter', 'ruler', 'steady beat', 'xylophone'].forEach((m) => {
-    assert.notEqual(bridges.voiceFor(m), 'musicBox', 'voiceFor(' + m + ')');
+    assert.equal(bridges.voiceFor(m) === 'musicBox' || bridges.voiceFor(m) === 'fingerCymbal', false, 'voiceFor(' + m + ')');
   });
   assert.deepEqual([...places.hundred], ['lowFlute']);
   assert.deepEqual([...places.ten], ['lowClarinet']);
   assert.deepEqual([...places.tenth], ['musicBox']);
+  assert.deepEqual([...places.hundredth], ['fingerCymbal']);
   assert.equal(places.one.has('drum') && places.one.has('bell') && places.one.has('xylo'), true);
-  ['lowFlute', 'lowClarinet', 'musicBox'].forEach((v) => assert.equal(places.one.has(v), false, v));
+  ['lowFlute', 'lowClarinet', 'musicBox', 'fingerCymbal'].forEach((v) => assert.equal(places.one.has(v), false, v));
   const used = new Set();
   Object.keys(instruments.TOPICS).forEach((topic) => {
     instruments.forTopic(topic).forEach((inst) => used.add(inst.voice));
   });
   assert.equal(used.has('musicBox'), false);
+  assert.equal(used.has('fingerCymbal'), false);
   const length = bridges.soundPlan('length units', 12.3);
   assert.equal(length.filter((ev) => ev.place === 'one').every((ev) => ev.voice === 'xylo'), true);
   assert.equal(length.filter((ev) => ev.place === 'tenth').every((ev) => ev.voice === 'musicBox'), true);
@@ -317,4 +324,24 @@ test('each place value has its own instrument, and voiceFor never returns the te
     delete global.loadAccess;
   }
   assert.equal(hushed.length, 0);
+});
+
+test('played digits equal the asked number, with no rounding', () => {
+  const scale = { hundred: 10000, ten: 1000, one: 100, tenth: 10, hundredth: 1 };
+  bridges.RAW_BRIDGES.forEach((row) => {
+    const s = String(row[4] == null ? '' : row[4]).trim().replace(/,/g, '.');
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return;
+    const n = Number(s);
+    if (!(n > 0) || !Number.isFinite(n)) return;
+    const b = bridges.bridgeForLink(row[0], row[1]);
+    if (b.sound[0] && b.sound[0].listen) return;
+    const heard = b.sound.reduce((sum, ev) => sum + (scale[ev.place] || 0), 0);
+    assert.equal(heard, Math.round(n * 100), row[0] + '->' + row[1] + ' ' + row[4]);
+  });
+  const align = bridges.bridgeForLink('mm-cur-45', 'mm-cur-46');
+  assert.equal(align.answer, 3.55);
+  assert.equal(align.sound.filter((ev) => ev.place === 'one').length, 3);
+  assert.equal(align.sound.filter((ev) => ev.place === 'tenth').length, 5);
+  assert.equal(align.sound.filter((ev) => ev.place === 'hundredth' && ev.voice === 'fingerCymbal').length, 5);
+  assert.equal(align.sound.some((ev) => ev.voice === 'pluck' || ev.voice === 'breathy'), false);
 });

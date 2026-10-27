@@ -31,6 +31,7 @@ in the repository is missing from this file.
 | `lowFlute` | low flute for hundreds, no topic | synthesised, low sine | project code |
 | `lowClarinet` | low clarinet for tens, no topic | synthesised, low square | project code |
 | `musicBox` | music box for tenths, no topic | synthesised, high sine | project code |
+| `fingerCymbal` | finger cymbal for hundredths, no topic | synthesised, high sine | project code |
 | `reed` | reed instruments | synthesised, filtered square | project code |
 | `horn` | horns (shofar) | synthesised | project code |
 | `drone` | drones (didgeridoo) | synthesised | project code |
