@@ -156,9 +156,10 @@ test('number line hides its answer, percentages leave the ukulele, and a kept se
     const ex = variety.generateVariant(Object.assign({ topicId: 'mm-cur-2' }, it), 2, { seed: 4, rounds: 6 });
     assert.equal(shows(ex.answer, ex.prompt), false, ex.prompt);
   });
-  assert.equal(instruments.forTopic('percent').some((x) => x.id === 'ukulele'), false);
-  assert.ok(instruments.instrumentById('ukulele').mathTopics.includes('fractions'));
-  for (let r = 0; r < 6; r++) assert.notEqual(variety.generateVariant('mm-cur-53', r, { seed: r }).instrument, 'ukulele');
+  const percentInst = instruments.forTopic('percent');
+  assert.deepEqual(percentInst.map((x) => x.id + ':' + x.family).sort(), ['darbuka:percussion', 'erhu:strings']);
+  assert.deepEqual(instruments.instrumentById('ukulele').mathTopics, ['fractions']);
+  for (let r = 0; r < 6; r++) assert.ok(['darbuka', 'erhu'].includes(variety.generateVariant('mm-cur-53', r, { seed: r }).instrument));
   assert.ok(variety.TOPIC_RANGES['mm-cur-45'] && variety.TOPIC_RANGES['mm-cur-46']);
   [
     ['mm-cur-3', 'addition', '3 פעימות תוף ועוד 2 — כמה ביחד?', 5, /פעימות תוף ועוד/],
