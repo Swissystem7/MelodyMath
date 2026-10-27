@@ -45,7 +45,7 @@
       prompt: prompt, answer: expected, hint: hint, wordCount: countWords(prompt), hasMusic: true,
       soundEvents: pattern.map(function (item, idx) {
         const missing = idx === pattern.length - 1;
-        return { at: idx * 0.4, note: item, voice: missing ? 'bell' : (idx % 2 ? 'xylo' : 'drum'), hz: NOTE_HZ[item] || 330, isMissing: missing };
+        return { at: idx * 0.4, note: item, voice: missing ? 'breathy' : (idx % 2 ? 'xylo' : 'drum'), hz: NOTE_HZ[item] || 330, isMissing: missing };
       }),
       check: function (given) {
         const isOk = String(given).trim() === String(expected).trim();
@@ -57,6 +57,18 @@
     const ca = ex.checkA != null ? Number(ex.checkA) : (Number(ex.a) === 4 ? 2 : 4);
     const cb = ex.checkB != null ? Number(ex.checkB) : (Number(ex.b) === 3 ? 1 : 3);
     return { a: ca, b: cb, total: ca + cb };
+  }
+  function plainHint(pair) { return 'התחילו מ-' + pair.a + ' וספרו עוד ' + pair.b; }
+  function playNote(env, voice, hz) {
+    const e = env || {};
+    const sing = e.playVoice || (root && root.playVoice);
+    const ac = e.audioContext || (root && typeof root.getSharedAudioContext === 'function' ? root.getSharedAudioContext() : null);
+    if (voice !== 'drum' && voice !== 'bell' && voice !== 'xylo' && typeof sing === 'function' && ac) {
+      sing(ac, voice, hz, ac.currentTime || 0, null, null);
+      return;
+    }
+    const play = e.playTap || (root && root.playTap);
+    if (typeof play === 'function') play(voice, { hz: hz, step: 0 });
   }
   function stageHeading(ex, stage) {
     const a = ex.a, b = ex.b, total = ex.total;
@@ -71,7 +83,7 @@
     const stage = o.stage || 'demo';
     const prompt = stageHeading({ a: a, b: b, total: total }, stage);
     const pair = plainAdd({ a: a, b: b });
-    const hint = stage === 'plain' ? (pair.a + ' ועוד ' + pair.b + '.') : (a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.');
+    const hint = stage === 'plain' ? plainHint(pair) : (a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.');
     return {
       id: o.id || 'worked-example-' + a + '+' + b + '-' + stage,
       grade: o.grade || 'א', skill: 'addition', kind: EXERCISE_KINDS.WORKED_EXAMPLE,
@@ -150,8 +162,7 @@
     const answer = answerForShown(ex.pattern);
     (ex.choices || ['דו', 'מי', 'סול']).forEach(function (c) {
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
-        const play = opts.playTap || (root && root.playTap);
-        if (typeof play === 'function') play('bell', { hz: NOTE_HZ[c] || 330, step: 0 });
+        playNote(opts, 'breathy', NOTE_HZ[c] || 330);
         const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
         hint.hidden = !!res.correct;
         hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
@@ -198,7 +209,7 @@
       container._noMusic = plain;
       const heading = stageHeading(ex, stage);
       writeHeading(container, heading);
-      if (plain) { const p = plainAdd(ex); ex.answer = p.total; ex.hint = p.a + ' ועוד ' + p.b + '.'; }
+      if (plain) { const p = plainAdd(ex); ex.answer = p.total; ex.hint = plainHint(p); }
       const row = pageAnswerRow(container, opts);
       if (row) row.hidden = !plain;
       const wrap = d.createElement('div');

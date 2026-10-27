@@ -58,7 +58,9 @@ test('worked example implements fading and restoration of scaffolding on mistake
   assert.match(plainEx.prompt, /4 ועוד 3/);
   assert.equal(/3 ועוד 2/.test(plainEx.prompt), false);
   assert.equal(plainEx.answer, 7);
+  assert.equal(plainEx.hint, 'התחילו מ-4 וספרו עוד 3');
   assert.equal(plainEx.check(5).correct, false);
+  assert.equal(plainEx.check(5).hint, 'התחילו מ-4 וספרו עוד 3');
   assert.equal(plainEx.check(7).next, 'mastered');
 });
 
@@ -137,16 +139,26 @@ test('הבנתי moves on and does not fill the answer', () => {
   assert.equal(find(host, 'mm-try-btn'), null);
 });
 
-test('the missing pattern note is a bell, a second instrument family', () => {
+test('the missing pattern note is a sung voice, and the shown notes stay percussion', () => {
   const ex = PW.createPatternCompletionExercise();
   assert.equal(ex.soundEvents[0].voice, 'drum');
   assert.equal(ex.soundEvents[1].voice, 'xylo');
-  assert.equal(ex.soundEvents[ex.soundEvents.length - 1].voice, 'bell');
+  assert.equal(ex.soundEvents[ex.soundEvents.length - 1].voice, 'breathy');
+  assert.equal(ex.soundEvents[ex.soundEvents.length - 1].isMissing, true);
   const heard = [];
   const host = box();
   PW.renderPatternWidget(host, ex, { playTap: function (v) { heard.push(v); } });
   find(host, 'pattern-choice-btn').onclick();
-  assert.equal(heard[0], 'bell');
+  assert.equal(heard[0], 'breathy');
+  const sung = [];
+  PW.renderPatternWidget(host, ex, {
+    playVoice: function (_ac, v) { sung.push(v); },
+    audioContext: { currentTime: 0 },
+    playTap: function (v) { heard.push('tap:' + v); }
+  });
+  find(host, 'pattern-choice-btn').onclick();
+  assert.equal(sung[0], 'breathy');
+  assert.equal(heard.some(function (v) { return v === 'tap:breathy'; }), false);
 });
 
 test('עכשיו לבד hides the total, then the topic ends with a no-music check', () => {
@@ -180,6 +192,7 @@ test('עכשיו לבד hides the total, then the topic ends with a no-music che
   assert.equal(/3 ועוד 2/.test(host._heading), false);
   assert.equal(/הם 5/.test(host._heading), false);
   assert.equal(ex.answer, 7);
+  assert.equal(ex.hint, 'התחילו מ-4 וספרו עוד 3');
 });
 
 test('a wrong completion tap stays and shows the hint', () => {
