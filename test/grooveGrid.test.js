@@ -127,3 +127,22 @@ test('the card is in the music games tab and ?topic=mm-cur-47 opens it', () => {
   assert.match(html, /SCREEN_FOR\[q\.get\('topic'\)\]/);
   ['grooveGrid.js', 'GrooveGridScreen.js'].forEach((f) => assert.ok(read('sw.js').includes(f + "'"), f));
 });
+
+test('the rendered grid for a percussion child never shows kora, and works with audio muted or missing (Refs #665)', () => {
+  const JAM = require('../src/components/jamKit.js'), ME = require('../src/lib/musicEngine.js');
+  [{}, { [MI.KEY]: 'djembe' }, { [MI.KEY]: 'marimba' }].forEach((init) => {
+    const tr = SCREEN.tracks(mem(init));
+    assert.equal(tr.kid.family, 'percussion');
+    const html = SCREEN.renderHtml(SCREEN.createState(0, true), tr);
+    assert.doesNotMatch(html, /קוֹרָה|kora/);
+    assert.match(html, /גיטרה/);
+  });
+  const st = SCREEN.createState(0, false), tr = SCREEN.tracks(mem({}));
+  assert.doesNotMatch(SCREEN.renderHtml(st, tr), /קוֹרָה|kora|data-tap=/);
+  assert.equal(SCREEN.answer(st, String(GG.gridArea(st.ex.rows, st.ex.cols))).status, 'right');
+  const plan = GG.areaPlan(st.ex.rows, st.ex.cols, tr.trackVoice);
+  ME.setMuted(true);
+  try { assert.doesNotThrow(() => JAM.playNotes(plan).stop()); } finally { ME.setMuted(false); }
+  assert.doesNotThrow(() => JAM.playNotes(plan).stop()); // Node: no AudioContext at all
+  assert.equal(JAM.feedback(true, false), null);
+});

@@ -130,3 +130,21 @@ test('LoopStack is reachable: card in the music games tab, scripts, router, prec
   const sw = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
   ['loopStack.js', 'LoopStackScreen.js'].forEach((f) => assert.ok(sw.includes(f), f));
 });
+
+test('the rendered layers for a marimba or djembe child never show kora, and work with audio muted or missing (Refs #665)', () => {
+  const JAM = require('../src/components/jamKit.js'), ME = require('../src/lib/musicEngine.js');
+  const st = S.createState(0, true), ex = st.ex;
+  ['marimba', 'djembe'].forEach((child) => {
+    const names = LS.layerInstruments(ex.c, child, 'percussion').map((id) => JAM.instrument(id).he);
+    const html = S.renderHtml(st, names);
+    assert.doesNotMatch(html, /קוֹרָה|kora/, child);
+    assert.match(html, /גיטרה/, child);
+  });
+  const off = S.createState(0, false);
+  assert.doesNotMatch(S.renderHtml(off, []), /קוֹרָה|data-act="play"/);
+  assert.equal(S.check(off, String(LS.volume(ex.a, ex.b, ex.c))).status, 'right');
+  const plan = LS.stackPlan(ex.a, ex.b, ex.c, () => 'woodBar');
+  ME.setMuted(true);
+  try { assert.doesNotThrow(() => JAM.playNotes(plan).stop()); } finally { ME.setMuted(false); }
+  assert.doesNotThrow(() => JAM.playNotes(plan).stop()); // Node: no AudioContext at all
+});
