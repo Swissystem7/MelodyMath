@@ -1232,7 +1232,7 @@ function varyTopicExercise(topicId, item, round) {
   const rounds = typeof PLAN_PER_SKILL === 'number' ? PLAN_PER_SKILL : 6;
   const made = MM_VARIETY.generateVariant(Object.assign({}, item, { topicId: topicId }), round || 0, { seed: seed, rounds: rounds });
   if (!made) return item;
-  if (typeof made.answer === 'number' && made.exerciseType === MM_VARIETY.TOPIC_TYPES[topicId]) {
+  if (made.prompt !== item.prompt && typeof made.answer === 'number' && made.exerciseType === MM_VARIETY.TOPIC_TYPES[topicId]) {
     const range = MM_VARIETY.getTopicRange(topicId);
     if (made.answer < range.min || made.answer > range.max) return item;
   }
