@@ -2928,4 +2928,6 @@ try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.
 <script>/* ?topic=mm-cur-56&screen=1 opens LoopStack. Its own map, not progression.js SCREENS (#798). */
 try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_LOOP_STACK.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 <script src="src/lib/noteLengthLine.js"></script><script src="src/components/NoteLengthLineScreen.js"></script>
+<script>/* ?topic=mm-cur-42&screen=1 opens NoteLengthLine. Its own map, not progression.js SCREENS (#798). */
+try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_NOTE_LENGTH_LINE.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 </body></html>
