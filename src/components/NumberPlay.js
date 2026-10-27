@@ -49,6 +49,12 @@
       const a = +sub[1], b = +sub[2];
       return inRange(a) && inRange(b) && b <= a ? { op: 'subtraction', groups: [a, b] } : null;
     }
+    // Fair sharing (Carpenter et al. 1999): a ÷ b deals a sounds into b equal groups.
+    const div = p.match(/(\d+)\s*[÷:]\s*(\d+)/);
+    if (div) {
+      const a = +div[1], b = +div[2];
+      return inRange(b) && a <= 100 && a % b === 0 && inRange(a / b) ? { op: 'division', groups: groupsOf(b, a / b) } : null;
+    }
     const mul = p.match(/(\d+)\s*[×xX*]\s*(\d+)/);
     if (mul) {
       const a = +mul[1], b = +mul[2];
@@ -128,14 +134,15 @@
       const sounds = parts.reduce(function (s, p) { return s + p.n; }, 0);
       const value = parts.reduce(function (s, p) { return s + p.n * p.v; }, 0);
       const pure = parts.length === 1;
+      const take = parsed.op === 'subtraction' && gi === 1;
       const hzGroup = pure && parts[0].v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
-      groups.push({ index: gi, count: pure ? parts[0].n : sounds, each: pure ? parts[0].v : 1, value: value, startIndex: notes.length, instrument: v.instrument, family: v.family, voice: v.voice, hz: hzGroup, he: v.he });
+      groups.push({ index: gi, count: pure ? parts[0].n : sounds, each: pure ? parts[0].v : 1, value: value, startIndex: notes.length, instrument: v.instrument, family: v.family, voice: v.voice, hz: hzGroup, he: v.he, take: take });
       let heard = 0;
       parts.forEach(function (p) {
         const hz = p.v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
         for (let k = 0; k < p.n; k++) {
           heard += 1;
-          notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: p.v, inGroup: heard, groupCount: sounds });
+          notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: p.v, inGroup: heard, groupCount: sounds, take: take });
           t += beat;
         }
       });
@@ -150,7 +157,7 @@
       let dots = '';
       plan.notes.forEach(function (n) {
         if (n.groupIndex !== gi) return;
-        dots += '<span class="np-dot' + (n.value === 10 ? ' np-ten' : '') + '" data-value="' + n.value + '" data-group="' + gi + '" data-i="' + n.index + '">' + (n.value === 10 ? '10' : '') + '</span>';
+        dots += '<span class="np-dot' + (n.value === 10 ? ' np-ten' : '') + (n.take ? ' np-take' : '') + '" data-value="' + n.value + '" data-group="' + gi + '" data-i="' + n.index + '">' + (n.value === 10 ? '10' : '') + '</span>';
       });
       return '<span class="np-group" data-group="' + gi + '">' + dots + '</span>' + (gi < plan.groups.length - 1 ? '<span class="np-gap" aria-hidden="true"></span>' : '');
     }).join('');
@@ -182,13 +189,26 @@
     function go() {
       if (handle && handle.stop) handle.stop();
       const dots = container.querySelectorAll('.np-dot');
-      Array.prototype.forEach.call(dots, function (d) { d.classList.remove('lit'); });
-      let heard = 0;
+      Array.prototype.forEach.call(dots, function (d) { d.classList.remove('lit'); d.classList.remove('taken'); });
+      let heard = 0, taken = 0;
+      const lit = [];
       handle = play(plan, function (n, i) {
+        if (n.take) {
+          // Take-from: each taken sound dims one circle of the same value counted before it.
+          taken += n.value || 1;
+          if (dots[i]) dots[i].classList.add('taken');
+          let k = lit.length - 1;
+          while (k >= 0 && plan.notes[lit[k]].value !== n.value) k--;
+          const d = k >= 0 ? dots[lit.splice(k, 1)[0]] : null;
+          if (d) { d.classList.remove('lit'); d.classList.add('taken'); }
+          if (live) live.textContent = 'לקחנו ' + taken + ', נשארו ' + (heard - taken);
+          return;
+        }
         if (dots[i]) dots[i].classList.add('lit');
+        lit.push(i);
         heard += n.value || 1;
         if (live) live.textContent = 'נשמעו ' + heard + ' מתוך ' + plan.totalValue;
-      }, function () { if (live) live.textContent = 'נגמרו ' + plan.totalValue + ' צלילים'; });
+      }, function () { if (live) live.textContent = plan.op === 'subtraction' ? 'נשארו ' + (heard - taken) : 'נגמרו ' + plan.totalValue + ' צלילים'; });
     }
     if (btn) btn.addEventListener('click', go);
     return { plan: plan, play: go, stop: function () { if (handle && handle.stop) handle.stop(); } };

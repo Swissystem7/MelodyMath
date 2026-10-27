@@ -246,3 +246,37 @@ test('fractions, decimals, percents and numbers above 20 are left alone (#686)',
   });
   assert.equal(NP.mount({ innerHTML: 'x', classList: { add: function () {}, remove: function () {} } }, { prompt: '3/4', skill: 'fractions' }), null);
 });
+
+test('a ÷ b deals a sounds into b equal groups; remainders and big quotients are skipped (#720)', () => {
+  const plan = NP.extractNumberPlan({ prompt: '12 ÷ 3 = ?', skill: 'division' }, { bpm: 60 });
+  assert.equal(plan.op, 'division');
+  assert.equal(plan.groups.length, 3);
+  assert.ok(plan.groups.every(function (g, i) { return g.count === 4 && (i === 0 || plan.notes[g.startIndex].at - plan.notes[g.startIndex - 1].at >= plan.beat * 2); }));
+  assert.equal(plan.totalValue, 12);
+  assert.equal(dots(NP.renderHtml(plan)), 12);
+  assert.equal(NP.extractNumberPlan({ prompt: '10 : 2 = ?' }).groups.length, 2);
+  assert.equal(NP.extractNumberPlan({ prompt: 'אם 6 × 7 = 42, אז 42 ÷ 6 = ?' }).op, 'division');
+  assert.equal(NP.extractNumberPlan({ prompt: '13 ÷ 4 = ?' }), null);
+  assert.equal(NP.extractNumberPlan({ prompt: '84 ÷ 2 = ?' }), null);
+  assert.equal(NP.extractNumberPlan({ prompt: 'מה השעה 10:30?' }), null);
+});
+
+test('subtraction takes the subtrahend away: its sounds dim counted circles (#720)', () => {
+  const plan = NP.extractNumberPlan({ prompt: '5 - 2 = ?' }, { bpm: 60 });
+  assert.ok(!plan.groups[0].take && plan.groups[1].take);
+  assert.deepEqual(plan.notes.map(function (n) { return !!n.take; }), [false, false, false, false, false, true, true]);
+  assert.equal((NP.renderHtml(plan).match(/np-take/g) || []).length, 2);
+  assert.ok(NP.extractNumberPlan({ prompt: '5 + 2 = ?' }).notes.every(function (n) { return !n.take; }));
+  const prev = global.MM_JAM;
+  global.MM_JAM = { playNotes: function (notes, onNote, onEnd) { notes.forEach(function (n, i) { onNote(n, i); }); onEnd(); return { stop: function () {} }; } };
+  try {
+    const btn = { addEventListener: function (type, fn) { btn.click = fn; } };
+    const live = { textContent: '' };
+    const built = plan.notes.map(function () { const s = new Set(); return { classList: { add: function (c) { s.add(c); }, remove: function (c) { s.delete(c); }, has: function (c) { return s.has(c); } } }; });
+    const box = { innerHTML: '', classList: { add: function () {}, remove: function () {} }, querySelector: function (sel) { return sel.indexOf('play-numbers') >= 0 ? btn : live; }, querySelectorAll: function () { return built; } };
+    NP.mount(box, { prompt: '5 - 2 = ?' }, { bpm: 60 });
+    btn.click();
+    assert.deepEqual(built.map(function (d) { return d.classList.has('lit') ? 'lit' : d.classList.has('taken') ? 'taken' : '-'; }), ['lit', 'lit', 'lit', 'taken', 'taken', 'taken', 'taken']);
+    assert.match(live.textContent, /נשארו 3/);
+  } finally { global.MM_JAM = prev; }
+});

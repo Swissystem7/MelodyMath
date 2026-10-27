@@ -58,3 +58,5 @@
 .np-dot[data-group="1"].lit{background:var(--pink)}
 .np-dot[data-group="2"].lit{background:var(--mint)}
 .np-gap{display:inline-block;width:12px}
+.np-dot.np-take{border-style:dashed}
+.np-dot.taken{background:var(--card);opacity:.35;text-decoration:line-through}
