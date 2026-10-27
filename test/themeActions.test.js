@@ -29,6 +29,13 @@ test('phone tab row is one scrolling line', () => {
   assert.match(phone, /\.tab \{ flex: none;/);
 });
 
+// 27.10.2026, Chromium 375×667: margin-inline −18px against the 12px wrap
+// padding made nav.tabs 387px and body.scrollWidth 381.
+test('at 480px the tab row bleeds only as far as the 12px page padding', () => {
+  const narrow = theme.slice(theme.indexOf('@media (max-width: 480px)'));
+  assert.match(narrow, /\.tabs \{[^}]*margin-inline: -12px/);
+});
+
 test('#507: no floating notes; reduced motion stops the sheen and the answer pop', () => {
   assert.doesNotMatch(theme, /body::(before|after)/);
   const calm = theme.slice(theme.indexOf('@media (prefers-reduced-motion: reduce)'));

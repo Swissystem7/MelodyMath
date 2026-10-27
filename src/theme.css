@@ -331,6 +331,10 @@ summary:focus-visible {
   .tab { flex: none; scroll-snap-align: start; }
   .card { padding: 18px 16px; }
 }
+/* 480px page padding is 12px. A −18px bleed is 387px wide on a 375px phone. */
+@media (max-width: 480px) {
+  .tabs { margin-inline: -12px; padding-inline: 12px; scroll-padding-inline: 12px; }
+}
 /* Fingers, not mice: every control at least 48px tall. */
 @media (pointer: coarse) {
   button, .primary, .tab, .secondary, input, select { min-height: 48px; }
