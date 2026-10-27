@@ -109,3 +109,29 @@ test('exercises in index.html are age-appropriate for elementary school (grades 
     assert.equal(JSON.stringify([row[2], row[3], row[5]]), JSON.stringify(want));
   }
 });
+
+test('אתגר ו׳ draws the EXTRA exercises, and a fast tempo is four beats', () => {
+  assert.match(indexHtml, /data-level="4"[^>]*>\s*<strong>אתגר ו׳<\/strong>/);
+  const raw = vm.runInNewContext(indexHtml.match(/const exercises=(\[[\s\S]*?\])\.map/)[1]);
+  assert.equal(raw.filter(r => r[7] === 'EXTRA').some(r => String(r[4]).includes('BPM')), false);
+  const exercises = raw.map(([id, level, mathTopic, musicConcept, prompt, answer, hint, extra, ref]) => (
+    { id, level, mathTopic, musicConcept, prompt, answer, hint, extra: extra === 'EXTRA', ref }
+  ));
+  const lines = ['practicePool', 'extraTempoPreview'].map((name) => {
+    const line = indexHtml.split('\n').find((l) => l.startsWith('function ' + name + '('));
+    assert.ok(line, name);
+    return line;
+  });
+  const sandbox = { exercises, chosenLevel: 1 };
+  vm.createContext(sandbox);
+  vm.runInContext(lines.join('\n'), sandbox);
+  assert.equal(sandbox.practicePool().some((x) => x.extra), false);
+  sandbox.chosenLevel = 4;
+  const challenge = sandbox.practicePool();
+  assert.equal(challenge.length, 10);
+  assert.equal(challenge.every((x) => x.extra && x.level === 4), true);
+  const fast = exercises.find((x) => x.answer === 240);
+  assert.equal(JSON.stringify(sandbox.extraTempoPreview(fast)), JSON.stringify({ groups: [4], bpm: 240 }));
+  assert.equal(sandbox.extraTempoPreview(exercises.find((x) => x.answer === 8)), null);
+  assert.match(indexHtml, /playCountClicks\(tempo\.groups,tempo\.bpm\)/);
+});
