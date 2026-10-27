@@ -91,6 +91,8 @@ const ASSETS = [
   './src/lib/music/percentMix.js',
   './src/components/PercentMixPad.js',
   './src/components/EnsembleStudio.js',
+  './src/lib/music/grooveGrid.js',
+  './src/components/GrooveGridScreen.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/lib/exercises/tapTempoMean.js',
