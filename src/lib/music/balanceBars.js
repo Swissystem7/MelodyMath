@@ -16,6 +16,9 @@
   const WAY = 'balanceBars', MECHANISM = FB.MECHANISM, BAR_SEC = 2.4, BLANK = '☐';
   const SCREEN = { 'mm-cur-31': 'bbCard', 'mm-cur-39': 'bbCard' };
   const HZ = [262, 392]; // C4 and G4: one pitch per side, both above 220 Hz.
+  // Unequal sides must end far enough apart for a child to hear it (#830):
+  // at least 250 ms and at least 15% of the bar, whichever is larger.
+  const MIN_GAP_SEC = Math.max(0.25, 0.15 * BAR_SEC);
 
   // One side, as printed in the bank: digits with thousands commas, + − × :,
   // brackets. A small parser, never eval. null when it does not read.
@@ -91,6 +94,16 @@
     return notes.sort(function (a, b) { return a.at - b.at; });
   }
 
+  // How far apart the two ends sound, in seconds (0 for equal sides).
+  function endGap(left, right) {
+    const big = Math.max(left, right);
+    return big > 0 ? BAR_SEC * Math.abs(left - right) / big : 0;
+  }
+
+  function audibleGap(left, right) {
+    return left === right || endGap(left, right) >= MIN_GAP_SEC;
+  }
+
   // Bar widths in percent of the bigger side, for the picture.
   function barWidths(left, right) {
     const big = Math.max(left, right);
@@ -102,7 +115,7 @@
   const TARGETS = [
     { grade: 'ד', topic: 'mm-cur-31', kind: 'fill', expr: '☐ + 2,500 = 7,000', answer: 4500 },
     { grade: 'ד', topic: 'mm-cur-31', kind: 'fill', expr: '25 × 4 = 50 × ☐', answer: 2 },
-    { grade: 'ד', topic: 'mm-cur-31', kind: 'sign', expr: '8 × 7 ? 50 + 5', answer: '>' },
+    { grade: 'ד', topic: 'mm-cur-31', kind: 'sign', expr: '8 × 7 ? 40 + 5', answer: '>' },
     { grade: 'ה', topic: 'mm-cur-39', kind: 'fill', expr: '☐ : 8 = 125', answer: 1000 },
     { grade: 'ה', topic: 'mm-cur-39', kind: 'fill', expr: '36 × 25 = 9 × ☐', answer: 100 },
     { grade: 'ה', topic: 'mm-cur-39', kind: 'sign', expr: '999 × 0 ? 1 × 1', answer: '<' },
@@ -127,5 +140,5 @@
     return Object.prototype.hasOwnProperty.call(SCREEN, id) ? SCREEN[id] : null;
   }
 
-  return { WAY, MECHANISM, BAR_SEC, BLANK, SCREEN, HZ, TARGETS, NO_MUSIC_CHECK_ITEMS, evalSide, parse, signOf, sides, fillCheck, balancePlan, barWidths, plainOk, screenForTopic };
+  return { WAY, MECHANISM, BAR_SEC, MIN_GAP_SEC, BLANK, SCREEN, HZ, TARGETS, NO_MUSIC_CHECK_ITEMS, evalSide, parse, signOf, sides, fillCheck, balancePlan, endGap, audibleGap, barWidths, plainOk, screenForTopic };
 });

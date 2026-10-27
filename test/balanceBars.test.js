@@ -50,14 +50,27 @@ test('two bars start together: equal sides end together, the bigger one sounds o
   assert.equal(ends.length, 2);
   assert.equal(ends[0].at, ends[1].at);
   assert.ok(eq.filter((n) => n.held).every((n) => n.at === 0 && n.dur === BB.BAR_SEC));
-  const gt = BB.balancePlan(56, 55, ['a', 'b']);
+  const gt = BB.balancePlan(56, 45, ['a', 'b']);
   const end = (k) => gt.find((n) => n.end && n.side === k).at;
-  assert.ok(end(0) > end(1), '56 sounds on after 55');
+  assert.ok(end(0) > end(1), '56 sounds on after 45');
+  assert.ok(end(0) - end(1) >= Math.max(0.25, 0.15 * BB.BAR_SEC), 'a gap a child can hear');
   assert.equal(end(0), BB.BAR_SEC, 'the bigger side is one bar');
   assert.deepEqual(gt.map((n) => n.at), gt.map((n) => n.at).slice().sort((a, b) => a - b), 'sorted for playNotes');
   assert.ok(gt.every((n) => n.hz >= 220), 'audible on a phone');
   assert.equal(BB.balancePlan(7000, 2500, ['a', 'b'], 0).filter((n) => n.side === 0).length, 0, 'the side with ☐ stays silent');
   assert.deepEqual(BB.balancePlan(0, 0), []);
+});
+
+test('#830: every sign exercise ends its two bars at least 250 ms and 15% of the bar apart', () => {
+  assert.ok(BB.MIN_GAP_SEC >= 0.25 && BB.MIN_GAP_SEC >= 0.15 * BB.BAR_SEC);
+  assert.equal(BB.audibleGap(56, 55), false, '56 vs 55 is ~40 ms: not audible');
+  assert.ok(BB.endGap(56, 55) < 0.05);
+  BB.TARGETS.filter((t) => t.kind === 'sign').forEach((t) => {
+    const s = BB.sides(t.expr);
+    assert.ok(BB.audibleGap(s.left, s.right), t.expr);
+    const ends = BB.balancePlan(s.left, s.right, ['a', 'b']).filter((n) => n.end).map((n) => n.at);
+    if (ends.length === 2) assert.ok(Math.abs(ends[0] - ends[1]) >= BB.MIN_GAP_SEC, t.expr);
+  });
 });
 
 test('fillBar on the balance: the missing or extra part of the bar, as an exact fraction', () => {
