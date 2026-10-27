@@ -29,7 +29,7 @@ in the repository is missing from this file.
 | `bowed` | bowed strings | synthesised, sawtooth with vibrato | project code |
 | `breathy` | flutes and pipes | synthesised, sine + breath noise | project code |
 | `lowFlute` | low flute for hundreds, no topic | synthesised, low sine | project code |
-| `lowVoice` | low voice for tens, no topic | synthesised, low triangle | project code |
+| `lowClarinet` | low clarinet for tens, no topic | synthesised, low square | project code |
 | `reed` | reed instruments | synthesised, filtered square | project code |
 | `horn` | horns (shofar) | synthesised | project code |
 | `drone` | drones (didgeridoo) | synthesised | project code |

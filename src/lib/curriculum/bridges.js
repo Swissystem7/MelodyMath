@@ -141,8 +141,8 @@
   // Above that, ten of one place is one of the next: 10 tenths = 1 one,
   // 10 ones = 1 ten, 10 tens = 1 hundred. Each place has its own instrument.
   // Ones stay a short percussion tap and tenths stay the xylophone. Tens are
-  // a low voice (lowVoice) and hundreds are a low flute (lowFlute). No topic
-  // lists either voice, and they are not the pattern exercise's sung note.
+  // a low clarinet (lowClarinet) and hundreds are a low flute (lowFlute).
+  // No topic lists either voice. Not the ukulele, and not a sung note.
   // A word, a clock time, or a number past 12 hundreds plays one soft listen
   // tone. That tone is a cue, not a quantity.
   function listenTone() {
@@ -152,7 +152,7 @@
     const one = voiceFor(mechanism);
     return {
       hundred: { voice: 'lowFlute', held: true, hz: 196, place: 'hundred' },
-      ten: { voice: 'lowVoice', held: true, hz: 146, place: 'ten' },
+      ten: { voice: 'lowClarinet', held: true, hz: 146, place: 'ten' },
       one: { voice: one, held: false, place: 'one' },
       tenth: { voice: one === 'xylo' ? 'bell' : 'xylo', held: false, place: 'tenth' },
     };
@@ -212,7 +212,7 @@
     if (!d || typeof d.createElement !== 'function') return null;
     const key = d.createElement('p');
     key.className = 'topic-bridge-key';
-    key.textContent = 'חליל נמוך = 100, זמרה נמוכה = 10, נקישה קצרה = 1, קסילופון = עשיריות (למשל 7.70).';
+    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, קסילופון = עשיריות (למשל 7.70).';
     const input = d.createElement('input');
     input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
     const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;

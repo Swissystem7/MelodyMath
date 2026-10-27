@@ -156,21 +156,22 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   const twenty = bridges.bridgeForLink('mm-cur-1', 'mm-cur-12');
   assert.equal(twenty.answer, 20);
   assert.equal(twenty.sound.length, 2);
-  assert.equal(twenty.sound.every((ev) => ev.voice === 'lowVoice' && ev.place === 'ten'), true);
+  assert.equal(twenty.sound.every((ev) => ev.voice === 'lowClarinet' && ev.place === 'ten'), true);
   const hundred = bridges.soundPlan('units', 100);
   assert.equal(hundred.length, 1);
   assert.equal(hundred[0].voice, 'lowFlute');
   assert.equal(hundred[0].place, 'hundred');
   const mixed = bridges.soundPlan('steady beat', 111.1);
   assert.deepEqual(mixed.map((ev) => ev.place), ['hundred', 'ten', 'one', 'tenth']);
-  assert.deepEqual(mixed.map((ev) => ev.voice), ['lowFlute', 'lowVoice', 'drum', 'xylo']);
+  assert.deepEqual(mixed.map((ev) => ev.voice), ['lowFlute', 'lowClarinet', 'drum', 'xylo']);
   const usedByTopic = new Set();
   Object.keys(instruments.TOPICS).forEach((topic) => {
     instruments.forTopic(topic).forEach((inst) => usedByTopic.add(inst.voice));
   });
   assert.equal(usedByTopic.has('lowFlute'), false);
-  assert.equal(usedByTopic.has('lowVoice'), false);
+  assert.equal(usedByTopic.has('lowClarinet'), false);
   assert.equal(mixed[0].voice === 'pluck' || mixed[1].voice === 'breathy', false);
+  assert.equal(mixed[1].voice === 'breathy', false);
   const carried = bridges.soundPlan('steady beat', 0.999);
   assert.equal(carried.length, 1);
   assert.equal(carried[0].place, 'one');
@@ -215,8 +216,8 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   const box = { ownerDocument: d, _bridgeOk: null, appendChild(ch) { this.children = this.children || []; this.children.push(ch); } };
   const ui = bridges.mountAnswer(box, entry);
   assert.match(ui.key.textContent, /חליל נמוך = 100/);
-  assert.match(ui.key.textContent, /זמרה נמוכה = 10/);
-  assert.equal(/יוקללה|ukulele|pluck/.test(ui.key.textContent), false);
+  assert.match(ui.key.textContent, /קלרינט נמוך = 10/);
+  assert.equal(/יוקללה|ukulele|pluck|זמרה|breathy/.test(ui.key.textContent), false);
   assert.match(ui.key.textContent, /נקישה קצרה = 1/);
   assert.match(ui.key.textContent, /קסילופון = עשיריות/);
   assert.match(ui.key.textContent, /7\.70/);
