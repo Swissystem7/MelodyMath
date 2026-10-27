@@ -156,5 +156,6 @@ test('banks include pattern completion and worked example, and index.html wires 
   assert.ok(indexHtml.includes('MM_PATTERN_WORKED.renderWorkedExampleWidget'), 'worked example widget must be wired in renderWidget');
   assert.equal(indexHtml.includes('fill(item.total)'), false);
   assert.equal(patternItems[0].answer, 'מי');
+  assert.ok(patternItems[0].research.includes('10.1080/00220973.2020.1799316') && workedItems[0].research.includes('10.1207/s1532690xci0201_3') && /if \(raw\.a != null\)/.test(fs.readFileSync(path.join(__dirname, '..', 'src/lib/banks.js'), 'utf8')));
   assert.equal(PW.shownText(patternItems[0].pattern), 'דו➔מי➔דו➔?');
 });

@@ -128,7 +128,7 @@
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
     seq.className = 'pattern-sequence';
-    seq.textContent = shownText(ex.pattern);
+    seq.textContent = shownText(ex.pattern) + (ex.research ? ' · ' + ex.research : '');
     const hint = hintNode(d);
     const row = d.createElement('div');
     row.className = 'pattern-choices';
@@ -164,7 +164,7 @@
       wrap.className = 'worked-example-box';
       if (stage === 'demo') {
         const line = d.createElement('p');
-        line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total;
+        line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total + (ex.research ? ' · ' + ex.research : '');
         wrap.appendChild(line);
         wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));

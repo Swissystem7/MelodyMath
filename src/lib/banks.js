@@ -251,7 +251,7 @@
       stage: extra.stage,
       a: extra.a,
       b: extra.b,
-      total: extra.total,
+      total: extra.total, research: extra.research,
     };
   }
 
@@ -1973,8 +1973,8 @@
 
   // ---------- תרגילי השלמת תבנית ודוגמה פתורה (#670, Refs #665) ----------
   RAW.push(
-    I('א', 'counting', 'דו, מי, דו — איזה צליל משלים את התבנית?', 'מי', 'אחרי דו בא מי, ושוב דו, ואז מי.', { standard: ST.PATTERN, strand: STRAND.NUM, level: 1, kind: 'pattern_completion', pattern: ['דו', 'מי', 'דו', 'מי'], choices: ['דו', 'מי', 'סול'] }),
-    I('א', 'addition', 'ראו: 3 תופים ועוד 2 פעמונים הם 5 צלילים.', 5, '3 ועוד 2 הם 5 פעימות', { standard: ST.ADD10, strand: STRAND.OP, level: 1, kind: 'worked_example', a: 3, b: 2, total: 5, stage: 'demo' })
+    I('א', 'counting', 'דו, מי, דו — איזה צליל משלים את התבנית?', 'מי', 'אחרי דו בא מי, ושוב דו, ואז מי.', { standard: ST.PATTERN, strand: STRAND.NUM, level: 1, kind: 'pattern_completion', pattern: ['דו', 'מי', 'דו', 'מי'], choices: ['דו', 'מי', 'סול'], research: 'Azaryahu & Adi-Japha 2020, Journal of Experimental Education. https://doi.org/10.1080/00220973.2020.1799316' }),
+    I('א', 'addition', 'ראו: 3 תופים ועוד 2 פעמונים הם 5 צלילים.', 5, '3 ועוד 2 הם 5 פעימות', { standard: ST.ADD10, strand: STRAND.OP, level: 1, kind: 'worked_example', a: 3, b: 2, total: 5, stage: 'demo', research: 'Sweller & Cooper 1985, Cognition and Instruction 2(1), 59–89. https://doi.org/10.1207/s1532690xci0201_3' })
   );
 
   // ---------- כיתה ד׳ · מספרים מעורבים ושברים גדולים מ־1 (#709, mm-cur-33) ----------
@@ -2256,9 +2256,10 @@
     if (raw.pattern) it.pattern = raw.pattern;
     if (raw.choices) it.choices = raw.choices;
     if (raw.stage) it.stage = raw.stage;
-    if (raw.a) it.a = raw.a;
-    if (raw.b) it.b = raw.b;
-    if (raw.total) it.total = raw.total;
+    if (raw.research) it.research = raw.research;
+    if (raw.a != null) it.a = raw.a;
+    if (raw.b != null) it.b = raw.b;
+    if (raw.total != null) it.total = raw.total;
     if (raw.explorer) it.explorer = raw.explorer;
     if (raw.noMusic) it.noMusic = true;
     SHIPPED.push(it);
