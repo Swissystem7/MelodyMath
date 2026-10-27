@@ -48,6 +48,7 @@ const ASSETS = [
   './src/lib/pace.js',
   './src/lib/streak.js',
   './src/lib/predict.js',
+  './src/lib/openCue.js',
   './src/lib/setlistGoal.js',
   './src/lib/curriculum.js',
   './src/lib/remediation.js',
