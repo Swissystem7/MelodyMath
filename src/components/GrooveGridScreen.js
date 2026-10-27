@@ -1,6 +1,4 @@
-// MelodyMath — GrooveGridScreen: the areaScore grid of grade ה׳ (mm-cur-47) as
-// a sequencer, with the perimeter loop as EXTRA and a no-music check last.
-// Refs #591 #665.
+// MelodyMath — GrooveGridScreen: areaScore grid, perimeter EXTRA, no-music check last. Refs #591 #665.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -16,8 +14,6 @@
   function myInstrument() { return root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js'); }
   function instData() { return typeof root.instrumentById === 'function' ? root : require('../lib/instruments.js'); }
 
-  // { kid, partner, families, trackVoice }: row 0 is the child's instrument
-  // (myInstrument.instrumentFor), every other row a partner of another family.
   function tracks(storage) {
     const d = instData(), kid = d.instrumentById(myInstrument().instrumentFor(FALLBACK, null, storage)) || d.instrumentById(FALLBACK);
     const partner = d.instrumentById(GG.partnerFor(kid.family));

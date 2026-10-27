@@ -1,8 +1,6 @@
-// MelodyMath — GrooveGrid: area and perimeter as a sequencer grid, grade ה׳
-// (mm-cur-47). Refs #591. Not a new way: it is `areaScore` (ג׳ AREA up to ה׳
-// TRI/PARA_AREA), same name and sound, one sound per square, row after row
-// (a row is a track, a column a beat: equal groups). The perimeter loop over
-// the edge is its EXTRA. Above 12 a ten is one held sound, ones on woodClick.
+// MelodyMath — GrooveGrid, grade ה׳ areaScore (mm-cur-47). Refs #591 #665.
+// Up to 12: one sound per square, row by row. Above 12 a product is one held
+// note per row plus a wood click per column (4×6 ≠ 3×8). Perimeter is EXTRA.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -11,16 +9,15 @@
   'use strict';
 
   const WAY = 'areaScore', STEP = 0.22, TEN_DUR = 0.45, ONE_VOICE = 'woodClick';
-  const ROW_HZ = [262, 330, 392, 523, 659, 784], MIN_HZ = 220;
+  const ROW_HZ = [262, 330, 392, 523, 659, 784], MIN_HZ = 220, CLICK = 0.16, ROW_GAP = 0.36;
+  const SCREEN_FOR = { 'mm-cur-47': 'ggCard' };
 
   function voiceDefs() {
     if (root && root.VOICES) return root.VOICES;
     try { return require('../instrumentVoices.js').VOICES; } catch (e) { return {}; }
   }
 
-  // Moves hz by octaves into the band the voice's filter lets through, and
-  // never below MIN_HZ (a small speaker drops lower notes). A held ten at
-  // 110 Hz through drumHigh's 2500 Hz bandpass was silent (#591).
+  // Octaves into the voice filter, never below MIN_HZ (110 Hz on drumHigh was silent).
   function audibleHz(voice, hz) {
     const f = voiceDefs()[voice] && voiceDefs()[voice].filter;
     let out = Number(hz) > 0 ? Number(hz) : 262;
@@ -71,9 +68,7 @@
       perimeter: 2 * (a.rows + a.cols) + 2 * (b.rows + b.cols) - 2 * shared };
   }
 
-  // Up to 12 steps: one sound each, a track per row, each row's first accented.
-  // Above 12: one held sound per full ten (track and row pitch of its last
-  // square, lifted into that voice's band), then ones.
+  // Up to 12: one sound per step. Above 12 (perimeter): one held ten, then woodClick ones.
   function stepNotes(steps, trackVoice) {
     const notes = [];
     if (steps.length <= 12) {
@@ -94,9 +89,22 @@
     return notes;
   }
 
-  // trackVoice(row) → voice id. Returns null for a grid outside 1..12.
+  function rowNotes(rows, cols, trackVoice) {
+    const notes = [];
+    let at = 0;
+    for (let y = 0; y < rows; y++) {
+      const v = trackVoice(y), ids = [];
+      for (let x = 0; x < cols; x++) ids.push(y * cols + x);
+      notes.push({ at: at, voice: v, hz: audibleHz(v, ROW_HZ[y % ROW_HZ.length]), steps: ids, accent: true, held: true, dur: cols * CLICK, gain: 0.28, row: y });
+      for (let x = 0; x < cols; x++) notes.push({ at: at + x * CLICK, voice: ONE_VOICE, hz: audibleHz(ONE_VOICE, 1800), steps: [ids[x]], held: false, row: y });
+      at += cols * CLICK + ROW_GAP;
+    }
+    return notes;
+  }
+
   function areaPlan(rows, cols, trackVoice) {
     if (!gridArea(rows, cols)) return null;
+    if (rows * cols > 12) return rowNotes(rows, cols, trackVoice);
     const steps = [];
     for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) steps.push({ r: y, c: x });
     return stepNotes(steps, trackVoice);
@@ -105,10 +113,8 @@
     if (!gridArea(rows, cols)) return null;
     return stepNotes(perimeterPath(rows, cols), trackVoice);
   }
-  // Row 0 is the child's instrument, the other rows a partner of another family.
   function partnerFor(family) { return family === 'percussion' ? 'kora' : 'djembe'; }
 
-  // The exercises (4×6 and 3×8: same area, other loop), then the no-music check (#665).
   const TARGETS = [[3, 4, 'area'], [4, 6, 'area'], [3, 8, 'area'], [4, 6, 'perimeter'], [3, 8, 'perimeter']]
     .map(function (t) { return { rows: t[0], cols: t[1], ask: t[2] }; });
   const L = composeL({ rows: 2, cols: 3 }, { rows: 4, cols: 2 });
@@ -119,5 +125,5 @@
     { id: 'gg-nm-4', prompt: 'ומה ההיקף של צורת ה־L?', answer: L.perimeter },
   ];
 
-  return { WAY, ONE_VOICE, MIN_HZ, TARGETS, NO_MUSIC_CHECK_ITEMS, audibleHz, gridArea, perimeterPath, composeL, areaPlan, perimeterPlan, partnerFor };
+  return { WAY, ONE_VOICE, MIN_HZ, SCREEN_FOR, TARGETS, NO_MUSIC_CHECK_ITEMS, audibleHz, gridArea, perimeterPath, composeL, areaPlan, perimeterPlan, partnerFor };
 });
