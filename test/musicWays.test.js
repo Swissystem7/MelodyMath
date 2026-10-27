@@ -142,9 +142,9 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1247/1247', () => {
+test('every item of every grade has a music side: 1249/1249', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1247); // + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688)
+  assert.equal(all.length, 1249); // + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688) + 2 pattern and worked example items (#670)
   assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
