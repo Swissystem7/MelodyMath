@@ -81,3 +81,61 @@ test('lookups', () => {
   assert.ok(I.forTopic(t).every((x) => x.mechanism === I.TOPICS[t].mechanism));
   assert.deepEqual(I.forTopic('nope'), []);
 });
+
+test('instrument variety: each topic offers instruments from at least 2 of the 4 families (Refs #591)', () => {
+  const activeTopics = Object.keys(I.TOPICS);
+  activeTopics.forEach((topic) => {
+    const instruments = I.forTopic(topic);
+    assert.ok(instruments.length >= 2, topic + ' must offer at least 2 instruments');
+    const families = new Set(instruments.map((x) => x.family));
+    assert.ok(
+      families.size >= 2,
+      topic + ' must offer instruments from at least 2 families, got: ' + Array.from(families).join(', ')
+    );
+  });
+});
+
+test('regression guard: topics keep their instruments, except gankogui and kora leave patterns (Refs #740)', () => {
+  // Snapshot of what master offered. gankogui and kora are the exception:
+  // their method is polyrhythm (M4), so they voice lcm only. Patterns keeps
+  // one main method, melodic and rhythmic patterns (M6).
+  const MASTER_TOPIC_INSTRUMENTS = {
+    counting: ['taiko', 'cajon', 'tof', 'surdo', 'handbells', 'udu', 'balalaika', 'didgeridoo'],
+    nextPrev: ['cajon', 'tof', 'handbells'],
+    skipCounting: ['djembe', 'tabla', 'mbira', 'charango'],
+    multiplication: ['djembe', 'tabla', 'mridangam', 'bodhran', 'riq', 'mbira', 'charango', 'qanun'],
+    division: ['tabla', 'mridangam', 'bodhran', 'qanun'],
+    fractions: ['darbuka', 'erhu', 'ukulele', 'shofar', 'ney', 'recorder', 'accordion'],
+    decimals: ['darbuka', 'erhu', 'ney', 'recorder'],
+    patterns: [
+      'conga', 'gamelan', 'kalimba', 'marimba', 'balafon', 'steelPan',
+      'claves', 'oud', 'sitar', 'guzheng',
+      'violin', 'shakuhachi', 'bagpipes', 'dizi', 'piano', 'harmonium'
+    ],
+    symmetry: ['marimba', 'dizi'],
+    lcm: [],
+    numberLine: ['xylophone', 'koto', 'guitar', 'panFlute', 'pipeOrgan'],
+    data: ['cajon'],
+    percent: ['darbuka', 'erhu']
+  };
+
+  for (const [topic, masterList] of Object.entries(MASTER_TOPIC_INSTRUMENTS)) {
+    const currentIds = new Set(I.forTopic(topic).map((x) => x.id));
+    for (const instId of masterList) {
+      assert.ok(
+        currentIds.has(instId),
+        `Topic "${topic}" must not lose instrument "${instId}" vs master`
+      );
+    }
+  }
+
+  ['gankogui', 'kora'].forEach((id) => {
+    const x = I.instrumentById(id);
+    assert.equal(x.mechanism, 'M4', id + ' is the lcm polyrhythm, not a patterns method');
+    assert.equal(x.optional, true, id);
+    assert.equal(x.evidence, 'weak', id);
+    assert.deepEqual(x.mathTopics, ['lcm'], id + ' voices lcm only');
+    assert.equal(I.forTopic('patterns').some((y) => y.id === id), false, id + ' stays off patterns');
+    assert.equal(I.forTopic('lcm').some((y) => y.id === id), true, id + ' voices lcm');
+  });
+});
