@@ -137,47 +137,74 @@
     const gn = Number(g), wn = Number(w);
     return Number.isFinite(gn) && Number.isFinite(wn) && gn === wn;
   }
-  // Counts up to 12 play one tap each. Larger numbers play a low held note per
-  // ten and a tap per one (then per hundred, when the tens no longer fit).
-  // A word, a clock time, or a number too big to count plays one soft listen
+  // Counts up to 12 play one tap each, so a child can count them.
+  // Above that, ten of one place is one of the next: 10 tenths = 1 one,
+  // 10 ones = 1 ten, 10 tens = 1 hundred. Each place has its own instrument.
+  // Ones stay a short percussion tap and tenths stay the xylophone. Tens are
+  // a sung note (breathy, through playVoice) and hundreds are the ukulele
+  // (pluck, the strings voice already used for fractions). Those two are
+  // added; they do not replace the percussion taps.
+  // A word, a clock time, or a number past 12 hundreds plays one soft listen
   // tone. That tone is a cue, not a quantity.
   function listenTone() {
     return [{ at: 0, voice: 'bell', held: false, hz: 523.25, listen: true }];
   }
+  function placeVoices(mechanism) {
+    const one = voiceFor(mechanism);
+    return {
+      hundred: { voice: 'pluck', held: true, hz: 196, place: 'hundred' },
+      ten: { voice: 'breathy', held: true, hz: 392, place: 'ten' },
+      one: { voice: one, held: false, place: 'one' },
+      tenth: { voice: one === 'xylo' ? 'bell' : 'xylo', held: false, place: 'tenth' },
+    };
+  }
   function soundPlan(mechanism, answer) {
-    const voice = voiceFor(mechanism);
     const s = String(answer == null ? '' : answer).trim().replace(/,/g, '.');
     if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return listenTone();
     const n = Number(s);
     if (!(n > 0) || !Number.isFinite(n)) return listenTone();
-    const whole = Math.floor(n + 1e-9);
-    const tenths = Math.round((n - whole) * 10);
+    let whole = Math.floor(n + 1e-9);
+    let tenths = Math.round((n - whole) * 10);
+    if (tenths >= 10) { whole += Math.floor(tenths / 10); tenths %= 10; }
+    const places = placeVoices(mechanism);
     const events = [];
     function add(count, spec) {
       for (let i = 0; i < count; i++) events.push(spec);
     }
-    if (tenths === 0 && whole <= 12) add(whole, { voice: voice, held: false });
-    else if (Math.floor(whole / 10) <= 12) {
-      add(Math.floor(whole / 10), { voice: voice, held: true, hz: 110 });
-      add(whole % 10, { voice: voice, held: false });
+    if (tenths === 0 && whole <= 12) add(whole, places.one);
+    else if (whole < 100) {
+      add(Math.floor(whole / 10), places.ten);
+      add(whole % 10, places.one);
     } else if (Math.floor(whole / 100) <= 12) {
-      add(Math.floor(whole / 100), { voice: 'xylo', held: true, hz: 82 });
-      add(Math.floor(whole / 10) % 10, { voice: voice, held: true, hz: 110 });
-      add(whole % 10, { voice: voice, held: false });
+      add(Math.floor(whole / 100), places.hundred);
+      add(Math.floor(whole / 10) % 10, places.ten);
+      add(whole % 10, places.one);
     } else return listenTone();
-    add(tenths, { voice: voice === 'xylo' ? 'bell' : 'xylo', held: false });
+    add(tenths, places.tenth);
     const step = events.length <= 1 ? 0 : Math.min(0.22, 0.9 / (events.length - 1));
     return events.map(function (ev, i) {
-      return { at: Math.round(i * step * 1000) / 1000, voice: ev.voice, held: ev.held, hz: ev.hz };
+      return { at: Math.round(i * step * 1000) / 1000, voice: ev.voice, held: ev.held, hz: ev.hz, place: ev.place };
     });
   }
+  const PERCUSSION = { drum: true, bell: true, xylo: true };
   function play(entry, env) {
     const events = (entry && entry.sound) || [];
     const e = env || {};
     const tap = e.playTap || (typeof playTap === 'function' ? playTap : null);
-    if (typeof tap !== 'function') return events;
+    const sing = e.playVoice || (typeof playVoice === 'function' ? playVoice : null);
+    const ac = e.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
+    if (typeof tap !== 'function' && typeof sing !== 'function') return events;
     const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
-    events.forEach(function (ev) { later(function () { tap(ev.voice, { step: 0, hz: ev.hz != null ? ev.hz : (ev.held ? 110 : undefined) }); }, Math.round(ev.at * 1000)); });
+    events.forEach(function (ev) {
+      later(function () {
+        const hz = ev.hz != null ? ev.hz : (ev.held ? 110 : undefined);
+        if (!PERCUSSION[ev.voice] && typeof sing === 'function' && ac) {
+          sing(ac, ev.voice, hz, ac.currentTime || 0, null, ev.held ? { dur: 0.5 } : null);
+          return;
+        }
+        if (typeof tap === 'function') tap(ev.voice, { step: 0, hz: hz });
+      }, Math.round(ev.at * 1000));
+    });
     return events;
   }
   function mountAnswer(container, entry) {
@@ -186,7 +213,7 @@
     if (!d || typeof d.createElement !== 'function') return null;
     const key = d.createElement('p');
     key.className = 'topic-bridge-key';
-    key.textContent = 'תו ארוך = 10, נקישה קצרה = 1, קסילופון = עשיריות (למשל 7.70).';
+    key.textContent = 'יוקללה = 100, קול שר = 10, נקישה קצרה = 1, קסילופון = עשיריות (למשל 7.70).';
     const input = d.createElement('input');
     input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
     const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;
@@ -235,6 +262,6 @@
     bridgeForLink: bridgeForLink,
     bridgesForTopic: bridgesForTopic,
     bridgesEnteringTopic: bridgesEnteringTopic,
-    play: play, mountAnswer: mountAnswer,
+    play: play, mountAnswer: mountAnswer, soundPlan: soundPlan,
   };
 });
