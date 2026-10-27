@@ -1261,7 +1261,7 @@ function startTopicPractice(id,skill){
   rpRender();
   return true;
 }
-try{const q=new URLSearchParams(location.search);if(q.get('topic'))startTopicPractice(q.get('topic'),q.get('skill'));}catch(e){}
+try{const q=new URLSearchParams(location.search);if(q.get('topic'))document.addEventListener('DOMContentLoaded',function(){startTopicPractice(q.get('topic'),q.get('skill'));});}catch(e){}
 
 function renderCertificate(){
   const box=$('certSheet'); if(!box) return;
