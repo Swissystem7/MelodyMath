@@ -139,7 +139,7 @@ test('every target sounds in two families, including a split of 4 with no 10% ti
 test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', () => {
   assert.equal(P.myInstrument(), 'darbuka');
   const d = P.voicesFor('darbuka');
-  assert.deepEqual([d.voice, d.melody, d.partnerId], ['drumLow', 'pluck', 'ukulele']);
+  assert.deepEqual([d.voice, d.melody, d.partnerId], ['drumLow', 'bowed', 'erhu']);
   const piano = P.voicesFor('piano');
   assert.deepEqual([piano.id, piano.voice, piano.melody, piano.partnerId], ['piano', 'drumLow', 'keys', 'darbuka']);
   assert.notEqual(piano.family, piano.partnerFamily);
