@@ -62,7 +62,12 @@ test('no weak mechanism without the optional mark (dosage rule 2)', () => {
 test('one way per topic: every math topic is served by its own primary mechanism', () => {
   ALL.forEach((x) => x.mathTopics.forEach((t) => {
     assert.ok(I.TOPICS[t], x.id + ' unknown topic ' + t);
-    assert.equal(I.TOPICS[t].mechanism, x.mechanism, x.id + ' ' + t);
+    assert.equal(I.TOPICS[t].mechanism, I.mechanismFor(x, t), x.id + ' ' + t);
+  }));
+  // A per-topic override is only ever a weak way (optional play).
+  ALL.filter((x) => x.weakWays).forEach((x) => Object.keys(x.weakWays).forEach((t) => {
+    assert.ok(I.WEAK.includes(x.weakWays[t]), x.id + ' ' + t + ' override must be weak');
+    assert.ok(x.mathTopics.includes(t), x.id + ' ' + t + ' override for a listed topic');
   }));
   Object.keys(I.TOPICS).forEach((t) => {
     const m = I.TOPICS[t].mechanism;
@@ -95,10 +100,9 @@ test('instrument variety: each topic offers instruments from at least 2 of the 4
   });
 });
 
-test('regression guard: topics keep their instruments, except gankogui and kora leave patterns (Refs #740)', () => {
-  // Snapshot of what master offered. gankogui and kora are the exception:
-  // their method is polyrhythm (M4), so they voice lcm only. Patterns keeps
-  // one main method, melodic and rhythmic patterns (M6).
+test('regression guard: topics keep their instruments; gankogui and kora voice patterns and lcm (Refs #740)', () => {
+  // Snapshot of what master offered before #740. gankogui and kora keep
+  // patterns (M6) and also voice lcm, as optional play (M4, weak evidence).
   const MASTER_TOPIC_INSTRUMENTS = {
     counting: ['taiko', 'cajon', 'tof', 'surdo', 'handbells', 'udu', 'balalaika', 'didgeridoo'],
     nextPrev: ['cajon', 'tof', 'handbells'],
@@ -109,11 +113,11 @@ test('regression guard: topics keep their instruments, except gankogui and kora 
     decimals: ['darbuka', 'erhu', 'ney', 'recorder'],
     patterns: [
       'conga', 'gamelan', 'kalimba', 'marimba', 'balafon', 'steelPan',
-      'claves', 'oud', 'sitar', 'guzheng',
+      'claves', 'gankogui', 'oud', 'sitar', 'kora', 'guzheng',
       'violin', 'shakuhachi', 'bagpipes', 'dizi', 'piano', 'harmonium'
     ],
     symmetry: ['marimba', 'dizi'],
-    lcm: [],
+    lcm: ['gankogui', 'kora'],
     numberLine: ['xylophone', 'koto', 'guitar', 'panFlute', 'pipeOrgan'],
     data: ['cajon'],
     percent: ['darbuka', 'erhu']
@@ -131,11 +135,11 @@ test('regression guard: topics keep their instruments, except gankogui and kora 
 
   ['gankogui', 'kora'].forEach((id) => {
     const x = I.instrumentById(id);
-    assert.equal(x.mechanism, 'M4', id + ' is the lcm polyrhythm, not a patterns method');
-    assert.equal(x.optional, true, id);
-    assert.equal(x.evidence, 'weak', id);
-    assert.deepEqual(x.mathTopics, ['lcm'], id + ' voices lcm only');
-    assert.equal(I.forTopic('patterns').some((y) => y.id === id), false, id + ' stays off patterns');
+    assert.deepEqual(x.mathTopics, ['patterns', 'lcm'], id);
+    assert.equal(I.mechanismFor(x, 'patterns'), 'M6', id + ' patterns is the main way');
+    assert.equal(x.optional, undefined, id + ' patterns is not optional');
+    assert.equal(I.mechanismFor(x, 'lcm'), 'M4', id + ' lcm is the polyrhythm (weak, optional play)');
+    assert.equal(I.forTopic('patterns').some((y) => y.id === id), true, id + ' voices patterns');
     assert.equal(I.forTopic('lcm').some((y) => y.id === id), true, id + ' voices lcm');
   });
 });

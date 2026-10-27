@@ -5,7 +5,8 @@
 // never a new method. Every entry uses the one primary mechanism of its
 // topics (M1 steady beat, M2 grouped beats, M3 note durations, M6 patterns,
 // see banks.MUSIC_MECHANISMS). A weak mechanism (M4 polyrhythm, M5 pitch,
-// M7 movement) only appears as optional:true with evidence:'weak'.
+// M7 movement) only appears as optional:true with evidence:'weak', or as a
+// weakWays entry for one topic of an instrument whose main way is primary.
 //
 // `source` backs the fact about the instrument that `why` uses (a museum
 // record, an ethnomusicology article, a primary text); the evidence that the
@@ -40,10 +41,13 @@
     percent: { he: 'אחוזים', mechanism: 'M3' },
   };
 
-  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
-  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source) {
+  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays)
+  // weakWays (optional) maps a topic to the weak way (M4/M5/M7) the entry
+  // uses there as optional play; every other topic uses `mechanism`.
+  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays) {
     const x = { id, instrument: { he, en }, origin, family, mathTopics, mechanism, why, source, voice };
     if (WEAK.indexOf(mechanism) >= 0) { x.optional = true; x.evidence = 'weak'; }
+    if (weakWays) x.weakWays = weakWays;
     return x;
   }
 
@@ -106,9 +110,9 @@
     e('claves', 'קלאבס', 'Claves (son clave)', 'Cuba', 'percussion', 'M6', ['patterns'], 'woodClick',
       'The two-bar son clave [x..x..x...x.x...] begins with the tresillo, 3 onsets spread as evenly as possible over 8 pulses (Toussaint 2005, Bridges): a rhythmic pattern (M6).',
       'https://archive.bridgesmathart.org/2005/bridges2005-47.html'),
-    e('gankogui', 'גנקוגוי', 'Gankogui bell', 'Ewe, Ghana', 'percussion', 'M4', ['lcm'], 'metalBell',
-      'The double bell plays the timeline against the drum pulses (Pressing 1983): the cycles meet again at their least common multiple. Optional play only (M4, weak evidence).',
-      'https://doi.org/10.21504/amj.v6i3.1165'),
+    e('gankogui', 'גנקוגוי', 'Gankogui bell', 'Ewe, Ghana', 'percussion', 'M6', ['patterns', 'lcm'], 'metalBell',
+      'All parts of the Ewe ensemble follow the gankogui bell pattern, a time-line (Pressing 1983): one repeating pattern (M6). Against the drum pulses the cycles meet again at their least common multiple: optional play only (M4, weak evidence).',
+      'https://doi.org/10.21504/amj.v6i3.1165', { lcm: 'M4' }),
     e('xylophone', 'קסילופון', 'Xylophone', 'Europe (orchestral)', 'percussion', 'M5', ['numberLine'], 'woodBar',
       'Each bar is tuned by its length, and a shorter bar sounds higher. Optional play only: bars in order as a line from low to high (M5, weak evidence).',
       'https://old.physics.wfu.edu/demolabs/demos/3/3d/3D4010.html'),
@@ -122,9 +126,9 @@
     e('sitar', 'סיטאר', 'Sitar', 'North India (Hindustani music)', 'strings', 'M6', ['patterns'], 'pluck',
       'A long-necked lute with movable frets and sympathetic strings, played with tabla in a chosen taal: its repeating raag phrases voice melodic patterns (M6).',
       'https://www.swarganga.org/instruments/3/Sitar'),
-    e('kora', 'קוֹרָה', 'Kora', 'Mande, West Africa (Senegal, The Gambia)', 'strings', 'M4', ['lcm'], 'pluck',
-      'A 21-string harp whose hands interlock in 3 against 2, so the parts meet again at their least common multiple (Racanelli 2012). Optional play only (M4, weak evidence).',
-      'https://oldaawmjournal.iftawm.org/articles/2012a/Racanelli_AAWM_Vol_2_1.pdf'),
+    e('kora', 'קוֹרָה', 'Kora', 'Mande, West Africa (Senegal, The Gambia)', 'strings', 'M6', ['patterns', 'lcm'], 'pluck',
+      'A 21-string harp whose kumbengo is a recurrent accompaniment theme (Racanelli 2012): a repeating pattern to continue (M6). Its hands interlock in 3 against 2 and meet again at their least common multiple: optional play only (M4, weak evidence).',
+      'https://oldaawmjournal.iftawm.org/articles/2012a/Racanelli_AAWM_Vol_2_1.pdf', { lcm: 'M4' }),
     e('koto', 'קוֹטוֹ', 'Koto', 'Japan (from China, 8th century)', 'strings', 'M5', ['numberLine'], 'pluck',
       'A long zither, most often with 13 bridges; where each bridge stands sets the pitch of its string. Optional play only: sliding a bridge to order low and high (M5, weak evidence).',
       'https://collections.ed.ac.uk/mimed/record/18373'),
@@ -199,12 +203,16 @@
   function byFamily(family) {
     return INSTRUMENTS.filter(function (x) { return x.family === family; });
   }
+  // The way an instrument uses for one of its topics.
+  function mechanismFor(x, topic) {
+    return (x.weakWays && x.weakWays[topic]) || x.mechanism;
+  }
   // Instruments that may voice a topic: only those using its primary way.
   function forTopic(topic) {
     const t = TOPICS[topic];
     if (!t) return [];
-    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && x.mechanism === t.mechanism; });
+    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && mechanismFor(x, topic) === t.mechanism; });
   }
 
-  return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, forTopic };
+  return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, mechanismFor, forTopic };
 });
