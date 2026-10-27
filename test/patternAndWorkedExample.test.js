@@ -49,7 +49,60 @@ test('worked example implements fading and restoration of scaffolding on mistake
   assert.ok(indEx.wordCount <= 15);
   assert.equal(indEx.answer, 5);
   assert.equal(indEx.check(5).correct, true);
-  assert.equal(indEx.check(5).next, 'mastered');
+  assert.equal(indEx.check(5).next, 'check');
+  assert.equal(/5/.test(indEx.prompt), false, 'עכשיו לבד does not name the total');
+
+  // Step 4: the topic ends on a check with no music
+  const chk = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'check' });
+  assert.equal(chk.noMusic, true);
+  assert.equal(chk.musicStage, 'no_music_check');
+  assert.equal(chk.hasMusic, false);
+  assert.equal(/5/.test(chk.prompt), false);
+  assert.equal(chk.check(5).next, 'mastered');
+});
+
+test('the missing pattern note is a bell; the notes on screen stay on the xylophone', () => {
+  const ex = PW.createPatternCompletionExercise();
+  assert.deepEqual(ex.soundEvents.map(e => e.voice), ['xylo', 'xylo', 'xylo', 'bell']);
+  const host = box(), heard = [];
+  PW.renderPatternWidget(host, ex, { playTap: function (v) { heard.push(v); } });
+  find(host, 'pattern-choice-btn').onclick();
+  assert.deepEqual(heard, ['bell']);
+});
+
+test('the heading follows the stage and never shows the total in עכשיו לבד or the check', () => {
+  const host = box(), heading = { textContent: '' }, filled = [];
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {
+    heading: heading, onAnswer: function (v) { filled.push(v); }
+  });
+  assert.match(heading.textContent, /הם 5/);
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-tap-btn').onclick();
+  assert.equal(heading.textContent, 'עכשיו לבד: כמה צלילים הם 3 ועוד 2?');
+  assert.equal(/5/.test(heading.textContent), false);
+  const label = find(host, 'worked-answer-label');
+  assert.equal(label.textContent, 'התשובה');
+  const input = find(host, 'worked-answer');
+  assert.equal(input.dir, 'ltr');
+  input.value = '5'; input.onchange();
+  assert.deepEqual(filled, ['5']);
+  assert.equal(host._stage, 'check');
+  assert.equal(host._noMusic, true);
+  assert.equal(host._musicStage, 'no_music_check');
+  assert.equal(find(host, 'demo-listen-btn'), null);
+  assert.equal(/5/.test(heading.textContent), false);
+});
+
+test('a real element (read-only children) still repaints and updates the heading', () => {
+  const host = box();
+  const kids = host.children;
+  Object.defineProperty(host, 'children', { get: function () { return { get length() { return kids.length; } }; } });
+  const heading = { textContent: '' };
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2 }), { heading: heading });
+  assert.match(heading.textContent, /הם 5/);
+  kids[kids.length - 1].children.find(c => c.className.includes('demo-proceed-btn')).onclick();
+  assert.equal(host._stage, 'completion');
+  assert.match(heading.textContent, /^השלימו/);
 });
 
 test('validation rejects prompts exceeding 15 words or missing standards', () => {
