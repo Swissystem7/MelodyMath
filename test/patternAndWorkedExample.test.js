@@ -88,19 +88,19 @@ function find(n, cls) {
 }
 
 test('the pattern on screen is דו➔מי➔דו➔? and the answer is מי', () => {
-  const host = box();
+  const host = box(), heard = [];
   const ex = PW.createPatternCompletionExercise({ pattern: ['דו', 'מי', 'דו', 'מי'], expected: 'דו' });
-  PW.renderPatternWidget(host, ex, {});
+  PW.renderPatternWidget(host, ex, { playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); } });
+  find(host, 'demo-listen-btn').onclick();
   assert.equal(find(host, 'pattern-sequence').textContent, 'דו➔מי➔דו➔?');
-  assert.equal(ex.answer, 'מי');
-  assert.equal(ex.check('מי').correct, true);
+  assert.equal(ex.answer, 'מי'); assert.equal(ex.check('מי').correct, true); assert.deepEqual(heard, ['xylo', 'xylo', 'xylo']);
   assert.equal(find(host, 'pattern-choice-btn').style.minHeight, '44px');
 });
 
 test('הקשיבו להדגמה plays 3 drums, 2 bells, then 5', () => {
   const heard = [];
   const host = box();
-  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {
+  PW.renderWorkedExampleWidget(host, { a: 3, b: 2, total: 5, stage: 'demo' }, {
     playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); }
   });
   find(host, 'demo-listen-btn').onclick();
