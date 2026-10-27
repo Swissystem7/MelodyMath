@@ -871,7 +871,7 @@ function renderWidget(hostId, item, inputId){
     MM_PATTERN_WORKED.renderPatternWidget(host, item, { onAnswer: fill });
   } else if (item.kind === 'worked_example' && typeof MM_PATTERN_WORKED !== 'undefined' && typeof MM_PATTERN_WORKED.renderWorkedExampleWidget === 'function'){
     host.classList.remove('hidden');
-    MM_PATTERN_WORKED.renderWorkedExampleWidget(host, item, { getAnswer: function(){ const inp=inputId&&$(inputId); return inp?inp.value:''; } });
+    MM_PATTERN_WORKED.renderWorkedExampleWidget(host, item, {});
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }

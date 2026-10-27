@@ -128,13 +128,15 @@
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
     seq.className = 'pattern-sequence';
-    seq.textContent = shownText(ex.pattern) + (ex.research ? ' · ' + ex.research : '');
+    seq.textContent = shownText(ex.pattern);
     const hint = hintNode(d);
     const row = d.createElement('div');
     row.className = 'pattern-choices';
     const answer = answerForShown(ex.pattern);
     (ex.choices || ['דו', 'מי', 'סול']).forEach(function (c) {
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
+        const play = opts.playTap || (root && root.playTap);
+        if (typeof play === 'function') play('xylo', { hz: NOTE_HZ[c] || 330, step: 0 });
         const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
         hint.hidden = !!res.correct;
         hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
@@ -164,7 +166,7 @@
       wrap.className = 'worked-example-box';
       if (stage === 'demo') {
         const line = d.createElement('p');
-        line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total + (ex.research ? ' · ' + ex.research : '');
+        line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total;
         wrap.appendChild(line);
         wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
@@ -179,16 +181,7 @@
       } else {
         const line = d.createElement('p');
         line.textContent = 'עכשיו לבד: כמה צלילים הם ' + ex.a + ' ועוד ' + ex.b + '?';
-        const hint = hintNode(d);
         wrap.appendChild(line);
-        wrap.appendChild(hint);
-        wrap.appendChild(btn(d, 'primary mm-try-btn', 'בדקו', function () {
-          const given = typeof opts.getAnswer === 'function' ? opts.getAnswer() : '';
-          const res = createWorkedExampleExercise({ a: ex.a, b: ex.b, stage: 'independent' }).check(given);
-          hint.hidden = !!res.correct;
-          hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
-          container._hint = hint.textContent;
-        }));
       }
       container.appendChild(wrap);
     }

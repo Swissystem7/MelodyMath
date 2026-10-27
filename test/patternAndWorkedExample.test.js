@@ -90,9 +90,10 @@ function find(n, cls) {
 test('the pattern on screen is דו➔מי➔דו➔? and the answer is מי', () => {
   const host = box(), heard = [];
   const ex = PW.createPatternCompletionExercise({ pattern: ['דו', 'מי', 'דו', 'מי'], expected: 'דו' });
+  ex.research = 'Azaryahu 2020 https://doi.org/10.1080/00220973.2020.1799316';
   PW.renderPatternWidget(host, ex, { playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); } });
   find(host, 'demo-listen-btn').onclick();
-  assert.equal(find(host, 'pattern-sequence').textContent, 'דו➔מי➔דו➔?');
+  assert.equal(find(host, 'pattern-sequence').textContent, 'דו➔מי➔דו➔?'); assert.equal(/doi|http|Journal/i.test(host.textContent), false);
   assert.equal(ex.answer, 'מי'); assert.equal(ex.check('מי').correct, true); assert.deepEqual(heard, ['xylo', 'xylo', 'xylo']);
   assert.equal(find(host, 'pattern-choice-btn').style.minHeight, '44px');
 });
@@ -100,13 +101,14 @@ test('the pattern on screen is דו➔מי➔דו➔? and the answer is מי', (
 test('הקשיבו להדגמה plays 3 drums, 2 bells, then 5', () => {
   const heard = [];
   const host = box();
-  PW.renderWorkedExampleWidget(host, { a: 3, b: 2, total: 5, stage: 'demo' }, {
+  PW.renderWorkedExampleWidget(host, { a: 3, b: 2, total: 5, stage: 'demo', research: 'Sweller 1985 https://doi.org/10.1207/s1532690xci0201_3' }, {
     playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); }
   });
   find(host, 'demo-listen-btn').onclick();
   assert.equal(heard.filter(function (v) { return v === 'drum'; }).length, 3);
   assert.equal(heard.filter(function (v) { return v === 'bell'; }).length, 2);
   assert.equal(heard.filter(function (v) { return v === 'xylo'; }).length, 5);
+  assert.equal(/doi|http|Journal/i.test(host.textContent), false);
 });
 
 test('הבנתי moves on and does not fill the answer', () => {
@@ -122,16 +124,21 @@ test('הבנתי moves on and does not fill the answer', () => {
   find(host, 'completion-tap-btn').onclick();
   assert.equal(host._stage, 'independent');
   assert.equal(filled, 0);
+  assert.equal(find(host, 'mm-try-btn'), null);
 });
 
 test('a wrong answer shows the hint and does not fill the choice', () => {
   let filled = 0;
+  const heard = [];
   const host = box();
-  PW.renderPatternWidget(host, PW.createPatternCompletionExercise(), { onAnswer: function () { filled++; } });
+  PW.renderPatternWidget(host, PW.createPatternCompletionExercise(), {
+    onAnswer: function () { filled++; }, playTap: function (v, o) { heard.push(o && o.hz); }
+  });
   const wrong = find(host, 'pattern-choice-btn');
   assert.equal(wrong.textContent, 'דו');
   wrong.onclick();
   assert.equal(filled, 0);
+  assert.equal(heard[0], 261.63);
   const hint = find(host, 'mm-ex-hint');
   assert.equal(hint.hidden, false);
   assert.match(hint.textContent, /מי/);
