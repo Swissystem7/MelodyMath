@@ -117,19 +117,52 @@
     ['mm-cur-49', 'mm-cur-58', 'data interpretation to multiple views', 'בטבלת נגינה 10 תלמידים בחרו כינור. כמה תווי כינור של 2 תלמידים יופיעו בפיקטוגרם?', 5, '10 לחלק ל־2'],
   ];
 
+  // Fyfe et al. 2014 is the concreteness-fading step this bridge is (#718).
+  // Azaryahu & Adi-Japha 2020 is the musical pattern the sound uses.
+  const RESEARCH = Object.freeze({
+    id: 'fyfe2014',
+    citation: 'Fyfe, E. R., McNeil, N. M., Son, J. Y., & Goldstone, R. L. (2014). Concreteness fading in mathematics and science instruction. Educational Psychology Review, 26(1), 9–25.',
+    doi: '10.1007/s10648-014-9249-3',
+    url: 'https://doi.org/10.1007/s10648-014-9249-3',
+    music: Object.freeze({ id: 'azaryahu2020', doi: '10.1080/00220973.2020.1799316', url: 'https://doi.org/10.1080/00220973.2020.1799316' })
+  });
+
+  function soundPlan(mechanism, answer) {
+    const n = Number(answer);
+    const count = n > 0 && n <= 6 && n === Math.round(n) ? n : 3;
+    const voice = /bell|coin|angle|clock|data/.test(String(mechanism)) ? 'bell' : 'drum';
+    const step = count <= 1 ? 0 : Math.min(0.22, 0.9 / (count - 1));
+    const out = [];
+    for (let i = 0; i < count; i++) out.push({ at: Math.round(i * step * 1000) / 1000, voice: voice });
+    return out;
+  }
+
+  function play(entry, env) {
+    const events = (entry && entry.sound) || [];
+    const e = env || {};
+    const tap = e.playTap || (typeof playTap === 'function' ? playTap : null);
+    if (typeof tap !== 'function') return events;
+    const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
+    events.forEach(function (ev) { later(function () { tap(ev.voice, { step: 0 }); }, Math.round(ev.at * 1000)); });
+    return events;
+  }
+
   const BRIDGES = {};
   const BY_FROM = {};
   const BY_TO = {};
 
   RAW_BRIDGES.forEach(function (row) {
-    const entry = Object.freeze({
-      from: row[0],
-      to: row[1],
-      mechanism: row[2],
-      prompt: row[3],
-      answer: row[4],
-      hint: row[5],
-    });
+    const entry = {
+      from: row[0], to: row[1], mechanism: row[2], prompt: row[3], answer: row[4], hint: row[5],
+      source: RESEARCH,
+      sound: soundPlan(row[2], row[4])
+    };
+    entry.check = function (given) {
+      const want = entry.answer;
+      const g = String(given == null ? '' : given).trim();
+      return typeof want === 'number' ? Number(g) === want : g === String(want).trim();
+    };
+    Object.freeze(entry);
     const key = entry.from + '->' + entry.to;
     BRIDGES[key] = entry;
     if (!BY_FROM[entry.from]) BY_FROM[entry.from] = [];
@@ -153,8 +186,10 @@
   return {
     RAW_BRIDGES: RAW_BRIDGES,
     BRIDGES: BRIDGES,
+    RESEARCH: RESEARCH,
     bridgeForLink: bridgeForLink,
     bridgesForTopic: bridgesForTopic,
     bridgesEnteringTopic: bridgesEnteringTopic,
+    play: play,
   };
 });
