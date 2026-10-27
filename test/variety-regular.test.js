@@ -1,6 +1,6 @@
 'use strict';
 // The practice quiz (nextExercise / renderExercise) varies a topic sum.
-// The reinforcement plan (rpRender) is a separate call.
+// ?topic= renders that one exercise and does not open the reinforcement plan.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -18,7 +18,7 @@ function sliceFn(name) {
   return html.slice(start, end);
 }
 
-test('regular topic practice uses practiceTopicExercise, not only rpRender', () => {
+test('topic practice renders one exercise and leaves the reinforcement plan closed', () => {
   const next = sliceFn('nextExercise');
   const render = sliceFn('renderExercise');
   const plan = sliceFn('rpRender');
@@ -30,7 +30,37 @@ test('regular topic practice uses practiceTopicExercise, not only rpRender', () 
   assert.match(start, /practiceTopic=id/);
   assert.match(start, /topicPracticeItems=items/);
   assert.match(start, /renderExercise\(\)/);
-  assert.match(start, /rpRender\(\)/);
+  assert.equal(start.includes('rpRender('), false);
+  assert.doesNotMatch(start, /show\('rmPlan',\s*true\)/);
+  assert.match(start, /show\('rmPlan',\s*false\)/);
+
+  const shown = {};
+  const rendered = [];
+  const sandbox = {
+    Date: Date,
+    topicById: () => ({ grade: 'א' }),
+    isGrade: () => true,
+    itemsForTopic: () => [{ id: 'bank', skill: 'counting', prompt: 'plan', answer: 1 }],
+    itemsForGrade: () => [],
+    saveGrade: () => {},
+    rmPlanTopic: null,
+    rmVarietySeed: 0,
+    practiceTopic: null,
+    topicPracticeItems: null,
+    history: null,
+    current: null,
+    answered: false,
+    seed: 1,
+    show: (id, on) => { shown[id] = on; },
+    document: { getElementById: () => null },
+    renderExercise: () => { rendered.push('quiz'); },
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(start + '\nthis.ok = startTopicPractice("mm-cur-1");', sandbox);
+  assert.equal(sandbox.ok, true);
+  assert.deepEqual(rendered, ['quiz']);
+  assert.equal(shown.rmPlan, false);
+  assert.equal(shown.quiz, true);
 });
 
 function regularNext(topicId) {

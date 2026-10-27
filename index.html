@@ -1220,11 +1220,10 @@ function renderFirstRun(){
 }
 paintGrade();
 renderFirstRun();
-// program.html opens a curriculum row with ?topic=<id>[&skill=<k>]: the row's
-// tagged items run in the same plan loop as startStrugglePractice. Navigation
-// only — picking, levels and scoring are unchanged.
-// Topic practice (?topic=) varies numbers, instrument, rhythm and pattern
-// inside the row's own exercise. It does not rewrite the row as a + b.
+// program.html opens a curriculum row with ?topic=<id>[&skill=<k>].
+// That link starts the practice quiz only. The reinforcement plan is a
+// separate screen. varyTopicExercise still serves that plan.
+// Topic practice varies numbers inside the row's own exercise.
 // The last round is the plain check, so hasMusic is not forced on (Refs #681).
 function varyTopicExercise(topicId, item, round) {
   if (!topicId || !item || typeof MM_VARIETY === 'undefined' || !MM_VARIETY.TOPIC_RANGES || !MM_VARIETY.TOPIC_RANGES[topicId]) return item;
@@ -1248,9 +1247,9 @@ function varyTopicExercise(topicId, item, round) {
   else if (made.music) patch.music = made.music;
   return Object.assign({}, item, patch);
 }
-// Regular topic practice (the practice quiz), separate from the reinforcement
-// plan screen rpRender. ?topic= fills both: the plan still varies, and this
-// quiz draws each sum through practiceTopicExercise.
+// Regular topic practice (the practice quiz). ?topic= opens only this quiz,
+// so the child hears one exercise. The reinforcement plan stays on its own
+// screen and is not started here.
 function practiceTopicExercise(topicId, item, round) {
   return varyTopicExercise(topicId, item, round);
 }
@@ -1261,13 +1260,10 @@ function startTopicPractice(id,skill){
   if(!items.length) return false;
   rmPlanTopic=id;rmVarietySeed=(Date.now()%88)+1;
   saveGrade(row.grade);
-  rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:rmHe(k)||k,items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
-  rpStep=0; rpItem=0;
-  show('rmStart',false); show('rmReport',false); show('rmPlanDoneActions',false); show('rmPlan',true);
-  rpRender();
   practiceTopic=id;
   topicPracticeItems=items;
   history=[]; current=null; answered=false; seed=(Date.now()&0x7fffffff)||1;
+  show('rmPlan',false);
   const tab=document.getElementById('tab-practice');
   if(tab&&typeof activateHomeTab==='function') activateHomeTab(tab);
   show('start',false); show('summary',false); show('quiz',true);
