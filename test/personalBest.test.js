@@ -74,8 +74,12 @@ test('the encore uses myInstrument.instrumentFor and backing from 2 other instru
     assert.equal(fams.size, 3, 'lead and backing are three different families');
     plan.backing.forEach((b) => assert.equal(instruments.instrumentById(b.id).family, b.family));
     const played = [];
-    P.playEncore(plan, { playPhrase: (p, inst, ac, d) => { played.push(inst); return { started: true }; } }, 0);
-    assert.deepEqual(played, ['djembe', 'djembe', plan.backing[0].id, plan.backing[1].id]);
+    const later = [];
+    P.playEncore(plan, { playPhrase: (p, inst, ac, d) => { played.push(inst); return { started: true }; } }, 0, { set: (f) => later.push(f), clear() {} });
+    later.forEach((f) => f());
+    assert.equal(played[0], 'djembe');
+    assert.equal(played.filter((id) => id === 'djembe').length, 2, 'both phrases on the lead');
+    assert.deepEqual(new Set(played), new Set(['djembe', plan.backing[0].id, plan.backing[1].id]));
   } finally { myInstrument.instrumentFor = orig; }
   assert.equal(P.encorePlan([], { storage: mockStorage() }).lead, 'piano', 'no pick yet: the default lead');
 });
@@ -103,10 +107,35 @@ test('wired into the topic step on the practice screen, after its last item', ()
   assert.match(read('sw.js'), /'\.\/src\/lib\/motivation\/personalBest\.js'/);
 });
 
+test('a long encore stops when the exercise changes: nothing plays over the next one (#801)', () => {
+  const song = Array.from({ length: 8 }, (_, i) => streak.PHRASES[i % streak.PHRASES.length]);
+  const plan = P.encorePlan(song, { storage: mockStorage() });
+  const pending = new Map();
+  let id = 0;
+  const timer = { set: (f, ms) => { pending.set(++id, { f, ms }); return id; }, clear: (k) => pending.delete(k) };
+  const played = [];
+  const h = P.playEncore(plan, { playPhrase: (p) => { played.push(p); return {}; } }, 0.3, timer);
+  assert.ok(h.seconds > 5, 'a song of 8 phrases is longer than the 5s before the next exercise');
+  const now = played.length;
+  assert.ok(now <= 3, 'only the first phrase and bar go to the audio clock up front');
+  assert.ok([...pending.values()].some((x) => x.ms > 5000), 'the rest is still waiting when the next exercise shows');
+  h.stop();
+  assert.equal(pending.size, 0, 'stop() clears every waiting phrase and bar');
+  assert.equal(played.length, now);
+  assert.equal(P.playEncore(null, {}), null);
+});
+
+test('the page stops the encore on the next exercise and when the child leaves the practice screen', () => {
+  const html = read('index.html');
+  assert.match(html, /function rpRender\(\)\{if\(typeof stopEncore==='function'\)stopEncore\(\);/);
+  assert.match(html, /rpEncore=P\.playEncore\(/);
+  assert.match(html, /\['rmPlanRestart','rmPlanReport'\]\.forEach\(function\(id\)\{ const b=\$\(id\); if\(b&&b\.addEventListener\) b\.addEventListener\('click',stopEncore\); \}\);/);
+});
+
 // The page's own rpAdvance + personalBestEncore, run in a VM: the last item of a topic step ends it.
 function runStepEnd(quiet) {
   const html = read('index.html').replace(/\r\n/g, '\n');
-  const src = html.match(/function personalBestEncore\(st\)\{[\s\S]*?\n\}\n/)[0] + html.match(/function rpAdvance\(\)\{.*\n/)[0];
+  const src = html.match(/function personalBestEncore\(st\)\{[\s\S]*?\n\}\n/)[0] + html.match(/var rpEncore=null;\nfunction stopEncore\(\)\{.*\n/)[0] + html.match(/function rpAdvance\(\)\{.*\n/)[0];
   P.setStorage(mockStorage({ 'mm.personalBest.v1': JSON.stringify({ me: { 'ג:MULT': { acc: 0.5, h: 0 } } }) }));
   const els = {};
   const el = (id) => els[id] || (els[id] = { id, innerHTML: '', textContent: '', hidden: true, disabled: false, focus() {} });
@@ -121,12 +150,19 @@ function runStepEnd(quiet) {
     endTeacherSession() {}, rpRender() {}, setTimeout() {}, PLAN_PER_SKILL: 6, rpStep: 0, rpItem: 0,
     rmPlan: [{ skill: 'MULT', he: 'כפל', history: Array.from({ length: 6 }, () => ({ correct: true })), hints: 0, current: { music: 'equalGroups' } }],
   });
-  try { vm.runInContext(src + '\nrpAdvance();', ctx); } finally { globalThis.MM_MY_INSTRUMENT = prevMine; }
-  return { reward: el('rmReward'), played, instCalls };
+  let stoppedAfter;
+  try {
+    vm.runInContext(src + '\nrpAdvance();', ctx);
+    const before = played.length;
+    vm.runInContext('stopEncore();', ctx); // what rpRender does when the next exercise shows
+    stoppedAfter = vm.runInContext('rpEncore', ctx) === null && played.length === before;
+  } finally { globalThis.MM_MY_INSTRUMENT = prevMine; }
+  return { reward: el('rmReward'), played, instCalls, stoppedAfter };
 }
 
 test('the end of a topic step shows the encore and plays it on the child\'s instrument (page code in a VM)', () => {
-  const { reward, played, instCalls } = runStepEnd(false);
+  const { reward, played, instCalls, stoppedAfter } = runStepEnd(false);
+  assert.ok(stoppedAfter, 'stopEncore() ends the page\'s encore');
   assert.match(reward.innerHTML, /data-encore[\s\S]*הדרן[\s\S]*השתמשת בקבוצות שוות/);
   assert.equal(reward.hidden, false);
   assert.equal(instCalls.length, 1);

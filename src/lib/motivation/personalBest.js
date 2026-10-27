@@ -112,17 +112,36 @@
     return { lead: lead, leadFamily: leadX ? leadX.family : null, backing: backing, phrases: phrases, beats: Math.max(4, len) };
   }
   // Plays through streak.playPhrase (the app's one phrase player): melody on
-  // the lead, a 0.4s beat on the first backing, a C drone on the second.
-  function playEncore(plan, S, delay) {
-    if (!plan || !S || typeof S.playPhrase !== 'function') return [];
-    const d0 = Number(delay) || 0, out = [];
+  // the lead, a 0.4s beat on the first backing, a C/G drone on the second.
+  // playPhrase hands its notes to the audio clock at once and cannot take them
+  // back, so only the first phrase and bar go out now; the rest wait on timers
+  // that stop() clears. The next exercise calls stop(), so a long song never
+  // plays over it (#801 review): at most one phrase or bar still sounds.
+  function playEncore(plan, S, delay, timer) {
+    if (!plan || !S || typeof S.playPhrase !== 'function') return null;
+    const T = timer || { set: function (f, ms) { return setTimeout(f, ms); }, clear: function (id) { clearTimeout(id); } };
+    const d0 = Number(delay) || 0, parts = [];
     let t = d0;
-    plan.phrases.forEach(function (p) { out.push(S.playPhrase(p, plan.lead, null, t)); t += p.notes.length * 0.03 + (p.durations || []).reduce(function (a, b) { return a + b; }, 0) + 0.3; });
-    const n = plan.beats, beat = [], beatD = [];
-    for (let i = 0; i < n; i++) { beat.push(i % 4 ? 196.00 : 130.81); beatD.push(0.37); }
-    if (plan.backing[0]) out.push(S.playPhrase({ notes: beat, durations: beatD }, plan.backing[0].id, null, d0));
-    if (plan.backing[1]) out.push(S.playPhrase({ notes: [130.81, 196.00, 130.81], durations: [n * 0.14, n * 0.13, n * 0.13] }, plan.backing[1].id, null, d0));
-    return out;
+    plan.phrases.forEach(function (p) { parts.push({ at: t, p: p, inst: plan.lead }); t += p.notes.length * 0.03 + (p.durations || []).reduce(function (a, b) { return a + b; }, 0) + 0.3; });
+    const n = plan.beats;
+    for (let b = 0; b < n; b += 4) {
+      const k = Math.min(4, n - b), at = d0 + b * 0.4, notes = [], durs = [];
+      for (let i = 0; i < k; i++) { notes.push(i ? 196.00 : 130.81); durs.push(0.37); }
+      if (plan.backing[0]) parts.push({ at: at, p: { notes: notes, durations: durs }, inst: plan.backing[0].id });
+      if (plan.backing[1]) parts.push({ at: at, p: { notes: [(b / 4) % 2 ? 196.00 : 130.81], durations: [k * 0.4 - 0.03] }, inst: plan.backing[1].id });
+    }
+    const out = [], timers = [];
+    let stopped = false;
+    function play(x, wait) { out.push(S.playPhrase(x.p, x.inst, null, wait)); }
+    parts.forEach(function (x) {
+      if (x.at <= d0) play(x, x.at);
+      else timers.push(T.set(function () { if (!stopped) play(x, 0); }, Math.round(x.at * 1000)));
+    });
+    return {
+      out: out,
+      seconds: Math.max(t, d0 + n * 0.4),
+      stop: function () { stopped = true; timers.forEach(function (id) { T.clear(id); }); timers.length = 0; },
+    };
   }
 
   // "In a row": activity with no pause longer than IDLE_MS. Returns true once per session after 20 minutes.
