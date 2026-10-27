@@ -117,15 +117,6 @@
     'ב:MONEY': 'mm-cur-19',
   };
 
-  // Music-game screens of a topic: topic id → card id in index.html's music
-  // games tab. index.html?topic=<id>&screen=1 opens the card (#591 LoopStack).
-  const SCREENS = {
-    'mm-cur-56': 'lsCard',
-  };
-  function screenForTopic(id) {
-    return Object.prototype.hasOwnProperty.call(SCREENS, id) ? SCREENS[id] : null;
-  }
-
   const BUILDS_TO = {};
   Object.keys(PREREQ).forEach(function (id) { BUILDS_TO[id] = []; });
   Object.keys(PREREQ).forEach(function (id) {
@@ -151,8 +142,6 @@
     PREREQ: PREREQ,
     BUILDS_TO: BUILDS_TO,
     SKILL_TOPIC: SKILL_TOPIC,
-    SCREENS: SCREENS,
-    screenForTopic: screenForTopic,
     linksForTopic: linksForTopic,
     linksForSkill: linksForSkill,
   };

@@ -35,10 +35,35 @@ test('a layer sounds like cubeLayerGroups: one beat per cube up to 12, tens and 
   const big = LS.layerNotes(24, 'drumLow', 0, 0);
   const s = g2.cubeLayerSounds(24);
   assert.equal(big.filter((n) => n.place === 'ten').length, s.tens);
-  assert.ok(big.filter((n) => n.place === 'ten').every((n) => n.held && n.dur > 0));
+  assert.ok(big.filter((n) => n.place === 'ten').every((n) => n.held && n.dur > 0 && n.hz !== 110));
   assert.ok(big.filter((n) => n.place === 'one').every((n) => n.voice === 'woodClick'));
+  assert.equal(big.reduce((n, x) => n + x.cubes, 0), 24, 'every cube is on a note');
   assert.equal(big.length, 6, 'never one sound per cube above 12');
   assert.equal(LS.layerNotes(20, 'drumLow', 0, 0).length, 2);
+});
+
+function passes(voiceId, hz) {
+  const f = require('../src/lib/instrumentVoices.js').VOICES[voiceId].filter;
+  if (!f) return 1;
+  const x = hz / f[1], den = Math.sqrt((1 - x * x) ** 2 + x * x);
+  return f[0] === 'lowpass' ? 1 / den : f[0] === 'highpass' ? (x * x) / den : x / den;
+}
+
+test('a 16-cube djembe layer sounds every cube: the ten is in band, not 6 clicks', () => {
+  assert.ok(passes('drumHigh', 110) < 0.1, 'the old 110 Hz ten on the djembe was filtered out');
+  const heard = (notes, count) => {
+    assert.equal(notes.reduce((n, x) => n + x.cubes, 0), count);
+    notes.forEach((n) => { assert.ok(n.hz >= LS.MIN_HZ); assert.ok(passes(n.voice, n.hz) >= 0.5, n.voice + ' ' + n.hz); });
+  };
+  const layer = LS.layerNotes(16, 'drumHigh', 0, 0);
+  assert.equal(layer.filter((n) => n.place === 'one').length, 6);
+  assert.equal(layer.filter((n) => n.place === 'ten').length, 1);
+  assert.ok(layer.find((n) => n.place === 'ten').hz >= 1250);
+  heard(layer, 16);
+  Object.keys(require('../src/lib/instrumentVoices.js').VOICES).forEach((v) => {
+    [16, 24, 30].forEach((c) => heard(LS.layerNotes(c, v, 0, 0), c));
+  });
+  heard(LS.stackPlan(4, 4, 2, () => 'drumHigh'), 32);
 });
 
 test('the stack plays c equal groups, layer 1 on the child instrument, others on 2+ families', () => {
@@ -89,12 +114,17 @@ test('the screen: answer the volume, then a no-music check with no sound buttons
 test('LoopStack is reachable: card in the music games tab, scripts, router, precache', () => {
   const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
   assert.match(html, /id="musicGames"[\s\S]*id="lsCard"[\s\S]*#591 music games end/);
-  assert.match(html, /grade2Music\.js[\s\S]*progression\.js[\s\S]*loopStack\.js[\s\S]*LoopStackScreen\.js/);
-  assert.match(html, /MM_PROGRESSION\.screenForTopic/);
-  assert.equal(prog.screenForTopic('mm-cur-56'), 'lsCard');
+  assert.match(html, /grade2Music\.js[\s\S]*loopStack\.js[\s\S]*LoopStackScreen\.js/);
+  assert.match(html, /MM_LOOP_STACK\.screenForTopic/);
+  assert.doesNotMatch(html, /MM_PROGRESSION\.screenForTopic/);
+  assert.equal(LS.screenForTopic('mm-cur-56'), 'lsCard');
+  assert.equal(LS.screenForTopic('nope'), null);
+  const shared = { SCREENS: { 'mm-cur-47': 'ggCard' }, screenForTopic(id) { return Object.prototype.hasOwnProperty.call(this.SCREENS, id) ? this.SCREENS[id] : null; } };
+  LS.registerScreen(shared);
+  assert.equal(shared.screenForTopic('mm-cur-47'), 'ggCard', 'keeps the #798 screen');
+  assert.equal(shared.screenForTopic('mm-cur-56'), 'lsCard');
   assert.equal(prog.linksForTopic('mm-cur-56').carries, 'volume');
-  assert.ok(prog.linksForTopic('mm-cur-56').prereq.includes('mm-cur-20'), 'builds on the ב׳ cube layers');
-  assert.equal(prog.screenForTopic('nope'), null);
+  assert.ok(prog.linksForTopic('mm-cur-56').prereq.includes('mm-cur-20'), 'continues the ד׳ cubeLayerGroups way');
   const sw = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
-  ['loopStack.js', 'LoopStackScreen.js', 'progression.js'].forEach((f) => assert.ok(sw.includes(f), f));
+  ['loopStack.js', 'LoopStackScreen.js'].forEach((f) => assert.ok(sw.includes(f), f));
 });

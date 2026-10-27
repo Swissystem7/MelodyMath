@@ -3,17 +3,19 @@
 // MASS_VOL, same name and sound (grade2Music.cubeLayerSounds): the base a×b
 // is one layer loop, the height c is how many times it repeats, so the volume
 // is c equal groups of the layer. Up to 12 a layer is one beat per cube; above
-// 12 a ten is one held sound and the ones play on woodClick. EXTRA: each new
-// layer adds an instrument of another family, so the song thickens.
+// 12 a ten is one held sound in that voice's band (110 Hz is silent on a phone
+// and on the djembe) and the ones play on woodClick. EXTRA: another family per layer.
 (function (root, factory) {
   const IN_NODE = typeof module === 'object' && !!module.exports;
   const api = factory(IN_NODE ? require('../grade2Music.js') : root);
   if (IN_NODE) module.exports = api;
   else root.MM_LOOP_STACK = api;
+  api.registerScreen(root && root.MM_PROGRESSION);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (g2) {
   'use strict';
 
-  const WAY = 'cubeLayerGroups', STEP = 0.22, TEN_DUR = 0.45, ONE_VOICE = 'woodClick', MAX_SIDE = 10;
+  const WAY = 'cubeLayerGroups', STEP = 0.22, TEN_DUR = 0.45, ONE_VOICE = 'woodClick', MAX_SIDE = 10, MIN_HZ = 220;
+  const SCREEN = { 'mm-cur-56': 'lsCard' }; // not progression.js SCREENS (#798 owns that map)
   // One partner per family; a layer never takes the child's own family.
   const PARTNERS = [['marimba', 'percussion'], ['kora', 'strings'], ['panFlute', 'winds'], ['piano', 'keys']];
 
@@ -48,18 +50,42 @@
     return Array.from({ length: count }, function (_, i) { return i === 0 ? childId : others[(i - 1) % others.length][0]; });
   }
 
-  // One layer as notes, the cubeLayerGroups sound: up to 12 one beat per cube,
-  // above 12 one held ten each, then the ones on woodClick.
+  function voiceDefs() {
+    const g = typeof globalThis !== 'undefined' ? globalThis : null;
+    if (g && g.VOICES && g.VOICES.drumHigh) return g.VOICES;
+    try { return require('../instrumentVoices.js').VOICES; } catch (e) { return {}; }
+  }
+
+  // Octaves into the filter band, never below MIN_HZ (GrooveGrid audibleHz, #798).
+  function audibleHz(voice, hz) {
+    const f = voiceDefs()[voice] && voiceDefs()[voice].filter;
+    let out = Number(hz) > 0 ? Number(hz) : 262, lo = MIN_HZ, hi = Infinity;
+    if (f && f[0] === 'bandpass') { lo = Math.max(lo, f[1] / 2); hi = f[1] * 2; }
+    if (f && f[0] === 'lowpass') hi = f[1];
+    if (f && f[0] === 'highpass') lo = Math.max(lo, f[1]);
+    while (out < lo) out *= 2;
+    while (out > hi && out / 2 >= lo) out /= 2;
+    return Math.round(out);
+  }
+
+  function screenForTopic(id) {
+    return Object.prototype.hasOwnProperty.call(SCREEN, id) ? SCREEN[id] : null;
+  }
+  function registerScreen(prog) {
+    if (prog && prog.SCREENS) Object.keys(SCREEN).forEach(function (id) { prog.SCREENS[id] = SCREEN[id]; });
+  }
+
+  // Up to 12: one beat per cube. Above: one audible held ten, then the ones.
   function layerNotes(cubes, voice, start, layer) {
     const s = g2.cubeLayerSounds(cubes), notes = [];
     if (!s) return notes;
     let at = start;
     if (s.units) {
-      for (let i = 0; i < s.count; i++) { notes.push({ at: at, voice: voice, hz: 0, layer: layer, place: 'unit', held: false }); at += STEP; }
+      for (let i = 0; i < s.count; i++) { notes.push({ at: at, voice: voice, hz: 0, layer: layer, place: 'unit', cubes: 1, held: false }); at += STEP; }
       return notes;
     }
-    for (let t = 0; t < s.tens; t++) { notes.push({ at: at, voice: voice, hz: 110, layer: layer, place: 'ten', held: true, dur: TEN_DUR, gain: 0.28 }); at += 2 * STEP; }
-    for (let j = 0; j < s.ones; j++) { notes.push({ at: at, voice: ONE_VOICE, hz: 1800, layer: layer, place: 'one', held: false }); at += STEP; }
+    for (let t = 0; t < s.tens; t++) { notes.push({ at: at, voice: voice, hz: audibleHz(voice, 110), layer: layer, place: 'ten', cubes: 10, held: true, dur: TEN_DUR, gain: 0.28 }); at += 2 * STEP; }
+    for (let j = 0; j < s.ones; j++) { notes.push({ at: at, voice: ONE_VOICE, hz: audibleHz(ONE_VOICE, 1800), layer: layer, place: 'one', cubes: 1, held: false }); at += STEP; }
     return notes;
   }
 
@@ -86,5 +112,5 @@
     { id: 'ls-nm-3', prompt: 'כמה ליטרים הם 3,000 סמ״ק?', answer: cm3ToLiters(3000) },
   ];
 
-  return { WAY, ONE_VOICE, PARTNERS, TARGETS, NO_MUSIC_CHECK_ITEMS, volume, layers, cm3ToLiters, baseLoop, layerInstruments, layerNotes, stackPlan };
+  return { WAY, ONE_VOICE, MIN_HZ, SCREEN, PARTNERS, TARGETS, NO_MUSIC_CHECK_ITEMS, volume, layers, cm3ToLiters, baseLoop, layerInstruments, audibleHz, layerNotes, stackPlan, screenForTopic, registerScreen };
 });
