@@ -1,17 +1,10 @@
 // MelodyMath — PersonalBestEncore: an encore when the child beats their own best (#591).
-//
-// Competence and choice keep a game going, not outside prizes (Ryan, Rigby &
-// Przybylski 2006, https://doi.org/10.1007/s11031-006-9051-8); praise for the
-// strategy, never for "being smart", keeps children going after a miss
+// Competence and choice, not outside prizes (Ryan, Rigby & Przybylski 2006,
+// https://doi.org/10.1007/s11031-006-9051-8); praise the strategy, never "smart"
 // (Mueller & Dweck 1998, https://doi.org/10.1037/0022-3514.75.1.33).
-//
-// - A run is one finished topic step: {correct, total, hintsUsed}. The best is
-//   kept per child and topic only; nothing here reads another child's data.
-// - Best = higher accuracy, or the same accuracy with fewer hints.
-// - The encore is the child's own song ("השיר שלי", streak.js, read only) on
-//   the child's instrument (myInstrument.instrumentFor), with a beat and a
-//   drone from two other instrument families.
-// - 20 minutes in a row shows a band break; a missed day costs nothing.
+// A run is one topic step {correct, total, hintsUsed}, kept per child and topic.
+// Best = higher accuracy, or the same accuracy with fewer hints. The encore is
+// "השיר שלי" (streak.js, read only) on the child's instrument, plus a beat and a drone.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -20,9 +13,6 @@
   'use strict';
 
   const STORAGE_KEY = 'mm.personalBest.v1';
-  const BREAK_MS = 20 * 60 * 1000;
-  // A pause this long ends the "in a row" session.
-  const IDLE_MS = 5 * 60 * 1000;
   const FALLBACK_LEAD = 'piano';
 
   let storageRef = null;
@@ -111,12 +101,8 @@
     const len = phrases.reduce(function (n, p) { return n + p.notes.length; }, 0);
     return { lead: lead, leadFamily: leadX ? leadX.family : null, backing: backing, phrases: phrases, beats: Math.max(4, len) };
   }
-  // Plays through streak.playPhrase (the app's one phrase player): melody on
-  // the lead, a 0.4s beat on the first backing, a C/G drone on the second.
-  // playPhrase hands its notes to the audio clock at once and cannot take them
-  // back, so only the first phrase and bar go out now; the rest wait on timers
-  // that stop() clears. The next exercise calls stop(), so a long song never
-  // plays over it (#801 review): at most one phrase or bar still sounds.
+  // Melody on the lead, a beat and a drone behind it. Only the first phrase and
+  // bar go to the audio clock now; stop() clears the rest (#801).
   function playEncore(plan, S, delay, timer) {
     if (!plan || !S || typeof S.playPhrase !== 'function') return null;
     const T = timer || { set: function (f, ms) { return setTimeout(f, ms); }, clear: function (id) { clearTimeout(id); } };
@@ -144,16 +130,5 @@
     };
   }
 
-  // "In a row": activity with no pause longer than IDLE_MS. Returns true once per session after 20 minutes.
-  let since = null, last = null, shown = false;
-  function tick(now) {
-    const t = now == null ? Date.now() : now;
-    if (last == null || t - last > IDLE_MS) { since = t; shown = false; }
-    last = t;
-    if (!shown && t - since >= BREAK_MS) { shown = true; return true; }
-    return false;
-  }
-  function resetSession() { since = null; last = null; shown = false; }
-
-  return { STORAGE_KEY, BREAK_MS, IDLE_MS, STRATEGY, isNewBest, recordRun, bestFor, strategyLine, encorePlan, playEncore, tick, resetSession, setStorage };
+  return { STORAGE_KEY, STRATEGY, isNewBest, recordRun, bestFor, strategyLine, encorePlan, playEncore, setStorage };
 });

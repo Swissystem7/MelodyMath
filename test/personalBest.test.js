@@ -27,7 +27,6 @@ test('isNewBest: higher accuracy, or the same accuracy with fewer hints (spec ac
   assert.equal(P.isNewBest({ acc: 0.8, h: 1 }, { acc: 0.8, h: 1 }), false);
   assert.equal(P.isNewBest(null, { acc: 1, h: 0 }), false, 'the first run sets the bar; there is nothing to beat yet');
 });
-
 test('recordRun keeps one best per child and topic, and only raises it', () => {
   P.setStorage(mockStorage());
   const first = P.recordRun('A/נועה', 'ג:MULT', { correct: 4, total: 6, hintsUsed: 1 });
@@ -43,7 +42,6 @@ test('recordRun keeps one best per child and topic, and only raises it', () => {
   assert.equal(P.recordRun('A/דן', 'ג:MULT', { correct: 1, total: 6 }).first, true);
   assert.equal(P.recordRun('A/נועה', 'ג:MULT', { correct: 0, total: 0 }).isNew, false, 'an empty run is never saved');
 });
-
 test('no comparison between children: no API reads across children, the screen names nobody else', () => {
   const api = Object.keys(P).join(' ');
   assert.doesNotMatch(api, /rank|leader|compare|others|top/i);
@@ -51,14 +49,12 @@ test('no comparison between children: no API reads across children, the screen n
   assert.doesNotMatch(src, /Object\.keys\(all\)|leaderboard|דירוג/);
   assert.doesNotMatch(read('index.html').match(/function personalBestEncore[\s\S]*?\n}/)[0], /getRoster|listStudents|classBoard/);
 });
-
 test('feedback is about the strategy, never about being smart', () => {
   assert.match(P.strategyLine('M2', { acc: 1, h: 0 }, { acc: 0.8, h: 0 }), /השתמשת בקבוצות שוות/);
   assert.match(P.strategyLine('M1', { acc: 0.8, h: 0 }, { acc: 0.8, h: 2 }), /פחות רמזים/);
   const all = Object.keys(P.STRATEGY).map((m) => P.strategyLine(m, { acc: 1, h: 0 }, null)).concat(P.strategyLine(null));
   all.forEach((s) => assert.doesNotMatch(s, /חכם|חכמה|כישרון|מוכשר|גאון/));
 });
-
 test('the encore uses myInstrument.instrumentFor and backing from 2 other instrument families', () => {
   const store = mockStorage();
   myInstrument.setMyInstrument('djembe', store);
@@ -83,30 +79,15 @@ test('the encore uses myInstrument.instrumentFor and backing from 2 other instru
   } finally { myInstrument.instrumentFor = orig; }
   assert.equal(P.encorePlan([], { storage: mockStorage() }).lead, 'piano', 'no pick yet: the default lead');
 });
-
-test('band break after 20 minutes in a row, once; a pause starts over; no day is counted', () => {
-  P.resetSession();
-  const t0 = 1e12, min = 60 * 1000;
-  let shown = 0;
-  for (let m = 0; m <= 25; m++) if (P.tick(t0 + m * min)) shown++;
-  assert.equal(shown, 1);
-  P.resetSession();
-  assert.equal(P.tick(t0), false);
-  assert.equal(P.tick(t0 + 19 * min), false, 'a 19-minute gap is a pause, not play in a row');
-  assert.equal(P.tick(t0 + 25 * min), false);
-  assert.doesNotMatch(read('src/lib/motivation/personalBest.js'), /dayKey|toDateString|penalt/);
-});
-
 test('wired into the topic step on the practice screen, after its last item', () => {
   const html = read('index.html');
   assert.match(html, /<script src="src\/lib\/motivation\/personalBest\.js"><\/script>/);
   assert.match(html, /function rpAdvance\(\)\{const st=rmPlan\[rpStep\];if\(\(st\.history\|\|\[\]\)\.length<PLAN_PER_SKILL\)\{rpRender\(\);return\}const enc=personalBestEncore\(st\);/);
   assert.match(html, /P\.playEncore\(P\.encorePlan\(/);
-  assert.match(html, /id="bandBreak"/);
-  assert.match(html, /bandBreakTick\(\);/);
+  assert.match(html, /length>=PLAN_PER_SKILL-1\)rpHoldStreak=true;const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he,it\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);rpHoldStreak=false/);
+  assert.match(html, /rpHoldStreak\)rpStreakHeld=r\.phrase;else S\.playPhrase\(r\.phrase,null,null,0\.4\)/);
   assert.match(read('sw.js'), /'\.\/src\/lib\/motivation\/personalBest\.js'/);
 });
-
 test('a long encore stops when the exercise changes: nothing plays over the next one (#801)', () => {
   const song = Array.from({ length: 8 }, (_, i) => streak.PHRASES[i % streak.PHRASES.length]);
   const plan = P.encorePlan(song, { storage: mockStorage() });
@@ -124,19 +105,19 @@ test('a long encore stops when the exercise changes: nothing plays over the next
   assert.equal(played.length, now);
   assert.equal(P.playEncore(null, {}), null);
 });
-
 test('the page stops the encore on the next exercise and when the child leaves the practice screen', () => {
   const html = read('index.html');
-  assert.match(html, /function rpRender\(\)\{if\(typeof stopEncore==='function'\)stopEncore\(\);/);
+  assert.match(html, /rpRender=function\(f\)\{return function\(\)\{stopEncore\(\);return f\(\)\}\}\(rpRender\)/);
+  assert.doesNotMatch(html, /function rpRender\(\)\{[^}]*stopEncore/, 'stop stays off the rpRender line (#813)');
   assert.match(html, /rpEncore=P\.playEncore\(/);
   assert.match(html, /\['rmPlanRestart','rmPlanReport'\]\.forEach\(function\(id\)\{ const b=\$\(id\); if\(b&&b\.addEventListener\) b\.addEventListener\('click',stopEncore\); \}\);/);
 });
 
 // The page's own rpAdvance + personalBestEncore, run in a VM: the last item of a topic step ends it.
-function runStepEnd(quiet) {
+function runStepEnd(quiet, prev) {
   const html = read('index.html').replace(/\r\n/g, '\n');
-  const src = html.match(/function personalBestEncore\(st\)\{[\s\S]*?\n\}\n/)[0] + html.match(/var rpEncore=null;\nfunction stopEncore\(\)\{.*\n/)[0] + html.match(/function rpAdvance\(\)\{.*\n/)[0];
-  P.setStorage(mockStorage({ 'mm.personalBest.v1': JSON.stringify({ me: { 'ג:MULT': { acc: 0.5, h: 0 } } }) }));
+  const src = html.match(/function personalBestEncore\(st\)\{[\s\S]*?\n\}\n/)[0] + html.match(/var rpEncore=null[^\n]*\nfunction stopEncore\(\)\{.*\n/)[0] + html.match(/function rpAdvance\(\)\{.*\n/)[0];
+  P.setStorage(mockStorage({ 'mm.personalBest.v1': JSON.stringify({ me: { 'ג:MULT': prev || { acc: 0.5, h: 0 } } }) }));
   const els = {};
   const el = (id) => els[id] || (els[id] = { id, innerHTML: '', textContent: '', hidden: true, disabled: false, focus() {} });
   const played = [], instCalls = [];
@@ -152,14 +133,13 @@ function runStepEnd(quiet) {
   });
   let stoppedAfter;
   try {
-    vm.runInContext(src + '\nrpAdvance();', ctx);
+    vm.runInContext(src + '\nrpStreakHeld={notes:[1]};\nrpAdvance();', ctx);
     const before = played.length;
     vm.runInContext('stopEncore();', ctx); // what rpRender does when the next exercise shows
     stoppedAfter = vm.runInContext('rpEncore', ctx) === null && played.length === before;
   } finally { globalThis.MM_MY_INSTRUMENT = prevMine; }
   return { reward: el('rmReward'), played, instCalls, stoppedAfter };
 }
-
 test('the end of a topic step shows the encore and plays it on the child\'s instrument (page code in a VM)', () => {
   const { reward, played, instCalls, stoppedAfter } = runStepEnd(false);
   assert.ok(stoppedAfter, 'stopEncore() ends the page\'s encore');
@@ -169,28 +149,30 @@ test('the end of a topic step shows the encore and plays it on the child\'s inst
   assert.equal(played[0], 'djembe');
   assert.equal(new Set(played.map((id) => instruments.instrumentById(id).family)).size, 3);
   assert.ok(!played.includes('rhythm'), 'the encore replaces the finale clicks, not on top of them');
+  assert.ok(!played.includes(null), 'the streak-of-5 phrase does not play with the encore');
   assert.deepEqual(P.bestFor('me', 'ג:MULT'), { acc: 1, h: 0 });
 });
-
+test('a held streak phrase plays alone when the step is not a new best', () => {
+  const { played } = runStepEnd(false, { acc: 1, h: 0 });
+  assert.ok(played.includes(null), 'the phrase still plays when there is no encore');
+  assert.ok(!played.includes('rhythm'), 'not the step clicks as well');
+});
 test('no-music check: with "בלי מוזיקה" the new best shows the words and plays nothing', () => {
   const { reward, played } = runStepEnd(true);
   assert.match(reward.innerHTML, /הדרן/);
   assert.deepEqual(played, []);
 });
-
 test('streak.js and fillBar are not changed; percentBar, areaScore and cubeLayerGroups stay', () => {
   const s = read('src/lib/streak.js');
   assert.equal(crypto.createHash('sha256').update(s.replace(/\r\n/g, '\n')).digest('hex').slice(0, 16), STREAK_SHA);
   const banks = read('src/lib/banks.js');
   ['fillBar', 'percentBar', 'areaScore', 'cubeLayerGroups'].forEach((t) => assert.match(banks, new RegExp("'" + t + "'"), t));
 });
-
 test('topic order is unchanged: curriculum rows and progression links', () => {
   const ids = curriculum.MATRIX.map((r) => r.grade + ':' + r.topicId).join(',');
   const links = Object.keys(progression.PREREQ).map((k) => k + '<' + progression.PREREQ[k][0].join('+')).join(',');
   assert.equal(crypto.createHash('sha256').update(ids + '|' + links).digest('hex').slice(0, 16), ORDER_SHA);
 });
-
 // Pinned from master at f48deb0: streak.js as it is, and the row order and prereq links of every topic.
 const STREAK_SHA = '5c1abeacab72f074';
 const ORDER_SHA = 'af3d54971df00e2b';
