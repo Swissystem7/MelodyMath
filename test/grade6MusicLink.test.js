@@ -36,7 +36,7 @@ test('every standard is met through at least two different musical models', () =
   Object.keys(g6.music).forEach((k) => {
     assert.ok(banks.ST[k], k);
     const ways = g6.music[k];
-    assert.ok(ways.length >= 2 && ways.length <= 3, k);
+    assert.ok(ways.length >= 2 && ways.length <= 4 && banks.primaryWays(ways).length <= 3, k); // one main way per level, plus an optional extra
     assert.equal(new Set(ways.map(([tag]) => tag)).size, ways.length, k + ' repeats a tag');
     assert.equal(new Set(ways.map(([, note]) => note)).size, ways.length, k + ' repeats a note');
   });
@@ -132,6 +132,9 @@ test('the way and source helpers render the note, the source link and the eviden
   assert.ok(src.includes(label.replace(/&/g, '&amp;')), src);
   assert.ok(src.includes(ctx.musicEvHe(way.musicEv)), src);
   assert.ok(ctx.musicSourceHtml(activity).includes(banks.MUSIC_SOURCES[activity.musicSrc][1]), 'an activity shows its source too (#591)');
+  const eq = banks.allItems().find((it) => it.musicSrcAlso);
+  const both = ctx.musicSourceHtml(eq);
+  assert.ok(both.includes(banks.MUSIC_SOURCES[eq.musicSrc][1]) && both.includes(banks.MUSIC_SOURCES[eq.musicSrcAlso[0]][1]), 'a second source shows next to the first (#710)');
   assert.equal(ctx.musicSourceHtml(null), '');
   assert.notEqual(ctx.musicEvHe('D'), ctx.musicEvHe('A'));
   assert.match(ctx.musicEvHe('R'), /[א-ת]/);

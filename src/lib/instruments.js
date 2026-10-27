@@ -36,6 +36,8 @@
     symmetry: { he: 'סימטריה', mechanism: 'M6' },
     lcm: { he: 'כפולה משותפת', mechanism: 'M4' },
     numberLine: { he: 'ישר המספרים וסדר', mechanism: 'M5' },
+    data: { he: 'נתונים', mechanism: 'M1' },
+    percent: { he: 'אחוזים', mechanism: 'M3' },
   };
 
   // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, topicMechanisms)
@@ -52,7 +54,7 @@
 
   const INSTRUMENTS = [
     // ---------- percussion ----------
-    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals'], 'drumLow',
+    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals', 'percent'], 'drumLow',
       'Two basic strokes, a low dum in the centre of the head and a high tek on the rim; long and short strokes filling one bar voice note lengths as fractions (M3).',
       'https://eefc.org/wp-content/uploads/Doumbek-strokes-1.pdf'),
     e('djembe', 'ג׳מבה', 'Djembe (jembe)', 'Mande, West Africa (Mali, Guinea)', 'percussion', 'M2', ['multiplication', 'skipCounting'], 'drumHigh',
@@ -67,7 +69,7 @@
     e('taiko', 'טאיקו', 'Taiko', 'Japan', 'percussion', 'M1', ['counting'], 'drumLow',
       'Players learn a piece by singing its rhythm first: "don" is one strong strike on the head and "ka" a strike on the rim, one syllable per strike to count (M1).',
       'https://www.janm.org/sites/default/files/2021-04/big-drum-family-guide.pdf'),
-    e('cajon', 'קחון', 'Cajón (box drum)', 'Afro-Peruvian, Peru', 'percussion', 'M1', ['counting', 'nextPrev'], 'woodClick',
+    e('cajon', 'קחון', 'Cajón (box drum)', 'Afro-Peruvian, Peru', 'percussion', 'M1', ['counting', 'nextPrev', 'data'], 'woodClick',
       'The box drum that, with guitar, accompanies the festejo and most Afro-Peruvian genres; a simple voice for a steady beat to count on (M1).',
       'https://calperformances.org/learn/program_notes/2007/pn_peru_negro.pdf'),
     e('bodhran', 'בודהראן', 'Bodhrán', 'Ireland', 'percussion', 'M2', ['multiplication', 'division'], 'frameDrum',
@@ -136,7 +138,7 @@
     e('guzheng', 'גוּצֶ׳נג', 'Guzheng', 'China', 'strings', 'M6', ['patterns'], 'pluck',
       'A zither with a movable bridge per string, tuned to a five-note (anhemitonic pentatonic) scale, so the same five notes repeat in every octave: a pattern of five (M6).',
       'https://collections.ed.ac.uk/mimed/record/14698'),
-    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals'], 'bowed',
+    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals', 'percent'], 'bowed',
       'A two-string bowed spike fiddle; a bowed note lasts exactly as long as the bow keeps moving, which makes it a clear voice for held note lengths in a bar (M3).',
       'https://www.horniman.ac.uk/object/1975.40/json'),
     e('guitar', 'גיטרה', 'Guitar', 'Spain, Europe', 'strings', 'M5', ['numberLine'], 'pluck',
