@@ -20,6 +20,8 @@
   const HZ = 392; // one fixed pitch (G4): magnitude is never pitch (M5 is weak evidence)
   const DENOMINATORS = [2, 3, 4, 5, 6, 8, 10, 100];
   const STORE_KEY = 'mm.noteLengthLine.magnitudeError';
+  const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
+  const SCREEN = { 'mm-cur-42': 'nllCard' }; // ?topic=...&screen=1; not progression.js SCREENS (#798)
 
   // place: one note on the line; compare: two notes in a row, both placed.
   const ITEMS = [
@@ -43,6 +45,17 @@
     { id: 'nll-nm-2', prompt: 'איזה שבר נמצא באמצע הקו בין 0 ל־1?', answer: '1/2' },
     { id: 'nll-nm-3', prompt: 'כתבו את 0.75 כשבר.', answer: '3/4' },
   ];
+
+  // Items for the child's grade (the app's 'mm-grade'): 0-1 lines for every
+  // grade, an item marked ה׳ or ו׳ only from that grade up. No grade: 0-1 only.
+  function itemsForGrade(grade) {
+    const g = GRADES.indexOf(grade);
+    return ITEMS.filter(function (it) { return !it.grade || (g >= 0 && g >= GRADES.indexOf(it.grade)); });
+  }
+  function storedGrade(storage) {
+    try { const s = store(storage); return s ? s.getItem('mm-grade') : null; } catch (e) { return null; }
+  }
+  function screenForTopic(id) { return Object.prototype.hasOwnProperty.call(SCREEN, id) ? SCREEN[id] : null; }
 
   function value(v) { const f = FB.toFraction(v); return f ? f.n / f.d : null; }
 
@@ -107,7 +120,7 @@
   }
 
   return {
-    WAY: WAY, BAR_SECONDS: BAR_SECONDS, HZ: HZ, DENOMINATORS: DENOMINATORS, ITEMS: ITEMS, NO_MUSIC_CHECK_ITEMS: NO_MUSIC_CHECK_ITEMS,
+    WAY: WAY, SCREEN: SCREEN, itemsForGrade: itemsForGrade, storedGrade: storedGrade, screenForTopic: screenForTopic, BAR_SECONDS: BAR_SECONDS, HZ: HZ, DENOMINATORS: DENOMINATORS, ITEMS: ITEMS, NO_MUSIC_CHECK_ITEMS: NO_MUSIC_CHECK_ITEMS,
     value: value, positionToValue: positionToValue, valueToPosition: valueToPosition, fractionAt: fractionAt, durationOf: durationOf,
     playPlan: playPlan, magnitudeError: magnitudeError, feedback: feedback, orderRight: orderRight, recordError: recordError, meanError: meanError,
   };

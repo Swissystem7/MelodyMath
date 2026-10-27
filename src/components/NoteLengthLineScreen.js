@@ -17,9 +17,10 @@
   const MINE = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
   const GAME = 'noteLengthLine', DEFAULT_INSTRUMENT = 'ukulele', STEPS = 1000;
 
-  function createState(index, showMusic) {
-    const n = NLL.ITEMS.length, i = Number(index) || 0;
-    return { index: i, item: i < n ? NLL.ITEMS[i] : null, chosen: [], feedback: [], status: i < n ? 'open' : 'plain', message: '', showMusic: showMusic !== false };
+  // grade: the child's grade letter ('mm-grade'); picks the items (and lines) offered.
+  function createState(index, showMusic, grade) {
+    const items = NLL.itemsForGrade(grade), n = items.length, i = Number(index) || 0;
+    return { index: i, item: i < n ? items[i] : null, chosen: [], feedback: [], status: i < n ? 'open' : 'plain', message: '', showMusic: showMusic !== false };
   }
 
   // x: 0..1 of the line. Places the next note of the item.
@@ -82,7 +83,7 @@
 
   function mount(el) {
     JAM.registerTapVoices();
-    let state = createState(0, JAM.loadShowMusic(GAME)), playing = null;
+    let state = createState(0, JAM.loadShowMusic(GAME), NLL.storedGrade()), playing = null;
     function inst() { return JAM.instrument(MINE.instrumentFor(DEFAULT_INSTRUMENT), 'pluck'); }
     function stop() { if (playing) playing.stop(); playing = null; }
     function play(notes) { stop(); if (state.showMusic) playing = JAM.playNotes(notes); }
@@ -103,7 +104,7 @@
         const answers = {};
         el.querySelectorAll('[data-plain]').forEach(function (i) { answers[i.getAttribute('data-plain')] = i.value; });
         state = checkPlain(state, answers);
-      } else if (act === 'next' || act === 'restart') { stop(); state = createState(act === 'next' ? state.index + 1 : 0, state.showMusic); }
+      } else if (act === 'next' || act === 'restart') { stop(); state = createState(act === 'next' ? state.index + 1 : 0, state.showMusic, NLL.storedGrade()); }
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic }); JAM.saveShowMusic(GAME, state.showMusic); }
       draw();
     });

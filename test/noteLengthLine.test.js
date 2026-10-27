@@ -100,6 +100,31 @@ test('fillBar stays MAIN in every fraction table that had it; no pitch for size'
   assert.doesNotMatch(src, /hzFor|pitchFor|valueToHz/);
 });
 
+test('the child\'s grade (mm-grade) picks the items: 0-1 for ד׳, mixed 0-2/0-3 from ה׳', () => {
+  const maxes = (g) => [...new Set(NLL.itemsForGrade(g).map((it) => it.max))].sort();
+  assert.deepEqual(maxes('ד'), [1]);
+  assert.deepEqual(maxes('ג'), [1]);
+  assert.deepEqual(maxes(null), [1], 'no grade yet: the 0-1 line only');
+  assert.deepEqual(maxes('ה'), [1, 2, 3]);
+  assert.deepEqual(maxes('ו'), [1, 2, 3]);
+  assert.ok(!NLL.itemsForGrade('ה').some((it) => it.grade === 'ו'), 'ו׳ items wait for ו׳');
+  assert.equal(NLL.itemsForGrade('ו').length, NLL.ITEMS.length);
+  const mem = { getItem: (k) => (k === 'mm-grade' ? 'ה' : null) };
+  assert.equal(NLL.storedGrade(mem), 'ה', 'the same key index.html saves');
+  const d = NLL.itemsForGrade('ד').length;
+  assert.equal(S.createState(d, true, 'ד').item, null, 'ד׳ reaches the no-music check after its own items');
+  assert.equal(S.createState(d, true, 'ה').item.max, 2);
+  const src = fs.readFileSync(require.resolve('../src/components/NoteLengthLineScreen.js'), 'utf8');
+  assert.match(src, /createState\(0, JAM\.loadShowMusic\(GAME\), NLL\.storedGrade\(\)\)/);
+});
+
+test('?topic=mm-cur-42&screen=1 opens the card in the music games tab', () => {
+  assert.equal(NLL.screenForTopic('mm-cur-42'), 'nllCard');
+  assert.equal(NLL.screenForTopic('nope'), null);
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  assert.match(html, /NoteLengthLineScreen\.js"><\/script>\s*<script>[^<]*MM_NOTE_LENGTH_LINE\.screenForTopic\(q\.get\('topic'\)\)[^<]*tab-musicGames[^<]*scrollIntoView/);
+});
+
 test('NoteLengthLine is reachable: card in the music games tab, scripts after fillBar, precache', () => {
   const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
   assert.match(html, /id="musicGames"[\s\S]*id="fbpCard"[\s\S]*id="nllCard"[\s\S]*#591 music games end/);
