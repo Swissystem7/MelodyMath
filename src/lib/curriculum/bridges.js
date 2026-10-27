@@ -148,8 +148,8 @@
   // lists those voices.
   // Not the ukulele, and not a sung note.
   // Notes are spaced so each one finishes before the next starts.
-  // A word, a clock time, or a number past 12 hundreds plays one soft listen
-  // tone. That tone is a cue, not a quantity.
+  // A word, a clock time, a third decimal digit, or a number past 12 hundreds
+  // plays one soft listen tone. That tone is a cue, not a quantity.
   function listenTone() {
     return [{ at: 0, voice: 'bell', held: false, hz: 523.25, listen: true }];
   }
@@ -172,13 +172,9 @@
     let whole = parseInt(bits[0] || '0', 10);
     if (!whole) whole = 0;
     const frac = (bits[1] || '').replace(/0+$/, '');
-    let tenths = frac.length ? frac.charCodeAt(0) - 48 : 0;
-    let hundredths = frac.length > 1 ? frac.charCodeAt(1) - 48 : 0;
-    // A digit past hundredths can fill the place. Ten hundredths are one tenth,
-    // and ten tenths are one one. 3.55 has no such digit, so it is not rounded.
-    if (frac.length > 2 && frac.charCodeAt(2) >= 53) hundredths += 1;
-    if (hundredths >= 10) { tenths += 1; hundredths -= 10; }
-    if (tenths >= 10) { whole += 1; tenths -= 10; }
+    if (frac.length > 2) return listenTone();
+    const tenths = frac.length ? frac.charCodeAt(0) - 48 : 0;
+    const hundredths = frac.length > 1 ? frac.charCodeAt(1) - 48 : 0;
     const places = placeVoices(mechanism);
     const events = [];
     function add(count, spec) {

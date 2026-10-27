@@ -181,10 +181,10 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   assert.equal(mixed[1].voice === 'breathy', false);
   const carried = bridges.soundPlan('steady beat', 0.999);
   assert.equal(carried.length, 1);
-  assert.equal(carried[0].place, 'one');
-  assert.equal(carried[0].voice, 'drum');
+  assert.equal(carried[0].listen, true);
+  assert.equal(carried[0].voice, 'bell');
   assert.equal(carried[0].voice === 'xylo', false);
-  assert.equal(carried[0].voice === 'musicBox' || carried[0].voice === 'fingerCymbal', false);
+  assert.equal(carried.some((ev) => ev.place === 'one'), false);
   const money = bridges.bridgeForLink('mm-cur-36', 'mm-cur-46');
   assert.equal(money.answer, '7.70');
   assert.equal(money.check('7.7'), true);
@@ -347,4 +347,16 @@ test('played digits equal the asked number, with no rounding', () => {
   assert.equal(align.sound.filter((ev) => ev.place === 'tenth').length, 5);
   assert.equal(align.sound.filter((ev) => ev.place === 'hundredth' && ev.voice === 'fingerCymbal').length, 5);
   assert.equal(align.sound.some((ev) => ev.voice === 'pluck' || ev.voice === 'breathy'), false);
+});
+
+test('3.555 is a listen cue, not a rounded 3.56', () => {
+  const extra = bridges.soundPlan('steady beat', 3.555);
+  assert.equal(extra.length, 1);
+  assert.equal(extra[0].listen, true);
+  assert.equal(extra[0].voice, 'bell');
+  assert.equal(extra.some((ev) => ev.place), false);
+  assert.equal(extra.filter((ev) => ev.voice === 'fingerCymbal').length, 0);
+  const same = bridges.soundPlan('length units', '3.555');
+  assert.equal(same[0].listen, true);
+  assert.equal(same.some((ev) => ev.voice === 'xylo'), false);
 });
