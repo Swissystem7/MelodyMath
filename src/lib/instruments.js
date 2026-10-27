@@ -131,7 +131,7 @@
     e('guzheng', 'גוּצֶ׳נג', 'Guzheng', 'China', 'strings', 'M6', ['patterns'], 'pluck',
       'A zither with a movable bridge per string, tuned to a five-note (anhemitonic pentatonic) scale, so the same five notes repeat in every octave: a pattern of five (M6).',
       'https://collections.ed.ac.uk/mimed/record/14698'),
-    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals'], 'bowed',
+    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals', 'percent'], 'bowed',
       'A two-string bowed spike fiddle; a bowed note lasts exactly as long as the bow keeps moving, which makes it a clear voice for held note lengths in a bar (M3).',
       'https://www.horniman.ac.uk/object/1975.40/json'),
     e('guitar', 'גיטרה', 'Guitar', 'Spain, Europe', 'strings', 'M5', ['numberLine'], 'pluck',

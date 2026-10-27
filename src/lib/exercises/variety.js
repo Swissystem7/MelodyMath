@@ -323,9 +323,7 @@
     if (silent) out.music = null;
     else if (source && source.music) out.music = source.music;
     else if (exerciseType === 'percent') out.music = 'percentBar';
-    if (exerciseType === 'number_line' && new RegExp('(^|[^\\d.])' + String(out.answer).replace(/\./g, '\\.') + '([^\\d]|$)').test(String(out.prompt))) {
-      const safe = otherSet('number_line', roundIndex * 17 + 1, getTopicRange(topicOrItem, opts)); if (safe) { out.prompt = safe.prompt; out.answer = safe.answer; out.hint = safe.hint; out.numberKey = safe.key; }
-    }
+    if (exerciseType === 'number_line' && new RegExp('(^|[^\\d.])' + String(out.answer).replace(/\./g, '\\.') + '([^\\d]|$)').test(String(out.prompt))) { const safe = otherSet('number_line', roundIndex * 17 + 1, getTopicRange(topicOrItem, opts)); if (safe) { out.prompt = safe.prompt; out.answer = safe.answer; out.hint = safe.hint; out.numberKey = safe.key; } }
     return out;
   }
   function createVarietySession(topicOrItem, options) {
