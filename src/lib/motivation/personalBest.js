@@ -45,7 +45,8 @@
   }
 
   // Records a run of one child in one topic; returns {run, prev, isNew, first}.
-  function recordRun(kid, topic, result) {
+  // commit false only reports the comparison, so a failed check does not save.
+  function recordRun(kid, topic, result, commit) {
     const k = String(kid || 'me'), t = String(topic || 'topic');
     const run = toRun(result);
     if (!(Number(result && result.total) > 0)) return { run: run, prev: null, isNew: false, first: false };
@@ -53,7 +54,7 @@
     const mine = all[k] || (all[k] = {});
     const prev = mine[t] || null;
     const isNew = isNewBest(prev, run);
-    if (!prev || isNew) { mine[t] = run; save(all); }
+    if (commit !== false && (!prev || isNew)) { mine[t] = run; save(all); }
     return { run: run, prev: prev, isNew: isNew, first: !prev };
   }
   function bestFor(kid, topic) { const m = load()[String(kid || 'me')]; return (m && m[String(topic || 'topic')]) || null; }
@@ -101,8 +102,7 @@
     const len = phrases.reduce(function (n, p) { return n + p.notes.length; }, 0);
     return { lead: lead, leadFamily: leadX ? leadX.family : null, backing: backing, phrases: phrases, beats: Math.max(4, len) };
   }
-  // Melody on the lead, a beat and a drone behind it. Only the first phrase and
-  // bar go to the audio clock now; stop() clears the rest (#801).
+  // First phrase and bar go to the audio clock now; stop() clears the rest (#801).
   function playEncore(plan, S, delay, timer) {
     if (!plan || !S || typeof S.playPhrase !== 'function') return null;
     const T = timer || { set: function (f, ms) { return setTimeout(f, ms); }, clear: function (id) { clearTimeout(id); } };

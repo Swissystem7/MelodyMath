@@ -27,6 +27,7 @@ async function finishTopic(page, quiet) {
     await expect(page.locator('#rmPlanFeedback')).toHaveClass(/good/);
     await page.locator('#rmPlanNext').click();
   }
+  await page.evaluate(() => { const st=rmPlan[rpStep], id=(st.checkUsed||[]).at(-1), it=(st.items||[]).find(x=>x&&x.id===id)||st.current, host=document.getElementById('masteryCheckHost'); if(!host||host.classList.contains('hidden')) return; const v=it&&it.answer!=null?String(it.answer):''; const input=host.querySelector('.plain-answer-input'); if(input){ input.value=v; const b=host.querySelector('.plain-submit-btn'); if(b) b.click(); return; } const btn=[...host.querySelectorAll('[data-plain-choice]')].find(x=>x.getAttribute('data-plain-choice')===v); if(btn) btn.click(); });
   return pick;
 }
 

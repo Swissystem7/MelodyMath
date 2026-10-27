@@ -113,13 +113,12 @@ test('the page stops the encore on the next exercise and when the child leaves t
   assert.match(html, /\['rmPlanRestart','rmPlanReport'\]\.forEach\(function\(id\)\{ const b=\$\(id\); if\(b&&b\.addEventListener\) b\.addEventListener\('click',stopEncore\); \}\);/);
 });
 
-// The page's own rpAdvance + personalBestEncore, run in a VM: the last item of a topic step ends it.
-function runStepEnd(quiet, prev) {
+function runStepEnd(quiet, prev, gate) {
   const html = read('index.html').replace(/\r\n/g, '\n');
   const src = html.match(/function personalBestEncore\(st\)\{[\s\S]*?\n\}\n/)[0] + html.match(/var rpEncore=null[^\n]*\nfunction stopEncore\(\)\{.*\n/)[0] + html.match(/function rpAdvance\(\)\{.*\n/)[0];
   P.setStorage(mockStorage({ 'mm.personalBest.v1': JSON.stringify({ me: { 'ג:MULT': prev || { acc: 0.5, h: 0 } } }) }));
-  const els = {};
-  const el = (id) => els[id] || (els[id] = { id, innerHTML: '', textContent: '', hidden: true, disabled: false, focus() {} });
+  const els = {}, box = {};
+  const el = (id) => els[id] || (els[id] = { id, innerHTML: '', textContent: '', hidden: true, disabled: false, classList: { add() {}, remove() {} }, focus() {} });
   const played = [], instCalls = [];
   const prevMine = globalThis.MM_MY_INSTRUMENT;
   globalThis.MM_MY_INSTRUMENT = { instrumentFor: (f) => { instCalls.push(f); return 'djembe'; } };
@@ -128,7 +127,8 @@ function runStepEnd(quiet, prev) {
     MM_MASTERY_STREAK: { mySong: () => [], PHRASES: streak.PHRASES, playPhrase: (p, inst) => { played.push(inst); return {}; } },
     $: el, show: (id, on) => { el(id).hidden = !on; }, prefsNow: () => ({ quiet }), who: { classCode: '', name: '' }, selectedGrade: 'ג',
     mechanismOf: () => 'M2', generateRhythmExercise: () => ({ pattern: [], bpm: 80, fractionPattern: '♩♩' }), playRhythmClicks: () => played.push('rhythm'),
-    endTeacherSession() {}, rpRender() {}, setTimeout() {}, PLAN_PER_SKILL: 6, rpStep: 0, rpItem: 0,
+    endTeacherSession() {}, rpRender() {}, setTimeout() {}, PLAN_PER_SKILL: 6, rpStep: 0, rpItem: 0, window: {},
+    mountMasteryCheck: gate ? (h, it, o) => { box.opts = o; } : undefined, MelodyMathMasteryCheck: { restoreMusicState() {} },
     rmPlan: [{ skill: 'MULT', he: 'כפל', history: Array.from({ length: 6 }, () => ({ correct: true })), hints: 0, current: { music: 'equalGroups' } }],
   });
   let stoppedAfter;
@@ -138,7 +138,7 @@ function runStepEnd(quiet, prev) {
     vm.runInContext('stopEncore();', ctx); // what rpRender does when the next exercise shows
     stoppedAfter = vm.runInContext('rpEncore', ctx) === null && played.length === before;
   } finally { globalThis.MM_MY_INSTRUMENT = prevMine; }
-  return { reward: el('rmReward'), played, instCalls, stoppedAfter };
+  return { reward: el('rmReward'), played, instCalls, stoppedAfter, gate: box };
 }
 test('the end of a topic step shows the encore and plays it on the child\'s instrument (page code in a VM)', () => {
   const { reward, played, instCalls, stoppedAfter } = runStepEnd(false);
@@ -162,6 +162,14 @@ test('no-music check: with "בלי מוזיקה" the new best shows the words an
   assert.match(reward.innerHTML, /הדרן/);
   assert.deepEqual(played, []);
 });
+test('the check is silent until passed, and the best is written only then', () => {
+  const a = runStepEnd(false, { acc: 0.5, h: 0 }, 1);
+  assert.deepEqual([a.played.length, P.bestFor('me', 'ג:MULT').acc], [0, 0.5]);
+  a.gate.opts.onAnswer('', false);
+  assert.deepEqual([a.played.length, P.bestFor('me', 'ג:MULT').acc], [0, 0.5]);
+  const b = runStepEnd(false, { acc: 1, h: 0 }, 1); assert.deepEqual(b.played, []); b.gate.opts.onAnswer('', true); assert.deepEqual(b.played, [null]);
+  const c = runStepEnd(false, { acc: 0.5, h: 0 }, 1); assert.equal(c.played.length, 0); c.gate.opts.onAnswer('', true); assert.ok(c.played.length >= 3 && !c.played.includes(null) && P.bestFor('me', 'ג:MULT').acc === 1);
+});
 test('streak.js and fillBar are not changed; percentBar, areaScore and cubeLayerGroups stay', () => {
   const s = read('src/lib/streak.js');
   assert.equal(crypto.createHash('sha256').update(s.replace(/\r\n/g, '\n')).digest('hex').slice(0, 16), STREAK_SHA);
@@ -173,6 +181,5 @@ test('topic order is unchanged: curriculum rows and progression links', () => {
   const links = Object.keys(progression.PREREQ).map((k) => k + '<' + progression.PREREQ[k][0].join('+')).join(',');
   assert.equal(crypto.createHash('sha256').update(ids + '|' + links).digest('hex').slice(0, 16), ORDER_SHA);
 });
-// Pinned from master at f48deb0: streak.js as it is, and the row order and prereq links of every topic.
 const STREAK_SHA = '5c1abeacab72f074';
 const ORDER_SHA = 'af3d54971df00e2b';
