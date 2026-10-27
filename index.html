@@ -497,6 +497,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/curriculum/grade2.js"></script>
 <script src="src/lib/exercises/explorerBank.js"></script>
 <script src="src/lib/curriculum/evidenceMeta.js"></script>
+<script src="src/lib/gradeView.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/mastery.js"></script>
 <script src="src/lib/numberLine.js"></script>
@@ -927,7 +928,7 @@ function answerOk(it,given){if(it&&it.tolerance!=null&&typeof isWithinTolerance=
 // once the child has answered. Items that are music activities themselves have no way.
 function musicWayHtml(it){return it&&it.musicNote?`<b>🎵 דרך מוזיקלית:</b> ${mathHtml(it.musicNote)}`:''}
 // Free play before answering (#591 A.3): an instrument strip under every exercise, in the timbre of its musical way.
-function setNumberPlay(id,it){const el=$(id);if(!el||typeof MM_NUMBER_PLAY==='undefined'||typeof MM_NUMBER_PLAY.mount!=='function')return;if(it&&it.noMusic){el.innerHTML='';el.classList.add('hidden');return;}MM_NUMBER_PLAY.mount(el,it,{grade:(it&&it.grade)||selectedGrade,streak:typeof metroStreak==='number'?metroStreak:0,who:typeof who!=='undefined'?who:null});}
+function setNumberPlay(id,it){const el=$(id);if(!el||typeof MM_NUMBER_PLAY==='undefined'||typeof MM_NUMBER_PLAY.mount!=='function')return;if(it&&it.noMusic){el.innerHTML='';el.classList.add('hidden');return;}MM_NUMBER_PLAY.mount(el,it,{grade:(it&&it.grade)||selectedGrade,streak:typeof metroStreak==='number'?metroStreak:0,who:typeof who!=='undefined'?who:null});if(typeof MM_GRADE_VIEW!=='undefined'&&typeof MM_GRADE_VIEW.mount==='function'){const view=MM_GRADE_VIEW.mount(el,(it&&it.grade)||selectedGrade);if(view)el.classList.remove('hidden');}}
 function setMusicWay(id,it){const el=$(id);if(!el)return;const html=musicWayHtml(it);el.innerHTML=html;show(id,!!html);if(typeof mountFreePad==='function')mountFreePad(el,{mechanism:it&&typeof mechanismOf==='function'?mechanismOf(it.music):null,quiet:typeof prefsNow==='function'&&!!prefsNow().quiet})}
 function musicEvHe(ev){return ev==='D'?'חלק מהתערבות שנבדקה במחקר':ev==='R'?'מקור הוראה מוכר':'התאמה שעדיין לא נבדקה בנפרד'}
 function musicSourceHtml(it){const s=it&&it.musicSrc&&typeof MUSIC_SOURCES!=='undefined'?MUSIC_SOURCES[it.musicSrc]:null;if(!s)return'';const link=s=>{const a=document.createElement('a');a.href=s[1];a.target='_blank';a.rel='noopener';a.textContent=s[0];return a.outerHTML};const also=(it.musicSrcAlso||[]).map(k=>MUSIC_SOURCES[k]).filter(Boolean).map(link);return`<div class="music-src">מקור הדרך המוזיקלית: ${[link(s)].concat(also).join('; ')} · ${musicEvHe(it.musicEv)}</div>`}
