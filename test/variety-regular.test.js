@@ -7,6 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const variety = require('../src/lib/exercises/variety.js');
+const curriculum = require('../src/lib/curriculum.js');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
@@ -110,6 +111,55 @@ for (const [id, min, max] of PLACE) {
     }
   });
 }
+
+test('topic practice shows the Hebrew topic name', () => {
+  const render = sliceFn('renderExercise');
+  assert.match(render, /topicPracticeName\(practiceTopic\)/);
+  assert.equal(render.includes('נושא '), false);
+  assert.equal(render.includes('mm-cur-'), false);
+  const sandbox = { topicById: curriculum.topicById };
+  vm.createContext(sandbox);
+  vm.runInContext(sliceFn('topicPracticeName') + '\nthis.name = topicPracticeName;', sandbox);
+  const he = sandbox.name('mm-cur-22');
+  assert.equal(he, 'מספרים עד 10,000, מבנה עשרוני');
+  assert.equal(he.includes('mm-cur-'), false);
+});
+
+test('the topic quiz no-music check is the last exercise', () => {
+  const sandbox = { MM_VARIETY: variety, PLAN_PER_SKILL: 6, rmVarietySeed: 1 };
+  vm.createContext(sandbox);
+  vm.runInContext(sliceFn('varyTopicExercise') + '\n' + sliceFn('practiceTopicExercise') + '\nthis.one = practiceTopicExercise;', sandbox);
+  const flags = [];
+  for (let round = 0; round < 10; round++) flags.push(sandbox.one('mm-cur-1', { id: 'bank', prompt: 'old', answer: 0 }, round).noMusic === true);
+  assert.equal(flags.indexOf(true), 9);
+  assert.equal(flags[5], false);
+});
+
+test('a finished topic quiz mounts one no-music check before the summary', () => {
+  const check = sliceFn('check');
+  assert.match(check, /practiceTopic&&mountTopicMasteryCheck\(\)/);
+  assert.match(html, /id="quizMastery"/);
+  const mounted = [];
+  let finished = 0;
+  const sandbox = {
+    practiceTopic: 'mm-cur-22',
+    topicPracticeItems: [{ id: 'bank', prompt: 'כמה?', answer: 4 }],
+    history: [{ id: 'a' }],
+    $: (id) => sandbox.els[id],
+    els: { quizMastery: { classList: { add() {} } }, answer: {}, check: {} },
+    show() {},
+    setNumberPlay() {},
+    mountMasteryCheck(host, item, opts) { mounted.push({ topicId: opts.topicId, noMusic: item.noMusic, stage: item.musicStage }); sandbox.done = opts.onAnswer; },
+    finish() { finished += 1; },
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(sliceFn('mountTopicMasteryCheck') + '\nthis.ok = mountTopicMasteryCheck();', sandbox);
+  assert.equal(sandbox.ok, true);
+  assert.deepEqual(mounted, [{ topicId: 'mm-cur-22', noMusic: true, stage: 'no_music_check' }]);
+  assert.equal(finished, 0);
+  sandbox.done('4', true);
+  assert.equal(finished, 1);
+});
 
 test('regular practice without a topic keeps the music exercise', () => {
   const box = regularNext(null);
