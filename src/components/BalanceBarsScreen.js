@@ -13,7 +13,9 @@
   const BB = root.MM_BALANCE_BARS || require('../lib/music/balanceBars.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
   const MINE = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
-  const GAME = 'balanceBars', DEFAULT_INSTRUMENT = 'marimba', PARTNER = 'kora';
+  // PARTNER is fillBar's own instrument (FractionBarPad), an M3 instrument in
+  // instruments.js: balanceBars extends fillBar. Not kora (M4, LCM only).
+  const GAME = 'balanceBars', DEFAULT_INSTRUMENT = 'marimba', PARTNER = 'darbuka';
   const SIGNS = ['<', '=', '>'];
 
   function createState(index, showMusic) {

@@ -34,8 +34,18 @@ test('the same way as the bank items, the same mechanism as fillBar', () => {
   assert.equal(banks.mechanismOf(BB.WAY), banks.mechanismOf('fillBar'));
 });
 
+test('the partner is a registered instrument of the balance mechanism, not kora', () => {
+  const INST = require('../src/lib/instruments.js');
+  assert.equal(S.DEFAULT_INSTRUMENT, 'marimba');
+  assert.equal(S.PARTNER, 'darbuka', 'fillBar\'s own instrument (FractionBarPad)');
+  const p = INST.instrumentById(S.PARTNER);
+  assert.ok(p, 'registered in instruments.js');
+  assert.equal(p.mechanism, banks.mechanismOf(BB.WAY), 'same mechanism as balanceBars');
+  assert.ok(!p.optional, 'not an optional weak-evidence instrument');
+});
+
 test('two bars start together: equal sides end together, the bigger one sounds on', () => {
-  const eq = BB.balancePlan(500, 500, ['marimba', 'kora']);
+  const eq = BB.balancePlan(500, 500, [S.DEFAULT_INSTRUMENT, S.PARTNER]);
   const ends = eq.filter((n) => n.end);
   assert.equal(ends.length, 2);
   assert.equal(ends[0].at, ends[1].at);
@@ -94,7 +104,7 @@ test('the screen: solve by ear, then the no-music check last', () => {
   st = S.check(st, '4,500');
   assert.equal(st.status, 'right');
   assert.equal(S.current(st).left, S.current(st).right);
-  const html = S.renderHtml(S.createState(0, true), ['מרימבה', 'קורה']);
+  const html = S.renderHtml(S.createState(0, true), ['מרימבה', 'דרבוקה']);
   assert.match(html, /data-act="play"/);
   assert.equal((html.match(/class="bb-side"/g) || []).length, 2);
   assert.doesNotMatch(S.renderHtml(S.createState(0, false), []), /data-act="play"/);
