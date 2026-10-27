@@ -4,14 +4,34 @@
 // (a row is a track, a column a beat: equal groups). The perimeter loop over
 // the edge is its EXTRA. Above 12 a ten is one held sound, ones on woodClick.
 (function (root, factory) {
-  const api = factory();
+  const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_GROOVE_GRID = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
   const WAY = 'areaScore', STEP = 0.22, TEN_DUR = 0.45, ONE_VOICE = 'woodClick';
-  const ROW_HZ = [262, 330, 392, 523, 659, 784];
+  const ROW_HZ = [262, 330, 392, 523, 659, 784], MIN_HZ = 220;
+
+  function voiceDefs() {
+    if (root && root.VOICES) return root.VOICES;
+    try { return require('../instrumentVoices.js').VOICES; } catch (e) { return {}; }
+  }
+
+  // Moves hz by octaves into the band the voice's filter lets through, and
+  // never below MIN_HZ (a small speaker drops lower notes). A held ten at
+  // 110 Hz through drumHigh's 2500 Hz bandpass was silent (#591).
+  function audibleHz(voice, hz) {
+    const f = voiceDefs()[voice] && voiceDefs()[voice].filter;
+    let out = Number(hz) > 0 ? Number(hz) : 262;
+    let lo = MIN_HZ, hi = Infinity;
+    if (f && f[0] === 'bandpass') { lo = Math.max(lo, f[1] / 2); hi = f[1] * 2; }
+    if (f && f[0] === 'lowpass') hi = f[1];
+    if (f && f[0] === 'highpass') lo = Math.max(lo, f[1]);
+    while (out < lo) out *= 2;
+    while (out > hi && out / 2 >= lo) out /= 2;
+    return Math.round(out);
+  }
 
   function side(n) { const v = Number(n); return Number.isInteger(v) && v >= 1 && v <= 12 ? v : null; }
 
@@ -52,7 +72,8 @@
   }
 
   // Up to 12 steps: one sound each, a track per row, each row's first accented.
-  // Above 12: one held sound per full ten (track of its last square), then ones.
+  // Above 12: one held sound per full ten (track and row pitch of its last
+  // square, lifted into that voice's band), then ones.
   function stepNotes(steps, trackVoice) {
     const notes = [];
     if (steps.length <= 12) {
@@ -64,10 +85,11 @@
     const tens = Math.floor(steps.length / 10);
     for (let t = 0; t < tens; t++) {
       const idx = Array.from({ length: 10 }, function (_, k) { return t * 10 + k; });
-      notes.push({ at: t * 2 * STEP, voice: trackVoice(steps[t * 10 + 9].r), hz: 110, steps: idx, held: true, dur: TEN_DUR, gain: 0.28 });
+      const last = steps[t * 10 + 9], v = trackVoice(last.r);
+      notes.push({ at: t * 2 * STEP, voice: v, hz: audibleHz(v, ROW_HZ[last.r % ROW_HZ.length]), steps: idx, held: true, dur: TEN_DUR, gain: 0.28 });
     }
     for (let i = tens * 10; i < steps.length; i++) {
-      notes.push({ at: (tens * 2 + i - tens * 10) * STEP, voice: ONE_VOICE, hz: 1800, steps: [i], held: false });
+      notes.push({ at: (tens * 2 + i - tens * 10) * STEP, voice: ONE_VOICE, hz: audibleHz(ONE_VOICE, 1800), steps: [i], held: false });
     }
     return notes;
   }
@@ -97,5 +119,5 @@
     { id: 'gg-nm-4', prompt: 'ומה ההיקף של צורת ה־L?', answer: L.perimeter },
   ];
 
-  return { WAY, ONE_VOICE, TARGETS, NO_MUSIC_CHECK_ITEMS, gridArea, perimeterPath, composeL, areaPlan, perimeterPlan, partnerFor };
+  return { WAY, ONE_VOICE, MIN_HZ, TARGETS, NO_MUSIC_CHECK_ITEMS, audibleHz, gridArea, perimeterPath, composeL, areaPlan, perimeterPlan, partnerFor };
 });

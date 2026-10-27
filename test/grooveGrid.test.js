@@ -56,6 +56,34 @@ test('above 12 a ten is one held sound and the ones play on woodClick', () => {
   assert.deepEqual([...new Set(small.map((n) => n.voice))], ['kid', 'partner']);
 });
 
+// Level of a sine at hz after the voice's filter (biquad, Q 1), 1 = untouched.
+function passes(voiceId, hz) {
+  const f = require('../src/lib/instrumentVoices.js').VOICES[voiceId].filter;
+  if (!f) return 1;
+  const x = hz / f[1], den = Math.sqrt((1 - x * x) ** 2 + x * x);
+  return f[0] === 'lowpass' ? 1 / den : f[0] === 'highpass' ? (x * x) / den : x / den;
+}
+
+test('above 12 the lines are clearly audible: every held ten and one is in its voice\'s band', () => {
+  const IV = require('../src/lib/instrumentVoices.js');
+  assert.ok(passes('drumHigh', 110) < 0.1, 'the old 110 Hz ten on the djembe was filtered out');
+  Object.keys(IV.VOICES).forEach((v) => {
+    [GG.areaPlan(4, 6, () => v), GG.areaPlan(12, 12, () => v), GG.perimeterPlan(3, 8, () => v)].forEach((plan) => {
+      plan.forEach((n) => {
+        assert.ok(n.hz >= GG.MIN_HZ, v + ': ' + n.hz + ' Hz is too low for a small speaker');
+        assert.ok(passes(n.voice, n.hz) >= 0.5, v + ': ' + n.voice + ' at ' + n.hz + ' Hz is muffled by its filter');
+      });
+    });
+  });
+  // the real default grid: djembe row 0, kora rows, each ten keeps its row's track
+  const tr = SCREEN.tracks(mem({}));
+  const tens = GG.areaPlan(4, 6, tr.trackVoice).filter((n) => n.held);
+  assert.deepEqual(tens.map((t) => t.voice), [tr.trackVoice(1), tr.trackVoice(3)]);
+  tens.forEach((t) => assert.ok(passes(t.voice, t.hz) >= 0.5));
+  const djembeTen = GG.perimeterPlan(1, 6, tr.trackVoice).find((n) => n.held && n.voice === 'drumHigh');
+  assert.ok(djembeTen && djembeTen.hz >= 1250, 'the djembe ten sits in its 2500 Hz band');
+});
+
 test('row 0 is the child\'s instrument from myInstrument.instrumentFor; the grid has 2 families', () => {
   const kid = SCREEN.tracks(mem({ [MI.KEY]: 'oud' }));
   assert.equal(kid.kid.id, 'oud');
