@@ -85,10 +85,27 @@ test('the child home has no middle-school topic or sonification jargon', () => {
 });
 
 test('exercises in index.html are age-appropriate for elementary school (grades א–ו)', () => {
-  // Elementary school does not teach exponents (חזקות), negative operations, or complex tuning ratios
-  assert.doesNotMatch(indexHtml, /'חזקות'/);
+  // Levels 1–3 stay elementary. The replaced items return only as EXTRA, level 4.
   assert.doesNotMatch(indexHtml, /75:64/);
   assert.doesNotMatch(indexHtml, /45:32/);
   assert.doesNotMatch(indexHtml, /64:45/);
-  assert.doesNotMatch(indexHtml, /,\s*-\d+\s*,/);
+  const rows = vm.runInNewContext(indexHtml.match(/const exercises=(\[[\s\S]*?\])\.map/)[1]);
+  const live = rows.filter(r => r[7] !== 'EXTRA');
+  const extra = rows.filter(r => r[7] === 'EXTRA');
+  assert.equal(live.some(r => r[2] === 'חזקות'), false);
+  assert.equal(live.some(r => typeof r[5] === 'number' && r[5] < 0), false);
+  const kept = live.filter(r => [7, 11, 14, 15, 17, 18, 20, 21, 22, 24].includes(r[0])).map(r => r[2]);
+  assert.equal(JSON.stringify(kept), JSON.stringify(['כפל', 'כפל', 'יחסים', 'כפל', 'שברים', 'סדרות', 'חילוק', 'יחסים', 'חיסור', 'כפל']));
+  const back = {
+    7: ['חזקות', 'טמפו', 8], 11: ['חזקות', 'טמפו', 240], 15: ['חזקות', 'טמפו', 1080],
+    20: ['חזקות', 'טמפו', 200], 24: ['חזקות', 'טמפו', 960],
+    14: ['יחסים', 'מרווחים', '5:4'], 17: ['יחסים', 'מרווחים', '5:3'], 21: ['יחסים', 'מרווחים', '15:8'],
+    18: ['פונקציות', 'מלודיה', 10], 22: ['פונקציות', 'מלודיה', -12]
+  };
+  for (const [id, want] of Object.entries(back)) {
+    const row = extra.find(r => r[8] === Number(id));
+    assert.ok(row, 'missing EXTRA for ' + id);
+    assert.equal(row[1], 4);
+    assert.equal(JSON.stringify([row[2], row[3], row[5]]), JSON.stringify(want));
+  }
 });
