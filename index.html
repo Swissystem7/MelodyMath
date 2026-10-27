@@ -889,10 +889,10 @@ function poolForSkill(skill){
   }
   return rows;
 }
-let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rmPlanTopic=null,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
+let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rmPlanTopic=null,rmVarietySeed=0,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
 function prefsNow(){return typeof loadAccess==='function'?loadAccess():{}}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
-function maybeHear(item){if(!item||item.noMusic)return;const groups=item.hear;setActiveHear(groups||null);if(prefsNow().quiet)return;if(groups&&typeof playCountClicks==='function'){playCountClicks(groups,76);return;}const active=(typeof document!=='undefined'&&document.querySelector)?(document.querySelector('#quiz:not(.hidden), #rmCard:not(.hidden), #rmPlanCard:not(.hidden), #classCard:not(.hidden)')||document):null;const btn=active&&active.querySelector?active.querySelector('.np-btn, [data-act="play-numbers"], #btnPlayWay, .way-play-btn'):null;if(btn&&typeof btn.click==='function'){btn.click();return;}if(typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item);if(plan&&typeof MM_NUMBER_PLAY.play==='function')MM_NUMBER_PLAY.play(plan);}}
+function maybeHear(item){if(!item||item.noMusic)return;const groups=item.hear;setActiveHear(groups||null);if(prefsNow().quiet)return;if(item.instrument&&typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item,{instrument:item.instrument,bpm:item.bpm,grade:item.grade||(typeof selectedGrade!=='undefined'?selectedGrade:undefined)});if(plan&&typeof MM_NUMBER_PLAY.play==='function'){MM_NUMBER_PLAY.play(plan);return;}}if(groups&&typeof playCountClicks==='function'){playCountClicks(groups,item.bpm||76);return;}const active=(typeof document!=='undefined'&&document.querySelector)?(document.querySelector('#quiz:not(.hidden), #rmCard:not(.hidden), #rmPlanCard:not(.hidden), #classCard:not(.hidden)')||document):null;const btn=active&&active.querySelector?active.querySelector('.np-btn, [data-act="play-numbers"], #btnPlayWay, .way-play-btn'):null;if(btn&&typeof btn.click==='function'){btn.click();return;}if(typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item);if(plan&&typeof MM_NUMBER_PLAY.play==='function')MM_NUMBER_PLAY.play(plan);}}
 // «3 שארית 2» is not a number, so it goes through the pure validator in
 // grade3Music.js instead of the numeric isCorrect path, and a miss gets the
 // message that names the mistake (R5).
@@ -903,7 +903,7 @@ function answerOk(it,given){if(it&&it.tolerance!=null&&typeof isWithinTolerance=
 // once the child has answered. Items that are music activities themselves have no way.
 function musicWayHtml(it){return it&&it.musicNote?`<b>🎵 דרך מוזיקלית:</b> ${mathHtml(it.musicNote)}`:''}
 // Free play before answering (#591 A.3): an instrument strip under every exercise, in the timbre of its musical way.
-function setNumberPlay(id,it){const el=$(id);if(!el||typeof MM_NUMBER_PLAY==='undefined'||typeof MM_NUMBER_PLAY.mount!=='function')return;if(it&&it.noMusic){el.innerHTML='';el.classList.add('hidden');return;}MM_NUMBER_PLAY.mount(el,it,{grade:(it&&it.grade)||selectedGrade,streak:typeof metroStreak==='number'?metroStreak:0,who:typeof who!=='undefined'?who:null});}
+function setNumberPlay(id,it){const el=$(id);if(!el||typeof MM_NUMBER_PLAY==='undefined'||typeof MM_NUMBER_PLAY.mount!=='function')return;if(it&&it.noMusic){el.innerHTML='';el.classList.add('hidden');return;}MM_NUMBER_PLAY.mount(el,it,{grade:(it&&it.grade)||selectedGrade,streak:typeof metroStreak==='number'?metroStreak:0,who:typeof who!=='undefined'?who:null,instrument:it&&it.instrument,bpm:it&&it.bpm});}
 function setMusicWay(id,it){const el=$(id);if(!el)return;const html=musicWayHtml(it);el.innerHTML=html;show(id,!!html);if(typeof mountFreePad==='function')mountFreePad(el,{mechanism:it&&typeof mechanismOf==='function'?mechanismOf(it.music):null,quiet:typeof prefsNow==='function'&&!!prefsNow().quiet})}
 function musicEvHe(ev){return ev==='D'?'חלק מהתערבות שנבדקה במחקר':ev==='R'?'מקור הוראה מוכר':'התאמה שעדיין לא נבדקה בנפרד'}
 function musicSourceHtml(it){const s=it&&it.musicSrc&&typeof MUSIC_SOURCES!=='undefined'?MUSIC_SOURCES[it.musicSrc]:null;if(!s)return'';const link=s=>{const a=document.createElement('a');a.href=s[1];a.target='_blank';a.rel='noopener';a.textContent=s[0];return a.outerHTML};const also=(it.musicSrcAlso||[]).map(k=>MUSIC_SOURCES[k]).filter(Boolean).map(link);return`<div class="music-src">מקור הדרך המוזיקלית: ${[link(s)].concat(also).join('; ')} · ${musicEvHe(it.musicEv)}</div>`}
@@ -1223,26 +1223,37 @@ renderFirstRun();
 // program.html opens a curriculum row with ?topic=<id>[&skill=<k>]: the row's
 // tagged items run in the same plan loop as startStrugglePractice. Navigation
 // only — picking, levels and scoring are unchanged.
-// Topic practice (?topic=mm-cur-…) speaks the variety engine: a new sum, tempo
-// and instrument each round. mm-cur-1, 22, 31 and 38 stay inside their ranges.
+// Topic practice (?topic=) varies numbers, instrument, rhythm and pattern
+// inside the row's own exercise. It does not rewrite the row as a + b.
+// The last round is the plain check, so hasMusic is not forced on (Refs #681).
 function varyTopicExercise(topicId, item, round) {
   if (!topicId || !item || typeof MM_VARIETY === 'undefined' || !MM_VARIETY.TOPIC_RANGES || !MM_VARIETY.TOPIC_RANGES[topicId]) return item;
-  const made = MM_VARIETY.createVarietySession(topicId).next(round || 0);
-  if (!made || typeof made.answer !== 'number') return item;
-  const range = MM_VARIETY.getTopicRange(topicId);
-  if (made.answer < range.min || made.answer > range.max) return item;
-  return Object.assign({}, item, {
+  const seed = typeof rmVarietySeed === 'number' ? rmVarietySeed : 0;
+  const rounds = typeof PLAN_PER_SKILL === 'number' ? PLAN_PER_SKILL : 6;
+  const made = MM_VARIETY.generateVariant(Object.assign({}, item, { topicId: topicId }), round || 0, { seed: seed, rounds: rounds });
+  if (!made) return item;
+  if (typeof made.answer === 'number' && made.exerciseType === MM_VARIETY.TOPIC_TYPES[topicId]) {
+    const range = MM_VARIETY.getTopicRange(topicId);
+    if (made.answer < range.min || made.answer > range.max) return item;
+  }
+  const patch = {
     id: made.id, prompt: made.prompt, answer: made.answer, hint: made.hint,
-    numberKey: made.numberKey, bpm: made.bpm, instrument: made.instrument,
-    voice: made.voice, hasMusic: true, topicId: topicId
-  });
+    numberKey: made.numberKey, bpm: made.bpm, rhythmPattern: made.rhythmPattern,
+    instrument: made.instrument, voice: made.voice, hear: made.hear,
+    exerciseType: made.exerciseType, hasMusic: made.hasMusic === true, noMusic: made.noMusic === true,
+    topicId: topicId
+  };
+  if (!item.skill) patch.skill = made.exerciseType;
+  if (made.noMusic) { patch.music = null; patch.widget = null; patch.hear = null; }
+  else if (made.music) patch.music = made.music;
+  return Object.assign({}, item, patch);
 }
 function startTopicPractice(id,skill){
   const row=typeof topicById==='function'?topicById(id):null;
   if(!row||!isGrade(row.grade)||typeof itemsForTopic!=='function') return false;
   const items=itemsForTopic(id,itemsForGrade(row.grade)).filter(it=>!skill||it.skill===skill);
   if(!items.length) return false;
-  rmPlanTopic=id;
+  rmPlanTopic=id;rmVarietySeed=(Date.now()%88)+1;
   saveGrade(row.grade);
   rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:rmHe(k)||k,items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
   rpStep=0; rpItem=0;
