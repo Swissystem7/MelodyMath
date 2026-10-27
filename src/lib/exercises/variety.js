@@ -266,12 +266,31 @@
     return candidate;
   }
 
+  function sameShape(type, prompt) {
+    const p = String(prompt || '');
+    if (type === 'percent') return p.indexOf('%') >= 0 && p.indexOf('כמה זה') >= 0;
+    if (type === 'addition') return /^\d+\s*\+\s*\d+\s*=/.test(p);
+    if (type === 'subtraction') return /^\d+\s*[-−]\s*\d+\s*=/.test(p);
+    if (type === 'multiplication' || type === 'operations') return /^\d+\s*×\s*\d+\s*=/.test(p);
+    if (type === 'division') return /^\d+\s*[:÷]\s*\d+\s*=/.test(p);
+    if (type === 'fractions' || type === 'basic_fractions') return p.indexOf('איזה שבר') >= 0;
+    if (type === 'factors') return p.indexOf('תוף') >= 0 && p.indexOf('נפגש') >= 0;
+    if (type === 'counting') return p.indexOf('המספר הבא') >= 0;
+    if (type === 'number_line') return p.indexOf('על הישר') >= 0;
+    if (type === 'place_value') return p.indexOf('עשרות') >= 0 && p.indexOf('יחידות') >= 0;
+    if (type === 'patterns') return p.indexOf('הדגם') >= 0;
+    if (type === 'word_problems') return p.indexOf('כמה חסר') >= 0;
+    if (type === 'measurement') return p.indexOf('הסרגל') >= 0;
+    if (type === 'data') return p.indexOf('בעמודה') >= 0;
+    return false;
+  }
+
   function generateVariant(topicOrItem, roundIndex, options) {
     const opts = options || {}, topicKey = resolveTopicKey(topicOrItem), exerciseType = exerciseTypeOf(topicOrItem);
     const source = typeof topicOrItem === 'object' && topicOrItem !== null ? topicOrItem : null;
     const recentKeys = opts.recentNumbers || (opts.history && opts.history.slice(-5).map(x => x.numberKey)) || [];
     const grade = resolveGrade(topicOrItem, opts);
-    const keep = !!(source && source.prompt && source.prompt !== 'old' && !OWN_TYPES[exerciseType]);
+    const keep = !!(source && source.prompt && source.prompt !== 'old' && (!OWN_TYPES[exerciseType] || !sameShape(exerciseType, source.prompt)));
     const numSet = keep ? null : generateNumberSet(exerciseType, roundIndex, recentKeys, grade, topicOrItem, opts.seed);
     const tempo = pickTempo(roundIndex, opts.seed), pattern = pickPattern(roundIndex, opts.seed), inst = pickInstrument(instrumentKey(exerciseType, topicKey), roundIndex, opts.seed);
     const basePrompt = source ? source.prompt : '';
