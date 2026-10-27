@@ -133,13 +133,14 @@ test('every target sounds in two families, including a split of 4 with no 10% ti
   assert.deepEqual(climb.map((n) => n.voice), ['keys', 'keys']);
   assert.deepEqual(climb.map((n) => n.hz), PM.TEN_STEPS_HZ.slice(0, 2));
   assert.ok(PM.barPlan(['ten'], 90, 'drumLow', 10).every((n) => n.voice !== 'pluck'));
+  assert.equal(I.forTopic('percent').some((x) => x.id === 'ukulele'), false);
   assert.deepEqual(I.forTopic('percent').map((x) => x.family).sort(), ['percussion', 'strings']);
 });
 
 test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', () => {
   assert.equal(P.myInstrument(), 'darbuka');
   const d = P.voicesFor('darbuka');
-  assert.deepEqual([d.voice, d.melody, d.partnerId], ['drumLow', 'pluck', 'ukulele']);
+  assert.deepEqual([d.voice, d.melody, d.partnerId], ['drumLow', 'bowed', 'erhu']);
   const piano = P.voicesFor('piano');
   assert.deepEqual([piano.id, piano.voice, piano.melody, piano.partnerId], ['piano', 'drumLow', 'keys', 'darbuka']);
   assert.notEqual(piano.family, piano.partnerFamily);

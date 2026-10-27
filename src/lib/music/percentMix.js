@@ -62,7 +62,7 @@
   }
 
   const TEN_STEPS_HZ = Object.freeze([261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 783.99, 880]);
-  function partnerInstrument(family) { return family === 'percussion' ? 'ukulele' : 'darbuka'; }
+  function partnerInstrument(family) { return family === 'percussion' ? 'erhu' : 'darbuka'; }
   function libOf(which) {
     if (which === 'my' && typeof globalThis !== 'undefined' && globalThis.MM_MY_INSTRUMENT) return globalThis.MM_MY_INSTRUMENT;
     if (which === 'instruments' && typeof globalThis !== 'undefined' && typeof globalThis.instrumentById === 'function') return globalThis;
@@ -74,7 +74,7 @@
     const data = libOf('instruments'), my = libOf('my');
     const id = my && my.instrumentFor ? my.instrumentFor('darbuka', null, storage) : 'darbuka';
     const main = (data && data.instrumentById && data.instrumentById(id)) || { id: 'darbuka', family: 'percussion', voice: 'drumLow' };
-    const partner = (data && data.instrumentById && data.instrumentById(partnerInstrument(main.family))) || { voice: 'pluck', family: 'strings', id: 'ukulele' };
+    const partner = (data && data.instrumentById && data.instrumentById(partnerInstrument(main.family))) || { voice: 'bowed', family: 'strings', id: 'erhu' };
     const melodic = main.family !== 'percussion';
     return { id: main.id, family: main.family, drum: melodic ? partner.voice : main.voice, melody: melodic ? main.voice : partner.voice, partnerId: partner.id, partnerFamily: partner.family };
   }
