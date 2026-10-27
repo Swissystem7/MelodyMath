@@ -132,7 +132,7 @@
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
     container.innerHTML = '';
-    if (container.children) container.children.length = 0;
+    if (Array.isArray(container.children)) container.children.length = 0;
     const wrap = d.createElement('div');
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
@@ -182,7 +182,7 @@
     let filled = false;
     function paint() {
       container.innerHTML = '';
-      if (container.children) container.children.length = 0;
+      if (Array.isArray(container.children)) container.children.length = 0;
       container._stage = stage;
       container._filled = filled;
       const plain = stage === 'plain';
