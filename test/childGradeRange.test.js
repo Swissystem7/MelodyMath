@@ -100,7 +100,7 @@ test('exercises in index.html are age-appropriate for elementary school (grades 
   const back = {
     7: ['חזקות', 'טמפו', 8], 11: ['חזקות', 'טמפו', 240], 15: ['חזקות', 'טמפו', 1080],
     20: ['חזקות', 'טמפו', 200], 24: ['חזקות', 'טמפו', 960],
-    14: ['יחסים', 'מרווחים', '5:4'], 17: ['יחסים', 'מרווחים', '5:3'], 21: ['יחסים', 'מרווחים', '15:8'],
+    14: ['יחסים', 'צלילים', '5:4'], 17: ['יחסים', 'צלילים', '5:3'], 21: ['יחסים', 'צלילים', '15:8'],
     18: ['פונקציות', 'מלודיה', 10], 22: ['פונקציות', 'מלודיה', -12]
   };
   for (const [id, want] of Object.entries(back)) {
@@ -159,7 +159,7 @@ test('אתגר ו׳ draws the EXTRA exercises, and a fast tempo is four beats', 
   assert.equal(JSON.stringify(liveSound.notes.map((n) => n.voice)), JSON.stringify(['bell', 'xylo']));
   assert.equal(liveSound.notes[1].hz > liveSound.notes[0].hz, true);
   assert.equal(sandbox.extraMusic(exercises.find((x) => !x.extra && x.musicConcept === 'קצב')), null);
-  assert.match(indexHtml, /<span class="tag">מעבר לתוכנית · מרווחים וטמפו<\/span>/);
+  assert.match(indexHtml, /<span class="tag">מעבר לתוכנית · צלילים וטמפו<\/span>/);
   assert.equal(indexHtml.includes('לא תכנית א׳–ד׳'), false);
   assert.match(indexHtml, /#mm-speak-now,#mm-hear,#mm-access button\{min-height:44px;min-width:44px\}/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'src/theme.css'), 'utf8'), /@media \(max-width: 480px\) \{[^}]*\.tabs \{ margin-inline: -12px/);
