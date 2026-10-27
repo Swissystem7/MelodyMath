@@ -93,6 +93,8 @@ const ASSETS = [
   './src/components/EnsembleStudio.js',
   './src/lib/music/grooveGrid.js',
   './src/components/GrooveGridScreen.js',
+  './src/lib/music/loopStack.js',
+  './src/components/LoopStackScreen.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/lib/exercises/tapTempoMean.js',
