@@ -102,3 +102,5 @@ GitHub Pages מפורסם מענף `main`. אחרי שינוי ב־`master` צר
 
 ---
 פרויקט פתוח · Swissystem7
+
+Note: draft PRs may also be produced by the Muse Code queue on Dell (muse-task).
