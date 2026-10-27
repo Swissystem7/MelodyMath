@@ -104,7 +104,10 @@ test('grade א׳: a prompt that plays sound is a music activity, not a way', () 
   hear.forEach((it) => assert.equal(it.music, 'hearBeats', it.id));
   g1.forEach((it) => assert.equal(it.music, 'g1' + it.g1.kind.charAt(0).toUpperCase() + it.g1.kind.slice(1), it.id));
   hear.concat(g1).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
-  assert.equal(items.filter((it) => it.musicNote).length, items.length - hear.length - g1.length);
+  const widget = items.filter((it) => it.kind === 'pattern_completion' || it.kind === 'worked_example');
+  assert.ok(widget.length >= 2);
+  widget.forEach((it) => assert.equal(it.musicNote, undefined, it.id));
+  assert.equal(items.filter((it) => it.musicNote).length, items.length - hear.length - g1.length - widget.length);
 });
 
 test('grade ד׳: a 4/4-bar fraction item is music notation already, an activity and not a way', () => {

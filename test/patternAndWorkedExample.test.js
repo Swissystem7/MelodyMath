@@ -250,4 +250,29 @@ test('banks include pattern completion and worked example, and index.html wires 
   assert.equal(patternItems[0].answer, 'מי');
   assert.ok(patternItems[0].research.includes('10.1080/00220973.2020.1799316') && workedItems[0].research.includes('10.1207/s1532690xci0201_3') && /if \(raw\.a != null\)/.test(fs.readFileSync(path.join(__dirname, '..', 'src/lib/banks.js'), 'utf8')));
   assert.equal(PW.shownText(patternItems[0].pattern), 'דו➔מי➔דו➔?');
+  assert.equal(workedItems[0].a, 3);
+  assert.equal(workedItems[0].b, 2);
+  assert.equal(workedItems[0].musicNote, undefined);
+  assert.equal(patternItems[0].musicNote, undefined);
+  assert.ok(indexHtml.includes("it.kind==='worked_example'||it.kind==='pattern_completion'"));
+});
+
+test('the 3+2 example sits with the 3+2 instruction, and the plain line is 4+3', () => {
+  const host = box();
+  const h2 = { className: 'prompt', textContent: 'המורה מתופף 3 פעימות, הילד עונה 4' };
+  host.parentNode = { querySelector: function (sel) { return sel === 'h2.prompt' ? h2 : null; } };
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {});
+  const demoLine = host.children[0].children[0].textContent;
+  assert.match(demoLine, /3 \+/);
+  assert.match(demoLine, /2/);
+  assert.match(h2.textContent, /3 תופים ועוד 2/);
+  assert.equal(/עונה 4/.test(h2.textContent), false);
+  assert.equal(host._heading, h2.textContent);
+  const plain = box();
+  PW.renderWorkedExampleWidget(plain, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'plain' }), {});
+  const plainLine = plain.children[0].children[0].textContent;
+  assert.match(plainLine, /4 ועוד 3/);
+  assert.equal(/3 \+ /.test(plainLine), false);
+  assert.equal(/3 תופים/.test(plainLine), false);
+  assert.equal(plain._heading, 'בלי מוזיקה: כמה הם 4 ועוד 3?');
 });
