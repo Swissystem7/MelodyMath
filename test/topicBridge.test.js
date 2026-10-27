@@ -104,13 +104,22 @@ function soundCount(answer) {
   return 0;
 }
 
-test('every bridge sound matches the number, and 7.7 counts for 7.70', () => {
+test('every bridge has a sound, an answer check, and a real source', () => {
   const heard = [];
   const voices = new Set();
   bridges.RAW_BRIDGES.forEach((row) => {
     const b = bridges.bridgeForLink(row[0], row[1]);
-    assert.equal(b.sound.length, soundCount(row[4]), row[0] + '->' + row[1] + ' ' + row[4]);
-    if (b.sound.length) assert.equal(b.sound[b.sound.length - 1].at < 1, true, row[0]);
+    const counted = soundCount(row[4]);
+    assert.ok(b.sound.length >= 1, row[0] + '->' + row[1]);
+    if (counted === 0) {
+      assert.equal(b.sound.length, 1, row[0] + ' listen tone');
+      assert.equal(b.sound[0].listen, true, row[0]);
+      assert.equal(b.sound[0].held, false, row[0]);
+    } else {
+      assert.equal(b.sound.length, counted, row[0] + '->' + row[1] + ' ' + row[4]);
+      assert.equal(b.sound.some((ev) => ev.listen), false, row[0]);
+    }
+    assert.equal(b.sound[b.sound.length - 1].at < 1, true, row[0]);
     b.sound.forEach((ev) => voices.add(ev.voice));
     assert.equal(/BPM|אוקטבה/.test(b.prompt + ' ' + b.hint), false, row[0]);
     assert.equal(b.check(row[4]), true, row[0] + '->' + row[1]);
@@ -138,8 +147,25 @@ test('every bridge sound matches the number, and 7.7 counts for 7.70', () => {
   assert.equal(money.sound.length, 14);
   assert.equal(money.sound.filter((ev) => ev.voice === 'xylo').length, 7);
   const word = bridges.bridgeForLink('mm-cur-8', 'mm-cur-17');
-  assert.equal(word.sound.length, 0);
+  assert.equal(word.answer, 'כן');
+  assert.equal(word.sound.length, 1);
+  assert.equal(word.sound[0].listen, true);
+  assert.equal(word.sound[0].held, false);
+  const cue = [];
+  const wordPlayed = bridges.play(word, { playTap: (v) => cue.push(v), later: (fn) => fn() });
+  assert.equal(wordPlayed.length, 1);
+  assert.equal(cue.length, 1);
+  assert.equal(cue[0], 'bell');
   assert.equal(word.check('כן'), true);
+  const time = bridges.bridgeForLink('mm-cur-10', 'mm-cur-18');
+  assert.equal(time.answer, '3:30');
+  assert.equal(time.sound.length, 1);
+  assert.equal(time.sound[0].listen, true);
+  const huge = bridges.bridgeForLink('mm-cur-31', 'mm-cur-38');
+  assert.equal(huge.answer, 1000000);
+  assert.equal(huge.sound.length, 1);
+  assert.equal(huge.sound[0].listen, true);
+  assert.equal(huge.sound[0].held, false);
   const one = bridges.bridgeForLink('mm-cur-0', 'mm-cur-1');
   const played = bridges.play(one, { playTap: (v) => heard.push(v), later: (fn) => fn() });
   assert.equal(played.length, one.sound.length);

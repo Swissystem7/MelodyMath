@@ -139,13 +139,17 @@
   }
   // Counts up to 12 play one tap each. Larger numbers play a low held note per
   // ten and a tap per one (then per hundred, when the tens no longer fit).
-  // A word, a clock time, or a number too big to count is silent.
+  // A word, a clock time, or a number too big to count plays one soft listen
+  // tone. That tone is a cue, not a quantity.
+  function listenTone() {
+    return [{ at: 0, voice: 'bell', held: false, hz: 523.25, listen: true }];
+  }
   function soundPlan(mechanism, answer) {
     const voice = voiceFor(mechanism);
     const s = String(answer == null ? '' : answer).trim().replace(/,/g, '.');
-    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return [];
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return listenTone();
     const n = Number(s);
-    if (!(n > 0) || !Number.isFinite(n)) return [];
+    if (!(n > 0) || !Number.isFinite(n)) return listenTone();
     const whole = Math.floor(n + 1e-9);
     const tenths = Math.round((n - whole) * 10);
     const events = [];
@@ -160,7 +164,7 @@
       add(Math.floor(whole / 100), { voice: 'xylo', held: true, hz: 82 });
       add(Math.floor(whole / 10) % 10, { voice: voice, held: true, hz: 110 });
       add(whole % 10, { voice: voice, held: false });
-    } else return [];
+    } else return listenTone();
     add(tenths, { voice: voice === 'xylo' ? 'bell' : 'xylo', held: false });
     const step = events.length <= 1 ? 0 : Math.min(0.22, 0.9 / (events.length - 1));
     return events.map(function (ev, i) {
