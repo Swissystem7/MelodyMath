@@ -289,7 +289,7 @@
     const fmt = function (n, sample) { return sample.indexOf(',') >= 0 ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : String(n); };
     let out = p;
     [[hits[j], b], [hits[i], a]].forEach(function (pair) { const h = pair[0], v = fmt(pair[1], h[1]); out = out.slice(0, h[0]) + v + out.slice(h[0] + h[1].length); });
-    if (new RegExp('(^|[^\\d.])' + String(ans).replace(/\./g, '\\.') + '([^\\d]|$)').test(out)) return null;
+    if (new RegExp('(^|[^\\d.])' + String(ans).replace(/\\/g, '\\\\').replace(/\./g, '\\.') + '([^\\d]|$)').test(out)) return null;
     return { prompt: out, answer: ans, key: op + a + ':' + b, a: a, b: b, hint: '' };
   }
   function generateVariant(topicOrItem, roundIndex, options) {
@@ -323,7 +323,7 @@
     if (silent) out.music = null;
     else if (source && source.music) out.music = source.music;
     else if (exerciseType === 'percent') out.music = 'percentBar';
-    if (exerciseType === 'number_line' && new RegExp('(^|[^\\d.])' + String(out.answer).replace(/\./g, '\\.') + '([^\\d]|$)').test(String(out.prompt))) { const safe = otherSet('number_line', roundIndex * 17 + 1, getTopicRange(topicOrItem, opts)); if (safe) { out.prompt = safe.prompt; out.answer = safe.answer; out.hint = safe.hint; out.numberKey = safe.key; } }
+    if (exerciseType === 'number_line' && new RegExp('(^|[^\\d.])' + String(out.answer).replace(/\\/g, '\\\\').replace(/\./g, '\\.') + '([^\\d]|$)').test(String(out.prompt))) { const safe = otherSet('number_line', roundIndex * 17 + 1, getTopicRange(topicOrItem, opts)); if (safe) { out.prompt = safe.prompt; out.answer = safe.answer; out.hint = safe.hint; out.numberKey = safe.key; } }
     return out;
   }
   function createVarietySession(topicOrItem, options) {
