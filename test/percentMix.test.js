@@ -104,7 +104,7 @@ test('grade6 PERCENT: the percent bar is the single main way (M3)', () => {
 
 test('Instruments registry binds cajon to data (M1) and darbuka to percent (M3)', () => {
   assert.deepEqual([I.TOPICS.data.mechanism, I.TOPICS.percent.mechanism], ['M1', 'M3']);
-  assert.ok(I.forTopic('data').some((x) => x.id === 'cajon') && I.forTopic('percent').some((x) => x.id === 'darbuka'));
+  assert.ok(I.forTopic('data').some((x) => x.id === 'cajon') && I.forTopic('percent').map((x) => x.id).sort().join() === 'darbuka,erhu');
 });
 
 test('a grade ו PERCENT item shows one circle per beat (splits 4/10/20)', () => {
@@ -134,6 +134,7 @@ test('every target sounds in two families, including a split of 4 with no 10% ti
   assert.deepEqual(climb.map((n) => n.hz), PM.TEN_STEPS_HZ.slice(0, 2));
   assert.ok(PM.barPlan(['ten'], 90, 'drumLow', 10).every((n) => n.voice !== 'pluck'));
   assert.equal(I.forTopic('percent').some((x) => x.id === 'ukulele'), false);
+  assert.deepEqual(I.forTopic('percent').map((x) => x.family).sort(), ['percussion', 'strings']);
 });
 
 test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', () => {
