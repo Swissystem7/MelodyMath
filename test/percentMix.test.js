@@ -133,7 +133,7 @@ test('every target sounds in two families, including a split of 4 with no 10% ti
   assert.deepEqual(climb.map((n) => n.voice), ['keys', 'keys']);
   assert.deepEqual(climb.map((n) => n.hz), PM.TEN_STEPS_HZ.slice(0, 2));
   assert.ok(PM.barPlan(['ten'], 90, 'drumLow', 10).every((n) => n.voice !== 'pluck'));
-  assert.ok(I.forTopic('percent').some((x) => x.id === 'ukulele'));
+  assert.equal(I.forTopic('percent').some((x) => x.id === 'ukulele'), false);
 });
 
 test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', () => {
