@@ -15,6 +15,8 @@ const instruments = require('../src/lib/instruments');
 const variety = require('../src/lib/exercises/variety');
 const mastery = require('../src/lib/masteryCheck');
 const percentMix = require('../src/lib/music/percentMix');
+const GG = require('../src/lib/music/grooveGrid');
+const LS = require('../src/lib/music/loopStack');
 
 const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 const FILES = [1, 2, 3, 4, 5, 6].map((n) => require('../src/lib/curriculum/grade' + n));
@@ -196,6 +198,22 @@ test('3: on the practice screen every topic keeps the instrument rules', () => {
     }
   });
   assert.deepEqual([...new Set(wrong)], []);
+});
+
+test('3: the area grid and box-volume layers never bring in kora, gankogui or ukulele (Refs #665)', () => {
+  const banned = ['kora', 'gankogui', 'ukulele'];
+  const wrong = [];
+  LS.PARTNERS.forEach((p) => { if (banned.includes(p[0])) wrong.push('LoopStack partner ' + p[0]); });
+  instruments.FAMILIES.forEach((f) => {
+    const partner = GG.partnerFor(f);
+    if (banned.includes(partner)) wrong.push('GrooveGrid partner for ' + f + ': ' + partner);
+    const own = instruments.byFamily(f).find((x) => !banned.includes(x.id));
+    assert.ok(own, 'family ' + f + ' has an unrestricted instrument');
+    LS.layerInstruments(4, own.id, f).forEach((id) => {
+      if (banned.includes(id)) wrong.push('LoopStack layer for ' + f + ': ' + id);
+    });
+  });
+  assert.deepEqual(wrong, []);
 });
 
 // ---------- 4. a music-free mastery check at the end ----------

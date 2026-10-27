@@ -113,7 +113,7 @@
     if (!gridArea(rows, cols)) return null;
     return stepNotes(perimeterPath(rows, cols), trackVoice);
   }
-  function partnerFor(family) { return family === 'percussion' ? 'kora' : 'djembe'; }
+  function partnerFor(family) { return family === 'percussion' ? 'guitar' : 'djembe'; }
 
   const TARGETS = [[3, 4, 'area'], [4, 6, 'area'], [3, 8, 'area'], [4, 6, 'perimeter'], [3, 8, 'perimeter']]
     .map(function (t) { return { rows: t[0], cols: t[1], ask: t[2] }; });
