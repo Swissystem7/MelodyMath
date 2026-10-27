@@ -50,6 +50,7 @@ const ASSETS = [
   './src/lib/streak.js',
   './src/lib/predict.js',
   './src/lib/setlistGoal.js',
+  './src/lib/motivation/personalBest.js',
   './src/lib/curriculum.js',
   './src/lib/remediation.js',
   './src/lib/rhythmGame.js',
