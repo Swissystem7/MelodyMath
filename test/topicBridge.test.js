@@ -153,6 +153,10 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   const d = { createElement: (tag) => { const node = { tag: tag, className: '', hidden: true, textContent: '', value: '', children: [], setAttribute() {}, onclick: null }; made.push(node); return node; } };
   const box = { ownerDocument: d, _bridgeOk: null, appendChild(ch) { this.children = this.children || []; this.children.push(ch); } };
   const ui = bridges.mountAnswer(box, entry);
+  assert.match(ui.key.textContent, /תו ארוך = 10/);
+  assert.match(ui.key.textContent, /נקישה קצרה = 1/);
+  assert.match(ui.key.textContent, /קסילופון = עשיריות/);
+  assert.match(ui.key.textContent, /7\.70/);
   ui.input.value = '3'; ui.button.onclick();
   assert.equal(box._bridgeOk, false);
   assert.equal(ui.hint.hidden, false);

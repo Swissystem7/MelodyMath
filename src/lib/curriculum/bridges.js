@@ -180,6 +180,9 @@
     if (!container || !entry || typeof container.appendChild !== 'function') return null;
     const d = container.ownerDocument;
     if (!d || typeof d.createElement !== 'function') return null;
+    const key = d.createElement('p');
+    key.className = 'topic-bridge-key';
+    key.textContent = 'תו ארוך = 10, נקישה קצרה = 1, קסילופון = עשיריות (למשל 7.70).';
     const input = d.createElement('input');
     input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
     const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;
@@ -189,8 +192,8 @@
       hint.hidden = !!ok; hint.textContent = ok ? '' : (entry.hint || '');
       container._bridgeOk = ok;
     };
-    container.appendChild(input); container.appendChild(go); container.appendChild(hint);
-    return { input: input, button: go, hint: hint };
+    container.appendChild(key); container.appendChild(input); container.appendChild(go); container.appendChild(hint);
+    return { input: input, button: go, hint: hint, key: key };
   }
   const BRIDGES = {};
   const BY_FROM = {};
