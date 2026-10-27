@@ -189,16 +189,31 @@
     function go() {
       if (handle && handle.stop) handle.stop();
       const dots = container.querySelectorAll('.np-dot');
-      Array.prototype.forEach.call(dots, function (d) { d.classList.remove('lit'); d.classList.remove('taken'); });
-      let heard = 0, taken = 0;
+      Array.prototype.forEach.call(dots, function (d, i) {
+        d.classList.remove('lit'); d.classList.remove('taken'); d.classList.remove('broken');
+        if (plan.notes[i] && plan.notes[i].value === 10) d.textContent = '10';
+      });
+      let heard = 0, taken = 0, loose = 0, broken = null;
       const lit = [];
       handle = play(plan, function (n, i) {
         if (n.take) {
-          // Take-from: each taken sound dims one circle of the same value counted before it.
+          // Take-from: each taken sound dims one circle of the same value counted before it,
+          // or a unit still inside a broken ten.
           taken += n.value || 1;
           if (dots[i]) dots[i].classList.add('taken');
-          let k = lit.length - 1;
+          const v = n.value || 1;
+          let k = loose >= v ? -1 : lit.length - 1;
           while (k >= 0 && plan.notes[lit[k]].value !== n.value) k--;
+          // No circle of that value left (15 - 7): break the last lit ten; it shows the units still in it.
+          if (k < 0 && loose < v) {
+            k = lit.length - 1;
+            while (k >= 0 && plan.notes[lit[k]].value !== 10) k--;
+            if (k >= 0) { broken = dots[lit.splice(k, 1)[0]] || null; loose += 10; k = -1; if (broken) { broken.classList.remove('lit'); broken.classList.add('broken'); } }
+          }
+          if (k < 0 && loose >= v) {
+            loose -= v;
+            if (broken) { broken.textContent = loose ? String(loose) : '10'; if (!loose) { broken.classList.remove('broken'); broken.classList.add('taken'); } }
+          }
           const d = k >= 0 ? dots[lit.splice(k, 1)[0]] : null;
           if (d) { d.classList.remove('lit'); d.classList.add('taken'); }
           if (live) live.textContent = 'לקחנו ' + taken + ', נשארו ' + (heard - taken);

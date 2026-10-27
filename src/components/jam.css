@@ -60,3 +60,4 @@
 .np-gap{display:inline-block;width:12px}
 .np-dot.np-take{border-style:dashed}
 .np-dot.taken{background:var(--card);opacity:.35;text-decoration:line-through}
+.np-dot.broken{background:var(--yellow);border-style:dotted}

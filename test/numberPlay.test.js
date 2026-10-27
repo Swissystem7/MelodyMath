@@ -280,3 +280,52 @@ test('subtraction takes the subtrahend away: its sounds dim counted circles (#72
     assert.match(live.textContent, /נשארו 3/);
   } finally { global.MM_JAM = prev; }
 });
+
+test('subtraction that needs a ten broken (15 - 7) dims the ten, not leaves it lit (#838)', () => {
+  const plan = NP.extractNumberPlan({ prompt: '15 - 7 = ?' }, { bpm: 60 });
+  const tenIdx = plan.notes.findIndex(function (n) { return n.value === 10; });
+  assert.ok(tenIdx >= 0 && !plan.notes[tenIdx].take);
+  const prev = global.MM_JAM;
+  global.MM_JAM = { playNotes: function (notes, onNote, onEnd) { notes.forEach(function (n, i) { onNote(n, i); }); onEnd(); return { stop: function () {} }; } };
+  try {
+    const btn = { addEventListener: function (type, fn) { btn.click = fn; } };
+    const live = { textContent: '' };
+    const built = plan.notes.map(function () { const s = new Set(); return { classList: { add: function (c) { s.add(c); }, remove: function (c) { s.delete(c); }, has: function (c) { return s.has(c); } } }; });
+    const box = { innerHTML: '', classList: { add: function () {}, remove: function () {} }, querySelector: function (sel) { return sel.indexOf('play-numbers') >= 0 ? btn : live; }, querySelectorAll: function () { return built; } };
+    NP.mount(box, { prompt: '15 - 7 = ?' }, { bpm: 60 });
+    btn.click();
+    assert.ok(!built[tenIdx].classList.has('lit'));
+    assert.ok(built[tenIdx].classList.has('broken'));
+    assert.equal(built[tenIdx].textContent, '8');
+    assert.ok(plan.notes.every(function (n, i) { return n.value !== 10 || !built[i].classList.has('lit'); }));
+    assert.ok(built.every(function (d) { return !d.classList.has('lit'); }));
+    assert.match(live.textContent, /נשארו 8/);
+    btn.click();
+    assert.ok(!built[tenIdx].classList.has('lit') && built[tenIdx].classList.has('broken'));
+    assert.equal(built[tenIdx].textContent, '8');
+  } finally { global.MM_JAM = prev; }
+});
+
+test('20 - 12 breaks both tens and leaves 8 showing; with no audio kit replay resets a broken ten and does not throw (#838)', () => {
+  const prev = global.MM_JAM;
+  const fake = { playNotes: function (notes, onNote, onEnd) { notes.forEach(function (n, i) { onNote(n, i); }); onEnd(); return { stop: function () {} }; } };
+  function rig(prompt) {
+    const plan = NP.extractNumberPlan({ prompt: prompt }, { bpm: 60 }); assert.ok(plan);
+    const btn = { addEventListener: function (t, fn) { btn.click = fn; } }, live = { textContent: '' };
+    const dots = plan.notes.map(function () { const s = new Set(); return { classList: { add: function (c) { s.add(c); }, remove: function (c) { s.delete(c); }, has: function (c) { return s.has(c); } } }; });
+    NP.mount({ innerHTML: '', classList: { add: function () {}, remove: function () {} }, querySelector: function (q) { return q.indexOf('play-numbers') >= 0 ? btn : live; }, querySelectorAll: function () { return dots; } }, { prompt: prompt }, { bpm: 60 });
+    return { plan: plan, btn: btn, live: live, dots: dots, lit: function (v) { return plan.notes.filter(function (n, i) { return !n.take && n.value === v && dots[i].classList.has('lit'); }).length; } };
+  }
+  try {
+    global.MM_JAM = fake;
+    const b = rig('20 - 12 = ?'); b.btn.click(); // 12 taken units break both tens; the second still holds 8
+    assert.equal(b.lit(10), 0); assert.match(b.live.textContent, /נשארו 8/);
+    const ten = b.dots.findIndex(function (d) { return d.classList.has('broken'); });
+    assert.ok(ten >= 0 && b.plan.notes[ten].value === 10 && !b.plan.notes[ten].take); assert.equal(b.dots[ten].textContent, '8');
+    for (const kit of [{}, { playNotes: function () { return { stop: function () {} }; } }]) { // no playNotes; muted kit that never calls back
+      global.MM_JAM = kit; b.btn.click(); global.MM_JAM = fake; b.btn.click(); global.MM_JAM = kit;
+      assert.doesNotThrow(function () { b.btn.click(); });
+      assert.ok(b.plan.notes.every(function (n, i) { return n.value !== 10 || b.dots[i].textContent === '10'; })); assert.ok(b.dots.every(function (d) { return !d.classList.has('broken') && !d.classList.has('lit'); }));
+    }
+  } finally { global.MM_JAM = prev; }
+});
