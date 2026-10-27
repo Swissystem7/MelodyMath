@@ -55,7 +55,11 @@ test('worked example implements fading and restoration of scaffolding on mistake
   assert.equal(plainEx.musicStage, 'no_music_check');
   assert.equal(plainEx.hasMusic, false);
   assert.equal(/הם 5/.test(plainEx.prompt), false);
-  assert.equal(plainEx.check(5).next, 'mastered');
+  assert.match(plainEx.prompt, /4 ועוד 3/);
+  assert.equal(/3 ועוד 2/.test(plainEx.prompt), false);
+  assert.equal(plainEx.answer, 7);
+  assert.equal(plainEx.check(5).correct, false);
+  assert.equal(plainEx.check(7).next, 'mastered');
 });
 
 test('validation rejects prompts exceeding 15 words or missing standards', () => {
@@ -100,7 +104,7 @@ test('the pattern on screen is דו➔מי➔דו➔? and the answer is מי', (
   PW.renderPatternWidget(host, ex, { playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); } });
   find(host, 'demo-listen-btn').onclick();
   assert.equal(find(host, 'pattern-sequence').textContent, 'דו➔מי➔דו➔?'); assert.equal(/doi|http|Journal/i.test(host.textContent), false);
-  assert.equal(ex.answer, 'מי'); assert.equal(ex.check('מי').correct, true); assert.deepEqual(heard, ['xylo', 'xylo', 'xylo']);
+  assert.equal(ex.answer, 'מי'); assert.equal(ex.check('מי').correct, true); assert.deepEqual(heard, ['drum', 'xylo', 'drum']);
   assert.equal(find(host, 'pattern-choice-btn').style.minHeight, '44px');
 });
 
@@ -135,7 +139,8 @@ test('הבנתי moves on and does not fill the answer', () => {
 
 test('the missing pattern note is a bell, a second instrument family', () => {
   const ex = PW.createPatternCompletionExercise();
-  assert.equal(ex.soundEvents[0].voice, 'xylo');
+  assert.equal(ex.soundEvents[0].voice, 'drum');
+  assert.equal(ex.soundEvents[1].voice, 'xylo');
   assert.equal(ex.soundEvents[ex.soundEvents.length - 1].voice, 'bell');
   const heard = [];
   const host = box();
@@ -171,7 +176,27 @@ test('עכשיו לבד hides the total, then the topic ends with a no-music che
   assert.equal(ex.musicStage, 'no_music_check');
   assert.equal(find(host, 'demo-listen-btn'), null);
   assert.match(host._heading, /בלי מוזיקה/);
+  assert.match(host._heading, /4 ועוד 3/);
+  assert.equal(/3 ועוד 2/.test(host._heading), false);
   assert.equal(/הם 5/.test(host._heading), false);
+  assert.equal(ex.answer, 7);
+});
+
+test('a wrong completion tap stays and shows the hint', () => {
+  const heard = [];
+  const host = box();
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {
+    playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); }
+  });
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-wrong-btn').onclick();
+  assert.equal(host._stage, 'completion');
+  assert.equal(find(host, 'mm-ex-hint').hidden, false);
+  assert.match(find(host, 'mm-ex-hint').textContent, /פעימה אחת/);
+  assert.equal(heard.length, 0);
+  find(host, 'completion-tap-btn').onclick();
+  assert.equal(host._stage, 'independent');
+  assert.equal(heard.includes('drum') && heard.includes('bell'), true);
 });
 
 test('a wrong answer shows the hint and does not fill the choice', () => {

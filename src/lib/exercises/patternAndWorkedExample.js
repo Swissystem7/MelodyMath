@@ -45,7 +45,7 @@
       prompt: prompt, answer: expected, hint: hint, wordCount: countWords(prompt), hasMusic: true,
       soundEvents: pattern.map(function (item, idx) {
         const missing = idx === pattern.length - 1;
-        return { at: idx * 0.4, note: item, voice: missing ? 'bell' : 'xylo', hz: NOTE_HZ[item] || 330, isMissing: missing };
+        return { at: idx * 0.4, note: item, voice: missing ? 'bell' : (idx % 2 ? 'xylo' : 'drum'), hz: NOTE_HZ[item] || 330, isMissing: missing };
       }),
       check: function (given) {
         const isOk = String(given).trim() === String(expected).trim();
@@ -53,11 +53,16 @@
       }
     };
   }
+  function plainAdd(ex) {
+    const ca = ex.checkA != null ? Number(ex.checkA) : (Number(ex.a) === 4 ? 2 : 4);
+    const cb = ex.checkB != null ? Number(ex.checkB) : (Number(ex.b) === 3 ? 1 : 3);
+    return { a: ca, b: cb, total: ca + cb };
+  }
   function stageHeading(ex, stage) {
     const a = ex.a, b = ex.b, total = ex.total;
     if (stage === 'demo') return 'ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.';
     if (stage === 'completion') return 'השלימו את הפעימה החסרה';
-    if (stage === 'plain') return 'בלי מוזיקה: כמה הם ' + a + ' ועוד ' + b + '?';
+    if (stage === 'plain') { const p = plainAdd(ex); return 'בלי מוזיקה: כמה הם ' + p.a + ' ועוד ' + p.b + '?'; }
     return 'עכשיו לבד: כמה צלילים הם ' + a + ' תופים ועוד ' + b + ' פעמונים?';
   }
   function createWorkedExampleExercise(opts) {
@@ -65,13 +70,14 @@
     const a = o.a != null ? o.a : 3, b = o.b != null ? o.b : 2, total = a + b;
     const stage = o.stage || 'demo';
     const prompt = stageHeading({ a: a, b: b, total: total }, stage);
-    const hint = a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.';
+    const pair = plainAdd({ a: a, b: b });
+    const hint = stage === 'plain' ? (pair.a + ' ועוד ' + pair.b + '.') : (a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.');
     return {
       id: o.id || 'worked-example-' + a + '+' + b + '-' + stage,
       grade: o.grade || 'א', skill: 'addition', kind: EXERCISE_KINDS.WORKED_EXAMPLE,
       standard: o.standard || 'חיבור וחיסור בתחום 10 ואז 20; פירוקי 10; = משמאל; יותר משני מחוברים',
       a: a, b: b, total: total, stage: stage, prompt: prompt,
-      answer: stage === 'completion' ? 1 : total, hint: hint, wordCount: countWords(prompt),
+      answer: stage === 'completion' ? 1 : (stage === 'plain' ? plainAdd({ a: a, b: b }).total : total), hint: hint, wordCount: countWords(prompt),
       hasMusic: stage !== 'plain', noMusic: stage === 'plain', plain: stage === 'plain',
       musicStage: stage === 'plain' ? 'no_music_check' : stage,
       demoEvents: demoPlan({ a: a, b: b, total: total }),
@@ -83,7 +89,7 @@
         return 'mastered';
       },
       check: function (given) {
-        const expectedVal = stage === 'completion' ? 1 : total;
+        const expectedVal = stage === 'completion' ? 1 : (stage === 'plain' ? plainAdd({ a: a, b: b }).total : total);
         const isOk = Number(given) === expectedVal;
         return { correct: isOk, next: this.nextStage(isOk), hint: isOk ? '' : hint, feedback: isOk ? 'מצוין! הבנתם את המהלך.' : hint };
       }
@@ -92,7 +98,7 @@
   function demoPlan(ex) {
     if (ex && ex.pattern) {
       return shownTokens(ex.pattern).filter(function (n) { return n !== '?'; }).map(function (n, i) {
-        return { at: i * 0.4, voice: 'xylo', hz: NOTE_HZ[n] || 330, label: n };
+        return { at: i * 0.4, voice: i % 2 ? 'xylo' : 'drum', hz: NOTE_HZ[n] || 330, label: n };
       });
     }
     const a = ex.a, b = ex.b, total = ex.total;
@@ -192,6 +198,7 @@
       container._noMusic = plain;
       const heading = stageHeading(ex, stage);
       writeHeading(container, heading);
+      if (plain) { const p = plainAdd(ex); ex.answer = p.total; ex.hint = p.a + ' ועוד ' + p.b + '.'; }
       const row = pageAnswerRow(container, opts);
       if (row) row.hidden = !plain;
       const wrap = d.createElement('div');
@@ -203,10 +210,17 @@
         wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
       } else if (stage === 'completion') {
-        wrap.appendChild(btn(d, 'primary completion-tap-btn', '🥁 הקישו להשלמה', function () {
-          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, opts);
-          stage = 'independent'; paint();
-        }));
+        const hint = hintNode(d);
+        function choose(n, cls, text) {
+          wrap.appendChild(btn(d, cls, text, function () {
+            if (n !== 1) { hint.hidden = false; hint.textContent = 'חסרה פעימה אחת.'; container._hint = hint.textContent; return; }
+            container._heard = playDemo({ a: 1, b: 1, total: 0 }, opts);
+            stage = 'independent'; paint();
+          }));
+        }
+        choose(2, 'secondary completion-wrong-btn', 'שתי פעימות');
+        choose(1, 'primary completion-tap-btn', 'פעימה אחת');
+        wrap.appendChild(hint);
       } else if (stage === 'independent') {
         wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
         const label = d.createElement('label');
