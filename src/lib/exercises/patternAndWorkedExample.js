@@ -1,23 +1,17 @@
-// MelodyMath — Pattern Completion & Worked Example Exercises (Issue #670, Refs #665).
-// Implements missing Req 3 exercise types:
-// 1. Pattern Completion (השלמת תבנית צלילית ומספרית, Azaryahu & Adi-Japha 2020)
-// 2. Worked Example with Fading (דוגמה פתורה והשלמת צעד, Atkinson et al. 2000, Sweller 2006)
-// Constraints: <= 15 words per card, sound-first solving, audio cues, second try on error.
+// MelodyMath — Pattern Completion & Worked Example (Issue #670, Refs #665, Refs #591).
+// דו➔מי➔דו➔? expects מי. הבנתי never writes the answer.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_PATTERN_WORKED = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
-
-  const EXERCISE_KINDS = {
-    PATTERN_COMPLETION: 'pattern_completion',
-    WORKED_EXAMPLE: 'worked_example'
-  };
+  const EXERCISE_KINDS = { PATTERN_COMPLETION: 'pattern_completion', WORKED_EXAMPLE: 'worked_example' };
+  const NOTE_HZ = { 'דו': 261.63, 'רה': 293.66, 'מי': 329.63, 'פה': 349.23, 'סול': 392, 'לה': 440, 'סי': 493.88 };
+  const PATTERN = ['דו', 'מי', 'דו', 'מי'];
 
   function countWords(str) {
-    if (!str) return 0;
-    return String(str).trim().split(/\s+/).filter(Boolean).length;
+    return str ? String(str).trim().split(/\s+/).filter(Boolean).length : 0;
   }
 
   function validateExerciseCard(ex) {
@@ -25,86 +19,56 @@
     const words = countWords(ex.prompt);
     if (words > 15) return { valid: false, reason: 'prompt exceeds 15 words: ' + words };
     if (!ex.standard) return { valid: false, reason: 'missing curriculum standard' };
-    if (!ex.kind || !Object.values(EXERCISE_KINDS).includes(ex.kind)) {
-      return { valid: false, reason: 'unrecognized exercise kind: ' + ex.kind };
-    }
+    if (!ex.kind || !Object.values(EXERCISE_KINDS).includes(ex.kind)) return { valid: false, reason: 'unrecognized exercise kind: ' + ex.kind };
     return { valid: true, wordCount: words };
   }
-
-  // ---------- 1. Pattern Completion (השלמת תבנית) ----------
+  function shownTokens(pattern) {
+    const p = pattern && pattern.length ? pattern : PATTERN;
+    return p.slice(0, -1).concat('?');
+  }
+  function shownText(pattern) { return shownTokens(pattern).join('➔'); }
+  function answerForShown(pattern) {
+    const p = pattern && pattern.length ? pattern : PATTERN;
+    return p[p.length - 1];
+  }
   function createPatternCompletionExercise(opts) {
     const o = opts || {};
-    const pattern = o.pattern || ['דו', 'מי', 'דו', 'מי'];
-    const expected = o.expected || 'דו';
-    const choices = o.choices || ['דו', 'מי', 'סול'];
-    const prompt = o.prompt || 'דו, מי, דו, מי — איזה צליל משלים את התבנית?';
+    const pattern = o.pattern || PATTERN.slice();
+    const expected = answerForShown(pattern);
+    const prompt = o.prompt || 'דו, מי, דו — איזה צליל משלים את התבנית?';
+    const hint = o.hint || 'אחרי דו בא מי, ושוב דו, ואז מי.';
     return {
       id: o.id || 'pattern-' + pattern.join('-'),
-      grade: o.grade || 'א',
-      skill: 'counting',
-      kind: EXERCISE_KINDS.PATTERN_COMPLETION,
+      grade: o.grade || 'א', skill: 'counting', kind: EXERCISE_KINDS.PATTERN_COMPLETION,
       standard: o.standard || 'סדרות דגמים צורניים + יצירת סדרה',
-      pattern: pattern,
-      expected: expected,
-      choices: choices,
-      prompt: prompt,
-      answer: expected,
-      hint: 'הקשיבו לחזרה של שני הצלילים: אחרי מי מגיע שוב דו.',
-      wordCount: countWords(prompt),
-      hasMusic: true,
+      pattern: pattern, expected: expected, choices: o.choices || ['דו', 'מי', 'סול'],
+      prompt: prompt, answer: expected, hint: hint, wordCount: countWords(prompt), hasMusic: true,
       soundEvents: pattern.map(function (item, idx) {
-        return { at: idx * 0.4, note: item, isMissing: idx === pattern.length - 1 };
+        return { at: idx * 0.4, note: item, voice: 'xylo', hz: NOTE_HZ[item] || 330, isMissing: idx === pattern.length - 1 };
       }),
       check: function (given) {
         const isOk = String(given).trim() === String(expected).trim();
-        return {
-          correct: isOk,
-          status: isOk ? 'right' : 'retry',
-          feedback: isOk ? 'כל הכבוד! הצליל משלים את התבנית.' : 'כמעט! הקשיבו שוב לקצב ונסו פעם נוספת.'
-        };
+        return { correct: isOk, status: isOk ? 'right' : 'retry', hint: isOk ? '' : hint, feedback: isOk ? 'כל הכבוד! הצליל משלים את התבנית.' : hint };
       }
     };
   }
-
-  // ---------- 2. Worked Example with Fading (דוגמה פתורה) ----------
   function createWorkedExampleExercise(opts) {
     const o = opts || {};
-    const a = o.a != null ? o.a : 3;
-    const b = o.b != null ? o.b : 2;
-    const total = a + b;
-    const stage = o.stage || 'demo'; // 'demo' | 'completion' | 'independent'
-
-    let prompt = '';
-    if (stage === 'demo') {
-      prompt = 'ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.';
-    } else if (stage === 'completion') {
-      prompt = 'השלימו: יש כבר ' + (total - 1) + ' פעימות. הקישו פעם אחת להשלמת ' + total + '.';
-    } else {
-      prompt = 'עכשיו לבד: כמה צלילים הם ' + a + ' ועוד ' + b + '?';
-    }
-
+    const a = o.a != null ? o.a : 3, b = o.b != null ? o.b : 2, total = a + b;
+    const stage = o.stage || 'demo';
+    const prompt = stage === 'demo' ? ('ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.')
+      : stage === 'completion' ? ('השלימו: יש כבר ' + (total - 1) + ' פעימות. הקישו פעם אחת להשלמת ' + total + '.')
+      : ('עכשיו לבד: כמה צלילים הם ' + a + ' ועוד ' + b + '?');
+    const hint = a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.';
     return {
       id: o.id || 'worked-example-' + a + '+' + b + '-' + stage,
-      grade: o.grade || 'א',
-      skill: 'addition',
-      kind: EXERCISE_KINDS.WORKED_EXAMPLE,
+      grade: o.grade || 'א', skill: 'addition', kind: EXERCISE_KINDS.WORKED_EXAMPLE,
       standard: o.standard || 'חיבור וחיסור בתחום 10 ואז 20; פירוקי 10; = משמאל; יותר משני מחוברים',
-      a: a,
-      b: b,
-      total: total,
-      stage: stage,
-      prompt: prompt,
-      answer: stage === 'completion' ? 1 : total,
-      hint: a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.',
-      wordCount: countWords(prompt),
-      hasMusic: true,
-      demoEvents: [
-        { at: 0, count: a, timbre: 'drumLow', label: a + ' תופים' },
-        { at: a * 0.4 + 0.3, count: b, timbre: 'metalBell', label: b + ' פעמונים' },
-        { at: (a + b) * 0.4 + 0.8, count: total, timbre: 'scale', label: total + ' בסך הכל' }
-      ],
+      a: a, b: b, total: total, stage: stage, prompt: prompt,
+      answer: stage === 'completion' ? 1 : total, hint: hint, wordCount: countWords(prompt), hasMusic: true,
+      demoEvents: demoPlan({ a: a, b: b, total: total }),
       nextStage: function (wasCorrect) {
-        if (!wasCorrect) return 'demo'; // restore scaffolding after mistake (Kalyuga 2003)
+        if (!wasCorrect) return 'demo';
         if (stage === 'demo') return 'completion';
         if (stage === 'completion') return 'independent';
         return 'mastered';
@@ -112,88 +76,130 @@
       check: function (given) {
         const expectedVal = stage === 'completion' ? 1 : total;
         const isOk = Number(given) === expectedVal;
-        return {
-          correct: isOk,
-          next: this.nextStage(isOk),
-          feedback: isOk ? 'מצוין! הבנתם את המהלך.' : 'לא נורא, נביט שוב בהדגמה המוזיקלית ביחד.'
-        };
+        return { correct: isOk, next: this.nextStage(isOk), hint: isOk ? '' : hint, feedback: isOk ? 'מצוין! הבנתם את המהלך.' : hint };
       }
     };
   }
+  function demoPlan(ex) {
+    if (ex && ex.pattern) {
+      return shownTokens(ex.pattern).filter(function (n) { return n !== '?'; }).map(function (n, i) {
+        return { at: i * 0.4, voice: 'xylo', hz: NOTE_HZ[n] || 330, label: n };
+      });
+    }
+    const a = ex.a, b = ex.b, total = ex.total;
+    const ev = [];
+    for (let i = 0; i < a; i++) ev.push({ at: i * 0.28, voice: 'drum', label: 'תוף' });
+    for (let i = 0; i < b; i++) ev.push({ at: a * 0.28 + 0.25 + i * 0.28, voice: 'bell', label: 'פעמון' });
+    for (let i = 0; i < total; i++) ev.push({ at: (a + b) * 0.28 + 0.7 + i * 0.22, voice: 'xylo', label: 'סך' });
+    return ev;
+  }
 
+  function playDemo(ex, env) {
+    const e = env || {};
+    const events = (ex && ex.demoEvents) || demoPlan(ex);
+    const play = e.playTap || (root && root.playTap);
+    const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
+    if (typeof play === 'function') events.forEach(function (ev) {
+      later(function () { play(ev.voice, { hz: ev.hz, step: 0 }); }, Math.round((ev.at || 0) * 1000));
+    });
+    return events;
+  }
+  function docOf(container, opts) {
+    return (opts && opts.document) || (container && container.ownerDocument) || (typeof document !== 'undefined' ? document : null);
+  }
+  function btn(d, cls, text, fn) {
+    const b = d.createElement('button');
+    b.type = 'button'; b.className = cls; b.textContent = text; b.style.minHeight = '44px'; b.onclick = fn;
+    return b;
+  }
+  function hintNode(d) {
+    const p = d.createElement('p');
+    p.className = 'mm-ex-hint'; p.hidden = true; p.textContent = '';
+    return p;
+  }
   function renderPatternWidget(container, ex, options) {
     if (!container || !ex) return;
     const opts = options || {};
-    const d = opts.document || container.ownerDocument || (typeof document !== 'undefined' ? document : null);
+    const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
     container.innerHTML = '';
-    const wrapper = d.createElement('div');
-    wrapper.className = 'pattern-widget-box';
-    wrapper.style.margin = '10px 0';
-
-    const visual = ex.pattern.map(function (p, i) {
-      const isLast = i === ex.pattern.length - 1;
-      return '<span class="pattern-item" style="display:inline-block;padding:8px 12px;margin:4px;border-radius:12px;background:' + (isLast ? '#fef2f2;border:2px dashed var(--pink);' : '#f5f3ff;border:2px solid var(--purple);') + ';font-weight:bold;font-size:1.15rem;">' + (isLast ? '❓' : p) + '</span>';
-    }).join(' ➔ ');
-
-    const noteFreqs = { 'דו': 261.63, 'רה': 293.66, 'מי': 329.63, 'פה': 349.23, 'סול': 392.00, 'לה': 440.00, 'סי': 493.88 };
-    const choiceButtons = (ex.choices || []).map(function (c, idx) {
-      const hz = noteFreqs[c] || (261.63 * Math.pow(1.15, idx));
-      return '<button type="button" class="secondary pattern-choice-btn" data-tap="metalBell" data-step="' + idx + '" data-hz="' + hz + '" data-choice="' + c + '" style="min-width:44px;min-height:44px;padding:6px 16px;margin:4px;font-size:1.1rem;">' + c + '</button>';
-    }).join('');
-
-    wrapper.innerHTML = '<div class="pattern-sequence" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px;">' + visual + '</div>' +
-      '<div class="pattern-choices" role="group" aria-label="בחירת הצליל הבא בתבנית" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">' + choiceButtons + '</div>';
-
-    wrapper.querySelectorAll('.pattern-choice-btn').forEach(function (btn) {
-      btn.onclick = function () {
-        if (typeof opts.onAnswer === 'function') opts.onAnswer(btn.dataset.choice);
-      };
+    if (container.children) container.children.length = 0;
+    const wrap = d.createElement('div');
+    wrap.className = 'pattern-widget-box';
+    const seq = d.createElement('div');
+    seq.className = 'pattern-sequence';
+    seq.textContent = shownText(ex.pattern);
+    const hint = hintNode(d);
+    const row = d.createElement('div');
+    row.className = 'pattern-choices';
+    const answer = answerForShown(ex.pattern);
+    (ex.choices || ['דו', 'מי', 'סול']).forEach(function (c) {
+      row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
+        const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
+        hint.hidden = !!res.correct;
+        hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
+        container._hint = hint.textContent;
+        if (res.correct && typeof opts.onAnswer === 'function') opts.onAnswer(c);
+      }));
     });
-
-    container.appendChild(wrapper);
+    wrap.appendChild(seq);
+    wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+    wrap.appendChild(row);
+    wrap.appendChild(hint);
+    container.appendChild(wrap);
   }
-
   function renderWorkedExampleWidget(container, ex, options) {
     if (!container || !ex) return;
     const opts = options || {};
-    const d = opts.document || container.ownerDocument || (typeof document !== 'undefined' ? document : null);
+    const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
-    container.innerHTML = '';
-    const wrapper = d.createElement('div');
-    wrapper.className = 'worked-example-box';
-    wrapper.style.margin = '10px 0';
-
-    let contentHtml = '';
-    if (ex.stage === 'demo') {
-      contentHtml = '<div class="demo-display" style="padding:12px;background:#f5f3ff;border:2px solid var(--purple);border-radius:14px;text-align:center;">' +
-        '<span style="font-size:1.4rem;">🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total + '</span>' +
-        '<p style="margin:8px 0 0;color:var(--muted);font-size:0.95rem;">הקשיבו להדגמה המוזיקלית הפתורה</p>' +
-        '<button type="button" class="primary demo-proceed-btn" style="min-height:44px;margin-top:8px;">הבנתי, המשיכו לשלב הבא ←</button>' +
-        '</div>';
-    } else {
-      contentHtml = '<div class="completion-display" style="padding:12px;background:#fdfaff;border:2px solid var(--pink);border-radius:14px;text-align:center;">' +
-        '<div style="font-size:1.3rem;margin-bottom:8px;">השלימו את הפעימה החסרה</div>' +
-        '<button type="button" class="primary completion-tap-btn" data-tap="drumLow" style="min-width:64px;min-height:50px;font-size:1.25rem;">🥁 הקישו להשלמה</button>' +
-        '</div>';
+    let stage = ex.stage || 'demo';
+    let filled = false;
+    function paint() {
+      container.innerHTML = '';
+      if (container.children) container.children.length = 0;
+      container._stage = stage;
+      container._filled = filled;
+      const wrap = d.createElement('div');
+      wrap.className = 'worked-example-box';
+      if (stage === 'demo') {
+        const line = d.createElement('p');
+        line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total;
+        wrap.appendChild(line);
+        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+        wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
+      } else if (stage === 'completion') {
+        const line = d.createElement('p');
+        line.textContent = 'השלימו את הפעימה החסרה';
+        wrap.appendChild(line);
+        wrap.appendChild(btn(d, 'primary completion-tap-btn', '🥁 הקישו להשלמה', function () {
+          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, opts);
+          stage = 'independent'; paint();
+        }));
+      } else {
+        const line = d.createElement('p');
+        line.textContent = 'עכשיו לבד: כמה צלילים הם ' + ex.a + ' ועוד ' + ex.b + '?';
+        const hint = hintNode(d);
+        wrap.appendChild(line);
+        wrap.appendChild(hint);
+        wrap.appendChild(btn(d, 'primary mm-try-btn', 'בדקו', function () {
+          const given = typeof opts.getAnswer === 'function' ? opts.getAnswer() : '';
+          const res = createWorkedExampleExercise({ a: ex.a, b: ex.b, stage: 'independent' }).check(given);
+          hint.hidden = !!res.correct;
+          hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
+          container._hint = hint.textContent;
+        }));
+      }
+      container.appendChild(wrap);
     }
-
-    wrapper.innerHTML = contentHtml;
-    const proceed = wrapper.querySelector('.demo-proceed-btn');
-    if (proceed) proceed.onclick = function () { if (typeof opts.onProceed === 'function') opts.onProceed(); };
-    const tap = wrapper.querySelector('.completion-tap-btn');
-    if (tap) tap.onclick = function () { if (typeof opts.onTap === 'function') opts.onTap(1); };
-
-    container.appendChild(wrapper);
+    paint();
   }
 
   return {
-    EXERCISE_KINDS: EXERCISE_KINDS,
-    countWords: countWords,
-    validateExerciseCard: validateExerciseCard,
+    EXERCISE_KINDS: EXERCISE_KINDS, countWords: countWords, validateExerciseCard: validateExerciseCard,
+    shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo,
     createPatternCompletionExercise: createPatternCompletionExercise,
     createWorkedExampleExercise: createWorkedExampleExercise,
-    renderPatternWidget: renderPatternWidget,
-    renderWorkedExampleWidget: renderWorkedExampleWidget
+    renderPatternWidget: renderPatternWidget, renderWorkedExampleWidget: renderWorkedExampleWidget
   };
 });

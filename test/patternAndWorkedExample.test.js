@@ -13,20 +13,14 @@ test('pattern completion exercise creates sound-first model with <= 15 words', (
 
   assert.equal(ex.kind, 'pattern_completion');
   assert.equal(ex.grade, 'א');
-  assert.equal(ex.expected, 'דו');
+  assert.equal(ex.expected, 'מי');
+  assert.equal(PW.shownText(ex.pattern), 'דו➔מי➔דו➔?');
   assert.ok(ex.wordCount <= 15, `Word count ${ex.wordCount} exceeds 15 words`);
   assert.equal(ex.hasMusic, true);
   assert.equal(ex.soundEvents.length, 4);
-
-  // Correct answer verification
-  const rightRes = ex.check('דו');
-  assert.equal(rightRes.correct, true);
-  assert.equal(rightRes.status, 'right');
-
-  // Retry on error
-  const wrongRes = ex.check('מי');
-  assert.equal(wrongRes.correct, false);
-  assert.equal(wrongRes.status, 'retry');
+  assert.equal(ex.check('מי').correct, true);
+  assert.equal(ex.check('דו').correct, false);
+  assert.equal(ex.check('דו').status, 'retry');
 });
 
 test('worked example implements fading and restoration of scaffolding on mistake', () => {
@@ -76,41 +70,71 @@ test('validation rejects prompts exceeding 15 words or missing standards', () =>
   assert.match(missingStd.reason, /missing curriculum standard/);
 });
 
-test('render widgets generate accessible UI with minimum 44px buttons', () => {
-  const mockDoc = {
-    createElement: function (tag) {
-      const attrs = {};
-      const children = [];
-      return {
-        tag: tag,
-        style: {},
-        innerHTML: '',
-        children: children,
-        setAttribute: function (k, v) { attrs[k] = v; },
-        getAttribute: function (k) { return attrs[k]; },
-        appendChild: function (c) { children.push(c); },
-        querySelectorAll: function () { return []; },
-        querySelector: function () { return null; }
-      };
-    }
-  };
+function box() {
+  function node() {
+    const children = [];
+    const n = { style: {}, className: '', textContent: '', hidden: false, children: children };
+    n.appendChild = function (c) { children.push(c); return c; };
+    return n;
+  }
+  const host = node();
+  host.ownerDocument = { createElement: node };
+  return host;
+}
+function find(n, cls) {
+  if (n.className && n.className.split(' ').includes(cls)) return n;
+  for (const c of n.children || []) { const h = find(c, cls); if (h) return h; }
+  return null;
+}
 
-  const container = {
-    innerHTML: '',
-    children: [],
-    appendChild: function (el) { this.children.push(el); },
-    ownerDocument: mockDoc
-  };
+test('the pattern on screen is דו➔מי➔דו➔? and the answer is מי', () => {
+  const host = box();
+  const ex = PW.createPatternCompletionExercise({ pattern: ['דו', 'מי', 'דו', 'מי'], expected: 'דו' });
+  PW.renderPatternWidget(host, ex, {});
+  assert.equal(find(host, 'pattern-sequence').textContent, 'דו➔מי➔דו➔?');
+  assert.equal(ex.answer, 'מי');
+  assert.equal(ex.check('מי').correct, true);
+  assert.equal(find(host, 'pattern-choice-btn').style.minHeight, '44px');
+});
 
-  // Pattern widget
-  const patternEx = PW.createPatternCompletionExercise();
-  PW.renderPatternWidget(container, patternEx, {});
-  assert.ok(container.children.length >= 1);
+test('הקשיבו להדגמה plays 3 drums, 2 bells, then 5', () => {
+  const heard = [];
+  const host = box();
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {
+    playTap: function (v) { heard.push(v); }, later: function (fn) { fn(); }
+  });
+  find(host, 'demo-listen-btn').onclick();
+  assert.equal(heard.filter(function (v) { return v === 'drum'; }).length, 3);
+  assert.equal(heard.filter(function (v) { return v === 'bell'; }).length, 2);
+  assert.equal(heard.filter(function (v) { return v === 'xylo'; }).length, 5);
+});
 
-  // Worked example widget
-  const workedEx = PW.createWorkedExampleExercise();
-  PW.renderWorkedExampleWidget(container, workedEx, {});
-  assert.ok(container.children.length >= 2);
+test('הבנתי moves on and does not fill the answer', () => {
+  let filled = 0;
+  const host = box();
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {
+    onAnswer: function () { filled++; }, getAnswer: function () { return '5'; }
+  });
+  find(host, 'demo-proceed-btn').onclick();
+  assert.equal(host._stage, 'completion');
+  assert.equal(filled, 0);
+  assert.equal(host._filled, false);
+  find(host, 'completion-tap-btn').onclick();
+  assert.equal(host._stage, 'independent');
+  assert.equal(filled, 0);
+});
+
+test('a wrong answer shows the hint and does not fill the choice', () => {
+  let filled = 0;
+  const host = box();
+  PW.renderPatternWidget(host, PW.createPatternCompletionExercise(), { onAnswer: function () { filled++; } });
+  const wrong = find(host, 'pattern-choice-btn');
+  assert.equal(wrong.textContent, 'דו');
+  wrong.onclick();
+  assert.equal(filled, 0);
+  const hint = find(host, 'mm-ex-hint');
+  assert.equal(hint.hidden, false);
+  assert.match(hint.textContent, /מי/);
 });
 
 
@@ -130,4 +154,7 @@ test('banks include pattern completion and worked example, and index.html wires 
   assert.ok(indexHtml.includes('src/lib/exercises/patternAndWorkedExample.js'), 'script must be loaded in index.html');
   assert.ok(indexHtml.includes('MM_PATTERN_WORKED.renderPatternWidget'), 'pattern widget must be wired in renderWidget');
   assert.ok(indexHtml.includes('MM_PATTERN_WORKED.renderWorkedExampleWidget'), 'worked example widget must be wired in renderWidget');
+  assert.equal(indexHtml.includes('fill(item.total)'), false);
+  assert.equal(patternItems[0].answer, 'מי');
+  assert.equal(PW.shownText(patternItems[0].pattern), 'דו➔מי➔דו➔?');
 });

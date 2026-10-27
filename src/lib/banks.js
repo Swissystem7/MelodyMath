@@ -1973,7 +1973,7 @@
 
   // ---------- תרגילי השלמת תבנית ודוגמה פתורה (#670, Refs #665) ----------
   RAW.push(
-    I('א', 'counting', 'דו, מי, דו, מי — איזה צליל משלים את התבנית?', 'דו', 'התבנית חוזרת על דו ומי לסירוגין', { standard: ST.PATTERN, strand: STRAND.NUM, level: 1, kind: 'pattern_completion', pattern: ['דו', 'מי', 'דו', 'מי'], choices: ['דו', 'מי', 'סול'] }),
+    I('א', 'counting', 'דו, מי, דו — איזה צליל משלים את התבנית?', 'מי', 'אחרי דו בא מי, ושוב דו, ואז מי.', { standard: ST.PATTERN, strand: STRAND.NUM, level: 1, kind: 'pattern_completion', pattern: ['דו', 'מי', 'דו', 'מי'], choices: ['דו', 'מי', 'סול'] }),
     I('א', 'addition', 'ראו: 3 תופים ועוד 2 פעמונים הם 5 צלילים.', 5, '3 ועוד 2 הם 5 פעימות', { standard: ST.ADD10, strand: STRAND.OP, level: 1, kind: 'worked_example', a: 3, b: 2, total: 5, stage: 'demo' })
   );
 
