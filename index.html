@@ -848,7 +848,7 @@ function setItemTag(el,it){
 }
 function renderWidget(hostId, item, inputId){
   const host=$(hostId); if(!host) return;
-  host.innerHTML=''; host.classList.add('hidden'); host._sndSpec=null; host._sndRevealed=false;
+  host.innerHTML=''; host.classList.add('hidden'); host._sndSpec=null; host._sndRevealed=false; host._tapSession=null;
   if(!item) return;
   const fill=function(val){ const inp=inputId&&$(inputId); if(inp){ inp.value=val; } };
   if(item.widget==='numberLine' && item.line && typeof bindNumberLine==='function'){
@@ -888,6 +888,21 @@ function renderWidget(hostId, item, inputId){
     host.classList.remove('hidden');
     const sndSpec=MM_TAKEAWAY_TEN.specForItem(item); host._sndSpec=sndSpec; host._sndRevealed=false; host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(sndSpec); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_TAKEAWAY_TEN.play(sndSpec, host._sndRevealed?{revealed:true}:null)}; MM_TAKEAWAY_TEN.play(sndSpec);
   } else if(typeof MM_PERCENT_MIX!=='undefined' && MM_PERCENT_MIX.specForItem(item)){ host.classList.remove('hidden'); const ps=MM_PERCENT_MIX.specForItem(item); host.innerHTML=MM_PERCENT_MIX.circlesHtml(ps); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_PERCENT_MIX.play(ps);}; MM_PERCENT_MIX.play(ps);
+  } else if(item.standard==='G6_MEAN' && item.music==='tapTempo' && !item.noMusic && Array.isArray(item.intervals) && typeof MM_TAP_TEMPO_MEAN!=='undefined'){
+    // #750: the tap widget, in the instrument the child picks here (kept on this device by
+    // myInstrument.js, which also takes an old pick from the tap screen's own key). The pick
+    // is read on every tap, so it can change between taps; before a pick it is the wood click.
+    host.classList.remove('hidden');
+    const TAP_INST=['darbuka','marimba','recorder','guitar'], my=typeof MM_MY_INSTRUMENT!=='undefined'?MM_MY_INSTRUMENT:null;
+    const picked=function(){ return my?my.instrumentFor(null,TAP_INST):null; };
+    const pads=function(){ const cur=picked(); return TAP_INST.map(function(id){ const x=typeof instrumentById==='function'?instrumentById(id):null; return '<button type="button" class="jam-pad" data-tap-inst="'+id+'" aria-pressed="'+(id===cur)+'">'+(x?x.instrument.he:id)+'</button>'; }).join(''); };
+    host.innerHTML=MM_TAP_TEMPO_MEAN.renderTapTempoWidgetHtml(item)+'<div class="jam-row tap-inst-pick" role="group" aria-label="הכלי של ההקשה">'+pads()+'</div><div class="tap-mean-out" aria-live="polite"></div>';
+    const session=MM_TAP_TEMPO_MEAN.attachTapButton(host,{instrument:picked}); host._tapSession=session;
+    host.onclick=function(ev){
+      const t=ev.target&&ev.target.closest?ev.target:null; const b=t&&t.closest('[data-tap-inst]');
+      if(b&&my){ my.setMyInstrument(b.getAttribute('data-tap-inst')); host.querySelector('.tap-inst-pick').innerHTML=pads(); }
+      if(t&&t.closest('.btn-tap-cue')&&session.taps().length>1) host.querySelector('.tap-mean-out').textContent='המרווחים שלכם: '+session.intervals().join(', ')+' עש׳ · הממוצע: '+session.mean()+' עש׳';
+    };
   } else if (item.kind === 'pattern_completion' && typeof MM_PATTERN_WORKED !== 'undefined' && typeof MM_PATTERN_WORKED.renderPatternWidget === 'function'){
     host.classList.remove('hidden');
     MM_PATTERN_WORKED.renderPatternWidget(host, item, { onAnswer: fill });
