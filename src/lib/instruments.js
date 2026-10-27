@@ -131,7 +131,7 @@
     e('guzheng', 'גוּצֶ׳נג', 'Guzheng', 'China', 'strings', 'M6', ['patterns'], 'pluck',
       'A zither with a movable bridge per string, tuned to a five-note (anhemitonic pentatonic) scale, so the same five notes repeat in every octave: a pattern of five (M6).',
       'https://collections.ed.ac.uk/mimed/record/14698'),
-    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals'], 'bowed',
+    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals', 'percent'], 'bowed',
       'A two-string bowed spike fiddle; a bowed note lasts exactly as long as the bow keeps moving, which makes it a clear voice for held note lengths in a bar (M3).',
       'https://www.horniman.ac.uk/object/1975.40/json'),
     e('guitar', 'גיטרה', 'Guitar', 'Spain, Europe', 'strings', 'M5', ['numberLine'], 'pluck',
@@ -149,7 +149,7 @@
     e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division'], 'pluck',
       'A trapezoid zither with 81 strings stretched in groups of three, plus levers for microtones: 27 groups of 3 is a ready-made multiplication and division picture (M2).',
       'https://www.maqamworld.com/en/instr/qanun.php'),
-    e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions', 'percent'], 'pluck',
+    e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions'], 'pluck',
       'A small four-string guitar adopted in Hawaii in the 1880s from the machete; strumming quarters and eighths in one bar voices note lengths (M3).',
       'https://collections.vam.ac.uk/item/O372416/machete-unknown'),
     // ---------- winds ----------
