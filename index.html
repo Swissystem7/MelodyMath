@@ -475,6 +475,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <div class="card mm-game" id="bcCard" aria-label="ספירה לפי פעמה"></div>
 <div class="card mm-game" id="ttgCard" aria-label="לוח הכפל כשיר קצבי"></div>
 <div class="card mm-game" id="ensCard" aria-label="מנגנים יחד: תזמורת קטנה"></div>
+<div class="card mm-game" id="lsCard" aria-label="נפח תיבה כשכבות של לופים"></div>
 <div class="card mm-game" id="pmCard" aria-label="אחוזים כתיבה"></div>
 <!-- #591 music games end -->
 </section><footer class="no-print"><div style="text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px"><a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a> · <a href="frequency.html">מעבדת תדרים</a><div style="margin-top:8px;font-size:.85rem">MelodyMath · תרגול יסודי א׳–ו׳ בעברית</div></div></footer></main>
@@ -2922,4 +2923,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.get('screen')&&g&&g.SCREEN_FOR[q.get('topic')];if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 <script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/components/PercentMixPad.js"></script>
 <!-- #591 music game scripts end -->
+<script src="src/lib/music/loopStack.js"></script><script src="src/components/LoopStackScreen.js"></script>
+<script>/* ?topic=mm-cur-56&screen=1 opens LoopStack. Its own map, not progression.js SCREENS (#798). */
+try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_LOOP_STACK.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 </body></html>
