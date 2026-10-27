@@ -118,7 +118,7 @@ test('אתגר ו׳ draws the EXTRA exercises, and a fast tempo is four beats', 
   const exercises = raw.map(([id, level, mathTopic, musicConcept, prompt, answer, hint, extra, ref]) => (
     { id, level, mathTopic, musicConcept, prompt, answer, hint, extra: extra === 'EXTRA', ref }
   ));
-  const lines = ['practicePool', 'extraTempoPreview', 'beyondLabel', 'childPrompt', 'extraMusic'].map((name) => {
+  const lines = ['practicePool', 'extraTempoPreview', 'beyondLabel', 'childPrompt', 'extraMusic', 'speakTerm'].map((name) => {
     const line = indexHtml.split('\n').find((l) => l.startsWith('function ' + name + '('));
     assert.ok(line, name);
     return line;
@@ -154,6 +154,23 @@ test('אתגר ו׳ draws the EXTRA exercises, and a fast tempo is four beats', 
   assert.equal(melody.notes.length, 8);
   assert.equal(melody.notes[0].voice, 'xylo');
   assert.equal(sandbox.extraMusic(exercises.find((x) => x.answer === 240)).clicks[0], 4);
+  const liveFifth = exercises.find((x) => !x.extra && x.level === 1 && x.answer === '3:2');
+  const liveSound = sandbox.extraMusic(liveFifth);
+  assert.equal(JSON.stringify(liveSound.notes.map((n) => n.voice)), JSON.stringify(['bell', 'xylo']));
+  assert.equal(liveSound.notes[1].hz > liveSound.notes[0].hz, true);
+  assert.equal(sandbox.extraMusic(exercises.find((x) => !x.extra && x.musicConcept === 'קצב')), null);
+  assert.match(indexHtml, /<span class="tag">מעבר לתוכנית · מרווחים וטמפו<\/span>/);
+  assert.equal(indexHtml.includes('לא תכנית א׳–ד׳'), false);
+  assert.match(indexHtml, /#mm-speak-now,#mm-hear,#mm-access button\{min-height:44px;min-width:44px\}/);
+  assert.match(fs.readFileSync(path.join(__dirname, '..', 'src/theme.css'), 'utf8'), /@media \(max-width: 480px\) \{[^}]*\.tabs \{ margin-inline: -12px/);
+  const said = [];
+  sandbox.speakHebrew = (t) => { said.push(t); return true; };
+  sandbox.maybeSpeak = (t) => { said.push('maybe:' + t); };
+  assert.match(sandbox.speakTerm(tri), /קוורטה מוגדלת/);
+  assert.match(said[0], /קוורטה מוגדלת/);
+  said.length = 0;
+  assert.equal(sandbox.speakTerm(liveFifth), '');
+  assert.equal(said[0].startsWith('maybe:'), true);
   const originals = ["רבע מנוקד שווה לכמה שמיניות?","כמה רבעים יש בתיבה בזמן 4/4?","מה היחס בין תדר של דו לתדר של סול במרווח קווינטה?","כמה שמיניות יש בתיבה בזמן 3/4?","מה היחס בין תדר של דו לתדר של פה במרווח קוורטה?","כמה רבעים שווה חצי מנוקד?","אם מהירות הקצב מוכפלת פי 2 בכל דקה, כמה פעמים תגדל המהירות אחרי 3 דקות?","כמה שש־עשריות יש בתיבה בזמן 2/4?","מה היחס בין תדר של דו לתדר של דו באוקטבה?","משך תיבה במשקל 6/8 שווה לכמה רבעים?","קצב מתחיל ב־60 BPM ומוכפל כל 2 דקות. מה הקצב אחרי 4 דקות?","כמה חצאים יש בתיבה בזמן 4/4?","כמה רבעים שווה שלם מנוקד?","מה יחס התדרים בטרצה גדולה?","קצב מתחיל ב־40 BPM ומשולש כל דקה. מה הקצב אחרי 3 דקות?","כמה שמיניות שווה חצי מנוקד?","מה יחס התדרים בסקסטה גדולה?","תו עולה ב־2 חצאי טונים בכל צעד. מה השינוי אחרי 5 צעדים?","כמה שש־עשריות יש בתיבה בזמן 3/4?","קצב מתחיל ב־50 BPM ומוכפל כל 3 דקות. מה הקצב אחרי 6 דקות?","מה יחס התדרים בספטימה גדולה?","תו יורד ב־3 חצאי טונים בכל צעד. מה השינוי אחרי 4 צעדים?","כמה רבעים שווה שמינית מנוקדת?","קצב מתחיל ב־30 BPM ומוכפל כל דקה. מה הקצב אחרי 5 דקות?","כמה שמיניות יש בתיבה בזמן 12/8?","מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?","תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?","קצב מתחיל ב־20 BPM ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?","כמה רבעים שווה שלם עם שתי נקודות הארכה?","מה יחס התדרים בטריטון בכיוון עולה?","תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?","קצב מתחיל ב־10 BPM ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?","כמה שמיניות שווה רבע עם שתי נקודות הארכה?","מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?","תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?"];
   const norm = (s) => String(s).replaceAll('BPM', 'פעימות בדקה');
   const prompts = raw.map((r) => norm(r[4]));
