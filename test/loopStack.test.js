@@ -58,7 +58,9 @@ test('a 16-cube djembe layer sounds every cube: the ten is in band, not 6 clicks
   const layer = LS.layerNotes(16, 'drumHigh', 0, 0);
   assert.equal(layer.filter((n) => n.place === 'one').length, 6);
   assert.equal(layer.filter((n) => n.place === 'ten').length, 1);
-  assert.ok(layer.find((n) => n.place === 'ten').hz >= 1250);
+  const tenHz = layer.find((n) => n.place === 'ten').hz;
+  assert.ok(tenHz >= 1250);
+  assert.ok(tenHz - layer.find((n) => n.place === 'one').hz >= 500, 'ones sit clearly below the djembe ten');
   heard(layer, 16);
   Object.keys(require('../src/lib/instrumentVoices.js').VOICES).forEach((v) => {
     [16, 24, 30].forEach((c) => heard(LS.layerNotes(c, v, 0, 0), c));

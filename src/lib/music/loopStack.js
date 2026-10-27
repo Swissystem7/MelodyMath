@@ -75,7 +75,7 @@
     if (prog && prog.SCREENS) Object.keys(SCREEN).forEach(function (id) { prog.SCREENS[id] = SCREEN[id]; });
   }
 
-  // Up to 12: one beat per cube. Above: one audible held ten, then the ones.
+  // Up to 12: one beat per cube. Above: a held ten, then ones a fifth lower.
   function layerNotes(cubes, voice, start, layer) {
     const s = g2.cubeLayerSounds(cubes), notes = [];
     if (!s) return notes;
@@ -85,7 +85,7 @@
       return notes;
     }
     for (let t = 0; t < s.tens; t++) { notes.push({ at: at, voice: voice, hz: audibleHz(voice, 110), layer: layer, place: 'ten', cubes: 10, held: true, dur: TEN_DUR, gain: 0.28 }); at += 2 * STEP; }
-    for (let j = 0; j < s.ones; j++) { notes.push({ at: at, voice: ONE_VOICE, hz: audibleHz(ONE_VOICE, 1800), layer: layer, place: 'one', cubes: 1, held: false }); at += STEP; }
+    for (let j = 0; j < s.ones; j++) { notes.push({ at: at, voice: ONE_VOICE, hz: audibleHz(ONE_VOICE, 1173), layer: layer, place: 'one', cubes: 1, held: false }); at += STEP; }
     return notes;
   }
 
