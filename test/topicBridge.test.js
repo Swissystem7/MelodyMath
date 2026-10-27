@@ -43,7 +43,8 @@ function pageFns() {
 test('index.html loads progression.js and bridges.js, and sw.js caches them', () => {
   assert.match(html, /<script src="src\/lib\/curriculum\/progression\.js"><\/script>/);
   assert.match(html, /<script src="src\/lib\/curriculum\/bridges\.js"><\/script>/);
-  assert.match(html, /id="topicBridge"/);
+  assert.match(html, /<div id="topicBridge" class="note hidden"><\/div>/);
+  assert.doesNotMatch(html, /<p id="topicBridge"/);
   assert.match(html, /showTopicBridge\(rpStep\?rmPlan\[rpStep-1\]:null,st\)/);
   assert.match(sw, /'\.\/src\/lib\/curriculum\/progression\.js'/);
   assert.match(sw, /'\.\/src\/lib\/curriculum\/bridges\.js'/);
@@ -90,15 +91,27 @@ test('the next topic comes from getNextUnlockedTopics, and practice is not label
   assert.equal(sandbox.topicBridge.classList.hidden, true);
 });
 
-test('every bridge has a sound, an answer check, and a real source', () => {
+function soundCount(answer) {
+  const s = String(answer == null ? '' : answer).trim().replace(/,/g, '.');
+  if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return 0;
+  const n = Number(s);
+  if (!(n > 0) || !Number.isFinite(n)) return 0;
+  const whole = Math.floor(n + 1e-9);
+  const tenths = Math.round((n - whole) * 10);
+  if (tenths === 0 && whole <= 12) return whole;
+  if (Math.floor(whole / 10) <= 12) return Math.floor(whole / 10) + (whole % 10) + tenths;
+  if (Math.floor(whole / 100) <= 12) return Math.floor(whole / 100) + (Math.floor(whole / 10) % 10) + (whole % 10) + tenths;
+  return 0;
+}
+
+test('every bridge sound matches the number, and 7.7 counts for 7.70', () => {
   const heard = [];
+  const voices = new Set();
   bridges.RAW_BRIDGES.forEach((row) => {
     const b = bridges.bridgeForLink(row[0], row[1]);
-    const n = Number(row[4]);
-    const whole = n > 0 && n === Math.round(n);
-    const want = whole && n <= 12 ? n : whole ? Math.min(12, Math.floor(n / 10)) : 3;
-    assert.equal(b.sound.length, want, row[0] + '->' + row[1] + ' beats');
-    assert.equal(b.sound[b.sound.length - 1].at < 1, true, row[0]);
+    assert.equal(b.sound.length, soundCount(row[4]), row[0] + '->' + row[1] + ' ' + row[4]);
+    if (b.sound.length) assert.equal(b.sound[b.sound.length - 1].at < 1, true, row[0]);
+    b.sound.forEach((ev) => voices.add(ev.voice));
     assert.equal(/BPM|אוקטבה/.test(b.prompt + ' ' + b.hint), false, row[0]);
     assert.equal(b.check(row[4]), true, row[0] + '->' + row[1]);
     assert.equal(b.check('___nope___'), false);
@@ -106,6 +119,27 @@ test('every bridge has a sound, an answer check, and a real source', () => {
     assert.equal(b.source.url, 'https://doi.org/10.1007/s10648-014-9249-3');
     assert.equal(b.source.music.doi, '10.1080/00220973.2020.1799316');
   });
+  assert.equal(voices.has('drum') && voices.has('bell') && voices.has('xylo'), true);
+  const teens = bridges.bridgeForLink('mm-cur-1', 'mm-cur-3');
+  assert.equal(teens.answer, 14);
+  assert.equal(teens.sound.length, 5);
+  assert.equal(teens.sound.filter((ev) => ev.held).length, 1);
+  assert.equal(teens.sound.filter((ev) => !ev.held).length, 4);
+  const thirteen = bridges.bridgeForLink('mm-cur-3', 'mm-cur-7');
+  assert.equal(thirteen.sound.length, 4);
+  const thousand = bridges.bridgeForLink('mm-cur-35', 'mm-cur-56');
+  assert.equal(thousand.answer, 1000);
+  assert.equal(thousand.sound.length, 10);
+  assert.equal(thousand.sound.every((ev) => ev.voice === 'xylo' && ev.held), true);
+  const money = bridges.bridgeForLink('mm-cur-36', 'mm-cur-46');
+  assert.equal(money.answer, '7.70');
+  assert.equal(money.check('7.7'), true);
+  assert.equal(money.check('7.70'), true);
+  assert.equal(money.sound.length, 14);
+  assert.equal(money.sound.filter((ev) => ev.voice === 'xylo').length, 7);
+  const word = bridges.bridgeForLink('mm-cur-8', 'mm-cur-17');
+  assert.equal(word.sound.length, 0);
+  assert.equal(word.check('כן'), true);
   const one = bridges.bridgeForLink('mm-cur-0', 'mm-cur-1');
   const played = bridges.play(one, { playTap: (v) => heard.push(v), later: (fn) => fn() });
   assert.equal(played.length, one.sound.length);

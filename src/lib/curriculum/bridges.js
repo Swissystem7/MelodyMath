@@ -122,16 +122,50 @@
     music: Object.freeze({ id: 'azaryahu2020', doi: '10.1080/00220973.2020.1799316', url: 'https://doi.org/10.1080/00220973.2020.1799316' })
   });
 
+  function voiceFor(mechanism) {
+    const m = String(mechanism || '');
+    if (/bell|coin|angle|clock|data/.test(m)) return 'bell';
+    if (/length|line|area|grid|fraction|shape|perimeter|ruler/.test(m)) return 'xylo';
+    return 'drum';
+  }
+  function answersMatch(given, want) {
+    const g = String(given == null ? '' : given).trim().replace(/\s/g, '').replace(/,/g, '.');
+    const w = String(want == null ? '' : want).trim().replace(/\s/g, '').replace(/,/g, '.');
+    if (g === w) return true;
+    const num = /^[+-]?(?:\d+\.?\d*|\.\d+)$/;
+    if (!num.test(g) || !num.test(w)) return false;
+    const gn = Number(g), wn = Number(w);
+    return Number.isFinite(gn) && Number.isFinite(wn) && gn === wn;
+  }
+  // Counts up to 12 play one tap each. Larger numbers play a low held note per
+  // ten and a tap per one (then per hundred, when the tens no longer fit).
+  // A word, a clock time, or a number too big to count is silent.
   function soundPlan(mechanism, answer) {
-    const n = Number(answer);
-    const whole = n > 0 && n === Math.round(n);
-    const tens = whole && n > 12;
-    const count = whole && n <= 12 ? n : tens ? Math.min(12, Math.floor(n / 10)) : 3;
-    const voice = /bell|coin|angle|clock|data/.test(String(mechanism)) ? 'bell' : 'drum';
-    const step = count <= 1 ? 0 : Math.min(0.22, 0.9 / (count - 1));
-    const out = [];
-    for (let i = 0; i < count; i++) out.push({ at: Math.round(i * step * 1000) / 1000, voice: voice, held: tens });
-    return out;
+    const voice = voiceFor(mechanism);
+    const s = String(answer == null ? '' : answer).trim().replace(/,/g, '.');
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) return [];
+    const n = Number(s);
+    if (!(n > 0) || !Number.isFinite(n)) return [];
+    const whole = Math.floor(n + 1e-9);
+    const tenths = Math.round((n - whole) * 10);
+    const events = [];
+    function add(count, spec) {
+      for (let i = 0; i < count; i++) events.push(spec);
+    }
+    if (tenths === 0 && whole <= 12) add(whole, { voice: voice, held: false });
+    else if (Math.floor(whole / 10) <= 12) {
+      add(Math.floor(whole / 10), { voice: voice, held: true, hz: 110 });
+      add(whole % 10, { voice: voice, held: false });
+    } else if (Math.floor(whole / 100) <= 12) {
+      add(Math.floor(whole / 100), { voice: 'xylo', held: true, hz: 82 });
+      add(Math.floor(whole / 10) % 10, { voice: voice, held: true, hz: 110 });
+      add(whole % 10, { voice: voice, held: false });
+    } else return [];
+    add(tenths, { voice: voice === 'xylo' ? 'bell' : 'xylo', held: false });
+    const step = events.length <= 1 ? 0 : Math.min(0.22, 0.9 / (events.length - 1));
+    return events.map(function (ev, i) {
+      return { at: Math.round(i * step * 1000) / 1000, voice: ev.voice, held: ev.held, hz: ev.hz };
+    });
   }
   function play(entry, env) {
     const events = (entry && entry.sound) || [];
@@ -139,7 +173,7 @@
     const tap = e.playTap || (typeof playTap === 'function' ? playTap : null);
     if (typeof tap !== 'function') return events;
     const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
-    events.forEach(function (ev) { later(function () { tap(ev.voice, { step: 0, hz: ev.held ? 110 : undefined }); }, Math.round(ev.at * 1000)); });
+    events.forEach(function (ev) { later(function () { tap(ev.voice, { step: 0, hz: ev.hz != null ? ev.hz : (ev.held ? 110 : undefined) }); }, Math.round(ev.at * 1000)); });
     return events;
   }
   function mountAnswer(container, entry) {
@@ -168,11 +202,7 @@
       source: RESEARCH,
       sound: soundPlan(row[2], row[4])
     };
-    entry.check = function (given) {
-      const want = entry.answer;
-      const g = String(given == null ? '' : given).trim();
-      return typeof want === 'number' ? Number(g) === want : g === String(want).trim();
-    };
+    entry.check = function (given) { return answersMatch(given, entry.answer); };
     Object.freeze(entry);
     const key = entry.from + '->' + entry.to;
     BRIDGES[key] = entry;
