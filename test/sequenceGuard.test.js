@@ -47,6 +47,8 @@ test('1. every topic of grades א׳-ו׳ comes after the topics it needs', () =>
 // On master these fraction standards give each level its own primary way
 // (all M3, one mechanism), so they have two or three. The one-primary rule
 // is not applied to them yet; each is a todo until it is (#591, #751).
+// PR #745 makes fillBar the one primary fraction way; when it lands, drop
+// its topics from this list so the list only gets shorter.
 const MANY_PRIMARY_ON_MASTER = [
   'ד:FRAC_BAR', 'ד:FRAC_OF_QTY', 'ד:FRAC_NAMES', 'ד:FRAC_ADD_D',
   'ה:FRAC_EQUIV', 'ה:FRAC_ADD', 'ה:FRAC_OF', 'ה:FRAC_MIXED',
