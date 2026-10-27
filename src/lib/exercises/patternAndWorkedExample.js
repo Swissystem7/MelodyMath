@@ -209,10 +209,16 @@
         }));
       } else if (stage === 'independent') {
         wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+        const label = d.createElement('label');
+        label.className = 'worked-answer-label';
+        label.textContent = 'התשובה';
         const input = d.createElement('input');
         input.className = 'worked-answer';
+        input.dir = 'ltr';
+        if (typeof input.setAttribute === 'function') input.setAttribute('dir', 'ltr');
+        label.appendChild(input);
         const hint = hintNode(d);
-        wrap.appendChild(input);
+        wrap.appendChild(label);
         wrap.appendChild(hint);
         wrap.appendChild(btn(d, 'primary worked-check-btn', 'עניתי', function () {
           const res = typeof ex.check === 'function' ? ex.check(input.value) : { correct: Number(input.value) === Number(ex.total), hint: ex.hint || '' };

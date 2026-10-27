@@ -156,6 +156,8 @@ test('עכשיו לבד hides the total, then the topic ends with a no-music che
   assert.match(host._heading, /עכשיו לבד/);
   assert.equal(host._noMusic, false);
   const input = find(host, 'worked-answer');
+  assert.equal(input.dir, 'ltr');
+  assert.match(find(host, 'worked-answer-label').textContent, /התשובה/);
   input.value = '4';
   find(host, 'worked-check-btn').onclick();
   assert.equal(host._stage, 'independent');
