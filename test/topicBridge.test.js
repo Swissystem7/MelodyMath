@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const bridges = require('../src/lib/curriculum/bridges');
+const instruments = require('../src/lib/instruments');
 const prog = require('../src/lib/curriculum/progression');
 const cur = require('../src/lib/curriculum');
 const banks = require('../src/lib/banks');
@@ -140,7 +141,7 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   const thousand = bridges.bridgeForLink('mm-cur-35', 'mm-cur-56');
   assert.equal(thousand.answer, 1000);
   assert.equal(thousand.sound.length, 10);
-  assert.equal(thousand.sound.every((ev) => ev.voice === 'pluck' && ev.place === 'hundred' && ev.held), true);
+  assert.equal(thousand.sound.every((ev) => ev.voice === 'lowFlute' && ev.place === 'hundred' && ev.held), true);
   assert.equal(thousand.sound.some((ev) => ev.voice === 'xylo' || ev.place === 'tenth'), false);
   const sung = [], taps = [];
   bridges.play(thousand, {
@@ -150,19 +151,26 @@ test('every bridge has a sound, an answer check, and a real source', () => {
     later: (fn) => fn(),
   });
   assert.equal(sung.length, 10);
-  assert.equal(sung.every((v) => v === 'pluck'), true);
+  assert.equal(sung.every((v) => v === 'lowFlute'), true);
   assert.equal(taps.includes('xylo'), false);
   const twenty = bridges.bridgeForLink('mm-cur-1', 'mm-cur-12');
   assert.equal(twenty.answer, 20);
   assert.equal(twenty.sound.length, 2);
-  assert.equal(twenty.sound.every((ev) => ev.voice === 'breathy' && ev.place === 'ten'), true);
+  assert.equal(twenty.sound.every((ev) => ev.voice === 'lowVoice' && ev.place === 'ten'), true);
   const hundred = bridges.soundPlan('units', 100);
   assert.equal(hundred.length, 1);
-  assert.equal(hundred[0].voice, 'pluck');
+  assert.equal(hundred[0].voice, 'lowFlute');
   assert.equal(hundred[0].place, 'hundred');
   const mixed = bridges.soundPlan('steady beat', 111.1);
   assert.deepEqual(mixed.map((ev) => ev.place), ['hundred', 'ten', 'one', 'tenth']);
-  assert.deepEqual(mixed.map((ev) => ev.voice), ['pluck', 'breathy', 'drum', 'xylo']);
+  assert.deepEqual(mixed.map((ev) => ev.voice), ['lowFlute', 'lowVoice', 'drum', 'xylo']);
+  const usedByTopic = new Set();
+  Object.keys(instruments.TOPICS).forEach((topic) => {
+    instruments.forTopic(topic).forEach((inst) => usedByTopic.add(inst.voice));
+  });
+  assert.equal(usedByTopic.has('lowFlute'), false);
+  assert.equal(usedByTopic.has('lowVoice'), false);
+  assert.equal(mixed[0].voice === 'pluck' || mixed[1].voice === 'breathy', false);
   const carried = bridges.soundPlan('steady beat', 0.999);
   assert.equal(carried.length, 1);
   assert.equal(carried[0].place, 'one');
@@ -206,8 +214,9 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   const d = { createElement: (tag) => { const node = { tag: tag, className: '', hidden: true, textContent: '', value: '', children: [], setAttribute() {}, onclick: null }; made.push(node); return node; } };
   const box = { ownerDocument: d, _bridgeOk: null, appendChild(ch) { this.children = this.children || []; this.children.push(ch); } };
   const ui = bridges.mountAnswer(box, entry);
-  assert.match(ui.key.textContent, /יוקללה = 100/);
-  assert.match(ui.key.textContent, /קול שר = 10/);
+  assert.match(ui.key.textContent, /חליל נמוך = 100/);
+  assert.match(ui.key.textContent, /זמרה נמוכה = 10/);
+  assert.equal(/יוקללה|ukulele|pluck/.test(ui.key.textContent), false);
   assert.match(ui.key.textContent, /נקישה קצרה = 1/);
   assert.match(ui.key.textContent, /קסילופון = עשיריות/);
   assert.match(ui.key.textContent, /7\.70/);
