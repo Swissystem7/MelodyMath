@@ -146,7 +146,7 @@ test('grade 1 per-topic ranges and safe bounds across ALL exercise types (Refs #
 test('number line hides its answer, percentages leave the ukulele, and a kept sentence changes numbers (Refs #687 #665)', () => {
   const curriculum = require('../src/lib/curriculum.js');
   const banks = require('../src/lib/banks.js');
-  const shows = (a, p) => new RegExp('(^|[^\\d.])' + String(a).replace(/\./g, '\\.') + '([^\\d]|$)').test(String(p));
+  const shows = (a, p) => new RegExp('(^|[^\\d.])' + String(a).replace(/\\/g, '\\\\').replace(/\./g, '\\.') + '([^\\d]|$)').test(String(p));
   for (let r = 0; r < 12; r++) {
     const ex = variety.generateVariant('mm-cur-2', r, { seed: r });
     assert.equal(shows(ex.answer, ex.prompt), false, ex.prompt);
