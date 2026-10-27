@@ -1,14 +1,8 @@
 // MelodyMath — Exercise Variety Engine (Task V1, Refs #665).
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) {
-    let inst;
-    try { inst = require('../instruments.js'); } catch (_) { inst = null; }
-    module.exports = factory(inst);
-  } else {
-    root.MM_VARIETY = factory(root.MelodyMathInstruments || root);
-  }
-})(typeof globalThis !== 'undefined' ? globalThis : this, function (I) {
-  'use strict';
+  if (typeof module === 'object' && module.exports) { let inst; try { inst = require('../instruments.js'); } catch (_) { inst = null; } module.exports = factory(inst); }
+  else root.MM_VARIETY = factory(root.MelodyMathInstruments || root);
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (I) { 'use strict';
   const BPM_STEPS = [84, 92, 96, 104, 112, 118, 124, 128];
   const RHYTHM_PATTERNS = [
     { id: 'quarters_4', he: 'מקצב רבעים', meter: '4/4', subdivision: 'quarters', method: 'steady_beat', accents: [0] },
