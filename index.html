@@ -1208,14 +1208,17 @@ var rpEncore=null,rpStreakHeld=null,rpHoldStreak=false,rpHeldPlayed=0,rpPb=null;
 function stopEncore(){ if(rpEncore&&typeof rpEncore.stop==='function') rpEncore.stop(); rpEncore=null; }
 rpRender=function(f){return function(){stopEncore();return f()}}(rpRender);
 // #591 (redo of #831): the music between exercises (reward clicks, encore, a
-// worked-example demo, the last jamKit phrase) is cut before the next exercise
+// worked-example demo, the last jamKit phrase, a streak phrase) is cut before the next exercise
 // mounts, so it never plays over the exercise's own sound. A second wrapper,
 // next to #832's stopEncore one, so neither rpRender line has to change.
 var rpLive=[];
 function trackLivePlay(){const J=typeof MM_JAM!=='undefined'?MM_JAM:null;if(!J||J._mmTracked||typeof J.playNotes!=='function')return false;const p=J.playNotes;J.playNotes=function(){const h=p.apply(this,arguments);rpLive.push(h);if(rpLive.length>8)rpLive.shift();return h};J._mmTracked=true;return true}
+// Streak phrases are booked on the audio clock with no handle; route each one through its own bus so stopIntroAudio can cut it (streak.js stays untouched).
+function trackStreakPhrases(){const S=typeof MM_MASTERY_STREAK!=='undefined'?MM_MASTERY_STREAK:null;if(!S||S._mmTracked||typeof S.playPhrase!=='function'||typeof Proxy!=='function')return false;const p=S.playPhrase;S.playPhrase=function(phrase,inst,audioCtx,delay){const ac=audioCtx||(typeof getSharedAudioContext==='function'?getSharedAudioContext():null);if(!ac||typeof ac.createGain!=='function')return p.apply(this,arguments);const bus=ac.createGain();bus.connect(ac.destination);const via=new Proxy(ac,{get:function(t,k){if(k==='destination')return bus;const v=t[k];return typeof v==='function'?v.bind(t):v}});rpLive.push({stop:function(){try{bus.disconnect()}catch(e){}}});if(rpLive.length>8)rpLive.shift();return p.call(this,phrase,inst,via,delay)};S._mmTracked=true;return true}
 function stopIntroAudio(){stopEncore();rpLive.splice(0).forEach(function(h){if(h&&typeof h.stop==='function')h.stop()});if(typeof stopAllAudio==='function')stopAllAudio();if(typeof musicEngine!=='undefined'&&musicEngine&&typeof musicEngine.stopAll==='function')musicEngine.stopAll();const w=$('rmPlanWidget');if(w&&typeof MM_PATTERN_WORKED!=='undefined'&&typeof MM_PATTERN_WORKED.stopDemo==='function')MM_PATTERN_WORKED.stopDemo(w)}
 rpRender=function(f){return function(){stopIntroAudio();return f()}}(rpRender);
 document.addEventListener('DOMContentLoaded',trackLivePlay);
+document.addEventListener('DOMContentLoaded',trackStreakPhrases);
 ['rmPlanRestart','rmPlanReport'].forEach(function(id){ const b=$(id); if(b&&b.addEventListener) b.addEventListener('click',stopEncore); });
 // One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
 if(typeof installAudioUnlock==='function') installAudioUnlock(document);

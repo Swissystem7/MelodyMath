@@ -82,6 +82,21 @@ test('stopIntroAudio runs with no audio at all, and stops what exists', () => {
   assert.equal(full.rpLive.length, 0);
 });
 
+test('a streak phrase still sounding is cut by stopIntroAudio', () => {
+  const src = lineOf(/function trackStreakPhrases\(\)\{[^\n]*/) + ';' + lineOf(/function stopIntroAudio\(\)\{[^\n]*/);
+  const cut = [], dest = { real: true }, bus = { connect: () => {}, disconnect: () => cut.push('bus') };
+  const ac = { destination: dest, createGain: () => bus };
+  let heard = null;
+  const ctx = { Proxy, rpLive: [], $: () => null, stopEncore() {}, getSharedAudioContext: () => ac,
+    MM_MASTERY_STREAK: { playPhrase: (p, i, a) => { heard = a.destination; return { started: true }; } } };
+  vm.runInNewContext(src + ';trackStreakPhrases();MM_MASTERY_STREAK.playPhrase({notes:[440]},null,null,0.3)', ctx);
+  assert.equal(heard, bus, 'the phrase plays into its own bus, not straight to the speakers');
+  assert.equal(ctx.rpLive.length, 1);
+  vm.runInNewContext('stopIntroAudio()', ctx);
+  assert.deepEqual(cut, ['bus'], 'the bus is cut before the next exercise mounts');
+  assert.equal(ctx.rpLive.length, 0);
+});
+
 test('noMusic worked example opens at עכשיו לבד, silent, plays nothing', async () => {
   const h = host(), s = spies();
   PW.renderWorkedExampleWidget(h, Object.assign(PW.createWorkedExampleExercise({ a: 3, b: 2 }), { noMusic: true }), s);
