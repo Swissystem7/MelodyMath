@@ -30,6 +30,7 @@ in the repository is missing from this file.
 | `breathy` | flutes and pipes | synthesised, sine + breath noise | project code |
 | `lowFlute` | low flute for hundreds, no topic | synthesised, low sine | project code |
 | `lowClarinet` | low clarinet for tens, no topic | synthesised, low square | project code |
+| `musicBox` | music box for tenths, no topic | synthesised, high sine | project code |
 | `reed` | reed instruments | synthesised, filtered square | project code |
 | `horn` | horns (shofar) | synthesised | project code |
 | `drone` | drones (didgeridoo) | synthesised | project code |

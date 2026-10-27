@@ -140,9 +140,12 @@
   // Counts up to 12 play one tap each, so a child can count them.
   // Above that, ten of one place is one of the next: 10 tenths = 1 one,
   // 10 ones = 1 ten, 10 tens = 1 hundred. Each place has its own instrument.
-  // Ones stay a short percussion tap and tenths stay the xylophone. Tens are
-  // a low clarinet (lowClarinet) and hundreds are a low flute (lowFlute).
-  // No topic lists either voice. Not the ukulele, and not a sung note.
+  // Ones stay a short percussion tap. Tenths are always a music box
+  // (musicBox): one fixed voice, because voiceFor already uses the xylophone
+  // for ones in some topics. Tens are a low clarinet (lowClarinet) and
+  // hundreds are a low flute (lowFlute). No topic lists those three voices.
+  // Not the ukulele, and not a sung note.
+  // Notes are spaced so each one finishes before the next starts.
   // A word, a clock time, or a number past 12 hundreds plays one soft listen
   // tone. That tone is a cue, not a quantity.
   function listenTone() {
@@ -154,7 +157,7 @@
       hundred: { voice: 'lowFlute', held: true, hz: 196, place: 'hundred' },
       ten: { voice: 'lowClarinet', held: true, hz: 146, place: 'ten' },
       one: { voice: one, held: false, place: 'one' },
-      tenth: { voice: one === 'xylo' ? 'bell' : 'xylo', held: false, place: 'tenth' },
+      tenth: { voice: 'musicBox', held: false, hz: 1318.5, place: 'tenth' },
     };
   }
   function soundPlan(mechanism, answer) {
@@ -180,22 +183,41 @@
       add(whole % 10, places.one);
     } else return listenTone();
     add(tenths, places.tenth);
-    const step = events.length <= 1 ? 0 : Math.min(0.22, 0.9 / (events.length - 1));
+    // 0.7s is longer than a held note (0.5s) and a bell tap (0.6s), so the
+    // places are heard one after another instead of as one chord.
+    const STEP = 0.7;
     return events.map(function (ev, i) {
-      return { at: Math.round(i * step * 1000) / 1000, voice: ev.voice, held: ev.held, hz: ev.hz, place: ev.place };
+      return { at: Math.round(i * STEP * 1000) / 1000, voice: ev.voice, held: ev.held, hz: ev.hz, place: ev.place };
     });
   }
   const PERCUSSION = { drum: true, bell: true, xylo: true };
+  let playGen = 0;
+  const playTimers = [];
+  function silenced(e) {
+    if (e && (e.muted || e.quiet)) return true;
+    if (typeof audioState === 'function' && audioState.muted) return true;
+    try { if (typeof loadAccess === 'function' && loadAccess().quiet) return true; } catch (err) { /* no storage */ }
+    try { if (typeof prefsNow === 'function' && prefsNow().quiet) return true; } catch (err) { /* no prefs */ }
+    return false;
+  }
   function play(entry, env) {
     const events = (entry && entry.sound) || [];
     const e = env || {};
+    const gen = ++playGen;
+    playTimers.forEach(function (id) { clearTimeout(id); });
+    playTimers.length = 0;
+    if (silenced(e)) return events;
     const tap = e.playTap || (typeof playTap === 'function' ? playTap : null);
     const sing = e.playVoice || (typeof playVoice === 'function' ? playVoice : null);
     const ac = e.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
     if (typeof tap !== 'function' && typeof sing !== 'function') return events;
-    const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
+    const later = e.later || function (fn, ms) {
+      const id = setTimeout(fn, ms);
+      playTimers.push(id);
+    };
     events.forEach(function (ev) {
       later(function () {
+        if (gen !== playGen || silenced(e)) return;
         const hz = ev.hz != null ? ev.hz : (ev.held ? 110 : undefined);
         if (!PERCUSSION[ev.voice] && typeof sing === 'function' && ac) {
           sing(ac, ev.voice, hz, ac.currentTime || 0, null, ev.held ? { dur: 0.5 } : null);
@@ -212,18 +234,20 @@
     if (!d || typeof d.createElement !== 'function') return null;
     const key = d.createElement('p');
     key.className = 'topic-bridge-key';
-    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, קסילופון = עשיריות (למשל 7.70).';
+    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, תיבת נגינה = עשיריות (למשל 7.70).';
     const input = d.createElement('input');
     input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
     const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;
+    const again = d.createElement('button'); again.type = 'button'; again.className = 'topic-bridge-replay'; again.textContent = 'שמע שוב';
+    again.onclick = function () { play(entry); };
     const go = d.createElement('button'); go.type = 'button'; go.className = 'topic-bridge-check'; go.textContent = 'עניתי';
     go.onclick = function () {
       const ok = entry.check(input.value);
       hint.hidden = !!ok; hint.textContent = ok ? '' : (entry.hint || '');
       container._bridgeOk = ok;
     };
-    container.appendChild(key); container.appendChild(input); container.appendChild(go); container.appendChild(hint);
-    return { input: input, button: go, hint: hint, key: key };
+    container.appendChild(key); container.appendChild(again); container.appendChild(input); container.appendChild(go); container.appendChild(hint);
+    return { input: input, button: go, hint: hint, key: key, again: again };
   }
   const BRIDGES = {};
   const BY_FROM = {};
@@ -261,6 +285,6 @@
     bridgeForLink: bridgeForLink,
     bridgesForTopic: bridgesForTopic,
     bridgesEnteringTopic: bridgesEnteringTopic,
-    play: play, mountAnswer: mountAnswer, soundPlan: soundPlan,
+    play: play, mountAnswer: mountAnswer, soundPlan: soundPlan, voiceFor: voiceFor,
   };
 });

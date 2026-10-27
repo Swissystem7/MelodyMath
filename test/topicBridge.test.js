@@ -121,7 +121,10 @@ test('every bridge has a sound, an answer check, and a real source', () => {
       assert.equal(b.sound.length, counted, row[0] + '->' + row[1] + ' ' + row[4]);
       assert.equal(b.sound.some((ev) => ev.listen), false, row[0]);
     }
-    assert.equal(b.sound[b.sound.length - 1].at < 1, true, row[0]);
+    assert.equal(b.sound[0].at, 0, row[0]);
+    for (let i = 1; i < b.sound.length; i++) {
+      assert.ok(b.sound[i].at >= b.sound[i - 1].at + 0.6, row[0] + ' sequenced');
+    }
     b.sound.forEach((ev) => voices.add(ev.voice));
     assert.equal(/BPM|אוקטבה/.test(b.prompt + ' ' + b.hint), false, row[0]);
     assert.equal(b.check(row[4]), true, row[0] + '->' + row[1]);
@@ -163,7 +166,7 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   assert.equal(hundred[0].place, 'hundred');
   const mixed = bridges.soundPlan('steady beat', 111.1);
   assert.deepEqual(mixed.map((ev) => ev.place), ['hundred', 'ten', 'one', 'tenth']);
-  assert.deepEqual(mixed.map((ev) => ev.voice), ['lowFlute', 'lowClarinet', 'drum', 'xylo']);
+  assert.deepEqual(mixed.map((ev) => ev.voice), ['lowFlute', 'lowClarinet', 'drum', 'musicBox']);
   const usedByTopic = new Set();
   Object.keys(instruments.TOPICS).forEach((topic) => {
     instruments.forTopic(topic).forEach((inst) => usedByTopic.add(inst.voice));
@@ -181,7 +184,8 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   assert.equal(money.check('7.7'), true);
   assert.equal(money.check('7.70'), true);
   assert.equal(money.sound.length, 14);
-  assert.equal(money.sound.filter((ev) => ev.voice === 'xylo').length, 7);
+  assert.equal(money.sound.filter((ev) => ev.voice === 'musicBox' && ev.place === 'tenth').length, 7);
+  assert.equal(money.sound.some((ev) => ev.voice === 'xylo'), false);
   const word = bridges.bridgeForLink('mm-cur-8', 'mm-cur-17');
   assert.equal(word.answer, 'כן');
   assert.equal(word.sound.length, 1);
@@ -219,7 +223,22 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   assert.match(ui.key.textContent, /קלרינט נמוך = 10/);
   assert.equal(/יוקללה|ukulele|pluck|זמרה|breathy/.test(ui.key.textContent), false);
   assert.match(ui.key.textContent, /נקישה קצרה = 1/);
-  assert.match(ui.key.textContent, /קסילופון = עשיריות/);
+  assert.match(ui.key.textContent, /תיבת נגינה = עשיריות/);
+  assert.equal(ui.again.textContent, 'שמע שוב');
+  const replayed = [];
+  const origTimeout = global.setTimeout;
+  const queued = [];
+  global.setTimeout = function (fn) { queued.push(fn); return queued.length; };
+  global.playTap = function (v) { replayed.push(v); };
+  try {
+    ui.again.onclick();
+    queued.forEach(function (fn) { fn(); });
+  } finally {
+    global.setTimeout = origTimeout;
+    delete global.playTap;
+  }
+  assert.equal(replayed.length, entry.sound.length);
+  assert.equal(replayed.every(function (v) { return v === 'drum'; }), true);
   assert.match(ui.key.textContent, /7\.70/);
   ui.input.value = '3'; ui.button.onclick();
   assert.equal(box._bridgeOk, false);
@@ -228,4 +247,74 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   ui.input.value = '10'; ui.button.onclick();
   assert.equal(box._bridgeOk, true);
   assert.equal(ui.hint.hidden, true);
+});
+
+test('each place value has its own instrument, and voiceFor never returns the tenths voice', () => {
+  const places = { hundred: new Set(), ten: new Set(), one: new Set(), tenth: new Set() };
+  bridges.RAW_BRIDGES.forEach((row) => {
+    assert.notEqual(bridges.voiceFor(row[2]), 'musicBox', row[2]);
+    [111.1, 4, 4.2].forEach((n) => {
+      bridges.soundPlan(row[2], n).forEach((ev) => {
+        if (ev.place) places[ev.place].add(ev.voice);
+      });
+    });
+  });
+  ['', 'bell', 'coin', 'angle', 'clock', 'data', 'length', 'line', 'area', 'grid', 'fraction', 'shape', 'perimeter', 'ruler', 'steady beat', 'xylophone'].forEach((m) => {
+    assert.notEqual(bridges.voiceFor(m), 'musicBox', 'voiceFor(' + m + ')');
+  });
+  assert.deepEqual([...places.hundred], ['lowFlute']);
+  assert.deepEqual([...places.ten], ['lowClarinet']);
+  assert.deepEqual([...places.tenth], ['musicBox']);
+  assert.equal(places.one.has('drum') && places.one.has('bell') && places.one.has('xylo'), true);
+  ['lowFlute', 'lowClarinet', 'musicBox'].forEach((v) => assert.equal(places.one.has(v), false, v));
+  const used = new Set();
+  Object.keys(instruments.TOPICS).forEach((topic) => {
+    instruments.forTopic(topic).forEach((inst) => used.add(inst.voice));
+  });
+  assert.equal(used.has('musicBox'), false);
+  const length = bridges.soundPlan('length units', 12.3);
+  assert.equal(length.filter((ev) => ev.place === 'one').every((ev) => ev.voice === 'xylo'), true);
+  assert.equal(length.filter((ev) => ev.place === 'tenth').every((ev) => ev.voice === 'musicBox'), true);
+  const coin = bridges.soundPlan('coin sums', 4.2);
+  assert.equal(coin.filter((ev) => ev.place === 'one').every((ev) => ev.voice === 'bell'), true);
+  assert.equal(coin.filter((ev) => ev.place === 'tenth').every((ev) => ev.voice === 'musicBox'), true);
+  const sung = [];
+  const taps = [];
+  bridges.play({ sound: length }, {
+    playVoice: function (_ac, voice) { sung.push(voice); },
+    playTap: function (v) { taps.push(v); },
+    audioContext: { currentTime: 0 },
+    later: function (fn) { fn(); },
+  });
+  assert.equal(sung.includes('musicBox'), true);
+  assert.equal(taps.includes('musicBox'), false);
+  const blocked = [];
+  bridges.play({ sound: length }, {
+    muted: true,
+    playVoice: function () { blocked.push('sing'); },
+    playTap: function () { blocked.push('tap'); },
+    audioContext: { currentTime: 0 },
+    later: function (fn) { fn(); },
+  });
+  assert.equal(blocked.length, 0);
+  let quiet = false;
+  const late = [];
+  bridges.play(bridges.bridgeForLink('mm-cur-35', 'mm-cur-56'), {
+    get quiet() { return quiet; },
+    playVoice: function () { late.push('sing'); },
+    audioContext: { currentTime: 0 },
+    later: function (fn) { quiet = true; fn(); },
+  });
+  assert.equal(late.length, 0);
+  global.loadAccess = function () { return { quiet: true }; };
+  const hushed = [];
+  try {
+    bridges.play(bridges.bridgeForLink('mm-cur-0', 'mm-cur-1'), {
+      playTap: function () { hushed.push(1); },
+      later: function (fn) { fn(); },
+    });
+  } finally {
+    delete global.loadAccess;
+  }
+  assert.equal(hushed.length, 0);
 });
