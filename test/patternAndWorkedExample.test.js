@@ -252,9 +252,12 @@ test('banks include pattern completion and worked example, and index.html wires 
   assert.equal(PW.shownText(patternItems[0].pattern), 'דו➔מי➔דו➔?');
   assert.equal(workedItems[0].a, 3);
   assert.equal(workedItems[0].b, 2);
-  assert.equal(workedItems[0].musicNote, undefined);
-  assert.equal(patternItems[0].musicNote, undefined);
-  assert.ok(indexHtml.includes("it.kind==='worked_example'||it.kind==='pattern_completion'"));
+  assert.match(workedItems[0].musicNote, /3 תופים ועוד 2/);
+  assert.equal(/עונה 4/.test(workedItems[0].musicNote), false);
+  assert.match(patternItems[0].musicNote, /דו/);
+  assert.match(patternItems[0].musicNote, /מי/);
+  assert.equal(/שמרו פעימה קבועה/.test(patternItems[0].musicNote), false);
+  assert.equal(indexHtml.includes("if(it&&(it.kind==='worked_example'||it.kind==='pattern_completion'))it=null"), false);
 });
 
 test('the 3+2 example sits with the 3+2 instruction, and the plain line is 4+3', () => {
@@ -275,4 +278,43 @@ test('the 3+2 example sits with the 3+2 instruction, and the plain line is 4+3',
   assert.equal(/3 \+ /.test(plainLine), false);
   assert.equal(/3 תופים/.test(plainLine), false);
   assert.equal(plain._heading, 'בלי מוזיקה: כמה הם 4 ועוד 3?');
+});
+
+test('the music-way card shows the matching explanation, and the plain stage hides it', () => {
+  function wayEl() {
+    const way = { className: 'music-way hidden', textContent: '' };
+    way.classList = { toggle: function (cls, on) {
+      const parts = String(way.className || '').split(/\s+/).filter(function (c) { return c && c !== cls; });
+      if (on) parts.push(cls);
+      way.className = parts.join(' ');
+    } };
+    return way;
+  }
+  const host = box();
+  const way = wayEl();
+  const h2 = { className: 'prompt', textContent: 'המורה מתופף 3 פעימות, הילד עונה 4' };
+  host.parentNode = { querySelector: function (sel) {
+    if (sel === 'h2.prompt') return h2;
+    if (sel === 'p.music-way') return way;
+    return null;
+  } };
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {});
+  assert.match(way.textContent, /3 תופים ועוד 2 פעמונים הם 5 צלילים/);
+  assert.equal(/עונה 4/.test(way.textContent), false);
+  assert.equal(/\bhidden\b/.test(way.className), false);
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-tap-btn').onclick();
+  find(host, 'worked-answer').value = '5';
+  find(host, 'worked-check-btn').onclick();
+  assert.equal(host._stage, 'plain');
+  assert.equal(way.textContent, '');
+  assert.match(way.className, /\bhidden\b/);
+  assert.equal(host._heading, 'בלי מוזיקה: כמה הם 4 ועוד 3?');
+  const phost = box();
+  const pway = wayEl();
+  phost.parentNode = { querySelector: function (sel) { return sel === 'p.music-way' ? pway : null; } };
+  PW.renderPatternWidget(phost, PW.createPatternCompletionExercise(), {});
+  assert.match(pway.textContent, /אחרי דו בא מי/);
+  assert.equal(/שמרו פעימה קבועה/.test(pway.textContent), false);
+  assert.equal(/\bhidden\b/.test(pway.className), false);
 });

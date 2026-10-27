@@ -175,6 +175,7 @@
     wrap.appendChild(row);
     wrap.appendChild(hint);
     container.appendChild(wrap);
+    writeWay(container, ex.hint || '');
   }
   function writeHeading(container, text) {
     container._heading = text;
@@ -182,6 +183,23 @@
     if (!card || typeof card.querySelector !== 'function') return;
     const h = card.querySelector('h2.prompt');
     if (h) h.textContent = text;
+  }
+  function setHidden(el, on) {
+    if (el.classList && typeof el.classList.toggle === 'function') {
+      el.classList.toggle('hidden', !!on);
+      return;
+    }
+    const parts = String(el.className || '').split(/\s+/).filter(function (c) { return c && c !== 'hidden'; });
+    if (on) parts.push('hidden');
+    el.className = parts.join(' ');
+  }
+  function writeWay(container, text) {
+    const card = container.parentNode;
+    if (!card || typeof card.querySelector !== 'function') return;
+    const way = card.querySelector('p.music-way');
+    if (!way) return;
+    way.textContent = text ? ('🎵 דרך מוזיקלית: ' + text) : '';
+    setHidden(way, !text);
   }
   function pageAnswerRow(container, opts) {
     const d = docOf(container, opts);
@@ -209,6 +227,7 @@
       container._noMusic = plain;
       const heading = stageHeading(ex, stage);
       writeHeading(container, heading);
+      writeWay(container, plain ? '' : (ex.a + ' תופים ועוד ' + ex.b + ' פעמונים הם ' + ex.total + ' צלילים.'));
       if (plain) { const p = plainAdd(ex); ex.answer = p.total; ex.hint = plainHint(p); }
       const row = pageAnswerRow(container, opts);
       if (row) row.hidden = !plain;

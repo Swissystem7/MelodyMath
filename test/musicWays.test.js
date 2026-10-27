@@ -37,7 +37,13 @@ Object.keys(FILES).forEach((grade) => {
         assert.ok(it.musicSrc && it.musicEv, it.id);
         const way = wayOf(file, it);
         assert.ok(way, it.id + ' has no way for ' + it.standard + ' level ' + it.level);
-        assert.deepEqual([it.music, it.musicNote, it.musicSrc, it.musicEv], way.slice(0, 4), it.id);
+        // The pattern and the worked example keep the catalog tag and source,
+        // and show their own explanation instead of the catalog sentence.
+        if (it.kind === 'pattern_completion' || it.kind === 'worked_example') {
+          assert.deepEqual([it.music, it.musicSrc, it.musicEv], [way[0], way[2], way[3]], it.id);
+        } else {
+          assert.deepEqual([it.music, it.musicNote, it.musicSrc, it.musicEv], way.slice(0, 4), it.id);
+        }
       } else {
         assert.ok(banks.MUSIC_SOURCES[it.musicSrc] && it.musicEv, it.id + ' activity ' + it.music);
       }
@@ -106,8 +112,11 @@ test('grade א׳: a prompt that plays sound is a music activity, not a way', () 
   hear.concat(g1).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
   const widget = items.filter((it) => it.kind === 'pattern_completion' || it.kind === 'worked_example');
   assert.ok(widget.length >= 2);
-  widget.forEach((it) => assert.equal(it.musicNote, undefined, it.id));
-  assert.equal(items.filter((it) => it.musicNote).length, items.length - hear.length - g1.length - widget.length);
+  widget.forEach((it) => {
+    assert.ok(it.musicNote, it.id);
+    assert.equal(/עונה 4|שמרו פעימה קבועה/.test(it.musicNote), false, it.id);
+  });
+  assert.equal(items.filter((it) => it.musicNote).length, items.length - hear.length - g1.length);
 });
 
 test('grade ד׳: a 4/4-bar fraction item is music notation already, an activity and not a way', () => {

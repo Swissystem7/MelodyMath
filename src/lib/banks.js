@@ -2065,12 +2065,26 @@
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
-        // The widget is already the musical way. A catalog note beside it is a
-        // second instruction (the 3+2 example next to "the teacher drums 3,
-        // the child answers 4"). Keep a music tag so the item still has a
-        // music side, and leave musicNote empty so that sentence stays off.
+        // The card must explain THIS exercise. The catalog sentence is a
+        // different problem (3 drums, the child answers 4) and must not sit
+        // beside 3+2. Keep the catalog tag, source, and extras; replace the
+        // note with the drums and bells, or with the pattern hint.
         if (raw.kind === 'pattern_completion' || raw.kind === 'worked_example') {
-          if (!raw.music) raw.music = raw.kind === 'pattern_completion' ? 'g1Pattern' : 'workedExample';
+          if (raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard]) {
+            const ways = link[raw.standard];
+            const m = shownWay(raw, ways);
+            if (m) {
+              raw.music = m[0]; raw.musicSrc = m[2]; raw.musicEv = m[3];
+              if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
+              const extra = extraFor(raw, ways, m);
+              if (extra.length) raw.musicExtra = extra;
+              if (raw.kind === 'worked_example') {
+                raw.musicNote = raw.a + ' תופים ועוד ' + raw.b + ' פעמונים הם ' + (Number(raw.a) + Number(raw.b)) + ' צלילים.';
+              } else {
+                raw.musicNote = raw.hint;
+              }
+            }
+          }
           return;
         }
         const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
@@ -2113,7 +2127,7 @@
   const MUSIC_MECHANISMS = {
     M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
       finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
-      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'workedExample'] },
+      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
       tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
@@ -2202,7 +2216,7 @@
   // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
   // that mechanism's study. Activity tag → [source id, evidence].
   const ACTIVITY_SOURCES = {
-    hearBeats: ['mcdonel2015', 'A'], workedExample: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
+    hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
     evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
