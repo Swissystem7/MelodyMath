@@ -24,7 +24,7 @@ test('10 rounds of the same topic never repeat the same exercise twice in a row'
 test('per topic keeps the same exercise type across all rounds', () => {
   const specs = [
     { topic: 'multiplication', expectedType: 'multiplication' }, { topic: 'division', expectedType: 'division' },
-    { topic: 'counting', expectedType: 'addition' }, { topic: 'nextPrev', expectedType: 'subtraction' },
+    { topic: 'counting', expectedType: 'counting' }, { topic: 'nextPrev', expectedType: 'counting' },
     { topic: 'fractions', expectedType: 'fractions' }
   ];
   specs.forEach(spec => {
@@ -140,5 +140,47 @@ test('grade 1 per-topic ranges and safe bounds across ALL exercise types (Refs #
         assert.ok(Number(ex.answer.split('/')[1]) <= 4, 'Fraction denom <= 4');
       }
     }
+  });
+});
+
+test('number line hides its answer, percentages leave the ukulele, and a kept sentence changes numbers (Refs #687 #665)', () => {
+  const curriculum = require('../src/lib/curriculum.js');
+  const banks = require('../src/lib/banks.js');
+  const shows = (a, p) => new RegExp('(^|[^\\d.])' + String(a).replace(/\./g, '\\.') + '([^\\d]|$)').test(String(p));
+  for (let r = 0; r < 12; r++) {
+    const ex = variety.generateVariant('mm-cur-2', r, { seed: r });
+    assert.equal(shows(ex.answer, ex.prompt), false, ex.prompt);
+  }
+  const line = curriculum.topicById('mm-cur-2');
+  curriculum.itemsForTopic('mm-cur-2', banks.itemsForGrade(line.grade)).forEach((it) => {
+    const ex = variety.generateVariant(Object.assign({ topicId: 'mm-cur-2' }, it), 2, { seed: 4, rounds: 6 });
+    assert.equal(shows(ex.answer, ex.prompt), false, ex.prompt);
+  });
+  assert.equal(instruments.forTopic('percent').some((x) => x.id === 'ukulele'), false);
+  assert.ok(instruments.instrumentById('ukulele').mathTopics.includes('fractions'));
+  for (let r = 0; r < 6; r++) assert.notEqual(variety.generateVariant('mm-cur-53', r, { seed: r }).instrument, 'ukulele');
+  assert.ok(variety.TOPIC_RANGES['mm-cur-45'] && variety.TOPIC_RANGES['mm-cur-46']);
+  [
+    ['mm-cur-3', 'addition', '3 פעימות תוף ועוד 2 — כמה ביחד?', 5, /פעימות תוף ועוד/],
+    ['mm-cur-7', 'word_problems', 'לדנה 3 מדבקות. אמא נתנה לה עוד 2. כמה מדבקות יש לדנה?', 5, /לדנה/],
+    ['mm-cur-15', 'multiplication', '3 × 9 = ?', 27, /×/],
+    ['mm-cur-16', 'division', '10 עוגיות ל־2 ילדים, בשווה. כמה לכל אחד?', 5, /עוגיות/],
+    ['mm-cur-23', 'subtraction', '3,800 − 600 = ? (כתבו בלי פסיק)', 3200, /כתבו בלי פסיק/],
+    ['mm-cur-45', 'decimals', 'כתבו כשבר עשרוני: 7/10', 0.7, /כשבר עשרוני/],
+    ['mm-cur-46', 'decimals', '0.3 + 0.4 = ?', 0.7, /\+/],
+  ].forEach((c) => {
+    const seen = new Set();
+    for (let r = 0; r < 6; r++) {
+      const ex = variety.generateVariant({ topicId: c[0], skill: c[1], prompt: c[2], answer: c[3] }, r, { seed: 4, rounds: 6 });
+      assert.match(ex.prompt, c[4], c[0] + ' ' + ex.prompt);
+      const range = variety.getTopicRange(c[0]);
+      assert.ok(ex.answer >= range.min && ex.answer <= range.max, c[0] + ' ' + ex.answer);
+      seen.add(ex.prompt);
+    }
+    assert.equal(seen.size, 6, c[0]);
+  });
+  curriculum.MATRIX.forEach((row) => {
+    const ex = variety.generateVariant(row.topicId, 0, { seed: 3 });
+    assert.equal(String(ex.prompt).includes('כמה פעימות נשמעו?'), false, row.topicId);
   });
 });

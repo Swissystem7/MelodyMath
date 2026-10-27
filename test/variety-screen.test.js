@@ -130,5 +130,7 @@ test('mm-cur-40 is not whole tens, grade-1 addition stays within 20, and a new e
   assert.doesNotMatch(kept.prompt, /איזה שבר/);
   const spoken = vary('mm-cur-3', { skill: 'addition', prompt: '3 פעימות תוף ועוד 2 — כמה ביחד?', answer: 5 }, 1);
   assert.match(spoken.prompt, /פעימות תוף/);
-  assert.equal(spoken.answer, 5);
+  assert.match(spoken.prompt, /עוד/);
+  assert.notEqual(spoken.answer, 5);
+  assert.ok(spoken.answer <= 20);
 });
