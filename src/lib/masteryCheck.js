@@ -7,20 +7,18 @@
   else {
     root.MelodyMathMasteryCheck = factory();
     if (typeof root.mountMasteryCheck === 'undefined') root.mountMasteryCheck = root.MelodyMathMasteryCheck.mountMasteryCheck;
+    if (typeof root.nextPlainItem === 'undefined') root.nextPlainItem = root.MelodyMathMasteryCheck.nextPlainItem;
     if (typeof root.mmMasteryTracker === 'undefined') root.mmMasteryTracker = root.MelodyMathMasteryCheck.getMasteryTracker();
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-
   const STAGES = ['sound', 'picture', 'symbol', 'plain'];
   const STAGE_LABELS_HE = { sound: 'צליל ולהקה', picture: 'תמונה ודגם', symbol: 'סמל ומספר', plain: 'בלי להקה, רק אתם!' };
   const STORAGE_KEY = 'mm.mastery';
-
   function createTopicMastery(topicId, options) {
     const opts = options || {};
     return { topicId: String(topicId || ''), currentStage: opts.initialStage || 'sound', mastered: false, soundSolvedCount: 0, plainAttempts: 0, plainSuccesses: 0, history: [] };
   }
-
   function recordAttempt(state, attempt) {
     const att = attempt || {}, stage = state.currentStage, isCorrect = Boolean(att.correct), isMuted = Boolean(att.muted);
     state.history.push({ stage, correct: isCorrect, muted: isMuted, timestamp: Date.now() });
@@ -44,7 +42,6 @@
     }
     return { nextStage: state.currentStage, mastered: state.mastered, messageHe: '' };
   }
-
   function getTopicReport(state) {
     const rate = state.plainAttempts > 0 ? state.plainSuccesses / state.plainAttempts : null;
     return {
@@ -53,21 +50,20 @@
       plainAttempts: state.plainAttempts, plainSuccesses: state.plainSuccesses, plainSuccessRate: rate
     };
   }
-
   function restoreMusicState(audioContext) {
     const ctx = audioContext || (typeof globalThis !== 'undefined' && (globalThis.mmAudioCtx || (typeof globalThis.getAudioContext === 'function' ? globalThis.getAudioContext() : null))) || null;
     if (ctx && typeof ctx.resume === 'function') { try { ctx.resume(); } catch (_) {} return true; }
     return false;
   }
-
   function renderPlainCheckHtml(item, options) {
     const opts = options || {}, it = item || {}, promptText = it.prompt || '', choices = Array.isArray(it.choices) ? it.choices : [];
+    const promptHtml = typeof mathHtml === 'function' ? mathHtml(promptText) : String(promptText).replace(/[&<>]/g, function (ch) { return ch === '&' ? '&amp;' : ch === '<' ? '&lt;' : '&gt;'; });
     if (opts.audioContext && typeof opts.audioContext.suspend === 'function') { try { opts.audioContext.suspend(); } catch (_) {} }
     let html = '<div class="mm-plain-mastery-check" role="region" aria-label="בדיקת שליטה ללא מוזיקה" dir="rtl">'
       + '<div class="plain-banner" style="background:#f1f5f9;padding:12px;border-radius:10px;margin-bottom:12px;border:1px solid #cbd5e1">'
       + '<h3 style="margin:0 0 4px;font-size:1.1rem;color:#0f172a">עכשיו בלי להקה, רק אתם!</h3>'
       + '<p style="margin:0;color:#475569;font-size:0.9rem">פתרו את התרגיל ללא צלילים או רמזים מוזיקליים</p></div>'
-      + '<p class="plain-exercise-prompt" style="font-size:1.3rem;font-weight:700;margin:16px 0;text-align:center"><bdi dir="ltr">' + promptText + '</bdi></p>';
+      + '<p class="plain-exercise-prompt" style="font-size:1.3rem;font-weight:700;margin:16px 0;text-align:center"><bdi dir="ltr">' + promptHtml + '</bdi></p>';
     if (choices.length > 0) {
       html += '<div class="plain-choices" role="group" aria-label="תשובות אפשריות" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
         + choices.map(c => '<button type="button" class="plain-choice-btn" data-plain-choice="' + c + '" style="min-width:48px;min-height:48px;padding:8px 16px;border-radius:8px;border:1px solid #94a3b8;background:#fff;font-size:1.1rem;cursor:pointer">' + c + '</button>').join('') + '</div>';
@@ -76,7 +72,6 @@
     }
     return html + '</div>';
   }
-
   function mountMasteryCheck(container, item, options) {
     if (!container) return null;
     const opts = options || {};
@@ -91,7 +86,8 @@
     function answer(val) {
       if (answered) return;
       answered = true;
-      const ok = (item && item.answer != null) ? String(val).trim() === String(item.answer).trim() : Boolean(val);
+      const judge = typeof answerOk === 'function' ? answerOk : null;
+      const ok = judge ? !!judge(item, val) : ((item && item.answer != null) ? String(val).trim() === String(item.answer).trim() : Boolean(val));
       restoreMusicState(ctx);
       let recordRes = null;
       if (tracker && topicId) {
@@ -108,7 +104,18 @@
     choices.forEach(btn => { btn.onclick = () => answer(btn.getAttribute('data-plain-choice')); });
     return { container, restoreAudio: () => restoreMusicState(ctx), close: () => { restoreMusicState(ctx); container.classList.add('hidden'); } };
   }
-
+  function nextPlainItem(items, used) {
+    const list = Array.isArray(items) ? items : [];
+    const seen = Array.isArray(used) ? used : [];
+    const lastId = seen.length ? seen[seen.length - 1] : null;
+    const last = list.find(function (it) { return it && it.id === lastId; });
+    const kind = last && (last.kind || last.skill);
+    const same = kind ? list.filter(function (it) { return it && (it.kind || it.skill) === kind; }) : list;
+    const pool = same.length ? same : list;
+    const fresh = pool.filter(function (it) { return it && seen.indexOf(it.id) < 0; });
+    if (fresh.length) return fresh[0];
+    return pool.find(function (it) { return it && it.id !== lastId; }) || pool[0] || null;
+  }
   function isTopicUnlocked(topicIdOrGrade, tracker, progModule, skillKey) {
     if (!progModule) return false;
     let links = null;
@@ -120,7 +127,6 @@
     if (!Array.isArray(links.prereq) || links.prereq.length === 0) return true;
     return links.prereq.every(pId => tracker && tracker.isMastered(pId));
   }
-
   function orderTopics(topicList, progModule) {
     const list = Array.isArray(topicList) ? topicList.slice() : [];
     if (!list.length) return [];
@@ -131,7 +137,6 @@
     const idOf = it => (!it ? '' : typeof it === 'string' ? it : String(it.topicId || it.id || ''));
     return list.sort((a, b) => { const ia = keys.indexOf(idOf(a)), ib = keys.indexOf(idOf(b)); return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib); });
   }
-
   function getNextUnlockedTopics(tracker, progModule) {
     let prog = progModule || (typeof globalThis !== 'undefined' && globalThis.MM_PROGRESSION) || null;
     if (!prog && typeof require === 'function') { try { prog = require('./curriculum/progression.js'); } catch (_) {} }
@@ -143,7 +148,6 @@
     }
     return result;
   }
-
   function loadMastery(storage, key) {
     try { const raw = storage && storage.getItem(key || STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (_) { return null; }
   }
@@ -151,7 +155,6 @@
     if (!storage) return false;
     try { storage.setItem(key || STORAGE_KEY, JSON.stringify(data)); return true; } catch (_) { return false; }
   }
-
   function createMasteryTracker(options) {
     const opts = options || {}, storageKey = opts.key || STORAGE_KEY, topics = new Map();
     const storage = opts.storage !== undefined ? opts.storage : (typeof globalThis !== 'undefined' && globalThis.localStorage ? globalThis.localStorage : null);
@@ -186,18 +189,16 @@
       save: persist, load: loadFromStorage
     };
   }
-
   let sharedTracker = null;
   function getMasteryTracker(options) {
     if (!sharedTracker || options) { const t = createMasteryTracker(options); if (!options) sharedTracker = t; return t; }
     return sharedTracker;
   }
-
   return {
     STAGES, STAGE_LABELS_HE, STORAGE_KEY,
     createTopicMastery, recordAttempt,
     getTopicReport, renderPlainCheckHtml, mountMasteryCheck,
-    restoreMusicState, isTopicUnlocked, orderTopics, getNextUnlockedTopics,
+    restoreMusicState, isTopicUnlocked, orderTopics, getNextUnlockedTopics, nextPlainItem,
     createMasteryTracker, getMasteryTracker, loadMastery, saveMastery
   };
 });

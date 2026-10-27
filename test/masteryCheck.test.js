@@ -4,7 +4,6 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Mastery = require('../src/lib/masteryCheck.js');
 const prog = require('../src/lib/curriculum/progression.js');
-
 test('topic mastery fades sound -> picture -> symbol -> plain in plural Hebrew', () => {
   const m = Mastery.createTopicMastery('mm-cur-3');
   assert.equal(m.currentStage, 'sound');
@@ -19,7 +18,6 @@ test('topic mastery fades sound -> picture -> symbol -> plain in plural Hebrew',
   assert.equal(m.mastered, true);
   assert.match(res4.messageHe, /בעצמכם/);
 });
-
 test('stage progression cannot be skipped: jumping straight to plain requires prior musical stages', () => {
   const m = Mastery.createTopicMastery('mm-cur-18');
   assert.equal(m.currentStage, 'sound');
@@ -28,7 +26,6 @@ test('stage progression cannot be skipped: jumping straight to plain requires pr
   assert.equal(m.mastered, false);
   assert.equal(m.currentStage, 'picture', 'first solve moves sound to picture, not instant plain mastery');
 });
-
 test('failure on plain check routes back to musical version (stage sound) for remediation', () => {
   const m = Mastery.createTopicMastery('mm-cur-25');
   ['sound', 'picture', 'symbol'].forEach(s => Mastery.recordAttempt(m, { stage: s, correct: true }));
@@ -43,7 +40,6 @@ test('failure on plain check routes back to musical version (stage sound) for re
   assert.equal(m.plainAttempts, 2);
   assert.equal(m.plainSuccesses, 1);
 });
-
 test('progression buildsTo unlock: topic unlocked only when all prereqs pass no-music plain check', () => {
   const tracker = Mastery.createMasteryTracker();
   assert.equal(tracker.isUnlocked('mm-cur-32', prog), false);
@@ -56,14 +52,12 @@ test('progression buildsTo unlock: topic unlocked only when all prereqs pass no-
   assert.equal(tracker.isMastered('mm-cur-25'), true);
   assert.equal(tracker.isUnlocked('mm-cur-32', prog), true);
 });
-
 test('mountMasteryCheck mounts in screen and handles answers', () => {
   let answered = null;
   const mockContainer = { classList: { remove: () => {}, add: () => {} }, innerHTML: '', querySelector: () => null, querySelectorAll: sel => sel.includes('data-plain-choice') ? [{ getAttribute: () => '5', onclick: null }] : [] };
   const handle = Mastery.mountMasteryCheck(mockContainer, { prompt: '3 + 2 = ?', choices: ['4', '5'], answer: 5 }, { onAnswer: (val, ok) => { answered = { val, ok }; } });
   assert.ok(handle);
 });
-
 test('anti-skip guard: attempt passing stage plain is rejected when currentStage is picture even if soundSolvedCount is 3 (#718, Refs #591)', () => {
   const m = Mastery.createTopicMastery('mm-cur-15');
   Mastery.recordAttempt(m, { stage: 'sound', correct: true });
@@ -74,7 +68,6 @@ test('anti-skip guard: attempt passing stage plain is rejected when currentStage
   assert.equal(m.mastered, false);
   assert.equal(m.currentStage, 'symbol', 'advances from picture to symbol, ignoring external plain stage');
 });
-
 test('isTopicUnlocked locks unknown ids and resolves grade:skill via linksForSkill (#718, Refs #591)', () => {
   const tracker = Mastery.createMasteryTracker();
   assert.equal(tracker.isUnlocked('unknown-topic-id', prog), false, 'unknown topic id is locked');
@@ -87,7 +80,6 @@ test('isTopicUnlocked locks unknown ids and resolves grade:skill via linksForSki
   assert.equal(tracker.isMastered('mm-cur-0'), true);
   assert.equal(tracker.isUnlocked('א:NUMBER_LINE_APPROX', prog), true, 'unlocked once mm-cur-0 mastered');
 });
-
 test('orderTopics sorts to match progression.js (no topic before its prerequisite, #718, Refs #665)', () => {
   const sample = ['mm-cur-32', 'mm-cur-14', 'mm-cur-0', 'mm-cur-25', 'mm-cur-18', 'mm-cur-13'];
   const ordered = Mastery.orderTopics(sample, prog);
@@ -101,7 +93,6 @@ test('orderTopics sorts to match progression.js (no topic before its prerequisit
     });
   });
 });
-
 test('getNextUnlocked returns unmastered topics in progression order (#718, Refs #665)', () => {
   const tracker = Mastery.createMasteryTracker();
   const unlocked = tracker.getNextUnlocked(prog);
@@ -113,14 +104,12 @@ test('getNextUnlocked returns unmastered topics in progression order (#718, Refs
   assert.equal(nextUnlocked.includes('mm-cur-0'), false, 'mastered topic excluded');
   assert.ok(nextUnlocked.includes('mm-cur-1'), 'unlocked child topic included in order');
 });
-
 test('index.html runs mastery check at the end of each topic without grade-1 fallback (#718, Refs #591)', () => {
   const indexHtml = fs.readFileSync('index.html', 'utf8');
   assert.equal(indexHtml.includes("{prompt:'3 + 2 = ?',answer:5}"), false, 'fallback item removed');
   assert.ok(indexHtml.includes('checkItem='), 'picks item from current topic');
   assert.ok(indexHtml.includes("mountMasteryCheck($('masteryCheckHost'),checkItem"), 'mounts check at end of each topic');
 });
-
 test('sound restoration: audioContext is suspended during check and resumed after answer/close (#718, Refs #681)', () => {
   let suspended = 0, resumed = 0;
   const mockCtx = { suspend: () => { suspended++; return Promise.resolve(); }, resume: () => { resumed++; return Promise.resolve(); } };
@@ -139,7 +128,6 @@ test('sound restoration: audioContext is suspended during check and resumed afte
   mockBtn2.onclick();
   assert.equal(resumed, 3, 'audio resumed immediately when child answers');
 });
-
 test('persistent progress and mastery: saved to storage and reloaded (#718, Refs #681)', () => {
   const store = new Map();
   const mockStorage = { getItem: k => store.has(k) ? store.get(k) : null, setItem: (k, v) => store.set(k, String(v)) };
@@ -153,7 +141,6 @@ test('persistent progress and mastery: saved to storage and reloaded (#718, Refs
   const rep = tracker2.getReport('mm-cur-14');
   assert.equal(rep.mastered, true && rep.currentStage === 'plain' && rep.soundSolvedCount === 1);
 });
-
 test('mountMasteryCheck records mastery persistently in tracker on answer (#718, Refs #681)', () => {
   const store = new Map();
   const mockStorage = { getItem: k => store.has(k) ? store.get(k) : null, setItem: (k, v) => store.set(k, String(v)) };
@@ -167,4 +154,34 @@ test('mountMasteryCheck records mastery persistently in tracker on answer (#718,
   assert.equal(resumed, 1, 'music state restored');
   assert.equal(tracker.isMastered('mm-cur-7'), true, 'marked mastered');
   assert.ok(store.has(Mastery.STORAGE_KEY), 'saved persistently in storage');
+});
+test('plain check uses answerOk, so 3 : 2 and .5 count, and the prompt is escaped (#718)', () => {
+  const adaptive = require('../src/lib/adaptive.js');
+  global.answerOk = (it, val) => adaptive.isCorrect(val, it.answer);
+  function mount(item, pick) {
+    const btn = { getAttribute: () => pick, onclick: null };
+    const box = { classList: { remove() {}, add() {} }, innerHTML: '', querySelector: () => null, querySelectorAll: () => [btn] };
+    let ok = null;
+    Mastery.mountMasteryCheck(box, item, { onAnswer: (_v, good) => { ok = good; } });
+    btn.onclick();
+    return { ok, html: box.innerHTML };
+  }
+  assert.equal(mount({ prompt: '3:2', choices: ['3 : 2'], answer: '3:2' }, '3 : 2').ok, true);
+  assert.equal(mount({ prompt: 'half', choices: ['.5'], answer: 0.5 }, '.5').ok, true);
+  assert.equal(mount({ prompt: '3:2', choices: ['4'], answer: '3:2' }, '4').ok, false);
+  const escaped = Mastery.renderPlainCheckHtml({ prompt: '<b>3</b>' });
+  assert.equal(escaped.includes('<b>3</b>'), false);
+  assert.match(escaped, /&lt;b&gt;3&lt;\/b&gt;/);
+  delete global.answerOk;
+});
+test('a wrong plain check shows the hint and the next check is a different question of the same kind (#718)', () => {
+  const items = [{ id: 'a', skill: 'ratio', hint: 'יחס 3:2' }, { id: 'b', skill: 'ratio', hint: 'יחס אחר' }, { id: 'c', skill: 'add' }];
+  assert.equal(Mastery.nextPlainItem(items, []).id, 'a');
+  assert.equal(Mastery.nextPlainItem(items, ['a']).id, 'b');
+  assert.equal(Mastery.nextPlainItem(items, ['a', 'b']).id, 'a');
+  assert.notEqual(Mastery.nextPlainItem(items, ['a', 'b']).id, 'b');
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  assert.match(indexHtml, /nextPlainItem\(st\.items,st\.checkUsed\)/);
+  assert.match(indexHtml, /ננסה שאלה אחרת/);
+  assert.match(indexHtml, /mathHtml\(hint\)/);
 });
