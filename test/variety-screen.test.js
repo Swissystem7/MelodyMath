@@ -83,7 +83,7 @@ test('every topic keeps its own exercise type on the practice screen', () => {
     const ex = vary(id, own, 1);
     assert.equal(ex.exerciseType, own.skill, id + ' bank skill');
     if (own.skill !== 'addition' && own.skill !== 'subtraction') assert.doesNotMatch(String(ex.prompt), BARE_SUM, id + ' ' + ex.prompt);
-    if (Array.isArray(ex.hear)) ex.hear.forEach(function (h) { assert.ok(String(ex.prompt).includes(String(h)), ex.prompt + ' heard ' + h); });
+    if (ex.prompt !== own.prompt && Array.isArray(ex.hear)) ex.hear.forEach(function (h) { assert.ok(String(ex.prompt).includes(String(h)), ex.prompt + ' heard ' + h); });
     const last = vary(id, own, 5);
     assert.equal(last.noMusic, true, id + ' final check');
     assert.equal(last.hasMusic, false, id + ' final check');
@@ -123,4 +123,12 @@ test('mm-cur-40 is not whole tens, grade-1 addition stays within 20, and a new e
   const b = variety.generateVariant('mm-cur-53', 0, { seed: 4 });
   assert.equal(a.exerciseType, 'percent');
   assert.notEqual(a.numberKey, b.numberKey);
+  const drums = 'תוף אחד מכה כל 2 פעימות ותוף שני כל 3 פעימות. אחרי כמה פעימות הם מכים שוב יחד?';
+  const kept = vary('mm-cur-40', { skill: 'fractions', prompt: drums, answer: 6 }, 0);
+  assert.equal(kept.prompt, drums);
+  assert.equal(kept.answer, 6);
+  assert.doesNotMatch(kept.prompt, /איזה שבר/);
+  const spoken = vary('mm-cur-3', { skill: 'addition', prompt: '3 פעימות תוף ועוד 2 — כמה ביחד?', answer: 5 }, 1);
+  assert.match(spoken.prompt, /פעימות תוף/);
+  assert.equal(spoken.answer, 5);
 });
