@@ -180,9 +180,11 @@ test('every bridge has a sound, an answer check, and a real source', () => {
   assert.equal(mixed[0].voice === 'pluck' || mixed[1].voice === 'breathy', false);
   assert.equal(mixed[1].voice === 'breathy', false);
   const carried = bridges.soundPlan('steady beat', 0.999);
-  assert.equal(carried.filter((ev) => ev.place === 'one').length, 0);
-  assert.equal(carried.filter((ev) => ev.place === 'tenth').length, 9);
-  assert.equal(carried.filter((ev) => ev.place === 'hundredth').length, 9);
+  assert.equal(carried.length, 1);
+  assert.equal(carried[0].place, 'one');
+  assert.equal(carried[0].voice, 'drum');
+  assert.equal(carried[0].voice === 'xylo', false);
+  assert.equal(carried[0].voice === 'musicBox' || carried[0].voice === 'fingerCymbal', false);
   const money = bridges.bridgeForLink('mm-cur-36', 'mm-cur-46');
   assert.equal(money.answer, '7.70');
   assert.equal(money.check('7.7'), true);
@@ -244,6 +246,7 @@ test('a bridge question can be answered, and a miss shows the hint', () => {
   }
   assert.equal(replayed.length, entry.sound.length);
   assert.equal(replayed.every(function (v) { return v === 'drum'; }), true);
+  assert.match(ui.key.textContent, /7\.70/);
   assert.match(ui.key.textContent, /3\.55/);
   ui.input.value = '3'; ui.button.onclick();
   assert.equal(box._bridgeOk, false);

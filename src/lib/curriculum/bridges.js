@@ -172,8 +172,13 @@
     let whole = parseInt(bits[0] || '0', 10);
     if (!whole) whole = 0;
     const frac = (bits[1] || '').replace(/0+$/, '');
-    const tenths = frac.length ? frac.charCodeAt(0) - 48 : 0;
-    const hundredths = frac.length > 1 ? frac.charCodeAt(1) - 48 : 0;
+    let tenths = frac.length ? frac.charCodeAt(0) - 48 : 0;
+    let hundredths = frac.length > 1 ? frac.charCodeAt(1) - 48 : 0;
+    // A digit past hundredths can fill the place. Ten hundredths are one tenth,
+    // and ten tenths are one one. 3.55 has no such digit, so it is not rounded.
+    if (frac.length > 2 && frac.charCodeAt(2) >= 53) hundredths += 1;
+    if (hundredths >= 10) { tenths += 1; hundredths -= 10; }
+    if (tenths >= 10) { whole += 1; tenths -= 10; }
     const places = placeVoices(mechanism);
     const events = [];
     function add(count, spec) {
@@ -241,7 +246,7 @@
     if (!d || typeof d.createElement !== 'function') return null;
     const key = d.createElement('p');
     key.className = 'topic-bridge-key';
-    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, תיבת נגינה = עשיריות, צילצל = מאיות (למשל 3.55).';
+    key.textContent = 'חליל נמוך = 100, קלרינט נמוך = 10, נקישה קצרה = 1, תיבת נגינה = עשיריות (למשל 7.70), צילצל = מאיות (למשל 3.55).';
     const input = d.createElement('input');
     input.className = 'topic-bridge-answer'; input.setAttribute('aria-label', 'תשובת הגשר');
     const hint = d.createElement('p'); hint.className = 'mm-ex-hint'; hint.hidden = true;
