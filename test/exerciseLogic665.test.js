@@ -116,7 +116,9 @@ test('audio playback scheduling: one circle per sound', () => {
   const pmEvents = PM.soundsOf(pmSpec);
   const pmHtml = PM.circlesHtml(pmSpec);
   const pmCircleCount = (pmHtml.match(/snd-dot/g) || []).length;
-  assert.equal(pmCircleCount, pmEvents.length, 'Percent mix circle count matches sound count');
+  // A one-beat bar layers the drum under the melody on that beat (#782), so count beats, not events.
+  const pmBeats = new Set(pmEvents.map((n) => n.circle)).size;
+  assert.equal(pmCircleCount, pmBeats, 'Percent mix circle count matches sound count');
 
   // TakeAwayTen circles count in DOM matches spec circles length
   const taSpec = takeAwayTen.takeAwayCircles(6, 2);
