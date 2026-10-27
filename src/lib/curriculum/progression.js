@@ -137,7 +137,7 @@
     };
   }
 
-  // Links of a music skill. 	aggedTopicId is the row curriculum.js tags the
+  // Links of a music skill. `taggedTopicId` is the row curriculum.js tags the
   // standard with (null if none); SKILL_TOPIC fills the rest.
   function linksForSkill(grade, key, taggedTopicId) {
     const own = taggedTopicId || SKILL_TOPIC[grade + ':' + key];
