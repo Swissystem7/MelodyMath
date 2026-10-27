@@ -37,6 +37,16 @@ test('the note plays for the exact length and pitch never carries size', () => {
   for (let i = 1; i < plan.length; i++) assert.ok(plan[i].at >= plan[i - 1].at + plan[i - 1].dur, 'no note is cut by the next');
 });
 
+test('two instrument families: ukulele holds the note, darbuka counts the beats (child review)', () => {
+  const band = NLL.ensemble(), plan = NLL.withBeat(NLL.playPlan(['3/4'], band.primary.voice), band.beat.voice);
+  assert.deepEqual([band.primary.id, band.beat.id], ['ukulele', 'darbuka']);
+  assert.notEqual(band.primary.family, band.beat.family, 'a second, different family');
+  const held = plan.filter((n) => n.held), beats = plan.filter((n) => n.kind === 'beat');
+  assert.ok(held.length === 1 && held[0].voice === band.primary.voice && held[0].hz === NLL.HZ);
+  assert.deepEqual(beats.map((n) => n.at), [0, 0.5, 1], '3 pitchless darbuka beats under 3/4 of the bar');
+  assert.ok(beats.every((n) => n.voice === band.beat.voice && n.hz === undefined));
+});
+
 test('magnitudeError and distance feedback (close / near / far)', () => {
   assert.equal(NLL.magnitudeError(0.75, '3/4', 1), 0);
   assert.ok(Math.abs(NLL.magnitudeError(0.5, '3/4', 1) - 0.25) < 1e-12);

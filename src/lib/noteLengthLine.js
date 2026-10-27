@@ -15,6 +15,7 @@
   'use strict';
 
   const FB = root.MM_FRACTION_BAR || require('./music/fractionBar.js');
+  const INST = typeof root.instrumentById === 'function' ? root : require('./instruments.js');
   const WAY = 'fillBar';
   const BAR_SECONDS = 2; // one 4/4 bar at 120 BPM
   const HZ = 392; // one fixed pitch (G4): magnitude is never pitch (M5 is weak evidence)
@@ -69,6 +70,17 @@
     });
   }
 
+  // Two families: ukulele (strings, the fractions instrument) holds the note; darbuka (percussion) beats each quarter bar, pitchless.
+  function ensemble() {
+    const pick = function (id) { const x = INST.instrumentById(id); return { id: id, he: x.instrument.he, family: x.family, voice: x.voice }; };
+    return { primary: pick('ukulele'), beat: pick('darbuka') };
+  }
+  function withBeat(plan, voice) {
+    const step = BAR_SECONDS / 4, out = plan.slice();
+    plan.forEach(function (n) { for (let k = 0; k * step < n.dur - 1e-9; k++) out.push({ at: n.at + k * step, voice: voice, kind: 'beat' }); });
+    return out.sort(function (a, b) { return a.at - b.at; });
+  }
+
   // Distance on the line as a share of its length (Siegler's PAE).
   function magnitudeError(chosen, target, max) { return Math.abs(Number(chosen) - value(target)) / (max || 1); }
 
@@ -109,6 +121,6 @@
   return {
     WAY: WAY, BAR_SECONDS: BAR_SECONDS, HZ: HZ, DENOMINATORS: DENOMINATORS, ITEMS: ITEMS, NO_MUSIC_CHECK_ITEMS: NO_MUSIC_CHECK_ITEMS,
     value: value, positionToValue: positionToValue, valueToPosition: valueToPosition, fractionAt: fractionAt, durationOf: durationOf,
-    playPlan: playPlan, magnitudeError: magnitudeError, feedback: feedback, orderRight: orderRight, recordError: recordError, meanError: meanError,
+    ensemble: ensemble, withBeat: withBeat, playPlan: playPlan, magnitudeError: magnitudeError, feedback: feedback, orderRight: orderRight, recordError: recordError, meanError: meanError,
   };
 });

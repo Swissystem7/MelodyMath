@@ -14,7 +14,6 @@
 
   const NLL = root.MM_NOTE_LENGTH_LINE || require('../lib/noteLengthLine.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
-  const MINE = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
   const GAME = 'noteLengthLine', DEFAULT_INSTRUMENT = 'ukulele', STEPS = 1000;
 
   function createState(index, showMusic) {
@@ -83,22 +82,23 @@
   function mount(el) {
     JAM.registerTapVoices();
     let state = createState(0, JAM.loadShowMusic(GAME)), playing = null;
-    function inst() { return JAM.instrument(MINE.instrumentFor(DEFAULT_INSTRUMENT), 'pluck'); }
+    const band = NLL.ensemble(); // ukulele holds the note, darbuka counts the beats
+    function withBeat(plan) { return NLL.withBeat(plan, band.beat.voice); }
     function stop() { if (playing) playing.stop(); playing = null; }
     function play(notes) { stop(); if (state.showMusic) playing = JAM.playNotes(notes); }
-    function draw() { el.innerHTML = renderHtml(state, inst().he); }
+    function draw() { el.innerHTML = renderHtml(state, 'התו: ' + band.primary.he + ' · הקצב: ' + band.beat.he); }
     el.addEventListener('change', function (ev) {
       if (!ev.target.hasAttribute || !ev.target.hasAttribute('data-line')) return;
       state = place(state, Number(ev.target.value) / STEPS);
       NLL.recordError(state.feedback[state.feedback.length - 1].err);
       draw();
-      play(placedPlan(state, inst().voice));
+      play(withBeat(placedPlan(state, band.primary.voice)));
     });
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
       if (!b) return;
       const act = b.getAttribute('data-act');
-      if (act === 'play') { const it = state.item; play(NLL.playPlan(it.kind === 'compare' ? it.values : [it.values[0]], inst().voice)); return; }
+      if (act === 'play') { const it = state.item; play(withBeat(NLL.playPlan(it.kind === 'compare' ? it.values : [it.values[0]], band.primary.voice))); return; }
       if (act === 'plainCheck') {
         const answers = {};
         el.querySelectorAll('[data-plain]').forEach(function (i) { answers[i.getAttribute('data-plain')] = i.value; });
@@ -107,7 +107,6 @@
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic }); JAM.saveShowMusic(GAME, state.showMusic); }
       draw();
     });
-    if (root.addEventListener) root.addEventListener(MINE.EVENT, draw);
     JAM.stopWhenHidden(el, stop);
     draw();
     return { get state() { return state; } };
