@@ -49,7 +49,13 @@ test('worked example implements fading and restoration of scaffolding on mistake
   assert.ok(indEx.wordCount <= 15);
   assert.equal(indEx.answer, 5);
   assert.equal(indEx.check(5).correct, true);
-  assert.equal(indEx.check(5).next, 'mastered');
+  assert.equal(indEx.check(5).next, 'plain');
+  const plainEx = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'plain' });
+  assert.equal(plainEx.noMusic, true);
+  assert.equal(plainEx.musicStage, 'no_music_check');
+  assert.equal(plainEx.hasMusic, false);
+  assert.equal(/הם 5/.test(plainEx.prompt), false);
+  assert.equal(plainEx.check(5).next, 'mastered');
 });
 
 test('validation rejects prompts exceeding 15 words or missing standards', () => {
@@ -125,6 +131,45 @@ test('הבנתי moves on and does not fill the answer', () => {
   assert.equal(host._stage, 'independent');
   assert.equal(filled, 0);
   assert.equal(find(host, 'mm-try-btn'), null);
+});
+
+test('the missing pattern note is a bell, a second instrument family', () => {
+  const ex = PW.createPatternCompletionExercise();
+  assert.equal(ex.soundEvents[0].voice, 'xylo');
+  assert.equal(ex.soundEvents[ex.soundEvents.length - 1].voice, 'bell');
+  const heard = [];
+  const host = box();
+  PW.renderPatternWidget(host, ex, { playTap: function (v) { heard.push(v); } });
+  find(host, 'pattern-choice-btn').onclick();
+  assert.equal(heard[0], 'bell');
+});
+
+test('עכשיו לבד hides the total, then the topic ends with a no-music check', () => {
+  const host = box();
+  const ex = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' });
+  PW.renderWorkedExampleWidget(host, ex, {});
+  assert.match(host._heading, /הם 5/);
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-tap-btn').onclick();
+  assert.equal(host._stage, 'independent');
+  assert.equal(/הם 5/.test(host._heading), false);
+  assert.match(host._heading, /עכשיו לבד/);
+  assert.equal(host._noMusic, false);
+  const input = find(host, 'worked-answer');
+  input.value = '4';
+  find(host, 'worked-check-btn').onclick();
+  assert.equal(host._stage, 'independent');
+  assert.equal(host._filled, false);
+  assert.equal(find(host, 'mm-ex-hint').hidden, false);
+  input.value = '5';
+  find(host, 'worked-check-btn').onclick();
+  assert.equal(host._stage, 'plain');
+  assert.equal(host._noMusic, true);
+  assert.equal(ex.noMusic, true);
+  assert.equal(ex.musicStage, 'no_music_check');
+  assert.equal(find(host, 'demo-listen-btn'), null);
+  assert.match(host._heading, /בלי מוזיקה/);
+  assert.equal(/הם 5/.test(host._heading), false);
 });
 
 test('a wrong answer shows the hint and does not fill the choice', () => {
