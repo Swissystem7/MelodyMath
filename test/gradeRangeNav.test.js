@@ -14,6 +14,21 @@ const OLD_RANGE = /א׳–ד׳/;
 const PAGES = ['index.html', 'program.html', 'curriculum.html', 'landing.html',
   'offer.html', 'functions.html', '807.html', 'frequency.html'];
 
+// Drop every closed <!-- ... --> span by scanning (no regex replace, CodeQL
+// js/incomplete-multi-character-sanitization); an unclosed <!-- is kept and checked.
+function stripComments(html) {
+  let out = '';
+  let i = 0;
+  for (;;) {
+    const start = html.indexOf('<!--', i);
+    if (start === -1) return out + html.slice(i);
+    const end = html.indexOf('-->', start + 4);
+    if (end === -1) return out + html.slice(i);
+    out += html.slice(i, start);
+    i = end + 3;
+  }
+}
+
 test('the shared nav says תרגול א׳–ו׳ and links home on every page', () => {
   for (const here of [''].concat(PAGES)) {
     const html = core.siteNavHtml(here);
@@ -26,7 +41,7 @@ test('the shared nav says תרגול א׳–ו׳ and links home on every page', 
 test('no visible page still claims the old range א׳–ד׳', () => {
   for (const page of PAGES) {
     const raw = fs.readFileSync(path.join(root, page), 'utf8');
-    const visible = raw.replace(/<!--[\s\S]*?-->/g, '');
+    const visible = stripComments(raw);
     assert.doesNotMatch(visible, OLD_RANGE, page);
   }
 });
