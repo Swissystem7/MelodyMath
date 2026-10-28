@@ -1,9 +1,5 @@
-// MelodyMath — NoteLengthLineScreen (#591): the fillBar bar drawn as the 0–1
-// segment of a number line. The child hears a note, drags it onto the line,
-// the bar fills to that point and plays at that length, then at the true
-// length: too short or too long is heard. Compare items play two notes in a
-// row to order on the line. Feedback is by distance (close / far) and the
-// mean magnitudeError is kept per child. The no-music check is last (#665).
+// MelodyMath — NoteLengthLineScreen (#591): the fillBar bar as the 0–1 line.
+// Drag a note on; hear the chosen length, then the true one. No-music check last.
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -11,18 +7,19 @@
   if (typeof document !== 'undefined' && document.getElementById('nllCard')) api.mount(document.getElementById('nllCard'));
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
-
   const NLL = root.MM_NOTE_LENGTH_LINE || require('../lib/noteLengthLine.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
   const MINE = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
+  const INST = typeof root.forTopic === 'function' ? root : require('../lib/instruments.js');
   const GAME = 'noteLengthLine', DEFAULT_INSTRUMENT = 'ukulele', STEPS = 1000;
-
+  // Every M3 fractions instrument, all families (the app picker chooses); never kora/gankogui (#740).
+  const INSTRUMENTS = INST.forTopic('fractions').map(function (x) { return x.id; });
+  function instrumentId(storage) { return MINE.instrumentFor(DEFAULT_INSTRUMENT, INSTRUMENTS, storage); }
   // grade: the child's grade letter ('mm-grade'); picks the items (and lines) offered.
   function createState(index, showMusic, grade) {
     const items = NLL.itemsForGrade(grade), n = items.length, i = Number(index) || 0;
     return { index: i, item: i < n ? items[i] : null, chosen: [], feedback: [], status: i < n ? 'open' : 'plain', message: '', showMusic: showMusic !== false };
   }
-
   // x: 0..1 of the line. Places the next note of the item.
   function place(state, x) {
     const it = state.item;
@@ -35,20 +32,16 @@
     else if (!done) message = fb.he + ' עכשיו התו השני.';
     return Object.assign({}, state, { chosen: chosen, feedback: feedback, status: done ? 'done' : 'open', message: message });
   }
-
   // Notes after a placement: the child's length, then the true one.
   function placedPlan(state, voice) {
     const k = state.chosen.length - 1;
     return NLL.playPlan([state.chosen[k], state.item.values[k]], voice);
   }
-
   function checkPlain(state, answers) {
     const right = NLL.NO_MUSIC_CHECK_ITEMS.filter(function (it) { return String(answers[it.id] || '').replace(/\s/g, '') === it.answer; }).length;
     return Object.assign({}, state, { message: right + ' מתוך ' + NLL.NO_MUSIC_CHECK_ITEMS.length + ' נכונות.' });
   }
-
   function pct(v, max) { return (v / max) * 100; }
-
   function renderHtml(state, instrumentHe) {
     const e = JAM.esc, on = state.showMusic;
     const head = '<div class="jam-head"><span class="tag">M3 · התיבה היא הקו · כיתות ג׳–ו׳</span>' + JAM.musicToggleHtml(on) + '</div>';
@@ -80,11 +73,10 @@
       '<button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
       '<p class="jam-msg ' + (state.feedback.length && state.feedback[state.feedback.length - 1].level === 'close' ? 'good' : state.feedback.length ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
   }
-
   function mount(el) {
     JAM.registerTapVoices();
     let state = createState(0, JAM.loadShowMusic(GAME), NLL.storedGrade()), playing = null;
-    function inst() { return JAM.instrument(MINE.instrumentFor(DEFAULT_INSTRUMENT), 'pluck'); }
+    function inst() { return JAM.instrument(instrumentId(), 'pluck'); }
     function stop() { if (playing) playing.stop(); playing = null; }
     function play(notes) { stop(); if (state.showMusic) playing = JAM.playNotes(notes); }
     function draw() { el.innerHTML = renderHtml(state, inst().he); }
@@ -108,11 +100,10 @@
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic }); JAM.saveShowMusic(GAME, state.showMusic); }
       draw();
     });
-    if (root.addEventListener) root.addEventListener(MINE.EVENT, draw);
+    if (root.addEventListener) root.addEventListener(MINE.EVENT, function () { stop(); draw(); });
     JAM.stopWhenHidden(el, stop);
     draw();
     return { get state() { return state; } };
   }
-
-  return { GAME: GAME, DEFAULT_INSTRUMENT: DEFAULT_INSTRUMENT, STEPS: STEPS, createState: createState, place: place, placedPlan: placedPlan, checkPlain: checkPlain, renderHtml: renderHtml, mount: mount };
+  return { GAME: GAME, DEFAULT_INSTRUMENT: DEFAULT_INSTRUMENT, INSTRUMENTS: INSTRUMENTS, instrumentId: instrumentId, STEPS: STEPS, createState: createState, place: place, placedPlan: placedPlan, checkPlain: checkPlain, renderHtml: renderHtml, mount: mount };
 });
