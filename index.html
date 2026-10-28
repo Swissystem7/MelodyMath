@@ -885,6 +885,10 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='pie' && item.chart && typeof renderPieChartHtml==='function'){
     host.classList.remove('hidden');
     host.innerHTML=renderPieChartHtml(item.chart);
+  } else if(typeof MM_CUBE_LAYERS!=='undefined' && MM_CUBE_LAYERS.specForItem(item)){
+    // #864: box volume, one layer after another; «עכשיו לבד» is silent.
+    host.classList.remove('hidden');
+    MM_CUBE_LAYERS.bind(host, MM_CUBE_LAYERS.specForItem(item));
   } else if(typeof MM_TAKEAWAY_TEN!=='undefined' && MM_TAKEAWAY_TEN.specForItem(item)){
     host.classList.remove('hidden');
     const sndSpec=MM_TAKEAWAY_TEN.specForItem(item); host._sndSpec=sndSpec; host._sndRevealed=false; host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(sndSpec); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_TAKEAWAY_TEN.play(sndSpec, host._sndRevealed?{revealed:true}:null)}; MM_TAKEAWAY_TEN.play(sndSpec);
@@ -2947,7 +2951,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.get('screen')&&g&&g.SCREEN_FOR[q.get('topic')];if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 <script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/components/PercentMixPad.js"></script>
 <!-- #591 music game scripts end -->
-<script src="src/lib/music/loopStack.js"></script><script src="src/components/LoopStackScreen.js"></script>
+<script src="src/lib/music/loopStack.js"></script><script src="src/lib/music/cubeLayers.js"></script><script src="src/components/LoopStackScreen.js"></script>
 <script>/* ?topic=mm-cur-56&screen=1 opens LoopStack. Its own map, not progression.js SCREENS (#798). */
 try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_LOOP_STACK.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 </body></html>

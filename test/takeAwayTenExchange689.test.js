@@ -181,7 +181,7 @@ test('myInstrument: the child choice (incl. legacy mm-tap-instrument) sets the v
 });
 
 test('every topic has exactly one primary mechanism, this PR topics exactly one primary way, shared primaries allow-listed', () => {
-  const ALLOW = ['accentSkip', 'callResponse', 'twoDrums', 'balanceBars', 'tenThenMore', 'takeAwayBeats', 'repeatedBars', 'phraseShare', 'fillBar', 'areaScore', 'noteValues', 'splitNotes', 'roundBars', 'dottedBeats', 'barsAndHalf', 'barFill'];
+  const ALLOW = ['accentSkip', 'callResponse', 'twoDrums', 'balanceBars', 'tenThenMore', 'takeAwayBeats', 'repeatedBars', 'phraseShare', 'fillBar', 'areaScore', 'noteValues', 'splitNotes', 'roundBars', 'dottedBeats', 'barsAndHalf', 'barFill', 'cubeLayerGroups'];
   const share = {};
   for (let g = 1; g <= 6; g++) { const mg = require('../src/lib/curriculum/grade' + g); for (const [t, ways] of Object.entries(mg.music || {})) { const prim = banks.primaryWays(ways); assert.ok(prim.length >= 1, 'g' + g + ' ' + t); assert.equal(new Set(prim.map((w) => banks.mechanismOf(w[0]))).size, 1, 'g' + g + ' ' + t + ' one primary mechanism'); prim.forEach((w) => { (share[w[0]] = share[w[0]] || new Set()).add('g' + g + ':' + t); }); } }
   for (const [tag, topics] of Object.entries(share)) if (topics.size > 1) assert.ok(ALLOW.includes(tag), tag + ' shared: ' + [...topics].join(','));
