@@ -140,7 +140,6 @@
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
     container.innerHTML = '';
-    if (container.children) container.children.length = 0;
     const wrap = d.createElement('div');
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
@@ -182,7 +181,6 @@
       // The demo melody never runs on into the next stage (#591, redo of #831).
       stopDemo(container);
       container.innerHTML = '';
-      if (container.children) container.children.length = 0;
       container._stage = stage;
       container._filled = filled;
       container._silent = stage === 'independent';

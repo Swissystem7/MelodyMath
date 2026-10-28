@@ -10,7 +10,9 @@ const PW = require('../src/lib/exercises/patternAndWorkedExample.js');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 function el(tag) {
-  return { tag, children: [], className: '', textContent: '', style: {}, innerHTML: '',
+  // Like the DOM: assigning innerHTML drops the old children.
+  return { tag, children: [], className: '', textContent: '', style: {},
+    get innerHTML() { return ''; }, set innerHTML(v) { this.children.length = 0; },
     appendChild(c) { this.children.push(c); return c; } };
 }
 const doc = { createElement: el };

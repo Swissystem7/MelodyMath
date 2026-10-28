@@ -272,6 +272,9 @@
     }
     if (!op) return null;
     i -= 1; j -= 1;
+    // The prompt states the result too ("3 תופים ועוד 2 פעמונים הם 5"): rewriting only
+    // the two operands would leave a wrong sum on screen, so keep the original numbers.
+    if (hits.some(function (h, k) { return k !== i && k !== j && near(h[2], A); })) return null;
     const hi = range.max != null ? range.max : 20, lo = range.min || 0, s = Math.abs(step) + 1, dec = hits[i][1].indexOf('.') >= 0 || hits[j][1].indexOf('.') >= 0;
     let a, b, ans;
     if (dec && (op === '+' || op === '-')) { a = (1 + (s % 9)) / 10; b = (1 + ((s * 3) % 9)) / 10; if (op === '-' && b >= a) b = a / 2; ans = Math.round((op === '+' ? a + b : a - b) * 10) / 10; }
