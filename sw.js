@@ -23,6 +23,7 @@ const ASSETS = [
   './src/lib/core.js',
   './src/lib/sentryLoader.js',
   './src/lib/sonify.js',
+  './src/lib/openCue.js',
   './src/lib/grade3Music.js',
   './src/lib/adaptive.js',
   './src/lib/teacherStore.js',
