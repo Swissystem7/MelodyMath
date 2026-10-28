@@ -2321,6 +2321,17 @@
     });
   }
 
+  // #678: the diagnostic is never one long pre-test. It runs in rounds of at
+  // most DIAG_BLOCK questions (two skills, base + intermediate), and each
+  // round opens with a short spoken line in index.html.
+  const DIAG_BLOCK = 4;
+  function diagnosticBlocks(grade) {
+    const items = diagnosticItems(grade);
+    const out = [];
+    for (let i = 0; i < items.length; i += DIAG_BLOCK) out.push(items.slice(i, i + DIAG_BLOCK));
+    return out;
+  }
+
   // Class mode follows the grade picked in the header; no argument keeps the
   // grade-1 bank that beat mode and the worksheets rely on. Class mode answers
   // by tapping a choice, so typed items («3 שארית 2») stay out.
@@ -2434,6 +2445,8 @@
     itemsAtLevel: itemsAtLevel,
     skillsForGrade: skillsForGrade,
     diagnosticItems: diagnosticItems,
+    DIAG_BLOCK: DIAG_BLOCK,
+    diagnosticBlocks: diagnosticBlocks,
     classItems: classItems,
     practiceItems: practiceItems,
     coreFactItems: coreFactItems,
