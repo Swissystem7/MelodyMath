@@ -90,7 +90,17 @@ test('grade-ב multiplication is only 2/4/5/10; 3/6/7/8/9 live in grade ג', () 
   });
   const g3 = banks.rowsOf('multiplication', 'ג');
   assert.ok(g3.some((x) => x.prompt === '7 × 8 = ?' && x.answer === 56 && x.table === 7));
-  assert.ok(g3.every((x) => [3, 6, 7, 8, 9].includes(x.table)));
+  // The #463 chant items revisit 2/4/5/10 on the beat; everything else is 3/6/7/8/9.
+  assert.ok(g3.filter((x) => !(x.g3 && x.g3.kind === 'chant')).every((x) => [3, 6, 7, 8, 9].includes(x.table)));
+});
+
+test('grade ג has 8 skip-counting chant items on tables 2/4/5/10 (#463)', () => {
+  const chant = banks.itemsForGrade('ג').filter((x) => x.g3 && x.g3.kind === 'chant');
+  assert.equal(chant.length, 8);
+  chant.forEach((x) => {
+    assert.ok([2, 4, 5, 10].includes(x.g3.table), x.id);
+    assert.equal(x.answer, x.g3.table * x.g3.pauseAt, x.id);
+  });
 });
 
 test('division ships partitive and quotative items on the same numbers', () => {
