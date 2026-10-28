@@ -3,7 +3,8 @@
 // a layer is a group, and layers play one after another, never together. Up to
 // 12 a layer is one beat per cube; above 12 a ten is one held sound and the
 // ones are clicks. Layers alternate two instrument families. Round 1 «ביחד»
-// plays; round 2 «עכשיו לבד» is silent. A wrong answer keeps the same round.
+// plays; round 2 «עכשיו לבד» is silent, and is reached only by a checked right
+// answer. The opening sound is openCue → playItemMusic → playFor, not bind.
 (function (root, factory) {
   const IN_NODE = typeof module === 'object' && !!module.exports;
   const api = factory(IN_NODE ? require('./loopStack.js') : root.MM_LOOP_STACK, root);
@@ -17,6 +18,8 @@
   // Two families, so a child hears where one layer ends and the next begins.
   const FAMILIES = [['djembe', 'percussion', 'drumHigh', 330], ['charango', 'strings', 'pluck', 392]];
   const ROUNDS = ['together', 'alone', 'done'];
+  const MIN_HZ = 220; // a held ten below this is lost on phone speakers
+  let current = null;
 
   function n(s) { const v = Number(s); return Number.isInteger(v) && v > 0 ? v : null; }
 
@@ -58,7 +61,7 @@
       return out;
     }
     const tens = Math.floor(cubes / 10), ones = cubes % 10;
-    const tenHz = LS && LS.audibleHz ? LS.audibleHz(fam[2], 110) : 220;
+    const tenHz = Math.max(MIN_HZ, LS && LS.audibleHz ? LS.audibleHz(fam[2], 110) : MIN_HZ);
     for (let t = 0; t < tens; t++) { out.push({ at: at, dur: TEN_DUR, voice: fam[2], hz: tenHz, family: fam[1], group: group, place: 'ten', gain: 0.28 }); at += TEN_STEP; }
     const oneHz = LS && LS.audibleHz ? LS.audibleHz('woodClick', 1173) : 1173;
     for (let j = 0; j < ones; j++) { out.push({ at: at, dur: BEAT_DUR, voice: 'woodClick', hz: oneHz, family: fam[1], group: group, place: 'one' }); at += STEP; }
@@ -88,16 +91,20 @@
     return correct ? ROUNDS[Math.min(i + 1, ROUNDS.length - 1)] : round;
   }
 
-  function html(spec, round) {
+  // noGo: no answer box to check (class and beat screens), so no «עכשיו לבד».
+  function html(spec, round, noGo) {
     if (!spec) return '';
     const alone = round === 'alone';
     const chips = [];
     for (let i = 0; i < spec.layers; i++) chips.push('<span class="snd-circle snd-beat" role="img" aria-label="שכבה ' + (i + 1) + '">🧊</span>');
     return '<div class="snd-wrap cube-layers" data-round="' + (alone ? 'alone' : 'together') + '">'
       + (alone ? '<p class="cube-alone">עכשיו לבד: בלי צלילים. כמה קוביות בכל שכבה, וכמה שכבות?</p>'
-        : '<button type="button" class="snd-play">▶ שכבה אחרי שכבה</button><button type="button" class="cube-go-alone">עכשיו לבד</button>')
+        : '<button type="button" class="snd-play">▶ שכבה אחרי שכבה</button>' + (noGo ? '' : '<button type="button" class="cube-go-alone">עכשיו לבד</button>'))
       + '<div class="snd-circles" dir="ltr">' + chips.join('') + '</div></div>';
   }
+
+  // Per audio context, until when layers sound: a double tap never stacks them.
+  const busy = typeof WeakMap === 'function' ? new WeakMap() : null;
 
   function play(spec, round, env) {
     const notes = plan(spec, round);
@@ -107,25 +114,50 @@
     const ac = e.audioContext || (root && typeof root.getSharedAudioContext === 'function' ? root.getSharedAudioContext() : null);
     if (typeof pv !== 'function' || !ac) return null;
     if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
-    const t0 = ac.currentTime + 0.05;
+    // Still playing counts as sounding, so openCue adds no chime on top.
+    if (busy && ac.currentTime < (busy.get(ac) || -1)) return { notes: 0, busy: true };
+    const t0 = ac.currentTime + 0.05, last = notes[notes.length - 1];
+    if (busy) busy.set(ac, t0 + last.at + last.dur);
     notes.forEach(function (x) { pv(ac, x.voice, x.hz, t0 + x.at, null, { dur: x.dur, gain: x.gain || 0.16 }); });
     return { notes: notes.length };
+  }
+
+  // The child's answer, read from the page; empty is never right.
+  function given(env) { const v = env && typeof env.read === 'function' ? env.read() : ''; return String(v == null ? '' : v).trim(); }
+  function answerIsRight(env) {
+    const g = given(env);
+    if (!g || env.answer == null) return false;
+    return typeof env.check === 'function' ? !!env.check(g) : Number(g.replace(/,/g, '')) === Number(env.answer);
   }
 
   // Binds the widget to a host element; round 2 replaces the play button.
   function bind(host, spec, env) {
     if (!host || !spec) return false;
     let round = 'together';
-    const draw = function () { host.innerHTML = html(spec, round); };
+    const noGo = !(env && typeof env.read === 'function');
+    const draw = function () { host.innerHTML = html(spec, round, noGo); };
     draw();
     host.onclick = function (ev) {
       const t = ev && ev.target && ev.target.closest ? ev.target : null;
       if (t && t.closest('.snd-play')) play(spec, round, env);
-      else if (t && t.closest('.cube-go-alone')) { round = nextRound(round, true); draw(); }
+      else if (t && t.closest('.cube-go-alone')) {
+        const ok = answerIsRight(env);
+        round = nextRound(round, ok); draw();
+        // An empty box is asked for, not called wrong (same line as askForAnswer).
+        if (!ok) host.innerHTML += '<p class="cube-try" role="status">' + (given(env) ?'עוד לא. הקשיבו שוב לשכבות ונסו שוב.' : 'כתבו תשובה קודם 🙂') + '</p>';
+      }
     };
-    play(spec, round, env);
+    current = { item: (env || {}).item, spec: spec, round: function () { return round; }, env: env };
     return true;
   }
 
-  return { WAY, FAMILIES, ROUNDS, parse, specForItem, plan, nextRound, html, play, bind };
+  // The opening sound (openCue → playItemMusic → playFor): the bound item in
+  // its round, or, with no widget on screen (practice), the item's own layers.
+  function playFor(item) {
+    if (current && item && current.item === item) return play(current.spec, current.round(), current.env);
+    const s = specForItem(item);
+    return s ? play(s, 'together') : null;
+  }
+
+  return { WAY, FAMILIES, ROUNDS, MIN_HZ, parse, specForItem, plan, nextRound, html, play, bind, playFor, answerIsRight };
 });
