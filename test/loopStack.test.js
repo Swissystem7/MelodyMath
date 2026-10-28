@@ -148,3 +148,17 @@ test('the rendered layers for a marimba or djembe child never show kora, and wor
   try { assert.doesNotThrow(() => JAM.playNotes(plan).stop()); } finally { ME.setMuted(false); }
   assert.doesNotThrow(() => JAM.playNotes(plan).stop()); // Node: no AudioContext at all
 });
+
+test('a strings child stacks djembe layers; with music off a wrong volume stays on the same box (Refs #591 #665)', () => {
+  const JAM = require('../src/components/jamKit.js');
+  const ids = LS.layerInstruments(4, 'oud', 'strings');
+  assert.deepEqual(ids, ['oud', 'djembe', 'djembe', 'djembe']);
+  const html = S.renderHtml(S.createState(0, true), ids.map((id) => JAM.instrument(id).he));
+  assert.match(html, /ג׳מבה/);
+  assert.doesNotMatch(html, /קוֹרָה|kora|גיטרה/);
+  const off = S.createState(1, false), wrong = S.check(off, '1');
+  assert.equal(wrong.status, 'wrong');
+  assert.equal(wrong.index, 1);
+  assert.deepEqual(wrong.ex, off.ex);
+  assert.doesNotMatch(S.renderHtml(wrong, []), /data-act="play"|data-tap=/);
+});

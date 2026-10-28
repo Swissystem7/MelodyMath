@@ -146,3 +146,19 @@ test('the rendered grid for a percussion child never shows kora, and works with 
   assert.doesNotThrow(() => JAM.playNotes(plan).stop()); // Node: no AudioContext at all
   assert.equal(JAM.feedback(true, false), null);
 });
+
+test('a strings child hears djembe as partner; with music off a wrong answer stays on the same grid (Refs #591 #665)', () => {
+  ['oud', 'charango'].forEach((id) => {
+    const tr = SCREEN.tracks(mem({ [MI.KEY]: id }));
+    assert.equal(tr.kid.family, 'strings', id);
+    assert.equal(tr.partner.id, 'djembe', id);
+    const html = SCREEN.renderHtml(SCREEN.createState(0, true), tr);
+    assert.match(html, /ג׳מבה/, id);
+    assert.doesNotMatch(html, /קוֹרָה|kora|גיטרה/, id);
+  });
+  const off = SCREEN.createState(1, false), wrong = SCREEN.answer(off, '1');
+  assert.equal(wrong.status, 'retry');
+  assert.equal(wrong.index, 1);
+  assert.deepEqual(wrong.ex, off.ex);
+  assert.doesNotMatch(SCREEN.renderHtml(wrong, SCREEN.tracks(mem({}))), /data-tap=/);
+});
