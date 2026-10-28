@@ -138,7 +138,7 @@ test('the rendered layers for a marimba or djembe child never show kora, and wor
     const names = LS.layerInstruments(ex.c, child, 'percussion').map((id) => JAM.instrument(id).he);
     const html = S.renderHtml(st, names);
     assert.doesNotMatch(html, /קוֹרָה|kora/, child);
-    assert.match(html, /גיטרה/, child);
+    assert.match(html, /צָ׳רַנְגּוֹ/, child);
   });
   const off = S.createState(0, false);
   assert.doesNotMatch(S.renderHtml(off, []), /קוֹרָה|data-act="play"/);

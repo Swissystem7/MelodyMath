@@ -135,7 +135,7 @@ test('the rendered grid for a percussion child never shows kora, and works with 
     assert.equal(tr.kid.family, 'percussion');
     const html = SCREEN.renderHtml(SCREEN.createState(0, true), tr);
     assert.doesNotMatch(html, /קוֹרָה|kora/);
-    assert.match(html, /גיטרה/);
+    assert.match(html, /צָ׳רַנְגּוֹ/);
   });
   const st = SCREEN.createState(0, false), tr = SCREEN.tracks(mem({}));
   assert.doesNotMatch(SCREEN.renderHtml(st, tr), /קוֹרָה|kora|data-tap=/);

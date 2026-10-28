@@ -216,6 +216,24 @@ test('3: the area grid and box-volume layers never bring in kora, gankogui or uk
   assert.deepEqual(wrong, []);
 });
 
+test('3: area-grid and box-volume partners are chosen by mathTopics, over 2+ families (Refs #591 #665)', () => {
+  const wrong = [];
+  const topicsOf = (id) => instruments.instrumentById(id).mathTopics;
+  ['kora', 'gankogui'].forEach((id) => assert.deepEqual(topicsOf(id), ['lcm'], id + ' stays lcm-only'));
+  LS.PARTNERS.forEach((p) => { if (!topicsOf(p[0]).includes('volume')) wrong.push('LoopStack partner ' + p[0] + ' has no volume'); });
+  instruments.FAMILIES.forEach((f) => {
+    const partner = GG.partnerFor(f);
+    if (!topicsOf(partner).includes('area')) wrong.push('GrooveGrid partner for ' + f + ': ' + partner + ' has no area');
+    if (instruments.instrumentById(partner).family === f) wrong.push('GrooveGrid partner for ' + f + ' is the same family');
+    const own = instruments.byFamily(f).find((x) => !['kora', 'gankogui', 'ukulele'].includes(x.id));
+    const ids = LS.layerInstruments(4, own.id, f);
+    ids.slice(1).forEach((id) => { if (!topicsOf(id).includes('volume')) wrong.push('LoopStack layer for ' + f + ': ' + id + ' has no volume'); });
+    const fams = new Set(ids.map((id) => instruments.instrumentById(id).family));
+    if (fams.size < 2) wrong.push('LoopStack for ' + f + ' uses only ' + [...fams].join());
+  });
+  assert.deepEqual(wrong, []);
+});
+
 // ---------- 4. a music-free mastery check at the end ----------
 
 test('4: the mastery check fades to a plain (no-music) stage last', () => {

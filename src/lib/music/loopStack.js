@@ -16,8 +16,9 @@
 
   const WAY = 'cubeLayerGroups', STEP = 0.22, TEN_DUR = 0.45, ONE_VOICE = 'woodClick', MAX_SIDE = 10, MIN_HZ = 220;
   const SCREEN = { 'mm-cur-56': 'lsCard' }; // not progression.js SCREENS (#798 owns that map)
-  // One partner per family; a layer never takes the child's own family.
-  const PARTNERS = [['marimba', 'percussion'], ['guitar', 'strings'], ['panFlute', 'winds'], ['piano', 'keys']];
+  // Partners whose mathTopics include 'volume' (instruments.js, M2); a layer
+  // never takes the child's own family.
+  const PARTNERS = [['djembe', 'percussion'], ['charango', 'strings'], ['qanun', 'strings']];
 
   function side(n) { const v = Number(n); return Number.isInteger(v) && v >= 1 && v <= MAX_SIDE ? v : null; }
 
