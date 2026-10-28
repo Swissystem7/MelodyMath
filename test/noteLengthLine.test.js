@@ -38,13 +38,37 @@ test('the note plays for the exact length and pitch never carries size', () => {
 });
 
 test('two instrument families: ukulele holds the note, darbuka counts the beats (child review)', () => {
-  const band = NLL.ensemble(), plan = NLL.withBeat(NLL.playPlan(['3/4'], band.primary.voice), band.beat.voice);
+  const band = NLL.ensemble('ukulele'), plan = NLL.withBeat(NLL.playPlan(['3/4'], band.primary.voice), band.beat.voice);
   assert.deepEqual([band.primary.id, band.beat.id], ['ukulele', 'darbuka']);
   assert.notEqual(band.primary.family, band.beat.family, 'a second, different family');
   const held = plan.filter((n) => n.held), beats = plan.filter((n) => n.kind === 'beat');
   assert.ok(held.length === 1 && held[0].voice === band.primary.voice && held[0].hz === NLL.HZ);
   assert.deepEqual(beats.map((n) => n.at), [0, 0.5, 1], '3 pitchless darbuka beats under 3/4 of the bar');
   assert.ok(beats.every((n) => n.voice === band.beat.voice && n.hz === undefined));
+});
+
+test('the child\'s own instrument (the one picker) holds the note; the beat is another family (regression of a6f55a6)', () => {
+  const INST = require('../src/lib/instruments.js');
+  const MINE = require('../src/lib/myInstrument.js');
+  const mem = { d: {}, getItem(k) { return k in this.d ? this.d[k] : null; }, setItem(k, v) { this.d[k] = String(v); }, removeItem(k) { delete this.d[k]; } };
+  assert.equal(MINE.setMyInstrument('darbuka', mem), true);
+  const chosen = MINE.instrumentFor('ukulele', null, mem);
+  assert.equal(chosen, 'darbuka');
+  const check = (id, primaryId, beatId) => {
+    const band = NLL.ensemble(id);
+    assert.deepEqual([band.primary.id, band.beat.id], [primaryId, beatId], String(id));
+    assert.equal(band.primary.voice, INST.instrumentById(primaryId).voice);
+    assert.notEqual(band.primary.family, band.beat.family, 'two different families for ' + id);
+  };
+  check(chosen, 'darbuka', 'ukulele');
+  check('ukulele', 'ukulele', 'darbuka');
+  const wind = INST.byFamily('winds')[0].id;
+  check(wind, wind, 'darbuka');
+  check(null, 'ukulele', 'darbuka');
+  check('nope', 'ukulele', 'darbuka');
+  const src = fs.readFileSync(require.resolve('../src/components/NoteLengthLineScreen.js'), 'utf8');
+  assert.match(src, /MINE\.instrumentFor\(/, 'the screen reads the existing picker');
+  assert.match(src, /MINE\.EVENT/, 'and redraws when the child switches instrument');
 });
 
 test('magnitudeError and distance feedback (close / near / far)', () => {
@@ -119,4 +143,41 @@ test('NoteLengthLine is reachable: card in the music games tab, scripts after fi
   assert.equal((html.match(/id="myInstCard"/g) || []).length, 1, 'one instrument picker');
   const sw = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
   ['noteLengthLine.js', 'NoteLengthLineScreen.js'].forEach((f) => assert.ok(sw.includes(f), f));
+});
+
+test('mounted: a wrong answer stays on the item, play stops prior sound, works with music off / no AudioContext', () => {
+  const JAM = require('../src/components/jamKit.js'), MINE = require('../src/lib/myInstrument.js');
+  const on = {}, el = { innerHTML: '', addEventListener(t, f) { on[t] = f; }, querySelectorAll: () => [] };
+  const real = JAM.playNotes, calls = []; // real playNotes: Node has no AudioContext (audio unavailable)
+  JAM.playNotes = (notes) => { const h = real(notes); calls.push({ notes, h }); return h; };
+  const click = (act) => on.click({ target: { closest: () => ({ getAttribute: () => act }) } });
+  const drag = (v) => on.change({ target: { hasAttribute: (a) => a === 'data-line', value: String(v) } });
+  try {
+    const ui = S.mount(el), band = NLL.ensemble(MINE.instrumentFor('ukulele'));
+    drag(200); // 0.2 for 3/4: far
+    assert.equal(ui.state.index, 0, 'a wrong answer does not advance');
+    assert.equal(ui.state.feedback[0].level, 'far');
+    assert.ok(calls[0].notes.some((n) => n.held && n.voice === band.primary.voice), 'chosen instrument is the main voice');
+    assert.ok(calls[0].notes.some((n) => n.kind === 'beat' && n.voice === band.beat.voice), 'second family beats');
+    click('play'); click('play');
+    assert.equal(calls.length, 3);
+    assert.ok(calls[0].h.stopped && calls[1].h.stopped && !calls[2].h.stopped, 'no overlapping sounds');
+    click('music');
+    assert.ok(calls[2].h.stopped && ui.state.showMusic === false);
+    click('play'); click('next'); drag(500);
+    assert.equal(calls.length, 3, 'silent with music off');
+    assert.equal(ui.state.index, 1);
+    assert.equal(ui.state.feedback[0].level, 'close', 'still solvable without sound');
+    assert.doesNotMatch(el.innerHTML, /data-act="play"/);
+  } finally { JAM.playNotes = real; JAM.saveShowMusic('noteLengthLine', true); }
+});
+
+test('no number above 12: line ends, fraction parts, and beats per note', () => {
+  NLL.ITEMS.forEach((it) => {
+    assert.ok(it.max <= 12);
+    it.values.forEach((v) => {
+      String(v).split('/').forEach((p) => assert.ok(v.includes('.') || Number(p) <= 12, v));
+      assert.ok(NLL.withBeat(NLL.playPlan([v], 'a'), 'b').filter((n) => n.kind === 'beat').length <= 12, v);
+    });
+  });
 });

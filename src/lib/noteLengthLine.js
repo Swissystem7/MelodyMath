@@ -70,10 +70,13 @@
     });
   }
 
-  // Two families: ukulele (strings, the fractions instrument) holds the note; darbuka (percussion) beats each quarter bar, pitchless.
-  function ensemble() {
-    const pick = function (id) { const x = INST.instrumentById(id); return { id: id, he: x.instrument.he, family: x.family, voice: x.voice }; };
-    return { primary: pick('ukulele'), beat: pick('darbuka') };
+  // Two families: the child's chosen instrument (myInstrument; ukulele if none) holds the note;
+  // the beat comes from a different family - darbuka, or ukulele when the choice is percussion - one fixed sound (no hz) each quarter bar.
+  function ensemble(chosenId) {
+    const pick = function (id) { const x = INST.instrumentById(id); return x && { id: x.id, he: x.instrument.he, family: x.family, voice: x.voice }; };
+    const primary = pick(chosenId) || pick('ukulele');
+    const beat = pick(primary.family === 'percussion' ? 'ukulele' : 'darbuka');
+    return { primary: primary, beat: beat };
   }
   function withBeat(plan, voice) {
     const step = BAR_SECONDS / 4, out = plan.slice();
