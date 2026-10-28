@@ -166,8 +166,9 @@ test('index.html: with music off the 5th right answer still saves the phrase, si
     playTap: (v) => calls.push('tap:' + v), rpHoldStreak: false,
     AudioContext: spyAudio('new AudioContext'), webkitAudioContext: spyAudio('new webkitAudioContext'),
   };
-  const saved = { AudioContext: globalThis.AudioContext, getSharedAudioContext: globalThis.getSharedAudioContext };
-  Object.assign(globalThis, { AudioContext: sandbox.AudioContext, getSharedAudioContext: spyAudio('getSharedAudioContext') });
+  // window makes streak.js's own playPhrase reach getSharedAudioContext, so a dropped audio:false would show up here.
+  const saved = { window: globalThis.window, getSharedAudioContext: globalThis.getSharedAudioContext };
+  Object.assign(globalThis, { window: {}, getSharedAudioContext: spyAudio('getSharedAudioContext') });
   try {
     streakModule.setStorage(createMockStorage());
     streakModule.resetAll();
@@ -179,7 +180,7 @@ test('index.html: with music off the 5th right answer still saves the phrase, si
     assert.deepEqual(streakModule.mySong().map((p) => p.id), ['phrase_1'], 'kept in "השיר שלי"');
   } finally {
     Object.assign(globalThis, saved);
-    if (saved.AudioContext === undefined) delete globalThis.AudioContext;
+    if (saved.window === undefined) delete globalThis.window;
     if (saved.getSharedAudioContext === undefined) delete globalThis.getSharedAudioContext;
   }
 });
