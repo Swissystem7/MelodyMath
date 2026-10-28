@@ -2078,6 +2078,18 @@
   }
   musicForLate();
 
+  // #465 regroup pack: more מעבר עשרת duo items. Appended last so ids stay put.
+  RAW.push(
+    DUO('-', 42, 17, 25, '2 − 7 לא יוצא: ' + UNGROUP, 2),
+    DUO('-', 61, 28, 33, '1 − 8 לא יוצא: ' + UNGROUP, 2),
+    DUO('-', 53, 35, 18, '3 − 5 לא יוצא: ' + UNGROUP, 2),
+    DUO('-', 80, 53, 27, 'אפס מכות תוף: ' + UNGROUP, 3),
+    DUO('+', 38, 46, 84, '8 + 6 = 14 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 25, 58, 83, '5 + 8 = 13 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 69, 23, 92, '9 + 3 = 12 מכות תוף: ' + REGROUP, 2),
+    DUO('+', 27, 45, 72, '7 + 5 = 12 מכות תוף: ' + REGROUP, 2)
+  );
+
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
   // way and music activity uses one of 14 mechanisms; the peer-reviewed
   // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:
@@ -2332,6 +2344,15 @@
     });
   }
 
+  // Beat-mode pack «מעבר עשרת» (#465): the two-instrument vertical sums
+  // that really carry or borrow a ten.
+  function regroups(g) {
+    return g.op === '+' ? g.a % 10 + g.b % 10 >= 10 : g.a % 10 < g.b % 10;
+  }
+  function regroupItems() {
+    return SHIPPED.filter(function (it) { return it.g2 && it.g2.kind === 'duo' && !it.typed && regroups(it.g2); });
+  }
+
   function practiceItems(skills, grade) {
     const want = Array.isArray(skills) && skills.length ? skills : null;
     return SHIPPED.filter(function (it) {
@@ -2435,6 +2456,7 @@
     skillsForGrade: skillsForGrade,
     diagnosticItems: diagnosticItems,
     classItems: classItems,
+    regroupItems: regroupItems,
     practiceItems: practiceItems,
     coreFactItems: coreFactItems,
     coverage: coverage,
