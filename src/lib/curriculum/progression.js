@@ -26,6 +26,9 @@
 //   8  ג׳ remainder "1 out of 4" prepares ד׳ fractions: mm-cur-25 → mm-cur-32.
 //   9  א׳-ב׳ equality → ד׳ equations → ה׳ (#710): mm-cur-3 and mm-cur-14 →
 //      mm-cur-31 → mm-cur-39.
+//  10 ה׳ perimeter before ו׳ circle circumference (#711): the sides of a
+//      polygon fill one bar, then the circle is that bar with no corners
+//      (mm-cur-47 → mm-cur-54).
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -85,7 +88,7 @@
     'mm-cur-44': [['mm-cur-41', 'mm-cur-33', 'mm-cur-40'], 'common denominators, mixed numbers'],
     'mm-cur-45': [['mm-cur-42', 'mm-cur-38', 'mm-cur-35'], 'decimal place value'],
     'mm-cur-46': [['mm-cur-45', 'mm-cur-36'], 'decimal addition'],
-    'mm-cur-47': [['mm-cur-28', 'mm-cur-34'], 'height and area'],
+    'mm-cur-47': [['mm-cur-28', 'mm-cur-34'], 'perimeter as sides in one bar, height and area'],
     'mm-cur-48': [['mm-cur-34'], 'solids and nets'],
     'mm-cur-49': [['mm-cur-37'], 'frequency and mode'],
     // ו׳
