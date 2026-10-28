@@ -3,6 +3,15 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const { eligibleExercises } = require('../src/lib/adaptive');
 
+test('grade א ships exactly 8 count-on items whose answer is from + steps (#462)', () => {
+  const items = banks.allItems().filter((it) => it.g1?.kind === 'countOn');
+  assert.equal(items.length, 8);
+  items.forEach((it) => {
+    assert.equal(banks.isShippable(it), true, it.id);
+    assert.equal(it.answer, it.g1.from + it.g1.steps, it.id);
+  });
+});
+
 test('grade א has 8 approximate number-line items with tolerance 4 (#466)', () => {
   const approx = banks.allItems().filter((it) => it.tolerance === 4);
   assert.deepEqual(approx.map((it) => it.answer), [17, 23, 37, 48, 62, 71, 86, 94]);

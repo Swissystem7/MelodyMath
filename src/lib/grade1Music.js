@@ -269,6 +269,35 @@
     return 'הדגם הוא ' + challenge.type + '. שמעתם: ' + heard + '. מה בא אחר כך?';
   }
 
+  // ---------- 5. ספירה הלאה ----------
+  // Start in the middle and count on with the beat (#462). The last beat is
+  // accented: it lands on the answer, which is never written or spoken.
+  function countOnBeats(from, steps) {
+    const f = whole(from, 0, 1000);
+    const s = whole(steps, 1, 10);
+    if (f == null || s == null) return [];
+    const beats = [];
+    for (let i = 0; i < s; i++) beats.push({ count: f + i + 1, accent: i === s - 1 });
+    return beats;
+  }
+
+  function countOnEvents(from, steps, bpm) {
+    const beats = countOnBeats(from, steps);
+    if (!beats.length) return [];
+    const beat = beatLength(bpm);
+    return beats.map(function (b, i) {
+      return b.accent
+        ? hit(i * beat, beat * 0.5, 660, 0.26, 'triangle')
+        : hit(i * beat, beat * 0.3, 330, 0.12, 'sine');
+    });
+  }
+
+  function countOnNarration(from, steps) {
+    const beats = countOnBeats(from, steps);
+    if (!beats.length) return '';
+    return 'מתחילים ב־' + whole(from, 0, 1000) + ', ' + beats.length + ' פעימות קדימה.';
+  }
+
   // ---------- widgets (slice 2 of #102 / #328) ----------
   function doc() {
     return typeof document === 'undefined' ? null : document;
@@ -378,11 +407,28 @@
     box.appendChild(node('p', 'g3-note', patternNarration(spec.type, spec.length)));
   }
 
+  // One pad per beat, no numbers on them: the last count is the answer.
+  function drawCountOn(box, spec) {
+    const beats = countOnBeats(spec.from, spec.steps);
+    if (!beats.length) return;
+    const row = padRow(box);
+    const group = node('span', 'g3-bar');
+    beats.forEach(function (b) {
+      group.appendChild(node('i', b.accent ? 'on' : 'left'));
+    });
+    row.appendChild(group);
+    addPlay(box, '▶ השמע שוב', function () {
+      return countOnEvents(spec.from, spec.steps, spec.bpm);
+    });
+    box.appendChild(node('p', 'g3-note', countOnNarration(spec.from, spec.steps)));
+  }
+
   const DRAW = {
     beats: drawBeats,
     scale: drawScale,
     chart100: drawChart100,
     pattern: drawPattern,
+    countOn: drawCountOn,
   };
 
   function bindGrade1(host, spec) {
@@ -422,6 +468,9 @@
     createPatternChallenge: createPatternChallenge,
     patternEvents: patternEvents,
     patternNarration: patternNarration,
+    countOnBeats: countOnBeats,
+    countOnEvents: countOnEvents,
+    countOnNarration: countOnNarration,
     playEvents: playEvents,
     bindGrade1: bindGrade1
   };

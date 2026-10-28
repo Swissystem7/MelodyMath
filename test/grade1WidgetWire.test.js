@@ -21,7 +21,7 @@ function makeEl(tag) {
 test('grade א music items keep a g1 spec through the shipped bank', () => {
   const items = banks.itemsForGrade('א').filter((it) => it.widget === 'g1');
   const kinds = items.map((it) => it.g1 && it.g1.kind).sort();
-  assert.deepEqual(kinds, ['beats', 'chart100', 'pattern']);
+  assert.deepEqual(kinds, ['beats', 'chart100'].concat(Array(8).fill('countOn'), ['pattern']));
   const beats = items.find((it) => it.g1.kind === 'beats');
   assert.equal(beats.g1.step, 2);
   assert.equal(items.find((it) => it.g1.kind === 'chart100').g1.number, 34);
