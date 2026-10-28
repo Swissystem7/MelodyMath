@@ -793,17 +793,35 @@
     }
   }
 
-  // Four tap-targets. Nearby integers, or unit-fraction distractors.
+  // Four tap-targets. Nearby integers, or fractions with the same denominator
+  // one to three steps from the answer (never a fixed pool, never an equal value).
+  // No 0/d; a proper answer gets proper distractors within 0.5 of it, and when
+  // the same denominator runs out (1/2, 2/3) the nearest other fractions fill in.
   function makeChoices(answer, rng) {
     const roll = typeof rng === 'function' ? rng : Math.random;
     const raw = String(answer == null ? '' : answer).trim();
-    if (/^\d+\/\d+$/.test(raw) || raw === '½' || raw === '¼' || raw === '⅛') {
-      const pool = ['1/2', '1/4', '1/8', '1', '3/4', '0'];
-      const opts = [raw === '½' ? '1/2' : raw === '¼' ? '1/4' : raw === '⅛' ? '1/8' : raw];
-      pool.forEach(function (c) {
-        if (opts.length >= 4) return;
-        if (opts.indexOf(c) === -1) opts.push(c);
-      });
+    if (/^\d+\/[1-9]\d*$/.test(raw) || raw === '½' || raw === '¼' || raw === '⅛') {
+      const key = raw === '½' ? '1/2' : raw === '¼' ? '1/4' : raw === '⅛' ? '1/8' : raw;
+      const a = Number(key.split('/')[0]);
+      const d = Number(key.split('/')[1]);
+      const proper = a < d;
+      const opts = [key];
+      const seen = [a / d];
+      const fits = function (k, m) {
+        const v = k / m;
+        if (k < 1 || m < 1 || (proper && (k >= m || Math.abs(v - a / d) > 0.5))) return false;
+        return !seen.some(function (s) { return Math.abs(s - v) < 1e-9; });
+      };
+      const take = function (p) {
+        if (opts.length >= 4 || !fits(p[0], p[1])) return;
+        seen.push(p[0] / p[1]);
+        opts.push(p[0] + '/' + p[1]);
+      };
+      [a - 1, a + 1, a - 2, a + 2, a + 3].forEach(function (k) { take([k, d]); });
+      [[a, d + 1], [a, d - 1], [a, 2 * d], [1, d + 1], [1, d - 1], [a + 1, d + 1], [a, d + 2]]
+        .filter(function (p) { return p[1] !== d - 1 || d - 1 > a; })
+        .sort(function (p, q) { return Math.abs(p[0] / p[1] - a / d) - Math.abs(q[0] / q[1] - a / d); })
+        .forEach(take);
       for (let i = opts.length - 1; i > 0; i--) {
         const j = Math.floor(roll() * (i + 1));
         const tmp = opts[i];

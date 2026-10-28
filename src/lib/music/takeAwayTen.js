@@ -95,10 +95,12 @@
   // One circle stays one sound. Above 12 the ten is that one sound on the
   // child's instrument: longer (~0.45s), louder, and lower than a one. It is
   // not a second attack. 12 and below, and tenExchange, stay one plain note.
+  // TEN_HZ is A3 (220), not A2 (110): a held 110 Hz tone is silent on phones.
+  const TEN_HZ = 220;
   function noteOf(spec, ev) {
     const ten = spec && spec.kind === 'takeAway' && spec.start > 12 && ev && ev.kind === 'drum' && ev.v === 10;
     if (!ten) return { at: ev.at, hz: ev.hz, dur: 0.18, gain: 0.16, held: false };
-    return { at: ev.at, hz: 110, dur: 0.45, gain: 0.28, held: true };
+    return { at: ev.at, hz: TEN_HZ, dur: 0.45, gain: 0.28, held: true };
   }
   function play(spec, env) {
     const e = env || {}; const events = soundEvents(spec, e); if (!events.length) return null;
