@@ -73,8 +73,81 @@ test('wrong answer on picture stays on picture with the retry message', () => {
   assert.equal(box.widgets.msg.textContent, 'נסתכל שוב על הדגם');
   assert.equal(ctx.suspended, 0);
   box.answer('6');
-  assert.match(box.innerHTML, /data-stage="symbol"/, 'second miss shows the answer and moves on');
-  assert.ok(box.innerHTML.includes('התשובה היא 7'));
+  assert.match(box.innerHTML, /data-stage="picture"/, 'second miss shows the answer but stays');
+  assert.equal(box.history.length, 1);
+  assert.ok(box.widgets.msg.textContent.includes('התשובה היא 7'));
+  assert.equal(box.widgets.input.value, '', 'input cleared');
+  box.answer('7');
+  assert.match(box.innerHTML, /data-stage="symbol"/, 'only a correct answer advances');
+  box.answer('5'); box.answer('5');
+  assert.match(box.innerHTML, /data-stage="symbol"/);
+  assert.equal(box.history.length, 2, 'two misses on symbol stay on symbol');
+  assert.ok(box.widgets.msg.textContent.includes('התשובה היא 7'));
+  assert.equal(ctx.suspended, 0);
+  box.answer('7');
+  assert.deepEqual(box.history.map(stageOf), ['picture', 'symbol', 'plain']);
+});
+
+test('sequence guard: stages follow STAGES via nextStage, no hardcoded transitions', () => {
+  assert.deepEqual(Mastery.STAGES, ['sound', 'picture', 'symbol', 'plain']);
+  const chain = [];
+  for (let s = Mastery.nextStage('sound'); s; s = Mastery.nextStage(s)) chain.push(s);
+  assert.deepEqual(chain, ['picture', 'symbol', 'plain']);
+  assert.equal(Mastery.nextStage('plain'), null);
+  assert.equal(Mastery.nextStage('x'), null);
+  for (const s of ['sound', 'picture', 'symbol']) {
+    assert.equal(Mastery.recordAttempt({ currentStage: s, history: [], soundSolvedCount: 0 }, { correct: true }).nextStage, Mastery.nextStage(s), 'recordAttempt agrees with STAGES at ' + s);
+  }
+  const box = mockContainer();
+  Mastery.mountMasteryCheck(box, CHECK, { bridgeItem: BRIDGE, audioContext: mockCtx() });
+  assert.deepEqual([...box.innerHTML.matchAll(/data-step="(\w+)"/g)].map(m => m[1]), Mastery.STAGES);
+  assert.match(box.innerHTML, /data-step="sound">✓ /);
+  assert.match(box.innerHTML, /data-step="picture" aria-current="step"/);
+  box.answer('7'); box.answer('7');
+  assert.deepEqual(box.history.map(stageOf), Mastery.STAGES.slice(1));
+  const src = require('node:fs').readFileSync(require.resolve('../src/lib/masteryCheck.js'), 'utf8');
+  assert.doesNotMatch(src, /mountStage\('(picture|symbol)'/);
+});
+
+test('no overlapping sounds: bridge stages play nothing, plain is silent', () => {
+  const NP = require('../src/components/NumberPlay.js');
+  const saved = { jam: global.MM_JAM, freq: global.playFreq };
+  let calls = 0;
+  global.MM_JAM = { playNotes: () => { calls++; return { stop() {} }; } };
+  global.playFreq = () => { calls++; };
+  try {
+    const box = mockContainer(), ctx = mockCtx();
+    Mastery.mountMasteryCheck(box, CHECK, { bridgeItem: BRIDGE, audioContext: ctx });
+    box.answer('7'); box.answer('7');
+    assert.equal(stageOf(box.innerHTML), 'plain');
+    assert.equal(calls, 0, 'no player called during picture/symbol/plain');
+    assert.equal(ctx.resumed, 0, 'not resumed before the plain answer');
+    assert.equal(ctx.suspended, 1);
+    assert.doesNotMatch(box.innerHTML, /np-btn|▶|<audio/);
+  } finally {
+    global.MM_JAM = saved.jam; global.playFreq = saved.freq;
+  }
+  const src = require('node:fs').readFileSync(require.resolve('../src/lib/masteryCheck.js'), 'utf8');
+  assert.doesNotMatch(src, /playNotes|playFreq|maybeHear|\.play\(/);
+  const at = NP.extractNumberPlan(BRIDGE).notes.map(n => n.at);
+  assert.ok(at.every((t, i) => i === 0 || t > at[i - 1]), 'sound-stage notes never overlap');
+});
+
+test('sound stage plan uses at least 2 instrument families', () => {
+  const plan = require('../src/components/NumberPlay.js').extractNumberPlan(BRIDGE);
+  assert.ok(new Set(plan.groups.map(g => g.family)).size >= 2);
+});
+
+test('picture above 12 bundles tens and ones like NumberPlay', () => {
+  const item = { prompt: '15 + 3 = ?', answer: 18, skill: 'addition', grade: 'א' };
+  const box = mockContainer();
+  Mastery.mountMasteryCheck(box, CHECK, { bridgeItem: item, audioContext: mockCtx() });
+  const html = box.innerHTML;
+  assert.equal(count(html, /class="np-dot[ "]/g), require('../src/components/NumberPlay.js').extractNumberPlan(item).totalSounds);
+  assert.match(html, /np-ten/);
+  const groups = html.match(/<span class="np-group">.*?<\/span><\/span>(?=<span class="np-gap"|<\/div>)/g);
+  assert.equal(groups.length, 2);
+  for (const g of groups) assert.ok(count(g, /class="np-dot"/g) <= 12, 'no group of more than 12 loose dots');
 });
 
 test('compare with a single heard number skips the bridge', () => {
@@ -101,6 +174,10 @@ test('no-music path: full flow works with audioContext undefined or null', () =>
     const tracker = Mastery.createMasteryTracker({ storage: mockStorage() });
     assert.doesNotThrow(() => {
       const h = Mastery.mountMasteryCheck(box, CHECK, { bridgeItem: BRIDGE, audioContext, tracker, topicId: 'mm-cur-0', onAnswer: (v, ok) => { result = ok; } });
+      assert.equal(global.MM_JAM, undefined, 'no jam player loaded');
+      box.answer('6'); box.answer('6');
+      assert.ok(box.widgets.msg.textContent.includes('התשובה היא 7'), 'wrong answer stays without audio');
+      assert.equal(box.history.length, 1);
       box.answer('7');
       box.answer('7');
       assert.ok(box.innerHTML.includes('mm-plain-mastery-check'));

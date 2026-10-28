@@ -13,6 +13,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
   const STAGES = ['sound', 'picture', 'symbol', 'plain'];
+  function nextStage(stage) { const i = STAGES.indexOf(stage); return i >= 0 && i < STAGES.length - 1 ? STAGES[i + 1] : null; }
   const STAGE_LABELS_HE = { sound: 'צליל ולהקה', picture: 'תמונה ודגם', symbol: 'סמל ומספר', plain: 'בלי להקה, רק אתם!' };
   const STORAGE_KEY = 'mm.mastery';
   function createTopicMastery(topicId, options) {
@@ -111,7 +112,9 @@
     const promptHtml = typeof mathHtml === 'function' ? mathHtml(it.prompt || '') : escHtml(it.prompt || '');
     let body;
     if (stage === 'picture') {
-      const groups = p.groups.map(n => '<span class="np-group">' + Array.from({ length: n }, () => '<span class="np-dot"></span>').join('') + '</span>').join('<span class="np-gap" aria-hidden="true"></span>');
+      // same rule as NumberPlay's bundle(): a group above 12 is drawn as tens and ones
+      const dots = n => (n > 12 ? '<span class="np-dot np-ten">10</span>'.repeat(Math.floor(n / 10)) + '<span class="np-dot"></span>'.repeat(n % 10) : '<span class="np-dot"></span>'.repeat(n));
+      const groups = p.groups.map(n => '<span class="np-group">' + dots(n) + '</span>').join('<span class="np-gap" aria-hidden="true"></span>');
       body = '<h3 style="margin:0 0 8px;font-size:1.1rem">עכשיו נסתכל על התמונה</h3>'
         + '<div class="np-circles" role="img" aria-label="' + escHtml(pictureLabelHe(p)) + '" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0">' + groups + '</div>';
     } else {
@@ -141,16 +144,17 @@
         const val = input ? input.value : '', judge = typeof answerOk === 'function' ? answerOk : null;
         const ok = judge ? !!judge(bridgeItem, val) : (bridgeItem.answer != null ? String(val).trim() === String(bridgeItem.answer).trim() : false);
         if (!ok && ++wrong < 2) { if (msg) msg.textContent = recordAttempt({ currentStage: stage, history: [] }, { correct: false }).messageHe; return; }
-        // second miss: show the answer and move on, so the child is never stuck on a bridge stage
-        if (!ok) { const shown = 'התשובה היא ' + bridgeItem.answer + '. ממשיכים!'; if (stage === 'picture') mountStage('symbol', shown); else mountPlain(); return; }
+        // second miss: show the answer but stay on this stage; only a correct answer advances
+        if (!ok) { if (msg) msg.textContent = 'התשובה היא ' + bridgeItem.answer + '. כתבו ' + bridgeItem.answer + ' ולחצו על בדיקה.'; if (input) input.value = ''; return; }
         if (tracker && topicId) { const topState = tracker.get(topicId); if (topState.currentStage !== stage) topState.currentStage = stage; tracker.record(topicId, { stage, correct: true }); }
         const done = recordAttempt({ currentStage: stage, history: [] }, { correct: true });
-        if (stage === 'picture') mountStage('symbol', done.messageHe); else mountPlain();
+        const next = nextStage(stage);
+        if (next === 'plain') mountPlain(); else mountStage(next, done.messageHe);
       }
       if (submit) submit.onclick = check;
       if (input) { input.onkeydown = e => { if (e.key === 'Enter') check(); }; if (typeof input.focus === 'function') input.focus(); }
     }
-    mountStage('picture', '');
+    mountStage(nextStage('sound'), '');
     return handle;
     function mountPlain() {
       if (ctx && typeof ctx.suspend === 'function') { try { ctx.suspend(); } catch (_) {} }
@@ -270,7 +274,7 @@
     return sharedTracker;
   }
   return {
-    STAGES, STAGE_LABELS_HE, STORAGE_KEY,
+    STAGES, STAGE_LABELS_HE, STORAGE_KEY, nextStage,
     createTopicMastery, recordAttempt,
     getTopicReport, renderPlainCheckHtml, renderStageHtml, mountMasteryCheck,
     restoreMusicState, isTopicUnlocked, orderTopics, getNextUnlockedTopics, nextPlainItem,
