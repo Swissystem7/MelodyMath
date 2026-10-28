@@ -149,3 +149,14 @@ test('mistake replays sound via maybeHear for current exercise only (#722, 0h, R
   assert.ok(indexHtml.includes('#quiz:not(.hidden)'), 'maybeHear scopes to current active exercise container');
   assert.ok(indexHtml.includes('np-btn'), 'maybeHear falls back to playing active sound button if no hear array');
 });
+
+test('snapshot: every correct-answer animation class has CSS keyframes and a reduced-motion opt-out (#680)', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'jam.css'), 'utf8');
+  const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion:reduce)'));
+  Object.values(fb.ANIMATION_SPECS).forEach((spec) => {
+    const rule = css.match(new RegExp('\\.' + spec.className + '\\{animation:(\\w+)'));
+    assert.ok(rule, spec.className + ' has an animation rule');
+    assert.ok(css.includes('@keyframes ' + rule[1]), spec.className + ' keyframes exist');
+    assert.match(reduced, new RegExp('\\.' + spec.className + '[,{]'),spec.className + ' respects reduced motion');
+  });
+});
