@@ -43,13 +43,15 @@
 .anim-math-takeaway{animation:mathTakeaway .45s ease-out}
 .anim-math-repeat{animation:mathRepeat .45s ease-in-out}
 .anim-math-split{animation:mathSplit .45s ease-out}
+.anim-math-partition{animation:mathPartition .5s ease-out}
 .anim-math-glow{animation:mathGlow .5s ease-out}
 @keyframes mathMerge{0%{transform:scale(.95)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
 @keyframes mathTakeaway{0%{opacity:1}50%{opacity:.4;transform:translateY(4px)}100%{opacity:1;transform:none}}
 @keyframes mathRepeat{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 @keyframes mathSplit{0%{letter-spacing:normal}50%{letter-spacing:4px}100%{letter-spacing:normal}}
+@keyframes mathPartition{0%{word-spacing:normal}50%{word-spacing:10px;transform:scale(1.03)}100%{word-spacing:normal;transform:none}}
 @keyframes mathGlow{0%{box-shadow:none}50%{box-shadow:0 0 12px var(--mint)}100%{box-shadow:none}}
-@media (prefers-reduced-motion:reduce){.fbp-seg.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-glow{animation:none}}
+@media (prefers-reduced-motion:reduce){.fbp-seg.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-partition,.anim-math-glow{animation:none}}
 .np-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
 .np-btn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--ink);background:var(--purple);color:#fff;font-size:1.3rem;touch-action:manipulation}
 .np-circles,.np-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
