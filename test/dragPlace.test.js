@@ -6,6 +6,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const DP = require('../src/lib/music/dragPlace');
 const JAM = require('../src/components/jamKit');
@@ -75,10 +76,14 @@ test('sound: one note per landed piece on the child instrument, bigger place low
   const dj = mem(); MY.setMyInstrument('djembe', dj);
   const calls = [];
   const ac = { currentTime: 3, state: 'running', resume() {} };
-  const r = DP.sound(s, 'ten', { audioContext: ac, storage: dj, playVoice: (c, v, hz, t) => calls.push({ v, hz, t }) });
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].v, INST.instrumentById('djembe').voice);
+  const pv = (c, v, hz, t) => calls.push({ v, hz, t });
+  assert.equal(DP.sound(s, 'one', { audioContext: ac, storage: dj, playVoice: pv }).instrument, 'djembe');
+  const r = DP.sound(s, 'ten', { audioContext: ac, storage: dj, playVoice: pv });
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].v, INST.instrumentById('djembe').voice, 'ones on the child instrument');
+  assert.equal(calls[1].v, INST.instrumentById('koto').voice, 'bigger places on another family');
   assert.equal(r.hz, DP.noteFor(s, 'ten').hz);
+  calls.length = 1;
   const uke = mem(); MY.setMyInstrument('ukulele', uke);
   assert.equal(DP.voiceFor(uke), INST.instrumentById('xylophone').voice);
   assert.equal(DP.sound(s, 'ten', { quiet: true, audioContext: ac, playVoice: () => calls.push(1) }), null);
@@ -148,4 +153,78 @@ test('index.html shows the drag in the practice screen, and the pieces drag on t
   const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'jam.css'), 'utf8');
   assert.match(css, /\.dp-piece\{touch-action:none/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/dragPlace\.js'/);
+});
+
+test('at least 2 instrument families: ones and bigger places never share a family', () => {
+  const INST = require('../src/lib/instruments');
+  const MY = require('../src/lib/myInstrument');
+  const d = DP.voicesFor(mem());
+  assert.notEqual(INST.instrumentById(d.one.id).family, INST.instrumentById(d.big.id).family);
+  INST.INSTRUMENTS.forEach((x) => {
+    const st = mem(); MY.setMyInstrument(x.id, st);
+    const v = DP.voicesFor(st);
+    assert.notEqual(INST.instrumentById(v.one.id).family, INST.instrumentById(v.big.id).family, x.id);
+  });
+  const s = DP.specForItem(byPrompt('200 + 30 + 4 = ?')), ac = { currentTime: 0, state: 'running' }, pv = () => {};
+  assert.notEqual(DP.sound(s, 'one', { audioContext: ac, playVoice: pv }).voice, DP.sound(s, 'ten', { audioContext: ac, playVoice: pv }).voice);
+});
+
+// The real renderWidget of index.html, with the earlier music branches loaded,
+// on real mm-cur-13 (grade ב place value) items.
+const topic13 = require('../src/lib/curriculum').itemsForTopic('mm-cur-13', shipped);
+const byId = (id) => { const it = topic13.find((i) => i.id === id); assert.ok(it, id); return it; };
+function screen(t, prefs) {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const src = html.match(/function renderWidget\(hostId, item, inputId\)\{[\s\S]*?\n\}/)[0];
+  const p = fakePage(), input = { value: '' }, played = [];
+  p.host.classList = { names: ['hidden'], add(c) { if (!this.names.includes(c)) this.names.push(c); }, remove(c) { this.names = this.names.filter((n) => n !== c); } };
+  const saved = { document: globalThis.document, playVoice: globalThis.playVoice, getSharedAudioContext: globalThis.getSharedAudioContext };
+  globalThis.document = p.doc;
+  globalThis.playVoice = (c, v) => played.push(v);
+  globalThis.getSharedAudioContext = () => ({ currentTime: 0, state: 'running' });
+  t.after(() => Object.assign(globalThis, saved));
+  const ctx = { $: (id) => (id === 'ans' ? input : p.host), prefsNow: () => prefs || {}, MM_DRAG_PLACE: DP,
+    MM_TAKEAWAY_TEN: require('../src/lib/music/takeAwayTen.js'), MM_PERCENT_MIX: require('../src/lib/music/percentMix.js'),
+    MM_PATTERN_WORKED: require('../src/lib/exercises/patternAndWorkedExample.js'), MM_TAP_TEMPO_MEAN: require('../src/lib/exercises/tapTempoMean.js') };
+  vm.createContext(ctx);
+  const rw = vm.runInContext(src + '\nrenderWidget;', ctx);
+  const tap = (dp) => p.fire('click', p.el('dp-piece', { 'data-dp': String(dp) }), 0);
+  return { p, input, played, render: (item) => rw('widgetHost', item, 'ans'), tap };
+}
+
+test('dragPlace renders in the practice screen', (t) => {
+  const s = screen(t);
+  s.render(byId('ב-place_value-290'));
+  assert.deepEqual(s.p.host.classList.names, [], 'the host is shown');
+  assert.match(s.p.host.kids[0].innerHTML, /class="dp-box"/);
+});
+
+test('a correct drop is accepted by the screen answer check', (t) => {
+  const s = screen(t);
+  const build = byId('ב-place_value-290');
+  s.render(build);
+  ['hundred', 'hundred', 'ten', 'ten', 'ten', 'one', 'one', 'one', 'one'].forEach(s.tap);
+  assert.equal(core.isCorrect(s.input.value, build.answer), true);
+  assert.ok(new Set(s.played).size >= 2, 'two voices sound: ' + s.played);
+  s.tap('one');
+  assert.equal(core.isCorrect(s.input.value, build.answer), false, 'a wrong total fails');
+});
+
+test('a wrong drop is rejected: the smaller number when the bigger is asked', (t) => {
+  const q = screen(t), pick = byId('ב-place_value-294');
+  q.render(pick);
+  q.tap(0);
+  assert.equal(core.isCorrect(q.input.value, pick.answer), false, 'the smaller number when the bigger is asked');
+  q.tap(1);
+  assert.equal(core.isCorrect(q.input.value, pick.answer), true);
+  assert.equal(new Set(q.played).size, 1, 'both numbers on one instrument, so the timbre does not tell the answer');
+});
+
+test('no music: quiet stays silent and still fills the answer', (t) => {
+  const s = screen(t, { quiet: true });
+  const pick = byId('ב-place_value-294');
+  s.render(pick);
+  s.tap(1);
+  assert.deepEqual(s.played, []);
+  assert.equal(core.isCorrect(s.input.value, pick.answer), true);
 });

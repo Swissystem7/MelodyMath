@@ -1,6 +1,9 @@
 // dragPlace: a general drag exercise type (Refs #665, requirement 3). The child
 // drags pieces into a box with a finger, a mouse or the keyboard, and every
-// piece that lands sounds on the child's instrument. The box fills the answer
+// piece that lands sounds in two instrument families: ones (and both numbers
+// of a pick, so the timbre gives nothing away) on the child's instrument,
+// bigger places on the first M5 instrument of another family (xylophone +
+// koto by default). The box fills the answer
 // field, so the screen's own בדיקה checks it. The kind comes from the item's
 // own prompt, so shipped topics get it without new bank items:
 // - build: place-value pieces (thousand, hundred, ten, one) dragged in until
@@ -114,13 +117,17 @@
 
   function myInst() { if (root && root.MM_MY_INSTRUMENT) return root.MM_MY_INSTRUMENT; try { return require('../myInstrument.js'); } catch (e) { return null; } }
   function instData() { if (root && typeof root.instrumentById === 'function') return root; try { return require('../instruments.js'); } catch (e) { return null; } }
-  function voiceFor(storage) {
-    const mi = myInst();
+  // { one, big }: two M5 instruments of different families, each { id, family, voice }.
+  function voicesFor(storage) {
+    const mi = myInst(), d = instData();
     let id = mi ? mi.instrumentFor(FALLBACK, null, storage) : FALLBACK;
     if (id === 'ukulele') id = FALLBACK;
-    const d = instData(), x = d && d.instrumentById(id);
-    return x && x.voice ? x.voice : 'woodBar';
+    const x = d && (d.instrumentById(id) || d.instrumentById(FALLBACK));
+    const one = x && x.voice ? { id: x.id, family: x.family, voice: x.voice } : { id: FALLBACK, family: 'percussion', voice: 'woodBar' };
+    const y = (d && d.INSTRUMENTS || []).filter(function (i) { return i.mechanism === 'M5' && i.voice && i.family !== one.family; })[0];
+    return { one: one, big: y ? { id: y.id, family: y.family, voice: y.voice } : one };
   }
+  function voiceFor(storage) { return voicesFor(storage).one.voice; }
   // One sound per landed piece on the shared engine; null when silent.
   function sound(spec, piece, env) {
     const e = env || {};
@@ -128,9 +135,10 @@
     const ac = e.audioContext || (root && typeof root.getSharedAudioContext === 'function' ? root.getSharedAudioContext() : null);
     if (e.quiet || typeof pv !== 'function' || !ac) return null;
     if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
-    const n = noteFor(spec, piece), voice = voiceFor(e.storage);
-    pv(ac, voice, n.hz, ac.currentTime + 0.02, null, { dur: n.dur, gain: 0.22 });
-    return { voice: voice, hz: n.hz };
+    const n = noteFor(spec, piece), vs = voicesFor(e.storage);
+    const v = spec.kind === 'pick' || piece === 'one' ? vs.one : vs.big;
+    pv(ac, v.voice, n.hz, ac.currentTime + 0.02, null, { dur: n.dur, gain: 0.22 });
+    return { voice: v.voice, hz: n.hz, instrument: v.id };
   }
 
   // Draws the exercise in a fresh element inside host and wires drag, tap and
@@ -171,5 +179,5 @@
     return spec;
   }
 
-  return { PLACES: PLACES, MAX_IN: MAX_IN, roundPart: roundPart, specForItem: specForItem, boxValue: boxValue, noteFor: noteFor, html: html, voiceFor: voiceFor, sound: sound, mount: mount };
+  return { PLACES: PLACES, MAX_IN: MAX_IN, roundPart: roundPart, specForItem: specForItem, boxValue: boxValue, noteFor: noteFor, html: html, voiceFor: voiceFor, voicesFor: voicesFor, sound: sound, mount: mount };
 });
