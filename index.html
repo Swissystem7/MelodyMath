@@ -1312,11 +1312,15 @@ function varyTopicExercise(topicId, item, round) {
 function startTopicPractice(id,skill){
   const row=typeof topicById==='function'?topicById(id):null;
   if(!row||!isGrade(row.grade)||typeof itemsForTopic!=='function') return false;
-  const items=itemsForTopic(id,itemsForGrade(row.grade)).filter(it=>!skill||it.skill===skill);
+  // The #750 tap items are not in the SHIPPED banks; put them first so the G6_MEAN topic opens on the tap widget.
+  const extra=typeof MM_TAP_TEMPO_MEAN!=='undefined'?MM_TAP_TEMPO_MEAN.getItems():[];
+  const items=itemsForTopic(id,extra.concat(itemsForGrade(row.grade))).filter(it=>!skill||it.skill===skill);
   if(!items.length) return false;
+  // Keep the short skill title when it belongs to the topic; otherwise (e.g. old 'decimals' items on ממוצע) show the topic.
+  const stepTitle=k=>{const he=rmHe(k)||k;return String(row.topic||'').includes(he)?he:(row.topic||he);};
   rmPlanTopic=id;rmVarietySeed=(Date.now()%88)+1;
   saveGrade(row.grade);
-  rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:rmHe(k)||k,items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
+  rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:stepTitle(k),items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
   rpStep=0; rpItem=0;
   show('rmStart',false); show('rmReport',false); show('rmPlanDoneActions',false); show('rmPlan',true);
   rpRender();
