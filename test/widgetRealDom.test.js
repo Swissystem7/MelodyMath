@@ -60,6 +60,23 @@ test('worked example goes demo -> הבנתי -> עכשיו לבד on a read-only
   assert.match(h.textContent, /עכשיו לבד/);
 });
 
+test('mm-cur-6: the silent last round of patterns is headed עכשיו לבד', () => {
+  const V = require('../src/lib/exercises/variety.js');
+  const last = V.generateVariant({ topicId: 'mm-cur-6', kind: 'pattern_completion', prompt: 'old' }, 2, { rounds: 3 });
+  assert.equal(last.noMusic, true, 'the last round is the silent one');
+  const h = host();
+  const ex = Object.assign(PW.createPatternCompletionExercise({ pattern: ['דו', 'מי', 'דו', 'מי'] }), { noMusic: last.noMusic });
+  let played = 0;
+  PW.renderPatternWidget(h, ex, { playTap() { played++; }, later() { return 0; } });
+  assert.match(h.textContent, /^עכשיו לבד/);
+  assert.equal(find(h, 'demo-listen-btn'), null, 'still no demo button in the silent round');
+  find(h, 'pattern-choice-btn').onclick();
+  assert.equal(played, 0, 'the silent round stays silent');
+  const musical = host();
+  PW.renderPatternWidget(musical, PW.createPatternCompletionExercise({}), quiet);
+  assert.doesNotMatch(musical.textContent, /עכשיו לבד/, 'only the silent round gets the heading');
+});
+
 test('a noMusic worked example renders straight at עכשיו לבד', () => {
   const h = host();
   const ex = Object.assign(PW.createWorkedExampleExercise({ a: 4, b: 1, stage: 'demo' }), { noMusic: true });

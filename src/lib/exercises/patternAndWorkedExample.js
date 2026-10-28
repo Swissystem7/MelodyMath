@@ -163,6 +163,12 @@
         if (res.correct && typeof opts.onAnswer === 'function') opts.onAnswer(c);
       }));
     });
+    // The music-free last round of a topic (mm-cur-6) is headed עכשיו לבד, like the worked example.
+    if (silent) {
+      const line = d.createElement('p');
+      line.textContent = 'עכשיו לבד: איזה צליל משלים את התבנית?';
+      wrap.appendChild(line);
+    }
     wrap.appendChild(seq);
     if (!silent) wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { stopDemo(container); container._heard = playDemo(ex, demoEnv(container, opts)); }));
     wrap.appendChild(row);
