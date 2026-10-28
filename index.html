@@ -910,6 +910,10 @@ function renderWidget(hostId, item, inputId){
   } else if (item.kind === 'worked_example' && typeof MM_PATTERN_WORKED !== 'undefined' && typeof MM_PATTERN_WORKED.renderWorkedExampleWidget === 'function'){
     host.classList.remove('hidden');
     MM_PATTERN_WORKED.renderWorkedExampleWidget(host, item, {});
+  } else if(inputId && typeof MM_DRAG_PLACE!=='undefined' && MM_DRAG_PLACE.specForItem(item)){
+    // #665 req 3: drag pieces into the box; the box fills the answer field.
+    host.classList.remove('hidden'); host.onclick=null;
+    MM_DRAG_PLACE.mount(host, item, {fill:fill, quiet:!!prefsNow().quiet});
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
@@ -2935,7 +2939,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 </script><script src="src/lib/learnerPlanView.js"></script>
 <script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/lib/exercises/variety.js"></script><script src="src/lib/myInstrument.js"></script><script src="src/lib/masteryCheck.js"></script><script src="src/components/jamKit.js"></script><script src="src/components/NumberPlay.js"></script>
 <script src="src/lib/music/fractionBar.js"></script><script src="src/components/FractionBarPad.js"></script>
-<script src="src/lib/music/takeAwayTen.js"></script><script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
+<script src="src/lib/music/takeAwayTen.js"></script><script src="src/lib/music/dragPlace.js"></script><script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
 <script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/components/TimesTableGroove.js"></script>
 <script type="module" src="src/components/EnsembleStudio.js"></script>
 <script src="src/lib/music/grooveGrid.js"></script><script src="src/components/GrooveGridScreen.js"></script>

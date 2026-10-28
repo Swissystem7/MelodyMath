@@ -58,3 +58,11 @@
 .np-dot[data-group="1"].lit{background:var(--pink)}
 .np-dot[data-group="2"].lit{background:var(--mint)}
 .np-gap{display:inline-block;width:12px}
+/* dragPlace (#665 req 3): pieces dragged into the box; touch-action:none so a finger drags instead of scrolling */
+.dp-pile,.dp-box{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.dp-box{min-height:64px;padding:8px;border:3px dashed var(--ink);border-radius:16px;background:var(--card)}
+.dp-piece,.dp-in{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--ink);font-weight:700;font-size:1.1rem;color:var(--ink);background:var(--yellow)}
+.dp-piece{touch-action:none;cursor:grab}
+.dp-ghost{position:fixed;z-index:50;width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow);pointer-events:none;transform:translate(-50%,-50%)}
+.dp-thousand{background:var(--purple);color:#fff}.dp-hundred{background:var(--pink)}.dp-ten{background:var(--mint)}
+.dp-empty{opacity:.6}
