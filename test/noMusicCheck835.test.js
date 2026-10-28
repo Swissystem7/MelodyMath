@@ -9,7 +9,7 @@ const PW = require('../src/lib/exercises/patternAndWorkedExample.js');
 const INDEX = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const fnLine = (name) => INDEX.match(new RegExp('^function ' + name + '\\(.*$', 'm'))[0];
 function box() {
-  const node = () => { const n = { style: {}, className: '', textContent: '', hidden: false, children: [] }; n.appendChild = (c) => (n.children.push(c), c); return n; };
+  const node = () => { const n = { style: {}, className: '', textContent: '', hidden: false, children: [] }; n.appendChild = (c) => (n.children.push(c), c); Object.defineProperty(n, 'innerHTML', { get: () => '', set: () => n.children.splice(0) }); return n; };
   const host = node(); host.ownerDocument = { createElement: node }; return host;
 }
 function find(n, cls) {

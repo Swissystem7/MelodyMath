@@ -82,30 +82,47 @@
   // notes: [{ at (seconds from start), voice, hz }]. Schedules 0.2 s ahead on
   // the shared AudioContext; onNote(note, i) fires near each note for the
   // visuals, and the returned handle's stop() cancels what is not yet queued.
+  // Melodies still sounding. stopAll() silences them at once: the opening sound
+  // of an exercise and the silent "עכשיו לבד" round never share the air with one (Refs #845).
+  const running = [];
+  function stopAll() { running.slice().forEach(function (h) { h.stop(); }); }
+
   function playNotes(notes, onNote, onEnd) {
     const me = engine();
     const iv = voices();
     const ac = me && me.getSharedAudioContext ? me.getSharedAudioContext() : null;
-    const handle = { stopped: false, stop: function () { handle.stopped = true; } };
+    let bus = null;
+    const handle = { stopped: false, stop: function () {
+      handle.stopped = true;
+      if (running.indexOf(handle) >= 0) running.splice(running.indexOf(handle), 1);
+      if (bus) { try { bus.disconnect(); } catch (e) { /* already off */ } bus = null; }
+    } };
     if (me && me.audioState && me.audioState.muted) return handle;
     if (ac && ac.state === 'suspended') { try { ac.resume(); } catch (e) { /* autoplay */ } }
+    if (ac && typeof ac.createGain === 'function') { bus = ac.createGain(); bus.connect(ac.destination); }
+    running.push(handle);
     const t0 = ac ? ac.currentTime + 0.05 : 0;
     const w0 = now() + 50;
     let next = 0;
     function pump() {
       if (handle.stopped) return;
+      if (me && me.audioState && me.audioState.muted) { handle.stop(); return; }
       const lookahead = ac ? ac.currentTime + 0.2 - t0 : (now() - w0) / 1000 + 0.2;
       while (next < notes.length && notes[next].at <= lookahead) {
         const n = notes[next];
         const i = next;
-        if (ac && iv && n.voice) iv.playVoice(ac, n.voice, n.hz, t0 + n.at, null, n.held ? { dur: n.dur, gain: n.gain } : undefined); // a held ten (#665)
+        if (ac && iv && n.voice) iv.playVoice(ac, n.voice, n.hz, t0 + n.at, bus, n.held ? { dur: n.dur, gain: n.gain } : undefined); // a held ten (#665)
         if (onNote) setTimeout(function () { if (!handle.stopped) onNote(n, i); }, Math.max(0, w0 + n.at * 1000 - now()));
         next += 1;
       }
       if (next < notes.length) setTimeout(pump, 50);
-      else if (onEnd) {
+      else {
         const last = notes.length ? notes[notes.length - 1].at + 0.4 : 0;
-        setTimeout(function () { if (!handle.stopped) onEnd(); }, Math.max(0, w0 + last * 1000 - now()));
+        setTimeout(function () {
+          if (handle.stopped) return;
+          if (running.indexOf(handle) >= 0) running.splice(running.indexOf(handle), 1);
+          if (onEnd) onEnd();
+        }, Math.max(0, w0 + last * 1000 - now()));
       }
     }
     pump();
@@ -144,7 +161,7 @@
     loadShowMusic: loadShowMusic,
     saveShowMusic: saveShowMusic,
     musicToggleHtml: musicToggleHtml,
-    playNotes: playNotes,
+    playNotes: playNotes, stopAll: stopAll,
     feedback: feedback,
     cadence: cadence,
     stopWhenHidden: stopWhenHidden,

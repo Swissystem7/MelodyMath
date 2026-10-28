@@ -133,7 +133,6 @@
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
     container.innerHTML = '';
-    if (container.children) container.children.length = 0;
     const wrap = d.createElement('div');
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
@@ -175,8 +174,9 @@
       const clear = opts.clearLater || (typeof clearTimeout === 'function' ? clearTimeout : null);
       if (stage === 'independent') timers.splice(0).forEach(function (id) { if (clear && id != null) clear(id); });
       container.innerHTML = '';
-      if (container.children) container.children.length = 0;
       container._stage = stage;
+      // The host keeps the whole עכשיו לבד round silent, not just the check (Refs #845).
+      if (typeof opts.onSilent === 'function') opts.onSilent(stage === 'independent');
       container._silent = false;
       container._retry = null;
       container._filled = filled;

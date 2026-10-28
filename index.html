@@ -851,6 +851,7 @@ function setItemTag(el,it){
 }
 function renderWidget(hostId, item, inputId){
   const host=$(hostId); if(!host) return;
+  if(host._silent&&typeof hushAudio==='function')hushAudio(false);
   host.innerHTML=''; host.classList.add('hidden'); host._sndSpec=null; host._sndRevealed=false; host._tapSession=null; host._stage=null; host._silent=false; host._retry=null; host._restart=null;
   if(!item) return;
   const fill=function(val){ const inp=inputId&&$(inputId); if(inp){ inp.value=val; } };
@@ -911,7 +912,7 @@ function renderWidget(hostId, item, inputId){
     MM_PATTERN_WORKED.renderPatternWidget(host, item, { onAnswer: fill });
   } else if (item.kind === 'worked_example' && typeof MM_PATTERN_WORKED !== 'undefined' && typeof MM_PATTERN_WORKED.renderWorkedExampleWidget === 'function'){
     host.classList.remove('hidden');
-    MM_PATTERN_WORKED.renderWorkedExampleWidget(host, item, {});
+    MM_PATTERN_WORKED.renderWorkedExampleWidget(host, item, { onSilent: function(on){ if(typeof hushAudio==='function') hushAudio(on); } });
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
@@ -938,13 +939,13 @@ function poolForSkill(skill){
 let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rmPlanTopic=null,rmVarietySeed=0,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
 // mmHush: the no-music "עכשיו לבד" check is being scored — every reward sound stays off (Refs #835).
 let mmHush=false,mmHushWas=false;
-function hushAudio(on){const E=typeof musicEngine!=='undefined'&&musicEngine&&musicEngine.audioState?musicEngine:null;if(on&&!mmHush){mmHushWas=E?E.audioState.muted:false;if(E)E.audioState.muted=true;}else if(!on&&mmHush&&E)E.audioState.muted=mmHushWas;mmHush=!!on;}
+function hushAudio(on){const E=typeof musicEngine!=='undefined'&&musicEngine&&musicEngine.audioState?musicEngine:null;if(on&&typeof MM_JAM!=='undefined'&&MM_JAM.stopAll)MM_JAM.stopAll();if(on&&!mmHush){mmHushWas=E?E.audioState.muted:false;if(E)E.audioState.muted=true;}else if(!on&&mmHush&&E)E.audioState.muted=mmHushWas;mmHush=!!on;}
 function prefsNow(){const p=typeof loadAccess==='function'?loadAccess():{};return mmHush?Object.assign({},p,{quiet:true}):p}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 // Every exercise opens with a sound within 1 s (#665 2a): the item's music, or a neutral chime via openCue.js.
 var mmOpenCue=null;
 function maybeHear(item,how){if(!item||item.noMusic)return;setActiveHear(how&&how.chimeOnly?null:item.hear||null);if(prefsNow().quiet)return;const cue=openCue();if(!cue)return how&&how.chimeOnly?false:playItemMusic(item);return cue.open(item,how)}
-function openCue(){if(!mmOpenCue&&typeof MM_OPEN_CUE!=='undefined')mmOpenCue=MM_OPEN_CUE.createOpenCue({getContext:()=>typeof getSharedAudioContext==='function'?getSharedAudioContext():null,playItemMusic:playItemMusic,isMuted:()=>!!(prefsNow().quiet||(typeof audioState!=='undefined'&&audioState.muted)),target:document});return mmOpenCue}
+function openCue(){if(!mmOpenCue&&typeof MM_OPEN_CUE!=='undefined')mmOpenCue=MM_OPEN_CUE.createOpenCue({getContext:()=>typeof getSharedAudioContext==='function'?getSharedAudioContext():null,playItemMusic:playItemMusic,stopOthers:()=>{if(typeof MM_JAM!=='undefined'&&MM_JAM.stopAll)MM_JAM.stopAll()},isMuted:()=>!!(prefsNow().quiet||(typeof audioState!=='undefined'&&audioState.muted)),target:document});return mmOpenCue}
 function playItemMusic(item){const groups=item.hear;if(item.instrument&&typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item,{instrument:item.instrument,bpm:item.bpm,grade:item.grade||(typeof selectedGrade!=='undefined'?selectedGrade:undefined)});if(plan&&typeof MM_NUMBER_PLAY.play==='function'){MM_NUMBER_PLAY.play(plan);return true;}}if(groups&&typeof playCountClicks==='function'){playCountClicks(groups,item.bpm||76);return true;}const active=(typeof document!=='undefined'&&document.querySelector)?(document.querySelector('#quiz:not(.hidden), #rmCard:not(.hidden), #rmPlanCard:not(.hidden), #classCard:not(.hidden)')||document):null;const btn=active&&active.querySelector?active.querySelector('.np-btn, [data-act="play-numbers"], #btnPlayWay, .way-play-btn'):null;if(btn&&typeof btn.click==='function'){btn.click();return true;}if(typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item);if(plan&&typeof MM_NUMBER_PLAY.play==='function'){MM_NUMBER_PLAY.play(plan);return true;}}return false}
 // «3 שארית 2» is not a number, so it goes through the pure validator in
 // grade3Music.js instead of the numeric isCorrect path, and a miss gets the

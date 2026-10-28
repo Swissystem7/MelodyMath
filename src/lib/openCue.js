@@ -42,6 +42,8 @@
     const getContext = o.getContext || function () { return null; };
     const isMuted = o.isMuted || function () { return false; };
     const playItemMusic = o.playItemMusic || function () { return false; };
+    // stopOthers(): silences a melody still running, so the opening sound never overlaps it (Refs #845).
+    const stopOthers = o.stopOthers || function () {};
     const target = o.target || null;
     let last = null;
     let pending = null;
@@ -53,6 +55,7 @@
     }
 
     function sound(p) {
+      stopOthers();
       if (!p.chimeOnly && playItemMusic(p.item)) return true;
       return playChime(getContext()) != null;
     }
@@ -73,7 +76,7 @@
       last = item;
       pending = null;
       unlisten();
-      if (replay) return !!playItemMusic(item);
+      if (replay) { stopOthers(); return !!playItemMusic(item); }
       const p = { item: item, chimeOnly: !!(how && how.chimeOnly) };
       const ctx = getContext();
       if (ctx && ctx.state === 'suspended') {

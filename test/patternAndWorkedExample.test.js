@@ -75,6 +75,8 @@ function box() {
     const children = [];
     const n = { style: {}, className: '', textContent: '', hidden: false, children: children };
     n.appendChild = function (c) { children.push(c); return c; };
+    // Like a real element: innerHTML = '' empties it; children itself is read-only (Refs #845).
+    Object.defineProperty(n, 'innerHTML', { get: function () { return ''; }, set: function () { children.splice(0); } });
     return n;
   }
   const host = node();
@@ -125,6 +127,23 @@ test('הבנתי moves on and does not fill the answer', () => {
   assert.equal(host._stage, 'independent');
   assert.equal(filled, 0);
   assert.equal(find(host, 'mm-try-btn'), null);
+});
+
+test('a read-only children (a real HTMLCollection) never breaks a render; repaints do not pile up (Refs #845)', () => {
+  // children as a browser gives it: a read-only view, so `children.length = 0` throws.
+  const strictBox = () => { const h = box(), kids = h.children; Object.defineProperty(h, 'children', { get: () => Object.freeze(kids.slice()) }); return h; };
+  const p = strictBox();
+  assert.doesNotThrow(() => PW.renderPatternWidget(p, PW.createPatternCompletionExercise()));
+  assert.equal(p.children.length, 1, 'the pattern box is on screen');
+  const host = strictBox();
+  const silent = [];
+  PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2 }), { later: (fn) => fn(), onSilent: (on) => silent.push(on) });
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-tap-btn').onclick();
+  assert.equal(host.children.length, 1, 'one box after three paints');
+  assert.deepEqual(silent, [false, false, true], 'the host hears when the עכשיו לבד round starts');
+  host._restart();
+  assert.deepEqual(silent, [false, false, true, false], 'and when it ends');
 });
 
 test('a wrong answer shows the hint and does not fill the choice', () => {

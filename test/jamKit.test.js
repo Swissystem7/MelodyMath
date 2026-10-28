@@ -22,6 +22,20 @@ test('world-instrument voices become instant tap voices (drums keep their pitch,
   assert.equal(engine.tapPlan('metalBell', 0, 440)[0].hz, 440);
 });
 
+test('stopAll() ends every running melody, and a mute mid-melody stops it (Refs #845)', async () => {
+  const notes = [0, 0.2, 0.4, 0.6].map((at) => ({ at, voice: 'woodBar', hz: 440 }));
+  const a = JAM.playNotes(notes), b = JAM.playNotes(notes);
+  assert.equal(a.stopped || b.stopped, false);
+  JAM.stopAll();
+  assert.equal(a.stopped && b.stopped, true, 'the opening sound can silence what is playing');
+  const c = JAM.playNotes(notes);
+  engine.audioState.muted = true;
+  try {
+    await new Promise((ok) => setTimeout(ok, 120));
+    assert.equal(c.stopped, true, 'the עכשיו לבד round mutes; the melody does not play on into it');
+  } finally { engine.audioState.muted = false; }
+});
+
 test('the showMusic switch is on by default, kept per game, and labelled by its state', () => {
   const store = new Map();
   const s = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, v) };

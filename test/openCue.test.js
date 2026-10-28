@@ -57,6 +57,18 @@ test('an item with no music of its own opens with the C5-G5 triangle chime withi
   assert.ok(ctx.starts.every((s) => s.type === 'triangle'));
 });
 
+test('a running jamKit melody is stopped before the opening sound, so the two never overlap (Refs #845)', () => {
+  const ctx = fakeCtx();
+  const order = [];
+  const { c } = cue(ctx, { stopOthers: () => order.push('stop:' + ctx.starts.length), playItemMusic: () => { order.push('music'); return false; } });
+  assert.equal(c.open({ prompt: '3 + 4' }), true);
+  assert.deepEqual(order, ['stop:0', 'music'], 'stopped before any opening note was scheduled');
+  const item = { prompt: '5 + 1' };
+  c.open(item); order.length = 0;
+  c.open(item);
+  assert.deepEqual(order, ['stop:4', 'music'], 'a replay stops the melody too');
+});
+
 test('an item with its own music plays it through sonify playCountClicks within 1 s, no chime', () => {
   const ctx = fakeCtx();
   globalThis.window = { AudioContext: function () { return ctx; } };
