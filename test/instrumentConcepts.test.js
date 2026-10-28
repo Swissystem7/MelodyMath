@@ -24,8 +24,14 @@ test('every family instrument id exists in the catalogue with that family', () =
   });
 });
 
-test('5-6 concepts, each with a short clean line for every family', () => {
-  assert.ok(C.CONCEPTS.length >= 5 && C.CONCEPTS.length <= 6, 'concepts: ' + C.CONCEPTS.length);
+test('concept ids reuse the catalogue topics (addition/subtraction are new)', () => {
+  C.CONCEPTS.forEach((c) => {
+    assert.ok(c.id in I.TOPICS || ['addition', 'subtraction'].includes(c.id), c.id);
+  });
+});
+
+test('at least 5 concepts, each with a short clean line for every family', () => {
+  assert.ok(C.CONCEPTS.length >= 5, 'concepts: ' + C.CONCEPTS.length);
   assert.equal(new Set(C.CONCEPTS.map((c) => c.id)).size, C.CONCEPTS.length);
   C.CONCEPTS.forEach((c) => {
     assert.ok(c.he && !TECHNICAL.test(c.he), c.id + ' he');
