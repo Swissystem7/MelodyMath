@@ -896,6 +896,7 @@ function renderWidget(hostId, item, inputId){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
   }
+  if(typeof MM_MORE_FAMILIES!=='undefined') MM_MORE_FAMILIES.mount(host, item);
 }
 // A music widget keeps any text that names the answer in data-reveal while the
 // question is open (#457); the feedback step swaps it in, visible note and
@@ -2929,6 +2930,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 <script>/* ?topic=mm-cur-47&screen=1 opens #ggCard via MM_GROOVE_GRID.SCREEN_FOR. Refs #591. Leaves progression.js SCREENS to #811. */
 try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.get('screen')&&g&&g.SCREEN_FOR[q.get('topic')];if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 <script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/components/PercentMixPad.js"></script>
+<script src="src/lib/music/moreFamilies.js"></script>
 <!-- #591 music game scripts end -->
 <script src="src/lib/music/loopStack.js"></script><script src="src/components/LoopStackScreen.js"></script>
 <script>/* ?topic=mm-cur-56&screen=1 opens LoopStack. Its own map, not progression.js SCREENS (#798). */
