@@ -6,19 +6,19 @@
 
 | # | דרישה (ציטוט) | מצב | בקצרה |
 |---|---------------|-----|-------|
-| 1 | "מסך הילד: התרגיל למעלה, עד 15 מילים בכרטיס. טקסט למורים, ציטוטים ושורות של תוכנית הלימודים עוברים למסך הורה/מורה." | חלקי | המגבלה של 15 מילים נאכפת רק בחלק מהתרגילים; שורת תקן וקישור לתוכנית משרד החינוך עדיין מוצגים מעל התרגיל בכרטיסי הילד. |
+| 1 | "מסך הילד: התרגיל למעלה, עד 15 מילים בכרטיס. טקסט למורים, ציטוטים ושורות של תוכנית הלימודים עוברים למסך הורה/מורה." | הושלם (חוץ מ־15 מילים) | שורת התקן וקישור תוכנית משרד החינוך הוסרו ממסך הילד ונשארו ב־`program.html` וב־`curriculum.html`. המגבלה של 15 מילים עדיין נאכפת רק בחלק מהתרגילים. |
 | 2 | "כל תרגיל משמיע את המספרים שבו (3+2 = 3 תופים נמוכים, הפסקה, 2 תופים גבוהים), ולכל צליל יש עיגול מתאים על המסך. שמע תוך שנייה." | הושלם (בהבדל כלים, לא בגובה) | צליל לכל יחידה, הפסקה בין המחוברים, עיגול לכל צליל, צליל ראשון ב־0 ש׳. ההבדל בין המחוברים הוא בכלי (משפחה אחרת), לא דווקא תוף נמוך/גבוה. |
 | 3 | "מגוון סוגי תרגילים: בחירה, גרירה, ישר מספרים, הקשת תשובה, השלמת תבנית ודוגמה פתורה." | חלקי | יש בחירה, ישר מספרים, השלמת תבנית ודוגמה פתורה. הקשת תשובה רק בכמה תרגילים. גרירה חסרה לגמרי. |
 | 4 | "משוב מסביר: בתשובה נכונה מתנגנת אנימציה וסולם. בטעות התרגיל מתנגן שוב עם ספירה, מה שחסר מודגש, והילד מקבל ניסיון שני." | חלקי | אנימציה, מנגינת רצף, השמעה חוזרת עם ספירה וניסיון שני קיימים. סולם מלא מתנגן רק בתרגילי explorer. הדגשה של "מה שחסר" לא קיימת במסלול הכללי. |
 | 5 | "מעבר הדרגתי: קודם צליל, אחר כך תמונה, אחר כך סמל, ובסוף פתרון בלי צליל." | חלקי | השלבים מוגדרים רק במכונת המצבים. באפליקציה מוצג רק השלב האחרון, "בלי להקה", ושלבי התמונה והסמל לא מוצגים לילד. |
-| 6 | „הכותרת "א׳–ד׳" מתוקנת לא׳–ו׳, ופריטים שלא מתאימים לגיל מוסרים.“ | חלקי | הקובץ `index.html` תוקן. בסרגל הניווט שמוזרק לכל דף, גם לדף הבית, עדיין כתוב "תרגול א׳–ד׳", וכך גם בכמה דפים אחרים. פריטים לא מתאימים הוצאו מהתרגול הרגיל אבל נשארו ב"אתגר ו׳". |
+| 6 | „הכותרת "א׳–ד׳" מתוקנת לא׳–ו׳, ופריטים שלא מתאימים לגיל מוסרים.“ | חלקי | הטווח תוקן ל־א׳–ו׳ ב־`index.html`, בסרגל הניווט שמוזרק לכל דף ובשאר הדפים. פריטים לא מתאימים הוצאו מהתרגול הרגיל אבל נשארו ב"אתגר ו׳". |
 
 ## ראיות לפי דרישה
 
-### 1. מסך הילד — חלקי
+### 1. מסך הילד — הושלם (חוץ מ־15 מילים)
 - **עד 15 מילים:** `validateExerciseCard`/`countWords` ב־`src/lib/exercises/patternAndWorkedExample.js` (בדיקה: `validation rejects prompts exceeding 15 words or missing standards` ב־`test/patternAndWorkedExample.test.js`). `MAX_WORDS = 15` ב־`src/lib/exercises/explorerBank.js`. בדיקה שעוברת על כל הכרטיסים קיימת רק ב־Playwright (`e2e/exercise665Criteria.spec.js`, `e2e criteria #665: card word counts <= 15 words`) ולא רצה ב־`npm test` (`"test": "node --test"`). חוץ מזה היא בודקת רק את לשונית `#tab-remediation`.
 - **התרגיל למעלה:** אין בדיקה ב־`npm test`. ב־Playwright: `e2e criteria #665: practice answerY relative to exercise card top < 400px`.
-- **טקסט מורים ותוכנית לימודים עדיין אצל הילד:** `setItemTag` ב־`index.html` כותב "כיתה · strand · standard" ואחריו "לפי תוכנית משרד החינוך: … לתוכנית הרשמית ↗". הפונקציה נקראת עבור `rmItemTag`, `rmPlanTag`, `classItemTag` ו־`beatItemTag`, ו־`#rmItemTag` מופיע **מעל** `#rmPrompt`. ל־`.item-tag` ול־`.mm-official` אין CSS שמסתיר אותם.
+- **טקסט מורים ותוכנית לימודים הוסרו ממסך הילד:** `setItemTag` ב־`index.html` רק מרוקן ומסתיר את האלמנט (`el.textContent=''; el.hidden=true;`), ולארבעת האלמנטים `rmItemTag`, `rmPlanTag`, `classItemTag` ו־`beatItemTag` יש `hidden` כבר ב־HTML, כך שאין הבהוב לפני הציור הראשון. ה־CSS של `.mm-official` נמחק. נתוני התוכנית נשארו למורה ולהורה ב־`program.html` וב־`curriculum.html`. בדיקה: `index.html hides the curriculum line from every exercise view` ב־`test/curriculumSources.test.js`.
 - **מה תוקן:** `test/childLabels.test.js` (התוויות אומרות "צלילים" במקום "מרווחים"), ו־`test/childGradeRange.test.js` (`the child home has no middle-school topic or sonification jargon`).
 
 ### 2. המספרים נשמעים — הושלם
@@ -49,7 +49,7 @@
 
 ### 6. כותרת א׳–ו׳ ופריטים לא מתאימים — חלקי
 - **תוקן ב־`index.html`:** הכותרת, הבאנר והפוטר אומרים "תרגול יסודי א׳–ו׳". בדיקות: `index.html names the range א׳–ו׳ in the title, banner and footer` ו־`index.html renders elementary grade buttons א׳ through ו׳ in #gradePick` (`test/childGradeRange.test.js`). גם `README.md` אומר "כיתות א׳–ו׳".
-- **עדיין "א׳–ד׳":** `siteNavHtml` ב־`src/lib/core.js` (`link('index.html', 'תרגול א׳–ד׳')`). את הסרגל הזה `core.js` מזריק גם ל־`index.html`, ולכן הילד רואה אותו בדף הבית. בנוסף: `landing.html` ("תרגול יסודי א׳–ד׳", ונבדק כך ב־`test/landingUi.test.js`), ה־`<title>` של `curriculum.html` והבאנר שלו, ו־`onePagerFacts` ב־`src/lib/offer.js`. ב־`manifest.webmanifest` אין טווח כיתות. ב־`functions.html` וב־`807.html` הנוסח "לא חלק מתרגול א׳–ד׳" שייך למוצר הסוניפיקציה ונבדק במכוון.
+- **תוקן גם מחוץ ל־`index.html`:** `siteNavHtml` ב־`src/lib/core.js` אומר עכשיו "תרגול א׳–ו׳" (הסרגל מוזרק לכל דף, גם לדף הבית, ומוביל לבחירת הכיתות א׳–ו׳ ב־`#gradePick`). גם `landing.html`, ה־`<title>` והבאנר של `curriculum.html`, `onePagerFacts` ב־`src/lib/offer.js`, ו־`functions.html`/`807.html` ("לא חלק מתרגול א׳–ו׳") עודכנו. בדיקה: `test/gradeRangeNav.test.js`. "א׳–ד׳" נשאר רק בהערות קוד ובנתוני כיסוי של בנק המדידה.
 - **פריטים לא מתאימים לגיל:** חזקות, מספרים שליליים והיחסים 75:64, 45:32 ו־64:45 הוצאו מרמות 1–3, אבל נשארו כפריטי `EXTRA` ברמה 4 ("אתגר ו׳ · מעבר לתוכנית"). בדיקות: `exercises in index.html are age-appropriate for elementary school (grades א–ו)` ו־`אתגר ו׳ draws the EXTRA exercises, and a fast tempo is four beats`. הם הועברו לרמת אתגר ולא נמחקו, כלומר זה פחות מ"מוסרים".
 
 ## הערה נפרדת: כללי כלים (#740, לא #665)
@@ -59,4 +59,4 @@
 - בדיקות: ב־`test/sequence-guard.test.js`: `3: the area grid and box-volume layers never bring in kora, gankogui or ukulele` ו־`3: area-grid and box-volume partners are chosen by mathTopics, over 2+ families`. ב־`test/grooveGrid.test.js` וב־`test/loopStack.test.js`: `…never shows kora…` ו־`a strings child hears djembe as partner…` / `a strings child stacks djembe layers…`.
 - עדיין פתוח: ילד שבחר קורה בתור "הכלי שלי" שומע אותה בכל מקום. זה מחכה להחלטה של בעל המוצר (#717, #775).
 
-**הצעד הבא:** לסגור את דרישה 6 (סרגל הניווט ב־`core.js`, `landing.html`, `curriculum.html`, `offer.js`), ואז את דרישה 1 (להעביר את `setItemTag` ואת קישור התוכנית למסך הורה/מורה). אחרי זה: לחבר את שלבי התמונה והסמל לאפליקציה (דרישה 5), להוסיף תרגיל גרירה (דרישה 3) ולהדגיש את מה שחסר כשהתשובה שגויה (דרישה 4).
+**הצעד הבא:** לסגור את דרישה 6 (סרגל הניווט ב־`core.js`, `landing.html`, `curriculum.html`, `offer.js`), ואז את מגבלת 15 המילים בדרישה 1. אחרי זה: לחבר את שלבי התמונה והסמל לאפליקציה (דרישה 5), להוסיף תרגיל גרירה (דרישה 3) ולהדגיש את מה שחסר כשהתשובה שגויה (דרישה 4).
