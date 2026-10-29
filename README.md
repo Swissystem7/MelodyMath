@@ -2,7 +2,7 @@
 
 **For whom**: a student, parent, or מחנכת שילוב who opens a URL. There is no paying buyer today.
 
-**How**: open the [live demo](https://swissystem7.github.io/MelodyMath/) — no install, no account
+**How**: open the [live demo](https://swissystem7.github.io/MelodyMath/) — no install, no account.
 
 # MelodyMath
 
