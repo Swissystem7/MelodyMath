@@ -49,7 +49,9 @@
 @keyframes mathRepeat{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 @keyframes mathSplit{0%{letter-spacing:normal}50%{letter-spacing:4px}100%{letter-spacing:normal}}
 @keyframes mathGlow{0%{box-shadow:none}50%{box-shadow:0 0 12px var(--mint)}100%{box-shadow:none}}
-@media (prefers-reduced-motion:reduce){.fbp-seg.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-glow{animation:none}}
+.np-dot.np-missing{border-style:dashed;outline:3px solid var(--pink);outline-offset:2px}
+.np-dot.np-missing.lit{animation:mmTap .25s ease-out}
+@media (prefers-reduced-motion:reduce){.fbp-seg.lit,.np-dot.np-missing.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-glow{animation:none}}
 .np-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
 .np-btn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--ink);background:var(--purple);color:#fff;font-size:1.3rem;touch-action:manipulation}
 .np-circles,.np-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
