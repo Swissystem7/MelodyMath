@@ -10,7 +10,9 @@
   const STEP = 0.22, BEAT_DUR = 0.18, TEN_STEP = 0.5, TEN_DUR = 0.4, LAYER_GAP = 0.44;
   const FAMILIES = [['djembe', 'percussion', 'drumHigh', 330], ['charango', 'strings', 'pluck', 392]];
   const ROUNDS = ['together', 'alone', 'done'];
-  const MIN_HZ = 220; // a held ten below this is lost on phone speakers
+  // Same ten as grade-2 cube layers (and the 110 Hz chart / ten-exchange ten): one octave below 220.
+  function grade2() { if (root && typeof root.cubeLayerEvents === 'function') return root; try { return require('../grade2Music.js'); } catch (e) { return {}; } }
+  const TEN_HZ = (function () { const ev = grade2().cubeLayerEvents ? grade2().cubeLayerEvents(20) : []; const t = ev.filter(function (e) { return e.place === 'ten'; })[0]; return t && t.hz ? t.hz : 110; })();
   let current = null;
   const busy = typeof WeakMap === 'function' ? new WeakMap() : null;
   const outs = typeof WeakMap === 'function' ? new WeakMap() : null;
@@ -45,8 +47,7 @@
       return out;
     }
     const tens = Math.floor(cubes / 10), ones = cubes % 10;
-    const tenHz = Math.max(MIN_HZ, LS && LS.audibleHz ? LS.audibleHz(fam[2], 110) : MIN_HZ);
-    for (let t = 0; t < tens; t++) { out.push({ at: at, dur: TEN_DUR, voice: fam[2], hz: tenHz, family: fam[1], group: group, place: 'ten', gain: 0.28 }); at += TEN_STEP; }
+    for (let t = 0; t < tens; t++) { out.push({ at: at, dur: TEN_DUR, voice: fam[2], hz: TEN_HZ, family: fam[1], group: group, place: 'ten', gain: 0.28 }); at += TEN_STEP; }
     const oneHz = LS && LS.audibleHz ? LS.audibleHz('woodClick', 1173) : 1173;
     for (let j = 0; j < ones; j++) { out.push({ at: at, dur: BEAT_DUR, voice: 'woodClick', hz: oneHz, family: fam[1], group: group, place: 'one' }); at += STEP; }
     return out;
@@ -122,11 +123,15 @@
     if (!g || env.answer == null) return false;
     return typeof env.check === 'function' ? !!env.check(g) : Number(g.replace(/,/g, '')) === Number(env.answer);
   }
+  function quietCard(host) {
+    const card = host && host.closest && host.closest('.card');
+    if (card && card.querySelectorAll) card.querySelectorAll('.number-play-slot, .music-way, .mm-pad, .mm-pad-key, .snd-play, .np-btn, .g3-play, .way-play-btn, [data-act="play-numbers"]').forEach(function (el) { if (el.classList) el.classList.add('hidden'); });
+  }
   function bind(host, spec, env) {
     if (!host || !spec) return false;
     let round = env && env.round === 'alone' ? 'alone' : 'together';
     const noGo = !(env && typeof env.read === 'function');
-    const draw = function () { host.innerHTML = html(spec, round, noGo); };
+    const draw = function () { host.innerHTML = html(spec, round, noGo); if (round === 'alone') quietCard(host); };
     draw();
     host.onclick = function (ev) {
       const t = ev && ev.target && ev.target.closest ? ev.target : null;
@@ -147,5 +152,5 @@
     const s = specForItem(item);
     return s ? play(s, 'together') : null;
   }
-  return { WAY, FAMILIES, ROUNDS, MIN_HZ, parse, specForItem, plan, nextRound, choiceStep, html, play, hush, bind, playFor, answerIsRight };
+  return { WAY, FAMILIES, ROUNDS, TEN_HZ, parse, specForItem, plan, nextRound, choiceStep, html, play, hush, bind, playFor, answerIsRight };
 });
