@@ -123,10 +123,18 @@
     PREREQ[id][0].forEach(function (p) { if (BUILDS_TO[p]) BUILDS_TO[p].push(id); });
   });
 
-  // { prereq, buildsTo, carries } of a topic, or null for an unknown id.
+  const bridgesModule = typeof require === 'function' ? require('./bridges.js') : (typeof globalThis !== 'undefined' && globalThis.MM_BRIDGES);
+
+  // { prereq, buildsTo, carries, bridges } of a topic, or null for an unknown id.
   function linksForTopic(id) {
     if (!Object.prototype.hasOwnProperty.call(PREREQ, id)) return null;
-    return { topicId: id, prereq: PREREQ[id][0].slice(), buildsTo: BUILDS_TO[id].slice(), carries: PREREQ[id][1] };
+    return {
+      topicId: id,
+      prereq: PREREQ[id][0].slice(),
+      buildsTo: BUILDS_TO[id].slice(),
+      carries: PREREQ[id][1],
+      bridges: (bridgesModule && bridgesModule.bridgesForTopic) ? bridgesModule.bridgesForTopic(id) : [],
+    };
   }
 
   // Links of a music skill. `taggedTopicId` is the row curriculum.js tags the
@@ -144,5 +152,9 @@
     SKILL_TOPIC: SKILL_TOPIC,
     linksForTopic: linksForTopic,
     linksForSkill: linksForSkill,
+    BRIDGES: (bridgesModule && bridgesModule.BRIDGES) || {},
+    bridgeForLink: (bridgesModule && bridgesModule.bridgeForLink) || function () { return null; },
+    bridgesForTopic: (bridgesModule && bridgesModule.bridgesForTopic) || function () { return []; },
+    bridgesEnteringTopic: (bridgesModule && bridgesModule.bridgesEnteringTopic) || function () { return []; },
   };
 });
