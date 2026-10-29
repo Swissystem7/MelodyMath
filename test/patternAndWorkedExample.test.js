@@ -159,7 +159,45 @@ test('a wrong answer shows the hint and does not fill the choice', () => {
   assert.equal(heard[0], 261.63);
   const hint = find(host, 'mm-ex-hint');
   assert.equal(hint.hidden, false);
-  assert.match(hint.textContent, /מי/);
+  assert.equal(hint.textContent, 'הקשיבו לסדר שחוזר');
+  assert.equal(hint.textContent.includes('מי'), false);
+});
+
+test('no pattern hint contains the correct answer (Refs #835)', () => {
+  const banks = require('../src/lib/banks.js');
+  const samples = [
+    PW.createPatternCompletionExercise(),
+    PW.createPatternCompletionExercise({ pattern: ['סול', 'לה', 'סול', 'לה'], choices: ['דו', 'לה', 'מי'] }),
+    PW.createPatternCompletionExercise({ pattern: ['פה', 'סול', 'פה', 'סול'] }),
+  ].concat(banks.allItems().filter((it) => it.kind === 'pattern_completion'));
+  assert.ok(samples.length >= 4, 'factory patterns plus the bank item');
+  function buttons(n, cls, out) {
+    out = out || [];
+    if (n.className && n.className.split(' ').includes(cls)) out.push(n);
+    for (const c of n.children || []) buttons(c, cls, out);
+    return out;
+  }
+  for (const ex of samples) {
+    const answer = String(ex.answer);
+    const wrong = (ex.choices || ['דו', 'מי', 'סול']).find((c) => String(c) !== answer);
+    assert.ok(wrong, 'need a wrong choice beside ' + answer);
+    const shown = [ex.hint, PW.retryHint(ex)];
+    if (typeof ex.check === 'function') {
+      const res = ex.check(wrong);
+      shown.push(res.hint, res.feedback);
+    }
+    const host = box();
+    PW.renderPatternWidget(host, ex, { playTap() {} });
+    const choice = buttons(host, 'pattern-choice-btn').find((b) => b.textContent === wrong);
+    assert.ok(choice, 'button for ' + wrong);
+    choice.onclick();
+    shown.push(find(host, 'mm-ex-hint').textContent, host._hint);
+    for (const text of shown) {
+      assert.equal(String(text).includes(answer), false, JSON.stringify(text) + ' names ' + answer);
+    }
+    assert.equal(PW.retryHint(ex), 'הקשיבו לסדר שחוזר');
+    assert.equal(find(host, 'mm-ex-hint').textContent, 'הקשיבו לסדר שחוזר');
+  }
 });
 
 
@@ -209,7 +247,7 @@ test('#835 worked example: a wrong independent answer keeps the stage and the hi
   assert.equal(PW.retryHint(ind), '🥁🥁🥁 ➕ 🔔🔔 — ספרו את כל הצלילים.');
   assert.equal(ind.hint, '3 ועוד 2 הם 5 צלילים', 'hint is the post-correct explanation');
   assert.equal(ind.check(5).hint, '');
-  assert.equal(PW.retryHint(PW.createPatternCompletionExercise()), 'אחרי דו בא מי, ושוב דו, ואז מי.');
+  assert.equal(PW.retryHint(PW.createPatternCompletionExercise()), 'הקשיבו לסדר שחוזר');
   assert.equal(PW.createWorkedExampleExercise({ stage: 'completion' }).check(0).next, 'demo');
 });
 

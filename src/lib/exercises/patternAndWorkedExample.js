@@ -36,7 +36,8 @@
     const pattern = o.pattern || PATTERN.slice();
     const expected = answerForShown(pattern);
     const prompt = o.prompt || 'דו, מי, דו — איזה צליל משלים את התבנית?';
-    const hint = o.hint || 'אחרי דו בא מי, ושוב דו, ואז מי.';
+    // A wrong answer hears a guide, never the next note (Refs #835).
+    const hint = patternGuide();
     return {
       id: o.id || 'pattern-' + pattern.join('-'),
       grade: o.grade || 'א', skill: 'counting', kind: EXERCISE_KINDS.PATTERN_COMPLETION,
@@ -48,14 +49,17 @@
       }),
       check: function (given) {
         const isOk = String(given).trim() === String(expected).trim();
-        return { correct: isOk, status: isOk ? 'right' : 'retry', hint: isOk ? '' : hint, feedback: isOk ? 'כל הכבוד! הצליל משלים את התבנית.' : hint };
+        const again = patternGuide();
+        return { correct: isOk, status: isOk ? 'right' : 'retry', hint: isOk ? '' : again, feedback: isOk ? 'כל הכבוד! הצליל משלים את התבנית.' : again };
       }
     };
   }
-  // Digit-free retry hint: never shows the total (Refs #835).
+  // Wrong-answer guide for a pattern: listen again. It never names the missing note (Refs #835).
+  function patternGuide() { return 'הקשיבו לסדר שחוזר'; }
+  // Digit-free retry hint: never shows the total, and a pattern hint never names the answer (Refs #835).
   function retryHint(ex) {
     if (!ex) return '';
-    if (ex.kind === EXERCISE_KINDS.PATTERN_COMPLETION || ex.pattern) return ex.hint || '';
+    if (ex.kind === EXERCISE_KINDS.PATTERN_COMPLETION || ex.pattern) return patternGuide();
     const a = Math.max(0, Number(ex.a) || 0), b = Math.max(0, Number(ex.b) || 0);
     return '🥁'.repeat(a) + ' ➕ ' + '🔔'.repeat(b) + ' — ספרו את כל הצלילים.';
   }
@@ -146,9 +150,9 @@
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
         const play = opts.playTap || (root && root.playTap);
         if (typeof play === 'function') play('xylo', { hz: NOTE_HZ[c] || 330, step: 0 });
-        const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
+        const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer) });
         hint.hidden = !!res.correct;
-        hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
+        hint.textContent = res.correct ? '' : patternGuide();
         container._hint = hint.textContent;
         if (res.correct && typeof opts.onAnswer === 'function') opts.onAnswer(c);
       }));

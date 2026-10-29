@@ -73,7 +73,8 @@ test('#835 rpCheck: a wrong pattern_completion answer stays on the item, silent 
   assert.equal(ctx.rmPlan[0].history.length, 0);
   assert.equal(el('rmPlanNext').hidden, true);
   assert.equal(/התשובה/.test(el('rmPlanFeedback').innerHTML), false, el('rmPlanFeedback').innerHTML);
-  assert.match(el('rmPlanFeedback').innerHTML, /אחרי דו בא מי/);
+  assert.match(el('rmPlanFeedback').innerHTML, /הקשיבו לסדר שחוזר/);
+  assert.equal(el('rmPlanFeedback').innerHTML.includes(item.answer), false);
   assert.equal(el('rmPlanAnswer').value, '');
   assert.equal(el('rmPlanAnswer').disabled, false);
   assert.deepEqual(calls, [], 'no maybeHear/maybeSpeak/playTap on a wrong pattern answer');
