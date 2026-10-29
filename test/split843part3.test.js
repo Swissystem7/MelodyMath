@@ -196,3 +196,20 @@ test('no-music round: fraction choices and the worked example work with zero aud
   }
   assert.equal(made, 0, 'no AudioContext was created');
 });
+
+test('on a phone a one stays audible next to a ten and sounds different (23, cube layer, vertical)', () => {
+  // Phone speaker: two cascaded 2nd-order highpass at 300 Hz. Odd harmonics: triangle 1/n^2, square 1/n.
+  const H = (f) => { const x = (f / 300) ** 2; return (x / Math.sqrt(1 + x * x)) ** 2; };
+  const harm = (t) => (t === 'sine' ? [[1, 1]] : [1, 3, 5, 7, 9, 11, 13, 15].map((n) => [n, t === 'square' ? 1 / n : 1 / (n * n)]));
+  const phone = (e) => {
+    const parts = [[1, 1]].concat(e.partials || []), share = e.gain / parts.reduce((s, p) => s + p[1], 0);
+    return Math.sqrt(parts.reduce((s, [r, g]) => s + harm(e.type).reduce((t, [n, a]) => t + (share * g * a * H(e.hz * r * n)) ** 2 / 2, 0), 0));
+  };
+  [['chart 23', g1.chart100Events(23)], ['layer 23', g2.cubeLayerEvents(23)], ['vertical', g2.phaseEvents(g2.verticalVoices({ a: 47, b: 38, op: '+' }).phases)]].forEach(([name, ev]) => {
+    const ten = ev.find((e) => e.hz === 110), one = ev.find((e) => e.hz === 220);
+    const db = 20 * Math.log10(phone(one) / phone(ten));
+    assert.ok(db >= -6, name + ': a one is ' + db.toFixed(1) + ' dB against a ten on a phone');
+    assert.notEqual(one.type, ten.type, name + ': different timbre');
+    assert.ok(ten.dur >= 2 * one.dur, name + ': a one is a short click, a ten a long tone');
+  });
+});
