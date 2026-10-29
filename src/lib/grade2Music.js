@@ -358,9 +358,20 @@
     try { return !!load().quiet; } catch (e) { return false; }
   }
 
+  // A ten's overtones play as notes at the same moment, sharing its gain.
+  function withPartials(events) {
+    const out = [];
+    (events || []).forEach(function (e) {
+      if (!e || !Array.isArray(e.partials)) { out.push(e); return; }
+      const share = e.gain / (1 + e.partials.reduce(function (s, p) { return s + p[1]; }, 0));
+      [[1, 1]].concat(e.partials).forEach(function (p) { out.push({ at: e.at, dur: e.dur, hz: e.hz * p[0], gain: share * p[1], type: e.type }); });
+    });
+    return out;
+  }
+
   function playEvents(events) {
     if (isQuiet() || typeof engine.playSequence !== 'function') return [];
-    return engine.playSequence(events);
+    return engine.playSequence(withPartials(events));
   }
 
   function node(tag, cls, text) {
@@ -501,7 +512,7 @@
     evenOddBeats: evenOddBeats, evenOddEvents: evenOddEvents, evenOddNarration: evenOddNarration,
     verticalVoices: verticalVoices, phaseEvents: phaseEvents, phaseNarration: phaseNarration,
     barsBeats: barsBeats, barsBeatsEvents: barsBeatsEvents, barsBeatsNarration: barsBeatsNarration,
-    cubeLayerSounds: cubeLayerSounds, cubeLayerEvents: cubeLayerEvents,
+    cubeLayerSounds: cubeLayerSounds, cubeLayerEvents: cubeLayerEvents, withPartials: withPartials,
     halfBarSpec: halfBarSpec, halfBarEvents: halfBarEvents, halfBarNarration: halfBarNarration,
     registerVoices: registerVoices, registerNarration: registerNarration, registerCue: registerCue,
     bindGrade2: bindGrade2,

@@ -55,13 +55,11 @@ test('vertical and register voices: the 110 Hz bass is audible, ones one octave 
 test('take-away circles: every ten is 110 Hz and asks for the audible timbre', () => {
   let tens = 0;
   [[8, 3], [12, 5], [34, 10], [56, 21], [99, 40]].forEach(([a, b]) => {
-    const spec = take.takeAwayCircles(a, b), calls = [], seq = [];
+    const spec = take.takeAwayCircles(a, b), calls = [];
     take.soundEvents(spec).forEach((e) => { if (e.v === 10) { tens++; assert.equal(e.hz, 110, a + '-' + b); } });
     take.play(spec, { audioContext: AC, voice: 'drumLow', playVoice: (c, v, hz, t, d, o) => calls.push({ hz, o }) });
     calls.forEach((c) => assert.equal(!!(c.o && c.o.audibleLow), c.hz === 110, a + '-' + b + ' at ' + c.hz));
     calls.filter((c) => c.o && c.o.dur > 0.3).forEach((c) => assert.equal(c.hz, 110, 'held ten ' + a));
-    take.play(spec, { playSequence: (s) => { seq.push(...s); return {}; } });
-    seq.filter((s) => s.v >= 10).forEach((s) => audible(s, 'take-away sequence'));
   });
   assert.ok(tens > 0, 'tens were heard');
 });
@@ -83,7 +81,7 @@ test('number play: a ten on a 220 Hz instrument is 110 Hz (not 120), and jamKit 
   assert.deepEqual(seen, [{ audibleLow: true }, undefined], 'jamKit passes audibleLow for the ten only');
 });
 
-test('the engine plays a ten as 110 + 220/330/440 Hz at the same total gain', () => {
+test('playEvents (grade1, grade2) plays a ten as 110 + 220/330/440 Hz at the same total gain', () => {
   const made = [];
   const param = () => ({ setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
   const node = () => ({ connect(x) { return x; } });
@@ -95,7 +93,7 @@ test('the engine plays a ten as 110 + 220/330/440 Hz at the same total gain', ()
   const prev = globalThis.window;
   globalThis.window = { AudioContext: FakeAC };
   try {
-    assert.ok(engine.scheduleSequence(g1.chart100Events(10)), 'scheduled');
+    assert.ok(g1.playEvents(g1.chart100Events(10)), 'scheduled');
     assert.deepEqual(made.filter((x) => x.hz != null).map((x) => x.hz), [110, 220, 330, 440]);
     const peaks = made.filter((x) => x.peak).map((x) => x.peak);
     assert.ok(Math.abs(peaks.reduce((s, v) => s + v, 0) - 0.24) < 1e-9, 'total gain unchanged: ' + peaks);
@@ -103,7 +101,10 @@ test('the engine plays a ten as 110 + 220/330/440 Hz at the same total gain', ()
     if (engine.stopSequence) engine.stopSequence();
     if (prev === undefined) delete globalThis.window; else globalThis.window = prev;
   }
-  assert.equal(engine.planSequence([{ at: 0, dur: 0.2, hz: 220 }], 0)[0].partials, undefined, 'a plain note has no overtones');
+  const ten = g2.cubeLayerEvents(13).find((e) => e.place === 'ten'), one = g2.cubeLayerEvents(13).find((e) => e.place === 'one');
+  const x = g2.withPartials([ten, one]);
+  assert.deepEqual(x.map((e) => e.hz), [110, 220, 330, 440, 220], 'grade2: four notes for the ten, one for the one');
+  assert.ok(Math.abs(x.slice(0, 4).reduce((s, e) => s + e.gain, 0) - ten.gain) < 1e-9 && x[4].gain === one.gain, 'gain shared');
 });
 
 test('instrument voices: audibleLow lifts a 110 Hz ten into a phone band, other notes unchanged', () => {

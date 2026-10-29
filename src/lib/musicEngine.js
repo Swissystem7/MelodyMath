@@ -320,14 +320,10 @@
       if (!positive(dur) || typeof at !== 'number' || !Number.isFinite(at) || at < 0) return;
       const hz = e.rest ? null : clampHz(e.hz);
       if (hz != null) {
-        const note = {
+        out.push({
           time: t0 + at, dur: Math.max(dur, ATTACK + RELEASE), hz: hz,
           gain: clampGain(e.gain == null ? 0.2 : e.gain), type: e.type || 'sine',
-        };
-        // [ratio, relative gain] overtones of the same note: a 110 Hz ten is
-        // heard on a phone through its 220/330/440 Hz partials.
-        if (Array.isArray(e.partials)) note.partials = e.partials;
-        out.push(note);
+        });
       }
     });
     return out;
@@ -732,26 +728,19 @@
     if (Array.isArray(events)) { lastEvents = events.slice(); lastOpts = opts; }
     const start = ac.currentTime + 0.05;
     const plan = planSequence(events, start, opts);
-    function tone(note, hz, gain) {
+    plan.forEach(function (note) {
       const o = ac.createOscillator();
       const g = ac.createGain();
       o.type = note.type;
-      o.frequency.setValueAtTime(hz, note.time);
+      o.frequency.setValueAtTime(note.hz, note.time);
       g.gain.setValueAtTime(0.0001, note.time);
-      g.gain.linearRampToValueAtTime(gain, note.time + ATTACK);
-      g.gain.setValueAtTime(gain, note.time + note.dur - RELEASE);
+      g.gain.linearRampToValueAtTime(note.gain, note.time + ATTACK);
+      g.gain.setValueAtTime(note.gain, note.time + note.dur - RELEASE);
       g.gain.linearRampToValueAtTime(0.0001, note.time + note.dur);
       o.connect(g).connect(ac.destination);
       o.start(note.time);
       o.stop(note.time + note.dur + 0.02);
       live.push(o);
-    }
-    plan.forEach(function (note) {
-      // Overtones share the note's gain, so a ten is no louder than before.
-      const parts = note.partials || [];
-      const share = note.gain / (1 + parts.reduce(function (s, p) { return s + p[1]; }, 0));
-      tone(note, note.hz, share);
-      parts.forEach(function (p) { tone(note, clampHz(note.hz * p[0]), share * p[1]); });
     });
     const end = plan.reduce(function (m, n) { return Math.max(m, n.time + n.dur); }, start);
     return { startTime: start, endTime: end, notes: plan.length, plan: plan };

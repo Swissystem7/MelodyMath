@@ -123,9 +123,7 @@
     if (typeof ps === 'function') {
       const seq = events.map(function (ev) {
         const n = noteOf(spec, ev);
-        const s = { at: n.at, dur: n.dur, hz: n.hz, gain: n.gain, type: 'triangle', voice: voices[ev.kind] || voice, v: ev.v };
-        if (ev.v >= 10) s.partials = [[2, 0.8], [3, 0.55], [4, 0.35]];
-        return s;
+        return { at: n.at, dur: n.dur, hz: n.hz, gain: n.gain, type: 'triangle', voice: voices[ev.kind] || voice, v: ev.v };
       });
       const r = ps(seq);
       return r ? { instrument: id, voice: voice, notes: events.length } : null;

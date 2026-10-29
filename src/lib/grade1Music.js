@@ -56,12 +56,26 @@
     return { at: at, dur: dur, hz: hz, gain: gain, type: type };
   }
 
+  // A ten's overtones (partials: [ratio, relative gain]) play as notes at the
+  // same moment, sharing its gain: a 110 Hz ten a phone speaker can play.
+  function withPartials(events) {
+    const out = [];
+    events.forEach(function (e) {
+      if (!e || !Array.isArray(e.partials)) { out.push(e); return; }
+      const share = e.gain / (1 + e.partials.reduce(function (s, p) { return s + p[1]; }, 0));
+      [[1, 1]].concat(e.partials).forEach(function (p) {
+        out.push({ at: e.at, dur: e.dur, hz: e.hz * p[0], gain: share * p[1], type: e.type });
+      });
+    });
+    return out;
+  }
+
   // Hands a plain event list to the shared engine. In Node there is no
   // AudioContext, so this returns null and the activity stays silent.
   function playEvents(events) {
     if (!Array.isArray(events) || !events.length) return null;
     if (!engine || typeof engine.playSequence !== 'function') return null;
-    return engine.playSequence(events);
+    return engine.playSequence(withPartials(events));
   }
 
   function countBeats(start, step, max) {
@@ -431,6 +445,7 @@
     patternEvents: patternEvents,
     patternNarration: patternNarration,
     playEvents: playEvents,
+    withPartials: withPartials,
     bindGrade1: bindGrade1
   };
 });
