@@ -156,6 +156,57 @@ test('index.html: exactly one streak reward, after the right-answer sound', () =
   assert.equal(streakModule.getUnlocks('fractions')[0].instrument, 'flute');
 });
 
+function loadNoteMetro(calls) {
+  const block = indexHtml.slice(indexHtml.indexOf('function noteMetro('), indexHtml.indexOf("if($('metroToggle'))$('metroToggle').onclick"))
+    + indexHtml.slice(indexHtml.indexOf('function streakReward('), indexHtml.indexOf('function paintMySong('))
+    + indexHtml.slice(indexHtml.indexOf('function setlistNote('), indexHtml.indexOf('function paintSetlist('));
+  const sandbox = {
+    MM_MASTERY_STREAK: Object.assign({}, streakModule, {
+      instrumentFor: () => 'flute', playPhrase: () => calls.push('phrase'),
+    }),
+    MM_SETLIST_GOAL: { rollover() {}, songPhrase: () => [], recordAnswer: () => ({ counted: true, justMet: true }) },
+    metroStreak: 0, $: () => null, prefsNow: () => ({}), paintMySong() {}, paintSetlist() {},
+    playTap: (v) => calls.push('tap:' + v), playStreakMelody: () => calls.push('melody'),
+    playHarmonicReward: () => calls.push('harmonic'),
+    recordCorrect: () => null, setMetroBpm() {}, nextBpm() {}, metroBpmNow: () => 80, setTimeout,
+  };
+  streakModule.setStorage(createMockStorage());
+  streakModule.resetAll();
+  vm.createContext(sandbox);
+  vm.runInContext(block + '\nthis.noteMetro=noteMetro;', sandbox);
+  return sandbox;
+}
+
+test('index.html: the silent noMusic round plays no reward sound but still counts the streak', () => {
+  for (const item of [{ noMusic: true }, { plain: true }, { musicStage: 'no_music_check' }]) {
+    const calls = [];
+    const sandbox = loadNoteMetro(calls);
+    for (let i = 0; i < 6; i++) sandbox.noteMetro(true, 'fractions', item);
+    sandbox.noteMetro(false, 'fractions', item);
+    assert.deepEqual(calls, [], 'no sound in a music-free round: ' + JSON.stringify(item));
+    assert.equal(sandbox.metroStreak, 0, 'a wrong answer still resets the streak');
+    for (let i = 0; i < 3; i++) sandbox.noteMetro(true, 'fractions', item);
+    assert.equal(sandbox.metroStreak, 3, 'right answers still count');
+  }
+  const calls = [];
+  const sandbox = loadNoteMetro(calls);
+  for (let i = 0; i < 5; i++) sandbox.noteMetro(true, 'fractions', {});
+  sandbox.noteMetro(false, 'fractions', {});
+  assert.ok(calls.includes('melody') && calls.includes('phrase') && calls.includes('tap:wrong'), 'a music round still plays: ' + calls);
+});
+
+test('index.html: a silent round stops a running metronome and does not speed it up', () => {
+  const calls = [];
+  const sandbox = loadNoteMetro(calls);
+  sandbox.metroOn = true;
+  sandbox.stopMetro = () => { sandbox.metroOn = false; calls.push('stopMetro'); };
+  sandbox.$ = (id) => (id === 'metroAccel' ? { checked: true } : null);
+  sandbox.noteMetro(true, 'fractions', { noMusic: true });
+  assert.deepEqual(calls, ['stopMetro']);
+  assert.equal(sandbox.metroOn, false);
+  assert.equal(sandbox.metroStreak, 1);
+});
+
 test('index.html: every practice screen feeds its topic into the streak', () => {
   assert.match(indexHtml, /history\.push\(\{id:current\.id,correct\}\);noteMetro\(correct,current\.mathTopic\|\|current\.skill,current\)/, 'main practice');
   assert.match(indexHtml, /noteMetro\(correct,st\.skill\|\|st\.he,it\)/, 'personal plan');

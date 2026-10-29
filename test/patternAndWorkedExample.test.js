@@ -75,6 +75,8 @@ function box() {
     const children = [];
     const n = { style: {}, className: '', textContent: '', hidden: false, children: children };
     n.appendChild = function (c) { children.push(c); return c; };
+    // Like the DOM: assigning innerHTML drops the old children.
+    Object.defineProperty(n, 'innerHTML', { get() { return ''; }, set() { children.length = 0; } });
     return n;
   }
   const host = node();

@@ -84,7 +84,7 @@ test('wired into the topic step on the practice screen, after its last item', ()
   assert.match(html, /<script src="src\/lib\/motivation\/personalBest\.js"><\/script>/);
   assert.match(html, /function rpAdvance\(\)\{const st=rmPlan\[rpStep\];if\(\(st\.history\|\|\[\]\)\.length<PLAN_PER_SKILL\)\{rpRender\(\);return\}const enc=personalBestEncore\(st\);/);
   assert.match(html, /P\.playEncore\(P\.encorePlan\(/);
-  assert.match(html, /length>=PLAN_PER_SKILL-1\)rpHoldStreak=true;const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he,it\);if\(st\.level>lv0&&typeof playLevelTune==='function'\)playLevelTune\(\);rpHoldStreak=false/);
+  assert.match(html, /length>=PLAN_PER_SKILL-1\)rpHoldStreak=true;const lv0=it\.level\|\|st\.level\|\|1;st\.level=nextLevel\(lv0,st\.history\.slice\(-2\)\);noteMetro\(correct,st\.skill\|\|st\.he,it\);if\(st\.level>lv0&&typeof playLevelTune==='function'&&!\(it&&\(it\.noMusic\|\|it\.plain\|\|it\.musicStage==='no_music_check'\)\)\)playLevelTune\(\);rpHoldStreak=false/);
   assert.match(html, /rpHoldStreak\)rpStreakHeld=r\.phrase;else S\.playPhrase\(r\.phrase,null,null,0\.4\)/);
   assert.match(read('sw.js'), /'\.\/src\/lib\/motivation\/personalBest\.js'/);
 });

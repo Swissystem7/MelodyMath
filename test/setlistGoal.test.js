@@ -73,7 +73,7 @@ test('only an answer in a step with music adds a box; the no-music check does no
   assert.equal(G.getActive().count, 0);
   assert.equal(G.recordAnswer(true, { item: { prompt: '3 + 4', hear: [3, 4] } }).active.count, 1);
   const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
-  assert.match(html, /setlistNote\(correct,topic,won,item\)/);
+  assert.match(html, /setlistNote\(correct,topic,won,item,quiet\)/);
   assert.match(html, /recordAnswer\(correct,\{item:item,/);
 });
 
