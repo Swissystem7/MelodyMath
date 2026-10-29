@@ -66,17 +66,18 @@
     const ans = answerText(spec); return '<div class="snd-wrap"><button type="button" class="snd-play">▶ האזינו וספרו</button><div class="snd-circles' + (shown.length > 20 ? ' snd-many' : '') + '" dir="ltr">' + parts.join('') + '</div>' + (revealed ? '<span class="snd-answer">' + ans + '</span>' : '<span class="snd-answer" data-reveal="' + ans + '">?</span>') + '</div>';
   }
   function answerText(spec) { if (!spec) return ''; if (spec.kind === 'takeAway') return 'נשארו ' + spec.remaining; return (spec.hundreds ? spec.hundreds + ' מאות, ' : '') + spec.drums + ' עשרות ו־' + spec.left + ' יחידות'; }
+  const TEN_HZ = 110; // a ten is 110 Hz everywhere, held (above 12) or plain
   const STEP_HZ = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
-  function pushCount(ev, total, t, step, oneKind, phase) { countGroups(total).forEach(function (g) { for (let k = 0; k < g.n; k++) { ev.push({ at: t, hz: g.v === 10 ? 130 : STEP_HZ[ev.length % 8], kind: g.v === 10 ? 'drum' : oneKind, v: g.v, phase: phase }); t += step; } }); return t; }
+  function pushCount(ev, total, t, step, oneKind, phase) { countGroups(total).forEach(function (g) { for (let k = 0; k < g.n; k++) { ev.push({ at: t, hz: g.v === 10 ? TEN_HZ : STEP_HZ[ev.length % 8], kind: g.v === 10 ? 'drum' : oneKind, v: g.v, phase: phase }); t += step; } }); return t; }
   function groupingEvents(spec) {
     const ev = [], step = 0.16; let t = 0; const tens = spec.hundreds * 10 + spec.drums; const exchanged = tens > 0 && spec.bells >= 10;
-    function push(n, kind, v) { for (let i = 0; i < n; i++) { ev.push({ at: t, hz: v === 1 ? STEP_HZ[ev.length % 8] : 130, kind: kind, v: v, phase: 'group' }); t += step; } }
+    function push(n, kind, v) { for (let i = 0; i < n; i++) { ev.push({ at: t, hz: v === 1 ? STEP_HZ[ev.length % 8] : TEN_HZ, kind: kind, v: v, phase: 'group' }); t += step; } }
     push(exchanged ? 10 : Math.min(spec.left, 12), 'bell', 1); if (exchanged) push(1, 'drum', 10); push(Math.max(0, tens - (exchanged ? 1 : 0)), 'drum', 10); push(spec.left, 'bell', 1);
     return ev;
   }
   function soundEvents(spec, opts) { if (!spec || !Array.isArray(spec.circles)) return []; const ev = [];
     if (spec.kind === 'takeAway') { const t1 = pushCount(ev, spec.start, 0, 0.35, 'beat', 'start'); pushCount(ev, spec.remaining, t1 + 0.4, 0.35, 'beat', 'remain'); return ev; }
-    if (!(opts && opts.revealed)) { spec.circles.forEach(function (c, i) { const v = c.kind === 'hundred' ? 100 : (c.kind === 'drum' ? 10 : 1); ev.push({ at: i * 0.22, hz: v === 1 ? STEP_HZ[i % 8] : 130, kind: c.kind, v: v, phase: 'start' }); }); return ev; }
+    if (!(opts && opts.revealed)) { spec.circles.forEach(function (c, i) { const v = c.kind === 'hundred' ? 100 : (c.kind === 'drum' ? 10 : 1); ev.push({ at: i * 0.22, hz: v === 1 ? STEP_HZ[i % 8] : TEN_HZ, kind: c.kind, v: v, phase: 'start' }); }); return ev; }
     return groupingEvents(spec); }
   function myInst() { if (root && root.MM_MY_INSTRUMENT) return root.MM_MY_INSTRUMENT; try { return require('../myInstrument.js'); } catch (e) { return null; } }
   function instData() { if (root && typeof root.instrumentById === 'function') return root; try { return require('../instruments.js'); } catch (e) { return null; } }
@@ -98,7 +99,7 @@
   function noteOf(spec, ev) {
     const ten = spec && spec.kind === 'takeAway' && spec.start > 12 && ev && ev.kind === 'drum' && ev.v === 10;
     if (!ten) return { at: ev.at, hz: ev.hz, dur: 0.18, gain: 0.16, held: false };
-    return { at: ev.at, hz: 110, dur: 0.45, gain: 0.28, held: true };
+    return { at: ev.at, hz: TEN_HZ, dur: 0.45, gain: 0.28, held: true };
   }
   function play(spec, env) {
     const e = env || {}; const events = soundEvents(spec, e); if (!events.length) return null;

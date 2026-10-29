@@ -128,11 +128,11 @@
       const sounds = parts.reduce(function (s, p) { return s + p.n; }, 0);
       const value = parts.reduce(function (s, p) { return s + p.n * p.v; }, 0);
       const pure = parts.length === 1;
-      const hzGroup = pure && parts[0].v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
+      const hzGroup = pure && parts[0].v === 10 ? Math.max(110, Math.round(v.hz / 2)) : v.hz;
       groups.push({ index: gi, count: pure ? parts[0].n : sounds, each: pure ? parts[0].v : 1, value: value, startIndex: notes.length, instrument: v.instrument, family: v.family, voice: v.voice, hz: hzGroup, he: v.he });
       let heard = 0;
       parts.forEach(function (p) {
-        const hz = p.v === 10 ? Math.max(120, Math.round(v.hz / 2)) : v.hz;
+        const hz = p.v === 10 ? Math.max(110, Math.round(v.hz / 2)) : v.hz;
         for (let k = 0; k < p.n; k++) {
           heard += 1;
           notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: p.v, inGroup: heard, groupCount: sounds });

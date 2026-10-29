@@ -32,7 +32,8 @@
   // Every hz is inside the engine's 110–1,760 Hz safety window (§6.6), so
   // clampHz never has to move a voice and the timbres stay distinguishable.
   const VOICES = {
-    drum: { hz: 147, gain: 0.24, type: 'square', he: 'תוף' },
+    // Ones (drum) are 220 Hz, one octave above the 110 Hz tens (bass).
+    drum: { hz: 220, gain: 0.24, type: 'square', he: 'תוף' },
     bass: { hz: 110, gain: 0.26, type: 'triangle', he: 'בס' },
   };
   const PAIR_STRONG_HZ = 165;
@@ -307,7 +308,7 @@
   // leftover ones. It never schedules one unit sound per cube past 12.
   const LAYER_UNIT_MAX = 12;
   const LAYER_TEN_HZ = 110;
-  const LAYER_ONE_HZ = 880;
+  const LAYER_ONE_HZ = 220; // one octave above the ten
 
   function cubeLayerSounds(count) {
     const n = whole(count, 1, 100);

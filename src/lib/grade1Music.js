@@ -171,12 +171,17 @@
       + (jump.jump < 0 ? 'והצליל יורד' : 'והצליל עולה') + '.';
   }
 
+  const TEN_HZ = 110;
+  const ONE_HZ = 220;
+
   function chart100Sound(number, baseTensFreq) {
     const n = Math.max(1, Math.min(100, Math.round(Number(number)) || 1));
     const tens = Math.floor(n / 10);
     const ones = n % 10;
-    const base = Number(baseTensFreq) || 110;
-    const tensFreq = tens === 0 ? null : engine.clampHz(Math.round(base * (1 + tens * 0.1) * 10) / 10);
+    // Every ten is the same 110 Hz tone, one octave below the 220 Hz ones, so
+    // the place is heard as a register, not as a pitch that drifts with the count.
+    const base = Number(baseTensFreq) || TEN_HZ;
+    const tensFreq = tens === 0 ? null : engine.clampHz(base);
     const clickCount = ones;
     const tensHe = tens === 1 ? 'עשרת אחת' : tens + ' עשרות';
     const onesHe = ones === 1 ? 'יחידה אחת' : ones + ' יחידות';
@@ -212,6 +217,7 @@
 
   // The tens are a low tone per ten; the ones are short clicks after them, so
   // the place value is heard as two different things, not one long run.
+  // Tens 110 Hz, ones 220 Hz: one octave apart, the same in every place-value sound.
   function chart100Events(number, baseTensFreq, bpm) {
     const s = chart100Sound(number, baseTensFreq);
     const beat = beatLength(bpm);
@@ -221,7 +227,7 @@
     }
     const after = s.tens * beat + (s.tens ? beat * 0.5 : 0);
     for (let j = 0; j < s.clickCount; j++) {
-      out.push(hit(after + j * beat * 0.4, beat * 0.18, 880, 0.16, 'square'));
+      out.push(hit(after + j * beat * 0.4, beat * 0.18, ONE_HZ, 0.16, 'square'));
     }
     return out;
   }

@@ -272,6 +272,9 @@
     }
     if (!op) return null;
     i -= 1; j -= 1;
+    // A prompt that states its result after the operands ("3 תופים ועוד 2 פעמונים
+    // הם 5 צלילים") gets that number retuned too, or the screen shows a wrong sum.
+    const said = hits.filter(function (h, k) { return k > j && near(h[2], A); });
     const hi = range.max != null ? range.max : 20, lo = range.min || 0, s = Math.abs(step) + 1, dec = hits[i][1].indexOf('.') >= 0 || hits[j][1].indexOf('.') >= 0;
     let a, b, ans;
     if (dec && (op === '+' || op === '-')) { a = (1 + (s % 9)) / 10; b = (1 + ((s * 3) % 9)) / 10; if (op === '-' && b >= a) b = a / 2; ans = Math.round((op === '+' ? a + b : a - b) * 10) / 10; }
@@ -282,8 +285,8 @@
     if (!isFinite(ans) || ans < lo || ans > hi || near(a, hits[i][2]) && near(b, hits[j][2])) return null;
     const fmt = function (n, sample) { return sample.indexOf(',') >= 0 ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : String(n); };
     let out = p;
-    [[hits[j], b], [hits[i], a]].forEach(function (pair) { const h = pair[0], v = fmt(pair[1], h[1]); out = out.slice(0, h[0]) + v + out.slice(h[0] + h[1].length); });
-    if (new RegExp('(^|[^\\d.])' + String(ans).replace(/\\/g, '\\\\').replace(/\./g, '\\.') + '([^\\d]|$)').test(out)) return null;
+    said.map(function (h) { return [h, ans]; }).reverse().concat([[hits[j], b], [hits[i], a]]).forEach(function (pair) { const h = pair[0], v = fmt(pair[1], h[1]); out = out.slice(0, h[0]) + v + out.slice(h[0] + h[1].length); });
+    if (!said.length && new RegExp('(^|[^\\d.])' + String(ans).replace(/\\/g, '\\\\').replace(/\./g, '\\.') + '([^\\d]|$)').test(out)) return null;
     return { prompt: out, answer: ans, key: op + a + ':' + b, a: a, b: b, hint: '' };
   }
   function generateVariant(topicOrItem, roundIndex, options) {
@@ -314,6 +317,12 @@
       instrument: inst.id, voice: inst.voice, instrumentHe: (inst.instrument && inst.instrument.he) || inst.id,
       hear: hear, hasMusic: !silent, noMusic: silent
     };
+    // A worked example carries the numbers its demo plays (drums a, bells b, then
+    // the total), so the notes always match the sum on screen.
+    if (source && source.kind === 'worked_example') {
+      out.a = tuned ? tuned.a : source.a; out.b = tuned ? tuned.b : source.b;
+      out.total = out.a + out.b; out.stage = source.stage || 'demo';
+    }
     if (silent) out.music = null;
     else if (source && source.music) out.music = source.music;
     else if (exerciseType === 'percent') out.music = 'percentBar';

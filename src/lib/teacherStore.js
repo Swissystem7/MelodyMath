@@ -793,17 +793,38 @@
     }
   }
 
-  // Four tap-targets. Nearby integers, or unit-fraction distractors.
+  // Wrong choices a child could really pick for n/d: the same denominator one or
+  // two steps away (2/4 -> 1/4, 3/4), then the neighbouring denominator (1/3 ->
+  // 1/4, 1/2), nearest value first. Never 0, never a whole for a proper answer,
+  // never a value equal to the answer (2/4 never gets 1/2).
+  function fractionDistractors(key) {
+    const n = Number(key.split('/')[0]), d = Number(key.split('/')[1]);
+    const target = n / d, proper = n < d, opts = [key], seen = [target];
+    const ok = function (k, m, loose) {
+      if (k < 1 || m < 1 || (proper && k >= m)) return false;
+      if (!loose && Math.abs(k / m - target) > (proper ? 0.5 : 3 / d) + 1e-9) return false;
+      return !seen.some(function (v) { return Math.abs(v - k / m) < 1e-9; });
+    };
+    const near = function (p, q) { return Math.abs(p[0] / p[1] - target) - Math.abs(q[0] / q[1] - target); };
+    const sameD = [[n - 1, d], [n + 1, d], [n - 2, d], [n + 2, d], [n + 3, d], [n - 3, d]];
+    const nextD = [[n, d + 1], [n, d - 1], [n + 1, d + 1], [n - 1, d - 1], [1, d + 1], [1, d - 1], [n, 2 * d], [n + 1, 2 * d], [n, d + 2]];
+    sameD.sort(near); nextD.sort(near);
+    // Two same-denominator neighbours, one neighbouring denominator, then any.
+    [[sameD, 3], [nextD, 4], [sameD, 4], [nextD, 4], [sameD.concat(nextD), 4, true]].forEach(function (pass) {
+      pass[0].forEach(function (p) {
+        if (opts.length < pass[1] && ok(p[0], p[1], pass[2])) { seen.push(p[0] / p[1]); opts.push(p[0] + '/' + p[1]); }
+      });
+    });
+    return opts;
+  }
+
+  // Four tap-targets. Nearby integers, or close fraction distractors.
   function makeChoices(answer, rng) {
     const roll = typeof rng === 'function' ? rng : Math.random;
     const raw = String(answer == null ? '' : answer).trim();
-    if (/^\d+\/\d+$/.test(raw) || raw === '½' || raw === '¼' || raw === '⅛') {
-      const pool = ['1/2', '1/4', '1/8', '1', '3/4', '0'];
-      const opts = [raw === '½' ? '1/2' : raw === '¼' ? '1/4' : raw === '⅛' ? '1/8' : raw];
-      pool.forEach(function (c) {
-        if (opts.length >= 4) return;
-        if (opts.indexOf(c) === -1) opts.push(c);
-      });
+    const UNI = { '½': '1/2', '¼': '1/4', '⅛': '1/8' };
+    if (/^\d+\/[1-9]\d*$/.test(raw) || UNI[raw]) {
+      const opts = fractionDistractors(UNI[raw] || raw);
       for (let i = opts.length - 1; i > 0; i--) {
         const j = Math.floor(roll() * (i + 1));
         const tmp = opts[i];
