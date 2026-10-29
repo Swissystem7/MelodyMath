@@ -75,6 +75,8 @@ function box() {
     const children = [];
     const n = { style: {}, className: '', textContent: '', hidden: false, children: children };
     n.appendChild = function (c) { children.push(c); return c; };
+    // Like a real element: innerHTML = '' empties it; children itself is read-only (Refs #845).
+    Object.defineProperty(n, 'innerHTML', { get: function () { return ''; }, set: function () { children.splice(0); } });
     return n;
   }
   const host = node();
@@ -115,7 +117,7 @@ test('הבנתי moves on and does not fill the answer', () => {
   let filled = 0;
   const host = box();
   PW.renderWorkedExampleWidget(host, PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' }), {
-    onAnswer: function () { filled++; }, getAnswer: function () { return '5'; }
+    onAnswer: function () { filled++; }, getAnswer: function () { return '5'; }, later: function (fn) { fn(); }
   });
   find(host, 'demo-proceed-btn').onclick();
   assert.equal(host._stage, 'completion');
@@ -125,6 +127,22 @@ test('הבנתי moves on and does not fill the answer', () => {
   assert.equal(host._stage, 'independent');
   assert.equal(filled, 0);
   assert.equal(find(host, 'mm-try-btn'), null);
+});
+
+test('a read-only children list still draws the widget (Refs #845)', () => {
+  const host = box();
+  const kids = host.children;
+  Object.defineProperty(host, 'children', { get: () => Object.freeze(kids.slice()) });
+  assert.doesNotThrow(() => PW.renderPatternWidget(host, PW.createPatternCompletionExercise()));
+  assert.equal(host.children.length, 1);
+  const worked = box();
+  const workedKids = worked.children;
+  Object.defineProperty(worked, 'children', { get: () => Object.freeze(workedKids.slice()) });
+  assert.doesNotThrow(() => PW.renderWorkedExampleWidget(worked, PW.createWorkedExampleExercise({ a: 3, b: 2 }), { later: (fn) => fn() }));
+  find(worked, 'demo-proceed-btn').onclick();
+  find(worked, 'completion-tap-btn').onclick();
+  assert.equal(worked._stage, 'independent');
+  assert.equal(worked.children.length, 1);
 });
 
 test('a wrong answer shows the hint and does not fill the choice', () => {
@@ -141,7 +159,45 @@ test('a wrong answer shows the hint and does not fill the choice', () => {
   assert.equal(heard[0], 261.63);
   const hint = find(host, 'mm-ex-hint');
   assert.equal(hint.hidden, false);
-  assert.match(hint.textContent, /מי/);
+  assert.equal(hint.textContent, 'הקשיבו לסדר שחוזר');
+  assert.equal(hint.textContent.includes('מי'), false);
+});
+
+test('no pattern hint contains the correct answer (Refs #835)', () => {
+  const banks = require('../src/lib/banks.js');
+  const samples = [
+    PW.createPatternCompletionExercise(),
+    PW.createPatternCompletionExercise({ pattern: ['סול', 'לה', 'סול', 'לה'], choices: ['דו', 'לה', 'מי'] }),
+    PW.createPatternCompletionExercise({ pattern: ['פה', 'סול', 'פה', 'סול'] }),
+  ].concat(banks.allItems().filter((it) => it.kind === 'pattern_completion'));
+  assert.ok(samples.length >= 4, 'factory patterns plus the bank item');
+  function buttons(n, cls, out) {
+    out = out || [];
+    if (n.className && n.className.split(' ').includes(cls)) out.push(n);
+    for (const c of n.children || []) buttons(c, cls, out);
+    return out;
+  }
+  for (const ex of samples) {
+    const answer = String(ex.answer);
+    const wrong = (ex.choices || ['דו', 'מי', 'סול']).find((c) => String(c) !== answer);
+    assert.ok(wrong, 'need a wrong choice beside ' + answer);
+    const shown = [ex.hint, PW.retryHint(ex)];
+    if (typeof ex.check === 'function') {
+      const res = ex.check(wrong);
+      shown.push(res.hint, res.feedback);
+    }
+    const host = box();
+    PW.renderPatternWidget(host, ex, { playTap() {} });
+    const choice = buttons(host, 'pattern-choice-btn').find((b) => b.textContent === wrong);
+    assert.ok(choice, 'button for ' + wrong);
+    choice.onclick();
+    shown.push(find(host, 'mm-ex-hint').textContent, host._hint);
+    for (const text of shown) {
+      assert.equal(String(text).includes(answer), false, JSON.stringify(text) + ' names ' + answer);
+    }
+    assert.equal(PW.retryHint(ex), 'הקשיבו לסדר שחוזר');
+    assert.equal(find(host, 'mm-ex-hint').textContent, 'הקשיבו לסדר שחוזר');
+  }
 });
 
 
@@ -165,4 +221,163 @@ test('banks include pattern completion and worked example, and index.html wires 
   assert.equal(patternItems[0].answer, 'מי');
   assert.ok(patternItems[0].research.includes('10.1080/00220973.2020.1799316') && workedItems[0].research.includes('10.1207/s1532690xci0201_3') && /if \(raw\.a != null\)/.test(fs.readFileSync(path.join(__dirname, '..', 'src/lib/banks.js'), 'utf8')));
   assert.equal(PW.shownText(patternItems[0].pattern), 'דו➔מי➔דו➔?');
+});
+
+// ---------- Refs #835: wrong answer stays put; the no-music check is silent and spoiler-free ----------
+const vmMod = require('node:vm');
+const fsMod = require('node:fs');
+const pathMod = require('node:path');
+const INDEX = fsMod.readFileSync(pathMod.join(__dirname, '..', 'index.html'), 'utf8');
+const fnLine = (name) => INDEX.match(new RegExp('^function ' + name + '\\(.*$', 'm'))[0];
+function treeText(n) {
+  let s = String(n.textContent || '');
+  for (const k of Object.keys(n)) if (k !== 'textContent' && k !== 'children' && k !== 'ownerDocument' && typeof n[k] === 'string') s += ' ' + n[k];
+  for (const c of n.children || []) s += ' ' + treeText(c);
+  return s;
+}
+
+test('#835 worked example: a wrong independent answer keeps the stage and the hint has no digits', () => {
+  const ind = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'independent' });
+  const res = ind.check(4);
+  assert.equal(res.correct, false);
+  assert.equal(res.next, 'independent');
+  assert.equal(/\d/.test(res.hint), false, res.hint);
+  assert.equal(/\d/.test(res.feedback), false, res.feedback);
+  assert.equal(/\d/.test(PW.retryHint(ind)), false);
+  assert.equal(PW.retryHint(ind), '🥁🥁🥁 ➕ 🔔🔔 — ספרו את כל הצלילים.');
+  assert.equal(ind.hint, '3 ועוד 2 הם 5 צלילים', 'hint is the post-correct explanation');
+  assert.equal(ind.check(5).hint, '');
+  assert.equal(PW.retryHint(PW.createPatternCompletionExercise()), 'הקשיבו לסדר שחוזר');
+  assert.equal(PW.createWorkedExampleExercise({ stage: 'completion' }).check(0).next, 'demo');
+});
+
+test('#835 the עכשיו לבד screen hides the total and makes zero sound calls', () => {
+  const heard = [];
+  const host = box();
+  const ex = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' });
+  PW.renderWorkedExampleWidget(host, ex, { playTap: (v) => heard.push(v), later: (fn) => fn() });
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-tap-btn').onclick();
+  assert.equal(host._stage, 'independent');
+  heard.length = 0;
+  assert.equal(host._silent, true);
+  assert.equal(/5/.test(treeText(host)), false, 'total must not appear before a correct submit');
+  const hint = find(host, 'mm-ex-hint');
+  assert.equal(hint.hidden, true);
+  host._retry();
+  assert.equal(hint.hidden, false);
+  assert.equal(/\d/.test(hint.textContent), false);
+  assert.equal(/5/.test(treeText(host)), false);
+  assert.deepEqual(heard, [], 'no audio on the no-music screen');
+});
+
+test('#835 the bank worked example prompt and retry hint do not leak the answer', () => {
+  const it = require('../src/lib/banks.js').allItems().find((x) => x.kind === 'worked_example');
+  assert.equal(it.answer, 5);
+  assert.equal(it.prompt, '3 תופים ועוד 2 פעמונים. כמה צלילים ביחד?');
+  assert.equal(/5/.test(it.prompt), false, it.prompt);
+  assert.equal(/\d/.test(PW.retryHint(it)), false, PW.retryHint(it));
+  assert.equal(it.hint, '3 ועוד 2 הם 5 צלילים');
+  assert.ok(PW.countWords(it.prompt) <= 15);
+});
+
+test('#835 a demo started before the tap never sounds once עכשיו לבד is on screen', () => {
+  const heard = [], queue = [];
+  const host = box();
+  const ex = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' });
+  PW.renderWorkedExampleWidget(host, ex, { playTap: (v) => heard.push(v), later: (fn) => queue.push(fn), clearLater() {} });
+  find(host, 'demo-listen-btn').onclick();
+  assert.equal(heard.length, 0, 'demo notes are only scheduled');
+  find(host, 'demo-proceed-btn').onclick();
+  find(host, 'completion-tap-btn').onclick();
+  assert.deepEqual(heard, ['drum'], 'the completion drum plays right away');
+  assert.equal(host._stage, 'completion');
+  queue.pop()();
+  assert.equal(host._stage, 'independent');
+  assert.deepEqual(host._timers, [], 'pending demo timers are cleared');
+  heard.length = 0;
+  queue.splice(0).forEach((fn) => fn());
+  assert.deepEqual(heard, [], 'zero play calls on the independent stage');
+});
+
+function planCtx(stage) {
+  const calls = [];
+  const els = {};
+  const el = (id) => els[id] || (els[id] = { id, value: '', disabled: false, className: '', textContent: '', innerHTML: '', hidden: true, focus() {} });
+  const spy = (name) => function () { calls.push(name); };
+  const ctx = {
+    MM_PATTERN_WORKED: PW, $: el, PLAN_PER_SKILL: 5,
+    show: (id, on) => { el(id).hidden = !on; },
+    normalizeAnswer: (v) => String(v).trim(), askForAnswer: spy('askForAnswer'),
+    answerOk: (it, v) => Number(v) === Number(it.answer), mathHtml: (s) => String(s),
+    nextLevel: (lv) => lv, logTeacherItem() {}, answerHint: (it) => it.hint, musicSourceHtml: () => '', revealWidget() {},
+    musicEngine: { audioState: { muted: false } },
+    noteMetro: () => calls.push(ctx.mmHushNow() && ctx.musicEngine.audioState.muted ? 'noteMetro(hushed)' : 'noteMetro(loud)'),
+    playTap: spy('playTap'), playDemo: spy('playDemo'), maybeHear: spy('maybeHear'), maybeSpeak: spy('maybeSpeak'),
+    playLevelTune: spy('playLevelTune'), AudioContext: spy('AudioContext'),
+  };
+  vmMod.createContext(ctx);
+  vmMod.runInContext('let mmHush=false,mmHushWas=false,rpAnswered=false,rpHoldStreak=false,rpStep=0;var mmHushNow=()=>mmHush;' + fnLine('hushAudio') + '\n' + fnLine('stayOnWrong') + '\n' + fnLine('rpCheck'), ctx);
+  const item = PW.createWorkedExampleExercise({ a: 3, b: 2, stage: 'demo' });
+  ctx.rmPlan = [{ he: 'חיבור', current: item, history: [] }];
+  const host = el('rmPlanWidget');
+  Object.assign(host, box());
+  PW.renderWorkedExampleWidget(host, item, { playTap: spy('playTap'), later: (fn) => fn() });
+  if (stage !== 'demo') { find(host, 'demo-proceed-btn').onclick(); find(host, 'completion-tap-btn').onclick(); }
+  calls.length = 0;
+  return { ctx, el, calls, host, answered: () => vmMod.runInContext('rpAnswered', ctx) };
+}
+
+test('#835 rpCheck: a wrong answer stays on the same item with a written hint and no sound', () => {
+  const { ctx, el, calls, host, answered } = planCtx('independent');
+  el('rmPlanAnswer').value = '4';
+  ctx.rpCheck();
+  assert.equal(answered(), false);
+  assert.equal(el('rmPlanNext').hidden, true, 'no Next on a wrong answer');
+  assert.equal(ctx.rmPlan[0].history.length, 0);
+  assert.equal(el('rmPlanFeedback').hidden, false);
+  assert.equal(/התשובה|5/.test(el('rmPlanFeedback').innerHTML), false, el('rmPlanFeedback').innerHTML);
+  assert.equal(el('rmPlanFeedback').innerHTML, '<strong>כמעט! נסו שוב.</strong>', 'the widget shows the hint, not the feedback');
+  assert.equal(el('rmPlanFeedback').innerHTML.includes(ctx.rmPlan[0].current.hint), false);
+  assert.equal(ctx.rmPlan[0].hints, 1);
+  assert.equal(el('rmPlanAnswer').value, '');
+  assert.equal(el('rmPlanAnswer').disabled, false);
+  assert.equal(find(host, 'mm-ex-hint').hidden, false);
+  assert.deepEqual(calls, []);
+  el('rmPlanAnswer').value = '5';
+  ctx.rpCheck();
+  assert.equal(answered(), true);
+  assert.equal(ctx.rmPlan[0].history[0].correct, false, 'a correct answer after a miss does not count toward nextLevel');
+  assert.match(el('rmPlanFeedback').innerHTML, /3 ועוד 2 הם 5 צלילים\. התשובה/);
+  assert.equal(/נסו שוב/.test(el('rmPlanFeedback').innerHTML), false);
+  assert.deepEqual(calls, ['noteMetro(hushed)'], 'reward sounds stay off on the no-music check');
+  assert.equal(ctx.mmHushNow(), false);
+  assert.equal(ctx.musicEngine.audioState.muted, false, 'the mute is lifted after scoring');
+});
+
+test('#835 rpCheck: two misses on עכשיו לבד bring back the demo, silently', () => {
+  const { ctx, el, calls, host, answered } = planCtx('independent');
+  for (const v of ['4', '6']) { el('rmPlanAnswer').value = v; ctx.rpCheck(); }
+  assert.equal(answered(), false);
+  assert.equal(host._stage, 'demo');
+  assert.equal(el('rmPlanFeedback').textContent, 'בואו נראה שוב את ההדגמה');
+  assert.equal(ctx.rmPlan[0].current._misses, 0);
+  assert.equal(ctx.rmPlan[0].hints, 2);
+  assert.deepEqual(calls, []);
+  el('rmPlanAnswer').value = '5';
+  ctx.rpCheck();
+  assert.equal(answered(), false, 'the demo gate applies again');
+});
+
+test('#835 rpCheck: the answer cannot be typed during the demo', () => {
+  const { ctx, el, calls, answered } = planCtx('demo');
+  el('rmPlanAnswer').value = '5';
+  ctx.rpCheck();
+  assert.equal(answered(), false);
+  assert.match(el('rmPlanFeedback').textContent, /קודם הקשיבו והשלימו/);
+  assert.deepEqual(calls, []);
+});
+
+test('#835 practice check(): a wrong worked-example answer retries before the maybeHear/maybeSpeak branch', () => {
+  assert.match(fnLine('check'), /if\(!correct&&stayOnWrong\(current,null,'feedback','answer'\)\)\{[^}]*return;\}if\(!correct&&current&&!current\._retryDone/);
 });

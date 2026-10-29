@@ -36,7 +36,8 @@
     const pattern = o.pattern || PATTERN.slice();
     const expected = answerForShown(pattern);
     const prompt = o.prompt || 'דו, מי, דו — איזה צליל משלים את התבנית?';
-    const hint = o.hint || 'אחרי דו בא מי, ושוב דו, ואז מי.';
+    // A wrong answer hears a guide, never the next note (Refs #835).
+    const hint = patternGuide();
     return {
       id: o.id || 'pattern-' + pattern.join('-'),
       grade: o.grade || 'א', skill: 'counting', kind: EXERCISE_KINDS.PATTERN_COMPLETION,
@@ -48,9 +49,19 @@
       }),
       check: function (given) {
         const isOk = String(given).trim() === String(expected).trim();
-        return { correct: isOk, status: isOk ? 'right' : 'retry', hint: isOk ? '' : hint, feedback: isOk ? 'כל הכבוד! הצליל משלים את התבנית.' : hint };
+        const again = patternGuide();
+        return { correct: isOk, status: isOk ? 'right' : 'retry', hint: isOk ? '' : again, feedback: isOk ? 'כל הכבוד! הצליל משלים את התבנית.' : again };
       }
     };
+  }
+  // Wrong-answer guide for a pattern: listen again. It never names the missing note (Refs #835).
+  function patternGuide() { return 'הקשיבו לסדר שחוזר'; }
+  // Digit-free retry hint: never shows the total, and a pattern hint never names the answer (Refs #835).
+  function retryHint(ex) {
+    if (!ex) return '';
+    if (ex.kind === EXERCISE_KINDS.PATTERN_COMPLETION || ex.pattern) return patternGuide();
+    const a = Math.max(0, Number(ex.a) || 0), b = Math.max(0, Number(ex.b) || 0);
+    return '🥁'.repeat(a) + ' ➕ ' + '🔔'.repeat(b) + ' — ספרו את כל הצלילים.';
   }
   function createWorkedExampleExercise(opts) {
     const o = opts || {};
@@ -59,7 +70,9 @@
     const prompt = stage === 'demo' ? ('ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.')
       : stage === 'completion' ? ('השלימו: יש כבר ' + (total - 1) + ' פעימות. הקישו פעם אחת להשלמת ' + total + '.')
       : ('עכשיו לבד: כמה צלילים הם ' + a + ' ועוד ' + b + '?');
-    const hint = a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.';
+    // hint: shown only after a correct submit. retry: digit-free text for wrong answers.
+    const hint = a + ' ועוד ' + b + ' הם ' + total + ' צלילים';
+    const retry = retryHint({ a: a, b: b });
     return {
       id: o.id || 'worked-example-' + a + '+' + b + '-' + stage,
       grade: o.grade || 'א', skill: 'addition', kind: EXERCISE_KINDS.WORKED_EXAMPLE,
@@ -68,7 +81,7 @@
       answer: stage === 'completion' ? 1 : total, hint: hint, wordCount: countWords(prompt), hasMusic: true,
       demoEvents: demoPlan({ a: a, b: b, total: total }),
       nextStage: function (wasCorrect) {
-        if (!wasCorrect) return 'demo';
+        if (!wasCorrect) return stage === 'independent' ? 'independent' : 'demo';
         if (stage === 'demo') return 'completion';
         if (stage === 'completion') return 'independent';
         return 'mastered';
@@ -76,7 +89,7 @@
       check: function (given) {
         const expectedVal = stage === 'completion' ? 1 : total;
         const isOk = Number(given) === expectedVal;
-        return { correct: isOk, next: this.nextStage(isOk), hint: isOk ? '' : hint, feedback: isOk ? 'מצוין! הבנתם את המהלך.' : hint };
+        return { correct: isOk, next: this.nextStage(isOk), hint: isOk ? '' : retry, feedback: isOk ? 'מצוין! הבנתם את המהלך.' : retry };
       }
     };
   }
@@ -98,9 +111,10 @@
     const e = env || {};
     const events = (ex && ex.demoEvents) || demoPlan(ex);
     const play = e.playTap || (root && root.playTap);
-    const later = e.later || function (fn, ms) { setTimeout(fn, ms); };
+    const later = e.later || function (fn, ms) { return setTimeout(fn, ms); };
     if (typeof play === 'function') events.forEach(function (ev) {
-      later(function () { play(ev.voice, { hz: ev.hz, step: 0 }); }, Math.round((ev.at || 0) * 1000));
+      const id = later(function () { play(ev.voice, { hz: ev.hz, step: 0 }); }, Math.round((ev.at || 0) * 1000));
+      if (Array.isArray(e.timers)) e.timers.push(id);
     });
     return events;
   }
@@ -123,7 +137,6 @@
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
     container.innerHTML = '';
-    if (container.children) container.children.length = 0;
     const wrap = d.createElement('div');
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
@@ -137,9 +150,9 @@
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
         const play = opts.playTap || (root && root.playTap);
         if (typeof play === 'function') play('xylo', { hz: NOTE_HZ[c] || 330, step: 0 });
-        const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
+        const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer) });
         hint.hidden = !!res.correct;
-        hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
+        hint.textContent = res.correct ? '' : patternGuide();
         container._hint = hint.textContent;
         if (res.correct && typeof opts.onAnswer === 'function') opts.onAnswer(c);
       }));
@@ -157,10 +170,17 @@
     if (!d || typeof d.createElement !== 'function') return;
     let stage = ex.stage || 'demo';
     let filled = false;
+    const timers = container._timers = [];
+    const realPlay = opts.playTap || (root && root.playTap);
+    // Demo notes are recorded and cancelled on repaint; none may sound on the silent stage (Refs #835).
+    const env = { later: opts.later, timers: timers, playTap: function (v, o) { if (stage !== 'independent' && typeof realPlay === 'function') realPlay(v, o); } };
     function paint() {
+      const clear = opts.clearLater || (typeof clearTimeout === 'function' ? clearTimeout : null);
+      if (stage === 'independent') timers.splice(0).forEach(function (id) { if (clear && id != null) clear(id); });
       container.innerHTML = '';
-      if (container.children) container.children.length = 0;
       container._stage = stage;
+      container._silent = false;
+      container._retry = null;
       container._filled = filled;
       const wrap = d.createElement('div');
       wrap.className = 'worked-example-box';
@@ -168,29 +188,36 @@
         const line = d.createElement('p');
         line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total;
         wrap.appendChild(line);
-        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, env); }));
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
       } else if (stage === 'completion') {
         const line = d.createElement('p');
         line.textContent = 'השלימו את הפעימה החסרה';
         wrap.appendChild(line);
         wrap.appendChild(btn(d, 'primary completion-tap-btn', '🥁 הקישו להשלמה', function () {
-          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, opts);
-          stage = 'independent'; paint();
+          if (typeof realPlay === 'function') realPlay('drum', { step: 0 });
+          container._heard = [{ voice: 'drum' }];
+          (opts.later || setTimeout)(function () { if (stage === 'completion') { stage = 'independent'; paint(); } }, 350);
         }));
       } else {
+        // No-music check: no play* here, no total in text or attributes.
         const line = d.createElement('p');
         line.textContent = 'עכשיו לבד: כמה צלילים הם ' + ex.a + ' ועוד ' + ex.b + '?';
         wrap.appendChild(line);
+        const hint = hintNode(d);
+        wrap.appendChild(hint);
+        container._silent = true;
+        container._retry = function () { hint.hidden = false; hint.textContent = retryHint(ex); container._hint = hint.textContent; };
       }
       container.appendChild(wrap);
     }
+    container._restart = function () { stage = 'demo'; filled = false; paint(); };
     paint();
   }
 
   return {
     EXERCISE_KINDS: EXERCISE_KINDS, countWords: countWords, validateExerciseCard: validateExerciseCard,
-    shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo,
+    shownText: shownText, answerForShown: answerForShown, retryHint: retryHint, demoPlan: demoPlan, playDemo: playDemo,
     createPatternCompletionExercise: createPatternCompletionExercise,
     createWorkedExampleExercise: createWorkedExampleExercise,
     renderPatternWidget: renderPatternWidget, renderWorkedExampleWidget: renderWorkedExampleWidget
