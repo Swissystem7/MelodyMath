@@ -26,7 +26,14 @@
   function createState(index, showMusic, split) {
     const n = PM.TARGETS.length, i = Number(index) || 0;
     return { index: i, ex: i < n ? PM.TARGETS[i] : null, split: PM.SPLITS.indexOf(split) >= 0 ? split : PM.DEFAULT_SPLIT,
-      fill: [], status: i < n ? 'empty' : 'plain', message: '', showMusic: showMusic !== false, sound: null };
+      fill: [], status: i < n ? 'empty' : 'plain', message: '', showMusic: showMusic !== false, sound: null, subbeats: false };
+  }
+
+  // The optional 100-sub-beat add-on (evidence 'experimental', #682). Off by
+  // default and shown as a count only: a 1% sub-beat is too short to hear.
+  function subbeatsHtml(state) {
+    const a = PM.percentToSubbeats(PM.filled(state.fill));
+    return '<p class="jam-prompt" data-addon="subbeats100">' + a.subbeats + ' תת־פעמות מתוך ' + a.of + ' (תוספת ניסיונית)</p>';
   }
 
   function tapTile(state, id) {
@@ -75,8 +82,10 @@
     return head + '<h3>' + (on ? 'תיבה אחת = 100%' : 'רצועה אחת = 100%') + '</h3><p class="jam-prompt">' + e(state.ex.he) + '</p>' +
       (on ? '<div class="jam-row" role="group" aria-label="חלוקת התיבה">' + splits + '</div>' : '') +
       '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="מלא ' + PM.filled(state.fill) + '% מתוך 100%">' + segs + '</div>' +
+      (on && state.subbeats ? subbeatsHtml(state) : '') +
       '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div><div class="jam-row">' +
-      (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') + '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button>' +
+      (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') +
+      (on ? '<button type="button" class="secondary" data-act="subbeats" aria-pressed="' + !!state.subbeats + '">100 תת־פעמות (תוספת)</button>' : '') + '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button>' +
       '<button type="button" class="primary" data-act="check">בדיקה</button><button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
       '<p class="jam-msg ' + (state.status === 'exact' ? 'good' : state.sound === 'wrong' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
   }
@@ -96,6 +105,7 @@
         if (state.showMusic && t && t.voices) JAM.playNotes([{ at: 0, voice: t.voices[1], hz: 1800 }]); // the merged tile's second sound
         state = tapTile(state, b.getAttribute('data-tile'));
       } else if (act === 'split') state = Object.assign({}, state, { split: Number(b.getAttribute('data-split')), sound: null });
+      else if (act === 'subbeats') state = Object.assign({}, state, { subbeats: !state.subbeats, sound: null });
       else if (act === 'check') state = check(state);
       else if (act === 'undo') state = Object.assign({}, state, { fill: state.fill.slice(0, -1), status: 'filling', message: '', sound: null });
       else if (act === 'plainCheck') {
