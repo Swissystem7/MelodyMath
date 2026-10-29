@@ -81,6 +81,7 @@ const ASSETS = [
   './src/lib/instruments.js',
   './src/lib/myInstrument.js',
   './src/lib/masteryCheck.js',
+  './src/lib/noMusicCheck.js',
   './src/components/jamKit.js',
   './src/components/NumberPlay.js',
   './src/components/jam.css',
