@@ -66,9 +66,9 @@ test('every shipped item that gets the drag can be answered by dragging', () => 
   assert.equal(DP.specForItem(own), null, 'an item with its own widget keeps it');
 });
 
-test('sound: one note per landed piece on the child instrument, bigger place lower, never the ukulele', () => {
+test('sound: one note per landed piece on the child instrument, the ten at ~110 Hz, never the ukulele', () => {
   const s = DP.specForItem(byPrompt('200 + 30 + 4 = ?'));
-  assert.ok(DP.noteFor(s, 'hundred').hz < DP.noteFor(s, 'ten').hz && DP.noteFor(s, 'ten').hz < DP.noteFor(s, 'one').hz);
+  assert.ok(Math.abs(DP.noteFor(s, 'ten').hz - 110) < 1 && DP.noteFor(s, 'ten').hz < DP.noteFor(s, 'one').hz);
   const p = DP.specForItem(byPrompt('איזה מספר גדול יותר: 342 או 423?'));
   assert.ok(DP.noteFor(p, 1).hz > DP.noteFor(p, 0).hz, 'the bigger number sounds higher');
   const MY = require('../src/lib/myInstrument');

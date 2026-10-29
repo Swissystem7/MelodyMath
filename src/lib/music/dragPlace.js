@@ -8,7 +8,7 @@
   const PLACES = [
     { kind: 'thousand', v: 1000, he: 'אלפים', name: 'אלף', hz: 98 },
     { kind: 'hundred', v: 100, he: 'מאות', name: 'מאה', hz: 131 },
-    { kind: 'ten', v: 10, he: 'עשרות', name: 'עשרה', hz: 196 },
+    { kind: 'ten', v: 10, he: 'עשרות', name: 'עשרה', hz: 110 },
     { kind: 'one', v: 1, he: 'יחידות', name: 'יחידה', hz: 392 },
   ];
   const MAX_IN = 30;
