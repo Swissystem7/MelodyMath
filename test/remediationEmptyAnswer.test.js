@@ -44,6 +44,7 @@ function boot() {
     setTimeout: fn => fn(),
     normalizeAnswer,
     currentDiag: () => BANKS.diagnosticItems('א'),
+    DIAG_BLOCK: BANKS.DIAG_BLOCK,
     rmHe: s => s,
     setItemTag() {}, renderWidget() {}, revealWidget() {}, maybeHear() {}, maybeSpeak() {}, noteMetro() {}, rmAdvance() {},
     setMath: (node, text) => { node.textContent = String(text); },
