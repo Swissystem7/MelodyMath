@@ -44,7 +44,8 @@
       pattern: pattern, expected: expected, choices: o.choices || ['דו', 'מי', 'סול'],
       prompt: prompt, answer: expected, hint: hint, wordCount: countWords(prompt), hasMusic: true,
       soundEvents: pattern.map(function (item, idx) {
-        return { at: idx * 0.4, note: item, voice: 'xylo', hz: NOTE_HZ[item] || 330, isMissing: idx === pattern.length - 1 };
+        const missing = idx === pattern.length - 1;
+        return { at: idx * 0.4, note: item, voice: missing ? 'bell' : 'xylo', hz: NOTE_HZ[item] || 330, isMissing: missing };
       }),
       check: function (given) {
         const isOk = String(given).trim() === String(expected).trim();
@@ -52,25 +53,33 @@
       }
     };
   }
+  // Only the demo and completion stages name the total; «עכשיו לבד» and the
+  // closing check ask the question without it.
+  function stagePrompt(a, b, stage) {
+    const total = a + b;
+    return stage === 'demo' ? ('ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.')
+      : stage === 'completion' ? ('השלימו: יש כבר ' + (total - 1) + ' פעימות. הקישו פעם אחת להשלמת ' + total + '.')
+      : stage === 'check' ? ('כמה הם ' + a + ' ועוד ' + b + '?')
+      : ('עכשיו לבד: כמה צלילים הם ' + a + ' ועוד ' + b + '?');
+  }
   function createWorkedExampleExercise(opts) {
     const o = opts || {};
     const a = o.a != null ? o.a : 3, b = o.b != null ? o.b : 2, total = a + b;
     const stage = o.stage || 'demo';
-    const prompt = stage === 'demo' ? ('ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.')
-      : stage === 'completion' ? ('השלימו: יש כבר ' + (total - 1) + ' פעימות. הקישו פעם אחת להשלמת ' + total + '.')
-      : ('עכשיו לבד: כמה צלילים הם ' + a + ' ועוד ' + b + '?');
+    const prompt = stagePrompt(a, b, stage);
     const hint = a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.';
-    return {
+    const ex = {
       id: o.id || 'worked-example-' + a + '+' + b + '-' + stage,
       grade: o.grade || 'א', skill: 'addition', kind: EXERCISE_KINDS.WORKED_EXAMPLE,
       standard: o.standard || 'חיבור וחיסור בתחום 10 ואז 20; פירוקי 10; = משמאל; יותר משני מחוברים',
       a: a, b: b, total: total, stage: stage, prompt: prompt,
-      answer: stage === 'completion' ? 1 : total, hint: hint, wordCount: countWords(prompt), hasMusic: true,
+      answer: stage === 'completion' ? 1 : total, hint: hint, wordCount: countWords(prompt), hasMusic: stage !== 'check',
       demoEvents: demoPlan({ a: a, b: b, total: total }),
       nextStage: function (wasCorrect) {
         if (!wasCorrect) return 'demo';
         if (stage === 'demo') return 'completion';
         if (stage === 'completion') return 'independent';
+        if (stage === 'independent') return 'check';
         return 'mastered';
       },
       check: function (given) {
@@ -79,6 +88,8 @@
         return { correct: isOk, next: this.nextStage(isOk), hint: isOk ? '' : hint, feedback: isOk ? 'מצוין! הבנתם את המהלך.' : hint };
       }
     };
+    if (stage === 'check') { ex.noMusic = true; ex.musicStage = 'no_music_check'; }
+    return ex;
   }
   function demoPlan(ex) {
     if (ex && ex.pattern) {
@@ -117,13 +128,18 @@
     p.className = 'mm-ex-hint'; p.hidden = true; p.textContent = '';
     return p;
   }
+  // A real element's children is a read-only HTMLCollection: assigning its
+  // length throws in strict mode, so only a test double's array is emptied.
+  function clear(container) {
+    container.innerHTML = '';
+    if (Array.isArray(container.children)) container.children.length = 0;
+  }
   function renderPatternWidget(container, ex, options) {
     if (!container || !ex) return;
     const opts = options || {};
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
-    container.innerHTML = '';
-    if (container.children) container.children.length = 0;
+    clear(container);
     const wrap = d.createElement('div');
     wrap.className = 'pattern-widget-box';
     const seq = d.createElement('div');
@@ -136,7 +152,7 @@
     (ex.choices || ['דו', 'מי', 'סול']).forEach(function (c) {
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
         const play = opts.playTap || (root && root.playTap);
-        if (typeof play === 'function') play('xylo', { hz: NOTE_HZ[c] || 330, step: 0 });
+        if (typeof play === 'function') play('bell', { hz: NOTE_HZ[c] || 330, step: 0 });
         const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
         hint.hidden = !!res.correct;
         hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
@@ -158,10 +174,12 @@
     let stage = ex.stage || 'demo';
     let filled = false;
     function paint() {
-      container.innerHTML = '';
-      if (container.children) container.children.length = 0;
+      clear(container);
       container._stage = stage;
       container._filled = filled;
+      if (opts.heading) opts.heading.textContent = stagePrompt(ex.a, ex.b, stage);
+      container._noMusic = stage === 'check';
+      container._musicStage = stage === 'check' ? 'no_music_check' : null;
       const wrap = d.createElement('div');
       wrap.className = 'worked-example-box';
       if (stage === 'demo') {
@@ -178,9 +196,26 @@
           container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, opts);
           stage = 'independent'; paint();
         }));
+      } else if (stage === 'independent') {
+        const line = d.createElement('p');
+        line.textContent = stagePrompt(ex.a, ex.b, stage);
+        wrap.appendChild(line);
+        const label = d.createElement('label');
+        label.className = 'worked-answer-label';
+        label.textContent = 'התשובה';
+        const input = d.createElement('input');
+        input.className = 'worked-answer';
+        input.type = 'text'; input.dir = 'ltr'; input.inputMode = 'numeric'; input.autocomplete = 'off';
+        input.onchange = function () {
+          if (!String(input.value || '').trim()) return;
+          if (typeof opts.onAnswer === 'function') opts.onAnswer(input.value);
+          stage = 'check'; paint();
+        };
+        label.appendChild(input);
+        wrap.appendChild(label);
       } else {
         const line = d.createElement('p');
-        line.textContent = 'עכשיו לבד: כמה צלילים הם ' + ex.a + ' ועוד ' + ex.b + '?';
+        line.textContent = stagePrompt(ex.a, ex.b, stage);
         wrap.appendChild(line);
       }
       container.appendChild(wrap);
@@ -190,7 +225,7 @@
 
   return {
     EXERCISE_KINDS: EXERCISE_KINDS, countWords: countWords, validateExerciseCard: validateExerciseCard,
-    shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo,
+    stagePrompt: stagePrompt, shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo,
     createPatternCompletionExercise: createPatternCompletionExercise,
     createWorkedExampleExercise: createWorkedExampleExercise,
     renderPatternWidget: renderPatternWidget, renderWorkedExampleWidget: renderWorkedExampleWidget
