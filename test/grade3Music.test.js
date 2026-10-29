@@ -398,7 +398,8 @@ test('index.html draws the grade-ג widget, checks remainders and unlocks audio'
   assert.ok(indexHtml.includes("item.widget==='g3'"), 'renderWidget has no g3 branch');
   assert.ok(indexHtml.includes('bindGrade3(host, item.g3)'));
   // Both typed flows go through the remainder validator, not through isCorrect.
-  assert.equal((indexHtml.match(/answerOk\(/g) || []).length, 3);
+  // 4th: the #864 cube widget's «עכשיו לבד» check goes through answerOk too.
+  assert.equal((indexHtml.match(/answerOk\(/g) || []).length, 4);
   assert.ok(indexHtml.includes('isRemainderAnswer(given,barsAndRemainder('));
   assert.ok(indexHtml.includes('remainderMiss(given,s)'));
   // Tap-to-answer modes never serve an item that needs typing.
