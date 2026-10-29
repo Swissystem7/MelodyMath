@@ -886,7 +886,6 @@ function renderWidget(hostId, item, inputId){
     host.classList.remove('hidden');
     host.innerHTML=renderPieChartHtml(item.chart);
   } else if(typeof MM_CUBE_LAYERS!=='undefined' && MM_CUBE_LAYERS.specForItem(item)){
-    // #864: box volume, one layer after another; «עכשיו לבד» is silent and checks the answer.
     host.classList.remove('hidden');
     MM_CUBE_LAYERS.bind(host, MM_CUBE_LAYERS.specForItem(item), {item:item, answer:item.answer, read:inputId?function(){const inp=$(inputId);return inp?inp.value:'';}:null, check:function(v){return answerOk(item,v);}});
   } else if(typeof MM_TAKEAWAY_TEN!=='undefined' && MM_TAKEAWAY_TEN.specForItem(item)){
@@ -1049,14 +1048,25 @@ const CLASS_MS=8*60*1000;
 // Follows the header grade; ג׳ keeps tables 3/6/7/8/9 behind the 2/4/5/10 gate, as beat mode does.
 function classPool(){let pool=classItems(selectedGrade);if(selectedGrade==='ג'&&typeof gateItems==='function')pool=gateItems(pool,classHist,typeof allItems==='function'?allItems():pool);return pool}
 const preferLessMotion=()=>typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-let classTimerId=null,classEndsAt=0,classCurrent=null,classAnswered=false,classSeed=1,classHist=[];
+let classTimerId=null,classEndsAt=0,classCurrent=null,classAnswered=false,classSeed=1,classHist=[],cubeRound='together';
 document.querySelectorAll('.tabs [role="tab"]').forEach(function(b){b.addEventListener('click',function(){document.body.classList.toggle('class-live',b.dataset.tab==='classMode'&&classEndsAt>Date.now())})});
 function renderClassKids(){const box=$('classKids');if(!box)return;const names=who.classCode||who.name?listStudents(who.classCode):[];box.innerHTML=names.length?names.map(n=>`<button type="button" data-kid="${escapeHtml(n)}" aria-pressed="${n===who.name?'true':'false'}">${escapeHtml(n)}</button>`).join(''):'<span class="note">עדיין אין תלמידים בקוד הכיתה הזה במכשיר.</span>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>{if($('classGateMsg'))show('classGateMsg',false);switchToKid(b.dataset.kid)})}
 function classTick(){const left=Math.max(0,classEndsAt-Date.now());const t=classClockText(left,classClockVisible());if($('classTimer').textContent!==t)$('classTimer').textContent=t;if(left<=0)endClassSession('time')}
 if($('classClockShow')){$('classClockShow').checked=classClockVisible();$('classClockShow').onchange=()=>{setClassClockVisible($('classClockShow').checked);if(classEndsAt)classTick()}}
 function showClassCard(id){['classGate','classPlay','classDone'].forEach(x=>show(x,x===id))}
-function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const pool=classPool();const q=pool[Math.floor(random()*pool.length)];classCurrent=q;if($('classItemTag'))setItemTag($('classItemTag'),q);setMath($('classPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('classNumberPlay',q);if(typeof setMusicWay==='function')setMusicWay('classWay',q);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.setAttribute('aria-label','תשובה: '+String(v));b.onclick=()=>pickClass(v,b);box.appendChild(b)});const firstChoice=box.querySelector('button');if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus();maybeHear(q);maybeSpeak(q.prompt)}
-function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);classHist.push({id:classCurrent.id,correct:correct});noteMetro(correct,classCurrent.skill,classCurrent);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);revealWidget('classWidget');const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
+function cubeChoice(which,value){
+  const cur=which==='class'?classCurrent:beatCurrent,CL=typeof MM_CUBE_LAYERS!=='undefined'?MM_CUBE_LAYERS:null;
+  if(!cur||!CL||!CL.choiceStep||!CL.specForItem(cur))return false;
+  const ok=isCorrect(value,cur.answer),step=CL.choiceStep(cubeRound,ok);cubeRound=step.advance?'together':step.round;
+  if(step.advance){cur._quiet=true;return false;}
+  if(which==='beat')stopBeatTimer();
+  const host=$(which==='class'?'classWidget':'beatWidget'),fbId=which==='class'?'classFeedback':'beatFeedback',fb=$(fbId);
+  if(step.silent){if(host)CL.bind(host,CL.specForItem(cur),{item:cur,round:'alone'});if(CL.hush&&typeof getSharedAudioContext==='function')CL.hush(getSharedAudioContext());}
+  if(fb){fb.className='feedback '+(ok?'good':'bad');fb.textContent=ok?'עכשיו לבד, בלי צלילים.':'עוד לא.';show(fbId,true);}
+  return true;
+}
+function nextClassQuestion(){classAnswered=false;cubeRound='together';const random=rng(classSeed++);const pool=classPool();const q=pool[Math.floor(random()*pool.length)];classCurrent=q;if($('classItemTag'))setItemTag($('classItemTag'),q);setMath($('classPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('classNumberPlay',q);if(typeof setMusicWay==='function')setMusicWay('classWay',q);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.setAttribute('aria-label','תשובה: '+String(v));b.onclick=()=>pickClass(v,b);box.appendChild(b)});const firstChoice=box.querySelector('button');if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus();maybeHear(q);maybeSpeak(q.prompt)}
+function pickClass(value,btn){if(classAnswered||!classCurrent)return;if(cubeChoice('class',value))return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);classHist.push({id:classCurrent.id,correct:correct});noteMetro(correct,classCurrent.skill,classCurrent);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);revealWidget('classWidget');const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
 function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';if($('classGateMsg')){$('classGateMsg').textContent='יש לבחור תלמיד/ה מהרשימה או להזין שם בסרגל למעלה.';show('classGateMsg',true)}if($('studentName')&&typeof $('studentName').focus==='function')$('studentName').focus();return}if($('classGateMsg'))show('classGateMsg',false);endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classHist=[];classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
 function endClassSession(){classEndsAt=0;if(classTimerId){clearInterval(classTimerId);classTimerId=null}document.body.classList.remove('class-live');const ended=endTeacherSession();const last=ended&&ended.kind==='class'?ended:null;const n=last?(last.items||[]).length:0;const ok=last?(last.items||[]).filter(it=>it.correct).length:0;$('classDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות במפגש</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק במפגש</div>`;showClassCard('classDone');if($('classAgain')&&typeof $('classAgain').focus==='function')$('classAgain').focus()}
 if($('classStart'))$('classStart').onclick=startClassSession;
@@ -1136,6 +1146,7 @@ function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
 // restarting on every answer put an off-beat click right after each pick.
 function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
 function noteMetro(correct, topic, item){
+  if(item&&item._quiet){item._quiet=false;if(!correct){metroStreak=0;return;}metroStreak+=1;return;}
   // #739: 5 in a row in a topic plays one phrase for "השיר שלי" instead of the streak melody (one reward, not two).
   const won=typeof streakReward==='function'&&streakReward(topic,correct);
   if(typeof setlistNote==='function') setlistNote(correct,topic,won,item);
@@ -1374,7 +1385,7 @@ function paintBeatWindow(){
   if(left<=0 && !beatAnswered) beatLate();
 }
 function nextBeatQuestion(){
-  beatAnswered=false;
+  beatAnswered=false;cubeRound='together';
   const pool=eligibleExercises(beatPool(), beatHist, beatLastId, beatLevel);
   if(!pool || pool.length===0){
     if($('beatPrompt')) $('beatPrompt').textContent='אין פריטים זמינים בחבילה שנבחרה.';
@@ -1408,14 +1419,15 @@ function finishBeatPick(value, correct, late){
   beatLastId=beatCurrent.id;
   const lv0=beatCurrent.level||beatLevel;
   beatLevel=nextLevel(lv0, beatHist.slice(-2));
+  if(beatCurrent._quiet){var qpl=playLevelTune;playLevelTune=function(){playLevelTune=qpl;};if(!(beatLevel>lv0))playLevelTune();}
   if(beatLevel>lv0 && typeof playLevelTune==='function') playLevelTune(); // #591 A.4: a level is completed
   const paced=typeof applyStreak==='function'?applyStreak(metroBpmNow(), metroStreak, correct && !late, !!( $('metroAccel') && $('metroAccel').checked )):null;
-  if(paced){
+  if(paced&&!beatCurrent._quiet){
     metroStreak=paced.streak;
     setMetroBpm(paced.bpm);
     const won=typeof streakReward==='function'&&streakReward(beatCurrent.skill,correct && !late);
     if(typeof setlistNote==='function') setlistNote(correct && !late,beatCurrent.skill,won,beatCurrent);
-  } else noteMetro(correct && !late,beatCurrent.skill,beatCurrent);
+  } else if(beatCurrent._quiet){beatCurrent._quiet=false;} else noteMetro(correct && !late,beatCurrent.skill,beatCurrent);
   logTeacherItem({kind:'beat',skill:beatCurrent.he||beatCurrent.skill,prompt:beatCurrent.prompt,answer:beatCurrent.answer,given:late?'מאוחר':value,correct:correct});
   [...$('beatChoices').children].forEach(b=>{ b.disabled=true; if(isCorrect(b.textContent,beatCurrent.answer)) b.classList.add('picked-good'); });
   $('beatFeedback').className='feedback '+(correct?'good':'bad');
@@ -1429,13 +1441,14 @@ function finishBeatPick(value, correct, late){
 }
 function pickBeat(value, btn){
   if(beatAnswered||!beatCurrent) return;
+  if(cubeChoice('beat',value)) return;
   const onTime=typeof isWindowOpen==='function'?isWindowOpen(beatOpenedAt, Date.now(), metroBpmNow(), beatBeats()):true;
   if(!onTime){ beatLate(); return; }
   const correct=isCorrect(value, beatCurrent.answer);
   if(!correct) btn.classList.add('picked-bad');
   finishBeatPick(value, correct, false);
 }
-function beatLate(){ finishBeatPick('מאוחר', false, true); }
+function beatLate(){ if(cubeChoice('beat','מאוחר'))return; finishBeatPick('מאוחר', false, true); }
 function startBeatSession(){
   beatHist=[]; beatLevel=1; beatLastId=null; beatSeed=Date.now()&0x7fffffff; metroStreak=0;
   endTeacherSession();
