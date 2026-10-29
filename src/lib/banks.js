@@ -2057,6 +2057,17 @@
     });
   }
 
+  // ---------- כיתה ה׳ · היקף לפני היקף המעגל (#711, mm-cur-47 → mm-cur-54) ----------
+  // Appended last so existing ids stay put. Whole-cm sides, answers in cm.
+  RAW.push(
+    G5('geometry', 'למלבן צלעות של 7 ס״מ ו־4 ס״מ. מה ההיקף בס״מ?', 22, 'הולכים מסביב: 7 + 4 + 7 + 4', 1, ST.PERIMETER),
+    G5('geometry', 'למשולש צלעות של 5, 6 ו־8 ס״מ. מה ההיקף בס״מ?', 19, 'מחברים את שלוש הצלעות', 1, ST.PERIMETER),
+    G5('geometry', 'למשושה שכל צלעותיו שוות יש צלע של 4 ס״מ. מה ההיקף בס״מ?', 24, 'שש צלעות שוות: 6 פעמים 4', 2, ST.PERIMETER),
+    G5('geometry', 'למקבילית צלעות של 9 ס״מ ו־5 ס״מ. מה ההיקף בס״מ?', 28, 'צלעות נגדיות שוות: פעמיים 9 ועוד פעמיים 5', 2, ST.PERIMETER),
+    G5('geometry', 'היקף מלבן 30 ס״מ ואורכו 9 ס״מ. מה רוחבו בס״מ?', 6, 'חצי מההיקף הוא אורך ועוד רוחב: 15', 3, ST.PERIMETER),
+    G5('geometry', 'למלבן ולריבוע אותו היקף. צלעות המלבן 10 ס״מ ו־6 ס״מ. מה אורך צלע הריבוע בס״מ?', 8, 'ההיקף 32, ולריבוע ארבע צלעות שוות', 3, ST.PERIMETER)
+  );
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2114,7 +2125,7 @@
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012); the bar is the model for percent (Van den Heuvel-Panhuizen 2003).',
       tags: ['decimalNoteScale', 'tenthBeatGroups', 'percentBar', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'tapTempo', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
-        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar', 'balanceBars',
+        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'sidesFillBar', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar', 'balanceBars',
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
     M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
       finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
