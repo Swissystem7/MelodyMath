@@ -471,6 +471,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <div class="card mm-game" id="ggCard" aria-label="שטח והיקף כרשת מקצבים"></div>
 <div class="card mm-game" id="myInstCard" aria-label="הכלי שלי"></div>
 <div class="card mm-game" id="fbpCard" aria-label="ממלאים תיבה במשכי תווים"></div>
+<div class="card mm-game" id="nllCard" aria-label="איפה התו יושב על הקו"></div>
 <div class="card mm-game" id="bcCard" aria-label="ספירה לפי פעמה"></div>
 <div class="card mm-game" id="ttgCard" aria-label="לוח הכפל כשיר קצבי"></div>
 <div class="card mm-game" id="ensCard" aria-label="מנגנים יחד: תזמורת קטנה"></div>
@@ -2935,4 +2936,5 @@ try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.
 <script src="src/lib/music/loopStack.js"></script><script src="src/components/LoopStackScreen.js"></script>
 <script>/* ?topic=mm-cur-56&screen=1 opens LoopStack. Its own map, not progression.js SCREENS (#798). */
 try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_LOOP_STACK.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
+<script src="src/lib/noteLengthLine.js"></script><script src="src/components/NoteLengthLineScreen.js"></script>
 </body></html>
