@@ -172,6 +172,8 @@
   }
 
   const TEN_HZ = 110;
+  // Phone speakers barely play 110 Hz: the ten is heard through 220/330/440.
+  const TEN_PARTIALS = [[2, 0.8], [3, 0.55], [4, 0.35]];
   const ONE_HZ = 220;
 
   function chart100Sound(number, baseTensFreq) {
@@ -223,7 +225,7 @@
     const beat = beatLength(bpm);
     const out = [];
     for (let i = 0; i < s.tens; i++) {
-      out.push(hit(i * beat, beat * 0.7, s.tensFreq, 0.24, 'triangle'));
+      out.push(Object.assign(hit(i * beat, beat * 0.7, s.tensFreq, 0.24, 'triangle'), { partials: TEN_PARTIALS }));
     }
     const after = s.tens * beat + (s.tens ? beat * 0.5 : 0);
     for (let j = 0; j < s.clickCount; j++) {

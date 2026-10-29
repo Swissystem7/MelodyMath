@@ -31,10 +31,13 @@
 
   // Every hz is inside the engine's 110–1,760 Hz safety window (§6.6), so
   // clampHz never has to move a voice and the timbres stay distinguishable.
+  // A 110 Hz tone is near silent on a phone speaker; its 220/330/440 Hz
+  // overtones carry it while it still sounds like the low ten.
+  const TEN_PARTIALS = [[2, 0.8], [3, 0.55], [4, 0.35]];
   const VOICES = {
     // Ones (drum) are 220 Hz, one octave above the 110 Hz tens (bass).
     drum: { hz: 220, gain: 0.24, type: 'square', he: 'תוף' },
-    bass: { hz: 110, gain: 0.26, type: 'triangle', he: 'בס' },
+    bass: { hz: 110, gain: 0.26, type: 'triangle', he: 'בס', partials: TEN_PARTIALS },
   };
   const PAIR_STRONG_HZ = 165;
   const PAIR_WEAK_HZ = 220;
@@ -46,7 +49,7 @@
   const PLAY_CAP = 20;
 
   const REG_VOICES = {
-    bass: { hz: 110, gain: 0.26, type: 'triangle', he: 'בס' },
+    bass: { hz: 110, gain: 0.26, type: 'triangle', he: 'בס', partials: TEN_PARTIALS },
     piano: { hz: 262, gain: 0.22, type: 'sine', he: 'פסנתר' },
     bell: { hz: 523, gain: 0.2, type: 'square', he: 'פעמון' },
   };
@@ -69,7 +72,9 @@
 
   function hit(voice, at, dur) {
     const v = VOICES[voice] || REG_VOICES[voice] || VOICES.drum;
-    return { at: at, dur: dur, hz: v.hz, gain: v.gain, type: v.type };
+    const ev = { at: at, dur: dur, hz: v.hz, gain: v.gain, type: v.type };
+    if (v.partials) ev.partials = v.partials;
+    return ev;
   }
 
   // ---------- זוגי או אי־זוגי בשמיעה ----------
@@ -331,7 +336,7 @@
     }
     let at = 0;
     for (let i = 0; i < s.tens; i++) {
-      out.push({ at: at, dur: step * 0.75, hz: LAYER_TEN_HZ, gain: 0.24, type: 'triangle', place: 'ten' });
+      out.push({ at: at, dur: step * 0.75, hz: LAYER_TEN_HZ, gain: 0.24, type: 'triangle', place: 'ten', partials: TEN_PARTIALS });
       at += step;
     }
     if (s.tens && s.ones) at += step * 0.4;

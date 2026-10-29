@@ -135,7 +135,7 @@
         const hz = p.v === 10 ? Math.max(110, Math.round(v.hz / 2)) : v.hz;
         for (let k = 0; k < p.n; k++) {
           heard += 1;
-          notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: p.v, inGroup: heard, groupCount: sounds });
+          notes.push({ index: notes.length, at: t, groupIndex: gi, voice: v.voice, hz: hz, value: p.v, inGroup: heard, groupCount: sounds, audibleLow: p.v === 10 });
           t += beat;
         }
       });

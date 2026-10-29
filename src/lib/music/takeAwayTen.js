@@ -112,7 +112,9 @@
       events.forEach(function (ev) {
         const v = e.voice || voices[ev.kind] || voice;
         const n = noteOf(spec, ev);
-        if (n.held) pv(ac, v, n.hz, t0 + n.at, null, { dur: n.dur, gain: n.gain });
+        const low = ev.v >= 10; // a ten or hundred: 110 Hz, heard through its overtones
+        if (n.held) pv(ac, v, n.hz, t0 + n.at, null, { dur: n.dur, gain: n.gain, audibleLow: true });
+        else if (low) pv(ac, v, n.hz, t0 + n.at, null, { audibleLow: true });
         else pv(ac, v, n.hz, t0 + n.at);
       });
       return { instrument: id, voice: voice, notes: events.length };
@@ -121,7 +123,9 @@
     if (typeof ps === 'function') {
       const seq = events.map(function (ev) {
         const n = noteOf(spec, ev);
-        return { at: n.at, dur: n.dur, hz: n.hz, gain: n.gain, type: 'triangle', voice: voices[ev.kind] || voice, v: ev.v };
+        const s = { at: n.at, dur: n.dur, hz: n.hz, gain: n.gain, type: 'triangle', voice: voices[ev.kind] || voice, v: ev.v };
+        if (ev.v >= 10) s.partials = [[2, 0.8], [3, 0.55], [4, 0.35]];
+        return s;
       });
       const r = ps(seq);
       return r ? { instrument: id, voice: voice, notes: events.length } : null;

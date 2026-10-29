@@ -159,3 +159,135 @@ test('the stated result is retuned for any prompt that states it, not only worke
   assert.equal(+m[1] + +m[2], +m[3], ex.prompt);
   assert.equal(ex.a, undefined, 'only a worked example carries demo numbers');
 });
+
+// ---------- review on #877: a 110 Hz ten must be audible on a phone ----------
+const engine = require('../src/lib/musicEngine.js');
+const IV = require('../src/lib/instrumentVoices.js');
+// Energy a phone speaker can play: overtones at 220 Hz or above, together at
+// least as strong as the 110 Hz fundamental.
+function audibleEvent(e, where) {
+  assert.ok(Array.isArray(e.partials), where + ': overtones');
+  const up = e.partials.filter((p) => e.hz * p[0] >= 220);
+  assert.ok(up.length >= 2, where + ': two overtones at 220 Hz or above');
+  assert.ok(up.reduce((s, p) => s + p[1], 0) >= 1, where + ': overtones as strong as the fundamental');
+}
+function audibleVoice(voice, hz, where) {
+  const plan = IV.planVoice(voice, hz, { audibleLow: true });
+  const f = plan.filter;
+  const passes = (o) => !f || (f.type === 'lowpass' && o.hz <= f.hz) || (f.type === 'highpass' && o.hz >= f.hz);
+  const base = plan.oscillators[0].gain;
+  const up = plan.oscillators.filter((o) => o.hz >= 220 && passes(o));
+  assert.ok(up.length >= 2 && up.reduce((s, o) => s + o.gain, 0) >= base, where + ' on ' + voice + ': ' + JSON.stringify(plan.oscillators) + ' ' + JSON.stringify(f));
+}
+
+test('every ten event has energy at 220 Hz or above (chart, cube layer, vertical, registers)', () => {
+  for (let n = 10; n <= 100; n += 7) g1.chart100Events(n).filter((e) => e.hz === 110).forEach((e) => audibleEvent(e, 'chart ' + n));
+  for (let n = 13; n <= 100; n += 5) g2.cubeLayerEvents(n).filter((e) => e.place === 'ten').forEach((e) => audibleEvent(e, 'layer ' + n));
+  const tens = g2.phaseEvents(g2.verticalVoices({ a: 47, b: 38, op: '+' }).phases).filter((e) => e.hz === 110);
+  assert.ok(tens.length > 0);
+  tens.forEach((e) => audibleEvent(e, 'vertical'));
+  g2.phaseEvents(g2.registerVoices({ h: 4, t: 12, o: 3 }).phases).filter((e) => e.hz === 110).forEach((e) => audibleEvent(e, 'registers'));
+  // The ones are still one plain note each.
+  g1.chart100Events(34).filter((e) => e.hz === 220).forEach((e) => assert.equal(e.partials, undefined));
+});
+
+test('the engine plays a ten as 110 + 220/330/440 Hz at the same total gain', () => {
+  const made = [];
+  const param = () => ({ setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
+  const node = () => ({ connect(x) { return x; } });
+  class FakeAC {
+    constructor() { this.currentTime = 0; this.state = 'running'; this.destination = node(); }
+    createOscillator() { const o = Object.assign(node(), { frequency: param(), start() {}, stop() {}, hz: null }); o.frequency.setValueAtTime = (v) => { o.hz = v; }; made.push(o); return o; }
+    createGain() { const g = Object.assign(node(), { gain: param() }); g.gain.linearRampToValueAtTime = (v) => { if (!g.peak) g.peak = v; }; made.push(g); return g; }
+  }
+  const prev = globalThis.window;
+  globalThis.window = { AudioContext: FakeAC };
+  try {
+    const r = engine.scheduleSequence(g1.chart100Events(10));
+    assert.ok(r, 'scheduled');
+    const hz = made.filter((x) => x.hz != null).map((x) => x.hz);
+    assert.deepEqual(hz, [110, 220, 330, 440], 'one ten = fundamental + three overtones');
+    const peaks = made.filter((x) => x.peak).map((x) => x.peak);
+    assert.ok(Math.abs(peaks.reduce((s, v) => s + v, 0) - 0.24) < 1e-9, 'total gain unchanged: ' + peaks);
+  } finally {
+    engine.stopSequence && engine.stopSequence();
+    if (prev === undefined) delete globalThis.window; else globalThis.window = prev;
+  }
+  assert.equal(engine.planSequence([{ at: 0, dur: 0.2, hz: 220 }], 0)[0].partials, undefined, 'a plain note has no overtones');
+});
+
+test('instrument voices: audibleLow lifts a 110 Hz ten into a phone band, other notes unchanged', () => {
+  ['drumLow', 'drumHigh', 'pluck', 'woodClick', 'metalBell', 'frameDrum'].forEach((v) => audibleVoice(v, 110, 'ten'));
+  ['drumLow', 'drumHigh', 'woodClick'].forEach((v) => {
+    assert.deepEqual(IV.planVoice(v, 90, {}), IV.planVoice(v, 90), v + ' kick unchanged without audibleLow');
+    assert.deepEqual(IV.planVoice(v, 330, { audibleLow: true }), IV.planVoice(v, 330), v + ' 330 Hz unchanged');
+  });
+});
+
+test('take-away, NumberPlay and jamKit ask for the audible ten', () => {
+  const calls = [];
+  const ac = { currentTime: 0, state: 'running', resume() {} };
+  take.play(take.takeAwayCircles(34, 10), { audioContext: ac, voice: 'drumLow', playVoice: (c, v, hz, t, d, o) => calls.push({ hz, o }) });
+  const tens = calls.filter((c) => c.hz === 110);
+  assert.ok(tens.length > 0 && tens.every((c) => c.o && c.o.audibleLow), 'every take-away ten asks for audibleLow');
+  calls.filter((c) => c.hz !== 110).forEach((c) => assert.ok(!c.o || !c.o.audibleLow, 'a one stays plain'));
+  const seq = [];
+  take.play(take.takeAwayCircles(34, 10), { playSequence: (s) => { seq.push(...s); return {}; } });
+  seq.filter((s) => s.v >= 10).forEach((s) => audibleEvent(s, 'take-away sequence'));
+
+  const plan = NP.extractNumberPlan({ prompt: '5 × 20 = ?', skill: 'multiplication' }, { bpm: 60, instrument: 'oud' });
+  plan.notes.forEach((n) => assert.equal(n.audibleLow, n.value === 10));
+
+  const seen = [];
+  const saved = { musicEngine: globalThis.musicEngine, playVoice: globalThis.playVoice, VOICES: globalThis.VOICES };
+  globalThis.musicEngine = { getSharedAudioContext: () => ({ currentTime: 0, state: 'running' }), audioState: { muted: false } };
+  globalThis.playVoice = (c, v, hz, t, d, o) => seen.push({ hz, o });
+  globalThis.VOICES = IV.VOICES;
+  try {
+    delete require.cache[require.resolve('../src/components/jamKit.js')];
+    const jam = require('../src/components/jamKit.js');
+    const h = jam.playNotes([{ at: 0, voice: 'pluck', hz: 110, value: 10, audibleLow: true }, { at: 0.01, voice: 'pluck', hz: 220, value: 1, audibleLow: false }]);
+    if (h && h.stop) h.stop();
+  } finally {
+    Object.keys(saved).forEach((k) => { if (saved[k] === undefined) delete globalThis[k]; else globalThis[k] = saved[k]; });
+  }
+  assert.ok(seen.length === 2, 'both notes played: ' + JSON.stringify(seen));
+  assert.ok(seen[0].o && seen[0].o.audibleLow, 'jamKit passes audibleLow for the ten');
+  assert.ok(!seen[1].o, 'a one is played plain');
+});
+
+// ---------- review on #877: kid's-eye checks this PR owns ----------
+test('worked-example demo: two instrument families (drum = membrane, bells/xylophone = idiophone)', () => {
+  const FAMILY = { drum: 'membrane', bell: 'idiophone', xylo: 'idiophone' };
+  for (const it of worked) {
+    const ex = V.generateVariant(Object.assign({}, it, { topicId: 'mm-cur-0' }), 1, { rounds: 6, seed: 3 });
+    const fams = new Set(W.demoPlan(ex).map((e) => FAMILY[e.voice]));
+    assert.ok(!fams.has(undefined), 'every demo voice has a family');
+    assert.ok(fams.size >= 2, 'two families: ' + [...fams]);
+  }
+});
+
+test('no-music round: fraction choices and the worked example work with zero audio calls', () => {
+  const prevAC = globalThis.AudioContext, prevWin = globalThis.window;
+  let made = 0;
+  globalThis.AudioContext = function () { made++; };
+  globalThis.window = { AudioContext: globalThis.AudioContext };
+  try {
+    const opts = store.makeChoices('2/4', seeded(1));
+    assert.equal(opts.length, 4);
+    for (const it of worked) {
+      const ex = V.generateVariant(Object.assign({}, it, { topicId: 'mm-cur-0' }), 2, { noMusic: true, seed: 5 });
+      assert.equal(ex.noMusic, true);
+      assert.equal(ex.hasMusic, false);
+      assert.equal(ex.hear, null);
+      assert.equal(ex.music, null);
+      assert.equal(ex.a + ex.b, ex.total, 'still a true sum');
+      assert.equal(Number(ex.answer), ex.total);
+      assert.ok(W.demoPlan(ex).length > 0, 'the plan exists; nothing plays it');
+    }
+  } finally {
+    if (prevAC === undefined) delete globalThis.AudioContext; else globalThis.AudioContext = prevAC;
+    if (prevWin === undefined) delete globalThis.window; else globalThis.window = prevWin;
+  }
+  assert.equal(made, 0, 'no AudioContext was created');
+});

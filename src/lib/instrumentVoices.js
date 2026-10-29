@@ -40,18 +40,26 @@
 
   const MAX_GAIN = 0.3; // same ceiling idea as musicEngine.MAX_GAIN: gentle on small ears
 
-  function planVoice(voice, hz) {
+  // opts.audibleLow: a low place-value ten (110 Hz) gets 2x/3x/4x overtones and
+  // a filter that lets them through, so a phone speaker plays it. Other notes
+  // (a kick drum at 90 Hz, say) keep their timbre.
+  const LOW_PARTIALS = [[2, 0.8], [3, 0.55], [4, 0.35]];
+  function planVoice(voice, hz, opts) {
     const v = VOICES[voice];
     if (!v) return null;
     const f = Number(hz) > 0 ? Number(hz) : v.hz;
-    const total = v.partials.reduce(function (s, p) { return s + p[1]; }, 0) + v.noise;
+    const low = !!(opts && opts.audibleLow) && f < 200;
+    const parts = low ? v.partials.concat(LOW_PARTIALS.map(function (p) { return [p[0], p[1] * v.partials[0][1]]; })) : v.partials;
+    const total = parts.reduce(function (s, p) { return s + p[1]; }, 0) + v.noise;
     const scale = total > 0 ? MAX_GAIN / Math.max(total, 1) : 0;
+    const cut = v.filter && (v.filter[0] !== 'lowpass' || v.filter[1] < f * 4);
+    const filter = low && cut ? ['lowpass', 1500] : v.filter;
     return {
-      oscillators: v.partials.map(function (p) {
+      oscillators: parts.map(function (p) {
         return { type: v.wave, hz: f * p[0], endHz: f * p[0] * v.sweep, gain: p[1] * scale };
       }),
       noise: v.noise * scale,
-      filter: v.filter ? { type: v.filter[0], hz: v.filter[1] } : null,
+      filter: filter ? { type: filter[0], hz: filter[1] } : null,
       attack: v.attack,
       decay: v.decay,
       vibrato: v.vibrato ? { rate: v.vibrato[0], cents: v.vibrato[1] } : null,
@@ -72,7 +80,7 @@
   // opts.dur (seconds) holds that one note longer; opts.gain above 0.16
   // raises the envelope, still capped at 1. Omitted opts keep the voice plan.
   function playVoice(ac, voice, hz, when, dest, opts) {
-    const plan = planVoice(voice, hz);
+    const plan = planVoice(voice, hz, opts);
     if (!ac || !plan) return null;
     const t = typeof when === 'number' ? when : ac.currentTime;
     const held = opts && Number(opts.dur) > 0 ? Number(opts.dur) : 0;
