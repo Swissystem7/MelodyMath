@@ -62,7 +62,12 @@ test('no weak mechanism without the optional mark (dosage rule 2)', () => {
 test('one way per topic: every math topic is served by its own primary mechanism', () => {
   ALL.forEach((x) => x.mathTopics.forEach((t) => {
     assert.ok(I.TOPICS[t], x.id + ' unknown topic ' + t);
-    assert.equal(I.TOPICS[t].mechanism, x.mechanism, x.id + ' ' + t);
+    assert.equal(I.TOPICS[t].mechanism, I.mechanismFor(x, t), x.id + ' ' + t);
+  }));
+  // A per-topic override is only ever a weak way (optional play).
+  ALL.filter((x) => x.weakWays).forEach((x) => Object.keys(x.weakWays).forEach((t) => {
+    assert.ok(I.WEAK.includes(x.weakWays[t]), x.id + ' ' + t + ' override must be weak');
+    assert.ok(x.mathTopics.includes(t), x.id + ' ' + t + ' override for a listed topic');
   }));
   Object.keys(I.TOPICS).forEach((t) => {
     const m = I.TOPICS[t].mechanism;
@@ -78,7 +83,7 @@ test('lookups', () => {
   I.FAMILIES.forEach((f) => assert.ok(I.byFamily(f).every((x) => x.family === f)));
   const t = first.mathTopics[0];
   assert.ok(I.forTopic(t).includes(first));
-  assert.ok(I.forTopic(t).every((x) => x.mechanism === I.TOPICS[t].mechanism));
+  assert.ok(I.forTopic(t).every((x) => I.mechanismFor(x, t) === I.TOPICS[t].mechanism));
   assert.deepEqual(I.forTopic('nope'), []);
 });
 
@@ -113,7 +118,7 @@ test('regression guard: topics keep their instruments, except gankogui and kora 
       'violin', 'shakuhachi', 'bagpipes', 'dizi', 'piano', 'harmonium'
     ],
     symmetry: ['marimba', 'dizi'],
-    lcm: [],
+    lcm: ['gankogui', 'kora'],
     numberLine: ['xylophone', 'koto', 'guitar', 'panFlute', 'pipeOrgan'],
     data: ['cajon'],
     percent: ['darbuka', 'erhu']
@@ -137,5 +142,16 @@ test('regression guard: topics keep their instruments, except gankogui and kora 
     assert.deepEqual(x.mathTopics, ['lcm'], id + ' voices lcm only');
     assert.equal(I.forTopic('patterns').some((y) => y.id === id), false, id + ' stays off patterns');
     assert.equal(I.forTopic('lcm').some((y) => y.id === id), true, id + ' voices lcm');
+  });
+});
+
+test('gankogui and kora are not in patterns: an lcm extra only (M4, weak) (Refs #740 #824)', () => {
+  const patterns = I.forTopic('patterns').map((x) => x.id);
+  ['gankogui', 'kora'].forEach((id) => {
+    const x = I.instrumentById(id);
+    assert.equal(patterns.includes(id), false, id + ' must not voice patterns');
+    assert.equal(x.mathTopics.includes('patterns'), false, id + ' must not list patterns');
+    assert.equal(I.mechanismFor(x, 'lcm'), 'M4', id);
+    assert.equal(x.weakWays, undefined, id + ' needs no per-topic override');
   });
 });

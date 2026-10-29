@@ -5,7 +5,8 @@
 // never a new method. Every entry uses the one primary mechanism of its
 // topics (M1 steady beat, M2 grouped beats, M3 note durations, M6 patterns,
 // see banks.MUSIC_MECHANISMS). A weak mechanism (M4 polyrhythm, M5 pitch,
-// M7 movement) only appears as optional:true with evidence:'weak'.
+// M7 movement) only appears as optional:true with evidence:'weak', or as a
+// weakWays entry for one topic of an instrument whose main way is primary.
 //
 // `source` backs the fact about the instrument that `why` uses (a museum
 // record, an ethnomusicology article, a primary text); the evidence that the
@@ -42,10 +43,13 @@
     volume: { he: 'נפח', mechanism: 'M2' },
   };
 
-  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
-  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source) {
+  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays)
+  // weakWays (optional) maps a topic to the weak way (M4/M5/M7) the entry
+  // uses there as optional play; every other topic uses `mechanism`.
+  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays) {
     const x = { id, instrument: { he, en }, origin, family, mathTopics, mechanism, why, source, voice };
     if (WEAK.indexOf(mechanism) >= 0) { x.optional = true; x.evidence = 'weak'; }
+    if (weakWays) x.weakWays = weakWays;
     return x;
   }
 
@@ -201,12 +205,16 @@
   function byFamily(family) {
     return INSTRUMENTS.filter(function (x) { return x.family === family; });
   }
+  // The way an instrument uses for one of its topics.
+  function mechanismFor(x, topic) {
+    return (x.weakWays && x.weakWays[topic]) || x.mechanism;
+  }
   // Instruments that may voice a topic: only those using its primary way.
   function forTopic(topic) {
     const t = TOPICS[topic];
     if (!t) return [];
-    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && x.mechanism === t.mechanism; });
+    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && mechanismFor(x, topic) === t.mechanism; });
   }
 
-  return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, forTopic };
+  return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, mechanismFor, forTopic };
 });
