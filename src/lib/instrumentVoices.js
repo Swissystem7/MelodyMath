@@ -17,12 +17,14 @@
 
   // partials: [ratio to hz, gain]; sweep: pitch falls to hz*sweep (drums);
   // noise: gain of a filtered noise burst; attack/decay in seconds.
+  // lowFilter: replaces filter below LOW_HZ, so a held 220 Hz ten is not
+  // cut away by a high bandpass (#831).
   const VOICES = {
     drumLow: { wave: 'sine', partials: [[1, 1]], sweep: 0.55, noise: 0.15, filter: ['lowpass', 900], attack: 0.002, decay: 0.35, hz: 90 },
-    drumHigh: { wave: 'triangle', partials: [[1, 0.6], [1.6, 0.3]], sweep: 0.8, noise: 0.45, filter: ['bandpass', 2500], attack: 0.001, decay: 0.12, hz: 330 },
+    drumHigh: { wave: 'triangle', partials: [[1, 0.6], [1.6, 0.3]], sweep: 0.8, noise: 0.45, filter: ['bandpass', 2500], lowFilter: ['lowpass', 1500], attack: 0.001, decay: 0.12, hz: 330 },
     frameDrum: { wave: 'sine', partials: [[1, 0.8], [2.3, 0.2]], sweep: 0.7, noise: 0.3, filter: ['lowpass', 2000], attack: 0.002, decay: 0.25, hz: 140 },
     jingle: { wave: 'square', partials: [[1, 0.05]], sweep: 1, noise: 0.7, filter: ['highpass', 6000], attack: 0.001, decay: 0.18, hz: 5000 },
-    woodClick: { wave: 'sine', partials: [[1, 0.8], [2.8, 0.3]], sweep: 1, noise: 0.1, filter: ['bandpass', 2200], attack: 0.001, decay: 0.06, hz: 2000 },
+    woodClick: { wave: 'sine', partials: [[1, 0.8], [2.8, 0.3]], sweep: 1, noise: 0.1, filter: ['bandpass', 2200], lowFilter: ['lowpass', 1500], attack: 0.001, decay: 0.06, hz: 2000 },
     metalBell: { wave: 'sine', partials: [[1, 0.6], [2.76, 0.3], [5.4, 0.15], [8.93, 0.08]], sweep: 1, noise: 0, filter: null, attack: 0.002, decay: 0.9, hz: 880 },
     gong: { wave: 'sine', partials: [[1, 0.7], [1.48, 0.3], [2.1, 0.2], [2.93, 0.1]], sweep: 0.98, noise: 0.05, filter: ['lowpass', 3000], attack: 0.01, decay: 2.2, hz: 160 },
     woodBar: { wave: 'sine', partials: [[1, 0.8], [4, 0.2], [10, 0.05]], sweep: 1, noise: 0.05, filter: null, attack: 0.002, decay: 0.5, hz: 523 },
@@ -39,6 +41,7 @@
   };
 
   const MAX_GAIN = 0.3; // same ceiling idea as musicEngine.MAX_GAIN: gentle on small ears
+  const LOW_HZ = 250; // catches the 110/220 Hz ten; C4 (streak tunes) and 330 Hz keep their filter
 
   function planVoice(voice, hz) {
     const v = VOICES[voice];
@@ -46,12 +49,13 @@
     const f = Number(hz) > 0 ? Number(hz) : v.hz;
     const total = v.partials.reduce(function (s, p) { return s + p[1]; }, 0) + v.noise;
     const scale = total > 0 ? MAX_GAIN / Math.max(total, 1) : 0;
+    const filter = v.lowFilter && f < LOW_HZ ? v.lowFilter : v.filter;
     return {
       oscillators: v.partials.map(function (p) {
         return { type: v.wave, hz: f * p[0], endHz: f * p[0] * v.sweep, gain: p[1] * scale };
       }),
       noise: v.noise * scale,
-      filter: v.filter ? { type: v.filter[0], hz: v.filter[1] } : null,
+      filter: filter ? { type: filter[0], hz: filter[1] } : null,
       attack: v.attack,
       decay: v.decay,
       vibrato: v.vibrato ? { rate: v.vibrato[0], cents: v.vibrato[1] } : null,
