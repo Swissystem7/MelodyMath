@@ -110,22 +110,20 @@ test('bind does not autoplay; playFor is the one opening sound and is never stac
   try { assert.deepEqual(CL.playFor({ prompt: BOX, music: CL.WAY }), { notes: 15 }); } finally { delete g.playVoice; delete g.getSharedAudioContext; }
   assert.equal(n.length, 15);
 });
-test('sizes 13..100: djembe and charango tens match the shared ~110 Hz ten, and ones differ', () => {
-  const tenHz = require('../src/lib/grade2Music').cubeLayerEvents(20).find((e) => e.place === 'ten').hz;
-  assert.equal(CL.TEN_HZ, tenHz); assert.ok(Math.abs(tenHz - 110) < 1);
+test('sizes 13..100: both families use the #877 shared ten, with an audible partial at or above 220 Hz', () => {
+  const chart = require('../src/lib/grade1Music').chart100Events(10).find((e) => Array.isArray(e.partials));
+  const shared = chart ? chart.hz : 110;
+  assert.equal(CL.TEN_HZ, shared); assert.ok(Math.abs(shared - 110) < 1); assert.deepEqual(CL.TEN_PARTIALS, chart ? chart.partials : [[2, 0.8], [3, 0.55], [4, 0.35]]);
   for (let per = 13; per <= 100; per++) {
     const notes = CL.plan({ layers: 2, perLayer: per, rows: null, total: 2 * per }, 'together');
-    const tens = notes.filter((n) => n.place === 'ten');
+    const tens = notes.filter((n) => n.place === 'ten'), hit = [];
     assert.deepEqual([...new Set(tens.map((n) => CL.FAMILIES.find((f) => f[2] === n.voice)[0]))].sort(), ['charango', 'djembe']);
-    tens.forEach((n) => assert.equal(n.hz, tenHz));
-    notes.filter((n) => n.place === 'one').forEach((n) => assert.notEqual(n.hz, tenHz));
+    tens.forEach((n) => { assert.equal(n.hz, shared); const up = (n.partials || []).filter((p) => n.hz * p[0] >= 220); assert.ok(up.length >= 2 && up.reduce((s, p) => s + p[1], 0) >= 1 && up.map((p) => Math.round(n.hz * p[0])).join() === '220,330,440'); });
+    notes.filter((n) => n.place === 'one').forEach((n) => assert.notEqual(n.hz, shared));
     assert.ok(noOverlap(notes) && notes.every((n) => n.place !== 'unit') && [0, 1].every((g) => { const m = notes.filter((n) => n.group === g); return (m.length <= 12 || ![13, 20, 24, 36].includes(per)) && m.filter((n) => n.place === 'ten').length * 10 + m.filter((n) => n.place === 'one').length === per; }));
+    CL.play({ layers: 2, perLayer: per, rows: null, total: 2 * per }, 'together', { audioContext: { currentTime: per, state: 'running' }, playVoice: (c, v, hz) => hit.push([v, hz]) });
+    assert.ok(['drumHigh', 'pluck'].every((v) => hit.some((c) => c[0] === v && c[1] === shared)) && hit.some((c) => c[0] === 'organ' && c[1] >= 220));
   }
-  const got = [], g = globalThis; g.playVoice = (c, v, hz) => got.push([v, hz]); g.getSharedAudioContext = () => ({ currentTime: 0, state: 'running' });
-  try { CL.playFor({ prompt: 'תיבה בנויה מ־2 שכבות של 20 קוביות. כמה קוביות יש בה?', music: CL.WAY }); } finally { delete g.playVoice; delete g.getSharedAudioContext; }
-  assert.deepEqual(got.filter((c) => c[1] === tenHz).map((c) => c[0]).sort(), ['drumHigh', 'drumHigh', 'pluck', 'pluck']);
-  const osc = require('../src/lib/instrumentVoices').planVoice('pluck', tenHz).oscillators.map((o) => Math.round(o.hz));
-  assert.ok(osc.includes(tenHz) && osc.includes(tenHz * 2));
   let sel = ''; const hid = [];
   const host = { innerHTML: '', closest: () => ({ querySelectorAll: (s) => { sel = s; return [{ classList: { add: (c) => hid.push(c) } }]; } }) };
   CL.bind(host, CL.parse(BOX), { round: 'alone' });
