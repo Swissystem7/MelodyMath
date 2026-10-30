@@ -67,9 +67,77 @@ test('decimals and bar fractions convert both ways', () => {
   assert.equal(fb.decimalToBarFraction(0.375), '3/8');
   assert.equal(fb.decimalToBarFraction(1), '1');
   assert.equal(fb.decimalToBarFraction(0.2), null); // 1/5 is not a note length
-  assert.equal(fb.decimalToBarFraction(1.5), null); // more than one bar
+  assert.equal(fb.decimalToBarFraction(1.5), '3/2'); // fractions > 1 span multiple bars (0e, Refs #665)
+  assert.equal(fb.decimalToBarFraction(2.25), '9/4');
+  assert.equal(fb.barFractionToDecimal('3/2'), 1.5);
   assert.equal(fb.barFractionToDecimal('1/4'), 0.25);
   assert.equal(fb.barFractionToDecimal('3/8'), 0.375);
   assert.equal(fb.barFractionToDecimal('¾'), 0.75);
   assert.equal(fb.barFractionToDecimal('?'), null);
+});
+
+test('upper bound: decimalToBarFraction caps at 4 bars and returns null beyond (Refs #665)', () => {
+  assert.equal(fb.decimalToBarFraction(4), '4');
+  assert.equal(fb.decimalToBarFraction(3.5), '7/2');
+  assert.equal(fb.decimalToBarFraction(4.1), null, 'values > 4 must return null');
+  assert.equal(fb.decimalToBarFraction(100), null, 'huge values like 100 must return null');
+  assert.equal(fb.decimalToBarFraction(-0.5), null, 'negative values return null');
+});
+
+test('mixed-number representations convert both ways in standard and Hebrew notation (#723, Refs #665)', () => {
+  assert.equal(fb.toMixed('3/2'), '1 1/2');
+  assert.equal(fb.toMixed('3/2', { hebrew: true }), '1 ו־1/2');
+  assert.equal(fb.toMixed('9/4'), '2 1/4');
+  assert.equal(fb.toMixed('1/2'), '1/2');
+  assert.equal(fb.toMixed(1.5), '1 1/2');
+
+  assert.equal(fb.fromMixed('1 1/2'), '3/2');
+  assert.equal(fb.fromMixed('1 ו־1/2'), '3/2');
+  assert.equal(fb.fromMixed('1 ו-1/2'), '3/2');
+  assert.equal(fb.fromMixed('2 1/4'), '9/4');
+  assert.equal(fb.fromMixed('2 ו־1/4'), '9/4');
+
+  // decimalToBarFraction with mixed option
+  assert.equal(fb.decimalToBarFraction(1.5, { mixed: true }), '1 1/2');
+  assert.equal(fb.decimalToBarFraction(1.5, { mixed: true, hebrew: true }), '1 ו־1/2');
+});
+
+test('multi-bar fillBar continuity: 1.5 is checked as one full bar plus half bar using the same mechanism (#723, Refs #665)', () => {
+  const check1 = fb.checkFill(['whole', 'half'], 1.5);
+  assert.equal(check1.status, 'exact');
+  assert.equal(check1.sum, '3/2');
+  assert.equal(check1.diff, '0');
+
+  const check2 = fb.checkFill(['1', '1/4'], '1 1/2');
+  assert.equal(check2.status, 'under');
+  assert.equal(check2.diff, '1/4');
+});
+
+test('end-of-topic no-music check items exist for Grade ד mm-cur-33 (#723, Refs #665)', () => {
+  assert.ok(Array.isArray(fb.NO_MUSIC_CHECK_ITEMS));
+  assert.ok(fb.NO_MUSIC_CHECK_ITEMS.length >= 2);
+  fb.NO_MUSIC_CHECK_ITEMS.forEach(it => {
+    assert.equal(it.topic, 'mm-cur-33');
+    assert.equal(it.grade, 'ד');
+    assert.equal(it.noMusic, true);
+    assert.equal(it.plain, true);
+    assert.ok(it.prompt.length > 0);
+    assert.ok(it.answer);
+  });
+});
+
+
+test('FractionBarPad exercises include multi-bar target >1 and render mixed number prompt (#723, Refs #665)', () => {
+  const FBP = require('../src/components/FractionBarPad.js');
+  const ex = FBP.EXERCISES.find(e => e.target === '1.5');
+  assert.ok(ex, 'multi-bar exercise 1.5 must exist in FractionBarPad');
+  const idx = FBP.EXERCISES.indexOf(ex);
+  const state = FBP.createState(idx, true);
+  const html = FBP.renderHtml(state, 'drumLow');
+  assert.match(html, /1\.5 = 3\/2 \/ 1 ו־1\/2/);
+
+  // Solvable by whole + half
+  const filled = FBP.tapTile(FBP.tapTile(state, 'whole'), 'half');
+  assert.equal(filled.status, 'exact');
+  assert.equal(filled.sound, 'cadence');
 });

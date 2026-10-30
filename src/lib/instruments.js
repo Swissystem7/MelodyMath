@@ -5,7 +5,8 @@
 // never a new method. Every entry uses the one primary mechanism of its
 // topics (M1 steady beat, M2 grouped beats, M3 note durations, M6 patterns,
 // see banks.MUSIC_MECHANISMS). A weak mechanism (M4 polyrhythm, M5 pitch,
-// M7 movement) only appears as optional:true with evidence:'weak'.
+// M7 movement) only appears as optional:true with evidence:'weak', or as a
+// weakWays entry for one topic of an instrument whose main way is primary.
 //
 // `source` backs the fact about the instrument that `why` uses (a museum
 // record, an ethnomusicology article, a primary text); the evidence that the
@@ -36,23 +37,30 @@
     symmetry: { he: 'סימטריה', mechanism: 'M6' },
     lcm: { he: 'כפולה משותפת', mechanism: 'M4' },
     numberLine: { he: 'ישר המספרים וסדר', mechanism: 'M5' },
+    data: { he: 'נתונים', mechanism: 'M1' },
+    percent: { he: 'אחוזים', mechanism: 'M3' },
+    area: { he: 'שטח', mechanism: 'M2' },
+    volume: { he: 'נפח', mechanism: 'M2' },
     // TempoRuler (#591): time and length measured in note lengths = M3.
     measurement: { he: 'מדידה (זמן ואורך בפעמות)', mechanism: 'M3' },
   };
 
-  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source)
-  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source) {
+  // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays)
+  // weakWays (optional) maps a topic to the weak way (M4/M5/M7) the entry
+  // uses there as optional play; every other topic uses `mechanism`.
+  function e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays) {
     const x = { id, instrument: { he, en }, origin, family, mathTopics, mechanism, why, source, voice };
     if (WEAK.indexOf(mechanism) >= 0) { x.optional = true; x.evidence = 'weak'; }
+    if (weakWays) x.weakWays = weakWays;
     return x;
   }
 
   const INSTRUMENTS = [
     // ---------- percussion ----------
-    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals', 'measurement'], 'drumLow',
+    e('darbuka', 'דרבוקה', 'Darbuka (goblet drum)', 'Middle East and North Africa', 'percussion', 'M3', ['fractions', 'decimals', 'percent', 'measurement'], 'drumLow',
       'Two basic strokes, a low dum in the centre of the head and a high tek on the rim; long and short strokes filling one bar voice note lengths as fractions (M3).',
       'https://eefc.org/wp-content/uploads/Doumbek-strokes-1.pdf'),
-    e('djembe', 'ג׳מבה', 'Djembe (jembe)', 'Mande, West Africa (Mali, Guinea)', 'percussion', 'M2', ['multiplication', 'skipCounting'], 'drumHigh',
+    e('djembe', 'ג׳מבה', 'Djembe (jembe)', 'Mande, West Africa (Mali, Guinea)', 'percussion', 'M2', ['multiplication', 'skipCounting', 'area', 'volume'], 'drumHigh',
       'Jembe pieces run in a 4-beat/12-pulse cycle or a 4-beat/16-pulse cycle (Polak 2010, Music Theory Online): 4 groups of 3 or 4 groups of 4 pulses (M2).',
       'https://mtosmt.org/issues/mto.10.16.4/mto.10.16.4.polak.html'),
     e('tabla', 'טאבלה', 'Tabla', 'North India (Hindustani music)', 'percussion', 'M2', ['skipCounting', 'multiplication', 'division'], 'drumHigh',
@@ -64,7 +72,7 @@
     e('taiko', 'טאיקו', 'Taiko', 'Japan', 'percussion', 'M1', ['counting'], 'drumLow',
       'Players learn a piece by singing its rhythm first: "don" is one strong strike on the head and "ka" a strike on the rim, one syllable per strike to count (M1).',
       'https://www.janm.org/sites/default/files/2021-04/big-drum-family-guide.pdf'),
-    e('cajon', 'קחון', 'Cajón (box drum)', 'Afro-Peruvian, Peru', 'percussion', 'M1', ['counting', 'nextPrev'], 'woodClick',
+    e('cajon', 'קחון', 'Cajón (box drum)', 'Afro-Peruvian, Peru', 'percussion', 'M1', ['counting', 'nextPrev', 'data'], 'woodClick',
       'The box drum that, with guitar, accompanies the festejo and most Afro-Peruvian genres; a simple voice for a steady beat to count on (M1).',
       'https://calperformances.org/learn/program_notes/2007/pn_peru_negro.pdf'),
     e('bodhran', 'בודהראן', 'Bodhrán', 'Ireland', 'percussion', 'M2', ['multiplication', 'division'], 'frameDrum',
@@ -106,8 +114,8 @@
     e('claves', 'קלאבס', 'Claves (son clave)', 'Cuba', 'percussion', 'M6', ['patterns'], 'woodClick',
       'The two-bar son clave [x..x..x...x.x...] begins with the tresillo, 3 onsets spread as evenly as possible over 8 pulses (Toussaint 2005, Bridges): a rhythmic pattern (M6).',
       'https://archive.bridgesmathart.org/2005/bridges2005-47.html'),
-    e('gankogui', 'גנקוגוי', 'Gankogui bell', 'Ewe, Ghana', 'percussion', 'M6', ['patterns'], 'metalBell',
-      'All parts of the Ewe ensemble are conceived in relation to the gankogui bell pattern, which works as a time-line (Pressing 1983): one repeating pattern everyone follows (M6).',
+    e('gankogui', 'גנקוגוי', 'Gankogui bell', 'Ewe, Ghana', 'percussion', 'M4', ['lcm'], 'metalBell',
+      'The double bell plays the timeline against the drum pulses (Pressing 1983): the cycles meet again at their least common multiple. Optional play only (M4, weak evidence).',
       'https://doi.org/10.21504/amj.v6i3.1165'),
     e('xylophone', 'קסילופון', 'Xylophone', 'Europe (orchestral)', 'percussion', 'M5', ['numberLine'], 'woodBar',
       'Each bar is tuned by its length, and a shorter bar sounds higher. Optional play only: bars in order as a line from low to high (M5, weak evidence).',
@@ -122,8 +130,8 @@
     e('sitar', 'סיטאר', 'Sitar', 'North India (Hindustani music)', 'strings', 'M6', ['patterns'], 'pluck',
       'A long-necked lute with movable frets and sympathetic strings, played with tabla in a chosen taal: its repeating raag phrases voice melodic patterns (M6).',
       'https://www.swarganga.org/instruments/3/Sitar'),
-    e('kora', 'קוֹרָה', 'Kora', 'Mande, West Africa (Senegal, The Gambia)', 'strings', 'M6', ['patterns'], 'pluck',
-      'A 21-string harp whose kumbengo is a recurrent accompaniment theme (Racanelli 2012, Analytical Approaches to World Music): a repeating pattern to continue (M6).',
+    e('kora', 'קוֹרָה', 'Kora', 'Mande, West Africa (Senegal, The Gambia)', 'strings', 'M4', ['lcm'], 'pluck',
+      'A 21-string harp whose hands interlock in 3 against 2, so the parts meet again at their least common multiple (Racanelli 2012). Optional play only (M4, weak evidence).',
       'https://oldaawmjournal.iftawm.org/articles/2012a/Racanelli_AAWM_Vol_2_1.pdf'),
     e('koto', 'קוֹטוֹ', 'Koto', 'Japan (from China, 8th century)', 'strings', 'M5', ['numberLine'], 'pluck',
       'A long zither, most often with 13 bridges; where each bridge stands sets the pitch of its string. Optional play only: sliding a bridge to order low and high (M5, weak evidence).',
@@ -131,22 +139,22 @@
     e('guzheng', 'גוּצֶ׳נג', 'Guzheng', 'China', 'strings', 'M6', ['patterns'], 'pluck',
       'A zither with a movable bridge per string, tuned to a five-note (anhemitonic pentatonic) scale, so the same five notes repeat in every octave: a pattern of five (M6).',
       'https://collections.ed.ac.uk/mimed/record/14698'),
-    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals', 'measurement'], 'bowed',
+    e('erhu', 'אֶרְהוּ', 'Erhu', 'China', 'strings', 'M3', ['fractions', 'decimals', 'percent', 'measurement'], 'bowed',
       'A two-string bowed spike fiddle; a bowed note lasts exactly as long as the bow keeps moving, which makes it a clear voice for held note lengths in a bar (M3).',
       'https://www.horniman.ac.uk/object/1975.40/json'),
     e('guitar', 'גיטרה', 'Guitar', 'Spain, Europe', 'strings', 'M5', ['numberLine'], 'pluck',
       'Each fret raises the note one equal step and the 12th fret, at half the string, is the octave. Optional play only: frets in order as a line from low to high (M5, weak evidence).',
       'https://liutaiomottola.com/formulae/fret.htm'),
-    e('violin', 'כינור', 'Violin', 'Italy, Europe', 'strings', 'M6', ['patterns'], 'bowed',
+    e('violin', 'כינור', 'Violin', 'Italy, Europe', 'strings', 'M6', ['patterns', 'symmetry'], 'bowed',
       'Its four strings are tuned a fifth apart (G, D, A, E), the same step each time: a growing pattern a child can hear and continue (M6).',
       'https://hyperphysics.gsu.edu/hbase/Music/violin.html'),
-    e('charango', 'צָ׳רַנְגּוֹ', 'Charango', 'Andes (Bolivia, Argentina)', 'strings', 'M2', ['multiplication', 'skipCounting'], 'pluck',
+    e('charango', 'צָ׳רַנְגּוֹ', 'Charango', 'Andes (Bolivia, Argentina)', 'strings', 'M2', ['multiplication', 'skipCounting', 'area', 'volume'], 'pluck',
       'A small Andean lute with 10 strings in 5 double courses: 5 groups of 2, so counting its strings in pairs is a times-table group (M2).',
       'https://www.horniman.ac.uk/object/M23-1987/json'),
-    e('balalaika', 'בָּלָלַייקָה', 'Balalaika', 'Russia', 'strings', 'M1', ['counting'], 'pluck',
+    e('balalaika', 'בָּלָלַייקָה', 'Balalaika', 'Russia', 'strings', 'M1', ['counting', 'nextPrev', 'data'], 'pluck',
       'A Russian lute with a triangular body and three strings; one strum on each steady beat is a simple timbre for counting one-to-one (M1).',
       'https://collections.ed.ac.uk/mimed/record/112439'),
-    e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division'], 'pluck',
+    e('qanun', 'קָאנוּן', 'Qanun', 'Arab world, Middle East', 'strings', 'M2', ['multiplication', 'division', 'area', 'volume'], 'pluck',
       'A trapezoid zither with 81 strings stretched in groups of three, plus levers for microtones: 27 groups of 3 is a ready-made multiplication and division picture (M2).',
       'https://www.maqamworld.com/en/instr/qanun.php'),
     e('ukulele', 'יוּקָלֶלֶה', 'Ukulele', 'Hawaii (from the Portuguese machete)', 'strings', 'M3', ['fractions'], 'pluck',
@@ -159,7 +167,7 @@
     e('shofar', 'שופר', 'Shofar', 'Jewish tradition (ram\'s horn)', 'winds', 'M3', ['fractions'], 'horn',
       'Mishnah Rosh Hashanah 4:9: a tekiah lasts as long as three teruot, and a teruah as long as three short whimpers, so each blast is one third of the longer one: note lengths as fractions (M3).',
       'https://www.sefaria.org/Mishnah_Rosh_Hashanah.4.9'),
-    e('didgeridoo', 'דיגרידו', 'Didgeridoo (yiraki)', 'Aboriginal Australia', 'winds', 'M1', ['counting'], 'drone',
+    e('didgeridoo', 'דיגרידו', 'Didgeridoo (yiraki)', 'Aboriginal Australia', 'winds', 'M1', ['counting', 'nextPrev'], 'drone',
       'Played with circular breathing, its rhythmic breathing cycle makes a pulsating drone: a steady pulse to count along with, one count per pulse (M1).',
       'https://newt.phys.unsw.edu.au/jw/dij/dij.html'),
     e('shakuhachi', 'שאקוהאצ׳י', 'Shakuhachi', 'Japan', 'winds', 'M6', ['patterns'], 'breathy',
@@ -178,10 +186,10 @@
       'A bamboo cross flute with six finger holes and one extra hole covered by a membrane that gives its buzzing tone; a timbre for melodic and mirror patterns (M6).',
       'https://bu.hu.museum-digital.org/object/17387?navlang=en'),
     // ---------- keys ----------
-    e('piano', 'פסנתר', 'Piano', 'Italy (Florence, c. 1700)', 'keys', 'M6', ['patterns'], 'keys',
+    e('piano', 'פסנתר', 'Piano', 'Italy (Florence, c. 1700)', 'keys', 'M6', ['patterns', 'symmetry'], 'keys',
       'Hammers strike the strings; 88 keys, 52 white and 36 black, with 12 equal semitones per octave, so the same group of keys repeats along the keyboard: a pattern to find and continue (M6).',
       'https://hyperphysics.gsu.edu/hbase/Music/pianof.html'),
-    e('accordion', 'אקורדיון', 'Accordion', 'Europe (Germany)', 'keys', 'M3', ['fractions'], 'organ',
+    e('accordion', 'אקורדיון', 'Accordion', 'Europe (Germany)', 'keys', 'M3', ['fractions', 'decimals'], 'organ',
       'Free reeds sounded by a bellows; a note lasts as long as the bellows move, so it can hold a whole, half or quarter note exactly (M3).',
       'https://www.horniman.ac.uk/object/M25-1996'),
     e('harmonium', 'הרמוניום', 'Harmonium', 'India (Calcutta)', 'keys', 'M6', ['patterns'], 'organ',
@@ -199,12 +207,16 @@
   function byFamily(family) {
     return INSTRUMENTS.filter(function (x) { return x.family === family; });
   }
+  // The way an instrument uses for one of its topics.
+  function mechanismFor(x, topic) {
+    return (x.weakWays && x.weakWays[topic]) || x.mechanism;
+  }
   // Instruments that may voice a topic: only those using its primary way.
   function forTopic(topic) {
     const t = TOPICS[topic];
     if (!t) return [];
-    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && x.mechanism === t.mechanism; });
+    return INSTRUMENTS.filter(function (x) { return x.mathTopics.indexOf(topic) >= 0 && mechanismFor(x, topic) === t.mechanism; });
   }
 
-  return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, forTopic };
+  return { FAMILIES, PRIMARY, WEAK, TOPICS, INSTRUMENTS, instrumentById, byFamily, mechanismFor, forTopic };
 });
