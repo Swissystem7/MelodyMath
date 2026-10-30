@@ -6,7 +6,7 @@ const banks = require('../src/lib/banks');
 const engine = require('../src/lib/musicEngine');
 const poly = require('../src/lib/polyrhythm');
 
-const music = (skill, tag) => banks.rowsOf(skill, 'ה').filter((x) => x.music === tag);
+const music = (skill, tag) => banks.rowsOf(skill, 'ה').filter((x) => (x.musicStory || x.music) === tag);
 
 test('lcm: two drums meet at the least common multiple', () => {
   assert.equal(poly.lcmOf(3, 2), 6);

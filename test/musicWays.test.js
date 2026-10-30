@@ -13,10 +13,13 @@ const FILES = { 'ו': require('../src/lib/curriculum/grade6'), 'א': require('..
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
-const keyOf = (file, it) => Object.keys(file.music).find((k) => banks.ST[k] === it.standard);
+// The primary ways of an item's standard: its grade's, or carried from the
+// nearest earlier grade (rule 4). An activity of a weak or unsupported
+// mechanism keeps its tag as musicStory and takes a way (rules 1-3).
+const primaryOf = (grade, std) => banks.primaryWays(banks.waysCarried(grade, std));
 const cubeItem = (it) => /תיבה|קובי/.test(it.prompt);
 const wayOf = (file, it) => {
-  const listed = file.music[keyOf(file, it)] || [];
+  const listed = banks.waysCarried(it.grade, it.standard);
   // Grade ד׳ only: a cube item is solved with the volume way, not the kg one.
   if (file.grade === 'ד' && it.standard === banks.ST.MASS_VOL && cubeItem(it)) {
     return listed.find((w) => w[0] === 'cubeLayerGroups');
@@ -24,6 +27,7 @@ const wayOf = (file, it) => {
   const ways = banks.primaryWays(listed);
   return ways.length ? ways[Math.min(it.level, ways.length) - 1] : undefined;
 };
+const actOf = (it) => it.musicStory || (it.musicNote ? null : it.music);
 
 Object.keys(FILES).forEach((grade) => {
   const file = FILES[grade];
@@ -66,7 +70,7 @@ Object.keys(FILES).forEach((grade) => {
       // Dosage rule 4: one consistent way per topic, so a standard may have a
       // single primary way; with more, levels take different ones.
       const key = Object.keys(file.music).find((k) => banks.ST[k] === std);
-      const n = banks.primaryWays(file.music[key]).length;
+      const n = primaryOf(grade, std).length;
       if (grade === 'ד' && key === 'MASS_VOL') {
         assert.equal(n, 1, 'MASS_VOL has one main way');
         assert.ok(byStd[std].tags.has('kiloGroupsTen') && byStd[std].tags.has('cubeLayerGroups'), grade + ' ' + std);
@@ -102,9 +106,10 @@ test('grade א׳: a prompt that plays sound is a music activity, not a way', () 
   const g1 = items.filter((it) => it.g1);
   assert.ok(hear.length >= 10 && g1.length >= 3);
   hear.forEach((it) => assert.equal(it.music, 'hearBeats', it.id));
-  g1.forEach((it) => assert.equal(it.music, 'g1' + it.g1.kind.charAt(0).toUpperCase() + it.g1.kind.slice(1), it.id));
-  hear.concat(g1).forEach((it) => assert.equal(it.musicNote, undefined, it.id));
-  assert.equal(items.filter((it) => it.musicNote).length, items.length - hear.length - g1.length);
+  g1.forEach((it) => assert.equal(actOf(it), 'g1' + it.g1.kind.charAt(0).toUpperCase() + it.g1.kind.slice(1), it.id));
+  // g1Chart100 is M10 (unsupported): the story of the prompt, solved with a way
+  hear.concat(g1).forEach((it) => assert.equal(!!it.musicNote, !!it.musicStory, it.id));
+  assert.equal(items.filter((it) => it.musicNote && !it.musicStory).length, items.length - hear.length - g1.length);
 });
 
 test('grade ד׳: a 4/4-bar fraction item is music notation already, an activity and not a way', () => {
@@ -118,28 +123,28 @@ test('grade ד׳: a 4/4-bar fraction item is music notation already, an activity
 
 test('grade ה׳: the music activities of #106 keep their tag and take no way', () => {
   const items = banks.itemsForGrade('ה');
-  const acts = items.filter((it) => !it.musicNote);
+  const acts = items.filter(actOf);
   assert.ok(acts.length >= 30);
-  acts.forEach((it) => assert.ok(['bars', 'lcm', 'mixedBar', 'bpm', 'secPerBeat', 'drumsMeet', 'meters', 'hzChart'].includes(it.music), it.id + ' ' + it.music));
-  assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
+  acts.forEach((it) => assert.ok(['bars', 'lcm', 'mixedBar', 'bpm', 'secPerBeat', 'drumsMeet', 'meters', 'hzChart'].includes(actOf(it)), it.id + ' ' + actOf(it)));
+  assert.equal(items.filter((it) => it.musicNote && !it.musicStory).length, items.length - acts.length);
 });
 
 test('grade ג׳: the #105 activities keep their tag and the g3 widgets become activities, no way', () => {
   const items = banks.itemsForGrade('ג');
   const g3 = items.filter((it) => it.g3);
   assert.ok(g3.length >= 20);
-  g3.forEach((it) => assert.equal(it.music, 'g3' + it.g3.kind.charAt(0).toUpperCase() + it.g3.kind.slice(1), it.id));
-  const acts = items.filter((it) => !it.musicNote);
-  acts.forEach((it) => assert.ok(it.g3 || ['meters', 'tuneTime', 'stepGrid', 'leftoverBeats', 'howManyTimes', 'hzCompare'].includes(it.music), it.id + ' ' + it.music));
-  assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
+  g3.forEach((it) => assert.equal(actOf(it), 'g3' + it.g3.kind.charAt(0).toUpperCase() + it.g3.kind.slice(1), it.id));
+  const acts = items.filter(actOf);
+  acts.forEach((it) => assert.ok(it.g3 || ['meters', 'tuneTime', 'stepGrid', 'leftoverBeats', 'howManyTimes', 'hzCompare'].includes(actOf(it)), it.id + ' ' + actOf(it)));
+  assert.equal(items.filter((it) => it.musicNote && !it.musicStory).length, items.length - acts.length);
 });
 
 test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   const items = banks.itemsForGrade('ב').filter((it) => !it.noMusic);
-  const acts = items.filter((it) => !it.musicNote);
+  const acts = items.filter(actOf);
   assert.ok(acts.length >= 50);
-  acts.forEach((it) => assert.ok(['beatsBars', 'twoInstruments', 'evenOdd', 'registers', 'halfBar'].includes(it.music), it.id + ' ' + it.music));
-  assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
+  acts.forEach((it) => assert.ok(['beatsBars', 'twoInstruments', 'evenOdd', 'registers', 'halfBar'].includes(actOf(it)), it.id + ' ' + actOf(it)));
+  assert.equal(items.filter((it) => it.musicNote && !it.musicStory).length, items.length - acts.length);
 });
 
 test('every item of every grade has a music side: 1288/1288', () => {

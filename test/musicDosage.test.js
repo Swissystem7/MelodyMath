@@ -70,6 +70,27 @@ test('rule 4 across grades: a standard taught in several grades keeps its primar
   assert.deepEqual(wrong, []);
 });
 
+test('rule 1 on items: every item is solved through M1, M2, M3 or M6, way or activity', () => {
+  // The silent end-of-topic checks (noMusic, #688) have no music side by design.
+  const wrong = banks.allItems().filter((it) => !it.noMusic && !STRONG.includes(banks.mechanismOf(it.music)));
+  assert.deepEqual(wrong.map((it) => it.id + ' ' + it.music), []);
+});
+
+test('rules 2-3 on items: a weak or unsupported activity is only the story of the prompt', () => {
+  const story = banks.allItems().filter((it) => it.musicStory);
+  assert.ok(story.length >= 90, String(story.length));
+  story.forEach((it) => {
+    const m = banks.mechanismOf(it.musicStory);
+    assert.ok(m && !STRONG.includes(m), it.id + ' ' + it.musicStory + ' ' + m);
+    assert.ok(it.musicNote && banks.MUSIC_SOURCES[it.musicSrc], it.id);
+    assert.ok(banks.primaryWays(banks.waysCarried(it.grade, it.standard)).map(([t]) => t).includes(it.music), it.id);
+  });
+  // the weak polyrhythm of the LCM items stays as optional practice, marked weak
+  const lcm = story.filter((it) => it.musicStory === 'drumsMeet');
+  assert.ok(lcm.length >= 5);
+  lcm.forEach((it) => assert.deepEqual(it.musicExtra.map((x) => [x.music, x.evidence]), [['lcmDrums', 'weak']], it.id));
+});
+
 test('items: the way shown is primary and strong; optional ways ride along, weak ones marked', () => {
   let extras = 0;
   banks.allItems().filter((it) => DOSED.includes(it.grade) && it.musicNote).forEach((it) => {

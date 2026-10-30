@@ -5,7 +5,7 @@ const g2 = require('../src/lib/grade2Music');
 const engine = require('../src/lib/musicEngine');
 const banks = require('../src/lib/banks');
 
-const music = (name) => banks.itemsForGrade('ב').filter((it) => it.music === name);
+const music = (name) => banks.itemsForGrade('ב').filter((it) => (it.musicStory || it.music) === name);
 
 test('a cube layer over 12 plays as tens and ones, not one sound per cube', () => {
   const dozen = g2.cubeLayerSounds(12);

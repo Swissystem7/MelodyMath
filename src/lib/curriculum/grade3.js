@@ -8,8 +8,10 @@
 // load it before banks.js. The grade ג׳ music activities (#105: meters,
 // tuneTime, stepGrid, leftoverBeats, howManyTimes, hzCompare) and the g3
 // widgets (meter, remainder, pair, grid - they play) keep or get an activity
-// tag and take no way; standards made only of activities (MUL_COMPARE,
-// NUM_10K, AREA_RECT) have no entry here.
+// tag. An activity of a strong mechanism takes no way; one of M8-M14
+// (howManyTimes, tuneTime, hzCompare, g3Pair) keeps its tag as the story of
+// the prompt and is solved with the standard's primary way (#591 rules 1-3):
+// MUL_COMPARE and NUM_10K carry the ways of TIMES_MORE and NUM10K.
 //
 // Evidence labels follow the research map pasted on #591 (23.10.2026):
 // D = part of an evaluated maths-learning intervention (a package of
@@ -147,6 +149,11 @@
       ['groupsTakeAway', 'עודף בשני שלבים: נגנו את המחיר כקבוצות שוות, קבוצה לכל פריט, ואז השתיקו את כל הקבוצות מתוך הסכום ששולם.', 'das2023', 'A', EXTRA],
     ],
   };
+
+  // Same topic, same method (rule 4): the activity-only standards of the
+  // grade carry the ways of the standard they practise.
+  music.MUL_COMPARE = music.TIMES_MORE;
+  music.NUM_10K = music.NUM10K;
 
   return { grade: 'ג', ST: {}, items: [], music: music, sources: sources };
 });
