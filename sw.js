@@ -33,6 +33,7 @@ const ASSETS = [
   './src/lib/curriculum/grade5.js',
   './src/lib/curriculum/grade3.js',
   './src/lib/curriculum/grade2.js',
+  './src/lib/curriculum/ageFit.js',
   './src/lib/curriculum/evidenceMeta.js',
   './src/lib/banks.js',
   './src/lib/exercises/patternAndWorkedExample.js',
