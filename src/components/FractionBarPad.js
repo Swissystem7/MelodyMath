@@ -22,6 +22,7 @@
 
   const FB = root.MM_FRACTION_BAR || require('../lib/music/fractionBar.js');
   const JAM = root.MM_JAM || require('./jamKit.js');
+  const MY = root.MM_MY_INSTRUMENT || require('../lib/myInstrument.js');
   const GAME = 'fractionBarPad';
   const BPM = 90;
   const BEATS_PER_BAR = 4;
@@ -33,6 +34,7 @@
     { target: '3/4', allowed: ['half', 'quarter', 'eighth'], he: 'מלאו 3/4 תיבה' },
     { target: '1', allowed: ['half', 'quarter', 'eighth'], he: 'מלאו תיבה שלמה בשלושה סוגי אריחים לפחות' , minKinds: 3 },
     { target: '0.75', allowed: ['half', 'quarter', 'eighth'], he: 'מלאו 0.75 של תיבה' },
+    { target: '1.5', allowed: ['whole', 'half', 'quarter'], he: 'מלאו 1.5 תיבות (תיבה וחצי: 3/2 או 1 ו־1/2)' },
     { target: '5/8', allowed: ['half', 'quarter', 'eighth'], he: 'מלאו 5/8 תיבה' },
     { target: '0.5', allowed: ['quarter', 'eighth', 'sixteenth'], he: 'מלאו 0.5 של תיבה' },
     { target: '1', allowed: ['whole', 'half', 'quarter', 'eighth'], he: 'מלאו תיבה שלמה בדרך אחרת מהפעם הקודמת' },
@@ -116,6 +118,7 @@
     const target = FB.toFraction(state.ex.target);
     const targetText = FB.formatFraction(target);
     const isDecimal = /[.]/.test(String(state.ex.target));
+    const mixedText = target && (target.n / target.d > 1) && typeof FB.toMixed === 'function' ? FB.toMixed(target, { hebrew: true }) : null;
     const segs = state.fill.map(function (f, i) {
       return '<span class="fbp-seg" data-seg="' + i + '" style="width:' + (FB.sumDurations([f]) * 100) + '%"><bdi dir="ltr">' + e(f) + '</bdi></span>';
     }).join('');
@@ -133,7 +136,7 @@
       '<button type="button" class="jam-pad" data-tap="drumLow">דום</button><button type="button" class="jam-pad" data-tap="drumHigh">טק</button></div>' : '';
     return '<div class="jam-head"><span class="tag">M3 · משכי תווים · כיתות ג׳–ו׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🥁 ממלאים תיבה במשכי תווים' : 'ממלאים רצועת שבר') + '</h3>' +
-      '<p class="jam-prompt">' + e(state.ex.he) + (isDecimal ? ' (<bdi dir="ltr">' + e(state.ex.target) + ' = ' + targetText + '</bdi>)' : '') + '</p>' +
+      '<p class="jam-prompt">' + e(state.ex.he) + (isDecimal ? ' (<bdi dir="ltr">' + e(state.ex.target) + ' = ' + targetText + (mixedText ? ' / ' + mixedText : '') + '</bdi>)' : '') + '</p>' +
       '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="' + (on ? 'תיבה' : 'רצועה') + ' מלאה ' + FB.formatFraction(sum) + ' מתוך ' + targetText + '">' + segs + rest + '</div>' + over +
       '<p class="fbp-sum">מילאתם: <bdi dir="ltr">' + FB.formatFraction(sum) + (sumDec != null ? ' = ' + sumDec : '') + '</bdi> מתוך <bdi dir="ltr">' + targetText + '</bdi></p>' +
       '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div>' + free +
@@ -144,13 +147,15 @@
   }
 
   function mount(el, props) {
-    const inst = JAM.instrument((props && props.instrument) || DEFAULT_PROPS.instrument, 'drumLow');
+    // The child's instrument (#679) wins over the screen default; read on every
+    // draw and play so a mid-session switch sounds at once.
+    function inst() { return JAM.instrument(MY.instrumentFor((props && props.instrument) || DEFAULT_PROPS.instrument), 'drumLow'); }
     JAM.registerTapVoices();
     let state = createState(0, JAM.loadShowMusic(GAME), props);
     let playing = null;
     function stop() { if (playing) playing.stop(); playing = null; }
     function draw(focusSel) {
-      el.innerHTML = renderHtml(state, inst.voice);
+      el.innerHTML = renderHtml(state, inst().voice);
       const f = focusSel && el.querySelector(focusSel);
       if (f && f.focus) f.focus();
     }
@@ -171,7 +176,7 @@
       else if (act === 'music') { stop(); state = Object.assign({}, state, { showMusic: !state.showMusic, sound: null }); JAM.saveShowMusic(GAME, state.showMusic); }
       else if (act === 'play') {
         stop();
-        playing = JAM.playNotes(barPlan(state.fill, BPM, inst.voice), function (n) {
+        playing = JAM.playNotes(barPlan(state.fill, BPM, inst().voice), function (n) {
           if (n.kind !== 'tile') return;
           const s = el.querySelector('[data-seg="' + n.tile + '"]');
           if (s) { s.classList.remove('lit'); void s.offsetWidth; s.classList.add('lit'); }
@@ -181,6 +186,7 @@
       draw(focus);
       sound();
     });
+    if (typeof root.addEventListener === 'function') root.addEventListener(MY.EVENT, function () { draw(); });
     JAM.stopWhenHidden(el, stop);
     draw();
     return { get state() { return state; } };
