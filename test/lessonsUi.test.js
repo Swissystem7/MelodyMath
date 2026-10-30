@@ -55,8 +55,8 @@ test('the bank-practice button waits for a quiz answer and the retry cue is a pr
   assert.match(indexHtml, /לחצו «נסו שוב» כדי לבחור תשובה חדשה/);
 });
 
-test('the diagnostic counter is an isolated LTR integer N/total', () => {
-  assert.match(indexHtml, /שאלה <bdi dir="ltr"[^>]*>\$\{rmIdx\+1\}\/\$\{RM_DIAG\.length\}<\/bdi>/);
+test('the diagnostic counter is an isolated LTR integer N/total within the round (#678)', () => {
+  assert.match(indexHtml, /שאלה <bdi dir="ltr"[^>]*>\$\{ri\+1\}\/\$\{rn\}<\/bdi>/);
 });
 
 test('opening and closing a lesson manages keyboard focus properly', () => {
