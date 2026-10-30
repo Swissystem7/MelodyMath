@@ -139,6 +139,7 @@
     });
     const jam = root.MM_JAM;
     const handle = jam && typeof jam.dragToTarget === 'function' ? jam.dragToTarget(el, drag) : null;
+    if (host) host._dpDragCancel = handle ? handle.cancel : null;
     el.addEventListener('click', function (ev) {
       const b = ev.target.closest ? ev.target.closest('.dp-piece, .dp-in') : null;
       if (!b || (handle && handle.dragged(b))) return;

@@ -144,20 +144,31 @@
   // plain tap or Enter on the source is still its click. The click a browser
   // fires after a drag must be ignored, so the screen asks dragged(button)
   // first. o = { source, target, ghostClass, onDrop, enabled() }.
+  // Callers must call cancel() on teardown to remove a live ghost.
   const DRAG_MIN = 10;
   function dragToTarget(el, o) {
     const doc = root.document;
     let drag = null;
     let after = false;
+    function isOwner(ev) {
+      return !ev || ev.pointerId == null || !drag || ev.pointerId === drag.pointerId;
+    }
+    function removeGhost() {
+      if (drag && drag.ghost) { drag.ghost.remove(); drag.ghost = null; return true; }
+      return false;
+    }
+    function endDrag() { removeGhost(); drag = null; after = false; }
     el.addEventListener('pointerdown', function (ev) {
+      if (drag) return;
       after = false;
       const s = ev.target.closest ? ev.target.closest(o.source) : null;
       if (!s || s.disabled || (o.enabled && !o.enabled())) return;
-      drag = { x: ev.clientX, y: ev.clientY, ghost: null };
+      drag = { pointerId: ev.pointerId, x: ev.clientX, y: ev.clientY, ghost: null };
       if (s.setPointerCapture) s.setPointerCapture(ev.pointerId);
     });
     el.addEventListener('pointermove', function (ev) {
       if (!drag) return;
+      if (!isOwner(ev)) return;
       if (!drag.ghost) {
         if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) < DRAG_MIN) return;
         drag.ghost = doc.createElement('span');
@@ -169,10 +180,10 @@
     });
     function drop(ev) {
       if (!drag) return;
-      const ghost = drag.ghost;
+      if (!isOwner(ev)) return;
+      const hadGhost = removeGhost();
       drag = null;
-      if (!ghost) return;
-      ghost.remove();
+      if (!hadGhost) return;
       after = true;
       const over = ev.type === 'pointerup' && doc.elementFromPoint(ev.clientX, ev.clientY);
       if (over && over.closest && over.closest(o.target)) o.onDrop(over);
@@ -186,6 +197,7 @@
         after = false;
         return !!(b && b.closest && b.closest(o.source));
       },
+      cancel: function () { endDrag(); },
     };
   }
 
