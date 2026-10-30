@@ -90,6 +90,7 @@ const ASSETS = [
   './src/lib/music/fractionBar.js',
   './src/components/FractionBarPad.js',
   './src/lib/music/takeAwayTen.js',
+  './src/lib/music/dragPlace.js',
   './src/lib/music/beatCounter.js',
   './src/components/BeatCounter.js',
   './src/lib/music/dataBeats.js',
