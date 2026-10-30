@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v30';
+const CACHE = 'melodymath-offline-v31';
 const ASSETS = [
   './',
   './index.html',
@@ -83,6 +83,7 @@ const ASSETS = [
   './src/lib/instruments.js',
   './src/lib/myInstrument.js',
   './src/lib/masteryCheck.js',
+  './src/lib/noMusicCheck.js',
   './src/components/jamKit.js',
   './src/components/NumberPlay.js',
   './src/components/jam.css',
@@ -94,11 +95,16 @@ const ASSETS = [
   './src/lib/music/dataBeats.js',
   './src/lib/music/percentMix.js',
   './src/components/PercentMixPad.js',
+  './src/lib/music/moreFamilies.js',
   './src/components/EnsembleStudio.js',
   './src/lib/music/grooveGrid.js',
   './src/components/GrooveGridScreen.js',
   './src/lib/music/loopStack.js',
   './src/components/LoopStackScreen.js',
+  './src/lib/music/balanceBars.js',
+  './src/components/BalanceBarsScreen.js',
+  './src/lib/noteLengthLine.js',
+  './src/components/NoteLengthLineScreen.js',
   './src/data/struggleTopics.js',
   './src/lib/struggleTopics.js',
   './src/lib/exercises/tapTempoMean.js',

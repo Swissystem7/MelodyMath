@@ -133,7 +133,7 @@ async function smokeChecks(page, base, check) {
   await page.click('#whoSave');
   await tab('classMode');
   await page.click('#classStart');
-  await check('5 grade ג׳ class item tag «כיתה ג׳»', '#classItemTag', async (s) => (await text(s)).trim().startsWith('כיתה ג׳'));
+  await check('5 class item tag hidden from the child (#665 req 1)', '#classItemTag', async (s) => page.locator(s).first().isHidden());
   await page.click('#classCancel').catch(() => {});
 
   await tab('beatMode');
