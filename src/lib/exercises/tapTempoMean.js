@@ -61,27 +61,27 @@
     { id: 'g6-mean-tap-4t-80', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 4, intervals: [8, 8, 8], answer: 8, level: 1,
       prompt: 'הקשתם 4 פעמים ויצרתם 3 מרווחי זמן: 8, 8 ו־8 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 24, חלקי 3 מרווחי זמן = 8 עשיריות שנייה (קצב אחיד של 75 BPM)',
+      hint: 'הסכום 24, חלקי 3 מרווחי זמן = 8 עשיריות שנייה (קצב אחיד של 75 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-tap-4t-100', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 4, intervals: [5, 6, 7], answer: 6, level: 1,
       prompt: 'הקשתם 4 פעמים ויצרתם 3 מרווחי זמן: 5, 6 ו־7 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 18, חלקי 3 מרווחי זמן = 6 עשיריות שנייה (קצב אחיד של 100 BPM)',
+      hint: 'הסכום 18, חלקי 3 מרווחי זמן = 6 עשיריות שנייה (קצב אחיד של 100 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-tap-5t-80', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 5, intervals: [7, 8, 8, 9], answer: 8, level: 2,
       prompt: 'הקשתם 5 פעמים ויצרתם 4 מרווחי זמן: 7, 8, 8 ו־9 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 32, חלקי 4 מרווחי זמן = 8 עשיריות שנייה (קצב אחיד של 75 BPM)',
+      hint: 'הסכום 32, חלקי 4 מרווחי זמן = 8 עשיריות שנייה (קצב אחיד של 75 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-tap-5t-90', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 5, intervals: [7, 8, 10, 11], answer: 9, level: 2,
       prompt: 'הקשתם 5 פעמים ויצרתם 4 מרווחי זמן: 7, 8, 10 ו־11 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 36, חלקי 4 מרווחי זמן = 9 עשיריות שנייה (קצב אחיד של כ־67 BPM)',
+      hint: 'הסכום 36, חלקי 4 מרווחי זמן = 9 עשיריות שנייה (קצב אחיד של כ־67 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-tap-5t-81', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 5, intervals: [6, 7, 7, 8], answer: 7, level: 2,
       prompt: 'הקשתם 5 פעמים ויצרתם 4 מרווחי זמן: 6, 7, 7 ו־8 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 28, חלקי 4 מרווחי זמן = 7 עשיריות שנייה (קצב אחיד של כ־86 BPM)',
+      hint: 'הסכום 28, חלקי 4 מרווחי זמן = 7 עשיריות שנייה (קצב אחיד של כ־86 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-tap-5t-dec', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 5, intervals: [7, 8, 8, 10], answer: 8.25, level: 3,
@@ -91,12 +91,12 @@
     { id: 'g6-mean-tap-6t-80', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 6, intervals: [6, 7, 8, 9, 10], answer: 8, level: 2,
       prompt: 'הקשתם 6 פעמים ויצרתם 5 מרווחי זמן: 6, 7, 8, 9 ו־10 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 40, חלקי 5 מרווחי זמן = 8 עשיריות שנייה (קצב אחיד של 75 BPM)',
+      hint: 'הסכום 40, חלקי 5 מרווחי זמן = 8 עשיריות שנייה (קצב אחיד של 75 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-tap-6t-75', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 6, intervals: [5, 6, 7, 8, 9], answer: 7, level: 3,
       prompt: 'הקשתם 6 פעמים ויצרתם 5 מרווחי זמן: 5, 6, 7, 8 ו־9 עשיריות שנייה. מה אורך המרווח הממוצע בעשיריות שנייה?',
-      hint: 'הסכום 35, חלקי 5 מרווחי זמן = 7 עשיריות שנייה (קצב אחיד של כ־86 BPM)',
+      hint: 'הסכום 35, חלקי 5 מרווחי זמן = 7 עשיריות שנייה (קצב אחיד של כ־86 פעימות בדקה)',
       music: 'tapTempo', musicSrc: 'azaryahu2020', musicEv: 'A', stage: 'tap_active' },
     { id: 'g6-mean-nomusic-check', grade: 'ו', strand: 'data', standard: 'G6_MEAN', skill: 'mean',
       tapCount: 0, intervals: [6, 7, 8, 11], answer: 8, level: 2,
@@ -119,7 +119,7 @@
     const list = item.intervals || [];
     const pills = list.map(function (v) {
       const bpm = Math.round(600 / v);
-      return '<span class="bpm-pill" style="display:inline-block;padding:4px 10px;margin:2px 4px;background:var(--accent-subtle,#eef);border-radius:12px;font-weight:700;">' + v + ' עש׳ (' + bpm + ' BPM)</span>';
+      return '<span class="bpm-pill" style="display:inline-block;padding:4px 10px;margin:2px 4px;background:var(--accent-subtle,#eef);border-radius:12px;font-weight:700;">' + v + ' עש׳ (' + bpm + ' פעימות בדקה)</span>';
     }).join('');
     const intervalsCount = item.tapCount ? item.tapCount - 1 : list.length;
     return '<div class="tap-mean-widget" style="background:var(--card,#fff);border:1px solid var(--line,#ddd);border-radius:12px;padding:14px;text-align:center;margin:10px 0;">' +
