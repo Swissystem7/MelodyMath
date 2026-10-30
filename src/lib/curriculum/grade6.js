@@ -260,6 +260,8 @@
   // which are never primary. banks.js gives the item a primary way.
   const EXTRA = Object.freeze({ optional: true });
   const WEAK = Object.freeze({ optional: true, evidence: 'weak' });
+  // 100 equal notes can't be heard or counted (#682): add-on only, never primary.
+  const EXPERIMENTAL = Object.freeze({ optional: true, evidence: 'experimental' });
   const music = {
     FRAC_MUL: [
       ['noteLength', 'תיבה של 4/4 היא השלם: רבע מנוקד הוא רבע כפול 3/2. נגנו רבע ואז רבע מנוקד ומנו שמיניות — כך שומעים כפל שברים.', 'azaryahu2020', 'D'],
@@ -279,8 +281,8 @@
     PERCENT: [
       ['percentBar', 'תיבה אחת היא 100%. מחלקים אותה ל־4, 10 או 20 פעמות, ממלאים באריחי 50%, 25% ו־10% ומנגנים: כל פעמה היא חלק שווה מהשלם.', 'vanDenHeuvel2003', 'A'],
       ['sectionsFillBar', 'חלקים שממלאים תיבה שלמה מסתכמים ב־100%: חצי תיבה — 50%, רבע — 25%. בדקו שכל החלקים ממלאים בדיוק את התיבה.', 'azaryahu2020', 'A', EXTRA],
-      ['hundredBar', 'אחוז הוא תיבה של 100 תווים שווים: אחוז אחד הוא תו אחד ממנה. אחוז מכמות — מחלקים את הכמות ל־100 תווים ולוקחים כמה מהם.', 'azaryahu2020', 'A', EXTRA],
-      ['partOfHundredBar', 'איזה אחוז: החלק מתוך השלם הוא חלק מתיבה. מרחיבים את התיבה ל־100 תווים וקוראים כמה תווים תופס החלק.', 'azaryahu2020', 'A', EXTRA],
+      ['hundredBar', 'אחוז הוא תיבה של 100 תווים שווים: אחוז אחד הוא תו אחד ממנה. אחוז מכמות — מחלקים את הכמות ל־100 תווים ולוקחים כמה מהם.', 'azaryahu2020', 'A', EXPERIMENTAL],
+      ['partOfHundredBar', 'איזה אחוז: החלק מתוך השלם הוא חלק מתיבה. מרחיבים את התיבה ל־100 תווים וקוראים כמה תווים תופס החלק.', 'azaryahu2020', 'A', EXPERIMENTAL],
     ],
     G6_DECIMAL_SYS: [
       ['romanGroupSymbols', 'השיטה הרומית מקבצת בחמישיות ובעשרות כמו הדגשות: V קבוצה של 5, X של 10. השיטה העשרונית מקבצת רק בעשרות ונעזרת במקום.', 'das2023', 'A'],
@@ -362,8 +364,11 @@
       ['outerSideGroups', 'בהיקף של מצולע מורכב סופרים בקבוצות של יחידות רק את הצלעות החיצוניות; צלע משותפת לשני חלקים לא נכנסת.', 'das2023', 'A', EXTRA],
       ['areaScore', 'משולש הוא חצי מלבן: נגנו את כל משבצות המלבן, ואז רק חצי מהן — בסיס כפול גובה חלקי 2.', 'das2023', 'A', EXTRA],
     ],
+    // #591 LoopStack: the ד׳ way cubeLayerGroups continues here as the one MAIN
+    // way, same name and sound (LoopStackScreen); layerByLayer stays as EXTRA.
     G6_BOX_VOL: [
-      ['layerByLayer', 'נפח תיבה בשכבות: כל שכבה היא קבוצת קוביות, אורך כפול רוחב, והיא חוזרת כמספר השכבות — הגובה.', 'das2023', 'A'],
+      ['cubeLayerGroups', 'נפח תיבה: שכבה היא אורך כפול רוחב, לופ שחוזר כגובה. עד 12 — פעימה לכל קובייה; מעל 12 — עשרות ויחידות.', 'das2023', 'A'],
+      ['layerByLayer', 'נפח תיבה בשכבות: כל שכבה היא קבוצת קוביות, אורך כפול רוחב, והיא חוזרת כמספר השכבות — הגובה.', 'das2023', 'A', EXTRA],
       ['cubeEdgeLayers', 'קובייה: מקצוע כפול מקצוע הוא שכבה, והיא חוזרת כמספר המקצוע. מקצוע לא שלם? חלקו כל יחידה לקבוצות קטנות.', 'das2023', 'A', EXTRA],
       ['layerCount', 'יודעים את הנפח ואת הבסיס? נגנו שכבה־שכבה עד שמגיעים לנפח — מספר השכבות הוא הגובה: נפח חלקי שטח בסיס.', 'das2023', 'A', EXTRA],
     ],

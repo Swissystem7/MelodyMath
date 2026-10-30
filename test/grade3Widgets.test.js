@@ -192,10 +192,10 @@ test('every g3 spec in the question banks is one bindGrade3 draws', () => {
       assert.equal(g3.bindGrade3(makeEl('div'), it.g3), true, it.id + ' ' + JSON.stringify(it.g3));
       assert.equal(it.widget, 'g3', it.id + ' carries a g3 spec but asks for widget ' + it.widget);
     });
-    // All four kinds are actually in use; a typo in one would otherwise hide here.
+    // All five kinds are actually in use; a typo in one would otherwise hide here.
     assert.deepEqual(
       Array.from(new Set(items.map((it) => it.g3.kind))).sort(),
-      ['grid', 'meter', 'pair', 'remainder'],
+      ['chant', 'grid', 'meter', 'pair', 'remainder'],
     );
   });
 });

@@ -12,23 +12,24 @@ const assert = require('node:assert/strict');
 const I = require('../src/lib/instruments');
 const { familyCoverage } = require('../tools/family-coverage');
 
-// What master offered per topic before this change. Additions are allowed;
+// What master offered per topic before this change (re-taken after #809/#782). Additions are allowed;
 // losing any of these ids is not ("never remove").
 const BASELINE = {
   counting: ['taiko', 'cajon', 'tof', 'surdo', 'handbells', 'udu', 'balalaika', 'didgeridoo'],
-  nextPrev: ['cajon', 'tof', 'handbells'],
+  nextPrev: ['cajon', 'tof', 'handbells', 'balalaika', 'didgeridoo'],
   skipCounting: ['djembe', 'tabla', 'mbira', 'charango'],
   multiplication: ['djembe', 'tabla', 'mridangam', 'bodhran', 'riq', 'mbira', 'charango', 'qanun'],
   division: ['tabla', 'mridangam', 'bodhran', 'qanun'],
   fractions: ['darbuka', 'erhu', 'ukulele', 'shofar', 'ney', 'recorder', 'accordion'],
-  decimals: ['darbuka', 'erhu', 'ney', 'recorder'],
-  patterns: ['conga', 'gamelan', 'kalimba', 'marimba', 'balafon', 'steelPan', 'claves', 'gankogui',
-    'oud', 'sitar', 'kora', 'guzheng', 'violin', 'shakuhachi', 'bagpipes', 'dizi', 'piano', 'harmonium'],
-  symmetry: ['marimba', 'dizi'],
-  lcm: [],
+  decimals: ['darbuka', 'erhu', 'ney', 'recorder', 'accordion'],
+  patterns: ['conga', 'gamelan', 'kalimba', 'marimba', 'balafon', 'steelPan', 'claves', 'oud', 'sitar', 'guzheng', 'violin', 'shakuhachi', 'bagpipes', 'dizi', 'piano', 'harmonium'],
+  symmetry: ['marimba', 'violin', 'dizi', 'piano'],
+  lcm: ['gankogui', 'kora'],
   numberLine: ['xylophone', 'koto', 'guitar', 'panFlute', 'pipeOrgan'],
-  data: ['cajon'],
-  percent: ['darbuka', 'ukulele'],
+  data: ['cajon', 'balalaika'],
+  percent: ['darbuka', 'erhu'],
+  area: ['djembe', 'charango', 'qanun'],
+  volume: ['djembe', 'charango', 'qanun'],
 };
 
 test('report lists every topic with its family count out of 4', () => {
@@ -50,7 +51,8 @@ test('every topic offers at least 2 of the 4 families (target 4)', () => {
     assert.ok(r.familyCount >= 2, r.topic + ' offers only ' + r.familyCount + ': ' + r.families.join(', '));
   });
   // Topics that can reach the target with the verified catalogue do reach it.
-  ['fractions', 'decimals', 'patterns', 'symmetry', 'numberLine', 'percent'].forEach((topic) => {
+  // percent stays darbuka + erhu (#809 sequence guard), so it is not at 4.
+  ['fractions', 'decimals', 'patterns', 'symmetry', 'numberLine'].forEach((topic) => {
     const row = familyCoverage().find((r) => r.topic === topic);
     assert.equal(row.familyCount, 4, topic + ': ' + row.families.join(', '));
   });
@@ -63,9 +65,9 @@ test('no topic loses an instrument it offered on master (never remove)', () => {
   });
 });
 
-test('ukulele stays as found: fractions-led, no new topics', () => {
-  // Ukulele is the fractions note-length voice (M3) and the strings partner
-  // PercentMix pairs against percussion (test/percentMix.test.js). It is
-  // not a filler for other topics, so its topic list must not grow.
-  assert.deepEqual(I.instrumentById('ukulele').mathTopics, ['fractions', 'percent']);
+test('ukulele stays as found: fractions only, no new topics', () => {
+  // Ukulele is the fractions note-length voice (M3); master (#809) keeps it
+  // fractions-only. It is not a filler for other topics, so its topic list
+  // must not grow.
+  assert.deepEqual(I.instrumentById('ukulele').mathTopics, ['fractions']);
 });

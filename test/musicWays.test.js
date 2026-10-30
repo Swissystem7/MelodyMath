@@ -142,9 +142,9 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1247/1247', () => {
+test('every item of every grade has a music side: 1279/1279', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1247); // + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688)
+  assert.equal(all.length, 1279); // + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688) + 2 pattern and worked example items (#670) + 8 count-on items (#462) + 8 מעבר עשרת duo items (#465) + 8 chant items (#463) + 6 ה׳ perimeter (#711)
   assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
@@ -329,7 +329,7 @@ test('#751 batch 5: grade ה׳ and ו׳ topics keep one main way, the others sta
       G6_CIRCLE_TERMS: ['sectorAsNote', 'diameterTwoRadii', 'chordShorterNote'],
       G6_CIRCLE_CALC: ['piBarsAround', 'halfCircleBar', 'doubleRadiusBars'],
       G6_COMP_TRI: ['partsRowGroups', 'outerSideGroups', 'areaScore'],
-      G6_BOX_VOL: ['layerByLayer', 'cubeEdgeLayers', 'layerCount'],
+      G6_BOX_VOL: ['cubeLayerGroups', 'layerByLayer', 'cubeEdgeLayers', 'layerCount'],
       G6_VOL_UNITS: ['litreThousandGroups', 'cubicLayers', 'unitBySize'],
       G6_MEAN: ['levelNotes', 'equalPhrases'],
       G6_DATA_READ: ['columnsAsNotes', 'pieSectorRead', 'symbolNoteLength'],
