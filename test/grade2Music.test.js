@@ -7,6 +7,21 @@ const banks = require('../src/lib/banks');
 
 const music = (name) => banks.itemsForGrade('ב').filter((it) => (it.musicStory || it.music) === name);
 
+test('a cube layer over 12 plays as tens and ones, not one sound per cube', () => {
+  const dozen = g2.cubeLayerSounds(12);
+  assert.equal(dozen.units, true);
+  assert.equal(g2.cubeLayerEvents(12).length, 12);
+  assert.ok(g2.cubeLayerEvents(12).every((e) => e.place === 'unit'));
+  const layer = g2.cubeLayerSounds(24);
+  assert.deepEqual({ tens: layer.tens, ones: layer.ones, units: layer.units }, { tens: 2, ones: 4, units: false });
+  const played = g2.cubeLayerEvents(24);
+  assert.equal(played.length, 6);
+  assert.deepEqual(played.map((e) => e.place), ['ten', 'ten', 'one', 'one', 'one', 'one']);
+  assert.ok(played.filter((e) => e.place === 'ten').every((e) => e.hz < played.find((x) => x.place === 'one').hz));
+  assert.equal(g2.cubeLayerEvents(20).length, 2);
+  assert.equal(g2.cubeLayerSounds(0), null);
+});
+
 test('even or odd by ear: a full pair at the end, or one beat left alone', () => {
   assert.deepEqual(g2.evenOddBeats(4), { count: 4, pairs: 2, leftover: 0, even: true });
   assert.deepEqual(g2.evenOddBeats(7), { count: 7, pairs: 3, leftover: 1, even: false });
@@ -116,6 +131,8 @@ test('every event the activities emit survives the engine unchanged', () => {
     g2.evenOddEvents(11),
     g2.phaseEvents(g2.verticalVoices({ a: 85, b: 39, op: '-' }).phases),
     g2.phaseEvents(g2.verticalVoices({ a: 23, b: 14, op: '+' }).phases),
+    g2.cubeLayerEvents(6),
+    g2.cubeLayerEvents(24),
   ];
   batches.forEach((events) => {
     assert.ok(events.length, 'an activity with no sound is not an activity');

@@ -9,7 +9,7 @@
 const { test, expect } = require('@playwright/test');
 
 const PAGES = ['index', 'curriculum', 'landing', 'offer', 'frequency', 'functions', '807', 'check', 'demo'];
-const TABS = ['remediation', 'lessons', 'practice', 'playground', 'classMode', 'beatMode', 'teacherReport'];
+const TABS = ['remediation', 'lessons', 'practice', 'playground', 'musicGames', 'classMode', 'beatMode', 'teacherReport'];
 // Enough to reach every button a panel shows at first, without wandering
 // into a full exercise run.
 const MAX_CLICKS = 12;
@@ -43,6 +43,12 @@ for (const name of PAGES) {
 
 async function openTab(page, tab) {
   await page.locator('#tab-' + tab).click();
+  if (tab === 'teacherReport') {
+    // Adult gate (#737): answer the two-digit product.
+    const [a, b] = (await page.locator('#adultGateQ').textContent()).match(/\d+/g).map(Number);
+    await page.locator('#adultGateAnswer').fill(String(a * b));
+    await page.locator('#adultGateOk').click({ delay: 3200 }); // hold 3 s
+  }
   await expect(page.locator('#tab-' + tab)).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#' + tab)).toBeVisible();
 }

@@ -59,8 +59,13 @@ test('the main lines stay on one method from grade to grade', () => {
   // multiplication and division ב׳ → ג׳ → ה׳: accented, grouped beats
   ['mm-cur-15', 'mm-cur-16', 'mm-cur-24', 'mm-cur-25', 'mm-cur-26', 'mm-cur-40'].forEach((id) => only(id, 'M2'));
   // place value and big numbers ב׳ → ו׳: accent levels of ten
-  ['mm-cur-13', 'mm-cur-22', 'mm-cur-31', 'mm-cur-38', 'mm-cur-50'].forEach((id) => only(id, 'M2'));
-  // patterns start on M6 and counting on M1
-  only('mm-cur-6', 'M6');
+  ['mm-cur-13', 'mm-cur-22', 'mm-cur-38', 'mm-cur-50'].forEach((id) => only(id, 'M2'));
+  // mm-cur-31 also hosts the ד׳ equality balance (EQ_INEQ, balanceBars, M3) on
+  // master, so its place-value skills are checked one by one: all M2.
+  const g4 = require('../src/lib/curriculum/grade4');
+  ['NUM_MILLION', 'ADD_SUB_MILLION'].forEach((key) => assert.equal(banks.mechanismOf(banks.primaryWays(g4.music[key])[0][0]), 'M2', 'ד ' + key));
+  assert.deepEqual(prog.linksForTopic('mm-cur-31').mechanisms, ['M2', 'M3']);
+  // patterns: master moved א׳ PATTERN to fixedAccents (M2); counting stays on M1
+  only('mm-cur-6', 'M2');
   only('mm-cur-2', 'M1');
 });

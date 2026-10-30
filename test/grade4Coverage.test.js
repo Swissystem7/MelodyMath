@@ -22,7 +22,7 @@ test('every grade ד׳ row is covered, verified, and opens at least four exercis
 
 test('each new grade ד׳ standard has items at levels 1, 2 and 3 and a verified tag', () => {
   [ST.NUM_MILLION, ST.ADD_SUB_MILLION, ST.MUL_DIV_VERT, ST.ORDER_OPS, ST.FRAC_OF_QTY, ST.FRAC_NAMES,
-    ST.FRAC_ADD_D, ST.BOX_AREA, ST.TABLE, ST.BARCHART, ST.PIE].forEach((st) => {
+    ST.FRAC_ADD_D, ST.FRAC_MIXED_D, ST.BOX_AREA, ST.TABLE, ST.BARCHART, ST.PIE].forEach((st) => {
     const mine = items.filter((it) => it.standard === st);
     [1, 2, 3].forEach((lv) => assert.ok(mine.some((it) => it.level === lv), st + ' level ' + lv));
     mine.forEach((it) => {
@@ -45,6 +45,24 @@ test('plain grade ד׳ arithmetic and the vertical columns agree with their answ
     }
   });
   assert.ok(checked >= 18, 'only ' + checked + ' checked');
+});
+
+test('#709: mixed numbers and fractions above 1 are solved with fillBar over consecutive bars', () => {
+  const mine = items.filter((it) => it.standard === ST.FRAC_MIXED_D);
+  assert.ok(mine.length >= 6);
+  assert.match(cur.sectionForItem(mine[0]).topic, /^שבר כחלק מכמות/);
+  const val = (s) => { const m = /^(?:(\d+) ו־)?(\d+)\/(\d+)$/.exec(String(s)); return m ? Number(m[1] || 0) + m[2] / m[3] : Number(s); };
+  mine.forEach((it) => {
+    assert.ok(val(it.answer) > 1, it.id);
+    assert.equal(it.music, 'fillBar', it.id);
+    assert.match(it.musicNote, /תיבות ברצף/, it.id);
+    assert.ok((it.musicExtra || []).some((x) => x.music === 'noteValues'), it.id);
+  });
+  assert.ok(mine.some((it) => / ו־/.test(it.answer)) && mine.some((it) => /^\d+\/\d+$/.test(it.answer)));
+  // The two forms stay apart: 7/4 does not answer «write as a mixed number».
+  const toMixed = mine.find((it) => it.answer === '1 ו־3/4');
+  assert.ok(isCorrect('1 3/4', toMixed.answer) && !isCorrect('7/4', toMixed.answer));
+  assert.equal(val(mine.find((it) => /\+ 1\/2/.test(it.prompt)).answer), 1.75 + 0.5);
 });
 
 test('the pie chart draws one wedge per part and names the slices without fractions', () => {

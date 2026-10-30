@@ -22,6 +22,10 @@ test('struggleTopics schema and sourceUrl validity', () => {
   });
 });
 
+test('hookFor maps מעבר עשרת to the bass-to-drums hook (#465)', () => {
+  assert.equal(hookFor('מעבר עשרת'), 'בס אחד נפרט לעשר מכות תוף');
+});
+
 test('topicFragment resolves through hookFor to a non-empty hook', () => {
   rawData.forEach((row) => {
     const hook = hookFor(row.topicFragment);

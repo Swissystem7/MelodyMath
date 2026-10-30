@@ -101,11 +101,11 @@ test('a sequence is timed off the audio clock and clamped to the safe band', asy
 
   const played = await page.evaluate(() => {
     const before = window.getSharedAudioContext().currentTime;
-    const notes = window.scheduleSequence(
+    const r = window.scheduleSequence(
       [{ fraction: 'quarter', hz: 220 }, { fraction: 'eighth', hz: 5000 }, { fraction: 'eighth', hz: 20 }],
       { bpm: 120 }
     );
-    return { before, notes, canReplay: window.canReplay() };
+    return { before, notes: r.plan, canReplay: window.canReplay() };
   });
   expect(played.notes.map((n) => n.hz)).toEqual([220, 1760, 110]);
   played.notes.forEach((n) => {
@@ -130,7 +130,7 @@ test('after one visit the page and the engine work with the network off', async 
   const errors = watchConsole(page);
   await page.reload();
   await expect(page.locator('#main')).toBeVisible();
-  expect(await page.evaluate(() => window.measureFill('4/4', ['1/4', '1/8', '1/8', '1/2']).fill)).toBe('full');
+  expect(await page.evaluate(() => window.musicEngine.measureFill('4/4', ['1/4', '1/8', '1/8', '1/2']).fill)).toBe('full');
   await context.setOffline(false);
   expect(errors).toEqual([]);
 });
