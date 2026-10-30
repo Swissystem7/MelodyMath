@@ -228,3 +228,16 @@ test('classItems follows the selected grade and keeps the grade-1 default', () =
   assert.ok(banks.classItems('ב').every((i) => i.grade === 'ב'));
   banks.GRADES.forEach((g) => assert.ok(banks.classItems(g).every((i) => !i.typed), g + ' has typed items'));
 });
+
+test('regroupItems is a grade-ב duo pack for beat mode (#465)', () => {
+  const items = banks.regroupItems();
+  assert.ok(items.length >= 12, 'only ' + items.length);
+  items.forEach((it) => {
+    assert.equal(it.grade, 'ב', it.id);
+    assert.ok(banks.isShippable(it), it.id);
+    assert.ok(!it.typed, it.id);
+    assert.equal(it.g2.kind, 'duo', it.id);
+    const g = it.g2;
+    assert.ok(g.op === '+' ? g.a % 10 + g.b % 10 >= 10 : g.a % 10 < g.b % 10, it.id + ' does not regroup');
+  });
+});

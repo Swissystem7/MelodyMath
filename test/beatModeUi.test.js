@@ -72,6 +72,27 @@ test('nextBeatQuestion handles empty pool safely without throwing TypeError', ()
   assert.equal(elements.beatChoices.innerHTML, '');
 });
 
+test('beatPool serves the «מעבר עשרת» duo pack when regroup is picked (#465)', () => {
+  assert.match(indexHtml, /<option value="regroup">מעבר עשרת/);
+  const fnMatch = indexHtml.match(/function beatPool\(\)\{[\s\S]*?\n\}/);
+  assert.ok(fnMatch, 'beatPool function found in index.html');
+  const banks = require('../src/lib/banks');
+  const sandbox = {
+    $: (id) => (id === 'beatPack' ? { value: 'regroup' } : null),
+    regroupItems: banks.regroupItems,
+    classItems: banks.classItems,
+    rowsOf: banks.rowsOf,
+    itemsForGrade: banks.itemsForGrade,
+    selectedGrade: 'ב',
+    beatHist: [],
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(fnMatch[0], sandbox);
+  const pool = sandbox.beatPool();
+  assert.ok(pool.length > 0);
+  assert.equal(pool[0].g2.kind, 'duo');
+});
+
 test('beatMode complies with honesty guidelines (no medical or efficacy claims)', () => {
   assert.match(indexHtml, /לא טיפול ואין טענת יעילות/);
   assert.match(indexHtml, /לא ציון ולא הוכחה שהקצב עוזר/);
