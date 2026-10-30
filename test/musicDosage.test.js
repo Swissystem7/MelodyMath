@@ -71,7 +71,8 @@ test('rule 4 across grades: a standard taught in several grades keeps its primar
 });
 
 test('rule 1 on items: every item is solved through M1, M2, M3 or M6, way or activity', () => {
-  const wrong = banks.allItems().filter((it) => !STRONG.includes(banks.mechanismOf(it.music)));
+  // The silent end-of-topic checks (noMusic, #688) have no music side by design.
+  const wrong = banks.allItems().filter((it) => !it.noMusic && !STRONG.includes(banks.mechanismOf(it.music)));
   assert.deepEqual(wrong.map((it) => it.id + ' ' + it.music), []);
 });
 
