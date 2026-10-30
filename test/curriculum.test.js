@@ -53,8 +53,8 @@ test('grade א-ג demo completion covers 10,000 addition/subtraction, tables, ×
   assert.ok(rows.some((r) => r.grade === 'ג' && /חיבור\/חיסור במאוזן ובמאונך עד רבבה/.test(r.topic) && r.status === 'covered'));
   assert.ok(rows.some((r) => r.grade === 'ג' && /כפל\/חילוק ב־10, 100, 1,000/.test(r.topic) && r.status === 'covered'));
   assert.ok(rows.some((r) => r.grade === 'ג' && /ודו־שלביות/.test(r.topic) && r.status === 'covered'));
-  assert.equal(banks.rowsOf('addition', 'ג').length, 9);
-  assert.equal(banks.rowsOf('subtraction', 'ג').length, 9);
+  assert.equal(banks.rowsOf('addition', 'ג').length, 12);
+  assert.equal(banks.rowsOf('subtraction', 'ג').length, 12);
   assert.ok(banks.rowsOf('data', 'ב').some((it) => it.standard === banks.ST.TABLE));
   assert.ok(banks.rowsOf('division', 'ג').some((it) => it.standard === banks.ST.MUL_DIV_10));
   assert.ok(banks.rowsOf('word_problems', 'ג').some((it) => it.standard === banks.ST.WORD_TWO_STEP));
