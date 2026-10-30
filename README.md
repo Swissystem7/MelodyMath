@@ -2,7 +2,7 @@
 
 **For whom**: a student, parent, or מחנכת שילוב who opens a URL. There is no paying buyer today.
 
-**How**: open the [live demo](https://swissystem7.github.io/MelodyMath/) — no install, no account
+**How**: open the [live demo](https://swissystem7.github.io/MelodyMath/) — no install, no account.
 
 # MelodyMath
 
@@ -63,7 +63,7 @@
 3. **אין קונה משלם היום.** [MONETIZATION.md](MONETIZATION.md) לא מצא נתיב תשלום. נתיב האימות היחיד: **מחנכת שילוב אחת**, קבוצה קטנה, **4 שבועות, חינם, בלי טענת יעילות**. [דף הניסוי](https://swissystem7.github.io/MelodyMath/offer.html).
 
 ## הפעלה מקומית
-פותחים את `index.html` בדפדפן. זהו. כל הדפים טוענים את אותה ליבה (`src/lib/core.js` + המודולים שהוא צריך) — בלי CDN, בלי bundler, ובלי GitHub Actions.
+פותחים את `index.html` בדפדפן. זהו. כל הדפים טוענים את אותה ליבה (`src/lib/core.js` + המודולים שהוא צריך) — בלי CDN ובלי bundler. `.github/workflows/test.yml` מריץ `npm ci && npm test` על pull request ועל דחיפה ל־`master`.
 
 ```
 npm test
@@ -71,7 +71,21 @@ npm test
 
 או ישירות `node --test`. רץ על הליבה: נרמול תשובות, מיפוי מקצב, תיוג בנקים, שער שליטה בכפל, ישר מספרים, תיבה 4/4, כיסוי תוכנית, נגישות, ויושרת דפים.
 
-אין בדיקת WCAG מול NVDA/VoiceOver בכיתה אמיתית. אין GitHub Actions בריפו.
+אין בדיקת WCAG מול NVDA/VoiceOver בכיתה אמיתית. בדיקת ה־CI היחידה בריפו היא `npm test` (ו־CodeQL בנפרד).
+
+## Sentry ו־Codecov
+
+אין DSN ואין טוקן בקוד. ב־`index.html` הערך הוא `__SENTRY_DSN__`. בלי החלפה בזמן פריסה, Sentry לא נטען ואין שגיאה בקונסול, והטאבלט לא שולח דבר. סוד המאגר `SENTRY_DSN` מוחלף במקום הזה רק בפריסה; אז נטען ה־SDK עם `sendDefaultPii: false`.
+
+`node tools/codecov.js` (או `npm run coverage`) מריץ את הבדיקות וכותב `coverage/lcov.info`. אם `CODECOV_TOKEN` חסר, ההעלאה ל־Codecov מדולגת והפקודה מצליחה. הריפו לא מוסיף workflow של GitHub Actions.
+
+## Doppler
+
+הסודות נקראים רק מהסביבה ש־Doppler מזריק (`doppler run -- node tools/codecov.js`). אין ערכים בקוד וב־`doppler.yaml`.
+
+שמות נדרשים: `SENTRY_DSN`, `CODECOV_TOKEN`.
+
+בלי הזרקה נשאר `__SENTRY_DSN__` בעמוד, ו־Codecov מדלג. בדיקות הריפו רצות מקומית עם `npm test`.
 
 ## כמה תלמידים בו־זמנית
 אין שרת, ולכן «כמה משתמשים» עובד כך:
@@ -88,3 +102,5 @@ GitHub Pages מפורסם מענף `main`. אחרי שינוי ב־`master` צר
 
 ---
 פרויקט פתוח · Swissystem7
+
+Note: draft PRs may also be produced by the Muse Code queue on Dell (muse-task).

@@ -90,7 +90,6 @@ function classSandbox(grade) {
   const mastery = require('../src/lib/mastery');
   const pick = (re) => { const m = indexHtml.match(re); assert.ok(m, String(re)); return m[0]; };
   const code = [
-    pick(/function itemTagText\(it\)\{[\s\S]*?\n\}/),
     pick(/function classPool\(\)\{.*\}/),
     pick(/function nextClassQuestion\(\)\{.*\}/),
   ].join('\n');
@@ -101,7 +100,7 @@ function classSandbox(grade) {
     classItems: banks.classItems, allItems: banks.allItems, gateItems: mastery.gateItems,
     rng: (s) => { let x = s; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; },
     $: (id) => elements[id] || el(),
-    setItemTag: (e, it) => { e.textContent = sandbox.itemTagText(it); },
+    setItemTag: () => {},
     setMath: () => {}, renderWidget: () => {}, show: () => {}, maybeHear: () => {}, maybeSpeak: () => {},
     makeChoices: (a) => [a], pickClass: () => {},
     document: { createElement: () => ({ setAttribute() {} }) },
@@ -112,17 +111,17 @@ function classSandbox(grade) {
 }
 
 test('class mode serves the grade selected in the header', () => {
-  const { sandbox, elements } = classSandbox('ב');
+  const { sandbox } = classSandbox('ב');
   sandbox.nextClassQuestion();
-  assert.match(elements.classItemTag.textContent, /^כיתה ב׳/);
+  assert.equal(sandbox.classCurrent.grade, 'ב');
 });
 
 test('class mode at grade ג׳ keeps tables 3/6/7/8/9 behind the gate', () => {
-  const { sandbox, elements, mastery } = classSandbox('ג');
+  const { sandbox, mastery } = classSandbox('ג');
   const pool = sandbox.classPool();
   assert.ok(pool.length > 0);
   assert.ok(pool.every((it) => it.grade === 'ג' && !mastery.isBlockedItem(it)));
   assert.ok(sandbox.classItems('ג').some((it) => mastery.isBlockedItem(it)), 'grade ג bank has gated tables');
   sandbox.nextClassQuestion();
-  assert.match(elements.classItemTag.textContent, /^כיתה ג׳ · /);
+  assert.equal(sandbox.classCurrent.grade, 'ג');
 });

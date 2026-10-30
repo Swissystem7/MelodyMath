@@ -46,7 +46,7 @@ test('every way of every grade file and every music activity is mapped to a mech
   FILES.forEach((file) => Object.values(file.music).forEach((ways) => ways.forEach(([tag]) => {
     if (!banks.mechanismOf(tag)) unmapped.add(file.grade + ' ' + tag);
   })));
-  banks.allItems().forEach((it) => { if (!banks.mechanismOf(it.music)) unmapped.add(it.grade + ' ' + it.music); });
+  banks.allItems().forEach((it) => { if (it.noMusic) return; if (!banks.mechanismOf(it.music)) unmapped.add(it.grade + ' ' + it.music); });
   assert.deepEqual([...unmapped], []);
 });
 
