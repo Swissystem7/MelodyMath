@@ -1348,6 +1348,17 @@
     G3('multiplication', 'במשקל 6/8, כמה תיבות שלמות נדרשות כדי להגיע ל־42 פעמות?', 7, '42 : 6', { standard: ST.MUL_C, table: 6, level: 3, g3: { kind: 'meter', table: 6, bars: 7 } })
   );
 
+  // כפולות בקצב (#463): אומרים את הכפולות עם הפעימה, והצליל עוצר לפני
+  // אחת מהן — את הכפולה החסרה אומרים מהזיכרון. רק לוחות 2/4/5/10.
+  function CHANT(t, k) {
+    return G3('multiplication', `אומרים את הכפולות של ${t} בקצב. אחרי ${k - 1} כפולות, הצליל שותק לפעמה אחת. איזו כפולה חסרה?`, t * k, t + ' × ' + k,
+      { standard: ST.MUL_C, table: t, level: 1, g3: { kind: 'chant', table: t, upTo: 10, pauseAt: k } });
+  }
+  RAW.push(
+    CHANT(2, 3), CHANT(2, 6), CHANT(4, 3), CHANT(4, 6),
+    CHANT(5, 3), CHANT(5, 6), CHANT(10, 3), CHANT(10, 6)
+  );
+
   // חילוק עם שארית: הפעמות שנשארו מתנגנות בצליל אחר, וזו השארית.
   // בלי `table`: תשובה נכונה כאן אינה עובדה מלוח הכפל, ולכן היא לא נחשבת
   // שליטה בליבה ולא פותחת את השער של 3/6/7/8/9.
@@ -1922,7 +1933,7 @@
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
     // activity: counted beats (hear), the playing widgets of grades א׳-ג׳
-    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid)
+    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid, chant)
     // and the 4/4 bar of the fraction items (bar44).
     const cap = function (k) { return k.charAt(0).toUpperCase() + k.slice(1); };
     RAW.forEach(function (raw) {
@@ -2122,7 +2133,7 @@
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
       tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
-        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
+        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'g3Chant', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012); the bar is the model for percent (Van den Heuvel-Panhuizen 2003).',
       tags: ['decimalNoteScale', 'tenthBeatGroups', 'percentBar', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'tapTempo', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
@@ -2210,7 +2221,7 @@
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
     evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
-    meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'],
+    meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'], g3Chant: ['das2023', 'A'],
     leftoverBeats: ['das2023', 'A'], g3Remainder: ['das2023', 'A'],
     howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
     stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
