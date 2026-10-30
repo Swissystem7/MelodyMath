@@ -46,7 +46,7 @@ test('functions.html adheres to honesty constraints and carries no medical or ef
   assert.doesNotMatch(page, /הילד שולט בכל המיומנויות/);
   assert.doesNotMatch(page, /ADHD|דיסקלקול|dyscalcul/i);
   assert.doesNotMatch(page, /טיפול ב|משפר מתמטיקה/);
-  assert.match(page, /מוצר סוניפיקציה לחטיבה ולתיכון — לא חלק מתרגול א׳–ד׳/);
+  assert.match(page, /מוצר סוניפיקציה לחטיבה ולתיכון — לא חלק מתרגול א׳–ו׳/);
 });
 
 test('functions.html advances focus after game guess and guided lesson selection', () => {

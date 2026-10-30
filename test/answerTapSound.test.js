@@ -73,7 +73,7 @@ test('every answer surface in index.html is a tap voice (sounds on pointerdown)'
   assert.match(html, /id="check" data-tap="xylo"/);
   assert.match(html, /id="rmCheck" data-tap="xylo"/);
   assert.match(html, /id="rmPlanCheck" data-tap="xylo"/);
-  assert.match(html, /b\.setAttribute\('data-tap','xylo'\);b\.onclick=\(\)=>pickClass\(v,b\)/, 'class choices');
+  assert.match(html, /if\(!q\.noMusic\)b\.setAttribute\('data-tap','xylo'\);b\.onclick=\(\)=>pickClass\(v,b\)/, 'class choices (silent noMusic rounds stay quiet)');
   assert.match(html, /b\.setAttribute\('data-tap','xylo'\); b\.onclick=\(\)=>pickBeat\(v,b\)/, 'beat choices');
   assert.match(html, /class="secondary quiz-choice" data-tap="xylo"/, 'guided-lesson choices');
   assert.match(html, /if\(!correct && typeof playTap==='function'\) playTap\('wrong'\)/, 'wrong feedback');
