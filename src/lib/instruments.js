@@ -167,7 +167,7 @@
     e('shofar', 'שופר', 'Shofar', 'Jewish tradition (ram\'s horn)', 'winds', 'M3', ['fractions'], 'horn',
       'Mishnah Rosh Hashanah 4:9: a tekiah lasts as long as three teruot, and a teruah as long as three short whimpers, so each blast is one third of the longer one: note lengths as fractions (M3).',
       'https://www.sefaria.org/Mishnah_Rosh_Hashanah.4.9'),
-    e('didgeridoo', 'דיגרידו', 'Didgeridoo (yiraki)', 'Aboriginal Australia', 'winds', 'M1', ['counting', 'nextPrev'], 'drone',
+    e('didgeridoo', 'דיגרידו', 'Didgeridoo (yiraki)', 'Aboriginal Australia', 'winds', 'M1', ['counting', 'nextPrev', 'data'], 'drone',
       'Played with circular breathing, its rhythmic breathing cycle makes a pulsating drone: a steady pulse to count along with, one count per pulse (M1).',
       'https://newt.phys.unsw.edu.au/jw/dij/dij.html'),
     e('shakuhachi', 'שאקוהאצ׳י', 'Shakuhachi', 'Japan', 'winds', 'M6', ['patterns'], 'breathy',
