@@ -248,7 +248,7 @@ function findEl(root, cls) {
   return null;
 }
 
-test('bindGrade1 renders play button, visible note and screen-reader narration for all four kinds', (t) => {
+test('bindGrade1 renders play button, visible note and screen-reader narration for all five kinds', (t) => {
   global.document = { createElement: makeEl };
   t.after(() => { delete global.document; });
 
@@ -257,6 +257,7 @@ test('bindGrade1 renders play button, visible note and screen-reader narration f
     { kind: 'scale', from: 0, to: 10, baseFreq: 220 },
     { kind: 'chart100', number: 34, answer: 34 },
     { kind: 'pattern', type: 'ABC', length: 6 },
+    { kind: 'countOn', from: 7, steps: 3, answer: 10 },
   ];
 
   specs.forEach((spec) => {
@@ -289,5 +290,35 @@ test('bindGrade1 renders play button, visible note and screen-reader narration f
   assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'beats', from: 0, step: 0, accents: 3 }), false);
   assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'chart100', number: 0 }), false);
   assert.equal(g1.bindGrade1(null, { kind: 'beats', from: 0, step: 2, accents: 3 }), false);
+  assert.equal(g1.bindGrade1(makeEl('div'), { kind: 'countOn', from: 7, steps: 0 }), false);
+});
+
+test('countOn (#462) counts on from the start, accents the landing beat, never names it', () => {
+  const beats = g1.countOnBeats(7, 3);
+  assert.deepEqual(beats.map((b) => b.count), [8, 9, 10]);
+  assert.deepEqual(beats.map((b) => b.accent), [false, false, true]);
+
+  const ev = g1.countOnEvents(7, 3, 96);
+  assert.equal(ev.length, 3);
+  for (let i = 1; i < ev.length; i++) assert.ok(ev[i].at >= ev[i - 1].at);
+  assert.equal(ev[2].hz, 660);
+
+  assert.doesNotMatch(g1.countOnNarration(7, 3), /10/);
+  assert.deepEqual(g1.countOnBeats(7, 0), []);
+  assert.deepEqual(g1.countOnEvents(7, 0, 96), []);
+  assert.equal(g1.countOnNarration(7, 0), '');
+});
+
+test('countOn still draws and its play button is safe when muted and without AudioContext', (t) => {
+  global.document = { createElement: makeEl };
+  global.loadAccess = () => ({ quiet: true });
+  t.after(() => { delete global.document; delete global.loadAccess; });
+  assert.equal(typeof globalThis.AudioContext, 'undefined');
+  const host = makeEl('div');
+  assert.equal(g1.bindGrade1(host, { kind: 'countOn', from: 7, steps: 3 }), true);
+  const play = findEl(host.children[0], 'g3-play');
+  assert.doesNotThrow(() => play.clicks.forEach((fn) => fn()));
+  delete global.loadAccess; // unmuted, still no AudioContext
+  assert.doesNotThrow(() => play.clicks.forEach((fn) => fn()));
 });
 

@@ -1933,7 +1933,7 @@
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
     // activity: counted beats (hear), the playing widgets of grades א׳-ג׳
-    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid, chant)
+    // (g1: beats, chart100, pattern, countOn; g2; g3: meter, remainder, pair, grid, chant)
     // and the 4/4 bar of the fraction items (bar44).
     const cap = function (k) { return k.charAt(0).toUpperCase() + k.slice(1); };
     RAW.forEach(function (raw) {
@@ -2051,6 +2051,20 @@
     MEAS('ד', 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', 3, 'קודם סופרים את הקוביות בכל תיבה, ואז מחסירים', 3, ST.MASS_VOL)
   );
 
+  // ---------- כיתה א׳ · ספירה הלאה עם הפעימה (#462) ----------
+  // Appended last so existing ids stay put (#462). The widget plays the beats
+  // and names the start and the step count, never where the count lands.
+  RAW.push(
+    I('א', 'counting', 'מתחילים ב־4 ושומעים 2 פעימות — לאן הגענו?', 6, '4 ואז 2 קדימה', { standard: ST.COUNT_FWD, level: 1, widget: 'g1', g1: { kind: 'countOn', from: 4, steps: 2 } }),
+    I('א', 'counting', 'מתחילים ב־7 ושומעים 3 פעימות — לאן הגענו?', 10, '7 ואז 3 קדימה', { standard: ST.COUNT_FWD, level: 1, widget: 'g1', g1: { kind: 'countOn', from: 7, steps: 3 } }),
+    I('א', 'counting', 'מתחילים ב־12 ושומעים 4 פעימות — לאן הגענו?', 16, '12 ואז 4 קדימה', { standard: ST.COUNT_FWD, level: 1, widget: 'g1', g1: { kind: 'countOn', from: 12, steps: 4 } }),
+    I('א', 'counting', 'מתחילים ב־18 ושומעים 5 פעימות — לאן הגענו?', 23, '18 ואז 5 קדימה', { standard: ST.COUNT_FWD, level: 1, widget: 'g1', g1: { kind: 'countOn', from: 18, steps: 5 } }),
+    I('א', 'counting', 'מתחילים ב־23 ושומעים 2 פעימות — לאן הגענו?', 25, '23 ואז 2 קדימה', { standard: ST.COUNT_FWD, level: 2, widget: 'g1', g1: { kind: 'countOn', from: 23, steps: 2 } }),
+    I('א', 'counting', 'מתחילים ב־36 ושומעים 3 פעימות — לאן הגענו?', 39, '36 ואז 3 קדימה', { standard: ST.COUNT_FWD, level: 2, widget: 'g1', g1: { kind: 'countOn', from: 36, steps: 3 } }),
+    I('א', 'counting', 'מתחילים ב־48 ושומעים 4 פעימות — לאן הגענו?', 52, '48 ואז 4 קדימה', { standard: ST.COUNT_FWD, level: 2, widget: 'g1', g1: { kind: 'countOn', from: 48, steps: 4 } }),
+    I('א', 'counting', 'מתחילים ב־57 ושומעים 5 פעימות — לאן הגענו?', 62, '57 ואז 5 קדימה', { standard: ST.COUNT_FWD, level: 2, widget: 'g1', g1: { kind: 'countOn', from: 57, steps: 5 } })
+  );
+
   SKILL_HE.even_odd = 'זוגי/אי־זוגי';
   // The original tools stay in index.html. Specs live in explorerBank.js.
   const EXPLORER = (typeof module === 'object' && module.exports)
@@ -2087,6 +2101,10 @@
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
+        // A late g1 widget item (#462) is a music activity, like the early ones.
+        if (raw.grade === f.grade && !raw.music && raw.g1 && raw.g1.kind) {
+          raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
+        }
         const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
         if (!ways) return;
         const m = shownWay(raw, ways); // dosage: a primary way solves the item
@@ -2140,7 +2158,7 @@
   const MUSIC_MECHANISMS = {
     M1: { he: 'פעימה קבועה — מנייה אחד־לאחד', sources: ['mcdonel2015', 'akin2023'],
       finding: 'Preschool rhythm achievement correlated with early numeracy (McDonel 2015, correlational, small sample); across 245 studies music interventions raised maths achievement, g = 0.36, most when music and maths were integrated (Akın 2023).',
-      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats'] },
+      tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'g1CountOn'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
       tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
@@ -2229,7 +2247,7 @@
   // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
   // that mechanism's study. Activity tag → [source id, evidence].
   const ACTIVITY_SOURCES = {
-    hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'],
+    hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'], g1CountOn: ['mcdonel2015', 'A'],
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
     evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
