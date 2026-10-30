@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MelodyMath · תרגיל לדוגמה: שומעים חיבור</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="src/sefirot.css">
+  <link rel="stylesheet" href="src/theme.css">
+  <link rel="stylesheet" href="src/components/jam.css">
+  <link rel="stylesheet" href="src/components/soundAdd.css">
+</head>
+<body>
+  <!-- #665 example exercise: the exercise is the whole child screen. Teacher notes: docs/exercises/SOUND-ADD.md -->
+  <main id="main" class="sa-card">
+    <section id="saCard" class="mm-game" aria-label="תרגיל חיבור בצלילים"></section>
+  </main>
+  <script src="src/lib/musicEngine.js"></script>
+  <script src="src/lib/instrumentVoices.js"></script>
+  <script src="src/components/jamKit.js"></script>
+  <script>
+    if (typeof installAudioUnlock === 'function') installAudioUnlock(document);
+    if (typeof installTapFeedback === 'function') installTapFeedback(document);
+  </script>
+  <script src="src/components/SoundAdd.js"></script>
+</body>
+</html>
