@@ -8,7 +8,8 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   // Imported items (banks.js keeps raw.vert as-is) may carry any number; a
   // huge one prints in exponent form (1e+21) and the column stops lining up,
-  // so operands are capped. Six digits: grade ד׳ works up to a million.
+  // so operands are capped. Six digits: grade ג׳ subtracts from 10,000 (#411)
+  // and grade ד׳ works up to a million.
   const MAX_OPERAND = 999999;
 
   function normalizeVertical(raw) {
