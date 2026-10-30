@@ -33,7 +33,7 @@
   }
 
   function normalizeHebrewText(value) {
-    return String(value).trim().replace(/[\s\-־]/g, '');
+    return String(value).trim().replace(/[\s\-\u05BE\u2011\u2013]/g, '');
   }
 
   function parseStudentNumber(rawIn) {
