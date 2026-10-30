@@ -26,7 +26,7 @@ test('landing.html focus visible outlines are defined for all interactive contro
 
 test('landing.html provides clear primary and secondary call-to-actions', () => {
   assert.match(page, /<a class="cta" href="\.\/">לדמו<\/a>/);
-  assert.match(page, /<a class="btn primary" href="\.\/">תרגול יסודי א׳–ד׳<\/a>/);
+  assert.match(page, /<a class="btn primary" href="\.\/">תרגול יסודי א׳–ו׳<\/a>/);
   assert.match(page, /<a class="btn ghost" href="functions\.html">סוניפיקציה · חט״ב\/תיכון<\/a>/);
   assert.match(page, /<a class="btn ghost" href="curriculum\.html">כיסוי תוכנית<\/a>/);
   assert.match(page, /<a class="btn primary" href="offer\.html">הזמן ניסוי כיתתי<\/a>/);
