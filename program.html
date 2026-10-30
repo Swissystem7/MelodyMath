@@ -36,6 +36,7 @@
   .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
   .links a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);color:var(--purple);font-weight:700;text-decoration:none;background:#faf8ff}
   .links a.go{background:var(--purple);color:#fff;border-color:var(--purple)}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <link rel="stylesheet" href="src/sefirot.css">
 <link rel="stylesheet" href="src/theme.css">
@@ -56,6 +57,7 @@
 <script src="src/lib/curriculum/grade3.js"></script>
 <script src="src/lib/curriculum/grade2.js"></script>
 <script src="src/lib/curriculum.js"></script>
+<script src="src/lib/exercises/explorerBank.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
@@ -68,7 +70,21 @@
   const pick = document.getElementById('programGrades');
   const box = document.getElementById('programGrade');
   let grade = list[0];
-  try { const g = localStorage.getItem('mm-grade'); if (list.indexOf(g) >= 0) grade = g; } catch (e) {}
+  try {
+    const q = typeof location !== 'undefined' && location.search ? new URLSearchParams(location.search) : null;
+    const qg = q ? q.get('grade') : null;
+    if (qg && list.indexOf(qg) >= 0) {
+      grade = qg;
+    } else {
+      const g = localStorage.getItem('mm-grade');
+      if (list.indexOf(g) >= 0) grade = g;
+    }
+  } catch (e) {}
+
+  function saveGrade(g) {
+    grade = g;
+    try { localStorage.setItem('mm-grade', g); } catch (e) {}
+  }
 
   function topicHtml(r) {
     const place = r.verified
@@ -88,18 +104,24 @@
   function paint() {
     if (pick) {
       pick.innerHTML = list.map(function (g) {
-        return '<button type="button" data-grade="' + g + '" aria-pressed="' + (g === grade) + '">' + g + '׳</button>';
+        return '<button type="button" data-grade="' + g + '" aria-pressed="' + (g === grade) + '" aria-label="כיתה ' + g + '׳">' + g + '׳</button>';
       }).join('');
       Array.prototype.forEach.call(pick.querySelectorAll('button'), function (b) {
-        b.onclick = function () { grade = b.getAttribute('data-grade'); paint(); };
+        b.onclick = function () {
+          saveGrade(b.getAttribute('data-grade'));
+          paint();
+        };
       });
     }
     if (!box) return;
     const p = programForGrade(grade, itemsForGrade(grade));
+    const topicsHtml = (p.rows && p.rows.length)
+      ? '<ol class="topics">' + p.rows.map(topicHtml).join('') + '</ol>'
+      : '<p class="note" id="programEmpty">אין נושאים להצגה לכיתה זו.</p>';
     box.innerHTML = '<h2>כיתה ' + grade + '׳</h2>'
       + '<p class="note"><a href="' + esc(p.pdfUrl) + '" target="_blank" rel="noopener">המסמך הרשמי של כיתה ' + grade + '׳ (PDF) ↗</a>'
       + (p.untagged ? ' · ' + p.untagged + ' תרגילים בבנק של הכיתה לא שויכו לנושא מאומת ולכן לא מופיעים כאן' : '') + '</p>'
-      + '<ol class="topics">' + p.rows.map(topicHtml).join('') + '</ol>';
+      + topicsHtml;
   }
   paint();
 })();

@@ -328,11 +328,74 @@ test('the meter, remainder and pair widgets render without a real browser', () =
   }
 });
 
+test('the chant counts 2/4/5/10 on the beat and skips only the paused beat (#463)', () => {
+  const steps = g3.chantSteps(5, 10);
+  assert.equal(steps.length, 10);
+  assert.deepEqual(steps.map((s) => s.say), [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+  assert.deepEqual(g3.chantSteps(7, 10), []);
+  assert.deepEqual(g3.chantSteps(4, 11), []);
+  const ev = g3.chantEvents(4, 10, 96, 6);
+  assert.equal(ev.length, 9);
+  const step = g3.chantEvents(4, 10, 96, 0)[1].at;
+  assert.ok(ev.every((e) => Math.abs(e.at - 5 * step) > 1e-9), 'beat 6 stays silent');
+  assert.ok(Math.abs(ev[5].at - 6 * step) < 1e-9, 'the beats after the pause keep their time');
+  assert.doesNotMatch(g3.chantNarration(4, 6), /24/);
+  assert.match(g3.chantNarration(4, 6), /הכפולות של 4/);
+});
+
+test('the chant widget hides the paused multiple until the answer', () => {
+  const dom = fakeDoc(284);
+  globalThis.document = { createElement: dom.createElement };
+  try {
+    const host = dom.createElement('div');
+    assert.equal(g3.bindGrade3(host, { kind: 'chant', table: 4, upTo: 10, pauseAt: 6 }), true);
+    const pads = dom.all(host, 'g3-bar')[0].children;
+    assert.equal(pads.length, 10);
+    const left = dom.all(host, 'left');
+    assert.equal(left.length, 1);
+    assert.equal(left[0].textContent, '');
+    assert.equal(left[0].getAttribute('data-reveal'), '24');
+    assert.deepEqual(dom.all(host, 'on').map((p) => p.textContent), ['4', '8', '12', '16', '20']);
+    assert.ok(pads.slice(6).every((p) => p.textContent === ''), 'later multiples stay blank');
+    assert.equal(dom.all(host, 'g3-play')[0].textContent, '▶ השמע שוב');
+    assert.equal(dom.all(host, 'g3-note').length, 1);
+    assert.equal(g3.bindGrade3(dom.createElement('div'), { kind: 'chant', table: 7, upTo: 10, pauseAt: 3 }), false);
+  } finally {
+    delete globalThis.document;
+  }
+});
+
+test('the chant replay never throws with no audio, no speech, or quiet mode (no-music path)', () => {
+  const dom = fakeDoc(284);
+  const clicks = [];
+  const make = (tag) => Object.assign(dom.createElement(tag), { addEventListener: (t, f) => { if (t === 'click') clicks.push(f); } });
+  globalThis.document = { createElement: make };
+  const said = [];
+  try {
+    assert.equal(typeof globalThis.AudioContext, 'undefined');
+    assert.equal(g3.bindGrade3(make('div'), { kind: 'chant', table: 5, upTo: 10, pauseAt: 4, bpm: 96 }), true);
+    assert.ok(clicks.length >= 2, 'play + speech listeners');
+    clicks.forEach((f) => assert.doesNotThrow(f)); // no AudioContext, speakIfEnabled undefined
+    globalThis.speakIfEnabled = (s) => { said.push(s); throw new Error('speechSynthesis missing'); };
+    globalThis.loadAccess = () => ({ quiet: true });
+    clicks.forEach((f) => assert.doesNotThrow(f));
+    assert.deepEqual(said, [], 'quiet mode says nothing');
+    globalThis.loadAccess = () => { throw new Error('storage blocked'); };
+    clicks.forEach((f) => assert.doesNotThrow(f)); // speech is scheduled; throwing speaker must be swallowed
+  } finally {
+    delete globalThis.document; delete globalThis.loadAccess;
+  }
+  return new Promise((r) => setTimeout(r, 2000)).then(() => {
+    delete globalThis.speakIfEnabled;
+    assert.deepEqual(said, ['5', '10', '15'], 'only the multiples before the pause are spoken');
+  });
+});
+
 test('every grade-ג music item agrees with the pure function behind it', () => {
   const rows = banks.itemsForGrade('ג').filter((it) => it.g3);
   assert.ok(rows.length >= 15, 'expected the #104 items, got ' + rows.length);
   const kinds = new Set(rows.map((it) => it.g3.kind));
-  assert.deepEqual([...kinds].sort(), ['grid', 'meter', 'pair', 'remainder']);
+  assert.deepEqual([...kinds].sort(), ['chant', 'grid', 'meter', 'pair', 'remainder']);
   rows.forEach((it) => {
     const s = it.g3;
     assert.equal(it.widget, 'g3', it.id);
@@ -350,6 +413,8 @@ test('every grade-ג music item agrees with the pure function behind it', () => 
       assert.doesNotMatch(it.prompt, new RegExp('«' + it.answer + '»'), it.id + ' spells out its own answer');
     } else if (s.kind === 'grid') {
       assert.equal(g3.gridCells(s.rows, s.steps), Number(it.answer), it.id);
+    } else if (s.kind === 'chant') {
+      assert.equal(Number(it.answer), s.table * s.pauseAt, it.id);
     } else {
       const times = g3.timesMore(Math.max(s.a, s.b), Math.min(s.a, s.b));
       assert.ok(times === Number(it.answer) || g3.higherHz(s.a, s.b) === Number(it.answer)
