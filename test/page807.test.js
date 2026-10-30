@@ -32,7 +32,7 @@ test('807.html adheres to honesty constraints and carries no medical or efficacy
   assert.doesNotMatch(page, /הילד שולט בכל המיומנויות/);
   assert.doesNotMatch(page, /ADHD|דיסקלקול|dyscalcul/i);
   assert.doesNotMatch(page, /טיפול ב|משפר מתמטיקה/);
-  assert.match(page, /מוצר סוניפיקציה · לא תרגול א׳–ד׳ · שאלון 807/);
+  assert.match(page, /מוצר סוניפיקציה · לא תרגול א׳–ו׳ · שאלון 807/);
 });
 
 test('807.html wires keyboard submission, focus advancement, and return on next question', () => {
