@@ -45,17 +45,17 @@ test('chart100Sound encodes tens as low frequency tone and ones as clicks with H
   assert.equal(n7.clickCount, 7);
   assert.equal(n7.label, '7 יחידות');
 
-  const n30 = g1.chart100Sound(30, 110);
+  const n30 = g1.chart100Sound(30);
   assert.equal(n30.tens, 3);
   assert.equal(n30.ones, 0);
-  assert.equal(n30.tensFreq, 143);
+  assert.equal(n30.tensFreq, 260);
   assert.equal(n30.clickCount, 0);
   assert.equal(n30.label, '3 עשרות');
 
-  const n42 = g1.chart100Sound(42, 110);
+  const n42 = g1.chart100Sound(42);
   assert.equal(n42.tens, 4);
   assert.equal(n42.ones, 2);
-  assert.equal(n42.tensFreq, 154);
+  assert.equal(n42.tensFreq, 280);
   assert.equal(n42.clickCount, 2);
   assert.equal(n42.label, '4 עשרות ו־2 יחידות');
 
@@ -63,10 +63,10 @@ test('chart100Sound encodes tens as low frequency tone and ones as clicks with H
   assert.equal(g1.chart100Sound(18, 110).label, 'עשרת אחת ו־8 יחידות');
   assert.equal(g1.chart100Sound(21, 110).label, '2 עשרות ויחידה אחת');
 
-  const n100 = g1.chart100Sound(100, 110);
+  const n100 = g1.chart100Sound(100);
   assert.equal(n100.tens, 10);
   assert.equal(n100.ones, 0);
-  assert.equal(n100.tensFreq, 220);
+  assert.equal(n100.tensFreq, 400);
 });
 
 test('melodyPattern and createPatternChallenge produce repeating AB, AAB and ABC patterns with shapes and notes', () => {

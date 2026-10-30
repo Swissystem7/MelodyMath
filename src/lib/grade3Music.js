@@ -314,6 +314,35 @@
     return Math.max(x, y);
   }
 
+  // ---------- כפולות בקצב ----------
+  // Saying the multiples on the beat, and the sound stops before one of them:
+  // the child says the missing multiple from memory (issue #463).
+  const CHANT_TABLES = [2, 4, 5, 10];
+
+  function chantSteps(table, upTo) {
+    const t = whole(table, 1, 10);
+    const n = whole(upTo, 1, 10);
+    if (t == null || n == null || CHANT_TABLES.indexOf(t) === -1) return [];
+    const out = [];
+    for (let i = 1; i <= n; i++) out.push({ beat: i, say: t * i });
+    return out;
+  }
+
+  // One beep per beat, except the paused one: its slot keeps its time and
+  // stays silent.
+  function chantEvents(table, upTo, bpm, pauseAt) {
+    const step = beatLength(bpm);
+    return chantSteps(table, upTo).filter(function (s) { return s.beat !== pauseAt; }).map(function (s) {
+      return { at: (s.beat - 1) * step, dur: step * 0.7, hz: BEAT_HZ, gain: 0.16, type: 'sine' };
+    });
+  }
+
+  function chantNarration(table, pauseAt) {
+    const t = whole(table, 1, 10);
+    if (t == null || CHANT_TABLES.indexOf(t) === -1) return '';
+    return 'אומרים את הכפולות של ' + t + ' עם הפעימה. כשהצליל עוצר — אומרים את הבאה.';
+  }
+
   // ---------- the widgets ----------
   // Quiet mode is a hard mute. Every narration below is on screen too, so a
   // silenced tablet loses nothing (§4.3, §4.7).
@@ -444,7 +473,43 @@
     return true;
   }
 
-  const DRAW = { meter: drawMeter, remainder: drawRemainder, pair: drawPair, grid: drawGrid };
+  // One pad per beat. The multiples before the pause are written on their
+  // pads; the paused pad keeps its multiple in data-reveal, and the pads after
+  // it stay blank so they do not give the gap away.
+  function drawChant(box, spec) {
+    const steps = chantSteps(spec.table, spec.upTo);
+    if (!steps.length) return false;
+    const row = node('div', 'g3-row');
+    row.dir = 'ltr';
+    const group = node('span', 'g3-bar');
+    steps.forEach(function (s) {
+      if (s.beat < spec.pauseAt) group.appendChild(node('i', 'on', String(s.say)));
+      else if (s.beat === spec.pauseAt) {
+        const pad = node('i', 'left', '');
+        pad.setAttribute('data-reveal', String(s.say));
+        group.appendChild(pad);
+      } else group.appendChild(node('i', '', ''));
+    });
+    row.appendChild(group);
+    box.appendChild(row);
+    const b = addPlay(box, '▶ השמע שוב', function () { return chantEvents(spec.table, spec.upTo, spec.bpm, spec.pauseAt); });
+    // Speech is optional: speakIfEnabled checks the speak preference itself,
+    // and nothing here needs speechSynthesis to exist.
+    b.addEventListener('click', function () {
+      if (isQuiet() || typeof speakIfEnabled !== 'function' || typeof setTimeout !== 'function') return;
+      const step = beatLength(spec.bpm) * 1000;
+      steps.forEach(function (s) {
+        if (s.beat >= spec.pauseAt) return;
+        setTimeout(function () {
+          try { speakIfEnabled(String(s.say)); } catch (e) { /* no speech */ }
+        }, (s.beat - 1) * step);
+      });
+    });
+    addNote(box, chantNarration(spec.table, spec.pauseAt));
+    return true;
+  }
+
+  const DRAW = { meter: drawMeter, remainder: drawRemainder, pair: drawPair, grid: drawGrid, chant: drawChant };
 
   // Draws one grade-3 activity into `host`. The beat pads are a picture of the
   // narration, so they are hidden from the screen reader and the narration is
@@ -480,6 +545,8 @@
     gridCells: gridCells, gridLayout: gridLayout, gridEvents: gridEvents,
     gridNarration: gridNarration, gridCue: gridCue,
     tuneSeconds: tuneSeconds, tuneClock: tuneClock, higherHz: higherHz,
+    CHANT_TABLES: CHANT_TABLES, chantSteps: chantSteps, chantEvents: chantEvents,
+    chantNarration: chantNarration,
     bindGrade3: bindGrade3,
   };
 });

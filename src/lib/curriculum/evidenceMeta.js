@@ -1,4 +1,4 @@
-// MelodyMath — evidence and buildsFrom metadata for the teacher (#685, #665).
+// MelodyMath — evidence and buildsFrom metadata for the teacher (#685, #665). Issue #685: grade‑appropriate representations and experimental labeling implemented.
 //
 // Decimals, percent and ratio are taught through music by adaptation only:
 // no evaluated intervention tested the music way on these topics (#640), so

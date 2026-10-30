@@ -156,6 +156,35 @@ test('index.html: exactly one streak reward, after the right-answer sound', () =
   assert.equal(streakModule.getUnlocks('fractions')[0].instrument, 'flute');
 });
 
+test('index.html: with music off the 5th right answer still saves the phrase, silently', () => {
+  const block = indexHtml.slice(indexHtml.indexOf('function streakReward('), indexHtml.indexOf('function paintMySong('));
+  const calls = [];
+  const spyAudio = (k) => function () { calls.push(k); return fakeAudio(); };
+  const sandbox = {
+    MM_MASTERY_STREAK: Object.assign({}, streakModule, { playPhrase: (...a) => calls.push('phrase') && streakModule.playPhrase(...a) }),
+    prefsNow: () => ({ quiet: true }), paintMySong: (p) => calls.push('song:' + (p && p.id)),
+    playTap: (v) => calls.push('tap:' + v), rpHoldStreak: false,
+    AudioContext: spyAudio('new AudioContext'), webkitAudioContext: spyAudio('new webkitAudioContext'),
+  };
+  // window makes streak.js's own playPhrase reach getSharedAudioContext, so a dropped audio:false would show up here.
+  const saved = { window: globalThis.window, getSharedAudioContext: globalThis.getSharedAudioContext };
+  Object.assign(globalThis, { window: {}, getSharedAudioContext: spyAudio('getSharedAudioContext') });
+  try {
+    streakModule.setStorage(createMockStorage());
+    streakModule.resetAll();
+    vm.createContext(sandbox);
+    vm.runInContext(block + '\nthis.streakReward=streakReward;', sandbox);
+    const won = [1, 2, 3, 4, 5].map(() => sandbox.streakReward('fractions', true));
+    assert.deepEqual(won, [false, false, false, false, true], 'the 5th answer still unlocks');
+    assert.deepEqual(calls, ['song:phrase_1'], 'no playTap, no playPhrase, no AudioContext');
+    assert.deepEqual(streakModule.mySong().map((p) => p.id), ['phrase_1'], 'kept in "השיר שלי"');
+  } finally {
+    Object.assign(globalThis, saved);
+    if (saved.window === undefined) delete globalThis.window;
+    if (saved.getSharedAudioContext === undefined) delete globalThis.getSharedAudioContext;
+  }
+});
+
 test('index.html: every practice screen feeds its topic into the streak', () => {
   assert.match(indexHtml, /history\.push\(\{id:current\.id,correct\}\);noteMetro\(correct,current\.mathTopic\|\|current\.skill,current\)/, 'main practice');
   assert.match(indexHtml, /noteMetro\(correct,st\.skill\|\|st\.he,it\)/, 'personal plan');

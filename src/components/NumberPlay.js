@@ -144,13 +144,39 @@
     const totalValue = notes.reduce(function (s, n) { return s + n.value; }, 0);
     return { op: parsed.op, bpm: bpm, beat: beat, grade: grade, totalSounds: notes.length, totalValue: totalValue, groups: groups, notes: notes, duration: t };
   }
-  function renderHtml(plan) {
+  // #665: after a partial answer, the notes still missing — those whose running total passes `given`.
+  function missingIndexes(plan, given) {
+    if (!plan || !plan.notes || !/^(addition|counting|multiplication)$/.test(plan.op)) return [];
+    const g = String(given == null ? '' : given).trim();
+    if (!/^\d+$/.test(g)) return [];
+    const n = Number(g);
+    if (n >= plan.totalValue) return [];
+    const out = [];
+    let sum = 0, split = false;
+    plan.notes.forEach(function (note, i) {
+      if (note.value > 1 && sum < n && n < sum + note.value) split = true; // never half a ten
+      sum += note.value;
+      if (sum > n) out.push(i);
+    });
+    return split || out.length > 12 ? [] : out; // no long runs of unit beats
+  }
+  // The exercise once more, then only the missing notes one after another (no overlap).
+  function missingCue(plan, given) {
+    const miss = missingIndexes(plan, given);
+    if (!miss.length) return [];
+    const start = plan.duration + plan.beat;
+    return plan.notes.concat(miss.map(function (i, k) {
+      return Object.assign({}, plan.notes[i], { at: start + k * plan.beat, missing: true });
+    }));
+  }
+  function renderHtml(plan, opts) {
     if (!plan || !plan.totalSounds) return '';
+    const miss = (opts && opts.missing) || [];
     const groups = plan.groups.map(function (g, gi) {
       let dots = '';
       plan.notes.forEach(function (n) {
         if (n.groupIndex !== gi) return;
-        dots += '<span class="np-dot' + (n.value === 10 ? ' np-ten' : '') + '" data-value="' + n.value + '" data-group="' + gi + '" data-i="' + n.index + '">' + (n.value === 10 ? '10' : '') + '</span>';
+        dots += '<span class="np-dot' + (n.value === 10 ? ' np-ten' : '') + (miss.indexOf(n.index) >= 0 ? ' np-missing' : '') + '" data-value="' + n.value + '" data-group="' + gi + '" data-i="' + n.index + '">' + (n.value === 10 ? '10' : '') + '</span>';
       });
       return '<span class="np-group" data-group="' + gi + '">' + dots + '</span>' + (gi < plan.groups.length - 1 ? '<span class="np-gap" aria-hidden="true"></span>' : '');
     }).join('');
@@ -190,8 +216,27 @@
         if (live) live.textContent = 'נשמעו ' + heard + ' מתוך ' + plan.totalValue;
       }, function () { if (live) live.textContent = 'נגמרו ' + plan.totalValue + ' צלילים'; });
     }
+    function showMissing(given, o) {
+      const miss = o && plan.totalValue === Number(o.answer) ? missingIndexes(plan, given) : [];
+      if (!miss.length) return false;
+      if (handle && handle.stop) handle.stop();
+      const dots = container.querySelectorAll('.np-dot');
+      Array.prototype.forEach.call(dots, function (d) { d.classList.remove('lit'); });
+      miss.forEach(function (i) { if (dots[i]) dots[i].classList.add('np-missing'); });
+      let tail = false;
+      const left = plan.totalValue - Number(String(given).trim());
+      if (live) live.textContent = (left === 1 ? 'חסר עוד ' : 'חסרים עוד ') + left;
+      if (!(o && o.quiet)) {
+        handle = play({ notes: missingCue(plan, given) }, function (n, i) {
+          if (n.missing && !tail) { tail = true; miss.forEach(function (j) { if (dots[j]) dots[j].classList.remove('lit'); }); } // pulse again
+          const d = dots[n.missing ? miss[i - plan.notes.length] : i];
+          if (d) d.classList.add('lit');
+        });
+      }
+      return true;
+    }
     if (btn) btn.addEventListener('click', go);
-    return { plan: plan, play: go, stop: function () { if (handle && handle.stop) handle.stop(); } };
+    return { plan: plan, play: go, showMissing: showMissing, stop: function () { if (handle && handle.stop) handle.stop(); } };
   }
-  return { parseNumberGroups: parseNumberGroups, extractNumberPlan: extractNumberPlan, renderHtml: renderHtml, play: play, mount: mount, tempoFor: tempoFor, chosenInstrument: chosenInstrument, sources: sources };
+  return { parseNumberGroups: parseNumberGroups, extractNumberPlan: extractNumberPlan, renderHtml: renderHtml, missingIndexes: missingIndexes, missingCue: missingCue, play: play, mount: mount, tempoFor: tempoFor, chosenInstrument: chosenInstrument, sources: sources };
 });
