@@ -104,7 +104,7 @@ test('grade6 PERCENT: the percent bar is the single main way (M3)', () => {
 
 test('Instruments registry binds cajon to data (M1) and darbuka to percent (M3)', () => {
   assert.deepEqual([I.TOPICS.data.mechanism, I.TOPICS.percent.mechanism], ['M1', 'M3']);
-  assert.ok(I.forTopic('data').some((x) => x.id === 'cajon') && I.forTopic('percent').some((x) => x.id === 'darbuka'));
+  assert.ok(I.forTopic('data').some((x) => x.id === 'cajon') && I.forTopic('percent').map((x) => x.id).sort().join() === 'darbuka,erhu');
 });
 
 test('a grade ו PERCENT item shows one circle per beat (splits 4/10/20)', () => {
@@ -134,6 +134,7 @@ test('every target sounds in two families, including a split of 4 with no 10% ti
   assert.deepEqual(climb.map((n) => n.hz), PM.TEN_STEPS_HZ.slice(0, 2));
   assert.ok(PM.barPlan(['ten'], 90, 'drumLow', 10).every((n) => n.voice !== 'pluck'));
   assert.equal(I.forTopic('percent').some((x) => x.id === 'ukulele'), false);
+  assert.deepEqual(I.forTopic('percent').map((x) => x.family).sort(), ['percussion', 'strings']);
 });
 
 test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', () => {
@@ -157,4 +158,24 @@ test('a melodic instrument climbs on 10% tiles; the darbuka keeps 50% and 25%', 
   assert.match(four, /data-tile="quarter" data-tap="drumLow"/);
   const onlyQuarter = PM.barPlan(['quarter'], 90, 'drumLow', 4, 'pluck');
   assert.ok(onlyQuarter.some((n) => n.voice === 'pluck') && onlyQuarter.some((n) => n.voice === 'drumLow'));
+});
+
+test('#682: the 100-note ways are an experimental add-on, never the main way', () => {
+  const ways = Object.fromEntries(g6.music.PERCENT.map((w) => [w[0], w[4]]));
+  ['hundredBar', 'partOfHundredBar'].forEach((id) => assert.deepEqual([ways[id].optional, ways[id].evidence], [true, 'experimental'], id));
+  assert.equal(ways.percentBar, undefined);
+  const item = banks.allItems().find((i) => i.grade === 'ו' && i.music === 'percentBar');
+  const hundred = item.musicExtra.filter((w) => /hundredBar/i.test(w.music));
+  assert.equal(hundred.length, 2);
+  hundred.forEach((w) => assert.equal(w.evidence, 'experimental', w.music));
+});
+
+test('#682: the pad offers 100 sub-beats as an off-by-default add-on, shown as a count only', () => {
+  let s = P.createState(0, true, 10);
+  assert.equal(s.subbeats, false);
+  assert.doesNotMatch(P.renderHtml(s, 'drumLow'), /data-addon="subbeats100"/);
+  assert.match(P.renderHtml(s, 'drumLow'), /data-act="subbeats" aria-pressed="false"/);
+  s = Object.assign(P.tapTile(s, 'quarter'), { subbeats: true });
+  assert.match(P.renderHtml(s, 'drumLow'), /data-addon="subbeats100">25 תת־פעמות מתוך 100 \(תוספת ניסיונית\)/);
+  assert.doesNotMatch(P.renderHtml(Object.assign({}, s, { showMusic: false }), 'drumLow'), /subbeats/);
 });
