@@ -46,7 +46,7 @@ test('every way of every grade file and every music activity is mapped to a mech
   FILES.forEach((file) => Object.values(file.music).forEach((ways) => ways.forEach(([tag]) => {
     if (!banks.mechanismOf(tag)) unmapped.add(file.grade + ' ' + tag);
   })));
-  banks.allItems().forEach((it) => { if (!banks.mechanismOf(it.music)) unmapped.add(it.grade + ' ' + it.music); });
+  banks.allItems().forEach((it) => { if (it.noMusic) return; if (!banks.mechanismOf(it.music)) unmapped.add(it.grade + ' ' + it.music); });
   assert.deepEqual([...unmapped], []);
 });
 
@@ -68,7 +68,7 @@ test('every way of an evidenced mechanism cites one of its studies', () => {
 
 // M8-M14 have no evidence: in these grades every such way was replaced by a
 // way of M2, M3, M6 or M7, distinct within its standard.
-const REPLACED = ['א', 'ב', 'ג', 'ד'];
+const REPLACED = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 test('grades ' + REPLACED.join(', ') + ': no way uses a mechanism without evidence (M8-M14)', () => {
   const left = [];
   FILES.filter((file) => REPLACED.includes(file.grade)).forEach((file) => Object.keys(file.music).forEach((key) => file.music[key].forEach(([tag]) => {

@@ -24,6 +24,11 @@
 //   7  א׳ hundred chart before whole tens (mm-cur-5 → mm-cur-4); ה׳ fraction
 //      models before equivalence (mm-cur-42 → mm-cur-41) (#616).
 //   8  ג׳ remainder "1 out of 4" prepares ד׳ fractions: mm-cur-25 → mm-cur-32.
+//   9  א׳-ב׳ equality → ד׳ equations → ה׳ (#710): mm-cur-3 and mm-cur-14 →
+//      mm-cur-31 → mm-cur-39.
+//  10 ה׳ perimeter before ו׳ circle circumference (#711): the sides of a
+//      polygon fill one bar, then the circle is that bar with no corners
+//      (mm-cur-47 → mm-cur-54).
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -66,7 +71,7 @@
     'mm-cur-29': [['mm-cur-19', 'mm-cur-25'], 'shekels as 100 agorot'],
     'mm-cur-30': [['mm-cur-21'], 'collecting and charting data'],
     // ד׳
-    'mm-cur-31': [['mm-cur-22', 'mm-cur-23', 'mm-cur-24', 'mm-cur-25'], 'place value to a million; order of operations'],
+    'mm-cur-31': [['mm-cur-3', 'mm-cur-14', 'mm-cur-22', 'mm-cur-23', 'mm-cur-24', 'mm-cur-25'], 'the א׳-ב׳ equality balance, then place value to a million'],
     'mm-cur-32': [['mm-cur-25', 'mm-cur-18'], 'note values as parts of a 4/4 bar'],
     'mm-cur-33': [['mm-cur-32', 'mm-cur-16'], 'fractions of a quantity, equal names'],
     'mm-cur-34': [['mm-cur-27', 'mm-cur-28', 'mm-cur-20'], 'quadrilaterals and surface area'],
@@ -83,7 +88,7 @@
     'mm-cur-44': [['mm-cur-41', 'mm-cur-33', 'mm-cur-40'], 'common denominators, mixed numbers'],
     'mm-cur-45': [['mm-cur-42', 'mm-cur-38', 'mm-cur-35'], 'decimal place value'],
     'mm-cur-46': [['mm-cur-45', 'mm-cur-36'], 'decimal addition'],
-    'mm-cur-47': [['mm-cur-28', 'mm-cur-34'], 'height and area'],
+    'mm-cur-47': [['mm-cur-28', 'mm-cur-34'], 'perimeter as sides in one bar, height and area'],
     'mm-cur-48': [['mm-cur-34'], 'solids and nets'],
     'mm-cur-49': [['mm-cur-37'], 'frequency and mode'],
     // ו׳
@@ -100,7 +105,8 @@
 
   // Music standards that curriculum.js does not tag with a row yet.
   // 'grade:KEY' → topic id, or [prereq ids, buildsTo ids] for a standard
-  // outside its grade's program (ג׳ ק״ג/ליטר: not in Newprogramgrade3.pdf).
+  // outside its grade's program. ג׳ MASS_VOL is not here (#751): the ways
+  // moved to ד׳ beside UNITS, and the kg/liter items sit on that grade's row.
   const SKILL_TOPIC = {
     'א:NUMBER_LINE_APPROX': 'mm-cur-2',
     'א:RIGHT_ANGLE': 'mm-cur-8',
@@ -112,7 +118,6 @@
     'ב:WORD_REMOVE': 'mm-cur-14',
     'ב:WORD_COMPARE': 'mm-cur-14',
     'ב:MONEY': 'mm-cur-19',
-    'ג:MASS_VOL': [['mm-cur-20'], ['mm-cur-35']],
   };
 
   const BUILDS_TO = {};
@@ -121,10 +126,18 @@
     PREREQ[id][0].forEach(function (p) { if (BUILDS_TO[p]) BUILDS_TO[p].push(id); });
   });
 
-  // { prereq, buildsTo, carries } of a topic, or null for an unknown id.
+  const bridgesModule = typeof require === 'function' ? require('./bridges.js') : (typeof globalThis !== 'undefined' && globalThis.MM_BRIDGES);
+
+  // { prereq, buildsTo, carries, bridges } of a topic, or null for an unknown id.
   function linksForTopic(id) {
     if (!Object.prototype.hasOwnProperty.call(PREREQ, id)) return null;
-    return { topicId: id, prereq: PREREQ[id][0].slice(), buildsTo: BUILDS_TO[id].slice(), carries: PREREQ[id][1] };
+    return {
+      topicId: id,
+      prereq: PREREQ[id][0].slice(),
+      buildsTo: BUILDS_TO[id].slice(),
+      carries: PREREQ[id][1],
+      bridges: (bridgesModule && bridgesModule.bridgesForTopic) ? bridgesModule.bridgesForTopic(id) : [],
+    };
   }
 
   // Links of a music skill. `taggedTopicId` is the row curriculum.js tags the
@@ -142,5 +155,9 @@
     SKILL_TOPIC: SKILL_TOPIC,
     linksForTopic: linksForTopic,
     linksForSkill: linksForSkill,
+    BRIDGES: (bridgesModule && bridgesModule.BRIDGES) || {},
+    bridgeForLink: (bridgesModule && bridgesModule.bridgeForLink) || function () { return null; },
+    bridgesForTopic: (bridgesModule && bridgesModule.bridgesForTopic) || function () { return []; },
+    bridgesEnteringTopic: (bridgesModule && bridgesModule.bridgesEnteringTopic) || function () { return []; },
   };
 });

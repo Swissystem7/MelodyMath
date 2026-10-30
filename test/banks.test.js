@@ -3,6 +3,15 @@ const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
 const { eligibleExercises } = require('../src/lib/adaptive');
 
+test('grade א ships exactly 8 count-on items whose answer is from + steps (#462)', () => {
+  const items = banks.allItems().filter((it) => it.g1?.kind === 'countOn');
+  assert.equal(items.length, 8);
+  items.forEach((it) => {
+    assert.equal(banks.isShippable(it), true, it.id);
+    assert.equal(it.answer, it.g1.from + it.g1.steps, it.id);
+  });
+});
+
 test('grade א has 8 approximate number-line items with tolerance 4 (#466)', () => {
   const approx = banks.allItems().filter((it) => it.tolerance === 4);
   assert.deepEqual(approx.map((it) => it.answer), [17, 23, 37, 48, 62, 71, 86, 94]);
@@ -90,7 +99,17 @@ test('grade-ב multiplication is only 2/4/5/10; 3/6/7/8/9 live in grade ג', () 
   });
   const g3 = banks.rowsOf('multiplication', 'ג');
   assert.ok(g3.some((x) => x.prompt === '7 × 8 = ?' && x.answer === 56 && x.table === 7));
-  assert.ok(g3.every((x) => [3, 6, 7, 8, 9].includes(x.table)));
+  // The #463 chant items revisit 2/4/5/10 on the beat; everything else is 3/6/7/8/9.
+  assert.ok(g3.filter((x) => !(x.g3 && x.g3.kind === 'chant')).every((x) => [3, 6, 7, 8, 9].includes(x.table)));
+});
+
+test('grade ג has 8 skip-counting chant items on tables 2/4/5/10 (#463)', () => {
+  const chant = banks.itemsForGrade('ג').filter((x) => x.g3 && x.g3.kind === 'chant');
+  assert.equal(chant.length, 8);
+  chant.forEach((x) => {
+    assert.ok([2, 4, 5, 10].includes(x.g3.table), x.id);
+    assert.equal(x.answer, x.g3.table * x.g3.pauseAt, x.id);
+  });
 });
 
 test('division ships partitive and quotative items on the same numbers', () => {
@@ -217,4 +236,17 @@ test('classItems follows the selected grade and keeps the grade-1 default', () =
   assert.ok(g3.every((i) => i.grade === 'ג'));
   assert.ok(banks.classItems('ב').every((i) => i.grade === 'ב'));
   banks.GRADES.forEach((g) => assert.ok(banks.classItems(g).every((i) => !i.typed), g + ' has typed items'));
+});
+
+test('regroupItems is a grade-ב duo pack for beat mode (#465)', () => {
+  const items = banks.regroupItems();
+  assert.ok(items.length >= 12, 'only ' + items.length);
+  items.forEach((it) => {
+    assert.equal(it.grade, 'ב', it.id);
+    assert.ok(banks.isShippable(it), it.id);
+    assert.ok(!it.typed, it.id);
+    assert.equal(it.g2.kind, 'duo', it.id);
+    const g = it.g2;
+    assert.ok(g.op === '+' ? g.a % 10 + g.b % 10 >= 10 : g.a % 10 < g.b % 10, it.id + ' does not regroup');
+  });
 });
