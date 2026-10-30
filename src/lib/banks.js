@@ -2260,6 +2260,41 @@
     });
   }
 
+  // Rules 1-3 on the items: a music activity of a weak (M4) or unsupported
+  // (M8-M14) mechanism is no longer the way the item is solved. Its tag stays
+  // as the musical story of the prompt (`musicStory`), and the item takes
+  // its standard's primary way (tag, note and source) by level, as every
+  // other item does. A standard without ways in
+  // its grade carries the ways of the nearest earlier grade (rule 4).
+  const WAYS_OF = {};
+  GRADE_FILES.forEach(function (f) {
+    if (!f) return;
+    Object.keys(f.music || {}).forEach(function (k) { WAYS_OF[f.grade + '|' + ST[k]] = f.music[k]; });
+  });
+  // All ways (primary and optional) of a standard in a grade, carried from
+  // the nearest earlier grade when the grade itself lists none.
+  function waysCarried(grade, standard) {
+    for (let g = GRADES.indexOf(grade); g >= 0; g--) {
+      const ways = WAYS_OF[GRADES[g] + '|' + standard];
+      if (primaryWays(ways).length) return ways.slice();
+    }
+    return [];
+  }
+  RAW.forEach(function (raw) {
+    const m = raw.music && !raw.musicNote ? mechanismOf(raw.music) : null;
+    if (!m || MUSIC_DOSAGE.primary.indexOf(m) >= 0) return;
+    const ways = waysCarried(raw.grade, raw.standard);
+    const primary = primaryWays(ways);
+    if (!primary.length) return;
+    const w = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
+    raw.musicStory = raw.music;
+    raw.music = w[0]; raw.musicNote = w[1]; raw.musicSrc = w[2]; raw.musicEv = w[3];
+    const extra = ways.filter(isOptionalWay).map(function (x) {
+      return { music: x[0], note: x[1], src: x[2], ev: x[3], evidence: x[4].evidence || 'strong' };
+    });
+    if (extra.length) raw.musicExtra = extra;
+  });
+
   // A music activity (the prompt itself plays or reads music) cites the same
   // source and label as the way that uses the same relationship (#591 audit,
   // item 2). Azaryahu 2020 keeps D only on fraction items, where MusiMath
@@ -2318,6 +2353,7 @@
     if (raw.typed) it.typed = true;
     if (raw.tolerance != null) it.tolerance = raw.tolerance;
     if (raw.music) it.music = raw.music;
+    if (raw.musicStory) it.musicStory = raw.musicStory;
     if (raw.musicNote) it.musicNote = raw.musicNote;
     if (raw.musicSrc) { it.musicSrc = raw.musicSrc; it.musicEv = raw.musicEv; }
     if (raw.musicSrcAlso) it.musicSrcAlso = raw.musicSrcAlso.slice();
@@ -2512,6 +2548,7 @@
     MUSIC_DOSAGE: MUSIC_DOSAGE,
     isOptionalWay: isOptionalWay,
     primaryWays: primaryWays,
+    waysCarried: waysCarried,
     skillHe: skillHe,
     skillGrade: skillGrade,
     levelHe: levelHe,

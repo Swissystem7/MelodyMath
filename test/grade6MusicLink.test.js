@@ -12,10 +12,9 @@ const g6 = require('../src/lib/curriculum/grade6');
 
 const six = banks.itemsForGrade('ו');
 const ACTIVITIES = ['dotted', 'triplet', 'durationDiv', 'ratioHz', 'meanBpm', 'tempo', 'circleFifths', 'mean', 'bars'];
+// A standard without ways of its own in ו׳ carries the earlier grade's (rule 4).
 const wayOf = (it) => {
-  const key = Object.keys(g6.music).find((k) => banks.ST[k] === it.standard);
-  const ways = g6.music[key];
-  const primary = banks.primaryWays(ways);
+  const primary = banks.primaryWays(banks.waysCarried('ו', it.standard));
   return primary[Math.min(it.level, primary.length) - 1];
 };
 

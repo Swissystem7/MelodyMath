@@ -395,5 +395,14 @@
     ],
   };
 
+  // The grade ו׳ music activities of an unsupported mechanism (ratioHz,
+  // meanBpm, tempo, mean M8-M9, circleFifths M14) keep their tag as the
+  // story of the prompt and are solved with the primary way of their
+  // standard (#591 rules 1-3). Same topic, same method (rule 4): MEAN and
+  // CIRCLE carry the ways of G6_MEAN and G6_CIRCLE_TERMS; ANGLE_KINDS and
+  // GEO_SORT carry the ways of the earlier grades (banks.js).
+  music.MEAN = music.G6_MEAN;
+  music.CIRCLE = music.G6_CIRCLE_TERMS;
+
   return { grade: 'ו', rows: rows, order: order, ST: ST, standards: standards, items: items, music: music, sources: sources };
 });

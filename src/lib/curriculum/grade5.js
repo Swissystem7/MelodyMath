@@ -6,9 +6,10 @@
 // ways, `music` = ways per bank standard, one per level. No `rows`, so
 // curriculum.js leaves the official grade ה׳ matrix alone. Pages load it
 // before banks.js. The 36 grade ה׳ music activities (#106: bars, lcm,
-// mixedBar, bpm, secPerBeat, drumsMeet, meters, hzChart) keep their tag and
-// take no way; standards made only of activities (LCM, FACTORS, BARCHART)
-// have no entry here.
+// mixedBar, bpm, secPerBeat, drumsMeet, meters, hzChart) keep their tag. One
+// of a weak or unsupported mechanism (drumsMeet M4, bpm and secPerBeat M8,
+// hzChart M9) is solved with the standard's primary way (#591 rules 1-3):
+// LCM has its own M2 way below, BARCHART carries the ways of grade ד׳.
 //
 // Evidence labels follow the research map pasted on #591 (23.10.2026):
 // D = part of an evaluated maths-learning intervention (a package of
@@ -130,6 +131,10 @@
       ['solidFaceMotif', 'גוף כדגם חוזר: במנסרה אותו בסיס פעמיים ופאות מלבניות שחוזרות כמספר צלעותיו; בפירמידה בסיס אחד וקודקוד מעליו.', 'azaryahuPatterns', 'A'],
       ['netFoldEcho', 'פריסה היא מוטיב שמתקפל: כל צלע בפריסה פוגשת צלע תואמת, כמו קריאה ותשובה. ספרו זוגות תואמים — אלה המקצועות.', 'azaryahuPatterns', 'A', EXTRA],
       ['prismPyramidMotif', 'הדגם חוזר בכל גוף: למנסרה עם בסיס של n צלעות יש n פאות צד ו־2 בסיסים; לפירמידה n פאות צד ובסיס אחד.', 'azaryahuPatterns', 'A', EXTRA],
+    ],
+    LCM: [
+      ['accentSkip', 'שתי שורות: באחת הדגישו כל פעימה של המספר הראשון, בשנייה של השני. ההדגשה הראשונה המשותפת היא הכפולה המשותפת הקטנה ביותר.', 'das2023', 'A'],
+      ['lcmDrums', 'שני תופים, כל אחד במחזור שלו: הפעימה הראשונה שבה הם מכים יחד היא הכפולה המשותפת הקטנה ביותר.', 'rissman2005', 'R', WEAK],
     ],
     FREQ: [
       ['tallyFives', 'שכיחות בקבוצות: סמנו כל הופעה בפעימה וקבצו בחמישיות מודגשות. הערך עם הכי הרבה פעימות הוא השכיח.', 'das2023', 'A'],

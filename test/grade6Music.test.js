@@ -6,7 +6,7 @@ const banks = require('../src/lib/banks');
 const engine = require('../src/lib/musicEngine');
 const cof = require('../src/lib/circleOfFifths');
 
-const music = (skill, tag) => banks.rowsOf(skill, 'ו').filter((x) => x.music === tag);
+const music = (skill, tag) => banks.rowsOf(skill, 'ו').filter((x) => (x.musicStory || x.music) === tag);
 
 test('circle of fifths: 12 points, 30° apart, clockwise from C', () => {
   assert.equal(cof.FIFTHS.length, 12);
