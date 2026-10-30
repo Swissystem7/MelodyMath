@@ -1348,6 +1348,17 @@
     G3('multiplication', 'במשקל 6/8, כמה תיבות שלמות נדרשות כדי להגיע ל־42 פעמות?', 7, '42 : 6', { standard: ST.MUL_C, table: 6, level: 3, g3: { kind: 'meter', table: 6, bars: 7 } })
   );
 
+  // כפולות בקצב (#463): אומרים את הכפולות עם הפעימה, והצליל עוצר לפני
+  // אחת מהן — את הכפולה החסרה אומרים מהזיכרון. רק לוחות 2/4/5/10.
+  function CHANT(t, k) {
+    return G3('multiplication', `אומרים את הכפולות של ${t} בקצב. אחרי ${k - 1} כפולות, הצליל שותק לפעמה אחת. איזו כפולה חסרה?`, t * k, t + ' × ' + k,
+      { standard: ST.MUL_C, table: t, level: 1, g3: { kind: 'chant', table: t, upTo: 10, pauseAt: k } });
+  }
+  RAW.push(
+    CHANT(2, 3), CHANT(2, 6), CHANT(4, 3), CHANT(4, 6),
+    CHANT(5, 3), CHANT(5, 6), CHANT(10, 3), CHANT(10, 6)
+  );
+
   // חילוק עם שארית: הפעמות שנשארו מתנגנות בצליל אחר, וזו השארית.
   // בלי `table`: תשובה נכונה כאן אינה עובדה מלוח הכפל, ולכן היא לא נחשבת
   // שליטה בליבה ולא פותחת את השער של 3/6/7/8/9.
@@ -1922,7 +1933,7 @@
     Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
     // activity: counted beats (hear), the playing widgets of grades א׳-ג׳
-    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid)
+    // (g1: beats, chart100, pattern; g2; g3: meter, remainder, pair, grid, chant)
     // and the 4/4 bar of the fraction items (bar44).
     const cap = function (k) { return k.charAt(0).toUpperCase() + k.slice(1); };
     RAW.forEach(function (raw) {
@@ -2057,6 +2068,17 @@
     });
   }
 
+  // ---------- כיתה ה׳ · היקף לפני היקף המעגל (#711, mm-cur-47 → mm-cur-54) ----------
+  // Appended last so existing ids stay put. Whole-cm sides, answers in cm.
+  RAW.push(
+    G5('geometry', 'למלבן צלעות של 7 ס״מ ו־4 ס״מ. מה ההיקף בס״מ?', 22, 'הולכים מסביב: 7 + 4 + 7 + 4', 1, ST.PERIMETER),
+    G5('geometry', 'למשולש צלעות של 5, 6 ו־8 ס״מ. מה ההיקף בס״מ?', 19, 'מחברים את שלוש הצלעות', 1, ST.PERIMETER),
+    G5('geometry', 'למשושה שכל צלעותיו שוות יש צלע של 4 ס״מ. מה ההיקף בס״מ?', 24, 'שש צלעות שוות: 6 פעמים 4', 2, ST.PERIMETER),
+    G5('geometry', 'למקבילית צלעות של 9 ס״מ ו־5 ס״מ. מה ההיקף בס״מ?', 28, 'צלעות נגדיות שוות: פעמיים 9 ועוד פעמיים 5', 2, ST.PERIMETER),
+    G5('geometry', 'היקף מלבן 30 ס״מ ואורכו 9 ס״מ. מה רוחבו בס״מ?', 6, 'חצי מההיקף הוא אורך ועוד רוחב: 15', 3, ST.PERIMETER),
+    G5('geometry', 'למלבן ולריבוע אותו היקף. צלעות המלבן 10 ס״מ ו־6 ס״מ. מה אורך צלע הריבוע בס״מ?', 8, 'ההיקף 32, ולריבוע ארבע צלעות שוות', 3, ST.PERIMETER)
+  );
+
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
   function musicForLate() {
@@ -2102,6 +2124,7 @@
     ribeiro2020: ['Ribeiro & Santos 2020 — Persistent effects of musical training on mathematical skills of children with developmental dyscalculia (Front. Psychol.)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/'],
     courey2012: ['Courey et al. 2012 — Academic Music: music instruction to engage third-grade students in learning basic fraction concepts (Educ. Stud. Math.)', 'https://doi.org/10.1007/s10649-012-9395-9'],
     rissman2005: ['Rissman 2005 — Cycling through polyrhythms (J. Music Theory Pedagogy)', 'https://doi.org/10.71156/2994-7073.1141'],
+    bamberger2003: ['Bamberger & diSessa 2003 — Music as embodied mathematics: a study of a mutually informing affinity (Int. J. Comput. Math. Learn. 8, 123-160)', 'https://doi.org/10.1023/B:IJCO.0000003872.84260.96'],
     stevens2001: ['Stevens, Sharp & Nelson 2001 — The intersection of two unlikely worlds: ratios and drums (Teaching Children Mathematics)', 'https://doi.org/10.5951/tcm.7.6.0376'],
     rusconi2005: ['Rusconi et al. 2005 — The mental space of pitch height (Ann. N. Y. Acad. Sci.)', 'https://doi.org/10.1196/annals.1360.056'],
     mohring2016: ['Möhring et al. 2016 — Where music meets space: pitch intervals and spatial transformation in children (Cognition)', 'https://doi.org/10.1016/j.cognition.2016.02.016'],
@@ -2122,14 +2145,14 @@
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
       tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
-        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
+        'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'g3Chant', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
       finding: 'Fourth graders who learned fractions as note durations in a 4/4 bar (MusiMath) gained more on trained and untrained fractions than a comparison class (Azaryahu et al. 2020); Academic Music taught third graders fraction concepts through note values and rhythm (Courey et al. 2012); the bar is the model for percent (Van den Heuvel-Panhuizen 2003).',
       tags: ['decimalNoteScale', 'tenthBeatGroups', 'percentBar', 'hundredBar', 'partOfHundredBar', 'sectionsFillBar', 'bracketNoteFirst', 'wholeFromPartBar', 'nearlyWholeNote', 'shortNoteBound', 'bracketBeatsFirst', 'equalNotesDistribute', 'wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'sectorAsNote', 'diameterTwoRadii', 'chordShorterNote', 'piBarsAround', 'halfCircleBar', 'doubleRadiusBars', 'levelNotes', 'tapTempo', 'columnsAsNotes', 'pieSectorRead', 'symbolNoteLength', 'showAsBar', 'symbolsPerKey', 'barToDegrees', 'partsOfWholeBar', 'tenthNotes', 'compareBeatParts', 'tenthsTogether', 'beatsLeftOver', 'pieBarParts', 'twoSectorNotes', 'columnHeldNote', 'notesRatioCompare', 'barChartMelody', 'quantityAsBar', 'pieAsBar', 'sectorNoteShare', 'turnAsBar', 'columnNoteLength', 'twoNotesDifference', 'notesInARow', 'quarterBarCorner', 'quarterTurnBar', 'fillBar', 'barFill', 'barFraction', 'barsAndHalf', 'beatDecimal', 'dottedBeats', 'durationCount', 'noteLength', 'noteValues', 'quarterCount', 'reciprocalNotes', 'roundBars', 'shortenNote', 'splitNotes', 'tripletShare', 'commonNoteValue', 'halfNoteSkip', 'sameLength', 'equalPhrases', 'dayAsSong', 'tempoSwap', 'silenceQuarter',
-        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar', 'balanceBars',
+        'wholeNotesTens', 'shapeAsBar', 'cmNote', 'rowDurations', 'barNotes', 'carryNote', 'threeNoteLengths', 'startTogether', 'sideNotes', 'sidesFillBar', 'litreBar', 'halfSymbolNote', 'barSumBar', 'tableCellNotes', 'piecesFillBar', 'balanceBars',
         'halfBar', 'bar44Notes', 'bars', 'lcm', 'mixedBar', 'dotted', 'triplet', 'durationDiv'] },
-    M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001'],
-      finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report).',
+    M4: { he: 'פולי־ריתמוס — כפולה משותפת וגורמים', sources: ['rissman2005', 'stevens2001', 'bamberger2003'],
+      finding: 'Pedagogy only, no outcome study: the subdivisions of a polyrhythm are the least common multiple of its parts (Rissman 2005); fifth graders met ratio through conga polyrhythms (Stevens et al. 2001, classroom report); learners built and heard rhythm ratios as embodied mathematics (Bamberger & diSessa 2003, case study).',
       tags: ['lcmDrums', 'stepCycle', 'drumsMeet'] },
     M5: { he: 'גובה צליל — ישר המספרים וסדר', sources: ['rusconi2005', 'mohring2016'],
       finding: 'Partial: low pitches map to down or left and high pitches to up or right even when pitch is irrelevant (SMARC, Rusconi et al. 2005); children map pitch onto space, but their pitch skill was not related to number-line skill (Möhring et al. 2016).',
@@ -2210,7 +2233,7 @@
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
     evenOdd: ['das2023', 'A'], twoInstruments: ['interplay2024', 'A'],
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
-    meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'],
+    meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'], g3Chant: ['das2023', 'A'],
     leftoverBeats: ['das2023', 'A'], g3Remainder: ['das2023', 'A'],
     howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
     stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
@@ -2331,6 +2354,17 @@
     return skillsForGrade(g).flatMap(function (skill) {
       return diagnosticPair(skill, g);
     });
+  }
+
+  // #678: the diagnostic is never one long pre-test. It runs in rounds of at
+  // most DIAG_BLOCK questions (two skills, base + intermediate), and each
+  // round opens with a short spoken line in index.html.
+  const DIAG_BLOCK = 4;
+  function diagnosticBlocks(grade) {
+    const items = diagnosticItems(grade);
+    const out = [];
+    for (let i = 0; i < items.length; i += DIAG_BLOCK) out.push(items.slice(i, i + DIAG_BLOCK));
+    return out;
   }
 
   // Class mode follows the grade picked in the header; no argument keeps the
@@ -2455,6 +2489,8 @@
     itemsAtLevel: itemsAtLevel,
     skillsForGrade: skillsForGrade,
     diagnosticItems: diagnosticItems,
+    DIAG_BLOCK: DIAG_BLOCK,
+    diagnosticBlocks: diagnosticBlocks,
     classItems: classItems,
     regroupItems: regroupItems,
     practiceItems: practiceItems,

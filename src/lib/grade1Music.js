@@ -175,7 +175,8 @@
     const n = Math.max(1, Math.min(100, Math.round(Number(number)) || 1));
     const tens = Math.floor(n / 10);
     const ones = n % 10;
-    const base = Number(baseTensFreq) || 110;
+    // Default 200 Hz: one ten = 220 Hz, the same held ten as #843's takeAwayTen (#831).
+    const base = Number(baseTensFreq) || 200;
     const tensFreq = tens === 0 ? null : engine.clampHz(Math.round(base * (1 + tens * 0.1) * 10) / 10);
     const clickCount = ones;
     const tensHe = tens === 1 ? 'עשרת אחת' : tens + ' עשרות';

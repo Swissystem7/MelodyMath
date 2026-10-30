@@ -2,7 +2,7 @@
 
 **For whom**: a student, parent, or מחנכת שילוב who opens a URL. There is no paying buyer today.
 
-**How**: open the [live demo](https://swissystem7.github.io/MelodyMath/) — no install, no account
+**How**: open the [live demo](https://swissystem7.github.io/MelodyMath/) — no install, no account.
 
 # MelodyMath
 
@@ -102,3 +102,5 @@ GitHub Pages מפורסם מענף `main`. אחרי שינוי ב־`master` צר
 
 ---
 פרויקט פתוח · Swissystem7
+
+Note: draft PRs may also be produced by the Muse Code queue on Dell (muse-task).

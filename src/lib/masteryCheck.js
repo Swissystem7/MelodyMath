@@ -13,6 +13,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
   const STAGES = ['sound', 'picture', 'symbol', 'plain'];
+  function nextStage(stage) { const i = STAGES.indexOf(stage); return i >= 0 && i < STAGES.length - 1 ? STAGES[i + 1] : null; }
   const STAGE_LABELS_HE = { sound: 'צליל ולהקה', picture: 'תמונה ודגם', symbol: 'סמל ומספר', plain: 'בלי להקה, רק אתם!' };
   const STORAGE_KEY = 'mm.mastery';
   function createTopicMastery(topicId, options) {
@@ -72,37 +73,115 @@
     }
     return html + '</div>';
   }
+  // Concrete → pictorial → abstract bridge (#665 req 5): the practice items were the sound
+  // stage; the picture and symbol stages reuse NumberPlay's parse of the same exercise.
+  function bridgeOf(item) {
+    let np = typeof globalThis !== 'undefined' ? globalThis.MM_NUMBER_PLAY : null;
+    if (!np && typeof require === 'function') { try { np = require('../components/NumberPlay.js'); } catch (_) {} }
+    if (!item || !np || typeof np.parseNumberGroups !== 'function') return null;
+    try {
+      const p = np.parseNumberGroups(item);
+      if (!p || !Array.isArray(p.groups) || !p.groups.length || p.op === 'counting') return null;
+      // compare/subtraction read only two numbers; skip the bridge rather than show a mismatched symbol
+      if ((p.op === 'compare' || p.op === 'subtraction') && p.groups.length !== 2) return null;
+      return p;
+    } catch (_) { return null; }
+  }
+  function symbolOf(parsed) {
+    const g = parsed.groups;
+    if (parsed.op === 'addition') return g.join(' + ') + ' = ?';
+    if (parsed.op === 'subtraction') return g[0] + ' − ' + g[1] + ' = ?';
+    if (parsed.op === 'multiplication') return g.length + ' × ' + g[0] + ' = ?';
+    if (parsed.op === 'compare') return g[0] + ' ? ' + g[1];
+    return String(g[0]);
+  }
+  function escHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]); }
+  function dotsHe(n) { return n === 1 ? 'עיגול אחד' : n + ' עיגולים'; }
+  function pictureLabelHe(parsed) {
+    const g = parsed.groups;
+    if (parsed.op === 'multiplication') return (g.length === 1 ? 'קבוצה אחת' : g.length + ' קבוצות') + ', בכל קבוצה ' + dotsHe(g[0]);
+    if (g.length === 1) return dotsHe(g[0]);
+    return g.map(n => 'קבוצה של ' + dotsHe(n)).join(' ו');
+  }
+  function renderStageHtml(stage, bridgeItem, parsed, message) {
+    const it = bridgeItem || {}, p = parsed || bridgeOf(it);
+    if (!p || (stage !== 'picture' && stage !== 'symbol')) return '';
+    const at = STAGES.indexOf(stage);
+    const steps = '<ol class="mm-cpa-steps" aria-label="שלבי הבדיקה" style="display:flex;gap:8px;flex-wrap:wrap;list-style:none;padding:0;margin:0 0 12px">'
+      + STAGES.map((s, i) => '<li data-step="' + s + '"' + (i === at ? ' aria-current="step" style="font-weight:700"' : '') + '>' + (i < at ? '✓ ' : '') + STAGE_LABELS_HE[s] + '</li>').join('') + '</ol>';
+    const promptHtml = typeof mathHtml === 'function' ? mathHtml(it.prompt || '') : escHtml(it.prompt || '');
+    let body;
+    if (stage === 'picture') {
+      // same rule as NumberPlay's bundle(): a group above 12 is drawn as tens and ones
+      const dots = n => (n > 12 ? '<span class="np-dot np-ten">10</span>'.repeat(Math.floor(n / 10)) + '<span class="np-dot"></span>'.repeat(n % 10) : '<span class="np-dot"></span>'.repeat(n));
+      const groups = p.groups.map(n => '<span class="np-group">' + dots(n) + '</span>').join('<span class="np-gap" aria-hidden="true"></span>');
+      body = '<h3 style="margin:0 0 8px;font-size:1.1rem">עכשיו נסתכל על התמונה</h3>'
+        + '<div class="np-circles" role="img" aria-label="' + escHtml(pictureLabelHe(p)) + '" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0">' + groups + '</div>';
+    } else {
+      body = '<h3 style="margin:0 0 8px;font-size:1.1rem">עכשיו נכתוב את זה במספרים</h3>'
+        + '<p class="mm-cpa-symbol" style="font-size:1.4rem;font-weight:700;text-align:center;margin:12px 0"><bdi dir="ltr">' + escHtml(symbolOf(p)) + '</bdi></p>';
+    }
+    return '<div class="mm-cpa-stage" data-stage="' + stage + '" role="region" aria-label="' + escHtml(STAGE_LABELS_HE[stage]) + '" dir="rtl">' + steps + body
+      + '<p class="mm-cpa-prompt" style="text-align:center;margin:8px 0">' + promptHtml + '</p>'
+      + '<div style="text-align:center;margin:12px 0"><input type="text" class="mm-cpa-input" aria-label="תשובה" style="font-size:1.2rem;padding:8px 12px;width:120px;text-align:center;border-radius:8px;border:1px solid #94a3b8" /> <button type="button" class="mm-cpa-submit primary" style="min-height:44px;padding:8px 16px;border-radius:8px;cursor:pointer">בדיקה</button></div>'
+      + '<p class="mm-cpa-msg" role="status" aria-live="polite" style="text-align:center;margin:0">' + escHtml(message || '') + '</p></div>';
+  }
   function mountMasteryCheck(container, item, options) {
     if (!container) return null;
     const opts = options || {};
     const ctx = opts.audioContext || (typeof globalThis !== 'undefined' && (globalThis.mmAudioCtx || (typeof globalThis.getAudioContext === 'function' ? globalThis.getAudioContext() : null))) || null;
-    if (ctx && typeof ctx.suspend === 'function') { try { ctx.suspend(); } catch (_) {} }
-    container.innerHTML = renderPlainCheckHtml(item, { ...opts, audioContext: null });
-    container.classList.remove('hidden');
-    const input = container.querySelector('.plain-answer-input'), submit = container.querySelector('.plain-submit-btn'), choices = container.querySelectorAll('[data-plain-choice]');
     const tracker = opts.tracker || (typeof globalThis !== 'undefined' && globalThis.mmMasteryTracker) || null;
     const topicId = opts.topicId || (item && (item.topicId || item.curriculumTopicId || item.id)) || '';
-    let answered = false;
-    function answer(val) {
-      if (answered) return;
-      answered = true;
-      const judge = typeof answerOk === 'function' ? answerOk : null;
-      const ok = judge ? !!judge(item, val) : ((item && item.answer != null) ? String(val).trim() === String(item.answer).trim() : Boolean(val));
-      restoreMusicState(ctx);
-      let recordRes = null;
-      if (tracker && topicId) {
-        const topState = tracker.get(topicId);
-        if (topState.currentStage !== 'plain') topState.currentStage = 'plain';
-        recordRes = tracker.record(topicId, { stage: 'plain', correct: ok });
+    const handle = { container, restoreAudio: () => restoreMusicState(ctx), close: () => { restoreMusicState(ctx); container.classList.add('hidden'); } };
+    const bridgeItem = opts.bridgeItem || null, parsed = bridgeItem ? bridgeOf(bridgeItem) : null;
+    if (!parsed) { mountPlain(); return handle; }
+    function mountStage(stage, message) {
+      container.innerHTML = renderStageHtml(stage, bridgeItem, parsed, message);
+      container.classList.remove('hidden');
+      const input = container.querySelector('.mm-cpa-input'), submit = container.querySelector('.mm-cpa-submit'), msg = container.querySelector('.mm-cpa-msg');
+      let wrong = 0;
+      function check() {
+        const val = input ? input.value : '', judge = typeof answerOk === 'function' ? answerOk : null;
+        const ok = judge ? !!judge(bridgeItem, val) : (bridgeItem.answer != null ? String(val).trim() === String(bridgeItem.answer).trim() : false);
+        if (!ok && ++wrong < 2) { if (msg) msg.textContent = recordAttempt({ currentStage: stage, history: [] }, { correct: false }).messageHe; return; }
+        // second miss: show the answer but stay on this stage; only a correct answer advances
+        if (!ok) { if (msg) msg.textContent = 'התשובה היא ' + bridgeItem.answer + '. כתבו ' + bridgeItem.answer + ' ולחצו על בדיקה.'; if (input) input.value = ''; return; }
+        if (tracker && topicId) { const topState = tracker.get(topicId); if (topState.currentStage !== stage) topState.currentStage = stage; tracker.record(topicId, { stage, correct: true }); }
+        const done = recordAttempt({ currentStage: stage, history: [] }, { correct: true });
+        const next = nextStage(stage);
+        if (next === 'plain') mountPlain(); else mountStage(next, done.messageHe);
       }
-      if (typeof opts.onAnswer === 'function') opts.onAnswer(val, ok, recordRes);
+      if (submit) submit.onclick = check;
+      if (input) { input.onkeydown = e => { if (e.key === 'Enter') check(); }; if (typeof input.focus === 'function') input.focus(); }
     }
-    if (submit && input) {
-      submit.onclick = () => answer(input.value);
-      input.onkeydown = e => { if (e.key === 'Enter') answer(input.value); };
+    mountStage(nextStage('sound'), '');
+    return handle;
+    function mountPlain() {
+      if (ctx && typeof ctx.suspend === 'function') { try { ctx.suspend(); } catch (_) {} }
+      container.innerHTML = renderPlainCheckHtml(item, { ...opts, audioContext: null });
+      container.classList.remove('hidden');
+      const input = container.querySelector('.plain-answer-input'), submit = container.querySelector('.plain-submit-btn'), choices = container.querySelectorAll('[data-plain-choice]');
+      let answered = false;
+      function answer(val) {
+        if (answered) return;
+        answered = true;
+        const judge = typeof answerOk === 'function' ? answerOk : null;
+        const ok = judge ? !!judge(item, val) : ((item && item.answer != null) ? String(val).trim() === String(item.answer).trim() : Boolean(val));
+        restoreMusicState(ctx);
+        let recordRes = null;
+        if (tracker && topicId) {
+          const topState = tracker.get(topicId);
+          if (topState.currentStage !== 'plain') topState.currentStage = 'plain';
+          recordRes = tracker.record(topicId, { stage: 'plain', correct: ok });
+        }
+        if (typeof opts.onAnswer === 'function') opts.onAnswer(val, ok, recordRes);
+      }
+      if (submit && input) {
+        submit.onclick = () => answer(input.value);
+        input.onkeydown = e => { if (e.key === 'Enter') answer(input.value); };
+      }
+      choices.forEach(btn => { btn.onclick = () => answer(btn.getAttribute('data-plain-choice')); });
     }
-    choices.forEach(btn => { btn.onclick = () => answer(btn.getAttribute('data-plain-choice')); });
-    return { container, restoreAudio: () => restoreMusicState(ctx), close: () => { restoreMusicState(ctx); container.classList.add('hidden'); } };
   }
   function nextPlainItem(items, used) {
     const list = Array.isArray(items) ? items : [];
@@ -195,9 +274,9 @@
     return sharedTracker;
   }
   return {
-    STAGES, STAGE_LABELS_HE, STORAGE_KEY,
+    STAGES, STAGE_LABELS_HE, STORAGE_KEY, nextStage,
     createTopicMastery, recordAttempt,
-    getTopicReport, renderPlainCheckHtml, mountMasteryCheck,
+    getTopicReport, renderPlainCheckHtml, renderStageHtml, mountMasteryCheck,
     restoreMusicState, isTopicUnlocked, orderTopics, getNextUnlockedTopics, nextPlainItem,
     createMasteryTracker, getMasteryTracker, loadMastery, saveMastery
   };

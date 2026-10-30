@@ -77,7 +77,7 @@
     const L = normalizeLine(line);
     const ticks = ticksOf(L);
     const dense = ticks.length > 25;
-    const sel = selected == null ? L.start : clampInt(selected, L.min, L.max);
+    const sel = selected === null || selected === undefined ? null : clampInt(selected, L.min, L.max);
     const marks = ticks.map(function (n) {
       const left = percentOnLine(n, L);
       const on = sel != null && n === sel;
