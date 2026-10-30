@@ -69,3 +69,8 @@ test('scaleJumpSound plays scale step frequencies where a jump of 10 is an octav
   assert.equal(downOctave.frequency, 110);
   assert.equal(downOctave.isOctave, true);
 });
+
+test('renderNumberLineHtml should not mark any button as "on" when selected is explicitly null or undefined', () => {
+  const html = line.renderNumberLineHtml({ min: 0, max: 20, start: 0 }, null);
+  assert.doesNotMatch(html, /class="nline-tick on"/);
+});

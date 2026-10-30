@@ -69,12 +69,47 @@ test('coveragePercent adds up and matches the row counts', () => {
   });
 });
 
-test('index.html shows the official tag on every exercise view, display only', () => {
+// #665 req 1: the curriculum line belongs to program.html / curriculum.html,
+// never to the child's exercise screen.
+test('index.html hides the curriculum line from every exercise view', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const fn = html.match(/function setItemTag\(el,it\)\{[^\n]*\}/);
+  assert.ok(fn, 'setItemTag not found');
+  assert.ok(!fn[0].includes('משרד החינוך'), fn[0]);
+  assert.ok(!fn[0].includes('mm-official'), fn[0]);
+  assert.match(fn[0], /el\.hidden=true/);
   ['rmItemTag', 'rmPlanTag', 'classItemTag', 'beatItemTag'].forEach(function (id) {
-    assert.ok(html.includes("setItemTag($('" + id + "')"), id);
+    assert.match(html, new RegExp('<p id="' + id + '" class="item-tag" hidden>'), id);
   });
-  assert.match(html, /function setItemTag\(el,it\)/);
-  assert.match(html, /לפי תוכנית משרד החינוך: /);
-  assert.match(html, /rel='noopener'/);
+});
+
+test('#665 req 1: exercise screen shows no curriculum line to the child', () => {
+  const vm = require('node:vm');
+  const root = path.join(__dirname, '..');
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const setTag = html.match(/function setItemTag\(el,it\)\{[^\n]*\}/);
+  assert.ok(setTag, 'setItemTag not found in index.html');
+  const children = [];
+  const record = function (c) { children.push(c); return c; };
+  const el = { textContent: 'stale', hidden: false, innerHTML: '', appendChild: record };
+  const sandbox = {
+    sectionForItem: cur.sectionForItem,
+    document: { createElement: function (tag) { return { tag: tag, setAttribute: function () {}, appendChild: record }; } },
+  };
+  vm.runInNewContext(setTag[0] + '\nthis.setItemTag = setItemTag;', sandbox);
+  // Items the old code would have tagged with a Ministry section and link.
+  const items = banks.allItems().filter(function (it) { return cur.sectionForItem(it); });
+  assert.ok(items.length > 0, 'need at least one item with an official section');
+  items.slice(0, 5).forEach(function (it) {
+    sandbox.setItemTag(el, it);
+    assert.equal(el.textContent, '');
+    assert.equal(el.hidden, true);
+    assert.equal(children.length, 0);
+    assert.doesNotMatch(el.textContent + el.innerHTML, /משרד החינוך|תוכנית|תכנית|כיתה/);
+  });
+  assert.doesNotThrow(function () { sandbox.setItemTag(null, items[0]); });
+  // The teacher/parent view keeps the curriculum.
+  const program = fs.readFileSync(path.join(root, 'program.html'), 'utf8');
+  assert.match(program, /תוכנית הלימודים במתמטיקה של משרד החינוך/);
+  assert.match(program, /<script src="src\/lib\/curriculum\.js"><\/script>/);
 });
