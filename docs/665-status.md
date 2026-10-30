@@ -59,4 +59,4 @@
 - בדיקות: ב־`test/sequence-guard.test.js`: `3: the area grid and box-volume layers never bring in kora, gankogui or ukulele` ו־`3: area-grid and box-volume partners are chosen by mathTopics, over 2+ families`. ב־`test/grooveGrid.test.js` וב־`test/loopStack.test.js`: `…never shows kora…` ו־`a strings child hears djembe as partner…` / `a strings child stacks djembe layers…`.
 - עדיין פתוח: ילד שבחר קורה בתור "הכלי שלי" שומע אותה בכל מקום. זה מחכה להחלטה של בעל המוצר (#717, #775).
 
-**הצעד הבא:** לסגור את דרישה 6 (סרגל הניווט ב־`core.js`, `landing.html`, `curriculum.html`, `offer.js`), ואז את מגבלת 15 המילים בדרישה 1. אחרי זה: לחבר את שלבי התמונה והסמל לאפליקציה (דרישה 5), להוסיף תרגיל גרירה (דרישה 3) ולהדגיש את מה שחסר כשהתשובה שגויה (דרישה 4).
+**הצעד הבא:** לסגור את דרישה 6, ואת שאר מגבלת 15 המילים בדרישה 1 (תבניות החלוקה־עם־שארית והכפולות־בקצב של כיתה ג׳ ורמז הפירוק של כיתה ב׳ כבר קוצרו ל־≤15 מילים, Refs #891). אחרי זה: לחבר את שלבי התמונה והסמל לאפליקציה (דרישה 5), להוסיף תרגיל גרירה (דרישה 3) ולהדגיש את מה שחסר כשהתשובה שגויה (דרישה 4).

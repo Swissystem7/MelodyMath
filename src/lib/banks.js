@@ -1018,7 +1018,7 @@
     });
   }
   const REGROUP = '10 מכות תוף מתקבצות לצליל בס אחד';
-  const UNGROUP = 'אין מספיק מכות תוף — צליל בס אחד נפרט ל־10 מכות תוף';
+  const UNGROUP = 'אין מספיק תוף — בס אחד נפרט ל־10 תופים';
   RAW.push(
     EVEN(4, 1), EVEN(3, 1), EVEN(6, 1), EVEN(5, 1),
     EVEN(7, 2), EVEN(8, 2), EVEN(9, 2),
@@ -1089,7 +1089,7 @@
     const q = Math.floor(total / bar);
     const r = total % bar;
     return MC('division', 'leftoverBeats',
-      total + ' פעימות בתיבות של ' + bar + ' — כמה תיבות שלמות, וכמה פעימות נשארות? (כתבו כמו 3 שארית 2)',
+      total + ' פעימות בתיבות של ' + bar + ': כמה שלמות, וכמה נשארות? (כמו 3 שארית 2)',
       q + ' שארית ' + r,
       q + ' תיבות של ' + bar + ' הן ' + (q * bar) + ' פעימות; ' + (r ? 'הנותרות מתנגנות בצליל אחר' : 'לא נשארת אף פעימה'),
       level, { standard: ST.DIV_REM, meaning: 'quotative', table: table });
@@ -1352,7 +1352,7 @@
   // כפולות בקצב (#463): אומרים את הכפולות עם הפעימה, והצליל עוצר לפני
   // אחת מהן — את הכפולה החסרה אומרים מהזיכרון. רק לוחות 2/4/5/10.
   function CHANT(t, k) {
-    return G3('multiplication', `אומרים את הכפולות של ${t} בקצב. אחרי ${k - 1} כפולות, הצליל שותק לפעמה אחת. איזו כפולה חסרה?`, t * k, t + ' × ' + k,
+    return G3('multiplication', `אומרים כפולות של ${t} בקצב. אחרי ${k} כפולות הצליל שותק. איזו כפולה חסרה?`, t * k, t + ' × ' + k,
       { standard: ST.MUL_C, table: t, level: 1, g3: { kind: 'chant', table: t, upTo: 10, pauseAt: k } });
   }
   RAW.push(
@@ -1367,7 +1367,7 @@
     const bars = Math.floor(beats / perBar);
     const rest = beats % perBar;
     return G3('division',
-      beats + ' פעמות נכנסות לתיבות של ' + perBar + '. כמה תיבות שלמות וכמה פעמות נשארות? כתבו תיבות, המילה שארית, ואז הפעמות — למשל 2 שארית 1.',
+      beats + ' פעימות בתיבות של ' + perBar + ': כמה שלמות, וכמה נשארות? (כמו 3 שארית 2)',
       bars + ' שארית ' + rest,
       bars + ' × ' + perBar + ' = ' + bars * perBar + ', ונשארות ' + rest + ' פעמות',
       {
