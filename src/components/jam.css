@@ -39,6 +39,13 @@
 .ttg-beat.ask{border:2px dashed var(--purple)}
 .ttg-plain{font-size:1.3rem;font-weight:bold;margin:8px 0}
 .mm-game [aria-pressed="true"]:not(.mm-music-toggle){border-color:var(--purple);box-shadow:0 0 0 3px color-mix(in srgb, var(--purple) 25%, transparent)}
+.tr-stick{display:flex;flex-direction:column;align-items:center;gap:6px}
+.tr-rod{display:block;height:12px;max-width:100%;border-radius:6px;background:color-mix(in srgb, var(--yellow) 70%, var(--ink))}
+.tr-line{display:flex;height:40px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--card);margin:8px 0}
+.tr-seg{background:color-mix(in srgb, var(--yellow) 55%, var(--card));border-inline-start:2px solid var(--ink)}
+.tr-seg.lit{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 45%, var(--card))}
+.tr-result{margin:6px 0;padding-inline-start:20px}
+@media (prefers-reduced-motion:reduce){.tr-seg.lit{animation:none}}
 .anim-math-merge{animation:mathMerge .45s cubic-bezier(.2,.8,.2,1)}
 .anim-math-takeaway{animation:mathTakeaway .45s ease-out}
 .anim-math-repeat{animation:mathRepeat .45s ease-in-out}

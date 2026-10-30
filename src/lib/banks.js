@@ -97,6 +97,7 @@
     ADD_SUB_10K: 'חיבור וחיסור במאוזן ובמאונך עד רבבה',
     MUL_DIV_10: 'כפל וחילוק ב־10, 100 ו־1,000',
     WORD_TWO_STEP: 'שאלות מילוליות דו־שלביות',
+    DATA_ORGANIZE: 'איסוף וארגון נתונים — מרשימה וסימני ספירה לטבלה',
     POLY_DECOMP: 'פירוק מצולע והרכבת מצולע חדש מכל החלקים',
     MONEY_BILLS: 'כסף — סכום בשטרות ובמטבעות, קנייה ועודף בשקלים',
     NUM_MILLION: 'מספרים עד מיליון — מבנה עשרוני, השוואה ועיגול',
@@ -2116,6 +2117,24 @@
       });
     });
   }
+  // כיתה ג׳ (#411): שאלות מילוליות עד רבבה, מאונך שמגיע בדיוק ל־10,000, ואיסוף
+  // וארגון — מרשימה גולמית או מסימני ספירה אל טבלה. נוספו בסוף כדי שמזהים קיימים יישארו.
+  function ORG(prompt, answer, hint, level) {
+    return I('ג', 'data', prompt, answer, hint, { strand: STRAND.DATA, standard: ST.DATA_ORGANIZE, level: level });
+  }
+  RAW.push(
+    I('ג', 'addition', 'למופע הראשון נמכרו 2,350 כרטיסים ולשני 1,420. כמה כרטיסים נמכרו בסך הכול?' + NO_COMMA, 3770, 'אלפים עם אלפים, מאות עם מאות, עשרות עם עשרות', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'addition', 'בספריית התווים 4,785 דפים, והוסיפו עוד 2,346. כמה דפים יש עכשיו?' + NO_COMMA, 7131, 'המרה ביחידות, בעשרות ובמאות', { standard: ST.ADD_SUB_10K, level: 2 }),
+    I('ג', 'addition', 'חשבו במאונך: 3,756 + 6,244' + NO_COMMA, 10000, 'כל טור משלים ל־10 ומעביר אחד שמאלה', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 3756, b: 6244, op: '+' }, level: 3 }),
+    I('ג', 'subtraction', 'באולם 5,600 מקומות, ו־2,400 כבר תפוסים. כמה מקומות פנויים?' + NO_COMMA, 3200, '5 אלפים ו־6 מאות פחות 2 אלפים ו־4 מאות', { standard: ST.ADD_SUB_10K, level: 1 }),
+    I('ג', 'subtraction', 'התזמורת צריכה לאסוף 10,000 ₪ וכבר אספה 6,275 ₪. כמה ₪ חסרים?' + NO_COMMA, 3725, 'משלימים מ־6,275 ל־7,000 ואז ל־10,000', { standard: ST.ADD_SUB_10K, level: 3 }),
+    I('ג', 'subtraction', 'חשבו במאונך: 10,000 − 3,648' + NO_COMMA, 6352, 'פריטה מהרבבה דרך כל האפסים', { standard: ST.ADD_SUB_10K, widget: 'vertical', vert: { a: 10000, b: 3648, op: '-' }, level: 3 }),
+
+    ORG('רשמנו את הכלי שכל ילד בחר: תוף, חליל, תוף, משולש, תוף, חליל, תוף. בטבלה מסודרת — כמה בחרו תוף?', 4, 'סופרים כל «תוף» ברשימה ומסמנים כדי לא לספור פעמיים', 1),
+    ORG('ספירת שירים בסימני ספירה: פופ — ||||| ||, רוק — |||. כמה שירי פופ נספרו?', 7, 'חבילה של 5 קווים ועוד 2 קווים', 2),
+    ORG('בסקר הכלים בחרו: גיטרה, פסנתר, גיטרה, כינור, פסנתר, גיטרה, פסנתר, גיטרה. ארגנו בטבלה: בכמה ילדים יותר בחרו גיטרה מאשר כינור?', 3, 'גיטרה 4, כינור 1 — ההפרש הוא 3', 3)
+  );
+
   musicForLate();
 
   // #465 regroup pack: more מעבר עשרת duo items. Appended last so ids stay put.
@@ -2161,7 +2180,7 @@
       tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'g1CountOn'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
-      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
+      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'listToGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
         'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'g3Chant', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
