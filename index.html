@@ -478,6 +478,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <div class="card mm-game" id="lsCard" aria-label="נפח תיבה כשכבות של לופים"></div>
 <div class="card mm-game" id="bbCard" aria-label="משוואות ואי־שוויונות כמאזן של שתי תיבות"></div>
 <div class="card mm-game" id="pmCard" aria-label="אחוזים כתיבה"></div>
+<div class="card mm-game" id="pcCard" aria-label="אתגר: תופים שנפגשים" hidden></div>
 <!-- #591 music games end -->
 </section><footer class="no-print"><div style="text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px"><a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a> · <a href="frequency.html">מעבדת תדרים</a><div style="margin-top:8px;font-size:.85rem">MelodyMath · תרגול יסודי א׳–ו׳ בעברית</div></div></footer></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
@@ -487,6 +488,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/rhythmGame.js"></script>
 <script src="src/lib/interactiveLessons.js"></script>
 <script src="src/lib/polyrhythm.js"></script>
+<script src="src/lib/polyChallenge.js"></script>
 <script src="src/lib/circleOfFifths.js"></script>
 <script src="src/lib/sonify.js"></script>
 <script src="src/lib/openCue.js"></script>
@@ -2932,6 +2934,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
 <script>/* ?topic=mm-cur-47&screen=1 opens #ggCard via MM_GROOVE_GRID.SCREEN_FOR. Refs #591. Leaves progression.js SCREENS to #811. */
 try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.get('screen')&&g&&g.SCREEN_FOR[q.get('topic')];if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
 <script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/components/PercentMixPad.js"></script>
+<script src="src/components/PolyChallengePad.js"></script>
 <script src="src/lib/music/moreFamilies.js"></script>
 <!-- #591 music game scripts end -->
 <script src="src/lib/music/loopStack.js"></script><script src="src/components/LoopStackScreen.js"></script>
