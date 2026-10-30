@@ -34,7 +34,7 @@ function setup(t, opts) {
     source: '.piece', target: '.basket', ghostClass: 'mm-ghost',
     onDrop(over) { drops.push(over); },
   }, opts));
-  const fire = (type, x, el) => { if (handlers[type]) handlers[type]({ type, target: el || btn, clientX: x, clientY: 0, pointerId: 1 }); };
+  const fire = (type, x, el, pointerId) => { if (handlers[type]) handlers[type]({ type, target: el || btn, clientX: x, clientY: 0, pointerId: pointerId == null ? 1 : pointerId }); };
   return { kit, fire, btn, target, ghosts, drops, doc, host };
 }
 
@@ -106,6 +106,38 @@ test('a disabled source or enabled() false starts no drag', (t) => {
   b.fire('pointerdown', 0); b.fire('pointermove', 120); b.fire('pointerup', 120);
   assert.strictEqual(b.ghosts.length + b.drops.length, 0);
   assert.strictEqual(b.kit.dragged(b.btn), false);
+});
+
+test('a second finger cannot steal or orphan the drag', (t) => {
+  const s = setup(t);
+  s.fire('pointerdown', 0, s.btn, 1);
+  s.fire('pointermove', 120, s.btn, 1);
+  assert.strictEqual(s.ghosts.length, 1);
+  s.fire('pointerdown', 0, s.btn, 2);
+  s.fire('pointermove', 120, s.btn, 2);
+  s.fire('pointerup', 120, s.btn, 2);
+  assert.strictEqual(s.ghosts.length, 1, 'the second finger creates no ghost');
+  assert.notStrictEqual(s.ghosts[0].removed, true, 'the first ghost is not removed');
+  assert.strictEqual(s.drops.length, 0);
+  s.fire('pointermove', 120, s.btn, 1);
+  s.fire('pointerup', 120, s.btn, 1);
+  assert.deepStrictEqual(s.drops, [s.target]);
+  assert.strictEqual(s.ghosts[0].removed, true);
+});
+
+test('cancel() mid-drag removes the ghost; later move/up create nothing and dragged() is false', (t) => {
+  const s = setup(t);
+  s.fire('pointerdown', 0, s.btn, 1);
+  s.fire('pointermove', 120, s.btn, 1);
+  assert.strictEqual(s.ghosts.length, 1);
+  s.kit.cancel();
+  s.kit.cancel();
+  assert.strictEqual(s.ghosts[0].removed, true);
+  s.fire('pointermove', 120, s.btn, 1);
+  s.fire('pointerup', 120, s.btn, 1);
+  assert.strictEqual(s.ghosts.length, 1, 'no new ghost after cancel');
+  assert.strictEqual(s.drops.length, 0);
+  assert.strictEqual(s.kit.dragged(s.btn), false);
 });
 
 test('dragToTarget never writes an answer: it only hands the target to onDrop', (t) => {

@@ -151,7 +151,7 @@
     let drag = null;
     let after = false;
     function isOwner(ev) {
-      return !ev || ev.pointerId == null || !drag || ev.pointerId === drag.pointerId;
+      return !ev || ev.pointerId == null || !drag || drag.pointerId == null || ev.pointerId === drag.pointerId;
     }
     function removeGhost() {
       if (drag && drag.ghost) { drag.ghost.remove(); drag.ghost = null; return true; }

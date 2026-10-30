@@ -129,14 +129,24 @@
       sound(spec, box[box.length - 1], opt);
     }
     let from = null;
+    let dragOwner = null;
     const drag = { ghostClass: 'dp-ghost', source: '.dp-piece', target: '.dp-box', onDrop: function () { if (from != null) put(from); } };
     el.addEventListener('pointerdown', function (ev) {
+      if (dragOwner !== null && ev.pointerId != null && ev.pointerId !== dragOwner) return;
       const s = ev.target.closest ? ev.target.closest('.dp-piece') : null;
       if (!s) return;
+      dragOwner = (ev.pointerId != null ? ev.pointerId : null);
       clearGhosts(doc);
       from = s.getAttribute('data-dp');
       drag.ghostClass = 'dp-ghost ' + s.className.replace('dp-piece', '').trim();
     });
+    function clearDragOwner(ev) {
+      if (dragOwner === null) return;
+      if (ev && ev.pointerId != null && ev.pointerId !== dragOwner) return;
+      dragOwner = null;
+    }
+    el.addEventListener('pointerup', clearDragOwner);
+    el.addEventListener('pointercancel', clearDragOwner);
     const jam = root.MM_JAM;
     const handle = jam && typeof jam.dragToTarget === 'function' ? jam.dragToTarget(el, drag) : null;
     if (host) host._dpDragCancel = handle ? handle.cancel : null;
