@@ -7,7 +7,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DB = require('../src/lib/music/dataBeats.js');
+const PM = require('../src/lib/music/percentMix.js');
+const CK = require('../src/lib/music/dataPercentCheck.js');
+const SCREEN = require('../src/components/DataBeats.js');
+const I = require('../src/lib/instruments.js');
 const VOICES = require('../src/lib/instrumentVoices.js').VOICES;
+
+const root = path.join(__dirname, '..');
+const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const DAY = CK.DAY;
 
 // ---------- sonifySeries ----------
 
@@ -76,8 +84,6 @@ test('practice series: whole-number means, 2-4 choices, the answer among them', 
 
 // ---------- percentToSubbeats ----------
 
-const PM = require('../src/lib/music/percentMix.js');
-
 test('percentToSubbeats: X% is X of the 100 sub-beats of one bar', () => {
   assert.deepEqual(
     (({ subbeats, of, beats, fullBeats, restSubbeats, fraction, decimal }) => ({ subbeats, of, beats, fullBeats, restSubbeats, fraction, decimal }))(PM.percentToSubbeats(25)),
@@ -98,7 +104,7 @@ test('percent is the M3 note-duration method and keeps its TODO-source mark', ()
   assert.equal(PM.MECHANISM, 'M3');
   assert.equal(PM.PER_BEAT, 25);
   assert.equal(PM.percentToSubbeats(10).source, 'TODO-source');
-  assert.match(fs.readFileSync(path.join(__dirname, '../src/lib/music/percentMix.js'), 'utf8'), /\/\/ TODO-source/);
+  assert.match(read('src/lib/music/percentMix.js'), /\/\/ TODO-source/);
   assert.equal(PM.percentOf(25, 20), 5);
 });
 
@@ -126,9 +132,6 @@ test('PercentMix pad: tiles fill toward the target, an overflow is refused', () 
 });
 
 // ---------- measurement ----------
-
-const CK = require('../src/lib/music/dataPercentCheck.js');
-const DAY = CK.DAY;
 
 test('12-item pre-test with a parallel post-test: same slots, different numbers, 6 unpractised', () => {
   const A = CK.items('pre');
@@ -236,4 +239,153 @@ test('results load and save through an injectable storage, under one key', () =>
   mem[CK.STORAGE_KEY] = '{broken';
   assert.deepEqual(CK.load(storage), CK.empty());
   assert.equal(CK.save({ setItem: () => { throw new Error('full'); } }, d), false);
+});
+
+// ---------- the screen, end to end in Node: pre-test -> 3 steps -> post-test ----------
+
+function rightTrend(q) { return q.answer; }
+
+function playSteps(s) {
+  // Step 1: mean (one wrong try first, no penalty).
+  assert.equal(s.view, 'step');
+  let q = SCREEN.questionsFor(0, s.round).qs[0];
+  s = SCREEN.choose(s, String(q.answer + 3));
+  assert.equal(s.status, 'try');
+  s = SCREEN.choose(s, String(q.answer));
+  assert.equal(s.status, 'right');
+  s = SCREEN.advance(s);
+  // Step 2: trend then range.
+  assert.equal(s.step, 1);
+  const set = SCREEN.questionsFor(1, s.round);
+  s = SCREEN.choose(s, rightTrend(set.qs[0]));
+  assert.equal(s.status, 'right');
+  s = SCREEN.advance(s);
+  s = SCREEN.choose(s, String(set.qs[1].answer));
+  assert.equal(s.status, 'right');
+  s = SCREEN.advance(s);
+  // Step 3: fill the percent target greedily with the allowed tiles.
+  assert.equal(s.step, 2);
+  const target = SCREEN.questionsFor(2, s.round).target;
+  const tiles = target.allowed.map((id) => PM.tile(id)).sort((a, b) => b.n - a.n);
+  let guard = 0;
+  while (s.status !== 'right' && guard++ < 50) {
+    const left = target.percent - PM.filled(s.fill);
+    const t = tiles.find((x) => x.n <= left);
+    s = SCREEN.tapTile(s, t.id);
+  }
+  assert.equal(s.status, 'right');
+  assert.equal(s.sound, 'cadence');
+  assert.match(s.message, new RegExp(target.percent + '% = ' + target.percent + ' מתוך 100'));
+  return SCREEN.advance(s);
+}
+
+function takeTest(s, phase, rightIds) {
+  s = SCREEN.startTest(s, phase);
+  assert.equal(s.view, 'test');
+  assert.equal(s.test.items.length, 12);
+  s.test.items.forEach((it) => {
+    const html = SCREEN.renderHtml(s);
+    assert.doesNotMatch(html, /data-tap=|data-act="play"/, 'tests are silent');
+    s = SCREEN.answerTest(s, rightIds.includes(it.id) ? it.answer : it.choices.find((c) => c !== it.answer));
+  });
+  assert.equal(s.view, 'result');
+  return s;
+}
+
+test('e2e (Node): pre-test, three practice steps, post-test four weeks later', () => {
+  const t0 = Date.UTC(2026, 9, 1);
+  let s = SCREEN.createState({ now: t0 });
+  assert.equal(SCREEN.startPractice(s), s, 'no practice before the pre-test');
+  assert.match(SCREEN.renderHtml(s), /data-phase="pre"/);
+  s = takeTest(s, 'pre', ['p1', 'p2', 'u1']);
+  assert.equal(s.data.learners.local.pre.score.unpractised, 1);
+  s = SCREEN.home(s);
+  assert.equal(SCREEN.startTest(s, 'post'), s, 'post-test is not open on day 0');
+  assert.match(SCREEN.renderHtml(s), /בעוד 28 ימים/);
+  s = SCREEN.startPractice(s);
+  s = playSteps(s);
+  assert.equal(s.view, 'home');
+  assert.match(s.message, /סיימתם את שלושת השלבים/);
+  s = Object.assign({}, s, { now: t0 + 28 * DAY });
+  assert.match(SCREEN.renderHtml(s), /data-phase="post"/);
+  s = takeTest(s, 'post', ['p1', 'p2', 'u1', 'u2', 'u5', 'u6']);
+  assert.equal(s.data.learners.local.post.form, 'B');
+  assert.equal(s.data.learners.local.post.score.unpractised, 4);
+  s = SCREEN.home(s);
+  assert.match(SCREEN.renderHtml(s), /בעוד 30 ימים/);
+});
+
+test('screen: pitch add-on and the music switch', () => {
+  let s = SCREEN.createState({ now: 1 });
+  s = SCREEN.answerTest(SCREEN.startTest(s, 'pre'), 'x'); // an answer not in the choices is ignored
+  assert.equal(s.test.i, 0);
+  s = Object.assign(SCREEN.createState({ now: 1 }), { data: CK.record(CK.empty(), 'local', 'pre', {}, 1) });
+  s = SCREEN.startPractice(s);
+  const plain = SCREEN.playPlan(s);
+  assert.ok(plain.length > 0 && plain.every((n) => n.hz === undefined));
+  assert.doesNotMatch(SCREEN.renderHtml(s), /aria-pressed="true"[^>]*>🎚/);
+  assert.match(SCREEN.renderHtml(s), /ראיות חלשות/);
+  s = SCREEN.setPitch(s, true);
+  assert.ok(SCREEN.playPlan(s).every((n) => n.hz > 0));
+  const off = Object.assign({}, s, { showMusic: false });
+  assert.deepEqual(SCREEN.playPlan(off), []);
+  assert.doesNotMatch(SCREEN.renderHtml(off), /data-act="play"|data-act="pitch"/);
+  assert.match(SCREEN.renderHtml(off), /db-choice/, 'still solvable without sound');
+});
+
+// ---------- honesty, dosage and wiring ----------
+
+function allScreenText() {
+  const t0 = Date.UTC(2026, 9, 1);
+  const out = [];
+  let s = SCREEN.createState({ now: t0 });
+  out.push(SCREEN.renderHtml(s));
+  s = SCREEN.startTest(s, 'pre');
+  out.push(SCREEN.renderHtml(s));
+  s.test.items.forEach((it) => { s = SCREEN.answerTest(s, it.answer); });
+  out.push(SCREEN.renderHtml(s));
+  s = SCREEN.startPractice(SCREEN.home(s));
+  for (let step = 0; step < 3; step++) {
+    out.push(SCREEN.renderHtml(Object.assign({}, s, { step: step, q: 0 })));
+    out.push(SCREEN.renderHtml(Object.assign({}, s, { step: step, q: 0, showMusic: false })));
+  }
+  ['pre', 'post'].forEach((p) => CK.items(p).forEach((it) => out.push(it.prompt, it.answer, ...it.choices)));
+  DB.SERIES.forEach((x) => out.push(x.he));
+  PM.TARGETS.forEach((x) => out.push(x.he));
+  PM.TILES.forEach((x) => out.push(x.he));
+  out.push(CK.CHECK_DISCLAIMER, ...Object.values(CK.PHASE_HE), ...Object.values(DB.TREND_HE));
+  return out.join('\n');
+}
+
+test('no claim that music improves maths, and no buy/price words', () => {
+  const text = allScreenText();
+  assert.doesNotMatch(text, /music (improves|boosts|raises)|improves? (math|maths)/i);
+  assert.doesNotMatch(text, /מוזיקה[^.]{0,30}(משפר|משפרת|מקדמ|מעלה|מחזק)/);
+  assert.doesNotMatch(text, /(משפר|משפרת|מקדמ|מחזק)[^.]{0,30}(מתמטיקה|חשבון)/);
+  assert.doesNotMatch(text, /(^|[^א-ת])(קנה|קנו|מחיר|רכישה|מנוי)([^א-ת]|$)/);
+  assert.doesNotMatch(text, /מטבע|שלל|טיימר|הזדמנות אחרונה/);
+});
+
+test('dosage: data is M1 and percent is M3 in instruments.TOPICS; pitch stays the weak add-on', () => {
+  assert.equal(I.TOPICS.data.mechanism, 'M1');
+  assert.equal(I.TOPICS.percent.mechanism, 'M3');
+  assert.ok(I.PRIMARY.includes(I.TOPICS.data.mechanism) && I.PRIMARY.includes(I.TOPICS.percent.mechanism));
+  assert.equal(DB.MECHANISM, I.TOPICS.data.mechanism);
+  assert.equal(PM.MECHANISM, I.TOPICS.percent.mechanism);
+  assert.ok(I.WEAK.includes(DB.PITCH_MECHANISM));
+  assert.ok(I.forTopic('data').some((x) => x.id === 'cajon'));
+  assert.ok(I.forTopic('percent').some((x) => x.id === 'darbuka'));
+  assert.ok(I.forTopic('data').every((x) => x.mechanism === 'M1'));
+});
+
+test('index.html has the card in the music-games panel and the scripts in order; sw.js precaches them', () => {
+  const html = read('index.html');
+  const sw = read('sw.js');
+  const panel = html.slice(html.indexOf('<section id="musicGames"'), html.indexOf('<!-- #591 music games end -->'));
+  assert.match(panel, /id="dbCard"[^>]*aria-label="[^"]+"/);
+  const srcs = ['src/components/jamKit.js', 'src/lib/music/dataBeats.js', 'src/lib/music/percentMix.js', 'src/lib/music/dataPercentCheck.js', 'src/components/DataBeats.js'];
+  const at = srcs.map((s) => html.indexOf('<script src="' + s + '"></script>'));
+  at.forEach((i, k) => assert.ok(i > 0, srcs[k]));
+  for (let k = 1; k < at.length; k++) assert.ok(at[k] > at[k - 1], srcs[k] + ' after ' + srcs[k - 1]);
+  srcs.slice(1).forEach((s) => assert.ok(sw.includes("'./" + s + "'"), s + ' in sw.js'));
 });
