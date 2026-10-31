@@ -40,6 +40,15 @@
 
   const JAM = root.MM_JAM || require('./jamKit.js');
   const GAME = 'soundAdd';
+  // Where the exercise sits in the curriculum (#691 review item 2). The same
+  // links are in src/lib/curriculum/progression.js; test/soundAdd.test.js
+  // fails if the two disagree.
+  const PROGRESSION = Object.freeze({
+    topicId: 'mm-cur-3',
+    prereq: ['mm-cur-1', 'mm-cur-2'],
+    skill: 'joining and removing beats within 20',
+    buildsTo: ['mm-cur-4', 'mm-cur-7', 'mm-cur-11'],
+  });
   const BEAT = 0.42; // seconds between two sounds of one group
   const GAP = 0.5; // the extra pause between the two groups
   const MAX_TRIES = 2;
@@ -48,6 +57,28 @@
 
   // Sums up to 10: every total fits on two hands and one row of dots.
   const ITEMS = [[3, 2], [2, 2], [4, 1], [3, 3], [5, 2], [2, 4], [4, 3], [6, 2], [5, 4], [3, 5], [6, 3], [4, 4]];
+  // The two music ways of the later steps, restored as they were before
+  // #635/#636 replaced them in the grade 3-4 curriculum (git show
+  // c133190^:src/lib/curriculum/grade3.js, the same rows in cd0d152^ grade4.js).
+  const WAYS = Object.freeze({
+    takeAwayBeats: { he: 'עודף: נגנו את מה ששילמתם, השתיקו את המחיר — מה שנשאר נשמע הוא העודף.', source: 'mcdonel2015', from: 'c133190^ grade3.js MONEY' },
+    tenExchange: { he: 'כל עשר נקישות — כלי גדול יותר: שייקר, תוף, מצילה, גונג (אלפים). ספרו את הכלי הגדול קודם.', also: 'פריטה בחיסור: תוף אחד (עשרת) נפרט לעשר נקישות כשחסרות יחידות — ורק אז מסירים.', source: 'kcConnections', from: 'c133190^ grade3.js NUM10K, ADD_SUB_10K' },
+  });
+  // The steps of mm-cur-3, in order. A step is mastered like the first one
+  // (two right first tries in the silent stage); then the next step starts
+  // again with sound. A fixed list until the #687 variation engine
+  // generates the items. [a, b, '-'] is a subtraction.
+  // tenExchange: the 10th sound is joined by a gong, the bigger instrument
+  // of a full ten. takeAwayBeats: all of a, then the same phrase with the
+  // last b beats silent; what is still heard is the answer.
+  const STEPS = [
+    { id: 'add10', way: null, items: ITEMS },
+    { id: 'makeTen', way: 'tenExchange', items: [[7, 3], [6, 4], [8, 2], [5, 5], [9, 1], [4, 6]] },
+    { id: 'crossTen', way: 'tenExchange', items: [[8, 5], [9, 4], [7, 6], [6, 6], [9, 3], [8, 7]] },
+    { id: 'add20', way: 'tenExchange', items: [[12, 5], [11, 6], [13, 4], [10, 7], [14, 5], [9, 9]] },
+    { id: 'sub10', way: 'takeAwayBeats', items: [[7, 3, '-'], [9, 4, '-'], [6, 2, '-'], [8, 5, '-'], [10, 6, '-'], [5, 3, '-']] },
+    { id: 'sub20', way: 'takeAwayBeats', items: [[13, 3, '-'], [15, 5, '-'], [12, 4, '-'], [14, 6, '-'], [17, 8, '-'], [11, 2, '-']] },
+  ];
   const STAGES = ['sound', 'picture', 'symbol', 'silent'];
   // One instrument per family; a = the first number, b = the second.
   const FAMILIES = [
@@ -69,7 +100,7 @@
   const MODES = ['tap', 'choice', 'drag', 'line'];
   const CHOICE_MAX = 10; // the silent check's grid: every number 1..10
   const CHOICE_COUNT = 5; // the stages with sound offer five numbers, not three
-  const LINE_MAX = 10; // the number line runs 0..10, every sum fits
+  const LINE_MAX = 10; // the number line runs 0..10, or 0..20 past ten (lineMax)
   const MODE_PROMPTS = {
     choice: {
       sound: 'הקשיבו 👂 ובחרו מספר',
@@ -90,6 +121,8 @@
       silent: 'כמה זה? הקישו על המספר בקו',
     },
   };
+  // A subtraction asks what is left, whatever the answer type.
+  const SUB_PROMPTS = { sound: 'הקשיבו 👂 כמה צלילים נשארו בסוף?', picture: 'כמה עיגולים נשארו?' };
   const BACK_PROMPT = 'נתרגל עוד קצת עם צלילים 🎵';
   // Everything the exercise says aloud. The same keys name the recorded clips.
   const SPEECH = {
@@ -103,6 +136,10 @@
     shown: 'לא נורא, הנה התשובה',
     count1: 'אחת', count2: 'שתיים', count3: 'שלוש', count4: 'ארבע', count5: 'חמש',
     count6: 'שש', count7: 'שבע', count8: 'שמונה', count9: 'תשע', count10: 'עשר',
+    count11: 'אחת עשרה', count12: 'שתים עשרה', count13: 'שלוש עשרה', count14: 'ארבע עשרה', count15: 'חמש עשרה',
+    count16: 'שש עשרה', count17: 'שבע עשרה', count18: 'שמונה עשרה', count19: 'תשע עשרה', count20: 'עשרים',
+    'sub.sound': 'הקשיבו. כמה צלילים נשארו בסוף?',
+    'sub.picture': 'כמה עיגולים נשארו?',
     'choice.sound': 'הקשיבו, ואז בחרו את המספר',
     'choice.picture': 'כמה עיגולים יש? בחרו את המספר',
     'choice.symbol': 'כמה זה? בחרו את המספר',
@@ -123,25 +160,41 @@
   // Rising C major, one note per answer dot (up to 10).
   const SCALE = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33, 659.25];
 
-  function sum(item) { return item[0] + item[1]; }
+  // The answer of an item: a + b, or a - b for [a, b, '-'].
+  function minus(item) { return item[2] === '-'; }
+  function sum(item) { return minus(item) ? item[0] - item[1] : item[0] + item[1]; }
+  function eqText(item, end) { return item[0] + (minus(item) ? ' − ' : ' + ') + item[1] + ' = ' + end; }
+  // The number line of an item: 0..10, or 0..20 once a number passes ten.
+  function lineMax(item) { return Math.max(item[0], sum(item)) > LINE_MAX ? 2 * LINE_MAX : LINE_MAX; }
 
   function family(id) { return FAMILIES.filter(function (f) { return f.id === id; })[0] || FAMILIES[0]; }
 
   // The exercise as sound: one sound per unit of the first number, a pause,
   // one higher sound per unit of the second. dot = the circle it lights.
-  function numbersToBeats(a, b, beat, gap, familyId) {
+  // Subtraction (takeAwayBeats): all of a, a pause, then a again with its
+  // last b beats silent, so only a - b higher sounds are heard. The 10th
+  // sound of a count gets a gong on top (tenExchange: a full ten).
+  function numbersToBeats(a, b, beat, gap, familyId, sub) {
     const step = beat || BEAT;
     const pause = gap == null ? GAP : gap;
     const f = family(familyId);
     const notes = [];
     for (let i = 0; i < a; i++) notes.push({ at: i * step, voice: f.a.voice, hz: f.a.hz, group: 0, dot: i });
-    for (let j = 0; j < b; j++) notes.push({ at: a * step + pause + j * step, voice: f.b.voice, hz: f.b.hz, group: 1, dot: a + j });
+    if (sub) {
+      for (let k = 0; k < a - b; k++) notes.push({ at: a * step + pause + k * step, voice: f.b.voice, hz: f.b.hz, group: 1, dot: k });
+    } else {
+      for (let j = 0; j < b; j++) notes.push({ at: a * step + pause + j * step, voice: f.b.voice, hz: f.b.hz, group: 1, dot: a + j });
+    }
+    const ten = notes.filter(function (x) { return x.dot === 9 && x.group === (sub ? 0 : x.group); })[0];
+    if (ten) notes.splice(notes.indexOf(ten) + 1, 0, { at: ten.at, voice: 'gong', group: ten.group, dot: 9, kind: 'ten' });
     return notes;
   }
 
   // The hint replay: the same sounds, each followed on screen by its count.
   function countPlan(item, familyId) {
-    return numbersToBeats(item[0], item[1], 0, null, familyId).map(function (n, i) { return Object.assign({}, n, { count: i + 1 }); });
+    // Counted are the sounds of the answer: all of them, or what is left.
+    const notes = numbersToBeats(item[0], item[1], 0, null, familyId, minus(item)).filter(function (n) { return n.kind !== 'ten' && (!minus(item) || n.group === 1); });
+    return notes.map(function (n, i) { return Object.assign({}, n, { count: i + 1 }); });
   }
 
   function scalePlan(n) {
@@ -153,11 +206,13 @@
   function createState(opts) {
     const o = opts || {};
     const stage = STAGES.indexOf(o.stage) >= 0 ? o.stage : STAGES[0];
-    const index = ((Number(o.index) || 0) % ITEMS.length + ITEMS.length) % ITEMS.length;
+    const step = Math.max(0, Math.min(STEPS.length - 1, Number(o.step) || 0));
+    const items = STEPS[step].items;
+    const index = ((Number(o.index) || 0) % items.length + items.length) % items.length;
     const mode = MODES.indexOf(o.mode) >= 0 ? o.mode : MODES[0];
     // In a picking type taps is the picked number, null until there is one.
     return {
-      index: index, item: o.item || ITEMS[index], stage: stage, family: family(o.family).id, mode: mode,
+      step: step, index: index, item: o.item || items[index], stage: stage, family: family(o.family).id, mode: mode,
       taps: picks(mode) ? null : 0, wrong: [], tries: 0, status: 'ready', back: !!o.back,
       streak: o.streak || 0, silentRight: o.silentRight || 0,
       plainTried: o.plainTried || 0, plainRight: o.plainRight || 0,
@@ -185,7 +240,7 @@
   }
 
   // Five numbers in a row around the sum (t-2..t+2, slid to stay inside
-  // 1..CHOICE_MAX); the row is rotated by the exercise index, so the right one
+  // 1..CHOICE_MAX, or 1..20 past ten); the row is rotated by the exercise index, so the right one
   // moves between the five places and is not always in the middle (owner
   // note on #700: three neighbours were a 1-in-3 guess, always the centre).
   // The silent stage is the no-music mastery check, so there the
@@ -193,8 +248,8 @@
   // guess is right 1 time in 10 and mastery needs two right first tries).
   function choices(item, index, stage) {
     const t = sum(item);
-    if (stage === 'silent') return Array.from({ length: Math.max(CHOICE_MAX, t) }, function (_, i) { return i + 1; });
-    const hi = Math.max(CHOICE_MAX, t);
+    const hi = t > CHOICE_MAX ? 2 * CHOICE_MAX : CHOICE_MAX;
+    if (stage === 'silent') return Array.from({ length: hi }, function (_, i) { return i + 1; });
     const lo = Math.max(1, Math.min(t - 2, hi - (CHOICE_COUNT - 1)));
     const opts = Array.from({ length: CHOICE_COUNT }, function (_, i) { return lo + i; });
     const r = (index || 0) % CHOICE_COUNT;
@@ -204,7 +259,7 @@
   // A picking type: choose a number; one already crossed out stays out.
   function pick(state, n) {
     // On the line the thumb may pass a crossed-out number; ✔ stays off there.
-    const out = state.mode === 'line' ? !(n >= 0 && n <= LINE_MAX) : state.wrong.indexOf(n) >= 0;
+    const out = state.mode === 'line' ? !(n >= 0 && n <= lineMax(state.item)) : state.wrong.indexOf(n) >= 0;
     if (done(state) || !picking(state) || out) return Object.assign({}, state, { sound: null });
     return Object.assign({}, state, { taps: n, sound: null });
   }
@@ -232,7 +287,7 @@
     if (done(state) || !answered(state)) return Object.assign({}, state, { sound: null });
     const total = sum(state.item);
     const tries = state.tries + 1;
-    const eq = state.item[0] + ' + ' + state.item[1] + ' = ' + total;
+    const eq = eqText(state.item, total);
     const plain = state.stage === 'silent' && tries === 1;
     const counted = {
       plainTried: state.plainTried + (plain ? 1 : 0),
@@ -265,14 +320,18 @@
 
   // →: the stage moves on after STREAK_TO_ADVANCE right first tries and back
   // after a shown solution; a miss in the plain stage goes back to the sound.
+  // A mastered step opens the next step of STEPS, with sound again.
   function next(state) {
+    if (state.status === 'right' && mastered(state) && state.step < STEPS.length - 1) {
+      return createState({ step: state.step + 1, family: state.family, mode: state.mode, plainTried: state.plainTried, plainRight: state.plainRight });
+    }
     let stage = state.stage;
     let streak = state.streak;
     let back = false;
     if (state.status === 'shown') { stage = stage === 'silent' ? STAGES[0] : nextStage(stage, -1); streak = 0; back = true; }
     else if (streak >= STREAK_TO_ADVANCE) { stage = nextStage(stage, +1); streak = 0; }
     return createState({
-      stage: stage, index: state.index + 1, streak: streak, back: back, family: state.family, mode: state.mode,
+      step: state.step, stage: stage, index: state.index + 1, streak: streak, back: back, family: state.family, mode: state.mode,
       silentRight: state.silentRight, plainTried: state.plainTried, plainRight: state.plainRight,
     });
   }
@@ -287,6 +346,7 @@
   function promptOf(state) {
     if (state.message) return state.message;
     if (state.back) return BACK_PROMPT;
+    if (minus(state.item) && SUB_PROMPTS[state.stage]) return SUB_PROMPTS[state.stage];
     return (MODE_PROMPTS[state.mode] || PROMPTS)[state.stage].replace('{i}', family(state.family).icon);
   }
 
@@ -294,6 +354,7 @@
   function speechKey(state) {
     if (state.speak) return state.speak;
     if (state.back) return 'back';
+    if (minus(state.item) && SPEECH['sub.' + state.stage]) return 'sub.' + state.stage;
     return SPEECH[state.mode + '.' + state.stage] ? state.mode + '.' + state.stage : state.stage;
   }
 
@@ -303,14 +364,21 @@
     const a = state.item[0];
     const b = state.item[1];
     const merge = state.status === 'right';
+    const sub = minus(state.item);
     function group(from, n, cls) {
       let dots = '';
-      for (let i = from; i < from + n; i++) dots += '<span class="sa-dot ' + cls + (show ? '' : ' sa-dim') + '" data-dot="' + i + '"><b class="sa-count"></b></span>';
+      for (let i = from; i < from + n; i++) {
+        const c = cls + (i === 9 ? ' sa-ten' : '') + (sub && i >= a - b ? ' sa-gone' : '');
+        dots += '<span class="sa-dot ' + c + (show ? '' : ' sa-dim') + '" data-dot="' + i + '"><b class="sa-count"></b></span>';
+      }
       return '<span class="sa-group"><span class="sa-row">' + dots + '</span>' + (groups ? '<span class="sa-num" aria-hidden="true">' + n + '</span>' : '') + '</span>';
     }
-    const label = merge ? a + ' ועוד ' + b + ' הם ' + sum(state.item) + ' עיגולים' : a + ' עיגולים ועוד ' + b + ' עיגולים';
+    const label = sub ? (merge ? 'נשארו ' + sum(state.item) + ' עיגולים' : a + ' עיגולים, ' + b + ' הולכים') :
+      merge ? a + ' ועוד ' + b + ' הם ' + sum(state.item) + ' עיגולים' : a + ' עיגולים ועוד ' + b + ' עיגולים';
+    const second = sub ? '<span class="sa-plus" aria-hidden="true">−</span>' + (groups ? '<span class="sa-num" aria-hidden="true">' + b + '</span>' : '') :
+      '<span class="sa-plus" aria-hidden="true">+</span>' + group(a, b, 'sa-high');
     return '<div class="sa-dots' + (merge ? ' sa-merge' : '') + '" dir="ltr" role="img" aria-label="' + label + '">' +
-      group(0, a, 'sa-low') + '<span class="sa-plus" aria-hidden="true">+</span>' + group(a, b, 'sa-high') +
+      group(0, a, 'sa-low') + second +
       (merge ? '<span class="sa-total" aria-hidden="true">' + sum(state.item) + '</span>' : '') + '</div>';
   }
 
@@ -336,14 +404,15 @@
   function lineHtml(state, fin) {
     const total = sum(state.item);
     const v = state.taps == null ? 0 : state.taps;
+    const max = lineMax(state.item);
     let ticks = '';
-    for (let n = 0; n <= LINE_MAX; n++) {
+    for (let n = 0; n <= max; n++) {
       const c = 'sa-tick' + (state.wrong.indexOf(n) >= 0 ? ' sa-wrong' : '') + (fin && n === total ? ' sa-right' : '') + (state.taps === n ? ' sa-on' : '');
       ticks += '<span class="' + c + '" data-tick="' + n + '">' + n + '</span>';
     }
     const off = fin ? ' disabled' : '';
-    return '<div class="sa-line nl-control" dir="ltr"><input id="saLine" class="sa-range" type="range" data-act="slide" min="0" max="' + LINE_MAX + '" step="1" value="' + v + '"' +
-      ' aria-valuemin="0" aria-valuemax="' + LINE_MAX + '" aria-valuenow="' + v + '" aria-valuetext="' + v + '" aria-label="מיקום על ישר המספרים"' + off + '>' +
+    return '<div class="sa-line nl-control' + (max > LINE_MAX ? ' sa-line20' : '') + '" dir="ltr"><input id="saLine" class="sa-range" type="range" data-act="slide" min="0" max="' + max + '" step="1" value="' + v + '"' +
+      ' aria-valuemin="0" aria-valuemax="' + max + '" aria-valuenow="' + v + '" aria-valuetext="' + v + '" aria-label="מיקום על ישר המספרים"' + off + '>' +
       '<div class="sa-ticks" aria-hidden="true">' + ticks + '</div></div>' +
       '<div class="nl-keys sa-nudge" dir="ltr" role="group" aria-label="צעד על הישר">' +
       '<button type="button" data-act="nudge" data-d="-1" aria-label="צעד אחורה"' + off + '>◀</button>' +
@@ -385,7 +454,7 @@
     const showDots = state.stage === 'sound' || state.stage === 'picture' || state.status === 'right' || (fin && state.stage !== 'silent');
     const showEq = state.stage === 'symbol' || state.stage === 'silent' || fin;
     const tapAttr = tapSounds(state) ? ' data-tap="' + f.tap + '"' : '';
-    const eq = '<bdi dir="ltr">' + state.item[0] + ' + ' + state.item[1] + ' = ' + (fin ? sum(state.item) : '?') + '</bdi>';
+    const eq = '<bdi dir="ltr">' + eqText(state.item, fin ? sum(state.item) : '?') + '</bdi>';
     // One line of text: the prompt, replaced by the feedback once there is one,
     // so the card never passes 15 words.
     const tone = state.status === 'right' ? ' good' : state.status === 'ready' && !state.back ? '' : ' soft';
@@ -445,7 +514,9 @@
   function mount(el) {
     JAM.registerTapVoices();
     const q = root.location && /[?&]mode=(\w+)/.exec(root.location.search || '');
-    let state = createState({ mode: q && q[1] });
+    // ?step=crossTen opens a later step directly (teacher preview, SOUND-ADD.md).
+    const sq = root.location && /[?&]step=(\w+)/.exec(root.location.search || '');
+    let state = createState({ mode: q && q[1], step: sq ? Math.max(0, STEPS.map(function (s) { return s.id; }).indexOf(sq[1])) : 0 });
     let playing = null;
     const answerSel = state.mode === 'line' ? '#saLine' : picking(state) ? '[data-act="pick"]:not([disabled])' : '[data-act="tap"]';
     function stop() { if (playing) playing.stop(); playing = null; }
@@ -472,7 +543,7 @@
     // The opening of every exercise: the spoken instruction, then its sound.
     function open() {
       say(speechKey(state));
-      if (sounding(state)) setTimeout(function () { play(numbersToBeats(state.item[0], state.item[1], 0, null, state.family)); }, 900);
+      if (sounding(state)) setTimeout(function () { play(numbersToBeats(state.item[0], state.item[1], 0, null, state.family, minus(state.item))); }, 900);
     }
     function sound() {
       if (state.speak) say(state.speak);
@@ -483,7 +554,7 @@
         setTimeout(function () { play(scalePlan(sum(state.item)), true); }, 1100);
       }
       if (state.sound === 'hint' || state.sound === 'solution') { JAM.feedback(false); setTimeout(function () { play(countPlan(state.item, state.family), true); }, 1800); }
-      if (state.sound === 'exercise') play(numbersToBeats(state.item[0], state.item[1], 0, null, state.family));
+      if (state.sound === 'exercise') play(numbersToBeats(state.item[0], state.item[1], 0, null, state.family, minus(state.item)));
       if (state.status === 'right' && state.stage === 'silent') { const dots = el.querySelector('.sa-dots'); if (dots) requestAnimationFrame(function () { dots.classList.add('sa-merged'); }); }
     }
     function save() {
@@ -503,7 +574,7 @@
     // again only when the thumb is let go, so the drag is not cut.
     function sing(n) {
       if (!tapSounds(state) || typeof root.soundForTick !== 'function') return;
-      JAM.playNotes([{ at: 0, voice: 'woodBar', hz: root.soundForTick(n, { min: 0, max: LINE_MAX }).frequency }]);
+      JAM.playNotes([{ at: 0, voice: 'woodBar', hz: root.soundForTick(n, { min: 0, max: lineMax(state.item) }).frequency }]);
     }
     el.addEventListener('input', function (ev) {
       if (!ev.target.classList || !ev.target.classList.contains('sa-range')) return;
@@ -535,7 +606,7 @@
       }
       if (act === 'listen') {
         if (state.status === 'retry' || state.status === 'shown') play(countPlan(state.item, state.family), true);
-        else play(numbersToBeats(state.item[0], state.item[1], 0, null, state.family));
+        else play(numbersToBeats(state.item[0], state.item[1], 0, null, state.family, minus(state.item)));
         return;
       }
       if (act === 'family') { state = setFamily(state, b.getAttribute('data-family')); focus = '[data-family="' + state.family + '"]'; }
@@ -543,7 +614,7 @@
       else if (act === 'untap') state = untap(state);
       else if (act === 'pick') state = pick(state, Number(b.getAttribute('data-n')));
       else if (act === 'nudge') {
-        state = pick(state, Math.max(0, Math.min(LINE_MAX, (state.taps == null ? 0 : state.taps) + Number(b.getAttribute('data-d')))));
+        state = pick(state, Math.max(0, Math.min(lineMax(state.item), (state.taps == null ? 0 : state.taps) + Number(b.getAttribute('data-d')))));
         focus = '[data-act="nudge"][data-d="' + b.getAttribute('data-d') + '"]';
         sing(state.taps);
       }
@@ -569,9 +640,9 @@
   }
 
   return {
-    GAME: GAME, ITEMS: ITEMS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
+    GAME: GAME, PROGRESSION: PROGRESSION, ITEMS: ITEMS, STEPS: STEPS, WAYS: WAYS, STAGES: STAGES, FAMILIES: FAMILIES, PROMPTS: PROMPTS, SPEECH: SPEECH, VOICE_CLIPS: VOICE_CLIPS,
     MAX_TRIES: MAX_TRIES, MODES: MODES, MODE_PROMPTS: MODE_PROMPTS, CHOICE_MAX: CHOICE_MAX, CHOICE_COUNT: CHOICE_COUNT, LINE_MAX: LINE_MAX,
-    numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
+    sum: sum, lineMax: lineMax, numbersToBeats: numbersToBeats, countPlan: countPlan, scalePlan: scalePlan, choices: choices,
     createState: createState, tap: tap, untap: untap, pick: pick, setFamily: setFamily, check: check, next: next,
     mastered: mastered, plainRate: plainRate, promptOf: promptOf, speechKey: speechKey, speechRoute: speechRoute,
     wordCount: wordCount, renderHtml: renderHtml, mount: mount,

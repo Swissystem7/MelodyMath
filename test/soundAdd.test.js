@@ -100,6 +100,7 @@ test('fading: sound, picture, symbol, plain; the first exercise is real solving'
   const seen = [s.stage];
   for (let round = 0; round < 12; round++) {
     s = SA.check(taps(s, s.item[0] + s.item[1]));
+    if (SA.mastered(s)) break; // a mastered step moves on to the next step (#703)
     s = SA.next(s);
     if (seen[seen.length - 1] !== s.stage) seen.push(s.stage);
   }
@@ -217,7 +218,9 @@ test('every answer type: the first exercise is real solving and mastery needs th
     assert.equal(s.stage, 'sound', mode + ': no worked example');
     const seen = [s.stage];
     for (let round = 0; round < 12; round++) {
-      s = SA.next(SA.check(answer(s, s.item[0] + s.item[1])));
+      const c = SA.check(answer(s, s.item[0] + s.item[1]));
+      if (SA.mastered(c)) { s = c; break; }
+      s = SA.next(c);
       if (seen[seen.length - 1] !== s.stage) seen.push(s.stage);
     }
     assert.deepEqual(seen, ['sound', 'picture', 'symbol', 'silent'], mode);
@@ -428,4 +431,99 @@ test('drag: after an error the exercise is replayed counted and the basket is ke
   const x = SA.check(SA.untap(w));
   assert.equal(x.status, 'shown', 'two misses show the solution');
   assert.equal(SA.next(x).mode, 'drag');
+});
+
+test('PROGRESSION matches the curriculum map (#691 review item 2)', () => {
+  const P = require('../src/lib/curriculum/progression.js');
+  const links = P.linksForTopic(SA.PROGRESSION.topicId);
+  assert.ok(links, 'topic is in MM_PROGRESSION');
+  assert.deepEqual([...SA.PROGRESSION.prereq].sort(), [...links.prereq].sort());
+  assert.deepEqual([...SA.PROGRESSION.buildsTo].sort(), [...links.buildsTo].sort());
+  assert.equal(typeof SA.PROGRESSION.skill, 'string');
+  assert.ok(SA.PROGRESSION.skill.length > 0);
+  SA.STEPS.forEach((st) => st.items.forEach((it) => assert.ok(SA.sum(it) <= 20 && it[0] <= 20, 'mm-cur-3 is within 20: ' + it.join(' '))));
+});
+
+// #703 round 3: sums to 20, the group of ten and subtraction, one step after another.
+test('STEPS: within 10, making ten, crossing ten, to 20, then taking away within 10 and 20', () => {
+  assert.deepEqual(SA.STEPS.map((s) => s.id), ['add10', 'makeTen', 'crossTen', 'add20', 'sub10', 'sub20']);
+  assert.equal(SA.STEPS[0].items, SA.ITEMS);
+  SA.STEPS.forEach((step) => step.items.forEach((item) => {
+    const r = SA.sum(item);
+    assert.ok(r >= 1 && r <= 20 && item[0] <= 20, step.id + ': ' + item.join(' '));
+    if (step.id === 'makeTen') assert.equal(r, 10, item.join(' + '));
+    if (step.id === 'crossTen') assert.ok(item[0] < 10 && r > 10, item.join(' + '));
+    if (step.id.startsWith('sub')) assert.equal(item[2], '-');
+  }));
+  assert.equal(SA.STEPS.find((s) => s.id === 'crossTen').way, 'tenExchange');
+  assert.equal(SA.STEPS.find((s) => s.id === 'sub10').way, 'takeAwayBeats');
+});
+
+test('the two ways are the restored rows of c133190^ (deleted from grades 3-4 by #635/#636), still tags of the bank', () => {
+  assert.match(SA.WAYS.takeAwayBeats.he, /השתיקו את המחיר/);
+  assert.equal(SA.WAYS.takeAwayBeats.source, 'mcdonel2015');
+  assert.match(SA.WAYS.tenExchange.he, /כל עשר נקישות — כלי גדול יותר/);
+  assert.equal(SA.WAYS.tenExchange.source, 'kcConnections');
+  const banks = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'banks.js'), 'utf8');
+  assert.ok(banks.includes("'takeAwayBeats'") && banks.includes("'tenExchange'"));
+});
+
+test('tenExchange: the 10th sound gets a gong, the count goes past ten', () => {
+  const notes = SA.numbersToBeats(8, 5);
+  const gong = notes.filter((n) => n.kind === 'ten');
+  assert.equal(gong.length, 1);
+  assert.equal(gong[0].voice, 'gong');
+  assert.equal(gong[0].at, notes.find((n) => n.dot === 9 && n.kind !== 'ten').at, 'together with the 10th sound');
+  assert.deepEqual(SA.countPlan([8, 5]).map((n) => n.count), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+  for (let i = 1; i <= 20; i++) assert.ok(SA.SPEECH['count' + i], 'count' + i);
+  assert.equal(SA.numbersToBeats(3, 2).filter((n) => n.kind === 'ten').length, 0, 'no gong below ten');
+  const html = SA.renderHtml(SA.createState({ stage: 'picture', item: [8, 5] }));
+  assert.equal((html.match(/sa-ten/g) || []).length, 1, 'the 10th circle is marked');
+});
+
+test('takeAwayBeats: all of a, then a again with b beats silent; the answer is what is still heard', () => {
+  const item = [7, 3, '-'];
+  const notes = SA.numbersToBeats(7, 3, 0, null, 'drums', true);
+  assert.equal(notes.filter((n) => n.group === 0).length, 7);
+  assert.equal(notes.filter((n) => n.group === 1).length, 4);
+  assert.deepEqual(SA.countPlan(item).map((n) => n.count), [1, 2, 3, 4], 'the hint counts what is left');
+  const s = SA.createState({ stage: 'sound', item });
+  assert.equal(SA.speechKey(s), 'sub.sound');
+  assert.match(SA.promptOf(s), /נשארו/);
+  const html = SA.renderHtml(s);
+  assert.equal((html.match(/sa-gone/g) || []).length, 3, 'three circles go');
+  assert.match(html, /−/);
+  const r = SA.check(taps(s, 4));
+  assert.equal(r.status, 'right');
+  assert.match(r.message, /7 − 3 = 4/);
+  assert.match(SA.check(taps(s, 3)).message, /חסרה הקשה אחת/);
+  SA.MODES.forEach((mode) => {
+    const st = SA.createState({ stage: 'symbol', mode, item });
+    const ans = mode === 'choice' || mode === 'line' ? SA.pick(st, 4) : taps(st, 4);
+    assert.equal(SA.check(ans).status, 'right', mode);
+  });
+});
+
+test('a mastered step opens the next one with sound; the last step stays', () => {
+  let s = SA.createState({ stage: 'silent', silentRight: 1, item: [4, 4] });
+  s = SA.check(taps(s, 8));
+  assert.ok(SA.mastered(s));
+  const n = SA.next(s);
+  assert.equal(n.step, 1);
+  assert.equal(n.stage, 'sound');
+  assert.equal(n.silentRight, 0);
+  assert.equal(SA.sum(n.item), 10, 'making ten');
+  assert.equal(n.plainTried, s.plainTried, 'the plain-check report carries on');
+  const last = SA.check(taps(SA.createState({ step: 5, stage: 'silent', silentRight: 1 }), SA.sum(SA.STEPS[5].items[0])));
+  assert.equal(SA.next(last).step, 5);
+});
+
+test('past ten: the silent grid has 1-20 and the line runs 0-20', () => {
+  assert.deepEqual(SA.choices([9, 9], 0, 'silent'), Array.from({ length: 20 }, (_, i) => i + 1));
+  assert.equal(SA.lineMax([12, 5]), 20);
+  assert.equal(SA.lineMax([13, 3, '-']), 20);
+  assert.equal(SA.lineMax([7, 3, '-']), 10);
+  const s = SA.createState({ stage: 'symbol', mode: 'line', item: [12, 5] });
+  assert.match(SA.renderHtml(s), /class="sa-line nl-control sa-line20"[^>]*><input id="saLine" class="sa-range" type="range" data-act="slide" min="0" max="20"/);
+  assert.equal(SA.check(SA.pick(s, 17)).status, 'right');
 });

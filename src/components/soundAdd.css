@@ -52,6 +52,11 @@
 .sa-tick.lit{animation:saPop .3s ease-out}
 .sa-nudge{display:flex;justify-content:center;gap:24px;margin:8px 0}
 .sa-nudge button{min-width:44px;min-height:44px;width:72px;height:56px;border-radius:16px;border:3px solid var(--ink);background:var(--card);color:var(--ink);font-size:1.6rem}
+/* #703: the full ten (tenExchange) and the beats taken away (takeAwayBeats) */
+.sa-dot.sa-ten{box-shadow:0 0 0 4px var(--yellow)}
+.sa-dot.sa-gone{opacity:.35;background:repeating-linear-gradient(45deg,transparent 0 6px,var(--ink) 6px 8px)}
+.sa-line20 .sa-ticks{padding:0 15px;font-size:.75rem}
+.sa-line20 .sa-tick{width:14px}
 .sa-mastered{font-weight:bold;color:var(--good);text-align:center}
 .sa-card,#saCard{position:relative}
 .sa-families{display:flex;justify-content:center;gap:10px;margin:2px 0 8px}
