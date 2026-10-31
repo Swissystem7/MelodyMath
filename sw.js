@@ -69,6 +69,7 @@ const ASSETS = [
   './src/lib/metro.js',
   './src/lib/musicEngine.js',
   './src/lib/access.js',
+  './src/lib/voicePrompt.js',
   './src/lib/graphListen.js',
   './src/lib/listenLessons.js',
   './src/lib/onboard.js',

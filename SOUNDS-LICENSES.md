@@ -36,4 +36,23 @@ in the repository is missing from this file.
 
 ## Audio files
 
-None.
+Pre-recorded spoken Hebrew instruction prompts and feedback clips for non-readers (#676, Refs #665). Recorded for the project, released as CC0.
+
+| File | Description | Licence |
+|---|---|---|
+| `sounds/voice/he/prompt_addition.wav` | Hebrew spoken prompt for addition | CC0 (project recorded) |
+| `sounds/voice/he/prompt_subtraction.wav` | Hebrew spoken prompt for subtraction | CC0 (project recorded) |
+| `sounds/voice/he/prompt_multiplication.wav` | Hebrew spoken prompt for multiplication | CC0 (project recorded) |
+| `sounds/voice/he/prompt_division.wav` | Hebrew spoken prompt for division | CC0 (project recorded) |
+| `sounds/voice/he/prompt_fractions.wav` | Hebrew spoken prompt for fractions | CC0 (project recorded) |
+| `sounds/voice/he/prompt_counting.wav` | Hebrew spoken prompt for counting | CC0 (project recorded) |
+| `sounds/voice/he/prompt_number_line.wav` | Hebrew spoken prompt for number line | CC0 (project recorded) |
+| `sounds/voice/he/prompt_even_odd.wav` | Hebrew spoken prompt for even/odd | CC0 (project recorded) |
+| `sounds/voice/he/prompt_groups_mult.wav` | Hebrew spoken prompt for groups multiplication | CC0 (project recorded) |
+| `sounds/voice/he/prompt_geometry.wav` | Hebrew spoken prompt for geometry | CC0 (project recorded) |
+| `sounds/voice/he/prompt_measurement.wav` | Hebrew spoken prompt for measurement | CC0 (project recorded) |
+| `sounds/voice/he/prompt_data.wav` | Hebrew spoken prompt for data | CC0 (project recorded) |
+| `sounds/voice/he/prompt_word_problems.wav` | Hebrew spoken prompt for word problems | CC0 (project recorded) |
+| `sounds/voice/he/feedback_correct.wav` | Hebrew spoken feedback for correct answer | CC0 (project recorded) |
+| `sounds/voice/he/feedback_retry.wav` | Hebrew spoken feedback for retry/hint | CC0 (project recorded) |
+| `sounds/voice/he/feedback_shown.wav` | Hebrew spoken feedback for shown solution | CC0 (project recorded) |
