@@ -98,3 +98,16 @@
 .db-note{font-size:.85rem;color:var(--muted)}
 .db-wait{font-weight:bold}
 @media (prefers-reduced-motion:reduce){.db-col.lit .db-dot,.db-seg.lit{animation:none}}
+
+/* MusicianshipPath (#591 part 2) */
+.msp-opt{min-height:56px;min-width:96px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:1.05rem;font-weight:bold}
+.msp-bar span{font-size:1.8rem;letter-spacing:.2em;direction:ltr;unicode-bidi:isolate}
+.msp-keys{gap:6px}
+.msp-key{min-width:48px;min-height:72px;flex:1 1 48px;border-radius:0 0 12px 12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font-weight:bold}
+.msp-key.msp-ref{box-shadow:inset 0 -6px 0 var(--purple)}
+.msp-key.msp-picked{background:color-mix(in srgb, var(--yellow) 55%, var(--card))}
+.msp-right{border-color:var(--good)!important;background:color-mix(in srgb, var(--good) 22%, var(--card))!important}
+.msp-wrong{border-style:dashed!important;border-color:var(--purple)!important}
+.msp-legend{color:var(--muted);font-size:.9rem;margin:4px 0}
+.msp-progress,.msp-round{margin:6px 0;padding-inline-start:20px}
+.msp-offer{width:auto;min-height:48px}
