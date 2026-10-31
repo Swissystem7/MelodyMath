@@ -1,9 +1,15 @@
-'use strict';
+// #591 RhythmPolygon (owner comment 6376161263): rhythm clock geometry,
+// measured like RhythmMaster (6376159285).
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
 const RP = require('../src/lib/music/rhythmPolygon.js');
 const CHK = require('../src/lib/music/polygonCheck.js');
+const SCREEN = require('../src/components/RhythmPolygon.js');
 const I = require('../src/lib/instruments.js');
+const read = (f) => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
 const DAY = 864e5;
 
 test('polygonFromBeats: N even beats make a regular N-gon with 360/N, N axes and N turns', () => {
@@ -98,6 +104,18 @@ test('forms A/B/C: 12 parallel items, 6 unpractised, answers computed and always
   assert.equal(CHK.buildItem('shift', { cycle: 12, onsets: [0, 3, 7], k: 4 }).answer, '120°');
   assert.equal(CHK.buildItem('beatsFromAngle', { n: 9 }).clock, null, 'no clock to count from');
 });
+
+test('the three steps practise only the practised clocks: sides, angles, symmetry and rotation', () => {
+  assert.equal(SCREEN.STEPS.length, 3);
+  assert.deepEqual(SCREEN.STEPS.map((s) => s.he), ['שלב 1 · צלעות', 'שלב 2 · זוויות', 'שלב 3 · סימטריה וסיבוב']);
+  SCREEN.STEPS.forEach((s) => s.items.forEach((it) => {
+    assert.ok(CHK.PRACTISED_N.includes(it.clock.cycle), it.prompt);
+    assert.ok(it.choices.length >= 2 && it.choices.length <= 4);
+  }));
+  const same = SCREEN.STEPS[2].items.filter((x) => x.kind === 'same').map((x) => x.answer);
+  assert.deepEqual(same, ['כן', 'לא']);
+});
+
 test('timing: post-test after 28 days, retention 30 days after it, first attempt kept', () => {
   const t0 = Date.UTC(2026, 9, 1);
   let rec = CHK.empty();
@@ -147,4 +165,105 @@ test('results stay in injectable local storage under one key', () => {
   assert.deepEqual(CHK.load(store), rec);
   mem[CHK.STORAGE_KEY] = '{bad';
   assert.deepEqual(CHK.load(store), CHK.empty());
+});
+
+function solveAll(state, rec, phase, now) {
+  let s = state;
+  let r = rec;
+  for (let i = 0; i < 12; i++) {
+    assert.equal(s.phase, phase);
+    const out = SCREEN.answerTest(s, r, SCREEN.currentItem(s).answer, now);
+    s = out.state;
+    r = out.rec;
+  }
+  return { s, r };
+}
+
+test('screen flow: choose instrument, pre-test, 3 steps, wait, post-test, wait, retention, report', () => {
+  const t0 = 1e12;
+  let s = SCREEN.start(null, t0, true);
+  assert.equal(s.phase, 'choose');
+  assert.equal(SCREEN.choose(s, 'piano'), s, 'only the offered instruments');
+  s = SCREEN.choose(s, 'dizi');
+  assert.equal(s.instrument, 'dizi');
+  let o = solveAll(s, CHK.empty(), 'pre', t0);
+  s = o.s;
+  assert.equal(o.r.pre.results.length, 12);
+  assert.equal(s.phase, 'steps');
+  let rec = o.r;
+  let n = 0;
+  while (s.phase === 'steps') {
+    const it = SCREEN.currentItem(s);
+    const wrong = it.choices.find((c) => c !== it.answer);
+    const w = SCREEN.answerStep(s, wrong);
+    assert.equal(w.solved, false);
+    assert.equal(SCREEN.nextStep(w, rec, t0), w, 'no skipping an unsolved step item');
+    s = SCREEN.nextStep(SCREEN.answerStep(w, it.answer), rec, t0 + DAY);
+    n += 1;
+  }
+  assert.equal(n, 12);
+  assert.equal(s.phase, 'wait');
+  assert.equal(s.daysLeft, 27);
+  assert.equal(SCREEN.start(rec, t0 + DAY, true).phase, 'steps', 'a returning child keeps practising');
+  s = SCREEN.refresh(s, rec, t0 + 28 * DAY);
+  o = solveAll(s, rec, 'post', t0 + 28 * DAY);
+  s = o.s;
+  rec = o.r;
+  assert.equal(s.phase, 'wait');
+  assert.equal(s.daysLeft, 30);
+  s = SCREEN.start(rec, t0 + 58 * DAY, true);
+  o = solveAll(s, rec, 'retention', t0 + 58 * DAY);
+  assert.equal(o.s.phase, 'report');
+  assert.deepEqual(Object.keys(o.r).filter((k) => o.r[k]), ['pre', 'post', 'retention']);
+});
+
+test('play plan: one turn of the clock, a turned rhythm after it, the turn button shifts the corners', () => {
+  const step3 = SCREEN.STEPS[2].items[1];
+  const plan = SCREEN.playPlan(step3, 0, 'woodBar', false);
+  assert.equal(plan.length, 16);
+  assert.deepEqual(plan.filter((x) => x.kind === 'corner' && x.second).map((x) => x.beat), step3.clock.turned);
+  const sq = SCREEN.STEPS[0].items[1];
+  assert.deepEqual(SCREEN.playPlan(sq, 1, 'woodBar').filter((x) => x.kind === 'corner').map((x) => x.beat), [1, 2, 3, 0].sort());
+});
+
+const NO_CLAIM = /מוזיקה\s*(משפרת|מקדמת|מחזקת|משפר)|music\s+(improves|boosts|makes)/i;
+const NO_BUY = /(^|[^א-ת])(קנה|מחיר|רכישה|מנוי)([^א-ת]|$)/;
+
+test('every screen and item: Hebrew, aria, no claim that music improves maths, no buy/price words', () => {
+  const t0 = 1e12;
+  const rec = CHK.record(CHK.empty(), 'pre', [], t0);
+  const states = [SCREEN.start(null, t0), SCREEN.choose(SCREEN.start(null, t0), 'marimba'), SCREEN.start(rec, t0), SCREEN.refresh(SCREEN.start(rec, t0), rec, t0)];
+  SCREEN.STEPS.forEach((st, step) => st.items.forEach((_, item) => states.push(Object.assign({}, states[2], { step, item }))));
+  const all = states.map(SCREEN.renderHtml).concat(['A', 'B', 'C'].flatMap((f) => CHK.buildForm(f).map((x) => x.prompt)));
+  all.push(CHK.CHECK_DISCLAIMER, RP.PITCH_ADDON.he);
+  all.forEach((h) => {
+    assert.doesNotMatch(h, NO_CLAIM);
+    assert.doesNotMatch(h, NO_BUY);
+    assert.match(h, /[א-ת]/);
+  });
+  const stepHtml = SCREEN.renderHtml(states[4]);
+  assert.match(stepHtml, /role="img" aria-label="שעון קצב/);
+  assert.match(stepHtml, /data-act="music"/, 'practice has the music switch');
+  assert.match(stepHtml, /class="jam-pad" data-tap="/, 'free play pads sound on pointerdown');
+  assert.match(stepHtml, /ראיות חלשות/);
+  assert.doesNotMatch(SCREEN.renderHtml(Object.assign({}, states[4], { showMusic: false })), /data-act="(play|turn|pitch)"|data-tap=/, 'silent without music');
+  const testHtml = SCREEN.renderHtml(states[1]);
+  assert.doesNotMatch(testHtml, /data-act="(music|play|turn|pitch)"/, 'the test is silent');
+  assert.match(testHtml, /בדיקת פתיחה/);
+});
+
+test('dosage: geometry has one primary music method (M6), instruments are timbre only, page wired', () => {
+  assert.equal(I.TOPICS.polygons.mechanism, 'M6');
+  assert.equal(RP.MECHANISM, I.TOPICS.polygons.mechanism);
+  assert.ok(I.PRIMARY.includes(RP.MECHANISM));
+  assert.equal(I.TOPICS.symmetry.mechanism, RP.MECHANISM, 'symmetry and polygons share the method');
+  assert.ok(SCREEN.INSTRUMENTS.length >= 2 && SCREEN.INSTRUMENTS.length <= 4);
+  SCREEN.INSTRUMENTS.forEach((id) => assert.equal(I.instrumentById(id).mechanism, RP.MECHANISM, id));
+  const html = read('index.html');
+  assert.match(html, /id="rpCard"/);
+  ['src/lib/music/rhythmPolygon.js', 'src/lib/music/polygonCheck.js', 'src/components/RhythmPolygon.js'].forEach((f) => {
+    assert.ok(html.includes('<script src="' + f + '"></script>'), f);
+    assert.ok(read('sw.js').includes("'./" + f + "'"), f);
+  });
+  assert.match(read('src/lib/music/rhythmPolygon.js'), /TODO-source/);
 });

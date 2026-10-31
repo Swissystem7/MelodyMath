@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath | תרגול יסודי א׳–ו׳</title><link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>MelodyMath | תרגול יסודי א׳–ד׳</title><link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <meta name="description" content="תרגול מתמטיקה בעברית לפי כיתה, מתויג לתוכנית הלימודים. בלי חשבון, בלי שרת, בלי טענת יעילות.">
 <style>
 :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--pink:#f2529a;--yellow:#ffd85d;--bg:#f7f4ff;--card:#fff;--line:#ded6f0;--good:#167957;--bad:#b23a52}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 5%,#ffe1ef,transparent 27%),radial-gradient(circle at 90% 0,#dfd6ff,transparent 31%),var(--bg);color:var(--ink);font-family:Arial,sans-serif;min-height:100vh}.wrap{max-width:940px;margin:auto;padding:28px 18px 60px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}.brand{font-size:1.15rem;font-weight:900;color:var(--purple)}h1{font-size:clamp(2.2rem,7vw,4.5rem);margin:8px 0;line-height:1}p{line-height:1.55}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab,.secondary{width:auto;background:#fff;color:var(--purple);border:1px solid var(--line);margin:0;min-height:44px}.tab.active{background:var(--purple);color:#fff}.panel{display:none}.panel.active{display:block}.card{background:#fffffff0;border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,34px);box-shadow:0 20px 50px #4638701a}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0}.level{border:2px solid transparent;background:#f0ebff;color:var(--ink);padding:22px 12px;border-radius:16px;cursor:pointer}.level strong{display:block;font-size:1.2rem}.level.selected{border-color:var(--purple);background:#e6deff}.primary,button{border:0;border-radius:12px;background:var(--purple);color:#fff;padding:13px 18px;font:inherit;font-weight:800;cursor:pointer}.primary{width:100%}.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9rem}.progress{height:8px;background:color-mix(in srgb, var(--confidence) 10%, var(--card));border-radius:99px;margin:12px 0 26px;overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--purple));transition:width .25s}.tag{display:inline-block;background:#eee9ff;color:var(--purple);padding:6px 10px;border-radius:99px;font-size:.78rem;font-weight:bold}.prompt{font-size:clamp(1.35rem,4vw,2rem);margin:18px 0 24px}.answer-row{display:flex;gap:10px}input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:13px;background:white;font:inherit;color:var(--ink)}.answer-row button{white-space:nowrap}.feedback{margin-top:18px;padding:16px;border-radius:14px}.feedback.good{background:#e5f6ef;color:var(--good)}.feedback.bad{background:#ffe8ed;color:var(--bad)}.hint{margin-top:7px;color:var(--ink)}.math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}input[dir=ltr]{text-align:right}input[dir=ltr]::placeholder{direction:rtl}.session{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.stat{flex:1;min-width:120px;background:#f4f0fc;border-radius:14px;padding:16px;text-align:center}.stat strong{font-size:1.7rem;display:block}.playgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.tool{background:#faf8ff;border:1px solid var(--line);border-radius:17px;padding:18px;min-width:0}.tool h3{margin-top:0}.result{margin-top:14px;padding:14px;background:#fff5ce;border-radius:12px;font-weight:bold}.rhythm{font-size:1.4rem;direction:ltr;text-align:center}.more-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 22px}.navcard{display:block;background:#fffffff0;border:1px solid var(--line);border-radius:16px;padding:16px 18px;text-decoration:none;color:var(--ink);box-shadow:0 10px 28px #46387014}.navcard:hover,.navcard:focus-visible{border-color:var(--purple);outline:none}.navcard strong{display:block;color:var(--purple);font-size:1.05rem;margin-bottom:4px}.navcard span{color:var(--muted);font-size:.92rem;line-height:1.45}.grade-filter-pills{display:flex;gap:6px;flex-wrap:wrap}@media(max-width:680px){header{display:block}.tabs{margin-top:15px}.levels,.more-nav{grid-template-columns:1fr}.playgrid{grid-template-columns:minmax(0,1fr)}.answer-row{display:block}.answer-row button{width:100%;margin-top:9px}}
@@ -15,7 +15,7 @@ body.class-live{--class-font:clamp(1.8rem,6vw,3rem)}body.class-live .prompt{font
 @media(max-width:680px){.choices{grid-template-columns:1fr}}.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}.report-table th,.report-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}.report-table th{color:var(--muted);font-size:.78rem}.err-list{margin:8px 0 0;padding-right:18px}.print-only{display:none}
 .mm-contact-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.mm-contact-links a{text-decoration:none;display:inline-block;width:auto;border-radius:12px;padding:12px 16px;font-weight:800}.mm-contact-links a.ghost{background:#fff;color:var(--purple);border:1px solid var(--line)}.mm-contact-links a.primary{color:#fff;background:var(--purple)}.mm-contact-note{font-size:.85rem;color:var(--muted)}
 /* phones 360-430px (#101): 44px targets, tables scroll inside themselves, never the page */
-html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedback{overflow-wrap:anywhere}button,select,input:not([type=checkbox]):not([type=radio]),summary,.level,.navcard{min-height:44px}#mm-access button,#mm-speak-now,#mm-hear,button,select,input:not([type=checkbox]):not([type=radio]),summary,.level,.navcard{min-width:44px}#mm-speak-now,#mm-hear,#mm-access button{min-height:44px;min-width:44px}
+html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedback{overflow-wrap:anywhere}button,select,input:not([type=checkbox]):not([type=radio]),summary,.level,.navcard{min-height:44px}
 @media(max-width:680px){.report-table,.class-board{display:block;max-width:100%;overflow-x:auto}}
 @media(max-width:480px){.wrap{padding:16px 12px 48px}.tabs{gap:8px}.tab{flex:1 1 calc(50% - 8px)}.levels{gap:8px}.level{padding:14px 10px}.choices{gap:8px}.metro-bar{padding:8px 10px}.metro-bar input[type=number]{width:64px;min-height:44px}.stat{min-width:0;flex-basis:calc(50% - 10px)}.class-timer{font-size:1.8rem}.class-kids button{min-width:44px}h1{font-size:2rem}}
 /* הבדיקה (#110): פסי השמיניות אינם יעדי מגע, ולכן הם מתכווצים ואין גלילה אופקית ב־360px */
@@ -24,7 +24,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   body{background:#fff;color:#000}
   header,.tabs,.more-nav,.who-bar,.metro-bar,.no-print,nav,#remediation,#practice,#classMode,#beatMode,#firstRun{display:none!important}
   .panel{display:none!important}
-  body.adult-ok #teacherReport.panel{display:block!important}
+  #teacherReport.panel{display:block!important}
   #trialKit{display:none!important}
   #worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard{display:none!important}
   body.print-lesson #lessonCard{display:block!important}
@@ -154,7 +154,6 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 @keyframes mmTap{0%{transform:scale(.9)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.mm-tap{animation:none!important;transform:none!important;outline:3px solid #ffd600}}
 .mm-pad{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 14px}.mm-pad-title{font-size:.88rem;color:var(--muted);font-weight:700}
-.sg-body{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.sg-boxes{display:flex;flex-wrap:wrap;gap:4px}.sg-box{width:18px;height:18px;border-radius:5px;border:2px solid var(--purple);background:#fff}.sg-box.on{background:var(--purple)}
 .mm-unlock{position:fixed;inset-inline:12px;bottom:16px;margin:auto;max-width:420px;z-index:60;background:#fff5ce;color:var(--ink);border:2px solid var(--yellow);border-radius:16px;padding:12px 16px;font-weight:800;text-align:center;box-shadow:0 10px 30px #4638702e}
 .mm-pad-key{min-width:48px;min-height:48px;padding:6px 10px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--purple);font-weight:800}.mm-pad-new{border:2px solid var(--yellow)}
 .nl-control{margin:10px 0}
@@ -163,14 +162,12 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 .nl-keys button{min-height:44px;min-width:44px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--purple);font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
 .nl-keys button.selected,.nl-keys button[aria-pressed="true"]{background:var(--purple);color:#fff;border-color:var(--purple)}
 .nl-keys button:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+.mm-official{display:inline-block;margin-top:4px;font-size:.8rem;color:var(--ink)}.mm-official a{color:var(--purple);font-weight:700;margin-inline-start:6px}
 .music-way{margin:-8px 0 18px;padding:10px 14px;border-radius:12px;background:#fff7d6;color:var(--ink);font-size:1.02rem;line-height:1.5}.music-way b{color:var(--purple)}
-.snd-circles{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.snd-circle{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#fff7d6;border:2px solid var(--purple);font-size:1.3rem}.snd-gone{opacity:.25;filter:grayscale(1)}.snd-many .snd-circle{width:26px;height:26px;font-size:.85rem}
-.music-src{margin-top:8px;font-size:.85rem;color:var(--muted)}.music-src a{color:var(--purple);font-weight:700}
-</style><link rel="stylesheet" href="src/sefirot.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/components/jam.css">
-<meta name="sentry-dsn" content="__SENTRY_DSN__">
-</head><body>
+.music-src{margin-top:8px;font-size:.85rem;color:var(--muted)}.music-src a{color:var(--purple);font-weight:700}.mm-official.unverified{color:var(--bad)}
+</style><link rel="stylesheet" href="src/sefirot.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/components/jam.css"></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
-<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>תרגילים לכל כיתה מא׳ עד ו׳, ומקצב שאפשר להפעיל כדי לתרגל לפי הקצב.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">צלילים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
   <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
   <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
@@ -203,44 +200,32 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <details class="metro-bar no-print" id="metroBar">
   <summary>מקצב אופציונלי — נקישה לקצב, לא טיפול</summary>
   <button type="button" id="metroToggle" aria-pressed="false">▶ מקצב</button>
-  <label>מהירות (טמפו) <input id="metroBpm" type="number" min="40" max="140" value="80" inputmode="numeric" aria-label="פעימות לדקה"></label>
+  <label>BPM <input id="metroBpm" type="number" min="40" max="140" value="80" inputmode="numeric" aria-label="פעימות לדקה"></label>
   <button type="button" id="metroDown" aria-label="האט">−</button>
   <button type="button" id="metroUp" aria-label="האץ">+</button>
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
-  <span class="note teacher-only hidden">נקישה לקצב התרגול במכשיר. שליטה בקצב הפעימות. לא טיפול ואין טענת יעילות.</span>
+  <span class="note">נקישה לקצב התרגול במכשיר. המורה שולטת ב־BPM. לא טיפול ואין טענת יעילות.</span>
 </details>
-<details class="metro-bar no-print" id="mySong">
-  <summary>🎶 השיר שלי — המשפטים שפתחתם ב־5 נכונות ברצף</summary>
-  <div id="mySongList" role="group" aria-label="השיר שלי"></div>
-</details>
-<p id="mySongNew" class="mm-unlock hidden" role="status"></p>
-<div class="metro-bar no-print" id="setlistGoal" role="group" aria-label="היעד שלי להיום">
-  <strong>🎤 היעד שלי להיום — כל תשובה נכונה מוסיפה תיבה לשיר</strong>
-  <div id="setlistBody" class="sg-body"></div>
-  <span id="setlistSay" class="note" role="status"></span>
-</div>
-<p class="mm-product-banner"><b>תרגול יסודי א׳–ו׳.</b> כיתה נבחרת למטה. <a href="curriculum.html" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
+<p class="mm-product-banner"><b>תרגול יסודי א׳–ד׳.</b> כיתה נבחרת למטה. <a href="curriculum.html" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
 <div class="who-bar" id="gradeBar">
   <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
   <div class="grade-pick" id="gradePick" role="group" aria-label="בחירת כיתה"></div>
   <p class="note" id="gradeNote">כיתה א׳: מנייה עד 100, חיבור/חיסור, ישר מספרים.</p>
 </div>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
-  <a class="navcard" href="program.html"><strong>תוכנית הלימודים א׳–ו׳</strong><span>כל נושא בסדר של תוכנית משרד החינוך: קישור לסעיף הרשמי ולתרגולים באפליקציה.</span></a>
-  <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב לכיתות א׳–ו׳: מוקדי כשל ומענה מוזיקלי מותאם.</span></a>
+  <a class="navcard" href="program.html"><strong>תוכנית הלימודים א׳–ד׳</strong><span>כל נושא בסדר של תוכנית משרד החינוך: קישור לסעיף הרשמי ולתרגולים באפליקציה.</span></a>
+  <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב: שברים, שיפוע פונקציה ומענה מוזיקלי מותאם.</span></a>
   <a class="navcard" href="check.html"><strong>בדיקה לפני ואחרי יחידה</strong><span>8 שאלות קצרות לפני ואחרי יחידה, נשמרות במכשיר. ללא מוזיקה.</span></a>
   <a class="navcard" href="offer.html"><strong>ניסוי כיתתי · 4 שבועות · חינם</strong><span>מכתב מוכן למנהל/ת ודף אחד להדפסה. בלי חשבונית ובלי טענת יעילות.</span></a>
   <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
 </nav>
 <section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">בתרגול האישי, לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.<span id="gateNoteDiag" class="hidden"> האבחון עצמו בודק גם לוחות שעוד לא נפתחו — כדי לדעת מאיפה להתחיל.</span></div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button><div id="rmStruggleList" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div></div>
-<div id="mixtapeCard" class="card"><span class="tag">חזרה מעורבת · מיקסטייפ</span><h2>🎧 מיקסטייפ</h2><p id="mixtapeLock">המיקסטייפ נפתח אחרי ששולטים בשני נושאים</p><button type="button" id="mixtapeStart" class="primary" disabled>🎧 מיקסטייפ</button></div>
-<div id="mixtapePlay" class="card hidden"><div class="topline"><span id="mixtapeTag" class="tag"></span><span id="mixtapeCounter"></span></div><h2 id="mixtapePrompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="mixtapeAnswer">תשובה</label><input id="mixtapeAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="mixtapeCheck" data-tap="xylo">בדיקה</button></div><div id="mixtapeFeedback" class="feedback hidden" role="status" aria-live="polite"></div></div>
-<div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag" hidden></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmNumberPlay" class="number-play-slot"></div><p id="rmWay" class="music-way hidden"></p><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck" data-tap="xylo">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button><button type="button" id="rmCancel" class="secondary no-print" style="margin-top:10px">ביטול וחזרה</button></div>
+<div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag"></p><h2 id="rmPrompt" class="prompt"></h2><p id="rmWay" class="music-way hidden"></p><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button><button type="button" id="rmCancel" class="secondary no-print" style="margin-top:10px">ביטול וחזרה</button></div>
 <div id="rmReport" class="card hidden"><span class="tag">דוח פערים להורה</span><h2>מה מצאנו</h2><div id="rmStats" class="session"></div><p id="rmSummary"></p><button type="button" id="rmPractice" class="primary hidden">מתחילים תרגול אישי</button><button type="button" id="rmRestart" class="secondary hidden">אבחון חדש</button></div>
-<div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag" hidden></p><h2 id="rmPlanPrompt" class="prompt"></h2><div id="rmPlanNumberPlay" class="number-play-slot"></div><p id="rmPlanWay" class="music-way hidden"></p><div id="rmPlanPredict" class="predict hidden"></div><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck" data-tap="xylo">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden" role="status" aria-live="polite"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button><div id="rmPlanDoneActions" class="hidden" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="rmPlanRestart" class="primary">אבחון חדש</button><button type="button" id="rmPlanReport" class="secondary">חזרה לדוח הפערים</button></div><div id="masteryCheckHost" class="hidden" style="margin-top:16px"></div></div></section>
+<div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag"></p><h2 id="rmPlanPrompt" class="prompt"></h2><p id="rmPlanWay" class="music-way hidden"></p><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden" role="status" aria-live="polite"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button><div id="rmPlanDoneActions" class="hidden" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="rmPlanRestart" class="primary">אבחון חדש</button><button type="button" id="rmPlanReport" class="secondary">חזרה לדוח הפערים</button></div></div></section>
 <section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" role="group" aria-label="סינון שיעורים לפי כיתה" style="display:flex;gap:6px;flex-wrap:wrap;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:44px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" role="navigation" aria-label="שלבי השיעור" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;"><h4 id="stepTitle" style="margin:0;font-size:1.15rem;color:var(--purple);"></h4><button type="button" id="stepSpeakBtn" class="secondary" style="width:auto;min-height:44px;padding:4px 12px;font-size:0.85rem;" aria-label="הקראת השלב בקול">🔊 הקשב</button></div><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" role="group" aria-label="אפשרויות תשובה" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
-<section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">מעבר לתוכנית · צלילים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחסים בין צלילים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels" role="group" aria-label="רמת קושי לתרגול"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות וצלילים</button><button type="button" class="level" data-level="4" aria-pressed="false"><strong>אתגר ו׳</strong>מעבר לתוכנית</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
-<div id="quiz" class="card hidden"><div class="topline"><span id="counter" role="status" aria-live="polite"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div id="practiceNumberPlay" class="number-play-slot"></div><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check" data-tap="xylo">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button><button type="button" id="quizCancel" class="secondary no-print">ביטול וחזרה</button></div>
+<section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">לא תכנית א׳–ד׳ · מרווחים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחס מרווחים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels" role="group" aria-label="רמת קושי לתרגול"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות ומרווחים</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
+<div id="quiz" class="card hidden"><div class="topline"><span id="counter" role="status" aria-live="polite"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button><button type="button" id="quizCancel" class="secondary no-print">ביטול וחזרה</button></div>
 <div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button type="button" id="again" class="primary">אימון חדש</button></div></section>
 <section id="classMode" class="panel" role="tabpanel" aria-labelledby="tab-classMode" hidden><div class="card" id="classGate">
   <span class="tag">מפגש תרגול · 8 דקות · הכיתה שנבחרה</span>
@@ -255,9 +240,8 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 </div>
 <div class="card hidden" id="classPlay">
   <div class="topline"><span class="class-timer" id="classTimer" role="timer" aria-live="polite">8:00</span><span id="classWho" class="tag"></span></div>
-  <p id="classItemTag" class="item-tag" hidden></p>
+  <p id="classItemTag" class="item-tag"></p>
   <h2 class="prompt" id="classPrompt"></h2>
-  <div id="classNumberPlay" class="number-play-slot"></div>
   <p id="classWay" class="music-way hidden"></p>
   <div id="classWidget" class="hidden"></div>
   <div class="choices" id="classChoices" role="group" aria-label="אפשרויות תשובה"></div>
@@ -277,7 +261,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <section id="beatMode" class="panel" role="tabpanel" aria-labelledby="tab-beatMode" hidden><div class="card" id="beatGate">
   <span class="tag">חלון תשובה לפי הפעימה · לא טיפול</span>
   <h2>תרגול על הפעימה</h2>
-  <p>השאלה נפתחת עם הפעימה. יש שתי פעימות לענות — ארבע אם בסרגל הנגישות מסומנת «המתנה ארוכה». רצף של 3 נכונות מגביר את הקצב רק אם סימנתם «האצה» בסרגל המקצב. מתרגלים בקצב אישי, לא טיפול ואין טענת יעילות.</p>
+  <p>השאלה נפתחת עם הפעימה. יש שתי פעימות לענות — ארבע אם בסרגל הנגישות מסומנת «המתנה ארוכה». רצף של 3 נכונות מעלה BPM רק אם סימנתם «האצה» בסרגל המקצב. זה כלי פסינג שהמורה מפעילה, לא טיפול ואין טענת יעילות.</p>
   <div class="sheet-actions">
     <label>חבילה
       <select id="beatPack" aria-label="חבילת תרגול על הפעימה">
@@ -286,7 +270,6 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
         <option value="multiplication">כפל (עם שער 2/4/5/10)</option>
         <option value="division">חילוק לחלקים ולהכלה</option>
         <option value="basic_fractions">שברים מול תיבה 4/4</option>
-        <option value="regroup">מעבר עשרת · פריטה והמרה (ב׳)</option>
       </select>
     </label>
   </div>
@@ -296,7 +279,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <div class="topline"><span id="beatMeta" class="tag"></span><span id="beatWho" class="tag"></span></div>
   <div class="beat-window" aria-hidden="true"><span id="beatBar"></span></div>
   <p id="beatClock" class="class-timer" aria-live="polite">—</p>
-  <p id="beatItemTag" class="item-tag" hidden></p>
+  <p id="beatItemTag" class="item-tag"></p>
   <h2 class="prompt" id="beatPrompt"></h2>
   <div id="beatWidget" class="hidden"></div>
   <div class="choices" id="beatChoices" role="group" aria-label="אפשרויות תשובה"></div>
@@ -313,14 +296,6 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <p id="beatDoneNote">המספרים האלה הם ספירה — כולל חלון שנסגר בלי תשובה. לא ציון ולא הוכחה שהקצב עוזר.</p>
   <button type="button" id="beatAgain" class="primary">סבב נוסף</button>
 </div></section>
-<div id="adultGate" class="card no-print hidden" role="group" aria-labelledby="adultGateTitle"><span class="tag">למבוגרים בלבד</span><h2 id="adultGateTitle">דוח המורה פתוח רק למבוגר</h2>
-  <label for="adultGateAnswer" id="adultGateQ">כמה זה ?</label>
-  <input id="adultGateAnswer" inputmode="numeric" autocomplete="off" aria-label="תשובה לשאלת המבוגר" aria-describedby="adultGateMsg">
-  <button type="button" id="adultGateOk" class="primary" aria-label="אישור: לחצו והחזיקו 3 שניות כדי לפתוח את דוח המורה">אישור</button>
-  <p id="adultGateHold" class="hint">כתבו תשובה, ואז לחצו והחזיקו «אישור» 3 שניות.</p>
-  <button type="button" id="adultGateCancel" class="secondary" aria-label="ביטול, חזרה לתרגול">ביטול</button>
-  <p id="adultGateMsg" class="feedback" role="status" aria-live="polite"></p>
-</div>
 <section id="teacherReport" class="panel" role="tabpanel" aria-labelledby="tab-teacherReport" hidden><div class="card" id="trialKit">
   <span class="tag">ערכת פיילוט · 4 שבועות · חינם</span>
   <h2>דף הפעלה למורה</h2>
@@ -471,20 +446,12 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 </div></section>
 <section id="playground" class="panel" role="tabpanel" aria-labelledby="tab-playground" hidden><div class="card"><span class="tag">סטודיו מקצב וצליל · העשרה</span><h2>שומעים תדר ויוצרים מקצב</h2><div class="playgrid"><div class="tool"><h3>גובה על המסך ← תדר</h3><label for="y">מיקום Y: <b id="yLabel">50</b></label><input id="y" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% · 370 Hz" aria-label="גובה על המסך לתדר"><div id="freq" class="result" aria-live="polite"></div></div><div class="tool"><h3>מחולל מקצב</h3><label for="rhythmLevel">קושי</label><select id="rhythmLevel"><option value="1">1 — פשוט</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 — מורכב</option></select><label for="accuracy">דיוק אחרון: <b id="accuracyLabel">70%</b></label><input id="accuracy" type="range" min="0" max="100" value="70" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70" aria-valuetext="70%" aria-label="דיוק אחרון במחולל המקצב"><button type="button" id="makeRhythm" class="primary">צרו תיבה</button><div id="rhythm" class="result rhythm" aria-live="polite"></div></div><div class="tool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><h3 style="margin:0;">ישר מספרים מנגן — שברים ותדרים</h3><span class="tag">מחוון רציף ופעמוני שבר</span></div><div class="nl-control"><label for="singingLine">מיקום על הישר (0–100%): <b id="singingLabel">50% (1/2)</b></label><input id="singingLine" type="range" min="0" max="100" value="50" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% (1/2) 🔔 פעמון שבר: 1/2" aria-label="מיקום על ישר המספרים"></div><div class="nl-keys" role="group" aria-label="נקודות שבר עיקריות על ישר המספרים"><button type="button" class="secondary" data-pct="0" aria-pressed="false">0 (בסיס)</button><button type="button" class="secondary" data-pct="25" aria-pressed="false">1/4 (רבע)</button><button type="button" class="secondary selected" data-pct="50" aria-pressed="true">1/2 (חצי)</button><button type="button" class="secondary" data-pct="75" aria-pressed="false">3/4 (שלושה רבעים)</button><button type="button" class="secondary" data-pct="100" aria-pressed="false">1 (שלם)</button></div><div id="singingResult" class="result" aria-live="polite"></div></div><div class="tool rhythm-studio" id="rhythmGameTool" style="grid-column:1 / -1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><h3 style="margin:0;color:var(--pink);font-size:1.35rem;">🥁 סטודיו מקצב ומוזיקה — מנגנים עם הלהקה</h3><span class="tag" id="rhythmStageTag">שלב 1: פעימת מקצב (4/4)</span></div><div class="band-stage" id="bandStage" role="region" aria-label="שלבי הלהקה"><div class="band-card unlocked" id="bandDrums" data-level="1"><span class="band-icon">🥁</span><span class="band-name">תופים</span><span class="band-level">שלב 1 · פעימה</span></div><div class="band-card" id="bandBass" data-level="2"><span class="band-icon">🎸</span><span class="band-name">קו בס</span><span class="band-level">שלב 2 · רצף 3+</span></div><div class="band-card" id="bandChords" data-level="3"><span class="band-icon">🎹</span><span class="band-name">אקורדים</span><span class="band-level">שלב 3 · רצף 6+</span></div><div class="band-card" id="bandMelody" data-level="4"><span class="band-icon">🎷</span><span class="band-name">סולו</span><span class="band-level">שלב 4 · רצף 10+</span></div></div><div class="rhythm-highway-wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.95rem;color:#ded6f0;"><span id="rhythmPatternName" style="color:var(--card);"><b>תבנית:</b> ארבעה רבעים (4/4)</span><span id="rhythmBpmDisplay" style="color:#ffd85d;font-weight:bold;"><b>טמפו:</b> 80 BPM</span></div><div class="rhythm-highway" id="rhythmFractionsVisual" aria-label="חלוקת התיבה לשברים"></div><div class="rhythm-track" style="position:relative;height:12px;background:rgba(255,255,255,0.15);border-radius:99px;overflow:hidden;margin-top:10px;"><div id="rhythmCursor" class="rhythm-cursor-line"></div></div><div id="rhythmSpark" class="rhythm-spark" aria-live="assertive">בול! 💥</div></div><div class="drum-pads-grid" role="group" aria-label="פדים לתופים"><button type="button" id="drumPadBtn" class="drum-pad pad-kick" data-sound="kick" title="בס (Kick) — רווח או מקש 1"><span class="pad-icon">🥁</span><span class="pad-label">בס (Kick)</span><span class="pad-key">רווח / 1</span></button><button type="button" id="drumSnareBtn" class="drum-pad pad-snare" data-sound="snare" title="סנר (Snare) — מקש 2"><span class="pad-icon">🪘</span><span class="pad-label">סנר (Snare)</span><span class="pad-key">מקש 2</span></button><button type="button" id="drumHihatBtn" class="drum-pad pad-hihat" data-sound="hihat" title="היי-האט — מקש 3"><span class="pad-icon">🪙</span><span class="pad-label">היי-האט</span><span class="pad-key">מקש 3</span></button><button type="button" id="drumClapBtn" class="drum-pad pad-clap" data-sound="clap" title="מחיאת כף — מקש 4"><span class="pad-icon">👏</span><span class="pad-label">כף (Clap)</span><span class="pad-key">מקש 4</span></button></div><div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap;"><button type="button" id="rhythmStartBtn" class="primary" style="width:auto;min-height:48px;padding:12px 24px;">▶ התחלת נגינה</button><button type="button" id="rhythmPatternNextBtn" class="secondary" style="width:auto;min-height:48px;padding:12px 20px;">🔄 החלף מקצב</button></div><div style="display:flex;justify-content:space-around;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin:12px 0;"><div><span style="font-size:0.8rem;color:var(--muted);display:block;">רצף מקצב</span><b id="rhythmStreakDisplay" style="font-size:1.45rem;color:var(--purple);">0</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">שכבה מוזיקלית</span><b id="rhythmLayerDisplay" style="font-size:1.45rem;color:var(--good);">רק תופים</b></div><div><span style="font-size:0.8rem;color:var(--muted);display:block;">דיוק פעימה</span><b id="rhythmAccuracyDisplay" style="font-size:1.45rem;color:var(--ink);">-</b></div></div><div class="xylo-shelf" id="xyloStudio"><div style="display:flex;justify-content:space-between;align-items:center;color:#ded6f0;margin-bottom:10px;font-size:0.88rem;"><span style="color:var(--card);"><b>🎹 קסילופון צבעוני:</b> הקישו על הקלידים או במקלדת A–K / 1–8</span><span id="xyloLastNote" style="color:#ffd85d;font-weight:bold;">נגנו מנגינה עם המקצב!</span></div><div class="xylo-keys" id="xyloKeys" role="group" aria-label="קלידי קסילופון 8 צלילים"></div></div></div></div></div></section>
 <section id="musicGames" class="panel" role="tabpanel" aria-labelledby="tab-musicGames" hidden><div class="card"><span class="tag">משחקי מוזיקה · #591</span><h2>מנגנים ופותרים</h2><p>בכל נושא יש דרך מוזיקלית אחת שממשיכה מכיתה לכיתה. הכלי משנה רק את הצליל. אפשר לכבות את המוזיקה בכל תרגיל ולפתור בלי צליל. זה תרגול, לא טיפול ואין טענת יעילות.</p></div>
-<div class="card mm-game" id="ggCard" aria-label="שטח והיקף כרשת מקצבים"></div>
-<div class="card mm-game" id="myInstCard" aria-label="הכלי שלי"></div>
 <div class="card mm-game" id="fbpCard" aria-label="ממלאים תיבה במשכי תווים"></div>
-<div class="card mm-game" id="nllCard" aria-label="איפה התו יושב על הקו"></div>
 <div class="card mm-game" id="bcCard" aria-label="ספירה לפי פעמה"></div>
 <div class="card mm-game" id="ttgCard" aria-label="לוח הכפל כשיר קצבי"></div>
-<div class="card mm-game" id="trCard" aria-label="סרגל הטמפו: מודדים בפעמות"></div>
-<div class="card mm-game" id="ensCard" aria-label="מנגנים יחד: תזמורת קטנה"></div>
-<div class="card mm-game" id="lsCard" aria-label="נפח תיבה כשכבות של לופים"></div>
-<div class="card mm-game" id="bbCard" aria-label="משוואות ואי־שוויונות כמאזן של שתי תיבות"></div>
-<div class="card mm-game" id="pmCard" aria-label="אחוזים כתיבה"></div>
-<div class="card mm-game" id="pcCard" aria-label="אתגר: תופים שנפגשים" hidden></div>
+<div class="card mm-game" id="rpCard" aria-label="שעון קצב: מצולעים, זוויות וסיבוב"></div>
 <!-- #591 music games end -->
-</section><footer class="no-print"><div style="text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px"><a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a> · <a href="frequency.html">מעבדת תדרים</a><div style="margin-top:8px;font-size:.85rem">MelodyMath · תרגול יסודי א׳–ו׳ בעברית</div></div></footer></main>
+</section><footer class="no-print"><div style="text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 12px;border-top:1px solid var(--line);margin-top:24px"><a href="curriculum.html">כיסוי תוכנית</a> · <a href="offer.html">ניסוי כיתתי</a> · <a href="landing.html">אודות</a> · <a href="frequency.html">מעבדת תדרים</a><div style="margin-top:8px;font-size:.85rem">MelodyMath · תרגול יסודי א׳–ד׳ בעברית</div></div></footer></main>
 <!-- לוגיקה מכוסה בטסטים. אותם קבצים בדיוק רצים תחת node --test. -->
 <script src="src/lib/musicEngine.js"></script>
 <script src="src/lib/grade3Music.js"></script>
@@ -492,10 +459,8 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/rhythmGame.js"></script>
 <script src="src/lib/interactiveLessons.js"></script>
 <script src="src/lib/polyrhythm.js"></script>
-<script src="src/lib/polyChallenge.js"></script>
 <script src="src/lib/circleOfFifths.js"></script>
 <script src="src/lib/sonify.js"></script>
-<script src="src/lib/openCue.js"></script>
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/teacherStore.js"></script>
@@ -505,8 +470,6 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/curriculum/grade5.js"></script>
 <script src="src/lib/curriculum/grade3.js"></script>
 <script src="src/lib/curriculum/grade2.js"></script>
-<script src="src/lib/exercises/explorerBank.js"></script>
-<script src="src/lib/curriculum/evidenceMeta.js"></script>
 <script src="src/lib/banks.js"></script>
 <script src="src/lib/mastery.js"></script>
 <script src="src/lib/numberLine.js"></script>
@@ -526,65 +489,31 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/onboard.js"></script>
 <script src="src/lib/contact.js"></script>
 <script src="src/lib/tabs.js"></script>
-<script src="src/lib/adultGate.js"></script>
 <script src="src/lib/core.js"></script>
-<script src="src/lib/sentryLoader.js"></script>
 <script src="src/lib/learnerPlan.js"></script>
 <script src="src/lib/pace.js"></script>
-<script src="src/lib/streak.js"></script>
-<script src="src/lib/predict.js"></script>
-<script src="src/lib/setlistGoal.js"></script>
-<script src="src/lib/motivation/personalBest.js"></script>
 <script src="src/data/struggleTopics.js"></script>
 <script src="src/lib/struggleTopics.js"></script>
-<script src="src/lib/encouragingFeedback.js"></script>
-<script src="src/lib/exercises/tapTempoMean.js"></script>
-<script src="src/lib/exercises/patternAndWorkedExample.js"></script>
 <script>
 const exercises=[
-[1,1,'שברים','קצב','רבע מנוקד שווה לכמה שמיניות?',3,'רבע רגיל = 2 שמיניות, והנקודה מוסיפה חצי מערך התו'],[2,1,'שברים','קצב','כמה רבעים יש בתיבה בזמן 4/4?',4,'המספר העליון מציין כמה רבעים בתיבה'],[3,1,'יחסים','צלילים','מה היחס בין תדר של דו לתדר של סול במרווח קווינטה?','3:2','קווינטה נקייה היא יחס 3:2'],[4,1,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 3/4?',6,'כל רבע שווה 2 שמיניות'],[5,1,'יחסים','צלילים','מה היחס בין תדר של דו לתדר של פה במרווח קוורטה?','4:3','קוורטה נקייה היא יחס 4:3'],[6,1,'שברים','קצב','כמה רבעים שווה חצי מנוקד?',3,'חצי רגיל = 2 רבעים, והנקודה מוסיפה רבע נוסף'],[7,1,'כפל','קצב','מקצב של 4 פעימות שחוזר 3 פעמים שווה לכמה פעימות בסך הכל?',12,'4 כפול 3 שווה 12'],[8,1,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 2/4?',8,'כל רבע שווה 4 שש־עשריות'],[9,1,'יחסים','צלילים','מה היחס בין תדר של דו לתדר של דו באוקטבה?','2:1','אוקטבה היא הכפלת התדר פי 2'],[10,1,'שברים','קצב','משך תיבה במשקל 6/8 שווה לכמה רבעים?',3,'שש שמיניות שוות במשך לשלושה רבעים; בפועל מרגישים שתי פעימות של רבע מנוקד'],[11,1,'כפל','קצב','מקצב של 3 פעימות שחוזר 4 פעמים שווה לכמה פעימות בסך הכל?',12,'3 כפול 4 שווה 12'],[12,1,'שברים','קצב','כמה חצאים יש בתיבה בזמן 4/4?',2,'כל חצי שווה 2 רבעים'],
-[13,2,'שברים','קצב','כמה רבעים שווה שלם מנוקד?',6,'שלם רגיל = 4 רבעים, והנקודה מוסיפה 2'],[14,2,'יחסים','צלילים','מה יחס התדרים בקווינטה זכה?','3:2','קווינטה נקייה היא יחס 3:2'],[15,2,'כפל','קצב','מקצב של 5 פעימות שחוזר 4 פעמים שווה לכמה פעימות?',20,'5 כפול 4 שווה 20'],[16,2,'שברים','קצב','כמה שמיניות שווה חצי מנוקד?',6,'4 שמיניות ועוד 2'],[17,2,'שברים','קצב','כמה רבעים יש בשני שלמים וחצי?',10,'בכל שלם יש 4 רבעים, וחצי הוא עוד 2 רבעים'],[18,2,'סדרות','מלודיה','תו עולה ב־2 צעדים בכל שלב. מה השינוי אחרי 5 שלבים?',10,'2 כפול 5'],[19,2,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 3/4?',12,'כל רבע שווה 4 שש־עשריות'],[20,2,'חילוק','קצב','חילקו 16 פעימות ל־4 קבוצות שוות. כמה פעימות בכל קבוצה?',4,'16 לחלק ל־4 שווה 4'],[21,2,'יחסים','צלילים','מה יחס התדרים באוקטבה?','2:1','אוקטבה היא יחס 2:1'],[22,2,'חיסור','מלודיה','מנגינה בת 12 פעימות התקצרה ב־4 פעימות. כמה פעימות נשארו?',8,'12 פחות 4'],[23,2,'שברים','קצב','כמה רבעים שווה שמינית מנוקדת?',.75,'0.5 רבע ועוד 0.25'],[24,2,'כפל','קצב','מקצב של 6 פעימות שחוזר 3 פעמים שווה לכמה פעימות?',18,'6 כפול 3 שווה 18'],
-[25,3,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 12/8?',12,'המספר העליון מציין שמיניות'],[26,3,'חילוק','קצב','חילקו 24 פעימות ל־6 תיבות שוות. כמה פעימות בכל תיבה?',4,'24 לחלק ל־6'],[27,3,'סדרות','מלודיה','תו עולה ב־4 צעדים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה 4 פחות 2 = 2; כפול 3'],[28,3,'כפל','קצב','מקצב של 8 פעימות שחוזר 3 פעמים שווה לכמה פעימות?',24,'8 כפול 3 שווה 24'],[29,3,'שברים','קצב','כמה רבעים שווה שלם עם שתי נקודות הארכה?',7,'4 + 2 + 1 = 7'],[30,3,'שברים','קצב','כמה חצאים יש בשלושה שלמים?',6,'בכל שלם יש 2 חצאים, 3 כפול 2 שווה 6'],[31,3,'סדרות','מלודיה','תו עולה ב־5 צעדים בכל שלב. מה השינוי אחרי 7 שלבים?',35,'5 כפול 7'],[32,3,'חילוק','קצב','חילקו 30 פעימות ל־5 מקצבים שווים. כמה פעימות בכל מקצב?',6,'30 לחלק ל־5 שווה 6'],[33,3,'שברים','קצב','כמה שמיניות שווה רבע עם שתי נקודות הארכה?',3.5,'2 + 1 + 0.5 = 3.5'],[34,3,'יחסים','צלילים','מה יחס התדרים בקוורטה זכה?','4:3','קוורטה נקייה היא יחס 4:3'],[35,3,'סדרות','מלודיה','תו עולה ב־6 צעדים ואז יורד ב־3. מה השינוי אחרי 4 חזרות?',12,'בכל חזרה: 6 פחות 3 = 3; כפול 4'],
-[36,4,'חזקות','טמפו','אם מהירות הקצב מוכפלת פי 2 בכל דקה, כמה פעמים תגדל המהירות אחרי 3 דקות?',8,'2 בחזקת 3','EXTRA',7],[37,4,'חזקות','טמפו','קצב מתחיל ב־60 פעימות בדקה ומוכפל כל 2 דקות. מה הקצב אחרי 4 דקות?',240,'60 × 2² = 240','EXTRA',11],[38,4,'יחסים','צלילים','מה יחס התדרים בטרצה גדולה?','5:4','טרצה גדולה בכיוון עולה היא יחס 5:4','EXTRA',14],[39,4,'חזקות','טמפו','קצב מתחיל ב־40 פעימות בדקה ומשולש כל דקה. מה הקצב אחרי 3 דקות?',1080,'40 × 3³','EXTRA',15],[40,4,'יחסים','צלילים','מה יחס התדרים בסקסטה גדולה?','5:3','סקסטה גדולה היא יחס 5:3','EXTRA',17],[41,4,'פונקציות','מלודיה','תו עולה ב־2 חצאי טונים בכל צעד. מה השינוי אחרי 5 צעדים?',10,'2 × 5','EXTRA',18],[42,4,'חזקות','טמפו','קצב מתחיל ב־50 פעימות בדקה ומוכפל כל 3 דקות. מה הקצב אחרי 6 דקות?',200,'50 × 2²','EXTRA',20],[43,4,'יחסים','צלילים','מה יחס התדרים בספטימה גדולה?','15:8','ספטימה גדולה היא יחס 15:8','EXTRA',21],[44,4,'פונקציות','מלודיה','תו יורד ב־3 חצאי טונים בכל צעד. מה השינוי אחרי 4 צעדים?',-12,'-3 × 4','EXTRA',22],[45,4,'חזקות','טמפו','קצב מתחיל ב־30 פעימות בדקה ומוכפל כל דקה. מה הקצב אחרי 5 דקות?',960,'30 × 2⁵','EXTRA',24],
-[46,4,'יחסים','צלילים','מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?','75:64','בכוונון טבעי 5-limit היחס הוא 75:64','EXTRA',26],
-[47,4,'פונקציות','מלודיה','תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה: 4−2=2; כפול 3','EXTRA',27],
-[48,4,'חזקות','טמפו','קצב מתחיל ב־20 פעימות בדקה ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?',540,'20 × 3³','EXTRA',28],
-[49,4,'יחסים','צלילים','מה יחס התדרים בטריטון בכיוון עולה?','45:32','בכוונון טבעי היחס הוא 45:32','EXTRA',30],
-[50,4,'פונקציות','מלודיה','תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?',35,'5 × 7','EXTRA',31],
-[51,4,'חזקות','טמפו','קצב מתחיל ב־10 פעימות בדקה ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?',80,'10 × 2³','EXTRA',32],
-[52,4,'יחסים','צלילים','מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?','64:45','בכוונון טבעי היחס הוא 64:45','EXTRA',34],
-[53,4,'פונקציות','מלודיה','תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?',-12,'בכל חזרה: ‎-6+3=-3; כפול 4','EXTRA',35]
-].map(([id,level,mathTopic,musicConcept,prompt,answer,hint,extra,ref])=>({id,level,mathTopic,musicConcept,prompt,answer,hint,extra:extra==='EXTRA',ref}));
+[1,1,'שברים','קצב','רבע מנוקד שווה לכמה שמיניות?',3,'רבע רגיל = 2 שמיניות, והנקודה מוסיפה חצי מערך התו'],[2,1,'שברים','קצב','כמה רבעים יש בתיבה בזמן 4/4?',4,'המספר העליון מציין כמה רבעים בתיבה'],[3,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של סול במרווח קווינטה?','3:2','קווינטה נקייה היא יחס 3:2'],[4,1,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 3/4?',6,'כל רבע שווה 2 שמיניות'],[5,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של פה במרווח קוורטה?','4:3','קוורטה נקייה היא יחס 4:3'],[6,1,'שברים','קצב','כמה רבעים שווה חצי מנוקד?',3,'חצי רגיל = 2 רבעים, והנקודה מוסיפה רבע נוסף'],[7,1,'חזקות','טמפו','אם מהירות הקצב מוכפלת פי 2 בכל דקה, כמה פעמים תגדל המהירות אחרי 3 דקות?',8,'2 בחזקת 3'],[8,1,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 2/4?',8,'כל רבע שווה 4 שש־עשריות'],[9,1,'יחסים','מרווחים','מה היחס בין תדר של דו לתדר של דו באוקטבה?','2:1','אוקטבה היא הכפלת התדר פי 2'],[10,1,'שברים','קצב','משך תיבה במשקל 6/8 שווה לכמה רבעים?',3,'שש שמיניות שוות במשך לשלושה רבעים; בפועל מרגישים שתי פעימות של רבע מנוקד'],[11,1,'חזקות','טמפו','קצב מתחיל ב־60 BPM ומוכפל כל 2 דקות. מה הקצב אחרי 4 דקות?',240,'60 × 2² = 240'],[12,1,'שברים','קצב','כמה חצאים יש בתיבה בזמן 4/4?',2,'כל חצי שווה 2 רבעים'],
+[13,2,'שברים','קצב','כמה רבעים שווה שלם מנוקד?',6,'שלם רגיל = 4 רבעים, והנקודה מוסיפה 2'],[14,2,'יחסים','מרווחים','מה יחס התדרים בטרצה גדולה?','5:4','טרצה גדולה בכיוון עולה היא יחס 5:4'],[15,2,'חזקות','טמפו','קצב מתחיל ב־40 BPM ומשולש כל דקה. מה הקצב אחרי 3 דקות?',1080,'40 × 3³'],[16,2,'שברים','קצב','כמה שמיניות שווה חצי מנוקד?',6,'4 שמיניות ועוד 2'],[17,2,'יחסים','מרווחים','מה יחס התדרים בסקסטה גדולה?','5:3','סקסטה גדולה היא יחס 5:3'],[18,2,'פונקציות','מלודיה','תו עולה ב־2 חצאי טונים בכל צעד. מה השינוי אחרי 5 צעדים?',10,'2 × 5'],[19,2,'שברים','קצב','כמה שש־עשריות יש בתיבה בזמן 3/4?',12,'כל רבע שווה 4 שש־עשריות'],[20,2,'חזקות','טמפו','קצב מתחיל ב־50 BPM ומוכפל כל 3 דקות. מה הקצב אחרי 6 דקות?',200,'50 × 2²'],[21,2,'יחסים','מרווחים','מה יחס התדרים בספטימה גדולה?','15:8','ספטימה גדולה היא יחס 15:8'],[22,2,'פונקציות','מלודיה','תו יורד ב־3 חצאי טונים בכל צעד. מה השינוי אחרי 4 צעדים?',-12,'-3 × 4'],[23,2,'שברים','קצב','כמה רבעים שווה שמינית מנוקדת?',.75,'0.5 רבע ועוד 0.25'],[24,2,'חזקות','טמפו','קצב מתחיל ב־30 BPM ומוכפל כל דקה. מה הקצב אחרי 5 דקות?',960,'30 × 2⁵'],
+[25,3,'שברים','קצב','כמה שמיניות יש בתיבה בזמן 12/8?',12,'המספר העליון מציין שמיניות'],[26,3,'יחסים','מרווחים','מה יחס התדרים בסקונדה מוגדלת בכיוון עולה?','75:64','בכוונון טבעי 5-limit היחס הוא 75:64'],[27,3,'פונקציות','מלודיה','תו עולה ב־4 חצאי טונים ואז יורד ב־2. מה השינוי אחרי 3 חזרות?',6,'בכל חזרה: 4−2=2; כפול 3'],[28,3,'חזקות','טמפו','קצב מתחיל ב־20 BPM ומשולש כל 2 דקות. מה הקצב אחרי 6 דקות?',540,'20 × 3³'],[29,3,'שברים','קצב','כמה רבעים שווה שלם עם שתי נקודות הארכה?',7,'4 + 2 + 1 = 7'],[30,3,'יחסים','מרווחים','מה יחס התדרים בטריטון בכיוון עולה?','45:32','בכוונון טבעי היחס הוא 45:32'],[31,3,'פונקציות','מלודיה','תו עולה ב־5 חצאי טונים בכל צעד. מה השינוי אחרי 7 צעדים?',35,'5 × 7'],[32,3,'חזקות','טמפו','קצב מתחיל ב־10 BPM ומוכפל כל 5 דקות. מה הקצב אחרי 15 דקות?',80,'10 × 2³'],[33,3,'שברים','קצב','כמה שמיניות שווה רבע עם שתי נקודות הארכה?',3.5,'2 + 1 + 0.5 = 3.5'],[34,3,'יחסים','מרווחים','מה יחס התדרים בקווינטה מוקטנת בכיוון עולה?','64:45','בכוונון טבעי היחס הוא 64:45'],[35,3,'פונקציות','מלודיה','תו יורד ב־6 חצאי טונים ואז עולה ב־3. מה השינוי אחרי 4 חזרות?',-12,'בכל חזרה: ‎-6+3=-3; כפול 4']
+].map(([id,level,mathTopic,musicConcept,prompt,answer,hint])=>({id,level,mathTopic,musicConcept,prompt,answer,hint}));
 let chosenLevel=1,history=[],current=null,answered=false,seed=Date.now()&0x7fffffff;
 document.addEventListener('pointerdown',function(){if(typeof unlockAudio==='function')unlockAudio()},{once:true,capture:true});
 const $=id=>document.getElementById(id); const show=(id,on)=>$(id).classList.toggle('hidden',!on);
 function rng(n){let s=n|0;return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
-function practicePool(){return exercises.filter(x=>chosenLevel>=4?!!x.extra:!x.extra)}
-function extraTempoPreview(item){if(!item||!item.extra||item.musicConcept!=='טמפו')return null;const bpm=Number(item.answer);if(!(bpm>12))return null;return {groups:[4],bpm:bpm}}
-function beyondLabel(item){return item&&item.extra&&(item.mathTopic==='חזקות'||Number(item.answer)<0)?'מעבר לתוכנית':''}
-function childPrompt(item){const p=String(item&&item.prompt||'');const bits=[];if(p.includes('טרצה'))bits.push('טרצה היא קפיצה של שלושה תווים, למשל מדו למי.');if(p.includes('סקסטה'))bits.push('סקסטה היא קפיצה של שישה תווים, למשל מדו ללה.');if(p.includes('ספטימה'))bits.push('ספטימה היא קפיצה של שבעה תווים, למשל מדו לסי.');if(p.includes('טריטון'))bits.push('טריטון נקרא גם קוורטה מוגדלת: שישה חצאי טונים, באמצע הדרך לאוקטבה.');if(p.includes('סקונדה מוגדלת'))bits.push('סקונדה מוגדלת היא קפיצה של שלושה חצאי טונים.');if(p.includes('קווינטה מוקטנת'))bits.push('קווינטה מוקטנת היא קפיצה של שישה חצאי טונים.');if(p.includes('חצאי טונים'))bits.push('חצי טון הוא הצעד הקטן בין שני תווים שכנים.');return bits.length?p+' '+bits.join(' '):p}
-function extraMusic(item){if(!item)return null;if(!item.extra&&item.musicConcept!=='צלילים')return null;if(item.musicConcept==='טמפו'){const bpm=Number(item.answer);if(bpm>12)return {clicks:[4],bpm:bpm};if(bpm>0&&bpm<=12&&bpm===Math.round(bpm))return {notes:Array.from({length:bpm},function(){return {voice:'drum',hz:180}})};return null}if(item.musicConcept==='צלילים'){const m=String(item.answer).match(/^(\d+):(\d+)$/);if(!m)return null;const root=261.63;return {notes:[{voice:'bell',hz:root},{voice:'xylo',hz:Math.round(root*Number(m[1])/Number(m[2])*100)/100}]}}if(item.musicConcept==='מלודיה'){const steps=[...String(item.prompt).matchAll(/(עולה|יורד) ב־(\d+)/g)].map(function(x){return (x[1]==='יורד'?-1:1)*Number(x[2])});const reps=Number((String(item.prompt).match(/אחרי (\d+)/)||[])[1]||1);if(!steps.length)return null;let semi=0;const notes=[{voice:'xylo',hz:262}];for(let r=0;r<reps;r++){for(let s=0;s<steps.length;s++){semi+=steps[s];notes.push({voice:semi<0?'drum':'bell',hz:Math.round(262*Math.pow(2,semi/12))})}}return {notes:notes.slice(0,12)}}return null}
-function playExtraNotes(notes){if(typeof playTap!=='function'||!notes)return;notes.forEach(function(n,i){setTimeout(function(){playTap(n.voice,{hz:n.hz,step:0})},i*280)})}
-function nextExercise(){const pool=eligibleExercises(practicePool(),history,current&&current.id,chosenLevel);const random=rng(seed+history.length*97);return pool[Math.floor(random()*pool.length)]}
-function speakTerm(item){const full=childPrompt(item);const gloss=full.slice(String(item&&item.prompt||'').length).trim();if(gloss&&typeof speakHebrew==='function'){speakHebrew(gloss);return gloss}if(typeof maybeSpeak==='function')maybeSpeak(full);return gloss}
-function renderExercise(){current=nextExercise();answered=false;$('counter').textContent=`תרגיל ${history.length+1} מתוך 10`;$('score').textContent=`${history.filter(x=>x.correct).length} נכונות`;$('bar').style.width=`${history.length*10}%`;const tag=beyondLabel(current);$('meta').textContent=`רמה ${current.level} · ${current.musicConcept} × ${current.mathTopic}${tag?' · '+tag:''}`;setMath($('prompt'),childPrompt(current));const music=extraMusic(current);if(music&&music.clicks&&typeof playCountClicks==='function'){playCountClicks(music.clicks,music.bpm);if(typeof setNumberPlay==='function')setNumberPlay('practiceNumberPlay',{noMusic:true})}else if(music&&music.notes){playExtraNotes(music.notes);if(typeof setNumberPlay==='function')setNumberPlay('practiceNumberPlay',{noMusic:true})}else if(typeof setNumberPlay==='function')setNumberPlay('practiceNumberPlay',current);$('answer').value='';$('answer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('check',current);$('check').disabled=false;show('feedback',false);show('next',false);show('finish',history.length>0);const cue=openCue();if(!music||!(music.clicks||music.notes))maybeHear(current);else if(cue)cue.seen(current);setActiveHear(null);speakTerm(current);setTimeout(()=>$('answer').focus(),0)}
+function nextExercise(){const pool=eligibleExercises(exercises,history,current&&current.id,chosenLevel);const random=rng(seed+history.length*97);return pool[Math.floor(random()*pool.length)]}
+function renderExercise(){current=nextExercise();answered=false;$('counter').textContent=`תרגיל ${history.length+1} מתוך 10`;$('score').textContent=`${history.filter(x=>x.correct).length} נכונות`;$('bar').style.width=`${history.length*10}%`;$('meta').textContent=`רמה ${current.level} · ${current.musicConcept} × ${current.mathTopic}`;setMath($('prompt'),current.prompt);$('answer').value='';$('answer').disabled=false;$('check').disabled=false;show('feedback',false);show('next',false);show('finish',history.length>0);setActiveHear(null);maybeSpeak(current.prompt);setTimeout(()=>$('answer').focus(),0)}
 // normalizeAnswer / isCorrect / nextLevel / eligibleExercises מגיעים מ-src/lib/adaptive.js.
 function askForAnswer(inputId,feedbackId){const fb=$(feedbackId);fb.className='feedback';fb.textContent='כתבו תשובה קודם 🙂';show(feedbackId,true);const inp=$(inputId);if(inp&&typeof inp.focus==='function')inp.focus();}
-function check(){if(answered)return;if(!normalizeAnswer($('answer').value))return askForAnswer('answer','feedback');if(current&&current.explorer&&typeof MM_EXPLORER_BANK!=='undefined'){current._retryDone=true;const exFlow=MM_EXPLORER_BANK.submit(current._exState||MM_EXPLORER_BANK.createState(current),$('answer').value);current._exState=exFlow;if(exFlow.secondTry){$('feedback').className='feedback soft';$('feedback').textContent=exFlow.message;show('feedback',true);MM_EXPLORER_BANK.playReplay(exFlow.replay);$('answer').value='';if($('answer').focus)$('answer').focus();return;}if(exFlow.phase==='correct')MM_EXPLORER_BANK.playScale(exFlow.scale);}const correct=isCorrect($('answer').value,current&&current.answer);if(!correct&&current&&!current._retryDone&&!current.noMusic){current._retryDone=true;$('feedback').className='feedback soft';$('feedback').innerHTML='<strong>כמעט! 🎵</strong><div class="hint">בואו נקשיב ונספור יחד שוב. נסו שוב עכשיו!</div>';show('feedback',true);if(typeof stopItemMusic==='function')stopItemMusic();const np=$('practiceNumberPlay')&&$('practiceNumberPlay')._np;if(!(np&&np.showMissing&&np.showMissing($('answer').value,{quiet:typeof prefsNow==='function'&&!!prefsNow().quiet,answer:current.answer}))&&typeof maybeHear==='function')maybeHear(current);if(typeof maybeSpeak==='function')maybeSpeak('כמעט! בואו נקשיב ונספור יחד שוב.');$('answer').value='';$('answer').disabled=false;$('check').disabled=false;setTimeout(()=>{if($('answer')&&typeof $('answer').focus==='function')$('answer').focus();},0);return;}answered=true;const npEnd=$('practiceNumberPlay')&&$('practiceNumberPlay')._np;if(npEnd&&npEnd.stop)npEnd.stop();history.push({id:current.id,correct});noteMetro(correct,current.mathTopic||current.skill,current);logTeacherItem({kind:'practice',skill:current.mathTopic,prompt:current.prompt,answer:current.answer,given:$('answer').value,correct});const anim=typeof MM_FEEDBACK!=='undefined'&&MM_FEEDBACK.getVisualMathAnimation?MM_FEEDBACK.getVisualMathAnimation(current):null;$('feedback').className=`feedback ${correct?'good':'bad'} ${correct&&anim?anim.className:''}`;$('feedback').innerHTML=`<strong>${correct?'בדיוק! 🎵':'עוד רגע זה יושב.'}</strong><div class="hint">${mathHtml(current.hint)}. התשובה: <b>${mathHtml(current.answer)}</b></div>`;show('feedback',true);$('answer').disabled=true;$('check').disabled=true;$('bar').style.width=`${history.length*10}%`;show('next',history.length<10);show('finish',true);if(history.length===10){setTimeout(finish,650);if($('finish')&&typeof $('finish').focus==='function')$('finish').focus();}else if($('next')&&typeof $('next').focus==='function'){$('next').focus();}}
+function check(){if(answered)return;if(!normalizeAnswer($('answer').value))return askForAnswer('answer','feedback');answered=true;const correct=isCorrect($('answer').value,current.answer);history.push({id:current.id,correct});noteMetro(correct);logTeacherItem({kind:'practice',skill:current.mathTopic,prompt:current.prompt,answer:current.answer,given:$('answer').value,correct});$('feedback').className=`feedback ${correct?'good':'bad'}`;$('feedback').innerHTML=`<strong>${correct?'בדיוק! 🎵':'עוד רגע זה יושב.'}</strong><div class="hint">${mathHtml(current.hint)}. התשובה: <b>${mathHtml(current.answer)}</b></div>`;show('feedback',true);$('answer').disabled=true;$('check').disabled=true;$('bar').style.width=`${history.length*10}%`;show('next',history.length<10);show('finish',true);if(history.length===10){setTimeout(finish,650);if($('finish')&&typeof $('finish').focus==='function')$('finish').focus();}else if($('next')&&typeof $('next').focus==='function'){$('next').focus();}}
 function finish(){endTeacherSession();show('quiz',false);show('summary',true);const good=history.filter(x=>x.correct).length;const level=Math.max(...history.map(x=>exercises.find(e=>e.id===x.id).level));$('stats').innerHTML=`<div class="stat"><strong>${good}/${history.length}</strong>נכונות</div><div class="stat"><strong>${Math.round(good/history.length*100)||0}%</strong>דיוק בסבב</div><div class="stat"><strong>${level}</strong>רמה מרבית בסבב</div>`;$('summaryText').textContent='ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.';if($('again')&&typeof $('again').focus==='function')$('again').focus()}
 document.querySelectorAll('.level').forEach(b=>b.onclick=()=>{chosenLevel=+b.dataset.level;document.querySelectorAll('.level').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})});
 $('begin').onclick=()=>{history=[];current=null;seed=Date.now()&0x7fffffff;show('start',false);show('summary',false);show('quiz',true);renderExercise()};$('check').onclick=check;$('answer').onkeydown=e=>{if(e.key==='Enter'){if(!answered)check();else if($('next')&&!$('next').classList.contains('hidden'))renderExercise();else if($('finish')&&!$('finish').classList.contains('hidden'))finish()}};$('next').onclick=renderExercise;$('finish').onclick=finish;$('again').onclick=()=>{show('summary',false);show('start',true);if($('begin')&&typeof $('begin').focus==='function')$('begin').focus()};if($('quizCancel'))$('quizCancel').onclick=()=>{endTeacherSession();history=[];current=null;show('quiz',false);show('start',true);if($('begin')&&typeof $('begin').focus==='function')$('begin').focus()};
-// שער מבוגר לפני דוח המורה (#737). כל כניסה לטאב עוברת ב־activateHomeTab: לחיצה, מקלדת (tabs.js קורא ל־click) וקוד. ההדפסה מציגה את הדוח רק עם body.adult-ok.
-let adultOk=false,adultQ=null,adultTab=null;
-function askAdult(msg){adultQ=adultQuestion();$('adultGateQ').textContent=adultQ.text;$('adultGateAnswer').value='';$('adultGateMsg').textContent=msg||''}
-function openAdultGate(btn){adultTab=btn;askAdult('');show('adultGate',true);setTimeout(()=>{if(typeof $('adultGateAnswer').focus==='function')$('adultGateAnswer').focus()},0)}
-function confirmAdultGate(){const v=$('adultGateAnswer').value;if(!String(v).trim()){$('adultGateMsg').textContent='כתבו תשובה קודם.';return false}if(adultAnswerOk(adultQ,v)){adultOk=true;adultQ=null;show('adultGate',false);activateHomeTab(adultTab);return true}askAdult('לא נכון — הדוח נשאר סגור. הנה שאלה חדשה.');if(typeof $('adultGateAnswer').focus==='function')$('adultGateAnswer').focus();return false}
-let adultHoldAt=null;
-function holdAdultGate(phase,now){if(phase==='start'){if(adultHoldAt===null)adultHoldAt=now;return null}const t=adultHoldAt;adultHoldAt=null;if(!holdLongEnough(t,now)){$('adultGateMsg').textContent='לחצו והחזיקו «אישור» 3 שניות.';return false}return confirmAdultGate()}
-function cancelAdultGate(){show('adultGate',false);adultQ=null;const cur=document.querySelector('.tabs [role="tab"][aria-selected="true"]');if(cur&&typeof cur.focus==='function')cur.focus()}
-function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;if(btn.dataset.tab==='teacherReport'&&!adultOk){openAdultGate(btn);return}adultOk=btn.dataset.tab==='teacherReport';document.body.classList.toggle('adult-ok',adultOk);show('adultGate',false);document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
+function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
-if($('adultGateOk')){$('adultGateOk').onpointerdown=()=>holdAdultGate('start',Date.now());$('adultGateOk').onpointerup=()=>holdAdultGate('end',Date.now());$('adultGateOk').onpointerleave=()=>{adultHoldAt=null};$('adultGateOk').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();holdAdultGate('start',Date.now())}};$('adultGateOk').onkeyup=e=>{if(e.key==='Enter'||e.key===' ')holdAdultGate('end',Date.now())}}if($('adultGateCancel'))$('adultGateCancel').onclick=cancelAdultGate;if($('adultGateAnswer'))$('adultGateAnswer').onkeydown=e=>{if(e.key==='Enter'){if(typeof $('adultGateOk').focus==='function')$('adultGateOk').focus()}else if(e.key==='Escape')cancelAdultGate()};
 // playRhythmClicks מגיע מ-src/lib/sonify.js (פעימות אחרי מיומנות). מעבדת התדר הוצאה מהדף (CUT, 28.9.2026).
 let yAudioThrottle=null;
 function updateYFreq(val,play){const v=Math.max(0,Math.min(100,Math.round(Number(val)||0)));if($('y')){$('y').value=v;$('y').setAttribute('aria-valuenow',String(v))}if($('yLabel'))$('yLabel').textContent=String(v);const f=typeof yToFreq==='function'?Math.round(yToFreq(v,0,100)):370;if($('y'))$('y').setAttribute('aria-valuetext',`${v}% · ${f} Hz`);if($('freq'))$('freq').innerHTML=`<b>${f} Hz</b> · מיקום Y: ${v}%`;if(play&&typeof playFreq==='function'){if(yAudioThrottle)clearTimeout(yAudioThrottle);yAudioThrottle=setTimeout(()=>{playFreq(f,150)},30)}}
@@ -790,9 +719,7 @@ const GRADE_NOTE={
   'א':'כיתה א׳: מנייה עד 100, חיבור/חיסור (פירוקי 10, = משמאל, עשרות), ישר מספרים.',
   'ב':'כיתה ב׳: עשרות; כפל 2/4/5/10; חילוק לחלקים ולהכלה. 3/6/7/8/9 חסומים.',
   'ג':'כיתה ג׳: לוח 3 ב־3/4 ולוח 6 ב־6/8, חילוק עם שארית, «פי כמה», שטח כרשת מקצב, דקות ושניות ותדרים עד 10,000. הלוחות 3/6/7/8/9 נפתחים רק אחרי שליטה ב־2/4/5/10.',
-  'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».',
-  'ה':'כיתה ה׳: שברים פשוטים ומעורבים, מספרים עשרוניים, אחוזים ומצולעים.',
-  'ו':'כיתה ו׳: שברים ועשרוניים, יחס, פרופורציה, אחוזים ונפח תיבה.'
+  'ד':'כיתה ד׳: שבר כחלק משלם מול תיבה 4/4 (1/2, 1/4, 1/8). אין «חצי מ־8».'
 };
 let selectedGrade='א';
 try{const g=localStorage.getItem('mm-grade'); if(isGrade(g)) selectedGrade=g;}catch(e){}
@@ -829,18 +756,33 @@ function startStrugglePractice(st){
   const k=st.bankSkill;
   const items=poolForSkill(k);
   if(!items||!items.length) return;
-  rmPlanTopic=null;
   rmPlan=[{skill:k,he:(typeof rmHe==='function'?rmHe(k):k)||st.he,items:items,history:[],level:1,lastId:null,current:null}];
   rpStep=0; rpItem=0;
   show('rmStart',false); show('rmReport',false); show('rmPlanDoneActions',false); show('rmPlan',true);
   rpRender();
 }
-// #665 req 1 — the curriculum line is for teachers/parents (program.html, curriculum.html), not the child's exercise screen.
-function setItemTag(el,it){ if(!el) return; el.textContent=''; el.hidden=true; }
+function itemTagText(it){
+  if(!it) return '';
+  return 'כיתה '+it.grade+'׳ · '+(it.strand||'')+' · '+(it.standard||'');
+}
+// Tag + official Ministry section with a link to the official programme PDF.
+function setItemTag(el,it){
+  if(!el) return;
+  el.textContent=itemTagText(it);
+  const sec=it&&typeof sectionForItem==='function'?sectionForItem(it):null;
+  if(!sec) return;
+  const box=document.createElement('span');
+  box.className='mm-official'+(sec.verified?'':' unverified');
+  box.textContent='לפי תוכנית משרד החינוך: '+sec.label+' ';
+  const a=document.createElement('a');
+  a.href=sec.url;a.target='_blank';a.rel='noopener';
+  a.textContent='לתוכנית הרשמית ↗';
+  a.setAttribute('aria-label','תוכנית הלימודים הרשמית לכיתה '+sec.grade+'׳ באתר משרד החינוך');
+  box.appendChild(a);el.appendChild(document.createElement('br'));el.appendChild(box);
+}
 function renderWidget(hostId, item, inputId){
   const host=$(hostId); if(!host) return;
-  if(host._dpDragCancel){host._dpDragCancel();host._dpDragCancel=null;}
-  host.innerHTML=''; host.classList.add('hidden'); host._sndSpec=null; host._sndRevealed=false; host._tapSession=null;
+  host.innerHTML=''; host.classList.add('hidden');
   if(!item) return;
   const fill=function(val){ const inp=inputId&&$(inputId); if(inp){ inp.value=val; } };
   if(item.widget==='numberLine' && item.line && typeof bindNumberLine==='function'){
@@ -876,45 +818,16 @@ function renderWidget(hostId, item, inputId){
   } else if(item.widget==='pie' && item.chart && typeof renderPieChartHtml==='function'){
     host.classList.remove('hidden');
     host.innerHTML=renderPieChartHtml(item.chart);
-  } else if(typeof MM_TAKEAWAY_TEN!=='undefined' && MM_TAKEAWAY_TEN.specForItem(item)){
-    host.classList.remove('hidden');
-    const sndSpec=MM_TAKEAWAY_TEN.specForItem(item); host._sndSpec=sndSpec; host._sndRevealed=false; host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(sndSpec); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_TAKEAWAY_TEN.play(sndSpec, host._sndRevealed?{revealed:true}:null)}; MM_TAKEAWAY_TEN.play(sndSpec);
-  } else if(typeof MM_PERCENT_MIX!=='undefined' && MM_PERCENT_MIX.specForItem(item)){ host.classList.remove('hidden'); const ps=MM_PERCENT_MIX.specForItem(item); host.innerHTML=MM_PERCENT_MIX.circlesHtml(ps); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_PERCENT_MIX.play(ps);}; MM_PERCENT_MIX.play(ps);
-  } else if(item.standard==='G6_MEAN' && item.music==='tapTempo' && !item.noMusic && Array.isArray(item.intervals) && typeof MM_TAP_TEMPO_MEAN!=='undefined'){
-    // #750: the tap widget, in the instrument the child picks here (kept on this device by
-    // myInstrument.js, which also takes an old pick from the tap screen's own key). The pick
-    // is read on every tap, so it can change between taps; before a pick it is the wood click.
-    host.classList.remove('hidden');
-    const TAP_INST=['darbuka','marimba','recorder','guitar'], my=typeof MM_MY_INSTRUMENT!=='undefined'?MM_MY_INSTRUMENT:null;
-    const picked=function(){ return my?my.instrumentFor(null,TAP_INST):null; };
-    const pads=function(){ const cur=picked(); return TAP_INST.map(function(id){ const x=typeof instrumentById==='function'?instrumentById(id):null; return '<button type="button" class="jam-pad" data-tap-inst="'+id+'" aria-pressed="'+(id===cur)+'">'+(x?x.instrument.he:id)+'</button>'; }).join(''); };
-    host.innerHTML=MM_TAP_TEMPO_MEAN.renderTapTempoWidgetHtml(item)+'<div class="jam-row tap-inst-pick" role="group" aria-label="הכלי של ההקשה">'+pads()+'</div><div class="tap-mean-out" aria-live="polite"></div>';
-    const session=MM_TAP_TEMPO_MEAN.attachTapButton(host,{instrument:picked}); host._tapSession=session;
-    host.onclick=function(ev){
-      const t=ev.target&&ev.target.closest?ev.target:null; const b=t&&t.closest('[data-tap-inst]');
-      if(b&&my){ my.setMyInstrument(b.getAttribute('data-tap-inst')); host.querySelector('.tap-inst-pick').innerHTML=pads(); }
-      if(t&&t.closest('.btn-tap-cue')&&session.taps().length>1) host.querySelector('.tap-mean-out').textContent='המרווחים שלכם: '+session.intervals().join(', ')+' עש׳ · הממוצע: '+session.mean()+' עש׳';
-    };
-  } else if (item.kind === 'pattern_completion' && typeof MM_PATTERN_WORKED !== 'undefined' && typeof MM_PATTERN_WORKED.renderPatternWidget === 'function'){
-    host.classList.remove('hidden');
-    MM_PATTERN_WORKED.renderPatternWidget(host, item, { onAnswer: fill });
-  } else if (item.kind === 'worked_example' && typeof MM_PATTERN_WORKED !== 'undefined' && typeof MM_PATTERN_WORKED.renderWorkedExampleWidget === 'function'){
-    host.classList.remove('hidden');
-    MM_PATTERN_WORKED.renderWorkedExampleWidget(host, item, { onAnswer: fill, heading: $(hostId.replace(/Widget$/,'Prompt')) });
-  } else if(inputId && typeof MM_DRAG_PLACE!=='undefined' && MM_DRAG_PLACE.specForItem(item)){
-    host.classList.remove('hidden'); host.onclick=null;
-    MM_DRAG_PLACE.mount(host, item, {fill:fill, quiet:!!prefsNow().quiet});
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
   }
-  if(typeof MM_MORE_FAMILIES!=='undefined') MM_MORE_FAMILIES.mount(host, item);
 }
 // A music widget keeps any text that names the answer in data-reveal while the
 // question is open (#457); the feedback step swaps it in, visible note and
 // sr-only copy alike.
 function revealWidget(hostId){
-  const host=$(hostId); if(!host || !host.querySelectorAll) return; if(host._sndSpec && typeof MM_TAKEAWAY_TEN!=='undefined'){ host._sndRevealed=true; host.innerHTML=MM_TAKEAWAY_TEN.circlesHtml(host._sndSpec,{revealed:true}); if(host._sndSpec.kind==='tenExchange')MM_TAKEAWAY_TEN.play(host._sndSpec,{revealed:true}); return; }
+  const host=$(hostId); if(!host || !host.querySelectorAll) return;
   host.querySelectorAll('[data-reveal]').forEach(function(el){
     el.textContent=el.getAttribute('data-reveal');
     el.removeAttribute('data-reveal');
@@ -928,17 +841,10 @@ function poolForSkill(skill){
   }
   return rows;
 }
-let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rmPlanTopic=null,rmVarietySeed=0,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
-// #744: answer buttons sound on pointerdown (data-tap), except on a silent noMusic round.
-function tapVoiceFor(id,it){const el=$(id);if(!el||!el.setAttribute)return;if(it&&it.noMusic)el.removeAttribute('data-tap');else el.setAttribute('data-tap','xylo')}
+let rmIdx=0,rmAns=[],rmAnswered=false,rmPlan=null,rpStep=0,rpItem=0,rpAnswered=false,RM_DIAG=currentDiag();
 function prefsNow(){return typeof loadAccess==='function'?loadAccess():{}}
 function maybeSpeak(text){if(typeof speakIfEnabled==='function')speakIfEnabled(text,prefsNow());if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
-// Every exercise opens with a sound within 1 s (#665 2a): the item's music, or a neutral chime via openCue.js.
-var mmOpenCue=null;var mmItemPlay=null;
-function stopItemMusic(){if(mmItemPlay&&mmItemPlay.stop)mmItemPlay.stop();mmItemPlay=null;if(typeof stopAllAudio==='function')stopAllAudio()}
-function maybeHear(item,how){if(!item||item.noMusic)return;setActiveHear(how&&how.chimeOnly?null:item.hear||null);if(prefsNow().quiet)return;const cue=openCue();if(!cue)return how&&how.chimeOnly?false:playItemMusic(item);return cue.open(item,how)}
-function openCue(){if(!mmOpenCue&&typeof MM_OPEN_CUE!=='undefined')mmOpenCue=MM_OPEN_CUE.createOpenCue({getContext:()=>typeof getSharedAudioContext==='function'?getSharedAudioContext():null,playItemMusic:playItemMusic,isMuted:()=>!!(prefsNow().quiet||(typeof audioState!=='undefined'&&audioState.muted)),target:document});return mmOpenCue}
-function playItemMusic(item){const groups=item.hear;if(item.instrument&&typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item,{instrument:item.instrument,bpm:item.bpm,grade:item.grade||(typeof selectedGrade!=='undefined'?selectedGrade:undefined)});if(plan&&typeof MM_NUMBER_PLAY.play==='function'){mmItemPlay=MM_NUMBER_PLAY.play(plan);return true;}}if(groups&&typeof playCountClicks==='function'){playCountClicks(groups,item.bpm||76);return true;}const active=(typeof document!=='undefined'&&document.querySelector)?(document.querySelector('#quiz:not(.hidden), #rmCard:not(.hidden), #rmPlanCard:not(.hidden), #classCard:not(.hidden)')||document):null;const btn=active&&active.querySelector?active.querySelector('.np-btn, [data-act="play-numbers"], #btnPlayWay, .way-play-btn'):null;if(btn&&typeof btn.click==='function'){btn.click();return true;}if(typeof MM_NUMBER_PLAY!=='undefined'&&typeof MM_NUMBER_PLAY.extractNumberPlan==='function'){const plan=MM_NUMBER_PLAY.extractNumberPlan(item);if(plan&&typeof MM_NUMBER_PLAY.play==='function'){mmItemPlay=MM_NUMBER_PLAY.play(plan);return true;}}return false}
+function maybeHear(item){const groups=item&&item.hear;setActiveHear(groups||null);if(!groups)return;if(prefsNow().quiet)return;if(typeof playCountClicks==='function')playCountClicks(groups,76)}
 // «3 שארית 2» is not a number, so it goes through the pure validator in
 // grade3Music.js instead of the numeric isCorrect path, and a miss gets the
 // message that names the mistake (R5).
@@ -949,35 +855,25 @@ function answerOk(it,given){if(it&&it.tolerance!=null&&typeof isWithinTolerance=
 // once the child has answered. Items that are music activities themselves have no way.
 function musicWayHtml(it){return it&&it.musicNote?`<b>🎵 דרך מוזיקלית:</b> ${mathHtml(it.musicNote)}`:''}
 // Free play before answering (#591 A.3): an instrument strip under every exercise, in the timbre of its musical way.
-function setNumberPlay(id,it){const el=$(id);if(!el||typeof MM_NUMBER_PLAY==='undefined'||typeof MM_NUMBER_PLAY.mount!=='function')return;if(el._np&&el._np.stop)el._np.stop();el._np=null;if(it&&it.noMusic){el.innerHTML='';el.classList.add('hidden');return;}el._np=MM_NUMBER_PLAY.mount(el,it,{grade:(it&&it.grade)||selectedGrade,streak:typeof metroStreak==='number'?metroStreak:0,who:typeof who!=='undefined'?who:null,instrument:it&&it.instrument,bpm:it&&it.bpm});}
 function setMusicWay(id,it){const el=$(id);if(!el)return;const html=musicWayHtml(it);el.innerHTML=html;show(id,!!html);if(typeof mountFreePad==='function')mountFreePad(el,{mechanism:it&&typeof mechanismOf==='function'?mechanismOf(it.music):null,quiet:typeof prefsNow==='function'&&!!prefsNow().quiet})}
 function musicEvHe(ev){return ev==='D'?'חלק מהתערבות שנבדקה במחקר':ev==='R'?'מקור הוראה מוכר':'התאמה שעדיין לא נבדקה בנפרד'}
-function musicSourceHtml(it){const s=it&&it.musicSrc&&typeof MUSIC_SOURCES!=='undefined'?MUSIC_SOURCES[it.musicSrc]:null;if(!s)return'';const link=s=>{const a=document.createElement('a');a.href=s[1];a.target='_blank';a.rel='noopener';a.textContent=s[0];return a.outerHTML};const also=(it.musicSrcAlso||[]).map(k=>MUSIC_SOURCES[k]).filter(Boolean).map(link);return`<div class="music-src">מקור הדרך המוזיקלית: ${[link(s)].concat(also).join('; ')} · ${musicEvHe(it.musicEv)}</div>`}
+function musicSourceHtml(it){const s=it&&it.musicSrc&&typeof MUSIC_SOURCES!=='undefined'?MUSIC_SOURCES[it.musicSrc]:null;if(!s)return'';const a=document.createElement('a');a.href=s[1];a.target='_blank';a.rel='noopener';a.textContent=s[0];return`<div class="music-src">מקור הדרך המוזיקלית: ${a.outerHTML} · ${musicEvHe(it.musicEv)}</div>`}
 function answerHint(it,given,correct){const s=remSpec(it);if(correct||!s||typeof remainderMiss!=='function')return it.hint;return remainderMiss(given,s)}
-function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;const rd=Math.floor(rmIdx/DIAG_BLOCK),ri=rmIdx%DIAG_BLOCK,rn=Math.min(DIAG_BLOCK,RM_DIAG.length-rd*DIAG_BLOCK);$('rmCounter').innerHTML=`סבב ${rd+1} · שאלה <bdi dir="ltr" style="white-space:nowrap">${ri+1}/${rn}</bdi>`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${ri/rn*100}%`;if($('rmItemTag'))setItemTag($('rmItemTag'),q);setMath($('rmPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('rmNumberPlay',q);setMusicWay('rmWay',q);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('rmCheck',q);$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(ri?q.prompt:`${rd?'עוד סבב קצר.':'משחקים! סבב קצר של שאלות, ושומעים מיד איך הלך.'} ${q.prompt}`);setTimeout(()=>$('rmAnswer').focus(),0)}
-function rmCheck(){if(rmAnswered)return;if(!normalizeAnswer($('rmAnswer').value))return askForAnswer('rmAnswer','rmFeedback');rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct,q.skill,q);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>${musicSourceHtml(q)}`;show('rmFeedback',true);revealWidget('rmWidget');$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?((rmIdx+1)%DIAG_BLOCK?'הבא':'לסבב הבא'):'לדוח הפערים';if($('rmNext')&&typeof $('rmNext').focus==='function')$('rmNext').focus();}
+function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;$('rmCounter').innerHTML=`שאלה <bdi dir="ltr" style="white-space:nowrap">${rmIdx+1}/${RM_DIAG.length}</bdi>`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${rmIdx/RM_DIAG.length*100}%`;if($('rmItemTag'))setItemTag($('rmItemTag'),q);setMath($('rmPrompt'),q.prompt);setMusicWay('rmWay',q);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(q.prompt);setTimeout(()=>$('rmAnswer').focus(),0)}
+function rmCheck(){if(rmAnswered)return;if(!normalizeAnswer($('rmAnswer').value))return askForAnswer('rmAnswer','rmFeedback');rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>${musicSourceHtml(q)}`;show('rmFeedback',true);revealWidget('rmWidget');$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?'הבא':'לדוח הפערים';if($('rmNext')&&typeof $('rmNext').focus==='function')$('rmNext').focus();}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
-function rmReport(){rmPlanTopic=null;endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);window.mmLastDiag={grade:selectedGrade,perSkill:per.map(s=>({skill:s.skill,total:s.total,correct:s.correct}))};$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
+function rmReport(){endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);window.mmLastDiag={grade:selectedGrade,perSkill:per.map(s=>({skill:s.skill,total:s.total,correct:s.correct}))};$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
 const PLAN_PER_SKILL=6;
 function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItemsOrAll==='function'?gateItemsOrAll(st.items,st.history||[],st.items):(typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items);const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
-function rpRender(){const st=rmPlan[rpStep];const it=varyTopicExercise(rmPlanTopic,rpPick(),(st.history||[]).length);st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))setItemTag($('rmPlanTag'),it);setMath($('rmPlanPrompt'),it.prompt);if(typeof setNumberPlay==='function')setNumberPlay('rmPlanNumberPlay',it);setMusicWay('rmPlanWay',it);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('rmPlanCheck',it);$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);if(!(typeof MM_PREDICT!=='undefined'&&MM_PREDICT.mount($('rmPlanPredict'),it,st.skill||st.he,(st.history||[]).length,()=>maybeHear(it),null,{lock:[$('rmPlanAnswer'),$('rmPlanCheck')],hide:[$('rmPlanWay')]})))maybeHear(it);else maybeHear(it,{chimeOnly:true});maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
-function rpCheck(){if(rpAnswered||$('rmPlanAnswer').disabled)return;if(!normalizeAnswer($('rmPlanAnswer').value))return askForAnswer('rmPlanAnswer','rmPlanFeedback');const exIt=rmPlan[rpStep]&&rmPlan[rpStep].current;if(exIt&&exIt.explorer&&typeof MM_EXPLORER_BANK!=='undefined'){const exFlow=MM_EXPLORER_BANK.submit(exIt._exState||MM_EXPLORER_BANK.createState(exIt),$('rmPlanAnswer').value);exIt._exState=exFlow;if(exFlow.secondTry){rmPlan[rpStep].hints=(rmPlan[rpStep].hints||0)+1;$('rmPlanFeedback').className='feedback soft';$('rmPlanFeedback').textContent=exFlow.message;show('rmPlanFeedback',true);MM_EXPLORER_BANK.playReplay(exFlow.replay);$('rmPlanAnswer').value='';if($('rmPlanAnswer').focus)$('rmPlanAnswer').focus();return;}if(exFlow.phase==='correct')MM_EXPLORER_BANK.playScale(exFlow.scale);}rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerOk(it,$('rmPlanAnswer').value);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;if((st.history||[]).length>=PLAN_PER_SKILL-1)rpHoldStreak=true;const lv0=it.level||st.level||1;st.level=nextLevel(lv0,st.history.slice(-2));noteMetro(correct,st.skill||st.he,it);if(st.level>lv0&&typeof playLevelTune==='function')playLevelTune();rpHoldStreak=false;logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}${correct&&it._exState&&it._exState.animation?' '+it._exState.animation.className:''}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(answerHint(it,$('rmPlanAnswer').value,correct))}. התשובה: <b>${mathHtml(it.answer)}</b></div>${musicSourceHtml(it)}`;show('rmPlanFeedback',true);revealWidget('rmPlanWidget');$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא';if($('rmPlanNext')&&typeof $('rmPlanNext').focus==='function')$('rmPlanNext').focus();}
-function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}const enc=personalBestEncore(st);st.checkUsed=st.checkUsed||[];const checkItem=(typeof MM_NO_MUSIC_CHECK!=='undefined'?MM_NO_MUSIC_CHECK.pickCheckItem(rmPlanTopic,st.items,st.checkUsed):null)||(typeof nextPlainItem==='function'?nextPlainItem(st.items,st.checkUsed):null)||((st.items&&st.items.length)?(st.items.find(x=>x.id!==st.lastId)||st.items[0]):st.current);if(checkItem)st.checkUsed.push(checkItem.id);if(!checkItem){if($('rmPlanFeedback')){$('rmPlanFeedback').className='feedback bad';$('rmPlanFeedback').textContent='אין פריט בדיקה לנושא זה. הנושא הבא נעול.';show('rmPlanFeedback',true);}return;}function finishStep(){const P=typeof MM_PERSONAL_BEST!=='undefined'?MM_PERSONAL_BEST:null,S=typeof MM_MASTERY_STREAK!=='undefined'?MM_MASTERY_STREAK:null;if(rpPb&&P){const h=st.history||[];P.recordRun(who.name?who.classCode+'/'+who.name:'me',selectedGrade+':'+(st.skill||st.he),{correct:h.filter(x=>x.correct).length,total:h.length,hintsUsed:st.hints||0});rpPb=null;}let held=0;if(enc){rpStreakHeld=null;if(S&&P&&!prefsNow().quiet){const song=S.mySong();rpEncore=P.playEncore(P.encorePlan(song.length?song:[S.PHRASES[0]]),S,0.3);}}else{const phrase=rpStreakHeld;rpStreakHeld=null;if(phrase&&S&&!prefsNow().quiet){S.playPhrase(phrase,null,null,0.3);held=1;}}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!enc&&!held&&!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`+enc;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,enc?5000:1300)}else{const finale=generateRhythmExercise(3,.9);if(!enc&&!held&&!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`+enc;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);show('rmPlanDoneActions',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;if($('rmPlanRestart'))$('rmPlanRestart').focus()}}if(typeof mountMasteryCheck!=='function'||!$('masteryCheckHost')){finishStep();return}show('rmPlanNext',false);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;const audioCtx=window.mmAudioCtx||(typeof getAudioContext==='function'?getAudioContext():null);const topId=st.topicId||(checkItem&&checkItem.topicId)||st.skill;show('rmPlanFeedback',false);mountMasteryCheck($('masteryCheckHost'),checkItem,{audioContext:audioCtx,topicId:topId,bridgeItem:st.current,onAnswer:function(val,ok){$('masteryCheckHost').classList.add('hidden');if(typeof MelodyMathMasteryCheck!=='undefined'&&MelodyMathMasteryCheck.restoreMusicState)MelodyMathMasteryCheck.restoreMusicState(audioCtx);const next=typeof MM_NO_MUSIC_CHECK!=='undefined'?MM_NO_MUSIC_CHECK.afterAnswer(st,ok,window.mmMasteryTracker,topId):(ok?'pass':'picture');if(next==='pass'){finishStep()}else{rpPb=null;rpStreakHeld=null;stopEncore();show('rmReward',false);show('rmPlanFeedback',true);$('rmPlanFeedback').className='feedback soft';const hint=checkItem&&checkItem.hint?checkItem.hint:'';if(next==='retry'){$('rmPlanFeedback').innerHTML='<strong>ננסה שאלה אחרת.</strong><div class="hint">'+(typeof mathHtml==='function'?mathHtml(hint):hint)+'</div>';setTimeout(rpAdvance,1200);return}st.history=[];$('rmPlanFeedback').innerHTML='<strong>שתי טעויות: חוזרים לתמונה ולמוזיקה, ואז שוב בעצמכם.</strong><div class="hint">'+(typeof mathHtml==='function'?mathHtml(hint):hint)+'</div>';setTimeout(rpRender,1200)}}});}
+function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))setItemTag($('rmPlanTag'),it);setMath($('rmPlanPrompt'),it.prompt);setMusicWay('rmPlanWay',it);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
+function rpCheck(){if(rpAnswered)return;if(!normalizeAnswer($('rmPlanAnswer').value))return askForAnswer('rmPlanAnswer','rmPlanFeedback');rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerOk(it,$('rmPlanAnswer').value);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;const lv0=it.level||st.level||1;st.level=nextLevel(lv0,st.history.slice(-2));noteMetro(correct);if(st.level>lv0&&typeof playLevelTune==='function')playLevelTune();logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(answerHint(it,$('rmPlanAnswer').value,correct))}. התשובה: <b>${mathHtml(it.answer)}</b></div>${musicSourceHtml(it)}`;show('rmPlanFeedback',true);revealWidget('rmPlanWidget');$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא';if($('rmPlanNext')&&typeof $('rmPlanNext').focus==='function')$('rmPlanNext').focus();}
+function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);show('rmPlanDoneActions',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;if($('rmPlanRestart'))$('rmPlanRestart').focus()}}
 $('rmBegin').onclick=()=>{RM_DIAG=currentDiag();rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmPlanDoneActions',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
 $('rmPractice').onclick=()=>{rpStep=0;rpItem=0;show('rmReport',false);show('rmPlanDoneActions',false);show('rmPlan',true);rpRender()};
 $('rmRestart').onclick=()=>{show('rmReport',false);show('rmPlanDoneActions',false);show('rmStart',true);if($('rmBegin'))$('rmBegin').focus()};
-$('rmPlanCheck').onclick=rpCheck;$('rmPlanAnswer').onkeydown=e=>{if(e.key==='Enter')rpCheck()};
-let mixtapeSession=null,mixtapeBusy=false;
-function mixtapeMasteredIds(){try{const t=window.mmMasteryTracker;return t&&typeof t.getAllReports==='function'?t.getAllReports().filter(r=>r&&r.mastered).map(r=>r.topicId).filter(Boolean):[]}catch(e){return[]}}
-function mixtapePrimary(item){if(!item||!item.music)return false;try{if(typeof waysCarried==='function'&&typeof primaryWays==='function'&&typeof mechanismOf==='function'&&typeof MUSIC_DOSAGE!=='undefined'){return primaryWays(waysCarried(item.grade,item.standard)).map(w=>Array.isArray(w)?w[0]:w).indexOf(item.music)>=0&&MUSIC_DOSAGE.primary.indexOf(mechanismOf(item.music))>=0}}catch(e){}return true}
-function mixtapePool(){if(typeof itemsForGrade!=='function'||typeof itemsForTopic!=='function'||typeof rowsForGrade!=='function')return[];const base=itemsForGrade(selectedGrade),out=[];rowsForGrade(selectedGrade).forEach(row=>itemsForTopic(row.topicId,base).forEach(it=>out.push(Object.assign({},it,{topicId:row.topicId}))));return out}
-function refreshMixtapeGate(){if(typeof MM_MIXTAPE==='undefined'||!$('mixtapeStart'))return;const open=MM_MIXTAPE.canUnlock(mixtapeMasteredIds());$('mixtapeStart').disabled=!open;show('mixtapeLock',!open)}
-function renderMixtape(){const s=mixtapeSession,it=s&&s.current;if(!it)return;const intro=MM_MIXTAPE.sessionIntro(s),row=typeof topicById==='function'?topicById(intro.topicId):null;$('mixtapeTag').textContent=(row?row.topic:intro.topicId||'')+(intro.wayTag?' · '+intro.wayTag:'');$('mixtapeCounter').textContent=`תרגיל ${s.index+1} מתוך ${s.items.length}`;setMath($('mixtapePrompt'),it.prompt);$('mixtapeAnswer').value='';$('mixtapeAnswer').disabled=false;$('mixtapeCheck').disabled=false;show('mixtapeFeedback',false);if(!prefsNow().quiet&&typeof maybeHear==='function')maybeHear(it);setTimeout(()=>$('mixtapeAnswer').focus(),0)}
-function startMixtape(){if(mixtapeBusy||typeof MM_MIXTAPE==='undefined')return;const quiet=!!prefsNow().quiet,mix=MM_MIXTAPE.buildMixtape({items:mixtapePool(),masteredTopicIds:mixtapeMasteredIds(),grade:selectedGrade,seed:Date.now()&0x7fffffff,silent:quiet,primaryWaysFor:mixtapePrimary});if(!mix.ok){$('mixtapeLock').textContent=mix.reason==='locked'?'המיקסטייפ נפתח אחרי ששולטים בשני נושאים':'אין עדיין מספיק תרגילים במיקסטייפ';show('mixtapeLock',true);return}mixtapeSession=MM_MIXTAPE.createSession(mix);mixtapeBusy=true;show('mixtapeCard',false);show('mixtapePlay',true);renderMixtape()}
-function checkMixtape(){const s=mixtapeSession;if(!s||s.done)return;if(!normalizeAnswer($('mixtapeAnswer').value))return askForAnswer('mixtapeAnswer','mixtapeFeedback');const it=s.current,judge=typeof answerOk==='function'?answerOk:null,correct=judge?judge(it,$('mixtapeAnswer').value):String($('mixtapeAnswer').value).trim()===String(it.answer).trim(),res=MM_MIXTAPE.sessionAnswer(s,correct);$('mixtapeFeedback').className='feedback '+(correct?'good':'soft');if(!correct){$('mixtapeFeedback').textContent='כמעט — נסו שוב';show('mixtapeFeedback',true);$('mixtapeAnswer').value='';$('mixtapeAnswer').focus();return}if(!res.done){renderMixtape();return}mixtapeBusy=false;$('mixtapeAnswer').disabled=true;$('mixtapeCheck').disabled=true;$('mixtapeFeedback').textContent='סיימתם את המיקסטייפ! 🎧';show('mixtapeFeedback',true);show('mixtapeCard',true);refreshMixtapeGate();if(!prefsNow().quiet){try{const instId=typeof MM_MY_INSTRUMENT!=='undefined'?MM_MY_INSTRUMENT.getMyInstrument():null,inst=instId&&typeof instrumentById==='function'?instrumentById(instId):null,plan=MM_MIXTAPE.finalePlan(s,inst);if(typeof MM_MASTERY_STREAK!=='undefined'&&MM_MASTERY_STREAK.playPhrase)MM_MASTERY_STREAK.playPhrase({notes:plan.notes,durations:plan.notes.map(()=>0.18),instrument:instId},instId,null,0.3)}catch(e){}}}
-if($('mixtapeStart'))$('mixtapeStart').onclick=startMixtape;if($('mixtapeCheck'))$('mixtapeCheck').onclick=checkMixtape;if($('mixtapeAnswer'))$('mixtapeAnswer').onkeydown=e=>{if(e.key==='Enter')checkMixtape()};document.addEventListener('DOMContentLoaded',refreshMixtapeGate);$('rmPlanNext').onclick=rpAdvance;
+$('rmPlanCheck').onclick=rpCheck;$('rmPlanAnswer').onkeydown=e=>{if(e.key==='Enter')rpCheck()};$('rmPlanNext').onclick=rpAdvance;
 if($('rmCancel'))$('rmCancel').onclick=()=>{endTeacherSession();show('rmQuiz',false);show('rmStart',true);if($('rmBegin'))$('rmBegin').focus()};
 if($('rmPlanRestart'))$('rmPlanRestart').onclick=()=>{show('rmPlan',false);show('rmPlanDoneActions',false);show('rmStart',true);if($('rmBegin'))$('rmBegin').focus()};
 if($('rmPlanReport'))$('rmPlanReport').onclick=()=>{show('rmPlan',false);show('rmPlanDoneActions',false);show('rmReport',true);if($('rmPractice'))$('rmPractice').focus()};
@@ -1058,8 +954,8 @@ function renderClassKids(){const box=$('classKids');if(!box)return;const names=w
 function classTick(){const left=Math.max(0,classEndsAt-Date.now());const t=classClockText(left,classClockVisible());if($('classTimer').textContent!==t)$('classTimer').textContent=t;if(left<=0)endClassSession('time')}
 if($('classClockShow')){$('classClockShow').checked=classClockVisible();$('classClockShow').onchange=()=>{setClassClockVisible($('classClockShow').checked);if(classEndsAt)classTick()}}
 function showClassCard(id){['classGate','classPlay','classDone'].forEach(x=>show(x,x===id))}
-function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const pool=classPool();const q=pool[Math.floor(random()*pool.length)];classCurrent=q;if($('classItemTag'))setItemTag($('classItemTag'),q);setMath($('classPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('classNumberPlay',q);if(typeof setMusicWay==='function')setMusicWay('classWay',q);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.setAttribute('aria-label','תשובה: '+String(v));if(!q.noMusic)b.setAttribute('data-tap','xylo');b.onclick=()=>pickClass(v,b);box.appendChild(b)});const firstChoice=box.querySelector('button');if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus();maybeHear(q);maybeSpeak(q.prompt)}
-function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);classHist.push({id:classCurrent.id,correct:correct});noteMetro(correct,classCurrent.skill,classCurrent);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);revealWidget('classWidget');const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
+function nextClassQuestion(){classAnswered=false;const random=rng(classSeed++);const pool=classPool();const q=pool[Math.floor(random()*pool.length)];classCurrent=q;if($('classItemTag'))setItemTag($('classItemTag'),q);setMath($('classPrompt'),q.prompt);if(typeof setMusicWay==='function')setMusicWay('classWay',q);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.setAttribute('aria-label','תשובה: '+String(v));b.onclick=()=>pickClass(v,b);box.appendChild(b)});const firstChoice=box.querySelector('button');if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus();maybeHear(q);maybeSpeak(q.prompt)}
+function pickClass(value,btn){if(classAnswered||!classCurrent)return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);classHist.push({id:classCurrent.id,correct:correct});noteMetro(correct);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);revealWidget('classWidget');const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
 function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';if($('classGateMsg')){$('classGateMsg').textContent='יש לבחור תלמיד/ה מהרשימה או להזין שם בסרגל למעלה.';show('classGateMsg',true)}if($('studentName')&&typeof $('studentName').focus==='function')$('studentName').focus();return}if($('classGateMsg'))show('classGateMsg',false);endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classHist=[];classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
 function endClassSession(){classEndsAt=0;if(classTimerId){clearInterval(classTimerId);classTimerId=null}document.body.classList.remove('class-live');const ended=endTeacherSession();const last=ended&&ended.kind==='class'?ended:null;const n=last?(last.items||[]).length:0;const ok=last?(last.items||[]).filter(it=>it.correct).length:0;$('classDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות במפגש</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק במפגש</div>`;showClassCard('classDone');if($('classAgain')&&typeof $('classAgain').focus==='function')$('classAgain').focus()}
 if($('classStart'))$('classStart').onclick=startClassSession;
@@ -1138,16 +1034,14 @@ function toggleMetro(){ if(metroOn) stopMetro(); else startMetro(); }
 // startMetro() plays a click at once and resets the interval phase, so
 // restarting on every answer put an off-beat click right after each pick.
 function setMetroBpm(bpm){ const prev=metroBpmNow(); const next=clampBpm(bpm); if($('metroBpm')) $('metroBpm').value=next; if(metroOn && next!==prev) startMetro(); return next; }
-function noteMetro(correct, topic, item){
-  // #739: 5 in a row in a topic plays one phrase for "השיר שלי" instead of the streak melody (one reward, not two).
-  const won=typeof streakReward==='function'&&streakReward(topic,correct);
-  if(typeof setlistNote==='function') setlistNote(correct,topic,won,item);
+function noteMetro(correct){
   // A wrong answer gets its own soft falling step; a right one climbs with the streak.
   if(!correct && typeof playTap==='function') playTap('wrong');
-  // #591 A.4: the streak melody grows a note per right answer; right answers are counted; nothing is locked (#717).
+  // #591 A.4: the streak melody grows a note per right answer; right answers unlock strip instruments.
   else if(correct && typeof playStreakMelody==='function'){
-    if(!won) playStreakMelody(metroStreak + 1);
-    if(typeof recordCorrect==='function') recordCorrect();
+    playStreakMelody(metroStreak + 1);
+    const u=typeof recordCorrect==='function'?recordCorrect():null;
+    if(u&&u.unlocked&&typeof announceUnlock==='function') announceUnlock(u.unlocked);
   }
   else if(typeof playHarmonicReward==='function'){
     playHarmonicReward(correct ? metroStreak + 1 : 0);
@@ -1163,63 +1057,6 @@ if($('metroDown'))$('metroDown').onclick=function(){ setMetroBpm(metroBpmNow()-4
 if($('metroUp'))$('metroUp').onclick=function(){ setMetroBpm(metroBpmNow()+4); };
 if($('metroBpm'))$('metroBpm').onchange=function(){ this.value=clampBpm(this.value); if(metroOn) startMetro(); };
 document.addEventListener('visibilitychange',function(){ if(document.hidden) stopMetro(); });
-// #739 mastery streak on every practice screen: the right-answer sound first, then the new phrase on the child's instrument.
-function streakReward(topic,correct){
-  if(typeof MM_MASTERY_STREAK==='undefined') return false;
-  const S=MM_MASTERY_STREAK, id=topic||'practice';
-  const r=S.recordAnswer(id,correct,{instrument:S.instrumentFor(id),audio:false});
-  if(!r.unlocked) return false;
-  if(!prefsNow().quiet){ if(typeof playTap==='function') playTap('correct'); if(typeof rpHoldStreak!=='undefined'&&rpHoldStreak)rpStreakHeld=r.phrase;else S.playPhrase(r.phrase,null,null,0.4); }
-  paintMySong(r.phrase);
-  return true;
-}
-function paintMySong(fresh){
-  const host=$('mySongList'); if(!host||typeof MM_MASTERY_STREAK==='undefined') return;
-  const S=MM_MASTERY_STREAK, song=S.mySong();
-  host.innerHTML=S.mySongHtml(song);
-  host.querySelectorAll('[data-song]').forEach(function(b){ b.onclick=function(){ const k=b.getAttribute('data-song'); if(k==='all') S.playSong(song); else S.playPhrase(song[+k]); }; });
-  if(fresh){ const box=$('mySongNew'); if(box){ box.textContent='🎶 משפט חדש נכנס לשיר שלי: '+fresh.name; box.classList.remove('hidden'); setTimeout(function(){ box.classList.add('hidden'); },3500); } }
-}
-window.addEventListener('load',function(){ paintMySong(); paintSetlist(); });
-// #591 SetlistGoal: the child's goal for today (day in Israel time). Only right answers in a step with music add a box; meeting it plays the whole song
-// on the child's instrument (the same pick as "השיר שלי"). No timer, no failure message; "בלי מוזיקה" shows boxes only.
-function setlistNote(correct,topic,afterPhrase,item){
-  if(typeof MM_SETLIST_GOAL==='undefined') return;
-  const G=MM_SETLIST_GOAL, S=typeof MM_MASTERY_STREAK!=='undefined'?MM_MASTERY_STREAK:null;
-  G.rollover();
-  const r=G.recordAnswer(correct,{item:item,instrument:S?S.instrumentFor(topic):null});
-  if(!r.counted) return;
-  if(r.justMet&&S&&!prefsNow().quiet) S.playPhrase(G.songPhrase(r.song),null,null,afterPhrase?2.6:0.6);
-  paintSetlist(r.justMet);
-}
-function paintSetlist(done){
-  const host=$('setlistBody'); if(!host||typeof MM_SETLIST_GOAL==='undefined') return;
-  const G=MM_SETLIST_GOAL, a=G.rollover(), say=$('setlistSay');
-  if(a){
-    host.innerHTML=G.boxesHtml(a)+'<span class="note">'+a.count+' מתוך '+a.target+'</span><button type="button" data-goal-change>יעד אחר</button>';
-    host.querySelector('[data-goal-change]').onclick=function(){ G.close(); if(say) say.textContent='השיר נשמר כמו שהוא. בוחרים יעד חדש.'; paintSetlist(); };
-  } else {
-    const hist=G.getHistory(), last=hist[hist.length-1];
-    host.innerHTML=(last&&last.count&&!prefsNow().quiet?'<button type="button" data-goal-replay>▶ השיר האחרון</button>':'')+G.pickerHtml(G.suggestNextGoal(hist));
-    host.querySelectorAll('[data-goal]').forEach(function(b){ b.onclick=function(){ G.start(b.getAttribute('data-goal')); if(say) say.textContent='בחרתם: '+b.textContent.replace(' ⭐ מוצע',''); paintSetlist(); }; });
-    const rp=host.querySelector('[data-goal-replay]');
-    if(rp) rp.onclick=function(){ if(typeof MM_MASTERY_STREAK!=='undefined') MM_MASTERY_STREAK.playPhrase(G.songPhrase(last)); };
-  }
-  if(done&&say) say.textContent='🎶 השיר הושלם ונשמר!';
-} // instruments.js loads at the end of the page
-function personalBestEncore(st){
-  rpPb=null;
-  if(typeof MM_PERSONAL_BEST==='undefined'||!st) return '';
-  const P=MM_PERSONAL_BEST, h=st.history||[], it=st.current;
-  const r=P.recordRun(who.name?who.classCode+'/'+who.name:'me',selectedGrade+':'+(st.skill||st.he),{correct:h.filter(x=>x.correct).length,total:h.length,hintsUsed:st.hints||0},false);
-  rpPb=r;
-  if(!r.isNew) return '';
-  return '<div class="encore" data-encore role="status"><strong>🎺 הדרן!</strong> '+P.strategyLine(it&&typeof mechanismOf==='function'?mechanismOf(it.music):null,r.run,r.prev)+'</div>';
-}
-var rpEncore=null,rpStreakHeld=null,rpHoldStreak=false,rpHeldPlayed=0,rpPb=null;
-function stopEncore(){ if(rpEncore&&typeof rpEncore.stop==='function') rpEncore.stop(); rpEncore=null; }
-rpRender=function(f){return function(){stopEncore();return f()}}(rpRender);
-['rmPlanRestart','rmPlanReport'].forEach(function(id){ const b=$(id); if(b&&b.addEventListener) b.addEventListener('click',stopEncore); });
 // One AudioContext for the page (musicEngine.js), unlocked on the first tap: iOS plays nothing before a gesture.
 if(typeof installAudioUnlock==='function') installAudioUnlock(document);
 // Every [data-tap] element sounds on pointerdown with animation and a short buzz (#591).
@@ -1291,49 +1128,19 @@ renderFirstRun();
 // program.html opens a curriculum row with ?topic=<id>[&skill=<k>]: the row's
 // tagged items run in the same plan loop as startStrugglePractice. Navigation
 // only — picking, levels and scoring are unchanged.
-// Topic practice (?topic=) varies numbers, instrument, rhythm and pattern
-// inside the row's own exercise. It does not rewrite the row as a + b.
-// The last round is the plain check, so hasMusic is not forced on (Refs #681).
-function varyTopicExercise(topicId, item, round) {
-  if (!topicId || !item || typeof MM_VARIETY === 'undefined' || !MM_VARIETY.TOPIC_RANGES || !MM_VARIETY.TOPIC_RANGES[topicId]) return item;
-  const seed = typeof rmVarietySeed === 'number' ? rmVarietySeed : 0;
-  const rounds = typeof PLAN_PER_SKILL === 'number' ? PLAN_PER_SKILL : 6;
-  const made = MM_VARIETY.generateVariant(Object.assign({}, item, { topicId: topicId }), round || 0, { seed: seed, rounds: rounds });
-  if (!made) return item;
-  if (made.prompt !== item.prompt && typeof made.answer === 'number' && made.exerciseType === MM_VARIETY.TOPIC_TYPES[topicId]) {
-    const range = MM_VARIETY.getTopicRange(topicId);
-    if (made.answer < range.min || made.answer > range.max) return item;
-  }
-  const patch = {
-    id: made.id, prompt: made.prompt, answer: made.answer, hint: made.hint,
-    numberKey: made.numberKey, bpm: made.bpm, rhythmPattern: made.rhythmPattern,
-    instrument: made.instrument, voice: made.voice, hear: made.hear,
-    exerciseType: made.exerciseType, hasMusic: made.hasMusic === true, noMusic: made.noMusic === true,
-    topicId: topicId
-  };
-  if (!item.skill) patch.skill = made.exerciseType;
-  if (made.noMusic) { patch.music = null; patch.widget = null; patch.hear = null; }
-  else if (made.music) patch.music = made.music;
-  return Object.assign({}, item, patch);
-}
 function startTopicPractice(id,skill){
   const row=typeof topicById==='function'?topicById(id):null;
   if(!row||!isGrade(row.grade)||typeof itemsForTopic!=='function') return false;
-  // The #750 tap items are not in the SHIPPED banks; put them first so the G6_MEAN topic opens on the tap widget.
-  const extra=typeof MM_TAP_TEMPO_MEAN!=='undefined'?MM_TAP_TEMPO_MEAN.getItems():[];
-  const items=itemsForTopic(id,extra.concat(itemsForGrade(row.grade))).filter(it=>!skill||it.skill===skill);
+  const items=itemsForTopic(id,itemsForGrade(row.grade)).filter(it=>!skill||it.skill===skill);
   if(!items.length) return false;
-  // Keep the short skill title when it belongs to the topic; otherwise (e.g. old 'decimals' items on ממוצע) show the topic.
-  const stepTitle=k=>{const he=rmHe(k)||k;return String(row.topic||'').includes(he)?he:(row.topic||he);};
-  rmPlanTopic=id;rmVarietySeed=(Date.now()%88)+1;
   saveGrade(row.grade);
-  rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:stepTitle(k),items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
+  rmPlan=[...new Set(items.map(it=>it.skill))].map(k=>({skill:k,he:rmHe(k)||k,items:items.filter(it=>it.skill===k),history:[],level:1,lastId:null,current:null}));
   rpStep=0; rpItem=0;
   show('rmStart',false); show('rmReport',false); show('rmPlanDoneActions',false); show('rmPlan',true);
   rpRender();
   return true;
 }
-try{const q=new URLSearchParams(location.search);if(q.get('topic'))document.addEventListener('DOMContentLoaded',function(){startTopicPractice(q.get('topic'),q.get('skill'));});}catch(e){}
+try{const q=new URLSearchParams(location.search);if(q.get('topic'))startTopicPractice(q.get('topic'),q.get('skill'));}catch(e){}
 
 function renderCertificate(){
   const box=$('certSheet'); if(!box) return;
@@ -1357,7 +1164,6 @@ function beatPool(){
   let pool;
   if(pack==='grade') pool=itemsForGrade(selectedGrade);
   else if(pack==='multiplication' || pack==='division' || pack==='basic_fractions') pool=rowsOf(pack);
-  else if(pack==='regroup') pool=regroupItems();
   else pool=classItems();
   if(typeof gateItems==='function') pool=gateItems(pool, beatHist, typeof allItems==='function'?allItems():pool);
   // Beat mode answers by tapping a choice, so an item that needs a typed
@@ -1396,7 +1202,7 @@ function nextBeatQuestion(){
   show('beatFeedback',false);
   const opts=makeChoices(q.answer, random);
   const box=$('beatChoices'); box.innerHTML='';
-  opts.forEach(v=>{ const b=document.createElement('button'); b.type='button'; b.className='choice'; b.dir='ltr'; b.textContent=String(v); b.setAttribute('aria-label','תשובה: '+String(v)); b.setAttribute('data-tap','xylo'); b.onclick=()=>pickBeat(v,b); box.appendChild(b); });const firstBeatChoice=box.querySelector('button');if(firstBeatChoice&&typeof firstBeatChoice.focus==='function')firstBeatChoice.focus();
+  opts.forEach(v=>{ const b=document.createElement('button'); b.type='button'; b.className='choice'; b.dir='ltr'; b.textContent=String(v); b.setAttribute('aria-label','תשובה: '+String(v)); b.onclick=()=>pickBeat(v,b); box.appendChild(b); });const firstBeatChoice=box.querySelector('button');if(firstBeatChoice&&typeof firstBeatChoice.focus==='function')firstBeatChoice.focus();
   if(box.firstElementChild && typeof box.firstElementChild.focus==='function') box.firstElementChild.focus();
   maybeHear(q); maybeSpeak(q.prompt);
   beatOpenedAt=Date.now();
@@ -1417,10 +1223,7 @@ function finishBeatPick(value, correct, late){
   if(paced){
     metroStreak=paced.streak;
     setMetroBpm(paced.bpm);
-    const won=typeof streakReward==='function'&&streakReward(beatCurrent.skill,correct && !late);
-    if(typeof setlistNote==='function') setlistNote(correct && !late,beatCurrent.skill,won,beatCurrent);
-  } else noteMetro(correct && !late,beatCurrent.skill,beatCurrent);
-  if(paced && typeof playTap==='function') playTap(correct && !late ? 'correct' : 'wrong');
+  } else noteMetro(correct && !late);
   logTeacherItem({kind:'beat',skill:beatCurrent.he||beatCurrent.skill,prompt:beatCurrent.prompt,answer:beatCurrent.answer,given:late?'מאוחר':value,correct:correct});
   [...$('beatChoices').children].forEach(b=>{ b.disabled=true; if(isCorrect(b.textContent,beatCurrent.answer)) b.classList.add('picked-good'); });
   $('beatFeedback').className='feedback '+(correct?'good':'bad');
@@ -1721,7 +1524,7 @@ function renderStepQuiz(lesson, step) {
   choicesBox.setAttribute('aria-label', 'אפשרויות תשובה');
 
   choicesBox.innerHTML = step.options.map((opt, idx) => `
-    <button type="button" class="secondary quiz-choice" data-tap="xylo" data-choice-idx="${idx}" style="padding:12px;font-size:1.05rem;font-weight:bold;text-align:center;">
+    <button type="button" class="secondary quiz-choice" data-choice-idx="${idx}" style="padding:12px;font-size:1.05rem;font-weight:bold;text-align:center;">
       ${escapeHtml(opt)}
     </button>
   `).join('');
@@ -1746,7 +1549,6 @@ function renderStepQuiz(lesson, step) {
       feed.className = `feedback ${res.correct ? 'good' : 'bad'}`;
       feed.innerHTML = `<strong>${res.correct ? 'מעולה! תשובה מדויקת! 🎵' : 'לא בדיוק הפעם.'}</strong><div>${escapeHtml(res.explanation)}</div>`;
       if (!res.correct) {
-        if (typeof playTap === 'function') playTap('wrong');
         feed.innerHTML += `<div style="margin-top:12px;"><p style="margin:0 0 8px;font-weight:700;">התשובות נעולות — לחצו «נסו שוב» כדי לבחור תשובה חדשה.</p><button type="button" id="stepQuizRetryBtn" class="primary" style="width:auto;min-height:48px;padding:10px 24px;font-size:1.1rem;">🔄 נסו שוב</button></div>`;
       }
       feed.classList.remove('hidden');
@@ -2245,7 +2047,7 @@ function renderStepAction(step) {
             </div>
           `).join('')}
         </div>
-        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
+        <div style="font-size:1.1rem;color:var(--good);font-weight:bold;margin:8px 0;">LCM(2, 3) = 6. אחרי 6 פעימות שני התופים נפגשים בדיוק!</div>
         <button type="button" class="primary" id="btnPlayPolyDemo" style="width:auto;margin:8px auto;padding:10px 24px;">${step.actionLabel || 'השמיעו את רגע המפגש בפעימה 6 🎵'}</button>
       </div>
     `;
@@ -2832,7 +2634,7 @@ function renderPolyrhythmExplorerUI(box) {
         }).join('')}
       </div>
       <div style="font-size:1.2rem;font-weight:bold;color:var(--ink);margin:10px 0;">
-        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (תוף כל ${polyrhythmCycleA} ותוף כל ${polyrhythmCycleB} נפגשים שוב אחרי ${stepLcm} פעימות)
+        התופים נפגשים בפעימה: <span style="color:var(--good);font-size:1.4rem;">${stepLcm}</span> (LCM של ${polyrhythmCycleA} ו־${polyrhythmCycleB} הוא ${stepLcm})
       </div>
       <button type="button" class="primary" id="btnPlayPolyExp" style="width:auto;margin:8px auto;padding:10px 24px;">🥁 השמעת שני התופים יחד</button>
     </div>
@@ -2947,24 +2749,10 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
   if (tabRem && typeof activateHomeTab === 'function') activateHomeTab(tabRem);
 };
 </script><script src="src/lib/learnerPlanView.js"></script>
-<script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/lib/exercises/variety.js"></script><script src="src/lib/myInstrument.js"></script><script src="src/lib/masteryCheck.js"></script><script src="src/lib/noMusicCheck.js"></script><script src="src/lib/mixtape.js"></script><script src="src/components/jamKit.js"></script><script src="src/components/NumberPlay.js"></script>
+<script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/components/jamKit.js"></script>
 <script src="src/lib/music/fractionBar.js"></script><script src="src/components/FractionBarPad.js"></script>
-<script src="src/lib/music/tempoRuler.js"></script><script src="src/components/TempoRuler.js"></script>
-<script src="src/lib/music/takeAwayTen.js"></script><script src="src/lib/music/dragPlace.js"></script><script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
-<script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/components/TimesTableGroove.js"></script>
-<script type="module" src="src/components/EnsembleStudio.js"></script>
-<script src="src/lib/music/grooveGrid.js"></script><script src="src/components/GrooveGridScreen.js"></script>
-<script>/* ?topic=mm-cur-47&screen=1 opens #ggCard via MM_GROOVE_GRID.SCREEN_FOR. Refs #591. Leaves progression.js SCREENS to #811. */
-try{const q=new URLSearchParams(location.search),g=window.MM_GROOVE_GRID,card=q.get('screen')&&g&&g.SCREEN_FOR[q.get('topic')];if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
-<script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/components/PercentMixPad.js"></script>
-<script src="src/components/PolyChallengePad.js"></script>
-<script src="src/lib/music/moreFamilies.js"></script>
+<script src="src/lib/music/beatCounter.js"></script><script src="src/components/BeatCounter.js"></script>
+<script src="src/lib/music/groove.js"></script><script src="src/lib/music/streak.js"></script><script src="src/lib/music/unlocks.js"></script><script src="src/components/TimesTableGroove.js"></script>
+<script src="src/lib/music/rhythmPolygon.js"></script><script src="src/lib/music/polygonCheck.js"></script><script src="src/components/RhythmPolygon.js"></script>
 <!-- #591 music game scripts end -->
-<script src="src/lib/music/loopStack.js"></script><script src="src/components/LoopStackScreen.js"></script>
-<script>/* ?topic=mm-cur-56&screen=1 opens LoopStack. Its own map, not progression.js SCREENS (#798). */
-try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_LOOP_STACK.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
-<script src="src/lib/music/balanceBars.js"></script><script src="src/components/BalanceBarsScreen.js"></script>
-<script>/* ?topic=mm-cur-31 or mm-cur-39 &screen=1 opens BalanceBars (#710). Its own map, like LoopStack. */
-try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_BALANCE_BARS.screenForTopic(q.get('topic'));if(card&&document.getElementById(card)){activateHomeTab(document.getElementById('tab-musicGames'));document.getElementById(card).scrollIntoView({block:'start'})}}catch(e){}</script>
-<script src="src/lib/noteLengthLine.js"></script><script src="src/components/NoteLengthLineScreen.js"></script>
 </body></html>
