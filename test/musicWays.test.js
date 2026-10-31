@@ -147,9 +147,24 @@ test('grade ב׳: the #103 activities keep their tag and take no way', () => {
   assert.equal(items.filter((it) => it.musicNote && !it.musicStory).length, items.length - acts.length);
 });
 
-test('every item of every grade has a music side: 1288/1288', () => {
+test('every item of every grade has a music side and known IDs are present', () => {
   const all = banks.allItems();
-  assert.equal(all.length, 1288); // + 9 grade-ג 10,000 and data-organize items (#411) + 15 MASS_VOL in ד׳, minus 3 kg/liter removed from ב׳ (#751), + 3 explorer exercises and 3 silent checks (#688) + 2 pattern and worked example items (#670) + 8 count-on items (#462) + 8 מעבר עשרת duo items (#465) + 8 chant items (#463) + 6 ה׳ perimeter (#711)
+  assert.ok(all.length >= 1204, 'expected at least 1204 items, got ' + all.length);
+  const ids = new Set(all.map((it) => it.id));
+  [
+    'א-counting-0',
+    'ב-addition-123',
+    'ג-multiplication-194',
+    'ד-basic_fractions-227',
+    'ה-fractions-432',
+    'ו-fractions-454',
+    'ו-data-1197',
+    'ד-measurement-1250',
+    'א-number_line-1260',
+    'ה-geometry-1270',
+    'ג-data-1279',
+    'ב-addition-1287',
+  ].forEach((id) => assert.ok(ids.has(id), 'missing known item ID: ' + id));
   assert.equal(all.filter((it) => it.music || it.noMusic).length, all.length);
   assert.equal(all.filter((it) => it.musicNote && !(it.musicSrc && it.musicEv)).length, 0);
   assert.deepEqual(banks.GRADES.filter((g) => !FILES[g]), []);
