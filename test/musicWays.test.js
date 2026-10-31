@@ -236,7 +236,7 @@ test('grade א׳ #751: PATTERN is taught with fixed accents (das2023), and CHART
 
 test('#751 batch 2: one main way per topic; the others stay as EXTRA with their rating', () => {
   const MAIN = {
-    'ב': { DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', WORD_COLLECT: 'callResponse', WORD_REMOVE: 'takeAwayBeats', MASS_VOL: 'layerBars' },
+    'ב': { DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', WORD_COLLECT: 'callResponse', WORD_REMOVE: 'takeAwayBeats', MASS_VOL: 'cubeLayerGroups' },
     'ג': { MUL_C: 'repeatedBars', DIV_PART: 'phraseShare', DIV_QUOT: 'phraseShare', TRI_SORT: 'triangleMotif', MINUTES: 'hourTwelveGroups' },
   };
   Object.keys(MAIN).forEach((grade) => {
@@ -466,10 +466,10 @@ test('#751: grade ב׳ has no kg/liter method as primary', () => {
   });
   Object.values(g2.music).forEach((list) => assert.ok(!list.some((w) => w[0] === 'gramGroups')));
   const ways = g2.music.MASS_VOL;
-  assert.deepEqual(ways.map((w) => w[0]), ['layerBars', 'cubeRowPattern']);
-  assert.deepEqual(banks.primaryWays(ways).map((w) => w[0]), ['layerBars']);
+  assert.deepEqual(ways.map((w) => w[0]), ['cubeLayerGroups', 'layerBars', 'cubeRowPattern']);
+  assert.deepEqual(banks.primaryWays(ways).map((w) => w[0]), ['cubeLayerGroups']);
   banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MASS_VOL).forEach((it) => {
-    assert.equal(it.music, 'layerBars', it.prompt);
+    assert.equal(it.music, 'cubeLayerGroups', it.prompt);
     assert.doesNotMatch(it.musicNote, /ק״ג|ליטר/);
   });
 });
@@ -484,7 +484,7 @@ test('#751: no cube-volume item references kg', () => {
     (it.musicExtra || []).forEach((x) => assert.doesNotMatch(x.music + '\n' + x.note, kg, it.prompt));
   });
   banks.itemsForGrade('ב').filter((it) => it.standard === banks.ST.MASS_VOL).forEach((it) => {
-    assert.equal(it.music, 'layerBars', it.prompt);
+    assert.equal(it.music, 'cubeLayerGroups', it.prompt);
   });
   const g4 = FILES['ד'].music.MASS_VOL;
   assert.equal(g4[0][0], 'kiloGroupsTen');
