@@ -908,6 +908,9 @@ function renderWidget(hostId, item, inputId){
   } else if(inputId && typeof MM_DRAG_PLACE!=='undefined' && MM_DRAG_PLACE.specForItem(item)){
     host.classList.remove('hidden'); host.onclick=null;
     MM_DRAG_PLACE.mount(host, item, {fill:fill, quiet:!!prefsNow().quiet});
+  } else if (item.kind && (item.kind === 'singing_line' || item.kind === 'groups_mult' || item.kind === 'even_odd') && typeof MM_INTERACTIVE_EXPLORERS !== 'undefined' && typeof MM_INTERACTIVE_EXPLORERS.renderExplorerWidget === 'function'){
+    host.classList.remove('hidden');
+    MM_INTERACTIVE_EXPLORERS.renderExplorerWidget(host, item, { onSelect: fill });
   } else if(item.skill==='geometry' && typeof renderShapesHtml==='function'){
     const shapes=renderShapesHtml(item.prompt);
     if(shapes){ host.classList.remove('hidden'); host.innerHTML=shapes; }
@@ -2951,7 +2954,7 @@ if ($('stepPracticeBtn')) $('stepPracticeBtn').onclick = () => {
   if (tabRem && typeof activateHomeTab === 'function') activateHomeTab(tabRem);
 };
 </script><script src="src/lib/learnerPlanView.js"></script>
-<script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/lib/childScreenText.js"></script><script src="src/lib/exercises/variety.js"></script><script src="src/lib/myInstrument.js"></script><script src="src/lib/masteryCheck.js"></script><script src="src/lib/noMusicCheck.js"></script><script src="src/lib/mixtape.js"></script><script src="src/components/jamKit.js"></script><script src="src/components/NumberPlay.js"></script>
+<script src="src/lib/instrumentVoices.js"></script><script src="src/lib/instruments.js"></script><script src="src/lib/childScreenText.js"></script><script src="src/lib/exercises/variety.js"></script><script src="src/lib/exercises/interactiveExplorers.js"></script><script src="src/lib/myInstrument.js"></script><script src="src/lib/masteryCheck.js"></script><script src="src/lib/noMusicCheck.js"></script><script src="src/lib/mixtape.js"></script><script src="src/components/jamKit.js"></script><script src="src/components/NumberPlay.js"></script>
 <script src="src/lib/music/fractionBar.js"></script><script src="src/components/FractionBarPad.js"></script>
 <script src="src/lib/music/dataBeats.js"></script><script src="src/lib/music/percentMix.js"></script><script src="src/lib/music/dataPercentCheck.js"></script><script src="src/components/DataBeats.js"></script>
 <script src="src/lib/music/tempoRuler.js"></script><script src="src/components/TempoRuler.js"></script>
