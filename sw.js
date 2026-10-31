@@ -121,6 +121,7 @@ const ASSETS = [
   './src/lib/music/grooveGrid.js',
   './src/components/GrooveGridScreen.js',
   './src/lib/music/loopStack.js',
+  './src/lib/music/cubeLayers.js',
   './src/components/LoopStackScreen.js',
   './src/lib/music/balanceBars.js',
   './src/components/BalanceBarsScreen.js',

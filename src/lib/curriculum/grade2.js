@@ -160,8 +160,11 @@
       ['fillBar', 'עודף כהשלמה: מהמחיר נגנו פעימות עד הסכום ששולם וספרו — גם באגורות.', 'azaryahu2020', 'A', EXTRA],
     ],
     // Cube counting only. Kg and liters are grade ד׳, where kiloGroupsTen is primary (#751).
+    // #864: one way, the layers of cubeLayerGroups (the same sound in ד׳ and in
+    // ו׳ LoopStack). layerBars stays as EXTRA.
     MASS_VOL: [
-      ['layerBars', 'כל שכבת קוביות היא קבוצת פעימות, פעימה לכל קובייה והדגשה בראש כל שכבה. ספרו בקפיצות של שכבה עד הסוף.', 'das2023', 'A'],
+      ['cubeLayerGroups', 'כל שכבת קוביות היא קבוצה, והשכבות מתנגנות אחת אחרי השנייה. עד 12 — פעימה לכל קובייה; מעל 12 — עשרות ויחידות. כמה שכבות — כמה קבוצות.', 'das2023', 'A'],
+      ['layerBars', 'כל שכבת קוביות היא קבוצת פעימות, פעימה לכל קובייה והדגשה בראש כל שכבה. ספרו בקפיצות של שכבה עד הסוף.', 'das2023', 'A', EXTRA],
       ['cubeRowPattern', 'שכבת קוביות היא דגם שחוזר: שורה, שורה, שורה. בונים שכבה, ואז חוזרים על אותו דגם לשכבה הבאה — מוסיפים שכבה שלמה בכל פעם.', 'azaryahuPatterns', 'A', EXTRA],
     ],
     PICTOGRAM: [
