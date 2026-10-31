@@ -43,7 +43,7 @@ const WAYS = {
     G6_CIRCLE_TERMS: ['sectorAsNote', 'diameterTwoRadii', 'chordShorterNote'],
     G6_CIRCLE_CALC: ['piBarsAround', 'halfCircleBar', 'doubleRadiusBars'],
     G6_COMP_TRI: ['partsRowGroups', 'outerSideGroups', 'areaScore'],
-    G6_BOX_VOL: ['layerByLayer', 'cubeEdgeLayers', 'layerCount'],
+    G6_BOX_VOL: ['cubeLayerGroups', 'layerByLayer', 'cubeEdgeLayers', 'layerCount'],
     G6_VOL_UNITS: ['litreThousandGroups', 'cubicLayers', 'unitBySize'],
     G6_MEAN: ['levelNotes', 'tapTempo', 'equalPhrases', 'pitchMean'],
     G6_DATA_READ: ['columnsAsNotes', 'pieSectorRead', 'symbolNoteLength'],
