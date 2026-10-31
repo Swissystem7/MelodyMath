@@ -73,3 +73,54 @@ test('practice series: whole-number means, 2-4 choices, the answer among them', 
   });
   assert.ok(DB.SERIES.some((s) => DB.trend(s.values) === 'up') && DB.SERIES.some((s) => DB.trend(s.values) === 'down'));
 });
+
+// ---------- percentToSubbeats ----------
+
+const PM = require('../src/lib/music/percentMix.js');
+
+test('percentToSubbeats: X% is X of the 100 sub-beats of one bar', () => {
+  assert.deepEqual(
+    (({ subbeats, of, beats, fullBeats, restSubbeats, fraction, decimal }) => ({ subbeats, of, beats, fullBeats, restSubbeats, fraction, decimal }))(PM.percentToSubbeats(25)),
+    { subbeats: 25, of: 100, beats: 1, fullBeats: 1, restSubbeats: 0, fraction: '1/4', decimal: 0.25 });
+  assert.equal(PM.percentToSubbeats(50).fraction, '1/2', '50% = a half note');
+  assert.equal(PM.percentToSubbeats(75).beats, 3);
+  const p30 = PM.percentToSubbeats(30);
+  assert.equal(p30.fullBeats, 1);
+  assert.equal(p30.restSubbeats, 5);
+  assert.equal(p30.fraction, '3/10');
+  assert.equal(PM.percentToSubbeats(0).fraction, '0');
+  assert.equal(PM.percentToSubbeats(100).fraction, '1/1');
+  for (let x = 0; x <= 100; x++) assert.equal(PM.subbeatsToPercent(PM.percentToSubbeats(x).subbeats), x);
+  [-1, 101, 12.5, '25', NaN].forEach((bad) => assert.throws(() => PM.percentToSubbeats(bad), RangeError, String(bad)));
+});
+
+test('percent is the M3 note-duration method and keeps its TODO-source mark', () => {
+  assert.equal(PM.MECHANISM, 'M3');
+  assert.equal(PM.PER_BEAT, 25);
+  assert.equal(PM.percentToSubbeats(10).source, 'TODO-source');
+  assert.match(fs.readFileSync(path.join(__dirname, '../src/lib/music/percentMix.js'), 'utf8'), /\/\/ TODO-source/);
+  assert.equal(PM.percentOf(25, 20), 5);
+});
+
+test('PercentMix pad: tiles fill toward the target, an overflow is refused', () => {
+  let r = PM.addTile([], 'beat', 40);
+  assert.equal(r.status, 'under');
+  r = PM.addTile(r.fill, 'beat', 40);
+  assert.equal(r.accepted, false);
+  assert.equal(r.over, 10);
+  assert.deepEqual(r.fill, ['beat']);
+  r = PM.addTile(r.fill, 'ten', 40);
+  r = PM.addTile(r.fill, 'five', 40);
+  assert.equal(r.status, 'exact', '25 + 10 + 5 = 40 sub-beats');
+  const plan = PM.barPlan(['half', 'beat'], 60);
+  assert.deepEqual(plan.filter((n) => n.kind === 'tile').map((n) => n.at), [0, 2], '50 sub-beats = 2 beats');
+  assert.equal(plan.filter((n) => n.kind === 'click').length, 3);
+  PM.TARGETS.forEach((t) => {
+    assert.ok(t.allowed.length >= 2 && t.allowed.length <= 4, t.he);
+    // Every target can be filled with its allowed tiles.
+    const ns = t.allowed.map((id) => PM.tile(id).n);
+    const can = [true];
+    for (let s = 1; s <= t.percent; s++) can[s] = ns.some((n) => s - n >= 0 && can[s - n]);
+    assert.ok(can[t.percent], t.he);
+  });
+});
