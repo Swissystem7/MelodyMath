@@ -107,6 +107,8 @@ const ASSETS = [
   './src/lib/music/percentMix.js',
   './src/lib/music/dataPercentCheck.js',
   './src/components/DataBeats.js',
+  './src/lib/music/musicianship.js',
+  './src/components/MusicianshipPath.js',
   './src/components/PercentMixPad.js',
   './src/lib/music/moreFamilies.js',
   './src/components/EnsembleStudio.js',
