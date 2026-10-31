@@ -66,7 +66,7 @@ test('SOUNDS-LICENSES.md exists and states no third-party audio is used', () => 
       if (e.name === 'node_modules' || e.name.startsWith('.')) return;
       const p = path.join(dir, e.name);
       if (e.isDirectory()) walk(p);
-      else if (/\.(wav|mp3|ogg|flac|m4a|aac|opus)$/i.test(e.name)) audio.push(path.relative(path.join(__dirname, '..'), p));
+      else if (/\.(wav|mp3|ogg|flac|m4a|aac|opus)$/i.test(e.name)) audio.push(path.relative(path.join(__dirname, '..'), p).replace(/\\/g, '/'));
     });
   })(path.join(__dirname, '..'));
   audio.forEach((f) => assert.ok(md.includes(f), f + ' must be listed with its licence'));
