@@ -111,3 +111,8 @@
 .msp-legend{color:var(--muted);font-size:.9rem;margin:4px 0}
 .msp-progress,.msp-round{margin:6px 0;padding-inline-start:20px}
 .msp-offer{width:auto;min-height:48px}
+.rm-choices .rm-choice{min-width:64px;min-height:48px;font-size:1.1rem}
+.rm-voices{font-weight:bold}
+.rm-note{color:var(--muted);font-size:.92rem}
+.rm-pose{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin:8px 0}
+.rm-pose select,.rm-pose input{min-height:44px}
