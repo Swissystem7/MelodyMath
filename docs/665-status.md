@@ -6,7 +6,7 @@
 
 | # | דרישה (ציטוט) | מצב | בקצרה |
 |---|---------------|-----|-------|
-| 1 | "מסך הילד: התרגיל למעלה, עד 15 מילים בכרטיס. טקסט למורים, ציטוטים ושורות של תוכנית הלימודים עוברים למסך הורה/מורה." | הושלם (חוץ מ־15 מילים) | שורת התקן וקישור תוכנית משרד החינוך הוסרו ממסך הילד ונשארו ב־`program.html` וב־`curriculum.html`. המגבלה של 15 מילים עדיין נאכפת רק בחלק מהתרגילים. |
+| 1 | "מסך הילד: התרגיל למעלה, עד 15 מילים בכרטיס. טקסט למורים, ציטוטים ושורות של תוכנית הלימודים עוברים למסך הורה/מורה." | הושלם (למעט חוב 15־המילים) | שורת התקן וקישור תוכנית משרד החינוך הוסרו ממסך הילד ונשארו ב־`program.html` וב־`curriculum.html`. מגבלת 15 המילים נאכפת כעת ב־`npm test` כרצ׳ט מתכווץ בלבד (`test/cardWordLimit665.test.js`, Refs #892): כיתה א׳ נקייה, ו־108 פריטים (103 הנחיות + 5 רמזים) נשארו כחוב פתוח קפוא. |
 | 2 | "כל תרגיל משמיע את המספרים שבו (3+2 = 3 תופים נמוכים, הפסקה, 2 תופים גבוהים), ולכל צליל יש עיגול מתאים על המסך. שמע תוך שנייה." | הושלם (בהבדל כלים, לא בגובה) | צליל לכל יחידה, הפסקה בין המחוברים, עיגול לכל צליל, צליל ראשון ב־0 ש׳. ההבדל בין המחוברים הוא בכלי (משפחה אחרת), לא דווקא תוף נמוך/גבוה. |
 | 3 | "מגוון סוגי תרגילים: בחירה, גרירה, ישר מספרים, הקשת תשובה, השלמת תבנית ודוגמה פתורה." | חלקי | יש בחירה, ישר מספרים, השלמת תבנית ודוגמה פתורה. הקשת תשובה רק בכמה תרגילים. גרירה חסרה לגמרי. |
 | 4 | "משוב מסביר: בתשובה נכונה מתנגנת אנימציה וסולם. בטעות התרגיל מתנגן שוב עם ספירה, מה שחסר מודגש, והילד מקבל ניסיון שני." | חלקי | אנימציה, מנגינת רצף, השמעה חוזרת עם ספירה וניסיון שני קיימים. סולם מלא מתנגן רק בתרגילי explorer. הדגשה של "מה שחסר" לא קיימת במסלול הכללי. |
@@ -15,8 +15,8 @@
 
 ## ראיות לפי דרישה
 
-### 1. מסך הילד — הושלם (חוץ מ־15 מילים)
-- **עד 15 מילים:** `validateExerciseCard`/`countWords` ב־`src/lib/exercises/patternAndWorkedExample.js` (בדיקה: `validation rejects prompts exceeding 15 words or missing standards` ב־`test/patternAndWorkedExample.test.js`). `MAX_WORDS = 15` ב־`src/lib/exercises/explorerBank.js`. בדיקה שעוברת על כל הכרטיסים קיימת רק ב־Playwright (`e2e/exercise665Criteria.spec.js`, `e2e criteria #665: card word counts <= 15 words`) ולא רצה ב־`npm test` (`"test": "node --test"`). חוץ מזה היא בודקת רק את לשונית `#tab-remediation`.
+### 1. מסך הילד — הושלם (למעט חוב 15־המילים)
+- **עד 15 מילים:** `validateExerciseCard`/`countWords` ב־`src/lib/exercises/patternAndWorkedExample.js` (בדיקה: `validation rejects prompts exceeding 15 words or missing standards` ב־`test/patternAndWorkedExample.test.js`). `MAX_WORDS = 15` ב־`src/lib/exercises/explorerBank.js`. מאז Refs #892 רצה ב־`npm test` גם `test/cardWordLimit665.test.js`: רצ׳ט מתכווץ בלבד על כל הכיתות (הנחיה ורמז) — אין פריט חדש מעל 15, פריט חוב לא גדל מעל ספירתו הקפואה, ורשומה קפואה שהתיישנה נכשלת עד הסרתה. כיתה א׳ נקייה (תוקן `א-measurement-736`, התשובה עדיין 9); 108 פריטים נשארו כחוב פתוח. בדיקת ה־Playwright (`e2e/exercise665Criteria.spec.js`) בודקת רק את לשונית `#tab-remediation`.
 - **התרגיל למעלה:** אין בדיקה ב־`npm test`. ב־Playwright: `e2e criteria #665: practice answerY relative to exercise card top < 400px`.
 - **טקסט מורים ותוכנית לימודים הוסרו ממסך הילד:** `setItemTag` ב־`index.html` רק מרוקן ומסתיר את האלמנט (`el.textContent=''; el.hidden=true;`), ולארבעת האלמנטים `rmItemTag`, `rmPlanTag`, `classItemTag` ו־`beatItemTag` יש `hidden` כבר ב־HTML, כך שאין הבהוב לפני הציור הראשון. ה־CSS של `.mm-official` נמחק. נתוני התוכנית נשארו למורה ולהורה ב־`program.html` וב־`curriculum.html`. בדיקה: `index.html hides the curriculum line from every exercise view` ב־`test/curriculumSources.test.js`.
 - **מה תוקן:** `test/childLabels.test.js` (התוויות אומרות "צלילים" במקום "מרווחים"), ו־`test/childGradeRange.test.js` (`the child home has no middle-school topic or sonification jargon`).
