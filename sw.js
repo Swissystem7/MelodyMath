@@ -87,6 +87,7 @@ const ASSETS = [
   './src/components/PolyChallengePad.js',
   './src/lib/instrumentVoices.js',
   './src/lib/instruments.js',
+  './src/lib/childScreenText.js',
   './src/lib/myInstrument.js',
   './src/lib/masteryCheck.js',
   './src/lib/mixtape.js',

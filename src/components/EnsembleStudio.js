@@ -189,7 +189,6 @@ export function formatCrossInstrumentCard(preset, status, mine, locked, offerLcm
       + '<p>כלי אחד חוזר כל ' + bdi(p.cycleA) + ' פעימות וכלי שני כל ' + bdi(p.cycleB) + ' פעימות. אחרי כמה פעימות הכלים נפגשים שוב?</p>'
       + '<div class="jam-row">' + answers + '</div>'
       + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>')
-    + '<p><a href="' + escapeHtml(p.source) + '">מקור</a></p>'
     + '</article>';
 }
 
