@@ -19,6 +19,8 @@
 .fbp-seg{display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--yellow) 60%, var(--card));color:var(--ink);border-inline-start:2px solid var(--ink);font-weight:bold;min-width:0;overflow:hidden}
 .fbp-seg:nth-child(even){background:color-mix(in srgb, var(--pink) 22%, var(--card))}
 .fbp-seg.lit{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 45%, var(--card))}
+.gg-cell{background:color-mix(in srgb, var(--yellow) 35%, var(--card));border:2px solid var(--ink);border-radius:6px}
+.gg-cell.on{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 55%, var(--card))}
 .fbp-out{margin-inline-start:auto;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-size:.8rem}
 .fbp-over{display:flex;align-items:center;gap:8px;margin:6px 0;color:var(--purple);font-weight:bold}
 .fbp-overbar{display:inline-block;height:20px;max-width:60%;background:color-mix(in srgb, var(--purple) 25%, var(--card));border:2px dashed var(--purple);border-radius:6px}
@@ -37,7 +39,43 @@
 .ttg-beat.ask{border:2px dashed var(--purple)}
 .ttg-plain{font-size:1.3rem;font-weight:bold;margin:8px 0}
 .mm-game [aria-pressed="true"]:not(.mm-music-toggle){border-color:var(--purple);box-shadow:0 0 0 3px color-mix(in srgb, var(--purple) 25%, transparent)}
-@media (prefers-reduced-motion:reduce){.fbp-seg.lit{animation:none}}
+.tr-stick{display:flex;flex-direction:column;align-items:center;gap:6px}
+.tr-rod{display:block;height:12px;max-width:100%;border-radius:6px;background:color-mix(in srgb, var(--yellow) 70%, var(--ink))}
+.tr-line{display:flex;height:40px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--card);margin:8px 0}
+.tr-seg{background:color-mix(in srgb, var(--yellow) 55%, var(--card));border-inline-start:2px solid var(--ink)}
+.tr-seg.lit{animation:mmTap .25s ease-out;background:color-mix(in srgb, var(--mint) 45%, var(--card))}
+.tr-result{margin:6px 0;padding-inline-start:20px}
+@media (prefers-reduced-motion:reduce){.tr-seg.lit{animation:none}}
+.anim-math-merge{animation:mathMerge .45s cubic-bezier(.2,.8,.2,1)}
+.anim-math-takeaway{animation:mathTakeaway .45s ease-out}
+.anim-math-repeat{animation:mathRepeat .45s ease-in-out}
+.anim-math-split{animation:mathSplit .45s ease-out}
+.anim-math-glow{animation:mathGlow .5s ease-out}
+@keyframes mathMerge{0%{transform:scale(.95)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes mathTakeaway{0%{opacity:1}50%{opacity:.4;transform:translateY(4px)}100%{opacity:1;transform:none}}
+@keyframes mathRepeat{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes mathSplit{0%{letter-spacing:normal}50%{letter-spacing:4px}100%{letter-spacing:normal}}
+@keyframes mathGlow{0%{box-shadow:none}50%{box-shadow:0 0 12px var(--mint)}100%{box-shadow:none}}
+.np-dot.np-missing{border-style:dashed;outline:3px solid var(--pink);outline-offset:2px}
+.np-dot.np-missing.lit{animation:mmTap .25s ease-out}
+@media (prefers-reduced-motion:reduce){.fbp-seg.lit,.np-dot.np-missing.lit,.anim-math-merge,.anim-math-takeaway,.anim-math-repeat,.anim-math-split,.anim-math-glow{animation:none}}
+.np-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.np-btn{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--ink);background:var(--purple);color:#fff;font-size:1.3rem;touch-action:manipulation}
+.np-circles,.np-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
+.np-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);background:var(--card)}.np-ten{width:34px;height:34px;font-size:.7rem;line-height:30px;text-align:center;font-weight:700}
+.np-dot.lit{background:var(--yellow)}
+.np-dot[data-group="1"].lit{background:var(--pink)}
+.np-dot[data-group="2"].lit{background:var(--mint)}
+.np-gap{display:inline-block;width:12px}
+/* dragPlace (#665 req 3): pieces dragged into the box; touch-action:none so a finger drags instead of scrolling */
+.dp-pile,.dp-box{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.dp-box{min-height:64px;padding:8px;border:3px dashed var(--ink);border-radius:16px;background:var(--card)}
+.dp-piece,.dp-in{min-width:48px;min-height:48px;border-radius:14px;border:2px solid var(--ink);font-weight:700;font-size:1.1rem;color:var(--ink);background:var(--yellow)}
+.dp-piece{touch-action:none;cursor:grab}
+.dp-ghost{position:fixed;z-index:50;width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow);pointer-events:none;transform:translate(-50%,-50%)}
+.dp-thousand{background:var(--purple);color:#fff}.dp-hundred{background:var(--pink)}.dp-ten{background:var(--mint)}
+.dp-empty{opacity:.6}
+
 /* RhythmPolygon: the rhythm clock */
 .rp-clock{display:block;width:100%;max-width:240px;margin:8px auto}
 .rp-ring{fill:none;stroke:var(--line);stroke-width:.03}
