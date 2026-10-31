@@ -124,3 +124,116 @@ test('PercentMix pad: tiles fill toward the target, an overflow is refused', () 
     assert.ok(can[t.percent], t.he);
   });
 });
+
+// ---------- measurement ----------
+
+const CK = require('../src/lib/music/dataPercentCheck.js');
+const DAY = CK.DAY;
+
+test('12-item pre-test with a parallel post-test: same slots, different numbers, 6 unpractised', () => {
+  const A = CK.items('pre');
+  const B = CK.items('post');
+  assert.equal(A.length, 12);
+  assert.equal(A.filter((x) => !x.practised).length, 6);
+  A.forEach((a, i) => {
+    const b = B[i];
+    assert.equal(a.id, b.id);
+    assert.equal(a.topic, b.topic);
+    assert.notEqual(a.prompt, b.prompt, a.id + ' differs between the forms');
+    assert.ok(a.choices.includes(a.answer) && b.choices.includes(b.answer), a.id);
+    assert.ok(a.choices.length >= 2 && a.choices.length <= 4 && a.choices.length === b.choices.length, a.id);
+  });
+  assert.deepEqual(CK.items('retention').map((x) => x.prompt), A.map((x) => x.prompt), 'the 30-day check reuses form A');
+  ['mean', 'trend', 'range', 'percent'].forEach((t) => {
+    assert.ok(A.some((x) => x.topic === t && x.practised) && A.some((x) => x.topic === t && !x.practised), t);
+  });
+});
+
+test('the mean, range and trend answers of both forms match the numbers in the prompt', () => {
+  const nums = (s) => (s.match(/[0-9]+/g) || []).map(Number);
+  ['pre', 'post'].forEach((phase) => CK.items(phase).forEach((it) => {
+    const v = nums(it.prompt);
+    const where = phase + ' ' + it.id;
+    if (it.topic === 'mean') assert.equal(String(v.reduce((a, b) => a + b, 0) / v.length), it.answer, where);
+    if (it.topic === 'range') assert.equal(String(Math.max(...v) - Math.min(...v)), it.answer, where);
+    if (it.topic === 'trend') {
+      // Columns of taps go through DB.trend; the transfer tables (values over
+      // 12) are strictly monotone, so first vs last decides.
+      const t = v.every((x) => x <= DB.MAX_TAPS) ? DB.trend(v) : (v[v.length - 1] > v[0] ? 'up' : 'down');
+      assert.equal(it.answer, DB.TREND_HE[t], where);
+    }
+  }));
+});
+
+test('scoring splits practised and unpractised items', () => {
+  const A = CK.items('pre');
+  const all = {};
+  A.forEach((x) => { all[x.id] = x.answer; });
+  assert.deepEqual(CK.scoreAnswers('pre', all), { total: 12, practised: 6, unpractised: 6, of: { total: 12, practised: 6, unpractised: 6 } });
+  const s = CK.scoreAnswers('pre', { p1: '5', u1: '22', u2: 'nope' });
+  assert.equal(s.total, 2);
+  assert.equal(s.unpractised, 1);
+});
+
+test('pre -> post after 28 days -> retention after 30 more; out of turn throws', () => {
+  const t0 = Date.UTC(2026, 9, 1);
+  let d = CK.empty();
+  assert.equal(CK.nextStep(d.learners.a, t0).phase, 'pre');
+  assert.throws(() => CK.record(d, 'a', 'post', {}, t0), RangeError);
+  d = CK.record(d, 'a', 'pre', { p1: '5' }, t0);
+  assert.deepEqual(CK.nextStep(d.learners.a, t0 + 10 * DAY), { phase: 'wait-post', daysLeft: 18 });
+  assert.throws(() => CK.record(d, 'a', 'post', {}, t0 + 27 * DAY), RangeError);
+  d = CK.record(d, 'a', 'post', { p1: '6' }, t0 + 28 * DAY);
+  assert.equal(CK.retention(d.learners.a, t0 + 40 * DAY).status, 'not-due');
+  assert.equal(CK.retention(d.learners.a, t0 + 58 * DAY).status, 'due');
+  d = CK.record(d, 'a', 'retention', { p1: '5' }, t0 + 58 * DAY);
+  assert.equal(CK.nextStep(d.learners.a, t0 + 58 * DAY).phase, 'done');
+});
+
+function answersWith(phase, correctIds) {
+  const out = {};
+  CK.items(phase).forEach((x) => { out[x.id] = correctIds.includes(x.id) ? x.answer : 'x'; });
+  return out;
+}
+
+test('effect size = (post - pre) / SD of pre, on unpractised items only', () => {
+  const t0 = Date.UTC(2026, 9, 1);
+  let d = CK.empty();
+  // Pre unpractised scores 1, 2, 3 (SD 1); post 2, 3, 4 (gain 1) -> d = 1.
+  const pre = [['u1'], ['u1', 'u2'], ['u1', 'u2', 'u3']];
+  const post = [['u1', 'u2'], ['u1', 'u2', 'u3'], ['u1', 'u2', 'u3', 'u4']];
+  pre.forEach((ids, k) => { d = CK.record(d, 'k' + k, 'pre', answersWith('pre', ids.concat(['p1', 'p2', 'p3'])), t0); });
+  assert.equal(CK.effectSize(d).reason, 'need-two-learners');
+  post.forEach((ids, k) => { d = CK.record(d, 'k' + k, 'post', answersWith('post', ids), t0 + 28 * DAY); });
+  assert.deepEqual(CK.effectSize(d), { d: 1, n: 3, meets: true });
+  // Practised items do not move d: dropping every practised answer changes nothing.
+  assert.ok(CK.effectSize(d).d >= CK.TARGET_D);
+  let flat = CK.empty();
+  ['a', 'b'].forEach((k) => { flat = CK.record(flat, k, 'pre', answersWith('pre', ['u1']), t0); flat = CK.record(flat, k, 'post', answersWith('post', ['u1']), t0 + 28 * DAY); });
+  assert.equal(CK.effectSize(flat).reason, 'no-spread-in-pre');
+});
+
+test('30-day retention: kept when at most one unpractised item below the post-test', () => {
+  const t0 = Date.UTC(2026, 9, 1);
+  const base = () => {
+    let d = CK.record(CK.empty(), 'a', 'pre', answersWith('pre', []), t0);
+    return CK.record(d, 'a', 'post', answersWith('post', ['u1', 'u2', 'u3', 'u4']), t0 + 28 * DAY);
+  };
+  const kept = CK.record(base(), 'a', 'retention', answersWith('retention', ['u1', 'u2', 'u3']), t0 + 58 * DAY);
+  assert.equal(CK.retention(kept.learners.a, t0 + 58 * DAY).status, 'kept');
+  const dropped = CK.record(base(), 'a', 'retention', answersWith('retention', ['u1']), t0 + 58 * DAY);
+  assert.equal(CK.retention(dropped.learners.a, t0 + 58 * DAY).status, 'dropped');
+});
+
+test('results load and save through an injectable storage, under one key', () => {
+  const mem = {};
+  const storage = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); } };
+  assert.deepEqual(CK.load(storage), CK.empty());
+  const d = CK.record(CK.empty(), 'a', 'pre', {}, 1);
+  assert.equal(CK.save(storage, d), true);
+  assert.deepEqual(Object.keys(mem), [CK.STORAGE_KEY]);
+  assert.deepEqual(CK.load(storage), d);
+  mem[CK.STORAGE_KEY] = '{broken';
+  assert.deepEqual(CK.load(storage), CK.empty());
+  assert.equal(CK.save({ setItem: () => { throw new Error('full'); } }, d), false);
+});
