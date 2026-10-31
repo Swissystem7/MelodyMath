@@ -1,20 +1,5 @@
 // MelodyMath — DataBeats logic: a bar graph you hear in time (#591, owner
 // comment 6376162984, "DataBeats ו-PercentMix").
-//
-// Primary method: a time-mapped audible bar graph. Each column of the data is
-// a run of taps, one tap per unit, and the columns follow each other in time,
-// so the child hears the series left to right and counts every column. From
-// the columns the child finds the mean (even the columns out), the trend
-// (do the runs get longer or shorter) and the range (longest run minus the
-// shortest). Counting one tap per unit along a steady beat is M1
-// (instruments.TOPICS.data).
-//
-// Add-on, weak evidence: a column may also get a pitch that rises with its
-// value. Peres & Lane found time mapping of a statistical display beat pitch
-// mapping (https://www.ruf.rice.edu/~lane/papers/sonification_statistical.pdf),
-// so pitch is off by default, optional, and marked evidence:'weak' (M5).
-//
-// Pure functions, no sound and no DOM: the screen plays the notes.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -23,6 +8,7 @@
   'use strict';
 
   const MECHANISM = 'M1';
+  const ACCENT_MECHANISM = 'M2';
   const PITCH_MECHANISM = 'M5';
   const MAX_TAPS = 12;
   const DEFAULT_BPM = 100;
@@ -30,6 +16,9 @@
   const PITCH_VOICE = 'woodBar';
   const PITCH_LOW = 60; // MIDI C4
   const PITCH_HIGH = 72; // MIDI C5
+  const MIN_NOTE_SEC = 0.08;
+  const MIN_NOTE_MS = 80;
+  const SOURCES = Object.freeze({ M1: 'mcdonel2015', M2: 'das2023' });
 
   function checkSeries(values) {
     if (!Array.isArray(values) || values.length === 0) throw new RangeError('a series needs at least one column');
@@ -40,13 +29,6 @@
 
   function midiToHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
-  // values: whole numbers 0..12, one per column. opts: { bpm, voice, pitch,
-  // pitchVoice }. The pitch add-on uses a pitched voice (woodBar).
-  // Every column gets the same time slot (as many tap places as the tallest
-  // column) and one slot of silence after it, so a column's place in time is
-  // its place on the x-axis and its number of taps is its height.
-  // Returns { mapping:'time', mechanism, bars:[{bar, value, start, end}],
-  // notes:[{at, voice, kind:'tap', bar, n, hz?}], duration, tap, pitch }.
   function sonifySeries(values, opts) {
     checkSeries(values);
     const o = opts || {};
@@ -56,6 +38,8 @@
     const slot = Math.max(1, tallest) * tap;
     const gap = 2 * tap;
     const lo = Math.min.apply(null, values);
+    const dur = Math.max(MIN_NOTE_SEC, Math.round(tap * 1000) / 1000);
+    const durMs = Math.max(MIN_NOTE_MS, Math.round(dur * 1000));
     const bars = [];
     const notes = [];
     let t = 0;
@@ -68,7 +52,17 @@
         hz = Math.round(midiToHz(m) * 100) / 100;
       }
       for (let n = 0; n < v; n++) {
-        const note = { at: Math.round((t + n * tap) * 1000) / 1000, voice: o.pitch ? (o.pitchVoice || PITCH_VOICE) : (o.voice || TAP_VOICE), kind: 'tap', bar: bar, n: n + 1 };
+        const accent = (n + 1) % 5 === 0;
+        const note = {
+          at: Math.round((t + n * tap) * 1000) / 1000,
+          dur: dur,
+          durMs: durMs,
+          voice: o.pitch ? (o.pitchVoice || PITCH_VOICE) : (o.voice || TAP_VOICE),
+          kind: 'tap',
+          bar: bar,
+          n: n + 1,
+          accent: accent
+        };
         if (o.pitch) note.hz = hz;
         notes.push(note);
       }
@@ -77,6 +71,8 @@
     return {
       mapping: 'time',
       mechanism: MECHANISM,
+      accentMechanism: ACCENT_MECHANISM,
+      sources: SOURCES,
       bars: bars,
       notes: notes,
       duration: Math.round((t - gap) * 1000) / 1000,
@@ -97,8 +93,6 @@
     return { min: min, max: max, range: max - min };
   }
 
-  // 'up', 'down' or 'flat', from the least-squares slope in taps per column.
-  // A slope under a quarter of a tap per column is heard as flat.
   function trend(values) {
     checkSeries(values);
     const n = values.length;
@@ -115,8 +109,6 @@
 
   const TREND_HE = { up: 'עולה', down: 'יורדת', flat: 'כמעט קבועה' };
 
-  // Practice series: every mean is a whole number of taps. A zigzag series
-  // has no clear trend, so it is never asked about one.
   const SERIES = [
     { values: [2, 4, 6, 8], he: 'כמה דקות קראו ילדי הכיתה בכל יום' },
     { values: [9, 7, 5, 3], he: 'כמה עלים נשארו על השתיל בכל שבוע' },
@@ -131,7 +123,6 @@
     candidates.forEach(function (c) {
       if (out.length < max && out.indexOf(c) === -1 && c >= 0) out.push(c);
     });
-    // A fixed, non-random order: sorted, so the answer is not always first.
     return out.sort(function (a, b) { return a - b; });
   }
 
@@ -150,9 +141,13 @@
 
   return {
     MECHANISM: MECHANISM,
+    ACCENT_MECHANISM: ACCENT_MECHANISM,
     PITCH_MECHANISM: PITCH_MECHANISM,
     MAX_TAPS: MAX_TAPS,
     TAP_VOICE: TAP_VOICE,
+    MIN_NOTE_SEC: MIN_NOTE_SEC,
+    MIN_NOTE_MS: MIN_NOTE_MS,
+    SOURCES: SOURCES,
     SERIES: SERIES,
     TREND_HE: TREND_HE,
     sonifySeries: sonifySeries,
