@@ -134,7 +134,7 @@
     const over = state.over ? '<div class="fbp-over" role="note">עודף: <span class="fbp-overbar" style="width:' + (FB.sumDurations([state.over]) * 100) + '%"></span> <bdi dir="ltr">' + e(state.over) + '</bdi></div>' : '';
     const free = on ? '<div class="jam-free" role="group" aria-label="נגינה חופשית על דרבוקה"><span>🪘 נגנו חופשי:</span>' +
       '<button type="button" class="jam-pad" data-tap="drumLow">דום</button><button type="button" class="jam-pad" data-tap="drumHigh">טק</button></div>' : '';
-    return '<div class="jam-head"><span class="tag">M3 · משכי תווים · כיתות ג׳–ו׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
+    return '<div class="jam-head"><span class="tag">משכי תווים · כיתות ג׳–ו׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🥁 ממלאים תיבה במשכי תווים' : 'ממלאים רצועת שבר') + '</h3>' +
       '<p class="jam-prompt">' + e(state.ex.he) + (isDecimal ? ' (<bdi dir="ltr">' + e(state.ex.target) + ' = ' + targetText + (mixedText ? ' / ' + mixedText : '') + '</bdi>)' : '') + '</p>' +
       '<div class="fbp-bar' + (state.status === 'exact' ? ' done' : '') + '" role="img" aria-label="' + (on ? 'תיבה' : 'רצועה') + ' מלאה ' + FB.formatFraction(sum) + ' מתוך ' + targetText + '">' + segs + rest + '</div>' + over +
@@ -143,7 +143,8 @@
       '<div class="jam-row">' + (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') +
       '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button><button type="button" class="primary" data-act="check">בדיקה</button>' +
       '<button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
-      '<p class="jam-msg ' + (state.status === 'exact' ? 'good' : state.sound === 'wrong' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
+      '<p class="jam-msg ' + (state.status === 'exact' ? 'good' : state.sound === 'wrong' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>' +
+      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M3 (משכי תווים בתיבה) · כיתות ג׳–ו׳ · 90 פעימות לדקה · מקור: Azaryahu et al. 2020</div></details>' : '');
   }
 
   function mount(el, props) {
