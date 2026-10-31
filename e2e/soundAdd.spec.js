@@ -6,7 +6,7 @@
 // pointerdown, which is where musicEngine's tap voices begin.
 const { test, expect } = require('@playwright/test');
 
-async function open(page) {
+async function open(page, mode) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.addInitScript(() => {
@@ -25,8 +25,8 @@ async function open(page) {
     });
     window.addEventListener('pointerdown', () => { window.__down = performance.now(); }, true);
   });
-  await page.goto('/exercise.html');
-  await expect(page.locator('#saCard .sa-pad')).toBeVisible();
+  await page.goto('/exercise.html' + (mode ? '?mode=' + mode : ''));
+  await expect(page.locator('#saCard [data-act="check"]')).toBeVisible();
   // A browser that blocks audio before the first touch shows one ▶.
   await page.waitForTimeout(400);
   const start = page.locator('[data-act="start"]');
@@ -100,4 +100,58 @@ test('switching to keys replays the same exercise on keys', async ({ page }) => 
   await expect(page.locator('[data-family="keys"]')).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(() => page.evaluate(() => window.__voices.filter((v) => v.voice === 'keys').length), { timeout: 5000 }).toBe(circles);
   await expect(page.locator('.sa-pad')).toHaveAttribute('data-tap', 'keys');
+});
+
+// #671: the other answer types, opened as exercise.html?mode=...
+for (const [mode, control] of [['choice', '.sa-opts'], ['drag', '.sa-source'], ['line', '.sa-line']]) {
+  test(mode + ': the answer control is above 400px and a right answer merges the groups', async ({ page }) => {
+    const errors = await open(page, mode);
+    const box = await page.locator(control).boundingBox();
+    expect(box.y).toBeLessThan(400);
+    const circles = await page.locator('.sa-dot').count();
+    if (mode === 'drag') {
+      // one circle dragged into the basket, the rest tapped on the pile
+      const basket = await page.locator('.sa-basket').boundingBox();
+      await page.locator('.sa-source').hover();
+      await page.mouse.down();
+      await page.mouse.move(basket.x + basket.width / 2, basket.y + basket.height / 2, { steps: 5 });
+      await page.mouse.up();
+      await expect(page.locator('.sa-basket .sa-ans')).toHaveCount(1);
+      for (let i = 1; i < circles; i++) await page.locator('.sa-source').tap();
+    } else if (mode === 'line') {
+      for (let i = 0; i < circles; i++) await page.locator('[data-act="nudge"][data-d="1"]').tap();
+      await expect(page.locator('#saLine')).toHaveAttribute('aria-valuenow', String(circles));
+    } else {
+      await page.locator('[data-act="pick"][data-n="' + circles + '"]').tap();
+    }
+    await page.locator('[data-act="check"]').click();
+    await expect(page.locator('.sa-msg')).toContainText('כל הכבוד');
+    await expect(page.locator('.sa-dots.sa-merged')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}
+
+test('choice: a wrong number is crossed out for the second try', async ({ page }) => {
+  await open(page, 'choice');
+  const circles = await page.locator('.sa-dot').count();
+  const wrong = page.locator('[data-act="pick"]:not([data-n="' + circles + '"])').first();
+  const n = await wrong.getAttribute('data-n');
+  await wrong.tap();
+  await page.locator('[data-act="check"]').click();
+  await expect(page.locator('.sa-msg')).toContainText('כמעט');
+  await expect(page.locator('[data-n="' + n + '"]')).toBeDisabled();
+  await expect(page.locator('[data-n="' + n + '"]')).toHaveClass(/sa-wrong/);
+});
+test('line: at 390px every target on the line is at least 44px and nothing scrolls sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors = await open(page, 'line');
+  for (const sel of ['#saLine', '[data-act="nudge"][data-d="-1"]', '[data-act="nudge"][data-d="1"]']) {
+    const box = await page.locator(sel).boundingBox();
+    expect(box.width, sel).toBeGreaterThanOrEqual(44);
+    expect(box.height, sel).toBeGreaterThanOrEqual(44);
+  }
+  const thumb = await page.locator('#saLine').evaluate((r) => parseFloat(getComputedStyle(r, '::-webkit-slider-thumb').height) || 44);
+  expect(thumb).toBeGreaterThanOrEqual(44);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  expect(errors).toEqual([]);
 });

@@ -292,6 +292,49 @@ test('drag: a basket and a pile the child can also tap; hints speak of circles i
   assert.match(SA.renderHtml(SA.createState({ stage: 'silent', mode: 'drag' })), /class="sa-pad sa-source" data-act="tap" aria-label/, 'silent: the pile makes no sound');
 });
 
+test('line: the #singingLine pattern on 0-10, every sum lands on it, the solution is marked on it', () => {
+  const s = SA.createState({ stage: 'sound', mode: 'line', item: [3, 2] });
+  assert.equal(s.taps, null);
+  assert.equal(SA.speechKey(s), 'line.sound');
+  const html = SA.renderHtml(s);
+  assert.match(html, /<input id="saLine" class="sa-range" type="range" data-act="slide" min="0" max="10" step="1" value="0" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" aria-valuetext="0" aria-label="מיקום על ישר המספרים">/);
+  assert.match(html, /class="nl-keys sa-nudge"[^>]*role="group"/);
+  assert.match(html, /data-act="nudge" data-d="-1"/);
+  assert.match(html, /data-act="nudge" data-d="1"/);
+  assert.equal((html.match(/data-tick=/g) || []).length, SA.LINE_MAX + 1);
+  assert.match(html, /data-tick="0"/);
+  assert.match(html, /data-tick="10"/);
+  assert.doesNotMatch(html, /data-act="untap"/);
+  assert.match(html, /data-act="check" disabled/, 'nothing to check before the thumb moves');
+  SA.ITEMS.forEach(([a, b]) => assert.ok(a + b <= SA.LINE_MAX, a + ' + ' + b));
+  assert.equal(SA.pick(s, SA.LINE_MAX + 1).taps, null, 'off the line');
+  const w = SA.check(SA.pick(s, 7));
+  assert.match(w.message, /גדול מדי/);
+  const wh = SA.renderHtml(w);
+  assert.match(wh, /class="sa-tick sa-wrong sa-on" data-tick="7"/);
+  assert.match(wh, /aria-valuenow="7"/);
+  assert.match(wh, /data-act="check" disabled/, 'the crossed-out number cannot be checked again');
+  assert.equal(SA.pick(w, 7).taps, 7, 'the thumb may pass it');
+  const shown = SA.check(SA.pick(w, 8));
+  assert.match(shown.message, /3 \+ 2 = 5/);
+  assert.match(SA.renderHtml(shown), /class="sa-tick sa-right" data-tick="5"/);
+  assert.match(SA.renderHtml(shown), /class="sa-range"[^>]* disabled>/);
+});
+
+test('line: every tap target is at least 44px (owner note 24.10, checked at 390px in e2e)', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'soundAdd.css'), 'utf8');
+  const rule = (sel) => (css.split('}').find((r) => r.trim().startsWith(sel + '{')) || '');
+  ['.sa-range::-webkit-slider-thumb', '.sa-range::-moz-range-thumb'].forEach((sel) => {
+    assert.match(rule(sel), /width:44px/, sel);
+    assert.match(rule(sel), /height:44px/, sel);
+  });
+  assert.match(rule('.sa-range'), /min-height:48px/);
+  assert.match(rule('.sa-nudge button'), /min-width:44px/);
+  assert.match(rule('.sa-nudge button'), /min-height:44px/);
+  assert.doesNotMatch(rule('.sa-tick'), /min-width:0/, 'no squeezed tick buttons any more');
+  assert.match(page, /src="src[/]lib[/]numberLine.js"/, 'the line sings through numberLine.js soundForTick');
+});
+
 test('choice: the silent mastery check is not a 1-in-3 guess (owner note 24.10)', () => {
   SA.ITEMS.forEach(([a, b], i) => {
     const grid = SA.choices([a, b], i, 'silent');

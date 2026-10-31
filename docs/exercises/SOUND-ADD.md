@@ -21,6 +21,11 @@ to answer. Open the page with `?mode=`:
   only 1 time in 10 and two right first tries by chance are 1 in 100.
 - `exercise.html?mode=drag`: drag one circle per sound into the basket; a
   plain tap (or Enter) on the pile adds one too, so it works without dragging.
+- `exercise.html?mode=line`: a 0-10 number line; every sound is one hop on it
+  (the tick lights up), and the child moves the thumb where the hops land.
+  It mirrors the #singingLine slider (index.html, PR #656): a range input that
+  sings each number (numberLine.js soundForTick) plus two 44px step buttons
+  ◀ ▶; every target is at least 44x44 at 390px.
 
 **Opening:** the exercise speaks its instruction and plays its sound as soon
 as it opens. A browser that blocks audio before the first touch shows one big
