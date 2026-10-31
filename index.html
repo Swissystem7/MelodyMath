@@ -837,6 +837,7 @@ function startStrugglePractice(st){
 function setItemTag(el,it){ if(!el) return; el.textContent=''; el.hidden=true; }
 function renderWidget(hostId, item, inputId){
   const host=$(hostId); if(!host) return;
+  if(host._dpDragCancel){host._dpDragCancel();host._dpDragCancel=null;}
   host.innerHTML=''; host.classList.add('hidden'); host._sndSpec=null; host._sndRevealed=false; host._tapSession=null;
   if(!item) return;
   const fill=function(val){ const inp=inputId&&$(inputId); if(inp){ inp.value=val; } };

@@ -108,7 +108,7 @@ function fakePage() {
     elementFromPoint: (x) => (x >= 100 ? box : el('floor')),
   };
   const host = { kids: [], appendChild(k) { this.kids.push(k); } };
-  const fire = (type, target, x) => (handlers[type] || []).forEach((f) => f({ type, target, clientX: x, clientY: 0, pointerId: 1 }));
+  const fire = (type, target, x, pointerId) => (handlers[type] || []).forEach((f) => f({ type, target, clientX: x, clientY: 0, pointerId: pointerId == null ? 1 : pointerId }));
   return { el, doc, host, ghosts, fire };
 }
 
@@ -140,6 +140,31 @@ test('mount: drag with a finger, tap, and take out; the box fills the answer fie
     assert.match(view.innerHTML, /1 מאות, 1 עשרות, 0 יחידות/);
     p.fire('click', p.el('dp-in dp-hundred', { 'data-dp-at': '0' }), 0);
     assert.deepEqual(answers.slice(-1), ['10'], 'a piece in the box is taken out by a tap');
+  } finally {
+    globalThis.document = saved;
+    delete globalThis.MM_JAM;
+  }
+});
+
+test('mount: a second finger cannot overwrite the owner piece (Refs #890)', () => {
+  const p = fakePage();
+  const saved = globalThis.document;
+  globalThis.document = p.doc;
+  globalThis.MM_JAM = JAM;
+  try {
+    const answers = [];
+    DP.mount(p.host, byPrompt('200 + 30 + 4 = ?'), { fill: (v) => answers.push(v), quiet: true });
+    const hundred = p.el('dp-piece dp-hundred', { 'data-dp': 'hundred' });
+    const ten = p.el('dp-piece dp-ten', { 'data-dp': 'ten' });
+    p.fire('pointerdown', hundred, 0, 1); p.fire('pointermove', hundred, 60, 1);
+    assert.equal(p.ghosts.length, 1);
+    p.fire('pointerdown', ten, 0, 2); p.fire('pointermove', ten, 60, 2); p.fire('pointerup', ten, 150, 2);
+    assert.equal(p.ghosts.length, 1, 'the second finger creates no extra ghost');
+    assert.notEqual(p.ghosts[0].removed, true, 'the owner ghost survives the second finger');
+    assert.deepEqual(answers, [], 'the second finger drops nothing');
+    p.fire('pointermove', hundred, 60, 1); p.fire('pointerup', hundred, 150, 1);
+    assert.deepEqual(answers, ['100'], 'the owner drop counts the hundred, not the ten');
+    assert.equal(p.ghosts[0].removed, true, 'the ghost is removed after the drop');
   } finally {
     globalThis.document = saved;
     delete globalThis.MM_JAM;
@@ -218,6 +243,29 @@ test('a wrong drop is rejected: the smaller number when the bigger is asked', (t
   q.tap(1);
   assert.equal(core.isCorrect(q.input.value, pick.answer), true);
   assert.equal(new Set(q.played).size, 1, 'both numbers on one instrument, so the timbre does not tell the answer');
+});
+
+test('re-render via stored host._dpDragCancel removes the ghost and leaves the answer unchanged', (t) => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const rwSrc = html.match(/function renderWidget\(hostId, item, inputId\)\{[\s\S]*?\n\}/)[0];
+  assert.ok(rwSrc.indexOf('host._dpDragCancel()') >= 0 && rwSrc.indexOf('host._dpDragCancel()') < rwSrc.indexOf("host.innerHTML=''"), 'renderWidget cancels before wiping the host');
+  const hadJam = 'MM_JAM' in globalThis, origJam = globalThis.MM_JAM;
+  globalThis.MM_JAM = JAM; // screen() does not set it; mount() reads it from the real global
+  try {
+    const s = screen(t);
+    const item = byId('ב-place_value-290');
+    s.render(item);
+    s.tap('hundred');
+    assert.equal(s.input.value, '100');
+    assert.equal(typeof s.p.host._dpDragCancel, 'function');
+    const hundred = s.p.el('dp-piece dp-hundred', { 'data-dp': 'hundred' });
+    s.p.fire('pointerdown', hundred, 0); s.p.fire('pointermove', hundred, 60);
+    assert.equal(s.p.ghosts.length, 1);
+    assert.notEqual(s.p.ghosts[0].removed, true);
+    s.render(item); // simulated re-render: renderWidget invokes host._dpDragCancel first
+    assert.equal(s.p.ghosts[0].removed, true, 'the stored cancel removes the live ghost');
+    assert.equal(s.input.value, '100', 'the answer field is unchanged');
+  } finally { if (hadJam) globalThis.MM_JAM = origJam; else delete globalThis.MM_JAM; }
 });
 
 test('no music: quiet stays silent and still fills the answer', (t) => {
