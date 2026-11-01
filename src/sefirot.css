@@ -1,34 +1,63 @@
-/* Palette (#497, calmed in #507). Same three roles: violet = confidence
-   (buttons, links), raspberry = the one focus, sunshine = the week's progress
-   (fills only, never text). Neutral ink and paper so the one accent leads.
+/* Palette (#497, updated for warm, calm and clean Claude-inspired design).
+   Warm cream background, crisp white cards with delicate borders,
+   warm charcoal text and terracotta action accents.
    Every text pair is AA; see docs/DESIGN.md. */
 :root {
-  --ink: #1b1830;
-  --muted: #55526b;
-  --purple: #5b3fd1;
-  --pink: #c2185b;
-  --yellow: #ffc83d;
-  --bg: #f6f6fa;
+  --ink: #1f1e1d;
+  --muted: #6b6a65;
+  --purple: #9a3412;
+  --pink: #9a3412;
+  --yellow: #f0ead6;
+  --bg: #faf9f5;
   --card: #ffffff;
-  --line: #e5e4ee;
+  --line: #e8e6dc;
   --good: #137a43;
-  --bad: #b3261e;
-  --focus: #c2185b;
-  --joy: #ffb020;
-  --confidence: #5b3fd1;
-  --sky: #2b8fd6;
-  --mint: #1fb58f;
-  /* Neo-brutalist theme tokens for kids (#891 / redesign) */
-  --neo-outline: #1b1446;
-  --neo-cream: #fffdf5;
-  --neo-lavender: #f3f0ff;
-  --neo-yellow: #fef9c3;
-  --neo-orange: #c2410c;
-  --neo-turquoise: #0f766e;
-  --neo-sky: #0369a1;
-  --neo-purple: #5b3fd1;
-  --neo-indigo: #2a1b6b;
+  --bad: #9a3412;
+  --focus: #9a3412;
+  --joy: #f5e5d5;
+  --confidence: #9a3412;
+  --sky: #6b6a65;
+  --mint: #137a43;
+  /* Palette compatibility aliases */
+  --neo-outline: #2b2a27;
+  --neo-cream: #faf9f5;
+  --neo-lavender: #f4f1ea;
+  --neo-yellow: #f0ead6;
+  --neo-orange: #9a3412;
+  --neo-turquoise: #137a43;
+  --neo-sky: #6b6a65;
+  --neo-purple: #9a3412;
+  --neo-indigo: #2b2a27;
+  /* Dark mode palette tokens */
+  --dark-bg: #1f1e1d;
+  --dark-card: #2b2a27;
+  --dark-line: #3e3d39;
+  --dark-ink: #faf9f5;
+  --dark-muted: #a8a69f;
+  --dark-good: #4e9a70;
+  --dark-bad: #e08264;
+  --dark-accent: #e08264;
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--dark-bg);
+    --card: var(--dark-card);
+    --line: var(--dark-line);
+    --ink: var(--dark-ink);
+    --muted: var(--dark-muted);
+    --good: var(--dark-good);
+    --bad: var(--dark-bad);
+    --purple: var(--dark-accent);
+    --pink: var(--dark-accent);
+    --focus: var(--dark-accent);
+    --joy: var(--dark-card);
+    --confidence: var(--dark-accent);
+    --neo-cream: var(--dark-bg);
+    --neo-outline: var(--dark-line);
+  }
+}
+
 body { background: var(--bg); color: var(--ink); }
 h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 .card { box-shadow: none; }
