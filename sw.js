@@ -66,6 +66,7 @@ const ASSETS = [
   './src/lib/prepost.js',
   './src/lib/mathBidi.js',
   './src/lib/worksheets.js',
+  './src/lib/flashcards.js',
   './src/lib/metro.js',
   './src/lib/musicEngine.js',
   './src/lib/access.js',

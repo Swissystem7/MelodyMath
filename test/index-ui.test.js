@@ -118,6 +118,15 @@ test('teacher tab provides a printable RAMA failure-point diagnostic card', () =
   assert.match(indexHtml, /src\/lib\/remediation\.js/);
 });
 
+test('teacher tab provides a printable flashcards and rhythm practice kit', () => {
+  assert.match(indexHtml, /id="flashcardsCard"/);
+  assert.match(indexHtml, /id="flashcardsMake"/);
+  assert.match(indexHtml, /id="flashcardsPrint"/);
+  assert.match(indexHtml, /id="flashcardsSheet"/);
+  assert.match(indexHtml, /print-flashcards/);
+  assert.match(indexHtml, /src\/lib\/flashcards\.js/);
+});
+
 test('playground includes singing number line with harmonic fraction bells', () => {
   assert.match(indexHtml, /id="singingLine"/);
   assert.match(indexHtml, /id="singingLabel"/);

@@ -29,3 +29,16 @@ test('print.css hides lessonCard and ramaCard during print-kit, print-sheet, pri
     assert.match(printCss, reRama, `${mode} must hide #ramaCard`);
   }
 });
+
+test('print.css isolates print-flashcards and hides sibling cards', () => {
+  assert.match(printCss, /body\.print-flashcards #flashcardsCard,body\.print-flashcards #flashcardsSheet\{display:block!important\}/);
+  assert.match(printCss, /body\.print-flashcards #trialKit,body\.print-flashcards #reportCard,body\.print-flashcards #classBoardCard,body\.print-flashcards #parentCard,body\.print-flashcards #worksheetCard,body\.print-flashcards #certCard,body\.print-flashcards #lessonCard,body\.print-flashcards #ramaCard\{display:none!important\}/);
+});
+
+test('print.css hides flashcardsCard during other print modes', () => {
+  const modes = ['print-kit', 'print-sheet', 'print-class', 'print-parent', 'print-cert', 'print-lesson', 'print-rama'];
+  for (const mode of modes) {
+    const reCards = new RegExp(`body\\.${mode} [^;]*#flashcardsCard`);
+    assert.match(printCss, reCards, `${mode} must hide #flashcardsCard`);
+  }
+});

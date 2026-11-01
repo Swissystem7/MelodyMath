@@ -162,12 +162,27 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
 .cert{border:4px double #6946e8;border-radius:18px;padding:28px 24px;text-align:center;max-width:40rem;margin:12px auto}
 .cert h2{font-size:1.7rem;margin:8px 0}
 
+.flashcards-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.flashcard-item{border:2px dashed #6946e8;border-radius:12px;padding:12px 14px;break-inside:avoid;page-break-inside:avoid;box-sizing:border-box;background:#fff;display:flex;flex-direction:column;justify-content:space-between;min-height:160px}
+.flashcard-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.flashcard-topic-tag{font-size:.78rem;font-weight:700;color:#6946e8;background:#f4f0fc;padding:2px 8px;border-radius:6px}
+.flashcard-badge{font-size:.75rem;font-weight:800;color:#534a6b}
+.flashcard-prompt{font-size:1.6rem;font-weight:900;color:#21183b;text-align:center;margin:6px 0}
+.flashcard-rhythm{font-size:1.05rem;color:#534a6b;text-align:center;margin:4px 0}
+.flashcard-note{font-size:.82rem;color:#706887;text-align:center;margin-top:2px}
+.flashcard-cutline{border-top:1px dashed #ded6f0;margin:10px 0 6px;text-align:center;font-size:.72rem;color:#999}
+.flashcard-back{display:flex;justify-content:space-between;align-items:center;background:#faf8ff;padding:6px 10px;border-radius:8px;font-size:.9rem}
+.flashcard-ans-label{color:#534a6b}
+.flashcard-ans{color:#167957;font-size:1.15rem}
+@media (max-width:680px){.flashcards-grid{grid-template-columns:1fr}}
+
 @media print{
   #mm-site-nav,#mm-access,.mm-no-print,header,nav.tabs,.tabs,.more-nav,.who-bar,.metro-bar,.pwa-banner,.roster-chips,.no-print{display:none!important}
   body{background:#fff!important;color:#000!important}
   .card{box-shadow:none!important;border:0!important}
   .print-only{display:block!important}
   #trialKit,#worksheetCard,#classBoardCard,#parentCard,#certCard,#lessonCard,#ramaCard{display:none!important}
+  #flashcardsCard{display:none!important}
   body.print-kit #trialKit{display:block!important}
   body.print-kit #reportCard,body.print-kit #classBoardCard,body.print-kit #parentCard,body.print-kit #worksheetCard,body.print-kit #certCard,body.print-kit #lessonCard,body.print-kit #ramaCard{display:none!important}
   body.print-sheet #worksheetCard,body.print-sheet #worksheetSheet{display:block!important}
@@ -182,6 +197,9 @@ body.mm-large button,body.mm-large input,body.mm-large select{min-height:52px}
   body.print-lesson #trialKit,body.print-lesson #reportCard,body.print-lesson #classBoardCard,body.print-lesson #parentCard,body.print-lesson #worksheetCard,body.print-lesson #certCard,body.print-lesson #ramaCard{display:none!important}
   body.print-rama #ramaCard,body.print-rama #ramaSheet{display:block!important}
   body.print-rama #trialKit,body.print-rama #reportCard,body.print-rama #classBoardCard,body.print-rama #parentCard,body.print-rama #worksheetCard,body.print-rama #certCard,body.print-rama #lessonCard{display:none!important}
+  body.print-flashcards #flashcardsCard,body.print-flashcards #flashcardsSheet{display:block!important}
+  body.print-flashcards #trialKit,body.print-flashcards #reportCard,body.print-flashcards #classBoardCard,body.print-flashcards #parentCard,body.print-flashcards #worksheetCard,body.print-flashcards #certCard,body.print-flashcards #lessonCard,body.print-flashcards #ramaCard{display:none!important}
+  body.print-kit #flashcardsCard,body.print-sheet #flashcardsCard,body.print-class #flashcardsCard,body.print-parent #flashcardsCard,body.print-cert #flashcardsCard,body.print-lesson #flashcardsCard,body.print-rama #flashcardsCard{display:none!important}
   body.adult-ok #teacherReport.panel{display:block!important}
   #firstRun,.first-run{display:none!important}
   .sheet-item{border-color:#999}

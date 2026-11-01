@@ -37,6 +37,10 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   body.print-class #trialKit,body.print-class #reportCard,body.print-class #parentCard,body.print-class #worksheetCard,body.print-class #certCard{display:none!important}
   body.print-parent #parentCard,body.print-parent #parentLetter{display:block!important}
   body.print-parent #trialKit,body.print-parent #reportCard,body.print-parent #classBoardCard,body.print-parent #worksheetCard,body.print-parent #certCard{display:none!important}
+  #flashcardsCard{display:none!important}
+  body.print-flashcards #flashcardsCard,body.print-flashcards #flashcardsSheet{display:block!important}
+  body.print-flashcards #trialKit,body.print-flashcards #reportCard,body.print-flashcards #classBoardCard,body.print-flashcards #parentCard,body.print-flashcards #worksheetCard,body.print-flashcards #certCard,body.print-flashcards #lessonCard,body.print-flashcards #ramaCard{display:none!important}
+  body.print-kit #flashcardsCard,body.print-sheet #flashcardsCard,body.print-class #flashcardsCard,body.print-parent #flashcardsCard,body.print-cert #flashcardsCard,body.print-lesson #flashcardsCard,body.print-rama #flashcardsCard{display:none!important}
   .card{box-shadow:none;border:0;padding:0}
   .print-only{display:block}
   .report-table th,.report-table td{border-bottom:1px solid #999}
@@ -389,6 +393,30 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   </div>
   <div id="worksheetSheet" class="hidden" aria-live="polite"></div>
 </div>
+<div class="card" id="flashcardsCard">
+  <span class="tag">ערכת הדפסה למורה · כרטיסיות גזירה ומקצב</span>
+  <h2>כרטיסיות תרגול ומקצבים להדפסה</h2>
+  <p>כרטיסיות גזירה דו-צדדיות לקבוצות קטנות או עבודה בזוגות: תרגיל חשבון ומקצב מוזיקלי תואם עם פתרון לבקרה עצמית.</p>
+  <div class="sheet-actions no-print">
+    <label>נושא
+      <select id="flashcardsTopic" aria-label="נושא כרטיסיות">
+        <option value="addition">חיבור וחיסור עד 20</option>
+        <option value="multiplication">לוח הכפל ומקצבים</option>
+        <option value="fractions">שברים ותווי נגינה</option>
+        <option value="rhythms">קריאת מקצבים ופעימות</option>
+      </select>
+    </label>
+    <label>כמות
+      <select id="flashcardsCount" aria-label="כמות כרטיסיות">
+        <option value="4">4 כרטיסיות (גדולות)</option>
+        <option value="8" selected>8 כרטיסיות (דף מלא)</option>
+      </select>
+    </label>
+    <button type="button" id="flashcardsMake" class="secondary">הצגת כרטיסיות</button>
+    <button type="button" id="flashcardsPrint">הדפסת כרטיסיות</button>
+  </div>
+  <div id="flashcardsSheet" class="hidden" aria-live="polite"></div>
+</div>
 <div class="card" id="lessonCard">
   <span class="tag">מערכי שיעור · לפי תוכנית הלימודים</span>
   <h2>מערך שיעור לנושא</h2>
@@ -552,6 +580,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/curriculum.js"></script>
 <script src="src/lib/pedagogy.js"></script>
 <script src="src/lib/worksheets.js"></script>
+<script src="src/lib/flashcards.js"></script>
 <script src="src/lib/metro.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/voicePrompt.js"></script>
@@ -1078,7 +1107,7 @@ function renderLessonPlans(){const g=$('lessonGrade'),t=$('lessonTopic'),box=$('
 if($('lessonGrade')){$('lessonGrade').innerHTML=GRADES.map(g=>'<option value="'+g+'"'+(g===selectedGrade?' selected':'')+'>כיתה '+g+'׳</option>').join('');$('lessonGrade').onchange=paintLessonTopics;$('lessonTopic').onchange=renderLessonPlans;paintLessonTopics()}
 if($('lessonPrint'))$('lessonPrint').onclick=()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert');document.body.classList.add('print-lesson');renderLessonPlans();window.print()};
 if($('kitPrint'))$('kitPrint').onclick=()=>{document.body.classList.add('print-kit');window.print()};
-window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama','print-lesson')});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama','print-flashcards','print-lesson')});
 function downloadRoster(){if(!who.classCode&&!who.name){$('rosterMsg').textContent='קודם שומרים קוד כיתה.';return}const json=exportRoster(who.classCode);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='melodymath-'+normalizeCode(who.classCode||'default')+'.json';a.click();URL.revokeObjectURL(a.href);$('rosterMsg').textContent='הקובץ ירד למחשב. שמרו אותו אצלכם — זה לא ענן.'}
 if($('rosterExport'))$('rosterExport').onclick=downloadRoster;
 if($('rosterImport'))$('rosterImport').onchange=function(){const f=this.files&&this.files[0];this.value='';if(!f)return;const reader=new FileReader();reader.onload=()=>{const res=importRoster(who.classCode,String(reader.result||''));$('rosterMsg').textContent=summarizeImport(res);if(!res.ok)return;renderClassKids();renderRosterChips();renderTeacherReport();renderClassBoard()};reader.readAsText(f)};
@@ -1184,6 +1213,22 @@ if($('sheetPrint'))$('sheetPrint').onclick=function(){
   window.print();
 };
 if($('sheetPack'))$('sheetPack').onchange=function(){ if($('sheetCount')&&this.value==='diag') $('sheetCount').value=10; };
+function renderFlashcards(){
+  const box=$('flashcardsSheet'); if(!box) return;
+  const topic=($('flashcardsTopic')&&$('flashcardsTopic').value)||'addition';
+  const count=($('flashcardsCount')&&+$('flashcardsCount').value)||8;
+  if(typeof renderFlashcardsHtml==='function'){
+    box.innerHTML=renderFlashcardsHtml({topic:topic,count:count});
+    box.classList.remove('hidden');
+  }
+}
+if($('flashcardsMake'))$('flashcardsMake').onclick=renderFlashcards;
+if($('flashcardsPrint'))$('flashcardsPrint').onclick=function(){
+  if(!$('flashcardsSheet')||$('flashcardsSheet').classList.contains('hidden')) renderFlashcards();
+  document.body.classList.remove('print-kit','print-sheet','print-class','print-parent','print-cert','print-rama','print-lesson');
+  document.body.classList.add('print-flashcards');
+  window.print();
+};
 
 let metroTimer=null, metroOn=false, metroStreak=0;
 function metroBpmNow(){ return clampBpm($('metroBpm')?$('metroBpm').value:80); }
