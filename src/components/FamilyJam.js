@@ -266,6 +266,24 @@
       }
     });
 
+    if (root && typeof root.addEventListener === 'function') {
+      root.addEventListener('mm:instrument', (ev) => {
+        if (ev && ev.detail && ev.detail.id) {
+          const kidInstId = ev.detail.id;
+          const kidData = (INST && INST.instrumentById) ? INST.instrumentById(kidInstId) : null;
+          const kidFamily = kidData ? kidData.family : 'percussion';
+          const kidObj = (JAM && JAM.instrument) ? JAM.instrument(kidInstId, kidData ? kidData.voice : 'drumLow') : { id: kidInstId, he: kidData ? kidData.instrument.he : kidInstId, voice: kidData ? kidData.voice : 'drumLow' };
+          state.kidInstrument = Object.assign({}, kidObj, { family: kidFamily });
+          const parentInstId = getComplementaryInstrument(kidInstId);
+          const parentData = (INST && INST.instrumentById) ? INST.instrumentById(parentInstId) : null;
+          const parentFamily = parentData ? parentData.family : kidFamily;
+          const parentObj = (JAM && JAM.instrument) ? JAM.instrument(parentInstId, parentData ? parentData.voice : 'drumHigh') : { id: parentInstId, he: parentData ? parentData.instrument.he : parentInstId, voice: parentData ? parentData.voice : 'drumHigh' };
+          state.parentInstrument = Object.assign({}, parentObj, { family: parentFamily });
+          draw();
+        }
+      });
+    }
+
     draw();
     return { draw, stopAudio, getState: () => state };
   }
