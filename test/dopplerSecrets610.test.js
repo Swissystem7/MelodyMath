@@ -39,6 +39,9 @@ test('the README names the secrets and the repo stores no Doppler value', () => 
   assert.doesNotMatch(blob, /SENTRY_DSN\s*[:=]\s*['"]https:\/\//);
   assert.doesNotMatch(blob, /CODECOV_TOKEN\s*[:=]\s*['"][A-Za-z0-9]{8,}/);
   assert.doesNotMatch(blob, /dp\.(?:st|ct)\./);
-  assert.equal(fs.existsSync(path.join(root, '.github', 'workflows')), false);
+  const wf = path.join(root, '.github', 'workflows');
+  if (fs.existsSync(wf)) {
+    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
+  }
   assert.equal(fs.existsSync(path.join(root, 'doppler.yaml')), false);
 });

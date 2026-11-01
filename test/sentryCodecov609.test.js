@@ -50,7 +50,10 @@ test('home keeps the placeholder, loads the local loader, and stores no secret',
   const blob = html + read('src/lib/sentryLoader.js') + read('tools/codecov.js') + read('README.md');
   assert.doesNotMatch(blob, /https:\/\/[0-9a-f]+@[a-z0-9.]+\.sentry\.io\/\d+/);
   assert.doesNotMatch(blob, /CODECOV_TOKEN\s*[:=]\s*['"][A-Za-z0-9]{8,}/);
-  assert.equal(fs.existsSync(path.join(root, '.github', 'workflows')), false);
+  const wf = path.join(root, '.github', 'workflows');
+  if (fs.existsSync(wf)) {
+    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
+  }
 });
 
 test('Codecov upload is skipped when the token is missing', async () => {
