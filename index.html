@@ -996,7 +996,7 @@ function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;const rd=Math.floor(
 function rmCheck(){if(rmAnswered)return;if(!normalizeAnswer($('rmAnswer').value))return askForAnswer('rmAnswer','rmFeedback');rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct,q.skill,q);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>${musicSourceHtml(q)}`;show('rmFeedback',true);revealWidget('rmWidget');$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?((rmIdx+1)%DIAG_BLOCK?'הבא':'לסבב הבא'):'לדוח הפערים';if($('rmNext')&&typeof $('rmNext').focus==='function')$('rmNext').focus();}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
-function rmReport(){rmPlanTopic=null;endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);window.mmLastDiag={grade:selectedGrade,perSkill:per.map(s=>({skill:s.skill,total:s.total,correct:s.correct}))};$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
+function rmReport(){rmPlanTopic=null;endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);window.mmLastDiag={grade:selectedGrade,perSkill:per.map(s=>({skill:s.skill,total:s.total,correct:s.correct}))};$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').replaceChildren();const t1=document.createTextNode(`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: `);const b=document.createElement('b');b.textContent=gaps.map(rmHe).join(', ');const br=document.createElement('br');const t2=document.createTextNode('מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.');$('rmSummary').append(t1,b,br,t2);rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
 const PLAN_PER_SKILL=6;
 function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItemsOrAll==='function'?gateItemsOrAll(st.items,st.history||[],st.items):(typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items);const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
 function rpRender(){const st=rmPlan[rpStep];const it=varyTopicExercise(rmPlanTopic,rpPick(),(st.history||[]).length);st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))setItemTag($('rmPlanTag'),it);setMath($('rmPlanPrompt'),it.prompt);if(typeof setNumberPlay==='function')setNumberPlay('rmPlanNumberPlay',it);setMusicWay('rmPlanWay',it);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('rmPlanCheck',it);$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);if(!(typeof MM_PREDICT!=='undefined'&&MM_PREDICT.mount($('rmPlanPredict'),it,st.skill||st.he,(st.history||[]).length,()=>maybeHear(it),null,{lock:[$('rmPlanAnswer'),$('rmPlanCheck')],hide:[$('rmPlanWay')]})))maybeHear(it);else maybeHear(it,{chimeOnly:true});maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
@@ -1351,8 +1351,31 @@ function initWelcomeHero(){
   if(!startBtn||!steps)return;
   const grades=['א','ב','ג','ד','ה','ו'];
   const insts=[{id:'kalimba',name:'קלימבה 🔔'},{id:'darbuka',name:'דרבוקה 🥁'},{id:'piano',name:'פסנתר 🎹'},{id:'xylo',name:'קסילופון 🪵'},{id:'tof',name:'תֹּף 🪘'}];
-  function drawGrades(){if(!gradePills)return;gradePills.innerHTML=grades.map(g=>`<button type="button" class="tab ${g===selectedGrade?'active':''}" data-qs-grade="${g}">כיתה ${g}׳</button>`).join(' ');}
-  function drawInsts(){if(!instPills)return;const cur=(typeof MM_MY_INSTRUMENT!=='undefined'&&MM_MY_INSTRUMENT.getMyInstrument())||'darbuka';instPills.innerHTML=insts.map(it=>`<button type="button" class="tab ${it.id===cur?'active':''}" data-qs-inst="${it.id}">${it.name}</button>`).join(' ');}
+  function drawGrades(){
+    if(!gradePills)return;
+    gradePills.replaceChildren();
+    grades.forEach(g=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='tab '+(g===selectedGrade?'active':'');
+      b.setAttribute('data-qs-grade',g);
+      b.textContent=`כיתה ${g}׳`;
+      gradePills.appendChild(b);
+    });
+  }
+  function drawInsts(){
+    if(!instPills)return;
+    const cur=(typeof MM_MY_INSTRUMENT!=='undefined'&&MM_MY_INSTRUMENT.getMyInstrument())||'darbuka';
+    instPills.replaceChildren();
+    insts.forEach(it=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='tab '+(it.id===cur?'active':'');
+      b.setAttribute('data-qs-inst',it.id);
+      b.textContent=it.name;
+      instPills.appendChild(b);
+    });
+  }
   drawGrades();drawInsts();
   startBtn.onclick=function(){intro.classList.add('hidden');steps.classList.remove('hidden');if(instStep)instStep.classList.remove('hidden');if(launchBtn)launchBtn.classList.remove('hidden');};
   if(cancelBtn)cancelBtn.onclick=function(){steps.classList.add('hidden');intro.classList.remove('hidden');};
