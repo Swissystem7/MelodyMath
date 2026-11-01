@@ -1,5 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { generatePreRecordedNarration, HEBREW_VOICE_PROMPTS, ELEVEN_CONFIG } = require('../tools/elevenNarration');
 const NarrationPlayer = require('../src/lib/narrationPlayer');
 
@@ -23,6 +25,48 @@ test('generatePreRecordedNarration handles dry-run mode without network calls', 
   assert.equal(res.results[0].status, 'dry_run');
 });
 
+test('generatePreRecordedNarration writes audio buffer on successful response', async () => {
+  const origFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => ({
+      ok: true,
+      status: 200,
+      arrayBuffer: async () => Buffer.from('fake-mp3-bytes')
+    });
+    const fakeDir = path.join(__dirname, '..', 'tmp-test-voice');
+    const origDir = ELEVEN_CONFIG.outputDir;
+    ELEVEN_CONFIG.outputDir = fakeDir;
+    const res = await generatePreRecordedNarration('test-key', { prompts: [HEBREW_VOICE_PROMPTS[0]] });
+    assert.equal(res.skipped, false);
+    assert.equal(res.generatedCount, 1);
+    assert.equal(res.results[0].status, 'generated');
+    fs.rmSync(fakeDir, { recursive: true, force: true });
+    ELEVEN_CONFIG.outputDir = origDir;
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});
+
+test('generatePreRecordedNarration handles HTTP error and network exception', async () => {
+  const origFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => ({
+      ok: false,
+      status: 401
+    });
+    const res1 = await generatePreRecordedNarration('test-key', { prompts: [HEBREW_VOICE_PROMPTS[0]] });
+    assert.equal(res1.results[0].status, 'error');
+    assert.equal(res1.results[0].statusCode, 401);
+
+    globalThis.fetch = async () => { throw new Error('network down'); };
+    const res2 = await generatePreRecordedNarration('test-key', { prompts: [HEBREW_VOICE_PROMPTS[0]] });
+    assert.equal(res2.results[0].status, 'error');
+    assert.equal(res2.results[0].message, 'network down');
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});
+
 test('NarrationPlayer returns asset paths and handles unknown keys', () => {
   assert.equal(NarrationPlayer.getAudioPath('addition'), 'sounds/voice/he/prompt_addition.mp3');
   assert.equal(NarrationPlayer.getAudioPath('feedback_good'), 'sounds/voice/he/feedback_good.mp3');
@@ -35,4 +79,39 @@ test('NarrationPlayer playNarration invokes callback safely in non-browser Node 
     called = true;
   });
   assert.equal(called, true);
+});
+
+test('NarrationPlayer playNarration in browser environment with mock Audio', () => {
+  let playCalled = false;
+  let listeners = {};
+  class MockAudio {
+    constructor(src) {
+      this.src = src;
+    }
+    addEventListener(evt, fn) {
+      listeners[evt] = fn;
+    }
+    play() {
+      playCalled = true;
+      return Promise.resolve();
+    }
+  }
+  const origAudio = globalThis.Audio;
+  try {
+    globalThis.Audio = MockAudio;
+    let ended = false;
+    const a = NarrationPlayer.playNarration('addition', () => { ended = true; });
+    assert.ok(a instanceof MockAudio);
+    assert.equal(playCalled, true);
+    listeners['ended']();
+    assert.equal(ended, true);
+
+    // Test error handler
+    let errorEnded = false;
+    NarrationPlayer.playNarration('addition', () => { errorEnded = true; });
+    listeners['error']();
+    assert.equal(errorEnded, true);
+  } finally {
+    globalThis.Audio = origAudio;
+  }
 });
