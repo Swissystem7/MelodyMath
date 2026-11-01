@@ -3,49 +3,52 @@
    colors: every paint is a token from sefirot.css or a color-mix of tokens.
    Mobile first; logical properties so RTL needs no mirrored rules. */
 :root {
-  --font: "Rubik", "Heebo", "Assistant", "Segoe UI", "Arial Hebrew", system-ui, sans-serif;
+  --font: "Assistant", "Heebo", "Rubik", "Segoe UI", "Arial Hebrew", system-ui, sans-serif;
+  --font-heading: "Lora", "Merriweather", "Georgia", "Frank Ruhl Hofshi", serif;
   --t-xs: .8125rem; --t-sm: .9375rem; --t-md: 1.0625rem; --t-lg: 1.375rem; --t-xl: clamp(1.9rem, 7vw, 3rem);
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; /* a 4px grid */
   --r-sm: 12px;
-  --r-md: 16px;
-  --r-lg: 24px;
+  --r-md: 14px;
+  --r-lg: 16px;
   --r-pill: 999px;
-  /* depth: hairline + soft ambient, never a hard 3D edge */
-  --e-1: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent);
-  --e-2: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent), 0 8px 24px color-mix(in srgb, var(--ink) 7%, transparent);
-  --e-3: 0 2px 6px color-mix(in srgb, var(--ink) 6%, transparent), 0 18px 44px color-mix(in srgb, var(--ink) 12%, transparent);
-  /* the one action colour on a screen (#88); a panel may swap it below */
+  /* depth: hairline + soft ambient, almost invisible soft shadow */
+  --e-1: 0 1px 3px color-mix(in srgb, var(--ink) 5%, transparent), 0 1px 2px color-mix(in srgb, var(--ink) 3%, transparent);
+  --e-2: 0 4px 6px -1px color-mix(in srgb, var(--ink) 6%, transparent), 0 2px 4px -1px color-mix(in srgb, var(--ink) 4%, transparent);
+  --e-3: 0 10px 15px -3px color-mix(in srgb, var(--ink) 7%, transparent), 0 4px 6px -2px color-mix(in srgb, var(--ink) 4%, transparent);
+  /* the one action colour on a screen: warm terracotta */
   --accent: var(--confidence);
-  --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--card));
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--card));
   --surface-2: color-mix(in srgb, var(--ink) 3%, var(--card));
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ease-pop: cubic-bezier(.34, 1.4, .64, 1);
   --d-1: .14s; --d-2: .26s; --d-3: .45s;
 
-  /* Neo-brutalist shared variables for kids (#891 / redesign) */
-  --font-heading: "Rubik", "Varela Round", "Heebo", system-ui, sans-serif;
-  --neo-border-w: 3px;
-  --neo-border: var(--neo-border-w) solid var(--neo-outline);
-  --neo-border-2: 2px solid var(--neo-outline);
+  /* Claude-inspired design tokens for warm, calm and clean UI */
+  --neo-border-w: 1px;
+  --neo-border: var(--neo-border-w) solid var(--line);
+  --neo-border-2: 1px solid var(--line);
   --neo-radius-sm: 12px;
-  --neo-radius: 18px;
-  --neo-radius-lg: 24px;
+  --neo-radius: 14px;
+  --neo-radius-lg: 16px;
   --neo-radius-pill: 999px;
-  --neo-shadow-sm: 0 3px 0 var(--neo-outline);
-  --neo-shadow: 0 4px 0 var(--neo-outline);
-  --neo-shadow-lg: 0 6px 0 var(--neo-outline);
-  --neo-shadow-hover: 0 5px 0 var(--neo-outline);
-  --neo-shadow-press: 0 1px 0 var(--neo-outline);
-  --neo-btn-min-h: 52px;
-  --neo-btn-pad: 14px 22px;
-  --neo-btn-font-size: 1.15rem;
+  --neo-shadow-sm: var(--e-1);
+  --neo-shadow: var(--e-1);
+  --neo-shadow-lg: var(--e-2);
+  --neo-shadow-hover: var(--e-2);
+  --neo-shadow-press: 0 1px 0 transparent;
+  --neo-btn-min-h: 48px;
+  --neo-btn-pad: 12px 20px;
+  --neo-btn-font-size: 1.125rem;
 }
 
 body {
   font-family: var(--font);
+  font-size: 1.125rem; /* 18px base text */
   background: var(--bg);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  line-height: 1.6;
 }
 
 /* Header: neo-brutalist headline with chunky rounded heading font */
