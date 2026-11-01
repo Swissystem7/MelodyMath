@@ -12,6 +12,7 @@
     { topic: 'שטח', q: 'במלבן יש 5 שורות ו־3 עמודות. כמה משבצות יש בו?', a: 15, g: 5, n: 3, unit: 'משבצות' },
     { topic: 'נפח', q: 'מגדל של 3 שכבות. בכל שכבה 2 שורות ו־3 עמודות. כמה קוביות יש בו?', a: 18, g: 3, n: 6, unit: 'קוביות' }
   ];
+  const ALLOWED_KEYS = { '0': 1, '1': 1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1, '9': 1, 'del': 1, 'clr': 1 };
 
   function e(s) {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -23,11 +24,13 @@
   }
 
   function pressKey(state, key) {
+    const k = String(key || '');
+    if (!ALLOWED_KEYS[k]) return state;
     if (state.qState === 'right') return state;
     let inp = state.qState === 'wrong' ? '' : state.qIn;
-    if (key === 'del') inp = inp.slice(0, -1);
-    else if (key === 'clr') inp = '';
-    else if (inp.length < 3) inp = (inp === '0' ? '' : inp) + key;
+    if (k === 'del') inp = inp.slice(0, -1);
+    else if (k === 'clr') inp = '';
+    else if (inp.length < 3 && /^[0-9]$/.test(k)) inp = (inp === '0' ? '' : inp) + k;
     return Object.assign({}, state, {
       qIn: inp,
       qState: (state.qState === 'wrong' || state.qState === 'retry') ? 'retry' : 'idle'
@@ -62,7 +65,7 @@
     const ansBorder = qRight ? '#0F766E' : (s.qState === 'wrong' ? '#C2410C' : '#1B1446');
     const ansBg = qRight ? '#D5F6EC' : (s.qState === 'wrong' ? '#FFF1E6' : '#FFFFFF');
     const ansColor = s.qIn === '' ? '#6B6396' : '#1B1446';
-    const ansText = s.qIn === '' ? '?' : s.qIn;
+    const ansText = e(s.qIn === '' ? '?' : s.qIn);
 
     let msgHtml = '';
     if (!qWrong && !qRight) {
@@ -78,13 +81,13 @@
       }
       const wrongText = s.qTries >= 2 ? 'טעויות עוזרות ללמוד. נסו שוב!' : 'כמעט! זו לא התשובה. נסו שוב.';
       msgHtml = '<div role="status" style="background:#FFF1E6;border:3px solid #C2410C;border-radius:22px;padding:10px 12px;display:flex;flex-direction:column;gap:8px">' +
-        '<div style="font-size:16px;font-weight:700;line-height:1.35">' + wrongText + '</div>' +
+        '<div style="font-size:16px;font-weight:700;line-height:1.35">' + e(wrongText) + '</div>' +
         '<div style="background:#FFFFFF;border:2px dashed #C2410C;border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;gap:6px">' +
         '<div style="font-size:14px;font-weight:700;color:#7A2E0A">רמז: ' + Q.g + ' קבוצות של ' + Q.n + '. ספרו את כל הנקודות!</div>' +
         '<div dir="ltr" aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">' + hintGroupsHtml + '</div>' +
         '</div></div>';
     } else if (qRight) {
-      msgHtml = '<div role="status" style="background:#2ED3A8;border:3px solid #1B1446;border-radius:22px;padding:14px 16px;font-size:19px;font-weight:800;text-align:center">✓ נכון! ' + Q.a + ' ' + Q.unit + '</div>';
+      msgHtml = '<div role="status" style="background:#2ED3A8;border:3px solid #1B1446;border-radius:22px;padding:14px 16px;font-size:19px;font-weight:800;text-align:center">✓ נכון! ' + Q.a + ' ' + e(Q.unit) + '</div>';
     }
 
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clr', '0', 'del'];
@@ -121,7 +124,7 @@
       '<div aria-live="polite" dir="ltr" style="height:76px;box-sizing:border-box;border-radius:22px;display:flex;align-items:center;justify-content:center;font:900 44px Rubik;border:3px solid ' + ansBorder + ';background:' + ansBg + ';color:' + ansColor + '">' + ansText + '</div>' +
       msgHtml +
       keysHtml +
-      '<button type="button" data-act="submit" style="height:64px;flex:none;border-radius:22px;font:800 20px Rubik;cursor:' + (qEmpty ? 'default' : 'pointer') + ';border:3px solid ' + submitBorder + ';background:' + submitBg + ';color:' + submitColor + ';box-shadow:' + submitShadow + '">' + submitLabel + '</button>' +
+      '<button type="button" data-act="submit" style="height:64px;flex:none;border-radius:22px;font:800 20px Rubik;cursor:' + (qEmpty ? 'default' : 'pointer') + ';border:3px solid ' + submitBorder + ';background:' + submitBg + ';color:' + submitColor + ';box-shadow:' + submitShadow + '">' + e(submitLabel) + '</button>' +
       '</div></div>';
   }
 
@@ -131,8 +134,11 @@
     el.addEventListener('click', function (ev) {
       const keyBtn = ev.target.closest ? ev.target.closest('[data-key]') : null;
       if (keyBtn) {
-        state = pressKey(state, keyBtn.getAttribute('data-key'));
-        draw();
+        const k = String(keyBtn.getAttribute('data-key') || '');
+        if (ALLOWED_KEYS[k]) {
+          state = pressKey(state, k);
+          draw();
+        }
         return;
       }
       const b = ev.target.closest ? ev.target.closest('[data-act]') : null;
