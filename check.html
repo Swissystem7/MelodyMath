@@ -8,17 +8,18 @@
 <meta name="description" content="בדיקה קצרה לפני יחידה ואחריה, נשמרת רק במכשיר. לא מחקר מבוקר.">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  :root{--ink:#1f1e1d;--muted:#6b6a65;--purple:#d97757;--accent:#d97757;--bg:#faf9f5;--card:#ffffff;--line:#e8e6dc;--font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:root{--ink:#faf9f5;--muted:#a8a69f;--purple:#e08264;--accent:#e08264;--bg:#1f1e1d;--card:#2b2a27;--line:#3e3d39}}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
   .wrap{max-width:720px;margin:auto;padding:20px 14px 60px}
   h1{font-size:clamp(1.5rem,6vw,2.2rem);margin:6px 0}
   h2{font-size:1.2rem;margin:0 0 10px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:16px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:16px 0}
   .note{color:var(--muted);font-size:.92rem}
   label{display:block;margin:8px 0 4px;font-weight:700}
-  input,select{width:100%;min-height:44px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
-  button{min-height:44px;min-width:44px;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
+  input,select{width:100%;min-height:44px;min-height:48px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+  button{min-height:44px;min-height:48px;min-width:48px;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
   button.secondary{background:#fff;color:var(--purple)}
   .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .row button{flex:1 1 9rem}

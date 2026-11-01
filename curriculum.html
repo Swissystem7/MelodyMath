@@ -7,19 +7,20 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <meta name="description" content="מה MelodyMath מכסה בתוכנית משרד החינוך, מוקדי כשל במבחני ראמ״ה ומיצ״ב, בסיס מחקרי והמענה המוזיקלי. בלי טענת יעילות.">
 <style>
-  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  :root{--ink:#1f1e1d;--muted:#6b6a65;--purple:#d97757;--accent:#d97757;--bg:#faf9f5;--card:#ffffff;--line:#e8e6dc;--font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:root{--ink:#faf9f5;--muted:#a8a69f;--purple:#e08264;--accent:#e08264;--bg:#1f1e1d;--card:#2b2a27;--line:#3e3d39}}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
   .wrap{max-width:940px;margin:auto;padding:24px 16px 60px}
   h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:8px 0}
   .lead{color:var(--muted);max-width:58ch}
   .sum{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:8rem}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:8rem}
   .stat strong{display:block;font-size:1.4rem}
-  .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0;overflow-x:auto}
+  .grade-block{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin:18px 0;overflow-x:auto}
   .note{color:var(--muted);font-size:.9rem}
   .cov-table td,.cov-table th{overflow-wrap:anywhere}
-  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:3px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
@@ -43,7 +44,7 @@
   .rem-box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.92rem}
   .rem-box strong{display:block;color:var(--purple);margin-bottom:6px;font-size:.95rem}
   .rem-box.music-box strong{color:#059669}
-  .sound-btn{margin-top:10px;padding:10px 16px;min-height:44px;min-width:44px;border-radius:10px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center}
+  .sound-btn{margin-top:10px;padding:10px 16px;min-height:44px;min-height:48px;min-width:44px;min-width:48px;border-radius:12px;background:var(--purple);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center}
   .sound-btn:hover{background:#4f46e5}
   .sound-btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
   .status-sound{margin-top:6px;font-size:.85rem;color:var(--muted);min-height:1.2em}

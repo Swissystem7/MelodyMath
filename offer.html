@@ -8,9 +8,15 @@
 <meta name="description" content="ארבעה שבועות חינם למחנכת שילוב אחת. בלי חשבונית, בלי טענת יעילות, בלי מוצר בתשלום.">
 <style>
   :root{
-    --ink:#132a26;--muted:#5a726b;--line:#e4ede9;--bg:#fff;--soft:#f4f9f6;
-    --green:#0e9f6e;--green-d:#0a7d57;--teal:#0f766e;--sand:#fbf7ee;--warn:#8a5a12;
-    --sans:"Assistant","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --ink:#1f1e1d;--muted:#6b6a65;--line:#e8e6dc;--bg:#faf9f5;--card:#ffffff;--soft:#f4f1ea;
+    --green:#137a43;--green-d:#0f6235;--teal:#d97757;--sand:#f0ead6;--warn:#9a3412;
+    --sans:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#faf9f5;--muted:#a8a69f;--line:#3e3d39;--bg:#1f1e1d;--card:#2b2a27;--soft:#2b2a27;
+      --green:#4e9a70;--green-d:#4e9a70;--teal:#e08264;--sand:#2b2a27;--warn:#e08264;
+    }
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -25,7 +31,7 @@
   .who{display:inline-block;background:#e6f6ef;color:var(--green-d);font-weight:800;font-size:.85rem;padding:6px 13px;border-radius:99px;margin-bottom:14px}
   section{padding:36px 0;border-top:1px solid var(--line)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .card{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
   .card h3{font-size:1.05rem}
   .card ul{margin:8px 0 0;padding-right:18px;color:var(--muted)}
   .honest{background:#fff8ec;border:1px solid #f0e2c4;border-radius:16px;padding:16px 18px}
@@ -33,10 +39,10 @@
   label{display:block;font-weight:700;font-size:.88rem;margin:12px 0 0}
   label.check{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:16px}
   label.check input{width:auto;margin-top:5px}
-  input,select{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px}
+  input,select{width:100%;min-height:44px;min-height:48px;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;margin-top:4px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-  button,.btn{border:0;border-radius:12px;padding:12px 18px;min-height:44px;min-width:44px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+  button,.btn{border:0;border-radius:12px;padding:12px 18px;min-height:44px;min-width:44px;min-height:48px;min-width:48px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
   .primary{background:var(--green);color:#fff}
   .primary:hover:not(:disabled){background:var(--green-d)}
   .ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}

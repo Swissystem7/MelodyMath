@@ -7,22 +7,23 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <meta name="description" content="נושאי תוכנית הלימודים במתמטיקה של משרד החינוך לכיתות א׳–ו׳, בסדר של התוכנית, עם קישור לסעיף הרשמי ולתרגולים המתאימים ב־MelodyMath.">
 <style>
-  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0}
+  :root{--ink:#1f1e1d;--muted:#6b6a65;--purple:#d97757;--accent:#d97757;--bg:#faf9f5;--card:#ffffff;--line:#e8e6dc;--font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:root{--ink:#faf9f5;--muted:#a8a69f;--purple:#e08264;--accent:#e08264;--bg:#1f1e1d;--card:#2b2a27;--line:#3e3d39}}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
   .wrap{max-width:940px;margin:auto;padding:24px 16px 60px}
   h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:8px 0}
   .lead,.note{color:var(--muted)}
   .lead{max-width:60ch}
   .note{font-size:.9rem}
-  :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+  :focus-visible{outline:3px solid var(--purple);outline-offset:3px}
   .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
   .grade-pick{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
-  .grade-pick button{min-width:56px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:800;font-size:1.05rem;cursor:pointer}
+  .grade-pick button{min-width:56px;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:800;font-size:1.05rem;cursor:pointer}
   .grade-pick button[aria-pressed="true"]{background:var(--purple);color:#fff;border-color:var(--purple)}
-  .grade-block{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin:18px 0}
+  .grade-block{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin:18px 0}
   .topics{list-style:none;margin:0;padding:0;counter-reset:t}
   .topic{border-bottom:1px solid var(--line);padding:12px 0;overflow-wrap:anywhere}
   .topic:last-child{border-bottom:0}

@@ -8,16 +8,17 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="src/lib/print.css">
   <style>
-    :root { --bg:#f7f4fb; --card:#fff; --ink:#1e1830; --muted:#554c6b; --accent:#4c2a85; --accent-soft:#ede6f9; --border:#d7cde8; }
+    :root { --bg:#faf9f5; --card:#ffffff; --ink:#1f1e1d; --muted:#6b6a65; --accent:#d97757; --accent-soft:color-mix(in srgb, #d97757 12%, #ffffff); --border:#e8e6dc; --font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif; }
+    @media (prefers-color-scheme: dark){:root { --bg:#1f1e1d; --card:#2b2a27; --ink:#faf9f5; --muted:#a8a69f; --accent:#e08264; --accent-soft:color-mix(in srgb, #e08264 15%, #2b2a27); --border:#3e3d39; }}
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+    body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.6; }
     .mm-skip { position: absolute; top: -100px; right: 12px; background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 100; text-decoration: none; font-weight: 700; }
     .mm-skip:focus { top: 12px; }
     header, main, footer { max-width: 880px; margin: 0 auto; padding: 16px 20px; }
     header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); }
     .top-links, .demo-video-controls, .demo-scene-list { display: flex; flex-wrap: wrap; gap: 10px; }
     .demo-video-controls, .demo-scene-list { margin-top: 16px; }
-    .top-links a, .secondary, .primary, .demo-scene-btn { min-height: 44px; padding: 10px 16px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--ink); }
+    .top-links a, .secondary, .primary, .demo-scene-btn { min-height: 44px; min-height: 48px; padding: 10px 16px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card); color: var(--ink); }
     .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .demo-video-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 16px; box-shadow: 0 4px 14px rgba(30,24,48,0.06); }
     .demo-video-stage { background: #1a132b; color: #fff; border-radius: 14px; padding: 20px; position: relative; overflow: hidden; }
