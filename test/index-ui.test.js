@@ -109,6 +109,18 @@ test('qrModal conforms to WAI-ARIA dialog accessibility pattern and touch target
   assert.match(indexHtml, /e\.key\s*===\s*'Escape'/);
 });
 
+test('qrModal provides offline progress export and import between devices in QR', () => {
+  assert.match(indexHtml, /id="qrModeExport"/);
+  assert.match(indexHtml, /id="qrModeImport"/);
+  assert.match(indexHtml, /id="qrExportStudentBtn"/);
+  assert.match(indexHtml, /id="qrExportRosterBtn"/);
+  assert.match(indexHtml, /id="qrExportSvgBox"/);
+  assert.match(indexHtml, /id="qrImportInput"/);
+  assert.match(indexHtml, /id="qrImportSubmitBtn"/);
+  assert.match(indexHtml, /src\/lib\/qrSync\.js/);
+  assert.match(indexHtml, /function checkHashImport\(\)/);
+});
+
 test('teacher tab provides a printable RAMA failure-point diagnostic card', () => {
   assert.match(indexHtml, /id="ramaCard"/);
   assert.match(indexHtml, /id="ramaMake"/);

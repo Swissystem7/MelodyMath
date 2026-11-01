@@ -184,14 +184,41 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
     <button type="button" class="modal-close" id="qrCloseBtn" aria-label="סגירה">✕</button>
     <h3 id="qrTitle">שיתוף מהיר לכיתה ולהורים</h3>
     <p class="note">סרקו ישירות מהטלפון או הטאבלט כדי לפתוח את התרגול ללא התקנה וללא רישום:</p>
-    <div class="qr-box">
-      <img src="icons/qr-code.svg" alt="קוד QR עבור MelodyMath" width="220" height="220" class="qr-img">
+    <div class="tabs" style="display:flex;gap:6px;margin:10px 0;justify-content:center">
+      <button type="button" id="qrModeApp" class="tab active" style="padding:6px 10px;font-size:.85rem">📱 קישור לאתר</button>
+      <button type="button" id="qrModeExport" class="tab" style="padding:6px 10px;font-size:.85rem">📤 ייצוא ב-QR</button>
+      <button type="button" id="qrModeImport" class="tab" style="padding:6px 10px;font-size:.85rem">📥 ייבוא מ-QR</button>
     </div>
-    <div class="share-actions">
-      <button type="button" id="copyLinkBtn" class="primary">📋 העתקת קישור</button>
-      <a id="whatsappShareBtn" href="https://api.whatsapp.com/send?text=%D7%AA%D7%A8%D7%92%D7%95%D7%9C%20%D7%9E%D7%AA%D7%9E%D7%98%D7%99%D7%A7%D7%94%20%D7%9E%D7%95%D7%96%D7%99%D7%A7%D7%9C%D7%99%20%D7%9C%D7%9C%D7%90%20%D7%94%D7%A8%D7%A9%D7%9E%D7%94%3A%20https%3A%2F%2Fswissystem7.github.io%2FMelodyMath%2F" target="_blank" rel="noopener" class="secondary wa-btn">💬 שיתוף בוואטסאפ</a>
+    <div id="qrPaneApp">
+      <div class="qr-box">
+        <img src="icons/qr-code.svg" alt="קוד QR עבור MelodyMath" width="220" height="220" class="qr-img">
+      </div>
+      <div class="share-actions">
+        <button type="button" id="copyLinkBtn" class="primary">📋 העתקת קישור</button>
+        <a id="whatsappShareBtn" href="https://api.whatsapp.com/send?text=%D7%AA%D7%A8%D7%92%D7%95%D7%9C%20%D7%9E%D7%AA%D7%9E%D7%98%D7%99%D7%A7%D7%94%20%D7%9E%D7%95%D7%96%D7%99%D7%A7%D7%9C%D7%99%20%D7%9C%D7%9C%D7%90%20%D7%94%D7%A8%D7%A9%D7%9E%D7%94%3A%20https%3A%2F%2Fswissystem7.github.io%2FMelodyMath%2F" target="_blank" rel="noopener" class="secondary wa-btn">💬 שיתוף בוואטסאפ</a>
+      </div>
+      <span id="copyMsg" class="who-status" role="status" aria-live="polite"></span>
     </div>
-    <span id="copyMsg" class="who-status" role="status" aria-live="polite"></span>
+    <div id="qrPaneExport" class="hidden">
+      <p class="note">העברת התקדמות למכשיר אחר ללא שרת וללא ענן. הטאבלט השני סורק במצלמה או מזין את הקוד בלשונית ייבוא:</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin:8px 0">
+        <button type="button" id="qrExportStudentBtn" class="secondary" style="padding:6px 12px">תלמיד/ה נוכחי/ת</button>
+        <button type="button" id="qrExportRosterBtn" class="secondary" style="padding:6px 12px">כל הכיתה (רוסטר)</button>
+      </div>
+      <div id="qrExportSvgBox" class="qr-box" style="min-height:160px;display:flex;align-items:center;justify-content:center"></div>
+      <div class="share-actions">
+        <button type="button" id="qrCopyPayloadBtn" class="secondary">📋 העתקת קוד שיתוף</button>
+      </div>
+      <span id="qrExportMsg" class="who-status" role="status" aria-live="polite"></span>
+    </div>
+    <div id="qrPaneImport" class="hidden">
+      <p class="note">הדביקו כאן מחרוזת שיתוף שסרקתם או קיבלתם מטאבלט אחר:</p>
+      <textarea id="qrImportInput" rows="3" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;font-family:monospace;font-size:.85rem" placeholder="הדביקו כאן קוד QR או מחרוזת #import=..."></textarea>
+      <div class="share-actions" style="margin-top:10px">
+        <button type="button" id="qrImportSubmitBtn" class="primary">📥 ייבוא נתונים עכשיו</button>
+      </div>
+      <span id="qrImportMsg" class="who-status" role="status" aria-live="polite"></span>
+    </div>
   </div>
 </div>
 <div class="who-bar" id="whoBar">
@@ -557,6 +584,7 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 <script src="src/lib/adaptive.js"></script>
 <script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/qrSync.js"></script>
 <script src="src/lib/curriculum/grade6.js"></script>
 <script src="src/lib/curriculum/grade1.js"></script>
 <script src="src/lib/curriculum/grade4.js"></script>
@@ -1347,6 +1375,81 @@ function closeQrModal(){
     btn.focus();
   }
 }
+function switchQrMode(mode){
+  const panes = { app: $('qrPaneApp'), export: $('qrPaneExport'), import: $('qrPaneImport') };
+  const tabs = { app: $('qrModeApp'), export: $('qrModeExport'), import: $('qrModeImport') };
+  Object.keys(panes).forEach(k => {
+    if(panes[k]) panes[k].classList.toggle('hidden', k !== mode);
+    if(tabs[k]) tabs[k].classList.toggle('active', k === mode);
+  });
+}
+if($('qrModeApp')) $('qrModeApp').onclick = () => switchQrMode('app');
+if($('qrModeExport')) $('qrModeExport').onclick = () => { switchQrMode('export'); renderExportQr('student'); };
+if($('qrModeImport')) $('qrModeImport').onclick = () => switchQrMode('import');
+
+let lastPackedPayload = '';
+function renderExportQr(type){
+  const box = $('qrExportSvgBox'); if(!box) return;
+  let packed;
+  if(type === 'roster'){
+    packed = typeof packRoster === 'function' ? packRoster(who.classCode) : null;
+  } else {
+    packed = typeof packStudent === 'function' ? packStudent(who.name || 'תלמיד', who.classCode) : null;
+  }
+  if(packed && typeof generateQrSvg === 'function'){
+    lastPackedPayload = packed.hash;
+    box.innerHTML = generateQrSvg(packed.url || packed.hash, { margin: 2 });
+    if($('qrExportMsg')) $('qrExportMsg').textContent = (type === 'roster' ? 'קוד QR עבור כל הכיתה' : 'קוד QR עבור ' + (who.name || 'תלמיד/ה')) + ' מוכן לסריקה.';
+  }
+}
+if($('qrExportStudentBtn')) $('qrExportStudentBtn').onclick = () => renderExportQr('student');
+if($('qrExportRosterBtn')) $('qrExportRosterBtn').onclick = () => renderExportQr('roster');
+if($('qrCopyPayloadBtn')) $('qrCopyPayloadBtn').onclick = () => {
+  if(lastPackedPayload && navigator.clipboard){
+    navigator.clipboard.writeText(lastPackedPayload).then(() => {
+      if($('qrExportMsg')) $('qrExportMsg').textContent = 'הקוד הועתק ללוח!';
+    }).catch(()=>{});
+  }
+};
+
+if($('qrImportSubmitBtn')) $('qrImportSubmitBtn').onclick = () => {
+  const raw = $('qrImportInput') ? $('qrImportInput').value : '';
+  if(!raw.trim()){
+    if($('qrImportMsg')) $('qrImportMsg').textContent = 'אנא הדביקו קוד QR או מחרוזת שיתוף.';
+    return;
+  }
+  if(typeof importPayload === 'function'){
+    const res = importPayload(raw, who.classCode);
+    if($('qrImportMsg')) $('qrImportMsg').textContent = res.message || (res.ok ? 'הייבוא הושלם בהצלחה!' : 'שגיאה בייבוא.');
+    if(res.ok){
+      if($('whoStatus')) $('whoStatus').textContent = res.message;
+      if(typeof renderClassKids === 'function') renderClassKids();
+      if(typeof renderRosterChips === 'function') renderRosterChips();
+      if(typeof renderTeacherReport === 'function') renderTeacherReport();
+      if(typeof renderClassBoard === 'function') renderClassBoard();
+    }
+  }
+};
+
+function checkHashImport(){
+  try {
+    const h = window.location.hash;
+    if(h && (h.includes('#import=') || h.includes('#sync='))){
+      if(typeof importPayload === 'function'){
+        const res = importPayload(h, who.classCode);
+        if(res.ok){
+          if($('whoStatus')) $('whoStatus').textContent = res.message || 'התקדמות יובאה בהצלחה!';
+          if(typeof renderClassKids === 'function') renderClassKids();
+          if(typeof renderRosterChips === 'function') renderRosterChips();
+          if(typeof renderTeacherReport === 'function') renderTeacherReport();
+          if(typeof renderClassBoard === 'function') renderClassBoard();
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      }
+    }
+  } catch(e){}
+}
+checkHashImport();
 if($('qrShareBtn')) $('qrShareBtn').onclick=openQrModal;
 if($('qrCloseBtn')) $('qrCloseBtn').onclick=closeQrModal;
 if($('qrModal')){
