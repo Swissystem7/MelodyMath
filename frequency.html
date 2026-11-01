@@ -7,22 +7,23 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <meta name="description" content="אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד — יחסים שומעים ומחשבים. העשרה לכיתות ה׳–ו׳, בלי טענת יעילות.">
 <style>
-  :root{--ink:#21183b;--muted:#534a6b;--purple:#6946e8;--bg:#f7f4ff;--line:#ded6f0;--replay-h:64px}
+  :root{--ink:#1f1e1d;--muted:#6b6a65;--purple:#d97757;--accent:#d97757;--bg:#faf9f5;--card:#ffffff;--line:#e8e6dc;--replay-h:64px;--font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:root{--ink:#faf9f5;--muted:#a8a69f;--purple:#e08264;--accent:#e08264;--bg:#1f1e1d;--card:#2b2a27;--line:#3e3d39}}
   *{box-sizing:border-box}
   html{scroll-padding-bottom:calc(var(--replay-h) + 16px)}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;line-height:1.55}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
   .wrap{max-width:900px;margin:auto;padding:16px 12px calc(var(--replay-h) + 24px)}
   h1{font-size:clamp(1.5rem,5vw,2.3rem);margin:8px 0}
   h2{font-size:clamp(1.1rem,3.6vw,1.4rem);margin:0 0 6px}
   .lead,.note{color:var(--muted)}
   .note{font-size:.9rem}
-  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 12px;margin:14px 0}
-  .tag{display:inline-block;background:#efe9ff;color:var(--purple);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:700;margin-bottom:6px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 12px;margin:14px 0}
+  .tag{display:inline-block;background:color-mix(in srgb, var(--purple) 12%, var(--card));color:var(--purple);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:700;margin-bottom:6px}
   .row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
-  button{font:inherit;min-height:44px;min-width:44px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
+  button{font:inherit;min-height:44px;min-height:48px;min-width:44px;min-width:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
   button.primary{background:var(--purple);border-color:var(--purple);color:#fff}
   button[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff}
-  input[type=text]{font:inherit;min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);width:9rem}
+  input[type=text]{font:inherit;min-height:44px;min-height:48px;padding:8px 10px;border-radius:12px;background:var(--card);color:var(--ink);border:1px solid var(--line);width:9rem}
   bdi,.num{unicode-bidi:isolate;direction:ltr}
   .hz{font-variant-numeric:tabular-nums;font-weight:700}
   .feedback{margin:8px 0 0;font-weight:700;min-height:1.6em}

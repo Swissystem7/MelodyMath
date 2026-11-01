@@ -7,17 +7,24 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <style>
   :root{
-    --indigo:#4f46e5; --indigo-d:#3730a3; --indigo-l:#eef2ff;
-    --ink:#1e1b2e; --muted:#6b7280; --line:#e5e7eb; --bg:#ffffff; --good:#059669; --bad:#dc2626;
+    --indigo:#d97757; --indigo-d:#9a3412; --indigo-l:color-mix(in srgb, #d97757 12%, #ffffff);
+    --ink:#1f1e1d; --muted:#6b6a65; --line:#e8e6dc; --bg:#faf9f5; --card:#ffffff; --good:#137a43; --bad:#9a3412;
+    --font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --indigo:#e08264; --indigo-d:#d97757; --indigo-l:color-mix(in srgb, #e08264 15%, #2b2a27);
+      --ink:#faf9f5; --muted:#a8a69f; --line:#3e3d39; --bg:#1f1e1d; --card:#2b2a27; --good:#4e9a70; --bad:#e08264;
+    }
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.5}
+    font-family:var(--font);line-height:1.6}
   header{padding:16px 18px;border-bottom:1px solid var(--line)}
   h1{margin:0;font-size:20px;color:var(--indigo-d)}
   .sub{color:var(--muted);font-size:13px;margin-top:2px}
   main{max-width:860px;margin:0 auto;padding:14px}
-  .card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;background:var(--card)}
   .truth{background:var(--indigo-l);border-color:#c7d2fe;font-size:13px}
   .truth b{color:var(--indigo-d)}
   label{font-size:13px;color:var(--muted);display:block;margin:2px 0}

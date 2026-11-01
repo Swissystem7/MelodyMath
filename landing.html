@@ -8,9 +8,15 @@
 <meta name="description" content="שני מוצרים נפרדים בדפדפן: תרגול יסודי בעברית לפי תכנית הלימודים, וסוניפיקציה של גרפים לחטיבה ולתיכון. בלי טענת יעילות.">
 <style>
   :root{
-    --ink:#132a26;--muted:#5a726b;--line:#e4ede9;--bg:#ffffff;--soft:#f4f9f6;
-    --green:#0e9f6e;--green-d:#0a7d57;--teal:#0f766e;--sand:#fbf7ee;--warn:#b4791a;
-    --sans:"Assistant","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --ink:#1f1e1d;--muted:#6b6a65;--line:#e8e6dc;--bg:#faf9f5;--card:#ffffff;--soft:#f4f1ea;
+    --green:#137a43;--green-d:#0f6235;--teal:#d97757;--sand:#f0ead6;--warn:#9a3412;
+    --sans:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#faf9f5;--muted:#a8a69f;--line:#3e3d39;--bg:#1f1e1d;--card:#2b2a27;--soft:#2b2a27;
+      --green:#4e9a70;--green-d:#4e9a70;--teal:#e08264;--sand:#2b2a27;--warn:#e08264;
+    }
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -24,7 +30,7 @@
   .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;}
   .brand{font-weight:800;font-size:1.15rem;display:flex;align-items:center;gap:8px;}
   .brand span{font-size:1.35rem;}
-  .nav a.cta{background:var(--green);color:#fff;padding:10px 18px;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;text-decoration:none;font-weight:800;font-size:.92rem;}
+  .nav a.cta{background:var(--teal);color:#fff;padding:10px 18px;min-height:44px;min-width:44px;min-height:48px;min-width:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;text-decoration:none;font-weight:800;font-size:.92rem;}
   .nav a.cta:hover:not(:disabled){background:var(--green-d);}
 
   .hero{background:linear-gradient(180deg,var(--soft),#fff);padding:64px 0 52px;}
@@ -32,7 +38,7 @@
   .hero p.lead{font-size:1.22rem;color:var(--muted);max-width:44ch;margin:0 0 26px;}
   .hero .who{display:inline-block;background:#e6f6ef;color:var(--green-d);font-weight:800;font-size:.85rem;padding:6px 13px;border-radius:99px;margin-bottom:18px;}
   .btns{display:flex;gap:12px;flex-wrap:wrap;}
-  button,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:12px 22px;border:0;border-radius:13px;font:inherit;font-weight:800;text-decoration:none;font-size:1rem;cursor:pointer;}
+  button,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;min-height:48px;min-width:48px;padding:12px 22px;border:0;border-radius:14px;font:inherit;font-weight:800;text-decoration:none;font-size:1rem;cursor:pointer;}
   .btn.primary{background:var(--green);color:#fff;} .btn.primary:hover:not(:disabled){background:var(--green-d);}
   .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);} .btn.ghost:hover:not(:disabled){border-color:var(--green);}
   button:disabled,.btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -40,7 +46,7 @@
   section{padding:52px 0;border-top:1px solid var(--line);}
   h2{font-size:1.7rem;} .sub{color:var(--muted);max-width:56ch;margin:0 0 30px;}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-  .card{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:22px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;}
   .card .ic{font-size:1.7rem;margin-bottom:10px;}
   .card h3{font-size:1.12rem;} .card p{margin:0;color:var(--muted);font-size:.96rem;}
 
