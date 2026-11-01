@@ -2,6 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const { generatePreRecordedNarration, HEBREW_VOICE_PROMPTS, ELEVEN_CONFIG } = require('../tools/elevenNarration');
 const NarrationPlayer = require('../src/lib/narrationPlayer');
 
@@ -67,6 +68,14 @@ test('generatePreRecordedNarration handles HTTP error and network exception', as
   }
 });
 
+test('tools/elevenNarration runs as standalone CLI and reports missing key', () => {
+  const r = spawnSync(process.execPath, [path.join(__dirname, '..', 'tools', 'elevenNarration.js')], {
+    env: { ...process.env, ELEVENLABS_API_KEY: '' }
+  });
+  assert.equal(r.status, 0);
+  assert.match(r.stdout.toString(), /ELEVENLABS_API_KEY absent/);
+});
+
 test('NarrationPlayer returns asset paths and handles unknown keys', () => {
   assert.equal(NarrationPlayer.getAudioPath('addition'), 'sounds/voice/he/prompt_addition.mp3');
   assert.equal(NarrationPlayer.getAudioPath('feedback_good'), 'sounds/voice/he/feedback_good.mp3');
@@ -106,7 +115,7 @@ test('NarrationPlayer playNarration in browser environment with mock Audio', () 
     listeners['ended']();
     assert.equal(ended, true);
 
-    // Test error handler
+    // Test error listener
     let errorEnded = false;
     NarrationPlayer.playNarration('addition', () => { errorEnded = true; });
     listeners['error']();
@@ -114,4 +123,39 @@ test('NarrationPlayer playNarration in browser environment with mock Audio', () 
   } finally {
     globalThis.Audio = origAudio;
   }
+});
+
+test('NarrationPlayer handles browser play rejection and Audio constructor error', async () => {
+  const origAudio = globalThis.Audio;
+  try {
+    let rejectEnded = false;
+    class RejectAudio {
+      constructor(src) { this.src = src; }
+      addEventListener() {}
+      play() {
+        return Promise.reject(new Error('play-error'));
+      }
+    }
+    globalThis.Audio = RejectAudio;
+    NarrationPlayer.playNarration('addition', () => { rejectEnded = true; });
+    await new Promise(r => setTimeout(r, 10));
+    assert.equal(rejectEnded, true);
+
+    globalThis.Audio = function() { throw new Error('audio-init-failed'); };
+    let initFailedEnded = false;
+    const res = NarrationPlayer.playNarration('addition', () => { initFailedEnded = true; });
+    assert.equal(res, null);
+    assert.equal(initFailedEnded, true);
+  } finally {
+    globalThis.Audio = origAudio;
+  }
+});
+
+test('NarrationPlayer supports non-CommonJS window root global', () => {
+  const code = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'narrationPlayer.js'), 'utf8');
+  const fn = new Function('module', code);
+  fn(undefined);
+  assert.ok(globalThis.NarrationPlayer);
+  assert.equal(typeof globalThis.NarrationPlayer.playNarration, 'function');
+  delete globalThis.NarrationPlayer;
 });
