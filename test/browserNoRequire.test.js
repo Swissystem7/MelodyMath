@@ -18,6 +18,9 @@ test('rhythmTrack, rhythmMaster, rhythmMeasure and RhythmMaster execute in brows
   });
   context.globalThis = context;
 
+  // In index.html, jamKit is loaded before RhythmMaster
+  vm.runInContext(read('src/components/jamKit.js'), context);
+
   // 1. rhythmTrack
   assert.doesNotThrow(() => {
     vm.runInContext(read('src/lib/music/rhythmTrack.js'), context);

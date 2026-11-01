@@ -20,7 +20,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const RM = (root && root.MM_RHYTHM_MASTER) || (typeof require === 'function' ? require('./rhythmMaster.js') : {});
+  const RM = (root && root.MM_RHYTHM_MASTER) || require('./rhythmMaster.js');
 
   const DAY_MS = 24 * 60 * 60 * 1000;
   const POST_AFTER_DAYS = 28;
