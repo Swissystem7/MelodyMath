@@ -9,9 +9,11 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
-test('there is no GitHub Actions workflow in the repo', () => {
+test('the only GitHub Actions workflow is the CI pipeline', () => {
   const wf = path.join(root, '.github', 'workflows');
-  assert.equal(fs.existsSync(wf), false, '.github/workflows must not exist');
+  if (!fs.existsSync(wf)) return; // no workflows at all is still fine
+  const files = fs.readdirSync(wf).sort();
+  assert.deepEqual(files, ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
 });
 
 test('the unused factory lib/ folder is gone', () => {
