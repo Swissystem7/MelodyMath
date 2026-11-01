@@ -1381,7 +1381,11 @@ function initWelcomeHero(){
   if(cancelBtn)cancelBtn.onclick=function(){steps.classList.add('hidden');intro.classList.remove('hidden');};
   if(gradePills)gradePills.onclick=function(e){const b=e.target.closest('[data-qs-grade]');if(!b)return;saveGrade(b.getAttribute('data-qs-grade'));drawGrades();if(instStep)instStep.classList.remove('hidden');if(launchBtn)launchBtn.classList.remove('hidden');};
   if(instPills)instPills.onclick=function(e){const b=e.target.closest('[data-qs-inst]');if(!b)return;if(typeof MM_MY_INSTRUMENT!=='undefined')MM_MY_INSTRUMENT.setMyInstrument(b.getAttribute('data-qs-inst'));drawInsts();if(launchBtn)launchBtn.classList.remove('hidden');};
-  if(launchBtn)launchBtn.onclick=function(){const b=$('rmBegin');if(b)b.click();};
+  if(launchBtn)launchBtn.onclick=function(){const hero=$('welcomeHero');if(hero)hero.classList.add('hidden');const b=$('rmBegin');if(b)b.click();};
+  const restoreHero=function(){const hero=$('welcomeHero');if(hero)hero.classList.remove('hidden');};
+  if($('rmCancel'))$('rmCancel').addEventListener('click',restoreHero);
+  if($('rmPlanRestart'))$('rmPlanRestart').addEventListener('click',restoreHero);
+  if($('rmRestart'))$('rmRestart').addEventListener('click',restoreHero);
 }
 initWelcomeHero();
 // program.html opens a curriculum row with ?topic=<id>[&skill=<k>]: the row's

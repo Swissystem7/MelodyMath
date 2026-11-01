@@ -164,14 +164,41 @@ button:disabled { opacity: .5; cursor: default; }
   from { transform: translateX(100%); }
   to { transform: translateX(-100%); }
 }
-.prompt { font-weight: 800; letter-spacing: -.01em; line-height: 1.35; padding: var(--s-5); border-radius: var(--r-lg); background: var(--surface-2); }
+.prompt {
+  font-family: var(--font-heading);
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.45;
+  padding: 22px 26px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
 input, select {
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--card);
   transition: border-color var(--d-2) var(--ease), box-shadow var(--d-2) var(--ease);
 }
-.answer-row input { font-size: var(--t-lg); font-weight: 700; }
+.answer-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+}
+.answer-row input {
+  min-height: 48px;
+  font-size: var(--t-lg);
+  font-weight: 700;
+  padding: 0 16px;
+}
+.answer-row button {
+  min-height: 48px;
+  min-width: 100px;
+  padding: 0 24px;
+}
 input:focus, select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
@@ -184,21 +211,61 @@ input:focus, select:focus {
   box-shadow: var(--neo-shadow);
   font-family: var(--font-heading);
   font-weight: 800;
+  min-height: 52px;
+  font-size: 1.15rem;
+  padding: 12px 20px;
 }
 .choice:hover:not(:disabled) { border-color: var(--neo-outline); box-shadow: var(--neo-shadow-hover); transform: translate(-1px, -1px); }
 .choice:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: var(--neo-shadow-press); }
-.choice.picked-good { color: var(--card); border-color: var(--good); animation: mm-pop var(--d-3) var(--ease-pop); }
-.choice.picked-bad { color: var(--card); border-color: var(--bad); animation: mm-shake .35s var(--ease); }
+.choice.picked-good { color: var(--card); border-color: var(--good); background: var(--good); animation: mm-pop var(--d-3) var(--ease-pop); }
+.choice.picked-bad { color: var(--card); border-color: var(--bad); background: var(--bad); animation: mm-shake .35s var(--ease); }
 
-/* Feedback: a correct answer pops in and a ring of light spreads from it. */
-.feedback { border-radius: var(--r-md); font-size: var(--t-md); font-weight: 600; }
+/* Feedback: warm, gentle, calm feedback cards for children */
+.feedback {
+  border-radius: var(--r-md);
+  font-size: var(--t-md);
+  font-weight: 600;
+  padding: 16px 20px;
+  margin: 14px 0;
+  line-height: 1.5;
+}
+.feedback strong {
+  display: block;
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+}
 .feedback.good {
+  background: var(--good-tint);
+  color: var(--good);
   border: 1px solid color-mix(in srgb, var(--good) 30%, var(--card));
   animation: mm-pop var(--d-3) var(--ease-pop), mm-ring .9s var(--ease) .1s;
 }
 .feedback.bad {
+  background: var(--bad-tint);
+  color: var(--bad);
   border: 1px solid color-mix(in srgb, var(--bad) 25%, var(--card));
   animation: mm-shake .35s var(--ease);
+}
+.feedback .hint {
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 1rem;
+  margin-top: 6px;
+}
+.feedback.soft {
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.music-way {
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--ink);
+  padding: 12px 18px;
+  margin: 12px 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 @keyframes mm-pop {
   0% { transform: scale(.94); opacity: 0; }
@@ -314,13 +381,14 @@ input:focus, select:focus {
   color: var(--confidence);
 }
 
-/* Focus: a raspberry ring with a card-coloured gap, visible on violet too. */
+/* Focus: high contrast visible focus ring for AA special education accessibility */
 :focus-visible,
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 summary:focus-visible {
+  outline: 3px solid var(--focus);
   outline-color: var(--focus);
   outline-offset: 3px;
 }
