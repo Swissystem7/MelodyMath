@@ -14,6 +14,7 @@ const INTENTIONALLY_UNUSED = {
   'instrumentLines.js': 'content-only data for the #687 variation engine (#673); no page uses it until that engine lands',
   'feedback.js': 'Node-only CommonJS (bare module.exports) that would throw in a browser; pages link the form directly',
   'partnerSchool.js': 'partner school 4-week pilot protocol and evaluation module (Refs #17)',
+  'vendorPortfolio.js': 'vendor portfolio checklist and self-audit module (Refs #18)',
 };
 
 function loadedByPages() {
