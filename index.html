@@ -232,7 +232,34 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
   <a class="navcard" href="offer.html"><strong>ניסוי כיתתי · 4 שבועות · חינם</strong><span>מכתב מוכן למנהל/ת ודף אחד להדפסה. בלי חשבונית ובלי טענת יעילות.</span></a>
   <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
 </nav>
-<section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">בתרגול האישי, לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.<span id="gateNoteDiag" class="hidden"> האבחון עצמו בודק גם לוחות שעוד לא נפתחו — כדי לדעת מאיפה להתחיל.</span></div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button><div id="rmStruggleList" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div></div>
+<section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="welcomeHero" class="card welcome-hero" role="region" aria-label="ברוכים הבאים ל-MelodyMath">
+  <span class="tag">ברוכים הבאים · תרגול יסודי א׳–ו׳</span>
+  <h2 style="font-size:1.65rem;margin:8px 0 6px;">מנגנים ולומדים חשבון ברוגע ♫</h2>
+  <p style="margin:0 0 12px;line-height:1.6;color:var(--ink);max-width:44rem;">
+    <strong>מה זה MelodyMath:</strong> סביבת תרגול שקטה וחמה המשלבת מתמטיקה עם מקצב אישי וצלילים מעולם המוזיקה, בקצב שלכם ובלי שום לחץ.<br>
+    <strong>למי זה מתאים:</strong> לילדים בכיתות א׳ עד ו׳, לתלמידים עם קשיי קשב ולחינוך מיוחד. ללא ציונים מלחיצים, פועל ישירות במכשיר וללא שום איסוף מידע.
+  </p>
+  <div id="qsFlow" class="qs-flow" style="margin-top:8px;">
+    <div id="qsIntro">
+      <button type="button" id="qsStartBtn" class="primary" style="font-size:1.15rem;padding:14px 28px;width:auto;min-width:200px;">מתחילים עכשיו ✨</button>
+    </div>
+    <div id="qsSteps" class="hidden" style="margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:16px;">
+      <div id="qsGradeStep" style="margin-bottom:14px;">
+        <p style="font-weight:700;margin:0 0 8px;font-size:1.05rem;">שלב 1 מתוך 2: באיזו כיתה נתרגל היום?</p>
+        <div class="grade-filter-pills" id="qsGradePills" role="group" aria-label="בחירת כיתה"></div>
+      </div>
+      <div id="qsInstStep" class="hidden" style="margin-bottom:14px;">
+        <p style="font-weight:700;margin:0 0 8px;font-size:1.05rem;">שלב 2 מתוך 2: באיזה כלי נגינה ננגן?</p>
+        <div class="grade-filter-pills" id="qsInstPills" role="group" aria-label="בחירת כלי נגינה"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button type="button" id="qsLaunchBtn" class="primary hidden" style="font-size:1.15rem;padding:12px 24px;width:auto;">קדימה, לתרגיל הראשון! 🚀</button>
+        <button type="button" id="qsCancelBtn" class="secondary" style="width:auto;">סגירה</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">בתרגול האישי, לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.<span id="gateNoteDiag" class="hidden"> האבחון עצמו בודק גם לוחות שעוד לא נפתחו — כדי לדעת מאיפה להתחיל.</span></div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button><div id="rmStruggleList" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div></div>
 <div id="mixtapeCard" class="card"><span class="tag">חזרה מעורבת · מיקסטייפ</span><h2>🎧 מיקסטייפ</h2><p id="mixtapeLock">המיקסטייפ נפתח אחרי ששולטים בשני נושאים</p><button type="button" id="mixtapeStart" class="primary" disabled>🎧 מיקסטייפ</button></div>
 <div id="mixtapePlay" class="card hidden"><div class="topline"><span id="mixtapeTag" class="tag"></span><span id="mixtapeCounter"></span></div><h2 id="mixtapePrompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="mixtapeAnswer">תשובה</label><input id="mixtapeAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="mixtapeCheck" data-tap="xylo">בדיקה</button></div><div id="mixtapeFeedback" class="feedback hidden" role="status" aria-live="polite"></div></div>
 <div id="rmQuiz" class="card hidden"><div class="topline"><span id="rmCounter"></span><span id="rmSkill" class="tag"></span></div><div class="progress"><span id="rmBar"></span></div><p id="rmItemTag" class="item-tag" hidden></p><h2 id="rmPrompt" class="prompt"></h2><div id="rmNumberPlay" class="number-play-slot"></div><p id="rmWay" class="music-way hidden"></p><div id="rmWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmAnswer">תשובה</label><input id="rmAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmCheck" data-tap="xylo">בדיקה</button></div><div id="rmFeedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="rmNext" class="primary hidden">הבא</button><button type="button" id="rmCancel" class="secondary no-print" style="margin-top:10px">ביטול וחזרה</button></div>
@@ -969,7 +996,7 @@ function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;const rd=Math.floor(
 function rmCheck(){if(rmAnswered)return;if(!normalizeAnswer($('rmAnswer').value))return askForAnswer('rmAnswer','rmFeedback');rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct,q.skill,q);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>${musicSourceHtml(q)}`;show('rmFeedback',true);revealWidget('rmWidget');$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?((rmIdx+1)%DIAG_BLOCK?'הבא':'לסבב הבא'):'לדוח הפערים';if($('rmNext')&&typeof $('rmNext').focus==='function')$('rmNext').focus();}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
 function rmDiagnose(a){const agg={};a.forEach(x=>{const g=agg[x.skill]||(agg[x.skill]={skill:x.skill,total:0,correct:0});g.total++;if(x.correct)g.correct++});const per=Object.values(agg).map(g=>({...g,he:rmHe(g.skill),mastered:g.correct===g.total})).sort((p,q)=>RM_ORDER[p.skill]-RM_ORDER[q.skill]);const gaps=per.filter(s=>!s.mastered).map(s=>s.skill).sort((p,q)=>RM_ORDER[p]-RM_ORDER[q]);return{per,gaps}}
-function rmReport(){rmPlanTopic=null;endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);window.mmLastDiag={grade:selectedGrade,perSkill:per.map(s=>({skill:s.skill,total:s.total,correct:s.correct}))};$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').innerHTML=`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: <b>${gaps.map(rmHe).join(', ')}</b>.<br>מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.`;rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
+function rmReport(){rmPlanTopic=null;endTeacherSession();show('rmQuiz',false);show('rmReport',true);const{per,gaps}=rmDiagnose(rmAns);window.mmLastDiag={grade:selectedGrade,perSkill:per.map(s=>({skill:s.skill,total:s.total,correct:s.correct}))};$('rmStats').innerHTML=per.map(s=>`<div class="stat"><strong>${s.correct}/${s.total}</strong>${s.he}${s.mastered?' ✅':' ⚠️'}</div>`).join('');if(gaps.length){$('rmSummary').replaceChildren();const t1=document.createTextNode(`במדגם הקצר של כיתה ${selectedGrade}׳ היו טעויות ב: `);const b=document.createElement('b');b.textContent=gaps.map(rmHe).join(', ');const br=document.createElement('br');const t2=document.createTextNode('מתחילים מהמיומנות הבסיסית ביותר, ברמה 1, ועולים אחרי שתי נכונות. זה לא אבחון קליני.');$('rmSummary').append(t1,b,br,t2);rmPlan=gaps.map(k=>({skill:k,he:rmHe(k),items:poolForSkill(k),history:[],level:1,lastId:null,current:null}));show('rmPractice',true);show('rmRestart',true)}else{$('rmSummary').textContent='במדגם של הכיתה הזו כל התשובות היו נכונות. זה מדגם קצר במכשיר — לא אבחון ואין כאן טענת שליטה.';show('rmPractice',false);show('rmRestart',true)}}
 const PLAN_PER_SKILL=6;
 function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItemsOrAll==='function'?gateItemsOrAll(st.items,st.history||[],st.items):(typeof gateItems==='function'?gateItems(st.items,st.history||[],st.items):st.items);const pool=eligibleExercises(gated,st.history||[],st.lastId,st.level||1);const random=rng((seed||1)+rpStep*97+(st.history||[]).length);return pool[Math.floor(random()*pool.length)]}
 function rpRender(){const st=rmPlan[rpStep];const it=varyTopicExercise(rmPlanTopic,rpPick(),(st.history||[]).length);st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))setItemTag($('rmPlanTag'),it);setMath($('rmPlanPrompt'),it.prompt);if(typeof setNumberPlay==='function')setNumberPlay('rmPlanNumberPlay',it);setMusicWay('rmPlanWay',it);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('rmPlanCheck',it);$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);if(!(typeof MM_PREDICT!=='undefined'&&MM_PREDICT.mount($('rmPlanPredict'),it,st.skill||st.he,(st.history||[]).length,()=>maybeHear(it),null,{lock:[$('rmPlanAnswer'),$('rmPlanCheck')],hide:[$('rmPlanWay')]})))maybeHear(it);else maybeHear(it,{chimeOnly:true});maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
@@ -1319,6 +1346,44 @@ function renderFirstRun(){
 }
 paintGrade();
 renderFirstRun();
+function initWelcomeHero(){
+  const startBtn=$('qsStartBtn'),steps=$('qsSteps'),intro=$('qsIntro'),gradePills=$('qsGradePills'),instPills=$('qsInstPills'),instStep=$('qsInstStep'),launchBtn=$('qsLaunchBtn'),cancelBtn=$('qsCancelBtn');
+  if(!startBtn||!steps)return;
+  const grades=['א','ב','ג','ד','ה','ו'];
+  const insts=[{id:'kalimba',name:'קלימבה 🔔'},{id:'darbuka',name:'דרבוקה 🥁'},{id:'piano',name:'פסנתר 🎹'},{id:'xylo',name:'קסילופון 🪵'},{id:'tof',name:'תֹּף 🪘'}];
+  function drawGrades(){
+    if(!gradePills)return;
+    gradePills.replaceChildren();
+    grades.forEach(g=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='tab '+(g===selectedGrade?'active':'');
+      b.setAttribute('data-qs-grade',g);
+      b.textContent=`כיתה ${g}׳`;
+      gradePills.appendChild(b);
+    });
+  }
+  function drawInsts(){
+    if(!instPills)return;
+    const cur=(typeof MM_MY_INSTRUMENT!=='undefined'&&MM_MY_INSTRUMENT.getMyInstrument())||'darbuka';
+    instPills.replaceChildren();
+    insts.forEach(it=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='tab '+(it.id===cur?'active':'');
+      b.setAttribute('data-qs-inst',it.id);
+      b.textContent=it.name;
+      instPills.appendChild(b);
+    });
+  }
+  drawGrades();drawInsts();
+  startBtn.onclick=function(){intro.classList.add('hidden');steps.classList.remove('hidden');if(instStep)instStep.classList.remove('hidden');if(launchBtn)launchBtn.classList.remove('hidden');};
+  if(cancelBtn)cancelBtn.onclick=function(){steps.classList.add('hidden');intro.classList.remove('hidden');};
+  if(gradePills)gradePills.onclick=function(e){const b=e.target.closest('[data-qs-grade]');if(!b)return;saveGrade(b.getAttribute('data-qs-grade'));drawGrades();if(instStep)instStep.classList.remove('hidden');if(launchBtn)launchBtn.classList.remove('hidden');};
+  if(instPills)instPills.onclick=function(e){const b=e.target.closest('[data-qs-inst]');if(!b)return;if(typeof MM_MY_INSTRUMENT!=='undefined')MM_MY_INSTRUMENT.setMyInstrument(b.getAttribute('data-qs-inst'));drawInsts();if(launchBtn)launchBtn.classList.remove('hidden');};
+  if(launchBtn)launchBtn.onclick=function(){const b=$('rmBegin');if(b)b.click();};
+}
+initWelcomeHero();
 // program.html opens a curriculum row with ?topic=<id>[&skill=<k>]: the row's
 // tagged items run in the same plan loop as startStrugglePractice. Navigation
 // only — picking, levels and scoring are unchanged.
