@@ -114,7 +114,7 @@ button, .primary, .mm-contact-links a {
   transition: transform var(--d-1) var(--ease), box-shadow var(--d-1) var(--ease), background-color var(--d-2) var(--ease);
 }
 .primary { background: var(--neo-purple); color: var(--card); font-size: var(--t-md); padding-block: var(--s-4); box-shadow: var(--neo-shadow); }
-button:active:not(:disabled) { transform: translateY(3px); box-shadow: var(--neo-shadow-press); }
+button:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: var(--neo-shadow-press); }
 button:disabled { opacity: .5; cursor: default; }
 
 /* Tabs: a segmented control on one tinted track. */
