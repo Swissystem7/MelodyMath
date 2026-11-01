@@ -23,7 +23,7 @@
   --d-1: .14s; --d-2: .26s; --d-3: .45s;
 
   /* Neo-brutalist shared variables for kids (#891 / redesign) */
-  --font-heading: "Fredoka", "Rubik", "Varela Round", "Heebo", system-ui, sans-serif;
+  --font-heading: "Rubik", "Varela Round", "Heebo", system-ui, sans-serif;
   --neo-border-w: 3px;
   --neo-border: var(--neo-border-w) solid var(--neo-outline);
   --neo-border-2: 2px solid var(--neo-outline);
@@ -31,11 +31,11 @@
   --neo-radius: 18px;
   --neo-radius-lg: 24px;
   --neo-radius-pill: 999px;
-  --neo-shadow-sm: 3px 3px 0 var(--neo-outline);
-  --neo-shadow: 4px 4px 0 var(--neo-outline);
-  --neo-shadow-lg: 6px 6px 0 var(--neo-outline);
-  --neo-shadow-hover: 5px 5px 0 var(--neo-outline);
-  --neo-shadow-press: 1px 1px 0 var(--neo-outline);
+  --neo-shadow-sm: 0 3px 0 var(--neo-outline);
+  --neo-shadow: 0 4px 0 var(--neo-outline);
+  --neo-shadow-lg: 0 6px 0 var(--neo-outline);
+  --neo-shadow-hover: 0 5px 0 var(--neo-outline);
+  --neo-shadow-press: 0 1px 0 var(--neo-outline);
   --neo-btn-min-h: 52px;
   --neo-btn-pad: 14px 22px;
   --neo-btn-font-size: 1.15rem;
@@ -114,7 +114,7 @@ button, .primary, .mm-contact-links a {
   transition: transform var(--d-1) var(--ease), box-shadow var(--d-1) var(--ease), background-color var(--d-2) var(--ease);
 }
 .primary { background: var(--neo-purple); color: var(--card); font-size: var(--t-md); padding-block: var(--s-4); box-shadow: var(--neo-shadow); }
-button:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: var(--neo-shadow-press); }
+button:active:not(:disabled) { transform: translateY(3px); box-shadow: var(--neo-shadow-press); }
 button:disabled { opacity: .5; cursor: default; }
 
 /* Tabs: a segmented control on one tinted track. */
@@ -425,17 +425,34 @@ summary:focus-visible {
   transition: transform var(--d-1) var(--ease), box-shadow var(--d-1) var(--ease);
 }
 .neo-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
+  transform: translateY(-1px);
   box-shadow: var(--neo-shadow-hover);
 }
 .neo-btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
+  transform: translateY(3px);
   box-shadow: var(--neo-shadow-press);
 }
 .neo-btn-orange { background: var(--neo-orange); color: var(--card); }
 .neo-btn-turquoise { background: var(--neo-turquoise); color: var(--card); }
 .neo-btn-sky { background: var(--neo-sky); color: var(--card); }
 .neo-btn-purple { background: var(--neo-purple); color: var(--card); }
+
+.cd-frame {
+  width: 390px;
+  max-width: 100%;
+  min-height: 844px;
+  border-radius: 52px;
+  border: 10px solid var(--neo-outline);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--neo-outline) 25%, transparent);
+  font-family: var(--font-heading);
+  color: var(--neo-outline);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
 
 /* Header with star adornments */
 .neo-header {
