@@ -132,16 +132,43 @@
   // length throws in strict mode, so only a test double's array is emptied.
   function clear(container) {
     container.innerHTML = '';
-    if (Array.isArray(container.children)) container.children.length = 0;
+    if (Array.isArray(container.children) && !Object.isFrozen(container.children)) {
+      try { container.children.length = 0; } catch (e) {}
+    }
+  }
+  function stopDemo(container) {
+    if (!container || !container._timers) return 0;
+    const count = container._timers.length;
+    container._timers.splice(0).forEach(function (id) { clearTimeout(id); });
+    return count;
+  }
+  function demoEnv(container, opts) {
+    container._timers = container._timers || [];
+    const baseLater = (opts && opts.later) || function (fn, ms) { return setTimeout(fn, ms); };
+    return Object.assign({}, opts, {
+      later: function (fn, ms) {
+        const id = baseLater(fn, ms);
+        container._timers.push(id);
+        return id;
+      }
+    });
   }
   function renderPatternWidget(container, ex, options) {
     if (!container || !ex) return;
     const opts = options || {};
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
+    const silent = !!(ex.noMusic || ex.plain || ex.musicStage === 'no_music_check');
+    stopDemo(container);
     clear(container);
+    container._silent = silent;
     const wrap = d.createElement('div');
     wrap.className = 'pattern-widget-box';
+    if (silent) {
+      const line = d.createElement('p');
+      line.textContent = 'עכשיו לבד: איזה צליל משלים את התבנית?';
+      wrap.appendChild(line);
+    }
     const seq = d.createElement('div');
     seq.className = 'pattern-sequence';
     seq.textContent = shownText(ex.pattern);
@@ -151,8 +178,10 @@
     const answer = answerForShown(ex.pattern);
     (ex.choices || ['דו', 'מי', 'סול']).forEach(function (c) {
       row.appendChild(btn(d, 'secondary pattern-choice-btn', c, function () {
-        const play = opts.playTap || (root && root.playTap);
-        if (typeof play === 'function') play('bell', { hz: NOTE_HZ[c] || 330, step: 0 });
+        if (!silent) {
+          const play = opts.playTap || (root && root.playTap);
+          if (typeof play === 'function') play('bell', { hz: NOTE_HZ[c] || 330, step: 0 });
+        }
         const res = (typeof ex.check === 'function' ? ex.check(c) : { correct: String(c) === String(answer), hint: ex.hint });
         hint.hidden = !!res.correct;
         hint.textContent = res.correct ? '' : (res.hint || ex.hint || '');
@@ -161,7 +190,7 @@
       }));
     });
     wrap.appendChild(seq);
-    wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+    if (!silent) wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { stopDemo(container); container._heard = playDemo(ex, demoEnv(container, opts)); }));
     wrap.appendChild(row);
     wrap.appendChild(hint);
     container.appendChild(wrap);
@@ -171,14 +200,17 @@
     const opts = options || {};
     const d = docOf(container, opts);
     if (!d || typeof d.createElement !== 'function') return;
-    let stage = ex.stage || 'demo';
+    const silent = !!(ex.noMusic || ex.plain || ex.musicStage === 'no_music_check');
+    let stage = silent ? 'independent' : (ex.stage || 'demo');
     let filled = false;
     function paint() {
+      stopDemo(container);
       clear(container);
       container._stage = stage;
       container._filled = filled;
+      container._silent = stage === 'independent';
       if (opts.heading) opts.heading.textContent = stagePrompt(ex.a, ex.b, stage);
-      container._noMusic = stage === 'check';
+      container._noMusic = stage === 'check' || silent;
       container._musicStage = stage === 'check' ? 'no_music_check' : null;
       const wrap = d.createElement('div');
       wrap.className = 'worked-example-box';
@@ -186,19 +218,19 @@
         const line = d.createElement('p');
         line.textContent = '🥁 ' + ex.a + ' + 🔔 ' + ex.b + ' = 🌟 ' + ex.total;
         wrap.appendChild(line);
-        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { container._heard = playDemo(ex, opts); }));
+        wrap.appendChild(btn(d, 'secondary demo-listen-btn', 'הקשיבו להדגמה', function () { stopDemo(container); container._heard = playDemo(ex, demoEnv(container, opts)); }));
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
       } else if (stage === 'completion') {
         const line = d.createElement('p');
         line.textContent = 'השלימו את הפעימה החסרה';
         wrap.appendChild(line);
         wrap.appendChild(btn(d, 'primary completion-tap-btn', '🥁 הקישו להשלמה', function () {
-          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, opts);
+          container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, Object.assign({}, opts, { later: function (fn) { fn(); } }));
           stage = 'independent'; paint();
         }));
       } else if (stage === 'independent') {
         const line = d.createElement('p');
-        line.textContent = stagePrompt(ex.a, ex.b, stage);
+        line.textContent = 'עכשיו לבד: כמה צלילים הם ' + ex.a + ' ועוד ' + ex.b + '?';
         wrap.appendChild(line);
         const label = d.createElement('label');
         label.className = 'worked-answer-label';
@@ -226,6 +258,7 @@
   return {
     EXERCISE_KINDS: EXERCISE_KINDS, countWords: countWords, validateExerciseCard: validateExerciseCard,
     stagePrompt: stagePrompt, shownText: shownText, answerForShown: answerForShown, demoPlan: demoPlan, playDemo: playDemo,
+    stopDemo: stopDemo,
     createPatternCompletionExercise: createPatternCompletionExercise,
     createWorkedExampleExercise: createWorkedExampleExercise,
     renderPatternWidget: renderPatternWidget, renderWorkedExampleWidget: renderWorkedExampleWidget
