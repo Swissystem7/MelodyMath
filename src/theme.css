@@ -94,6 +94,16 @@ p { line-height: 1.6; }
   to { opacity: 1; transform: none; }
 }
 
+@keyframes mmFall {
+  0% { transform: translateY(-40px) rotate(0); }
+  100% { transform: translateY(880px) rotate(540deg); }
+}
+
+@keyframes mmPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
 /* Buttons: neo-brutalist kid-friendly chunky buttons with hard shadows */
 button, .primary, .mm-contact-links a {
   border-radius: var(--neo-radius-sm);
