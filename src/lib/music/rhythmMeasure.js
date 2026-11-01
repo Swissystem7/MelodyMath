@@ -16,7 +16,7 @@
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.MM_RHYTHM_MEASURE = api;
+  if (root) root.MM_RHYTHM_MEASURE = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 

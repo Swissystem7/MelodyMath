@@ -19,10 +19,7 @@
 // task.
 (function (root, factory) {
   const api = factory();
-  if (root) {
-    root.MM_RHYTHM_TRACK = api;
-    root.MM_RHYTHM_MASTER = api;
-  }
+  if (root) root.MM_RHYTHM_TRACK = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';

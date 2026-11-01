@@ -2,11 +2,11 @@
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.MM_RHYTHM_MASTER = api;
+  if (root) root.MM_RHYTHM_MASTER = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const T = (root && (root.MM_RHYTHM_TRACK || root.MM_RHYTHM_MASTER)) || require('./rhythmTrack.js');
+  const T = (root && root.MM_RHYTHM_TRACK) || require('./rhythmTrack.js');
   const MAX_VOICE = T.MAX_VOICE;
   const MIN_VOICES = T.MIN_VOICES;
   const MAX_VOICES = T.MAX_VOICES;
