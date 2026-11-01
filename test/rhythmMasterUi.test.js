@@ -106,9 +106,10 @@ test('index.html and sw.js load the three RhythmMaster files in order', () => {
   const a = html.indexOf('src/lib/music/rhythmMaster.js');
   const b = html.indexOf('src/lib/music/rhythmMeasure.js');
   const c = html.indexOf('src/components/RhythmMaster.js');
-  assert.ok(a > html.indexOf('src/components/jamKit.js') && a < b && b < c);
+  const t = html.indexOf('src/lib/music/rhythmTrack.js');
+  assert.ok(t > html.indexOf('src/components/jamKit.js') && t < a && a < b && b < c);
   const sw = read('sw.js');
-  ['./src/lib/music/rhythmMaster.js', './src/lib/music/rhythmMeasure.js', './src/components/RhythmMaster.js'].forEach((f) => assert.ok(sw.includes("'" + f + "'"), f));
+  ['./src/lib/music/rhythmTrack.js', './src/lib/music/rhythmMaster.js', './src/lib/music/rhythmMeasure.js', './src/components/RhythmMaster.js'].forEach((f) => assert.ok(sw.includes("'" + f + "'"), f));
 });
 
 test('no "music improves maths" claim and no buy/price words in RhythmMaster text', () => {

@@ -22,9 +22,9 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const RM = root.MM_RHYTHM_MASTER || require('../lib/music/rhythmMaster.js');
-  const MS = root.MM_RHYTHM_MEASURE || require('../lib/music/rhythmMeasure.js');
-  const JAM = root.MM_JAM || require('./jamKit.js');
+  const RM = root.MM_RHYTHM_MASTER || (typeof require === 'function' ? require('../lib/music/rhythmMaster.js') : {});
+  const MS = root.MM_RHYTHM_MEASURE || (typeof require === 'function' ? require('../lib/music/rhythmMeasure.js') : {});
+  const JAM = root.MM_JAM || (typeof require === 'function' ? require('./jamKit.js') : null);
   const GAME = 'rhythmMaster';
   const ADAPT_KEY = 'mm.rhythmMaster.adapt';
   const STEPS_BEFORE_POST = 3;

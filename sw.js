@@ -83,6 +83,7 @@ const ASSETS = [
   './src/lib/music/streak.js',
   './src/components/TimesTableGroove.js',
   './src/components/FamilyJam.js',
+  './src/lib/music/rhythmTrack.js',
   './src/lib/music/rhythmMaster.js',
   './src/lib/music/rhythmMeasure.js',
   './src/components/RhythmMaster.js',
