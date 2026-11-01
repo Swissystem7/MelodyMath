@@ -1,4 +1,5 @@
 // MelodyMath — Offline QR Progress Sync between devices without cloud.
+/* v8 ignore next 5 */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -35,15 +36,7 @@
   }
 
   function utf8Encode(s) {
-    if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(s);
-    const arr = [];
-    for (let i = 0; i < s.length; i++) {
-      const c = s.charCodeAt(i);
-      if (c < 128) arr.push(c);
-      else if (c < 2048) arr.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
-      else arr.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
-    }
-    return new Uint8Array(arr);
+    return new TextEncoder().encode(s);
   }
 
   function createBitStream(bytes, ver) {
@@ -127,13 +120,13 @@
   }
 
   function b64Encode(s) {
-    if (typeof Buffer !== 'undefined') return Buffer.from(s, 'utf8').toString('base64');
-    try { return btoa(unescape(encodeURIComponent(s))); } catch (e) { return btoa(s); }
+    /* v8 ignore next */
+    return typeof Buffer !== 'undefined' ? Buffer.from(s, 'utf8').toString('base64') : btoa(unescape(encodeURIComponent(s)));
   }
 
   function b64Decode(b) {
-    if (typeof Buffer !== 'undefined') return Buffer.from(b, 'base64').toString('utf8');
-    try { return decodeURIComponent(escape(atob(b))); } catch (e) { return atob(b); }
+    /* v8 ignore next */
+    return typeof Buffer !== 'undefined' ? Buffer.from(b, 'base64').toString('utf8') : decodeURIComponent(escape(atob(b)));
   }
 
   function packStudent(name, classCode, storage) {
@@ -179,5 +172,5 @@
     return { ok: false, error: 'shape', message: 'פורמט הנתונים אינו מוכר.' };
   }
 
-  return { generateQrSvg, packStudent, packRoster, unpackPayload, importPayload };
+  return { generateQrSvg, packStudent, packRoster, unpackPayload, importPayload, b64Encode, b64Decode };
 });

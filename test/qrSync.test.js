@@ -18,6 +18,8 @@ test('generateQrSvg creates a valid svg string with crispEdges and rects', () =>
   assert.match(svg, /viewBox="0 0/);
   assert.match(svg, /shape-rendering="crispEdges"/);
   assert.match(svg, /<rect x="/);
+  const longSvg = qrSync.generateQrSvg('A'.repeat(250), { margin: 1, background: 'none' });
+  assert.ok(longSvg.includes('<svg'));
 });
 
 test('packStudent and packRoster round-trip via unpackPayload', () => {
@@ -35,6 +37,8 @@ test('packStudent and packRoster round-trip via unpackPayload', () => {
   const u2 = qrSync.unpackPayload(p2.hash);
   assert.equal(u2.ok, true);
   assert.ok(u2.data.students['נועה']);
+
+  assert.equal(qrSync.unpackPayload('').ok, false);
 });
 
 test('importPayload imports student and roster or rejects corrupted data', () => {
@@ -56,4 +60,5 @@ test('importPayload imports student and roster or rejects corrupted data', () =>
 
   assert.equal(qrSync.importPayload('#import=corrupted!').ok, false);
   assert.equal(qrSync.importPayload('{}').ok, false);
+  assert.equal(qrSync.importPayload({ type: 'unknown' }).ok, false);
 });
