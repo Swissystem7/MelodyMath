@@ -100,7 +100,7 @@
       while (next < notes.length && notes[next].at <= lookahead) {
         const n = notes[next];
         const i = next;
-        if (ac && iv && n.voice) iv.playVoice(ac, n.voice, n.hz, t0 + n.at, null, n.held ? { dur: n.dur, gain: n.gain } : undefined); // a held ten (#665)
+        if (ac && ac.state === 'running' && iv && n.voice) iv.playVoice(ac, n.voice, n.hz, t0 + n.at, null, n.held ? { dur: n.dur, gain: n.gain } : undefined); // a held ten (#665)
         if (onNote) setTimeout(function () { if (!handle.stopped) onNote(n, i); }, Math.max(0, w0 + n.at * 1000 - now()));
         next += 1;
       }

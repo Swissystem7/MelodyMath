@@ -52,7 +52,7 @@ const HEBREW_VOICE_PROMPTS = [
 ];
 
 async function generatePreRecordedNarration(apiKey, options = {}) {
-  const key = apiKey || process.env.ELEVENLABS_API_KEY;
+  const key = (apiKey !== undefined) ? apiKey : process.env.ELEVENLABS_API_KEY;
   if (!key) {
     // Decision 1.11.2026: בלי מפתח - לדלג בשקט
     return { skipped: true, reason: 'ELEVENLABS_API_KEY absent — skipped silently' };

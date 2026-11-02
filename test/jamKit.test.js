@@ -55,3 +55,62 @@ test('every music-games script and stylesheet is precached for offline play', ()
   srcs.push('src/components/jam.css');
   srcs.forEach((s) => assert.ok(sw.includes("'./" + s + "'"), s + ' is in sw.js ASSETS'));
 });
+
+
+test('playNotes guards inactive AudioContext and calls iv.playVoice when running', (t, done) => {
+  const iv = require('../src/lib/instrumentVoices.js');
+  let played = [];
+  const origPlay = iv.playVoice;
+  iv.playVoice = (ac, voice, hz, t, out, opts) => {
+    played.push({ voice, hz, t, opts });
+  };
+  t.after(() => {
+    iv.playVoice = origPlay;
+    delete globalThis.musicEngine;
+  });
+
+  const mockAc = { state: 'running', currentTime: 0, resume: () => {} };
+  globalThis.musicEngine = {
+    getSharedAudioContext: () => mockAc,
+    audioState: { muted: false }
+  };
+
+  const notes = [{ at: 0, voice: 'drumLow', hz: 120, held: true, dur: 0.3, gain: 0.8 }];
+  JAM.playNotes(notes, null, () => {
+    assert.equal(played.length, 1);
+    assert.equal(played[0].voice, 'drumLow');
+    assert.equal(played[0].hz, 120);
+    assert.equal(played[0].opts.dur, 0.3);
+
+    // Suspended AC should not invoke playVoice
+    played = [];
+    mockAc.state = 'suspended';
+    JAM.playNotes(notes, null, () => {
+      assert.equal(played.length, 0);
+      done();
+    });
+  });
+});
+
+test('feedback and cadence obey the music switch and trigger audio helpers', () => {
+  assert.equal(JAM.feedback(true, false), null);
+  assert.equal(JAM.cadence('woodBar', false), null);
+
+  let tapped = null;
+  globalThis.musicEngine = {
+    playTap: (kind) => { tapped = kind; return true; },
+    getSharedAudioContext: () => null
+  };
+  try {
+    assert.equal(JAM.feedback(true, true), true);
+    assert.equal(tapped, 'correct');
+    assert.equal(JAM.feedback(false, true), true);
+    assert.equal(tapped, 'wrong');
+
+    const cad = JAM.cadence('woodBar', true);
+    assert.ok(cad && typeof cad.stop === 'function');
+    cad.stop();
+  } finally {
+    delete globalThis.musicEngine;
+  }
+});
