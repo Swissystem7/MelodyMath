@@ -388,7 +388,7 @@
     // touch gets one big ▶ over the card; that touch starts the exercise.
     // resume() can stay pending until a touch, so decide after a short wait.
     const me = root.musicEngine;
-    if (me && me.unlockAudio) me.unlockAudio();
+    // Audio unlocks on child touch (sa-start or document gesture), avoiding autoplay warnings on page load
     setTimeout(function () {
       if (audioRunning()) { open(); return; }
       el.insertAdjacentHTML('afterbegin', '<button type="button" class="sa-start" data-act="start" aria-label="התחילו">▶</button>');
