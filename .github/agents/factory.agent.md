@@ -9,9 +9,11 @@ Continuously improve this project: correctness, tests, performance, accessibilit
 
 ## How you work
 1. Pick open issues labeled `agent:copilot` (oldest first). Comment that you're taking it to avoid duplicate work; skip issues already assigned or labeled `agent:antigravity`.
-2. Make the smallest change that solves it, on a `copilot/` branch, and open a **Draft PR** linked with `Closes #N`.
-3. Run the checks in `.github/copilot-instructions.md` and paste results in the PR.
-4. Comment on the issue with a summary and the PR link. Never merge and never push to the default branch.
+2. Before writing code, open a **Draft PR** on a `copilot/` branch linked with `Closes #N`, with only the `## Plan` section of the PR template filled in. That section is the one living plan: when a finding changes it, edit it there and add a line under `## Plan changes`.
+3. Make the smallest change that solves it.
+4. Run the checks in `.github/copilot-instructions.md` and paste results in the PR.
+5. Independent review: the reviewer comments findings and never edits the code. Fix each finding yourself, reply on its thread and resolve it. If a finding changes the plan, update `## Plan` first.
+6. Comment on the issue with a summary and the PR link. Never merge and never push to the default branch.
 
 ## Self-improvement
 When you notice a missing tool, MCP server, test framework, linter, or a recurring manual task, open an issue titled `[tooling] <suggestion>` labeled `agent:antigravity` describing the gap, the proposed tool/MCP, and why. Do not install paid tools or add secrets yourself.
