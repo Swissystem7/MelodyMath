@@ -1,5 +1,7 @@
 // MM-600 pilot — student flow: demo sign-in, lesson, exercises, audio feedback
 // (stubbed Web Audio, asserted through the UI state), saved progress after reload.
+// MM-601: the exercises are music (notes asserted through the window.__mmPilotMusic
+// hook), and q7 is the fraction rhythm exercise.
 'use strict';
 const { test, expect } = require('@playwright/test');
 const h = require('./helpers');
@@ -26,13 +28,17 @@ test.describe('student unit flow (grades 1–3)', () => {
     await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'new');
     await h.expectMobileFriendly(page);
 
-    // Lesson: the number line as a scale; the play button sends notes to the shared engine.
+    // Lesson: "every note is 1" — 3 notes and 2 more; the play button sends notes to the shared engine.
     await page.getByTestId('open-unit').click();
     await expect(page.getByTestId('view-lesson')).toBeVisible();
     await h.expectMobileFriendly(page);
     await page.getByTestId('lesson-play').click();
     await expect(page.getByTestId('lesson-status')).toHaveAttribute('data-audio', 'played');
-    await expect(page.getByTestId('lesson-status')).toContainText('קפיצה של 3');
+    await expect(page.getByTestId('lesson-status')).toContainText('3 צלילים');
+    await expect(page.getByTestId('lesson-caption')).toContainText('ועוד');
+    const lesson = await h.lastPlay(page, 'lesson');
+    expect(lesson.notes.filter((n) => n.role === 'a').length).toBe(3);
+    expect(lesson.notes.filter((n) => n.role === 'b').length).toBe(2);
     expect(await page.evaluate(() => window.__mmAudio.started)).toBeGreaterThan(0);
     await page.getByTestId('lesson-continue').click();
 
@@ -44,7 +50,8 @@ test.describe('student unit flow (grades 1–3)', () => {
     let fb = await h.answer(page, 7);
     await expect(fb).toHaveAttribute('data-result', 'right');
     await expect(fb).toHaveAttribute('data-audio', 'played');
-    await expect(page.getByTestId('feedback-sound')).toContainText('הצליל עולה');
+    await expect(page.getByTestId('feedback-sound')).toContainText('הביתה');
+    await expect(page.getByTestId('music-caption')).toContainText('= 7');
     expect(await page.evaluate(() => window.__mmAudio.started)).toBeGreaterThan(before);
     await expect(page.getByTestId('star-count')).toContainText('1');
     await h.expectMobileFriendly(page);
@@ -67,7 +74,7 @@ test.describe('student unit flow (grades 1–3)', () => {
     await page.reload();
     await expect(page.getByTestId('view-student-home')).toBeVisible();
     await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'progress');
-    await expect(page.getByTestId('unit-status')).toContainText('2 מתוך 6');
+    await expect(page.getByTestId('unit-status')).toContainText('2 מתוך 7');
     await page.getByTestId('open-unit').click();
     await h.expectQuestion(page, 'q3');
 
@@ -87,24 +94,38 @@ test.describe('student unit flow (grades 1–3)', () => {
     await h.expectQuestion(page, 'q5');
     fb = await h.answer(page, 16);
     await expect(fb).toHaveAttribute('data-result', 'right');
-    await expect(page.getByTestId('feedback-sound')).toContainText('אוקטבה');
+    await expect(page.getByTestId('music-caption')).toContainText('עשרת אחת');
     await page.getByTestId('next').click();
     await h.expectQuestion(page, 'q6');
     fb = await h.answer(page, 10);
     await expect(fb).toHaveAttribute('data-result', 'right');
     await page.getByTestId('next').click();
 
-    // Summary: saved, per topic.
+    // q7: the fraction rhythm exercise — a quarter is too short (the bar is not full), a half fills it.
+    await h.expectQuestion(page, 'q7');
+    await expect(page.getByTestId('rhythm-bar')).toHaveAttribute('data-fill', 'open');
+    await h.expectMobileFriendly(page);
+    fb = await h.answerRhythm(page, 'quarter');
+    await expect(fb).toHaveAttribute('data-result', 'wrong');
+    await expect(page.getByTestId('rhythm-bar')).toHaveAttribute('data-fill', 'short');
+    await expect(page.getByTestId('hint')).toContainText('ארוך יותר');
+    fb = await h.answerRhythm(page, 'half');
+    await expect(fb).toHaveAttribute('data-result', 'right');
+    await expect(page.getByTestId('rhythm-bar')).toHaveAttribute('data-fill', 'full');
+    await page.getByTestId('next').click();
+
+    // Summary: saved, per topic (4 of 7 right on the first try = one star).
     await expect(page.getByTestId('view-summary')).toBeVisible();
     await expect(page.getByTestId('saved')).toBeVisible();
-    await expect(page.getByTestId('summary-stars')).toHaveText('★★☆');
+    await expect(page.getByTestId('summary-stars')).toHaveText('★☆☆');
+    await expect(page.locator('[data-testid="summary-topic"][data-topic="frac"]')).toContainText('0 מתוך 1');
     await expect(page.locator('[data-testid="summary-topic"][data-topic="tens"]')).toContainText('2 מתוך 2');
     await h.expectMobileFriendly(page);
 
     // Reload after the unit: done, stars kept.
     await page.reload();
     await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'done');
-    await expect(page.getByTestId('unit-stars')).toHaveText('★★☆');
+    await expect(page.getByTestId('unit-stars')).toHaveText('★☆☆');
     expect(blocked).toEqual([]);
   });
 });

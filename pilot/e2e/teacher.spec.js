@@ -29,10 +29,10 @@ test.describe('teacher assign + report', () => {
     await expect(page.getByTestId('assignment-note')).toHaveText(NOTE);
     await page.getByTestId('open-unit').click();
     await page.getByTestId('lesson-continue').click();
-    const plan = [['q1', [7]], ['q2', [13]], ['q3', [6, 5]], ['q4', [9]], ['q5', [16]], ['q6', [10]]];
+    const plan = [['q1', [7]], ['q2', [13]], ['q3', [6, 5]], ['q4', [9]], ['q5', [16]], ['q6', [10]], ['q7', ['half']]];
     for (const [qid, tries] of plan) {
       await h.expectQuestion(page, qid);
-      for (const t of tries) await h.answer(page, t);
+      for (const t of tries) await (typeof t === 'number' ? h.answer(page, t) : h.answerRhythm(page, t));
       await expect(page.getByTestId('feedback')).toHaveAttribute('data-result', 'right');
       await page.getByTestId('next').click();
     }
@@ -51,6 +51,11 @@ test.describe('teacher assign + report', () => {
     await expect(row('sub').getByTestId('report-pct')).toHaveText('50%');
     await expect(row('sub').getByTestId('report-status')).toHaveText('פער');
     await expect(row('tens')).toHaveAttribute('data-status', 'ok');
+    // MM-601: the fraction rhythm topic is in the report, with its curriculum id.
+    await expect(row('frac')).toHaveAttribute('data-status', 'ok');
+    await expect(row('frac').getByTestId('report-pct')).toHaveText('100%');
+    await expect(row('frac').getByTestId('report-curriculum')).toHaveText('mm-cur-32');
+    await expect(row('sub').getByTestId('report-curriculum')).toHaveText('mm-cur-3');
     await expect(student.getByTestId('gap')).toHaveCount(1);
     await expect(student.locator('[data-testid="gap"][data-topic="sub"]')).toContainText('חיסור');
     await h.expectMobileFriendly(page);

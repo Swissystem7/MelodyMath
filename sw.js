@@ -149,6 +149,8 @@ const ASSETS = [
   './pilot/pilot.css',
   './pilot/seed/demo-accounts.js',
   './pilot/js/unit.js',
+  './pilot/js/music.js',
+  './pilot/js/research.js',
   './pilot/js/store.js',
   './pilot/js/app.js',
 ];

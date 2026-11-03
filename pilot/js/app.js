@@ -1,17 +1,24 @@
 // MM-600 pilot demo — the page: demo sign-in, the student unit and the teacher view.
 //
-// Sound comes from the existing app, loaded read-only by index.html:
-//   ../src/lib/musicEngine.js  (the one shared AudioContext, playSequence, unlock)
-//   ../src/lib/numberLine.js   (the number line as a scale)
-//   ../src/lib/grade1Music.js  (scaleJumpNarration, scaleJumpEvents)
-// If they are missing (or the browser has no Web Audio), the demo still works
-// and says so: every sound also has a written line, so sound is never the only channel.
+// MM-601: real music in every exercise, the curriculum each topic covers,
+// a "למה זה עובד" panel for adults and a fraction rhythm exercise.
+//
+// Existing MelodyMath code, loaded read-only by index.html:
+//   ../src/lib/musicEngine.js      (the one shared AudioContext, exact note fractions, unlock)
+//   ../src/lib/instrumentVoices.js (piano, xylophone, organ and wood-click voices)
+//   ../src/lib/curriculum.js       (official topics: ids, names, quotes, PDF pages)
+// The music of each exercise is planned in js/music.js and the research claims
+// live in js/research.js. If the sound code is missing (or the browser has no
+// Web Audio), the demo still works and says so: every sound also has a picture
+// and a written line, so sound is never the only channel.
 (function () {
   'use strict';
 
   const G = globalThis;
   const SEED = G.MM_PILOT_SEED || { accounts: [] };
   const U = G.MMPilotUnit;
+  const M = G.MMPilotMusic;
+  const R = G.MMPilotResearch || { CLAIMS: [], HONESTY: '', FROM: '' };
   const UNIT = U.UNIT;
   const store = G.MMPilotStore.create(safeStorage());
   const root = document.getElementById('mm-app');
@@ -30,56 +37,32 @@
   const engine = G.musicEngine || null;
   if (engine && typeof engine.installAudioUnlock === 'function') engine.installAudioUnlock(document);
 
-  function tone(at, dur, hz, gain, type) { return { at: at, dur: dur, hz: hz, gain: gain, type: type || 'sine' }; }
+  // Plays a stage of the current exercise and lights each note on screen as it sounds.
+  function playStage(q, stage, choice) {
+    const notes = M.plan(q, stage, choice);
+    const audio = M.play(q.id + ':' + stage, notes, highlight);
+    state.audio = audio;
+    return audio;
+  }
 
-  function stepHz(from, to) {
-    if (typeof G.scaleJumpSound === 'function') {
-      const s = G.scaleJumpSound(from, to, 220);
-      if (s && Number.isFinite(s.frequency)) return s.frequency;
+  function highlight(n) {
+    root.querySelectorAll('.is-on').forEach(function (el) { el.classList.remove('is-on'); });
+    if (!n) return;
+    if (n.chip != null) {
+      const el = root.querySelector('[data-chip="' + n.chip + '"]');
+      if (el) el.classList.add('is-on');
     }
-    return 220 * Math.pow(2, (to - from) / 10);
-  }
-
-  // One tone per step from `from` to `to`; a jump of 10 is the grade-1 octave (two tones).
-  function jumpEvents(from, to) {
-    if (Math.abs(to - from) === 10 && typeof G.scaleJumpEvents === 'function') {
-      const ev = G.scaleJumpEvents(from, to, 220, 110);
-      if (ev && ev.length) return ev;
+    if (n.beat != null) {
+      const cell = root.querySelector('[data-beat="' + n.beat + '"]');
+      if (cell) cell.classList.add('is-on');
     }
-    const dir = to >= from ? 1 : -1;
-    const out = [];
-    let at = 0;
-    for (let t = from; dir > 0 ? t <= to : t >= to; t += dir) {
-      out.push(tone(at, 0.16, stepHz(from, t), 0.18, 'triangle'));
-      at += 0.17;
-    }
-    return out;
   }
 
-  function jumpNarration(from, to) {
-    if (typeof G.scaleJumpNarration === 'function') {
-      const n = G.scaleJumpNarration(from, to, 220);
-      if (n) return n;
-    }
-    const size = Math.abs(to - from);
-    return 'קפיצה של ' + size + (to >= from ? ' קדימה — הצליל עולה.' : ' אחורה — הצליל יורד.');
-  }
+  function stopSound() { M.stop(); }
 
-  function tryAgainEvents() {
-    return [tone(0, 0.18, 246.94, 0.12, 'sine'), tone(0.22, 0.26, 220, 0.12, 'sine')];
-  }
-
-  // Returns 'played' when the shared engine scheduled the notes, 'silent' otherwise.
-  function play(events) {
-    if (!engine || typeof engine.playSequence !== 'function') return 'silent';
-    try {
-      if (typeof engine.unlockAudio === 'function') engine.unlockAudio();
-      return engine.playSequence(events) ? 'played' : 'silent';
-    } catch (e) { return 'silent'; }
-  }
-
-  function stopSound() {
-    try { if (engine && typeof engine.stopAll === 'function') engine.stopAll(); } catch (e) { /* nothing playing */ }
+  function soundLine(text) {
+    if (state.audio === 'played') return '🔊 ' + text;
+    return (M.isMuted() ? '🔇 הצליל כבוי' : '🔈 הצליל לא זמין במכשיר הזה') + ' — אותה מנגינה מוצגת בתמונה ובכתב. ' + text;
   }
 
   // ---------------------------------------------------------------- helpers
@@ -104,12 +87,13 @@
   }
 
   // ---------------------------------------------------------------- state
-  const state = { view: 'login', account: null, typed: '', qState: 'idle', audio: null, lessonStatus: '', flash: '' };
+  const state = { view: 'login', account: null, typed: '', choice: null, qState: 'idle', audio: null, lessonStatus: '', flash: '', whyOpen: false };
 
   function go(view) {
     stopSound();
     state.view = view;
     state.typed = '';
+    state.choice = null;
     state.qState = 'idle';
     state.audio = null;
     render();
@@ -176,26 +160,108 @@
     return html;
   }
 
-  function lineHtml(from, to) {
-    const lo = 0, hi = 20;
-    let out = '<div class="mm-line" aria-hidden="true">';
-    for (let t = lo; t <= hi; t++) {
-      const inPath = (t > Math.min(from, to) && t < Math.max(from, to));
-      const cls = t === from ? ' is-from' : t === to ? ' is-to' : inPath ? ' is-path' : '';
-      out += '<div class="mm-line__tick' + cls + '"><span class="mm-line__bar" style="height:' + (16 + t * 3) + 'px"></span>' + t + '</div>';
-    }
-    return out + '</div>';
+  // ---------------------------------------------------------------- curriculum (read from src/lib/curriculum.js)
+  function curriculumRow(id) {
+    const row = typeof G.topicById === 'function' ? G.topicById(id) : null;
+    if (!row) return null;
+    const order = (G.OFFICIAL_ORDER && G.OFFICIAL_ORDER[row.grade]) || [];
+    const placed = order.filter(function (o) { return o[0] === row.topic; })[0];
+    const page = placed ? placed[1] : null;
+    const file = String(row.sourceUrl || '').split('/').pop();
+    return {
+      id: row.topicId, grade: row.grade, topic: row.topic,
+      strand: typeof G.strandHe === 'function' ? G.strandHe(row.strand) : row.strand,
+      quote: row.quote, page: page, file: file,
+      url: page ? row.sourceUrl + '#page=' + page : row.sourceUrl
+    };
   }
 
+  function curriculumBadge(topicId) {
+    const ids = U.CURRICULUM[topicId] || [];
+    const rows = ids.map(curriculumRow).filter(Boolean);
+    if (!rows.length) return '';
+    const text = rows.map(function (r) { return r.id + ' · ' + r.grade + '׳'; }).join(' | ');
+    const title = rows.map(function (r) { return r.id + ': ' + r.topic + ' (כיתה ' + r.grade + '׳)'; }).join('; ');
+    return '<span class="mm-chip mm-chip--curr" data-testid="q-curriculum" title="' + esc(title) + '"><span class="sr-only">נושא בתוכנית הלימודים: </span>תוכנית: <span class="ltr">' + esc(text) + '</span></span>';
+  }
+
+  // ---------------------------------------------------------------- music on screen
+  function chipsHtml(q, stage) {
+    const cs = M.chips(q, stage);
+    const ROLE_HE = { a: 'פסנתר', b: 'קסילופון', removed: 'מורידים', ten: 'עשרת', 'removed-ten': 'מורידים', one: 'יחידה', home: 'הביתה' };
+    return '<div class="mm-notes" aria-hidden="true" data-testid="music-notes" data-count="' + cs.filter(function (c) { return c.role !== 'home'; }).length + '">'
+      + cs.map(function (c) {
+        const glyph = c.role === 'home' ? '⌂' : (c.role === 'ten' || c.role === 'removed-ten') ? '10' : '♪';
+        return '<span class="mm-note mm-note--' + c.role + '" data-chip="' + c.index + '" data-role="' + c.role + '" style="--step:' + c.step + '" title="' + ROLE_HE[c.role] + '">' + glyph + '</span>';
+      }).join('') + '</div>';
+  }
+
+  function legendHtml(q) {
+    if (q.music === 'join') return '<span class="mm-key-dot mm-note--a"></span>פסנתר <span class="mm-key-dot mm-note--b"></span>קסילופון';
+    if (q.music === 'remove') return '<span class="mm-key-dot mm-note--a"></span>נשארים <span class="mm-key-dot mm-note--removed"></span>מורידים (✕)';
+    return '<span class="mm-key-dot mm-note--ten"></span>עשרת (עוגב נמוך) <span class="mm-key-dot mm-note--one"></span>יחידה (קסילופון)';
+  }
+
+  // The 4/4 bar of q7: 4 beat cells, two quarter notes given, the rest open
+  // until the child has answered (then the chosen rhythm is drawn, with the
+  // silence it leaves or the part that spills over the bar line).
+  function barHtml(q, shown) {
+    const fill = shown ? M.barFill(shown) : null;
+    const choice = shown ? M.CHOICES.filter(function (c) { return c.id === shown; })[0] : null;
+    let cells = '';
+    for (let b = 0; b < 6; b++) cells += '<span class="mm-bar__beat' + (b >= 4 ? ' is-out' : '') + '" data-beat="' + b + '" style="grid-column:' + (b + 1) + '">' + (b < 4 ? (b + 1) : '') + '</span>';
+    let notes = M.GIVEN.map(function (g, i) {
+      return '<span class="mm-bar__note mm-note--a" data-chip="' + i + '" style="grid-column:' + (i + 1) + ' / span 1">♩ <span class="ltr">1/4</span></span>';
+    }).join('');
+    if (choice) {
+      const span = fill.choiceBeats;
+      notes += '<span class="mm-bar__note mm-note--b' + (fill.status === 'over' ? ' is-over' : '') + '" data-chip="2" style="grid-column:3 / span ' + span + '">' + choice.symbol + ' <span class="ltr">' + choice.fraction + '</span></span>';
+      if (fill.status === 'short') notes += '<span class="mm-bar__gap" style="grid-column:' + (3 + span) + ' / 5">שקט</span>';
+    } else {
+      notes += '<span class="mm-bar__slot" style="grid-column:3 / span 2">?</span>';
+    }
+    const label = !fill ? '' : fill.status === 'full' ? 'התיבה מלאה' : fill.status === 'short' ? 'התיבה עוד לא מלאה' : 'הקצב עובר את סוף התיבה';
+    return '<div class="mm-bar" dir="ltr" data-testid="rhythm-bar" data-fill="' + (fill ? fill.status : 'open') + '" aria-hidden="true">'
+      + '<div class="mm-bar__grid">' + cells + notes + '</div>'
+      + (label ? '<div class="mm-bar__label" dir="rtl">' + label + '</div>' : '')
+      + '</div>';
+  }
+
+  function musicCard(q, stage) {
+    const solved = stage === 'right' || stage === 'reveal';
+    const rhythm = q.kind === 'rhythm';
+    const shown = rhythm ? (solved ? q.answer : (state.qState === 'wrong' || state.qState === 'retry') ? state.lastChoice : null) : null;
+    return '<div class="mm-card mm-music" data-testid="music-card">'
+      + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">' + (rhythm ? 'שומעים ורואים: קצב בתיבה' : 'שומעים ורואים: המנגינה היא התרגיל') + '</span>'
+      + (rhythm ? '' : '<span class="mm-legend">' + legendHtml(q) + '</span>') + '</div>'
+      + (rhythm ? barHtml(q, shown) : chipsHtml(q, stage))
+      + '<p class="mm-caption" data-testid="music-caption" data-stage="' + (solved ? 'solved' : 'open') + '">' + esc(M.caption(q, stage)) + '</p>'
+      + '<p class="sr-only" data-testid="music-describe">' + esc(M.describe(q, stage)) + '</p>'
+      + '<div class="mm-row-actions">'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="replay" data-testid="replay">▶ ' + (solved ? 'להשמיע שוב את המנגינה השלמה' : rhythm ? 'להשמיע את התיבה' : 'להשמיע את המנגינה') + '</button>'
+      + soundToggle()
+      + '</div></div>';
+  }
+
+  function soundToggle() {
+    const off = M.isMuted();
+    return '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="sound" data-testid="sound-toggle" aria-pressed="' + (off ? 'true' : 'false') + '">' + (off ? '🔇 בלי צליל' : '🔊 עם צליל') + '</button>';
+  }
+
+  // ---------------------------------------------------------------- lesson
   function viewLesson() {
     const L = UNIT.lesson;
+    const demo = { id: 'lesson', music: 'join', a: L.demo.a, op: '+', b: L.demo.b };
     return '<section class="mm-view mm-view--lesson" data-testid="view-lesson">'
       + topbar('שיעור', UNIT.title)
       + '<div class="mm-card"><h2>' + esc(L.title) + '</h2><ul class="mm-lesson-lines">'
       + L.lines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul></div>'
-      + '<p class="mm-sub" style="text-align:center;color:inherit;font-weight:700">מ־' + L.demo.from + ' קופצים 3 צעדים קדימה ומגיעים ל־' + L.demo.to + '. הקשיבו:</p>'
-      + lineHtml(L.demo.from, L.demo.to)
-      + '<button type="button" class="mm-play" data-act="lesson-play" data-testid="lesson-play" aria-label="השמעת הקפיצה מ־2 ל־5"><span aria-hidden="true">▶</span>להשמיע</button>'
+      + '<div class="mm-card mm-music" data-testid="lesson-music">'
+      + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">דוגמה</span><span class="mm-legend">' + legendHtml(demo) + '</span></div>'
+      + chipsHtml(demo, 'right')
+      + '<p class="mm-caption" data-testid="lesson-caption">שומעים <span class="ltr">3</span> צלילים ועוד <span class="ltr">2</span> = <span class="ltr">5</span> — שתי מנגינות קצרות מתחברות למנגינה אחת.</p>'
+      + '</div>'
+      + '<button type="button" class="mm-play" data-act="lesson-play" data-testid="lesson-play" aria-label="השמעת הדוגמה: 3 צלילים ועוד 2"><span aria-hidden="true">▶</span>להשמיע</button>'
       + '<div class="mm-status" aria-live="polite" data-testid="lesson-status" data-audio="' + esc(state.audio || '') + '">' + esc(state.lessonStatus) + '</div>'
       + '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">'
       + '<div class="mm-small-print">המנגינה תמיד נעצרת לפני שהתרגילים מתחילים</div>'
@@ -205,47 +271,64 @@
 
   function currentProgress() { return store.progress(state.account.id, UNIT.id); }
 
-  function viewExercise() {
+  function currentQuestion() {
     const p = currentProgress();
     const i = Math.min(p.index, UNIT.questions.length - 1);
-    const q = UNIT.questions[state.qState === 'right' || state.qState === 'revealed' ? state.shownIndex : i];
+    return UNIT.questions[state.qState === 'right' || state.qState === 'revealed' ? state.shownIndex : i];
+  }
+
+  // ---------------------------------------------------------------- exercise
+  function viewExercise() {
+    const p = currentProgress();
+    const q = currentQuestion();
     const qi = UNIT.questions.indexOf(q);
     const topic = U.TOPICS[q.topic];
+    const rhythm = q.kind === 'rhythm';
     const right = state.qState === 'right', wrong = state.qState === 'wrong', retry = state.qState === 'retry', revealed = state.qState === 'revealed';
     const locked = right || revealed;
-    const empty = state.typed === '';
+    const pending = rhythm ? state.choice : state.typed;
+    const empty = pending == null || pending === '';
+    const stage = right ? 'right' : revealed ? 'reveal' : 'question';
     const ansCls = 'mm-answer' + (empty && !locked ? ' is-empty' : '') + (right ? ' is-right' : '') + (wrong || revealed ? ' is-wrong' : '');
-    const shownAnswer = revealed ? String(U.answerOf(q)) : (empty ? '?' : state.typed);
-    const soundLine = state.audio === 'played'
-      ? '🔊 ' + (right ? jumpNarration(q.a, U.answerOf(q)) : 'צליל עדין: ננסה שוב.')
-      : '🔈 הצליל לא זמין במכשיר הזה — המשוב כתוב כאן.';
+    const choiceText = function (id) { const c = M.CHOICES.filter(function (x) { return x.id === id; })[0]; return c ? c.fraction : ''; };
+    const shownAnswer = revealed ? String(U.answerOf(q)) : (empty ? '?' : rhythm ? choiceText(pending) : pending);
 
     let fb = '';
     if (right) {
       fb = '<div class="mm-fb mm-fb--right" role="status" data-testid="feedback" data-result="right" data-audio="' + esc(state.audio) + '">'
         + '<div>כל הכבוד! ' + mathHtml(q).replace('?', String(U.answerOf(q))) + '</div>'
-        + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine) + '</div></div>';
+        + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('המנגינה התחברה וחזרה הביתה.')) + '</div></div>';
     } else if (wrong || retry) {
       fb = '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="' + (wrong ? 'wrong' : 'retry') + '" data-audio="' + esc(state.audio || '') + '">'
-        + (wrong ? '<div>עוד לא. נסו שוב — יש לכם עוד ניסיון.</div><div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine) + '</div>' : '')
-        + '<div class="mm-hint"><div class="mm-hint__text" data-testid="hint">רמז: ' + esc(U.hintText(q)) + '</div>'
-        + '<div class="mm-hint__groups" aria-hidden="true">' + U.hintGroups(q).map(function (n) {
+        + (wrong ? '<div>עוד לא. נסו שוב — יש לכם עוד ניסיון.</div><div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('רמז במוזיקה: מקשיבים שוב, לאט, והמנגינה עוד לא חוזרת הביתה.')) + '</div>' : '')
+        + '<div class="mm-hint"><div class="mm-hint__text" data-testid="hint">רמז: ' + esc(M.hint(q, state.lastChoice)) + '</div>'
+        + (U.hintGroups(q).length ? '<div class="mm-hint__groups" aria-hidden="true">' + U.hintGroups(q).map(function (n) {
           return '<div class="mm-hint__group">' + '<span class="mm-hint__dot"></span>'.repeat(n) + '</div>';
-        }).join('') + '</div></div></div>';
+        }).join('') + '</div>' : '') + '</div></div>';
     } else if (revealed) {
       fb = '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="revealed" data-audio="' + esc(state.audio || '') + '">'
         + '<div>התשובה היא <span class="ltr">' + U.answerOf(q) + '</span>. נתרגל את זה שוב בפעם הבאה.</div>'
-        + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine) + '</div></div>';
+        + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('כך נשמעת המנגינה עם התשובה.')) + '</div></div>';
     } else {
-      fb = '<div class="mm-idle">כתבו תשובה ולחצו ״בדיקה״.</div>';
+      fb = '<div class="mm-idle">' + (rhythm ? 'בחרו קצב ולחצו ״בדיקה״.' : 'כתבו תשובה ולחצו ״בדיקה״.') + '</div>';
     }
 
-    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clr', '0', 'del'];
-    const keypad = '<div class="mm-keypad" role="group" aria-label="מקלדת מספרים">' + keys.map(function (k) {
-      const label = k === 'del' ? '⌫' : k === 'clr' ? 'נקה' : k;
-      const aria = k === 'del' ? 'מחיקה' : k === 'clr' ? 'ניקוי' : k;
-      return '<button type="button" class="mm-key' + (k === 'del' || k === 'clr' ? ' mm-key--tool' : '') + '" data-act="key" data-key="' + k + '" data-testid="key-' + k + '" aria-label="' + aria + '"' + (locked ? ' disabled' : '') + '>' + label + '</button>';
-    }).join('') + '</div>';
+    let input;
+    if (rhythm) {
+      input = '<div class="mm-choices" role="group" aria-label="בחרו את הקצב שממלא את סוף התיבה" data-testid="choices">'
+        + M.CHOICES.map(function (c, k) {
+          const on = state.choice === c.id;
+          return '<button type="button" class="mm-choice' + (on ? ' is-on' : '') + '" data-act="choose" data-choice="' + c.id + '" data-testid="choice-' + c.id + '" aria-pressed="' + on + '"' + (locked ? ' disabled' : '') + '>'
+            + '<span class="mm-choice__sym" aria-hidden="true">' + c.symbol + '</span><span>' + esc(c.he) + '</span><span class="ltr mm-choice__frac">' + c.fraction + '</span><span class="sr-only"> (מקש ' + (k + 1) + ')</span></button>';
+        }).join('') + '</div>';
+    } else {
+      const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clr', '0', 'del'];
+      input = '<div class="mm-keypad" role="group" aria-label="מקלדת מספרים">' + keys.map(function (k) {
+        const label = k === 'del' ? '⌫' : k === 'clr' ? 'נקה' : k;
+        const aria = k === 'del' ? 'מחיקה' : k === 'clr' ? 'ניקוי' : k;
+        return '<button type="button" class="mm-key' + (k === 'del' || k === 'clr' ? ' mm-key--tool' : '') + '" data-act="key" data-key="' + k + '" data-testid="key-' + k + '" aria-label="' + aria + '"' + (locked ? ' disabled' : '') + '>' + label + '</button>';
+      }).join('') + '</div>';
+    }
 
     const isLast = qi === UNIT.questions.length - 1;
     const submit = locked
@@ -256,13 +339,14 @@
       return '<span class="mm-dot' + (k < qi ? ' is-done' : k === qi ? ' is-now' : '') + '"></span>';
     }).join('');
 
-    return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-qid="' + q.id + '">'
+    return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-qid="' + q.id + '" data-kind="' + (rhythm ? 'rhythm' : 'keypad') + '">'
       + topbar('תרגול', UNIT.title, '<span class="mm-badge" data-testid="star-count" aria-label="כוכבים">★ ' + firstTryCount(p) + '</span>')
       + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>'
-      + '<div class="mm-card"><span class="mm-chip" data-testid="q-topic">' + esc(topic.name) + '</span>'
+      + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(topic.name) + '</span>' + curriculumBadge(q.topic) + '</div>'
       + '<h2 class="mm-question" data-testid="q-text">' + mathHtml(q) + '</h2></div>'
+      + musicCard(q, stage)
       + '<div class="' + ansCls + '" aria-live="polite" data-testid="answer" aria-label="התשובה שלכם">' + esc(shownAnswer) + '</div>'
-      + fb + keypad + submit
+      + fb + input + submit
       + '</section>';
   }
 
@@ -300,10 +384,17 @@
   }
 
   const ADVICE = {
-    add: 'לתרגל קפיצות קדימה על ישר המספרים ולשמוע את הצליל עולה צעד אחר צעד.',
-    sub: 'לתרגל קפיצות אחורה: לספור את הצעדים בקול בזמן שהצליל יורד.',
-    tens: 'לחזור על "קפיצה של 10 היא אוקטבה" עם לוח המאה — אותה ספרת אחדות, עשרת אחרת.'
+    add: 'לנגן או למחוא שתי מנגינות קצרות אחת אחרי השנייה ולספור בקול את כל הצלילים — קודם את החלק הראשון, ואז להמשיך לספור קדימה.',
+    sub: 'לנגן מנגינה, לכסות את הצלילים האחרונים ביד (✕) ולספור אחורה צליל אחד לכל צליל שהורדנו.',
+    tens: 'לחזור על "צליל נמוך אחד = עשרת" עם לוח המאה: קודם הצליל הנמוך, ואז היחידות אחת־אחת.',
+    frac: 'למחוא תיבה של 4 פעמות, ואז להחזיק תו אחד לאורך 2 פעמות ולשאול: איזה חלק מהתיבה הוא מילא?'
   };
+
+  function curriculumIdsHtml(topicId) {
+    return (U.CURRICULUM[topicId] || []).map(function (id) {
+      return '<span class="mm-chip mm-chip--curr ltr" data-testid="report-curriculum">' + esc(id) + '</span>';
+    }).join(' ');
+  }
 
   function teacherReport() {
     return students().map(function (s) {
@@ -314,29 +405,74 @@
       let html = '<div class="mm-card" data-testid="report-student" data-student="' + esc(s.id) + '">'
         + '<div class="mm-task__row"><h3>' + esc(s.displayName) + '</h3><span class="mm-chip" data-testid="report-unit-status">' + esc(unitStatus(p).text) + '</span></div>';
       if (!any) return html + '<p data-testid="report-empty">אין עדיין תוצאות. הן יופיעו כאן אחרי שהתלמיד/ה יתרגל/תתרגל במכשיר הזה.</p></div>';
-      html += '<div class="mm-table-wrap"><table class="mm-table" data-testid="report-table"><thead><tr><th scope="col">נושא</th><th scope="col">נענו</th><th scope="col">נכון בניסיון ראשון</th><th scope="col">מצב</th></tr></thead><tbody>'
+      html += '<div class="mm-table-wrap"><table class="mm-table" data-testid="report-table"><thead><tr><th scope="col">נושא</th><th scope="col">בתוכנית</th><th scope="col">נענו</th><th scope="col">נכון בניסיון ראשון</th><th scope="col">מצב</th></tr></thead><tbody>'
         + rep.map(function (t) {
           const pct = t.rate == null ? 0 : Math.round(t.rate * 100);
           const label = t.status === 'gap' ? 'פער' : t.status === 'ok' ? 'שולט/ת' : 'טרם';
           return '<tr data-testid="report-row" data-topic="' + t.topic + '" data-status="' + t.status + '">'
-            + '<th scope="row">' + esc(t.name) + '</th><td><span class="ltr">' + t.done + '/' + t.total + '</span></td>'
+            + '<th scope="row">' + esc(t.name) + '</th><td>' + curriculumIdsHtml(t.topic) + '</td><td><span class="ltr">' + t.done + '/' + t.total + '</span></td>'
             + '<td><div style="display:flex;align-items:center;gap:6px"><div class="mm-meter' + (t.status === 'gap' ? ' is-gap' : '') + '" role="img" aria-label="' + pct + ' אחוז"><span style="width:' + pct + '%"></span></div><span class="ltr" data-testid="report-pct">' + pct + '%</span></div></td>'
             + '<td><span class="mm-chip' + (t.status === 'gap' ? ' mm-chip--rust' : t.status === 'ok' ? ' mm-chip--mint' : '') + '" data-testid="report-status">' + label + '</span></td></tr>';
         }).join('') + '</tbody></table></div>';
       html += '<h4 style="margin:6px 0 0">פערים</h4>';
       html += gapRows.length
         ? '<ul class="mm-gap-list" data-testid="gaps">' + gapRows.map(function (t) {
-          return '<li data-testid="gap" data-topic="' + t.topic + '"><strong>' + esc(t.name) + '</strong> — ' + t.firstTry + ' מתוך ' + t.done + ' בניסיון ראשון. הצעה: ' + esc(ADVICE[t.topic]) + '</li>';
+          return '<li data-testid="gap" data-topic="' + t.topic + '"><strong>' + esc(t.name) + '</strong> (<span class="ltr">' + esc((U.CURRICULUM[t.topic] || []).join(', ')) + '</span>) — ' + t.firstTry + ' מתוך ' + t.done + ' בניסיון ראשון. הצעה: ' + esc(ADVICE[t.topic]) + '</li>';
         }).join('') + '</ul>'
         : '<p data-testid="no-gaps">לא נמצאו פערים ביחידה הזו.</p>';
       return html + '</div>';
     }).join('');
   }
 
+  // Which official topics the unit practises: the rows come from src/lib/curriculum.js
+  // (topic id, grade, name, the verbatim quote and its page in the Ministry PDF).
+  function coverageCard() {
+    const read = G.SOURCE_READ ? ' (נקרא ב־' + G.SOURCE_READ + ')' : '';
+    const rows = Object.keys(U.TOPICS).map(function (tid) {
+      const qs = UNIT.questions.filter(function (q) { return q.topic === tid; });
+      const curr = (U.CURRICULUM[tid] || []).map(curriculumRow).filter(Boolean);
+      return '<tr data-testid="coverage-row" data-topic="' + tid + '">'
+        + '<th scope="row">' + esc(U.TOPICS[tid].name) + '<div class="mm-sub">' + qs.length + ' ' + (qs.length === 1 ? 'תרגיל' : 'תרגילים') + ' · ' + esc(qs.map(function (q) { return U.questionText(q).replace(' = ?', '').replace(' + ? = 1', ' + ?'); }).join(' · ')) + '</div></th>'
+        + '<td>' + (curr.length ? curr.map(function (r) {
+          return '<div class="mm-curr" data-testid="coverage-topic" data-topic-id="' + esc(r.id) + '">'
+            + '<span class="mm-chip mm-chip--curr ltr">' + esc(r.id) + '</span> <strong>כיתה ' + esc(r.grade) + '׳ · ' + esc(r.strand) + ':</strong> ' + esc(r.topic)
+            + (r.quote ? '<div class="mm-quote">ציטוט מהתוכנית: «' + esc(r.quote) + '»</div>' : '')
+            + '<a class="mm-link" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer" data-testid="coverage-source">' + esc(r.file) + (r.page ? ', עמ׳ ' + r.page : '') + '</a>'
+            + '</div>';
+        }).join('') : '<span class="mm-sub">—</span>')
+        + (U.CURRICULUM_NOTE[tid] ? '<div class="mm-sub" data-testid="coverage-note">' + esc(U.CURRICULUM_NOTE[tid]) + '</div>' : '')
+        + '</td></tr>';
+    }).join('');
+    return '<div class="mm-card" data-testid="coverage"><h2>כיסוי תוכנית הלימודים</h2>'
+      + '<p class="mm-sub">הנושאים הרשמיים (תוכנית משרד החינוך במתמטיקה ליסודי) שהיחידה מתרגלת. המזהים, השמות, הציטוטים והעמודים כפי שהם ב־<span class="ltr">src/lib/curriculum.js</span>' + esc(read) + '. תרגול בהדגמה לא אומר שהנושא כולו נלמד.</p>'
+      + '<div class="mm-table-wrap"><table class="mm-table mm-table--cov"><thead><tr><th scope="col">ביחידה</th><th scope="col">בתוכנית הרשמית</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+  }
+
+  function whyCard() {
+    const open = !!state.whyOpen;
+    return '<div class="mm-card mm-why" data-testid="why">'
+      + '<div class="mm-task__row"><h2>למה זה עובד?</h2>'
+      + '<button type="button" class="mm-btn mm-btn--ink mm-btn--small" data-act="why" data-testid="why-open" aria-expanded="' + open + '" aria-controls="why-panel">' + (open ? 'סגירה' : 'מה המחקר אומר ומה לא') + '</button></div>'
+      + '<p class="mm-sub">' + R.CLAIMS.length + ' טענות קצרות, כל אחת עם המקור שלה — למורים ולמבוגרים.</p>'
+      + '<div id="why-panel" class="mm-why__panel" data-testid="why-panel"' + (open ? '' : ' hidden') + '>'
+      + '<ol class="mm-why__list">' + R.CLAIMS.map(function (c) {
+        return '<li data-testid="why-claim" data-claim="' + esc(c.id) + '"><h3>' + esc(c.title) + '</h3>'
+          + '<p><strong>מה נמצא:</strong> ' + esc(c.shows) + '</p>'
+          + '<p><strong>מה זה לא מראה:</strong> ' + esc(c.limits) + '</p>'
+          + '<p class="mm-source" data-testid="why-source">מקור: ' + (c.url
+            ? '<a class="mm-link" href="' + esc(c.url) + '" target="_blank" rel="noopener noreferrer"><span class="ltr">' + esc(c.source) + '</span></a>'
+            : '<span class="ltr">' + esc(c.source) + '</span>') + '</p></li>';
+      }).join('') + '</ol>'
+      + '<p class="mm-honest" data-testid="why-honest">' + esc(R.HONESTY) + '</p>'
+      + '<p class="mm-sub">' + esc(R.FROM) + '</p>'
+      + '</div></div>';
+  }
+
   function viewTeacher() {
     const acc = state.account;
     return '<section class="mm-view" data-testid="view-teacher">'
       + topbar('שלום, ' + acc.displayName, 'לוח המורה · הדגמה')
+      + whyCard()
       + '<div class="mm-grid">'
       + '<form class="mm-card" data-testid="assign-form" novalidate><h2>הקצאת משימה</h2>'
       + '<label class="mm-field">תלמיד/ה<select name="student" data-testid="assign-student">'
@@ -349,6 +485,7 @@
       + '</form>'
       + '<div class="mm-card"><h2>משימות שהוקצו</h2>' + teacherAssignments() + '</div>'
       + '</div>'
+      + coverageCard()
       + '<section class="mm-view" aria-labelledby="report-title" data-testid="report"><h2 id="report-title" style="margin:6px 0 0">דוח לפי נושא ופערים</h2>'
       + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. הנתונים מהמכשיר הזה בלבד.</p>'
       + teacherReport() + '</section>'
@@ -382,6 +519,11 @@
 
   function onKey(k) {
     if (state.qState === 'right' || state.qState === 'revealed') return;
+    if (currentQuestion().kind === 'rhythm') {
+      const c = M.CHOICES[Number(k) - 1];
+      if (c) onChoose(c.id);
+      return;
+    }
     let t = state.qState === 'wrong' ? '' : state.typed;
     if (k === 'del') t = t.slice(0, -1);
     else if (k === 'clr') t = '';
@@ -391,30 +533,48 @@
     render();
   }
 
+  function onChoose(id) {
+    if (state.qState === 'right' || state.qState === 'revealed') return;
+    state.choice = id;
+    if (state.qState === 'wrong') state.qState = 'retry';
+    render();
+    const b = root.querySelector('[data-choice="' + id + '"]');
+    if (b) b.focus();
+  }
+
   function onCheck() {
-    if (state.typed === '') return;
     const p = currentProgress();
     const q = UNIT.questions[Math.min(p.index, UNIT.questions.length - 1)];
+    const given = q.kind === 'rhythm' ? state.choice : state.typed;
+    if (given == null || given === '') return;
     const prev = p.results[q.id] || { tries: 0 };
     const tries = (prev.tries || 0) + 1;
-    if (U.isCorrect(q, state.typed)) {
+    state.lastChoice = q.kind === 'rhythm' ? given : null;
+    if (U.isCorrect(q, given)) {
       saveResult(q.id, { tries: tries, correct: true, firstTry: tries === 1, revealed: false, at: Date.now() }, true);
       state.qState = 'right';
       state.shownIndex = UNIT.questions.indexOf(q);
-      state.audio = play(jumpEvents(q.a, U.answerOf(q)));
     } else if (tries >= U.MAX_TRIES) {
       saveResult(q.id, { tries: tries, correct: false, firstTry: false, revealed: true, at: Date.now() }, true);
       state.qState = 'revealed';
       state.shownIndex = UNIT.questions.indexOf(q);
-      state.audio = play(tryAgainEvents());
     } else {
       saveResult(q.id, { tries: tries, correct: false, firstTry: false, revealed: false }, false);
       state.qState = 'wrong';
-      state.audio = play(tryAgainEvents());
     }
+    // Render first (the notes on screen), then play: each note lights up as it sounds.
     render();
-    const fb = root.querySelector('[data-testid="next"], [data-testid="key-1"]');
+    playStage(q, state.qState === 'right' ? 'right' : state.qState === 'revealed' ? 'reveal' : 'hint', state.lastChoice);
+    render();
+    // Right/revealed: focus "next". Wrong: focus stays on the page so the child can try again.
+    const fb = root.querySelector('[data-testid="next"]');
     if (fb && state.qState !== 'wrong') fb.focus();
+  }
+
+  function enterExercise() {
+    go('exercise');
+    const q = currentQuestion();
+    if (q) playStage(q, 'question');
   }
 
   function onNext() {
@@ -425,27 +585,29 @@
       go('summary');
       return;
     }
-    go('exercise');
+    enterExercise();
   }
 
   root.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-act]');
     if (!btn || btn.disabled) return;
     const act = btn.getAttribute('data-act');
-    if (act === 'signout') { store.signOut(); state.account = null; state.flash = ''; go('login'); return; }
+    if (act === 'signout') { store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); return; }
     if (act === 'open-unit') {
       const p = currentProgress();
       state.lessonStatus = '';
       if (p.completedAt) go('summary');
       else if (!p.lessonDone) go('lesson');
-      else go('exercise');
+      else enterExercise();
       return;
     }
     if (act === 'lesson-play') {
       const d = UNIT.lesson.demo;
-      state.audio = play(jumpEvents(d.from, d.to));
-      state.lessonStatus = (state.audio === 'played' ? '🔊 ' : '🔈 (בלי צליל במכשיר הזה) ') + jumpNarration(d.from, d.to);
-      render();
+      const demo = { id: 'lesson', music: 'join', a: d.a, op: '+', b: d.b };
+      state.audio = M.play('lesson', M.plan(demo, 'right'), highlight);
+      state.lessonStatus = (state.audio === 'played' ? '🔊 ' : '🔈 (בלי צליל במכשיר הזה) ') + 'שומעים 3 צלילים בפסנתר ועוד 2 בקסילופון = 5 צלילים, והמנגינה חוזרת הביתה.';
+      const status = root.querySelector('[data-testid="lesson-status"]');
+      if (status) { status.textContent = state.lessonStatus; status.setAttribute('data-audio', state.audio); }
       return;
     }
     if (act === 'lesson-done') {
@@ -454,10 +616,31 @@
       p.lessonDone = true;
       if (!p.startedAt) p.startedAt = Date.now();
       store.saveProgress(state.account.id, UNIT.id, p);
-      go('exercise');
+      enterExercise();
+      return;
+    }
+    if (act === 'replay') {
+      const q = currentQuestion();
+      const stage = state.qState === 'right' ? 'right' : state.qState === 'revealed' ? 'reveal' : 'question';
+      playStage(q, stage);
+      return;
+    }
+    if (act === 'sound') {
+      M.setMuted(!M.isMuted());
+      render();
+      const t = root.querySelector('[data-testid="sound-toggle"]');
+      if (t) t.focus();
+      return;
+    }
+    if (act === 'why') {
+      state.whyOpen = !state.whyOpen;
+      render();
+      const t = root.querySelector('[data-testid="why-open"]');
+      if (t) t.focus();
       return;
     }
     if (act === 'key') { onKey(btn.getAttribute('data-key')); return; }
+    if (act === 'choose') { onChoose(btn.getAttribute('data-choice')); return; }
     if (act === 'check') { onCheck(); return; }
     if (act === 'next') { onNext(); return; }
     if (act === 'home') { go('student-home'); return; }
@@ -493,7 +676,8 @@
     }
   });
 
-  // Physical keyboard on the exercise screen: digits, Backspace, Enter.
+  // Physical keyboard on the exercise screen: digits, Backspace (on the
+  // fraction exercise 1/2/3 pick a rhythm); Enter on a focused button clicks it.
   document.addEventListener('keydown', function (e) {
     if (state.view !== 'exercise' || e.target.closest && e.target.closest('input, textarea, select')) return;
     if (/^[0-9]$/.test(e.key)) { onKey(e.key); e.preventDefault(); }
