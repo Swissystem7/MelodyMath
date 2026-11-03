@@ -639,8 +639,6 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
     </div>
   </div>
 </div>
-<details class="adult-area no-print" id="adultArea">
-  <summary>👩‍🏫 למבוגרים: שם התלמיד/ה, כיתה, מדריך למורה ועוד</summary>
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
   <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
   <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
@@ -654,6 +652,13 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   <p class="pwa-banner" id="pwaStatus" role="status">פתיחה ראשונה מהקישור שומרת את הדף בטאבלט. אחר כך אפשר בלי רשת.</p>
   <p class="note">השם והרישום נשמרים רק במכשיר הזה (localStorage). אותו קוד כיתה בטאבלט אחר לא משתף נתונים. אין חשבון ואין שרת. להחלפה בין ילדים — לחצו על השם ברשימה.</p>
 </div>
+<div class="who-bar" id="gradeBar">
+  <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
+  <div class="grade-pick" id="gradePick" role="group" aria-label="בחירת כיתה"></div>
+  <p class="note" id="gradeNote">כיתה א׳: מנייה עד 100, חיבור/חיסור, ישר מספרים.</p>
+</div>
+<details class="adult-area no-print" id="adultArea">
+  <summary>👩‍🏫 למבוגרים: מדריך למורה, מקצב ודפים נוספים</summary>
 <div id="firstRun" class="first-run no-print hidden" role="region" aria-label="הדרכה למורה בפעם הראשונה"></div>
 <details class="metro-bar no-print" id="metroBar">
   <summary>מקצב אופציונלי — נקישה לקצב, לא טיפול</summary>
@@ -664,12 +669,7 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
   <span class="note teacher-only hidden">נקישה לקצב התרגול במכשיר. שליטה בקצב הפעימות. לא טיפול ואין טענת יעילות.</span>
 </details>
-<p class="mm-product-banner"><b>תרגול יסודי א׳–ו׳.</b> כיתה נבחרת למטה. <a href="curriculum.html" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
-<div class="who-bar" id="gradeBar">
-  <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
-  <div class="grade-pick" id="gradePick" role="group" aria-label="בחירת כיתה"></div>
-  <p class="note" id="gradeNote">כיתה א׳: מנייה עד 100, חיבור/חיסור, ישר מספרים.</p>
-</div>
+<p class="mm-product-banner"><b>תרגול יסודי א׳–ו׳.</b> כיתה נבחרת למעלה. <a href="curriculum.html" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
 <nav class="more-nav" aria-label="דפים במוצר היסודי">
   <a class="navcard" href="program.html"><strong>תוכנית הלימודים א׳–ו׳</strong><span>כל נושא בסדר של תוכנית משרד החינוך: קישור לסעיף הרשמי ולתרגולים באפליקציה.</span></a>
   <a class="navcard" href="curriculum.html"><strong>כיסוי תוכנית ומוקדי כשל</strong><span>מיפוי ראמ״ה ומיצ״ב לכיתות א׳–ו׳: מוקדי כשל ומענה מוזיקלי מותאם.</span></a>
@@ -1573,7 +1573,7 @@ function cubeChoice(which,value){
 }
 function nextClassQuestion(){classAnswered=false;cubeRound='together';const random=rng(classSeed++);const pool=classPool();const q=pool[Math.floor(random()*pool.length)];classCurrent=q;if($('classItemTag'))setItemTag($('classItemTag'),q);setMath($('classPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('classNumberPlay',q);if(typeof setMusicWay==='function')setMusicWay('classWay',q);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.setAttribute('aria-label','תשובה: '+String(v));if(!q.noMusic)b.setAttribute('data-tap','xylo');b.onclick=()=>pickClass(v,b);box.appendChild(b)});const firstChoice=box.querySelector('button');if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus();maybeHear(q);maybeSpeak(q.prompt)}
 function pickClass(value,btn){if(classAnswered||!classCurrent)return;if(cubeChoice('class',value))return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);classHist.push({id:classCurrent.id,correct:correct});noteMetro(correct,classCurrent.skill,classCurrent);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);revealWidget('classWidget');const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
-function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';if($('classGateMsg')){$('classGateMsg').textContent='יש לבחור תלמיד/ה מהרשימה או להזין שם בסרגל למעלה.';show('classGateMsg',true)}if($('adultArea'))$('adultArea').open=true;if($('studentName')&&typeof $('studentName').focus==='function')$('studentName').focus();return}if($('classGateMsg'))show('classGateMsg',false);endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classHist=[];classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
+function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';if($('classGateMsg')){$('classGateMsg').textContent='יש לבחור תלמיד/ה מהרשימה או להזין שם בסרגל למעלה.';show('classGateMsg',true)}if($('studentName')&&typeof $('studentName').focus==='function')$('studentName').focus();return}if($('classGateMsg'))show('classGateMsg',false);endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classHist=[];classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
 function endClassSession(){classEndsAt=0;if(classTimerId){clearInterval(classTimerId);classTimerId=null}document.body.classList.remove('class-live');const ended=endTeacherSession();const last=ended&&ended.kind==='class'?ended:null;const n=last?(last.items||[]).length:0;const ok=last?(last.items||[]).filter(it=>it.correct).length:0;$('classDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות במפגש</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק במפגש</div>`;showClassCard('classDone');if($('classAgain')&&typeof $('classAgain').focus==='function')$('classAgain').focus()}
 if($('classStart'))$('classStart').onclick=startClassSession;
 if($('classStop'))$('classStop').onclick=()=>endClassSession();

@@ -2,13 +2,13 @@
 // `python3` is often the Microsoft Store stub. Serves the repo root on
 // 127.0.0.1 only (a secure context for the service worker). No dependencies.
 //
-//   node e2e/staticServer.js [port]
+//   node e2e/app-shell/staticServer.js [port]
 'use strict';
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const ROOT = path.join(__dirname, '..');
+const ROOT = path.join(__dirname, '..', '..');
 const PORT = Number(process.argv[2] || process.env.PORT || 8141);
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',

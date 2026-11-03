@@ -1,7 +1,9 @@
 // MM-711 — child-first home (audit finding B1, docs/MM-700 in #951).
 // The child's start button "מתחילים עכשיו" is on the first screen of a fresh
-// device, at 360x640 and 1280x800; the adult blocks are folded into one
-// collapsed "למבוגרים" section and every feature in it is still reachable.
+// device, at 360x640 and 1280x800. The long adult blocks (first-run teacher
+// guide, metronome, product banner, "more" pages) are folded into one
+// collapsed "למבוגרים" section; the who-bar, grade bar and quick tools stay
+// open below the header. Every feature is still reachable.
 // Every request to another host is aborted, so nothing leaves the machine.
 const { test, expect } = require('@playwright/test');
 
@@ -67,23 +69,25 @@ test('starting a session from the first screen works', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('adult blocks are folded into one collapsed section and stay reachable', async ({ page }) => {
+test('the long adult blocks are folded into one collapsed section and stay reachable', async ({ page }) => {
   await page.goto('index.html', { waitUntil: 'networkidle' });
   const area = page.locator('details#adultArea');
   await expect(area).toHaveCount(1);
   expect(await area.evaluate((d) => d.open)).toBe(false);
-  for (const id of ['whoBar', 'firstRun', 'gradeBar', 'metroBar', 'qrShareBtn', 'smartboardToggle']) {
+  for (const id of ['firstRun', 'metroBar']) {
     expect(await page.locator('#adultArea #' + id).count(), id).toBe(1);
   }
   expect(await page.locator('#adultArea nav.more-nav a.navcard').count()).toBe(5);
   // A fresh device renders the first-run teacher guide inside the section.
   expect(await page.locator('#adultArea #firstRun:not(.hidden) #firstRunInner').count()).toBe(1);
-  await expect(page.locator('#studentName')).toBeHidden();
-  await area.locator(':scope > summary').click();
+  await expect(page.locator('#firstRunInner')).toBeHidden();
+  // The who-bar, grade bar and quick tools stay open (class mode and the
+  // teacher kit point at them).
   await expect(page.locator('#studentName')).toBeVisible();
   await expect(page.locator('#gradePick button').first()).toBeVisible();
+  await area.locator(':scope > summary').click();
   await expect(page.locator('#firstRunInner')).toBeVisible();
-  // The QR modal lives outside the section, so it opens.
+  await expect(page.locator('#adultArea a.navcard[href="program.html"]')).toBeVisible();
   await page.click('#qrShareBtn');
   await expect(page.locator('#qrModal')).toBeVisible();
 });
@@ -100,11 +104,10 @@ test('the start card belongs to the practice tab; other tabs and the teacher gat
   await expect(page.locator('#welcomeHero')).toBeVisible();
 });
 
-test('class mode without a name opens the adult section and focuses the name box', async ({ page }) => {
+test('class mode without a name points at the name box', async ({ page }) => {
   await page.goto('index.html', { waitUntil: 'networkidle' });
   await page.click('#tab-classMode');
   await page.click('#classStart');
   await expect(page.locator('#classGateMsg')).toBeVisible();
-  expect(await page.locator('#adultArea').evaluate((d) => d.open)).toBe(true);
   await expect(page.locator('#studentName')).toBeFocused();
 });
