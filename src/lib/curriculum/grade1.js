@@ -227,6 +227,25 @@
     ['subtraction', 'ניגנו 90 פעימות, ו־5 תיבות של 10 פעימות שתקו. כמה פעימות נשמעו?', 40, '9 עשרות פחות 5 עשרות', 2, 'TENS', { key: 73110 }],
     ['subtraction', '60 − 40 = ?', 20, '6 הדגשות פחות 4 הדגשות', 2, 'TENS', { key: 73111 }],
     ['subtraction', '100 − 30 = ?', 70, '10 עשרות פחות 3 עשרות', 2, 'TENS', { key: 73112 }],
+    // MM-732 · mm-cur-9 length and mm-cur-11 coins, 6 to 12 items each, every
+    // level present (gap G2 in docs/MM-700/curriculum-gaps.md, PR #951).
+    // Newprogramgrade1.pdf: length p. 11 «מדידת אורך», money p. 3 (MM-501,
+    // PR #949). Length is solved with cmNote (M3), coins with coinGroups (M2),
+    // the one primary way of each standard above. The ruler widget prints the
+    // length it shows, so no new ruler item asks for that length: each asks
+    // for one step more (longer, shorter, half, twice, up to 20).
+    ['measurement', 'בתמונה שורת קוביות אורך. מוסיפים עוד 2 קוביות. כמה קוביות יש עכשיו?', 6, 'ספרו את הקוביות שבתמונה והמשיכו עוד 2', 1, 'LENGTH', { key: 73201, widget: 'ruler', ruler: { unit: 'unit', length: 4 } }],
+    ['measurement', 'העיפרון בתמונה נמדד בקוביות. עיפרון אחר קצר ממנו בקובייה אחת. כמה קוביות בו?', 4, 'ספרו את הקוביות שבתמונה, ואז קובייה אחת פחות', 1, 'LENGTH', { key: 73202, widget: 'ruler', ruler: { unit: 'unit', length: 5 } }],
+    ['measurement', 'מדדו את הצעצוע בסרגל. צעצוע שני ארוך ממנו ב־3 ס״מ. כמה ס״מ הוא?', 10, 'קראו את הסרגל, ואז הוסיפו 3', 2, 'LENGTH', { key: 73203, widget: 'ruler', ruler: { unit: 'cm', length: 7 } }],
+    ['measurement', 'מדדו את החבל בסרגל. חותכים אותו לשני חלקים שווים. כמה ס״מ אורכו של כל חלק?', 6, 'חצי מהאורך שעל הסרגל', 3, 'LENGTH', { key: 73204, widget: 'ruler', ruler: { unit: 'cm', length: 12 } }],
+    ['measurement', 'מדדו את המקל בסרגל. שני מקלות כאלה זה אחרי זה — כמה ס״מ יחד?', 14, 'פעמיים האורך שעל הסרגל', 3, 'LENGTH', { key: 73205, widget: 'ruler', ruler: { unit: 'cm', length: 7 } }],
+    ['measurement', 'מדדו את הסרט בסרגל. כמה ס״מ חסרים לו כדי להגיע ל־20 ס״מ?', 7, 'מהאורך שעל הסרגל סופרים הלאה עד 20', 3, 'LENGTH', { key: 73206, widget: 'ruler', ruler: { unit: 'cm', length: 13 } }],
+    ['measurement', 'שני מטבעות של 1 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 4, '1 ועוד 1 ועוד 2', 1, 'MONEY', { key: 73207 }],
+    ['measurement', 'מטבע של 5 ₪ ומטבע של 1 ₪. כמה ₪ ביחד?', 6, 'מתחילים מ־5 וסופרים עוד 1', 1, 'MONEY', { key: 73208 }],
+    ['measurement', 'שני מטבעות של 5 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 12, 'שתי חמישיות הן עשר, ועוד 2', 2, 'MONEY', { key: 73209 }],
+    ['measurement', 'כמה מטבעות של 5 ₪ שווים למטבע אחד של 10 ₪?', 2, 'כמה קבוצות של חמש יש בעשר', 2, 'MONEY', { key: 73210 }],
+    ['measurement', 'מטבע של 10 ₪, מטבע של 5 ₪ ומטבע של 1 ₪. כמה ₪ ביחד?', 16, 'קודם המטבע הגדול, ואז ממשיכים לספור', 3, 'MONEY', { key: 73211 }],
+    ['measurement', 'קנינו מדבקה ב־6 ₪ ושילמנו במטבע של 10 ₪. כמה ₪ עודף?', 4, '10 פחות 6', 3, 'MONEY', { key: 73212 }],
   ];
 
   return { grade: 'א', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
