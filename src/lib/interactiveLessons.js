@@ -5,6 +5,35 @@
 // 2. Auditory and visual demonstration (Listen & See)
 // 3. Hands-on interactive manipulatives (Explore)
 // 4. Guided scaffolding check with feedback (Check)
+//
+// Lesson registry (MM-7xx contract; streams B and C add lessons through it).
+// Besides the built-in LESSONS below, every lesson in the global array
+// `MMLessonRegistry` is served by getAllLessons / getLessonById /
+// getLessonsForGrade. Any file may add lessons, in any load order: the array
+// is read on every call, and whichever file loads first creates it.
+//
+//   (globalThis.MMLessonRegistry = globalThis.MMLessonRegistry || []).push(...lessons);
+//
+// In a browser globalThis is window, so this is window.MMLessonRegistry. In
+// Node the adding file runs the same line (and may also put its lessons on
+// module.exports); require it before calling the getters. Lesson shape:
+//
+//   {
+//     id: 'g1-make-ten',          // unique, stable; a built-in id wins, and
+//                                 // among registry lessons the first one wins
+//     title: 'השלמה לעשר',        // Hebrew, shown as the card title
+//     grade: 'א',                 // 'א'…'ו'
+//     strand: 'מספרים ופעולות',   // Hebrew strand name
+//     topicId: 'mm-cur-3',        // optional: the curriculum.js MATRIX row
+//     icon: '🔟', summary: '…',   // optional card icon and one-line summary
+//     steps: [                    // at least one step
+//       { title, body, actionType?, actionLabel? },               // explain / listen / explore
+//       { title, body, options: [...], correctIndex, explanation } // check (quiz)
+//     ]
+//   }
+//
+// A registry entry without id, title, grade or a non-empty steps array is
+// ignored, as is a quiz step whose correctIndex is not one of its options.
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -359,18 +388,43 @@
     }
   ];
 
+  function isRegistryLesson(l) {
+    if (!l || typeof l !== 'object') return false;
+    if (typeof l.id !== 'string' || !l.id || !l.title || !l.grade) return false;
+    if (!Array.isArray(l.steps) || !l.steps.length) return false;
+    return l.steps.every(function (st) {
+      if (!st || typeof st !== 'object') return false;
+      if (!Array.isArray(st.options)) return true;
+      return Number.isInteger(st.correctIndex) && st.correctIndex >= 0 && st.correctIndex < st.options.length;
+    });
+  }
+
+  // Valid lessons of the global registry, built-in ids and repeats dropped.
+  function registryLessons() {
+    const g = typeof globalThis !== 'undefined' ? globalThis : {};
+    const list = Array.isArray(g.MMLessonRegistry) ? g.MMLessonRegistry : [];
+    const seen = {};
+    LESSONS.forEach(function (l) { seen[l.id] = true; });
+    return list.filter(function (l) {
+      if (!isRegistryLesson(l) || seen[l.id]) return false;
+      seen[l.id] = true;
+      return true;
+    });
+  }
+
   function getAllLessons() {
-    return LESSONS;
+    const extra = registryLessons();
+    return extra.length ? LESSONS.concat(extra) : LESSONS;
   }
 
   function getLessonById(id) {
     if (!id) return null;
-    return LESSONS.find(function (l) { return l.id === id; }) || null;
+    return getAllLessons().find(function (l) { return l.id === id; }) || null;
   }
 
   function getLessonsForGrade(grade) {
-    if (!grade) return LESSONS;
-    return LESSONS.filter(function (l) { return l.grade === grade; });
+    if (!grade) return getAllLessons();
+    return getAllLessons().filter(function (l) { return l.grade === grade; });
   }
 
   function evaluateStepAnswer(lessonId, stepIndex, chosenIndex) {
