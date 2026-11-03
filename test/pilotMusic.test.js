@@ -10,7 +10,8 @@ const C = require('../src/lib/curriculum.js');
 
 const COUNTED = ['a', 'b', 'one', 'ten', 'removed', 'removed-ten'];
 const counted = (notes, solved) => notes.filter((n) => COUNTED.includes(n.role) && !(solved && n.role.startsWith('removed')));
-const leaks = (text, answer) => new RegExp('(^|[^0-9/])' + String(answer).replace(/[/.]/g, '\\$&') + '([^0-9/]|$)').test(text);
+const escape = (v) => String(v).replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const leaks = (text, answer) => new RegExp('(^|[^0-9/])' + escape(answer) + '([^0-9/]|$)').test(text);
 
 test('every keypad exercise plays as many notes as its numbers, and the answer resolves home', () => {
   U.QUESTIONS.filter((q) => q.kind !== 'rhythm').forEach((q) => {
