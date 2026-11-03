@@ -259,5 +259,47 @@
     ['measurement', 'החזרה מתחילה בשעה שבשעון ונגמרת בשעה 1. כמה שעות היא נמשכת?', 3, 'סופרים מהשעה שבשעון עד 1, דרך 12', 3, 'CLOCK', { key: 73306, widget: 'clock', clock: { hour: 10 } }],
   ];
 
-  return { grade: 'א', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
+  // Guided lessons of grade א׳ (MM-7xx stream B), served by interactiveLessons.js
+  // through the MMLessonRegistry contract (shape at the top of that file).
+  const lessons = [
+    // MM-734 · mm-cur-3 make ten (gap G3/G5, PR #951). Newprogramgrade1.pdf
+    // p. 6 «פירוקי 10; חיבור בתחום העשרים» via MM-501 (PR #949). The music
+    // model is the ten-beat bar of accent groups (M2, das2023), as in TENS.
+    {
+      id: 'g1-make-ten',
+      title: 'השלמה לעשר: ממלאים תיבה של 10 פעימות',
+      grade: 'א',
+      strand: 'מספרים ופעולות',
+      topicId: 'mm-cur-3',
+      icon: '🥁',
+      summary: 'מחברים מעבר לעשר: קודם ממלאים תיבה של 10 פעימות, ואת מה שנשאר מנגנים בתיבה חדשה.',
+      steps: [
+        {
+          title: 'תיבה של עשר פעימות',
+          body: 'תיבה מלאה היא 10 פעימות, והפעימה הראשונה בכל תיבה מודגשת. כש־8 פעימות כבר נשמעו, חסרות 2 כדי למלא את התיבה. זו השלמה לעשר.'
+        },
+        {
+          title: 'קודם משלימים, אחר כך ממשיכים',
+          body: '8 + 5: מתוך ה־5 לוקחים 2 וממלאים את התיבה — 10. נשארו 3 פעימות, ומנגנים אותן בתיבה חדשה עם הדגשה בהתחלה: 10 ועוד 3 הם 13.'
+        },
+        {
+          title: 'נסו עם מחיאות',
+          body: '9 + 4: מחאו 9 פעמים. עוד מחיאה אחת ממלאת את התיבה. כמה מחיאות נשארו לתיבה החדשה? שלוש — ולכן ביחד 13.'
+        },
+        {
+          title: 'בדיקת הבנה מודרכת',
+          body: 'איך כדאי לחשב 7 + 5 בעזרת תיבה של עשר?',
+          options: ['7 + 3 + 2', '7 + 5 + 10', '5 + 5 + 5', '7 + 1 + 1 + 1'],
+          correctIndex: 0,
+          explanation: '3 פעימות משלימות את 7 לתיבה של 10, ונשארו עוד 2 לתיבה החדשה: 10 ועוד 2 הם 12.'
+        }
+      ]
+    },
+  ];
+  // Order-independent: whichever file loads first creates the array.
+  const reg = (typeof globalThis !== 'undefined' ? globalThis : {});
+  const list = (reg.MMLessonRegistry = reg.MMLessonRegistry || []);
+  lessons.forEach(function (l) { if (list.indexOf(l) === -1) list.push(l); });
+
+  return { grade: 'א', ST: {}, items: [], lateItems: lateItems, lessons: lessons, music: music, sources: sources };
 });

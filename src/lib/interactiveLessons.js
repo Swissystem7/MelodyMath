@@ -43,6 +43,7 @@
   const LESSONS = [
     {
       id: 'fractions-intro',
+      topicId: 'mm-cur-32', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'מהו שבר? חלק מתוך שלם',
       grade: 'ד',
       strand: 'שברים',
@@ -77,6 +78,7 @@
     },
     {
       id: 'multiplication-groups',
+      topicId: 'mm-cur-15', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'כפל כקבוצות שוות ומקצב חוזר',
       grade: 'ב',
       strand: 'כפל וחילוק',
@@ -111,6 +113,7 @@
     },
     {
       id: 'place-value-regrouping',
+      topicId: 'mm-cur-1', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'מבנה עשרוני: עשרות ואחדות',
       grade: 'א',
       strand: 'מבנה עשרוני',
@@ -145,6 +148,7 @@
     },
     {
       id: 'number-line-jumps',
+      topicId: 'mm-cur-2', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'ישר המספרים ודילוגים',
       grade: 'א',
       strand: 'ישר מספרים',
@@ -179,6 +183,7 @@
     },
     {
       id: 'division-groups',
+      topicId: 'mm-cur-25', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'חילוק כחלוקה שווה וכפעולה הפוכה לכפל',
       grade: 'ג',
       strand: 'כפל וחילוק',
@@ -213,6 +218,7 @@
     },
     {
       id: 'geometry-euclidean',
+      topicId: 'mm-cur-34', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'גיאומטריה של הזמן: מקצבים ומצולעים',
       grade: 'ד',
       strand: 'גיאומטריה',
@@ -247,6 +253,7 @@
     },
     {
       id: 'even-odd-rhythm',
+      topicId: 'mm-cur-13', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'זוגי ואי־זוגי: צעדים בזוגות מול צליל בודד',
       grade: 'ב',
       strand: 'מספרים ופעולות',
@@ -286,6 +293,7 @@
     },
     {
       id: 'polyrhythm-lcm',
+      topicId: 'mm-cur-40', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'פוליריתמיקה וכפולה משותפת: כשהתופים נפגשים',
       grade: 'ה',
       strand: 'מספרים ופעולות',
@@ -320,6 +328,7 @@
     },
     {
       id: 'dotted-notes-division',
+      topicId: 'mm-cur-51', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'תו מנוקד וחילוק שברים: חישוב משכי צליל',
       grade: 'ו',
       strand: 'שברים',
@@ -354,6 +363,7 @@
     },
     {
       id: 'circle-of-fifths-tempo',
+      topicId: 'mm-cur-54', // MM-734: curriculum.js row (lesson column of docs/MM-700/curriculum-gaps.md)
       title: 'מעגל הקווינטות וטמפו',
       grade: 'ו',
       strand: 'גיאומטריה ונתונים',
