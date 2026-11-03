@@ -75,3 +75,84 @@ test('the why-it-works panel: 3–5 claims, each with a source and what it does 
   });
   assert.match(R.HONESTY, /לא נבדק/);
 });
+
+test('describe and hint have a line for every exercise and every rhythm choice', () => {
+  U.QUESTIONS.forEach((q) => {
+    assert.ok(M.describe(q, 'question').length > 10, q.id);
+    assert.ok(M.hint(q, 'quarter').length > 10, q.id);
+    if (q.kind !== 'rhythm') assert.ok(M.chips(q, 'right').some((c) => c.role === 'home'), q.id);
+  });
+  const q7 = U.QUESTIONS.find((q) => q.kind === 'rhythm');
+  assert.match(M.hint(q7, 'half'), /4 פעמות/);
+  assert.equal(M.plan(q7, 'hint', 'whole').filter((n) => n.role === 'click-over').length, 2);
+  assert.deepEqual(U.hintGroups(q7), []);
+  assert.equal(U.questionText(q7), '1/4 + 1/4 + ? = 1');
+});
+
+test('the player schedules every note on Web Audio, records it for the tests, and stays silent when muted', async (t) => {
+  // A tiny fake AudioContext, enough for musicEngine and instrumentVoices.
+  const log = { started: 0 };
+  const param = () => ({ value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} });
+  const node = (x) => Object.assign({ connect(n) { return n || this; }, disconnect() {} }, x);
+  class FakeAC {
+    constructor() { this.state = 'running'; this.currentTime = 0; this.sampleRate = 8000; this.destination = node(); }
+    resume() { return Promise.resolve(); }
+    createGain() { return node({ gain: param() }); }
+    createOscillator() { return node({ frequency: param(), start() { log.started++; }, stop() {} }); }
+    createBiquadFilter() { return node({ frequency: param() }); }
+    createBuffer(c, len) { const d = new Float32Array(Math.max(1, len)); return { length: len, getChannelData: () => d }; }
+    createBufferSource() { return node({ start() {}, stop() {} }); }
+  }
+  global.window = { AudioContext: FakeAC };
+  const V = require('../src/lib/instrumentVoices.js');
+  t.after(() => { delete global.window; delete globalThis.playVoice; M.setMuted(false); M.stop(); });
+
+  const q1 = U.QUESTIONS[0];
+  const seen = [];
+  // Without instrument voices: the engine's plain tones.
+  assert.equal(M.play('fallback', M.plan(q1, 'question')), 'played');
+  const plain = log.started;
+  assert.ok(plain >= 7);
+  // With the instrument voices (as on the page, where they are globals).
+  globalThis.playVoice = V.playVoice;
+  assert.equal(M.play('voiced', M.plan(q1, 'right'), (n) => seen.push(n)), 'played');
+  assert.ok(log.started > plain);
+  const rec = globalThis.__mmPilotMusic.plays.at(-1);
+  assert.equal(rec.id, 'voiced');
+  assert.equal(rec.notes.filter((n) => n.role === 'home').length, 3);
+  await new Promise((r) => setTimeout(r, 200));
+  assert.ok(seen.length >= 1, 'notes light up as they play');
+  M.stop();
+
+  M.setMuted(true);
+  assert.ok(M.isMuted());
+  const before = log.started;
+  assert.equal(M.play('muted', M.plan(q1, 'question')), 'silent');
+  assert.equal(log.started, before);
+});
+
+test('the report has the fraction topic and keeps the gap rule; stars count first tries over all 7', () => {
+  const all = {};
+  U.QUESTIONS.forEach((q) => { all[q.id] = { tries: 1, correct: true, firstTry: true }; });
+  assert.equal(U.stars(all), 3);
+  assert.deepEqual(U.topicReport(all).map((t) => [t.topic, t.status]), [['add', 'ok'], ['sub', 'ok'], ['tens', 'ok'], ['frac', 'ok']]);
+  all.q7 = { tries: 2, correct: false, revealed: true, firstTry: false };
+  all.q3 = { tries: 2, correct: true, firstTry: false };
+  assert.equal(U.stars(all), 2);
+  assert.deepEqual(U.gaps(all).map((t) => t.topic), ['sub', 'frac']);
+  assert.equal(U.stars({}), 1);
+  assert.equal(U.topicReport(null)[3].status, 'none');
+  assert.equal(U.isCorrect(U.QUESTIONS[0], ''), false);
+  assert.equal(U.isCorrect(U.QUESTIONS[0], ' 7 '), true);
+  assert.equal(U.answerOf(U.QUESTIONS[6]), '1/2');
+  assert.match(U.hintText(U.QUESTIONS[2]), /אחורה 4/);
+  assert.deepEqual(U.hintGroups(U.QUESTIONS[4]), [10]);
+  assert.deepEqual(U.hintGroups(U.QUESTIONS[0]), [4, 3]);
+});
+
+test('captions for 20 − 10 and an unknown exercise', () => {
+  const q6 = U.QUESTIONS.find((q) => q.id === 'q6');
+  assert.match(M.caption(q6, 'question'), /2 עשרות/);
+  assert.match(M.caption(q6, 'right'), /= 10/);
+  assert.equal(M.caption({ id: 'x' }, 'question'), '');
+});

@@ -122,19 +122,10 @@
   ]);
   const GIVEN = Object.freeze([{ note: 'E4', fraction: '1/4' }, { note: 'D4', fraction: '1/4' }]);
 
-  function frac(text) {
-    if (engine && typeof engine.toFraction === 'function') return engine.toFraction(text);
-    const p = String(text).split('/');
-    return { n: Number(p[0]), d: Number(p[1] || 1) };
-  }
-  function add(a, b) {
-    if (engine && typeof engine.addFractions === 'function') return engine.addFractions(a, b);
-    return { n: a.n * b.d + b.n * a.d, d: a.d * b.d };
-  }
-  function cmp(a, b) {
-    if (engine && typeof engine.compareFractions === 'function') return engine.compareFractions(a, b);
-    return Math.sign(a.n * b.d - b.n * a.d);
-  }
+  // Exact fractions from the shared engine (never floats): 1/4 + 1/4 + 1/2 is exactly 1.
+  const frac = function (text) { return engine.toFraction(text); };
+  const add = function (a, b) { return engine.addFractions(a, b); };
+  const cmp = function (a, b) { return engine.compareFractions(a, b); };
 
   // How the bar ends with this choice: 'full' | 'short' | 'over', and the beats it takes.
   function barFill(choiceId) {
