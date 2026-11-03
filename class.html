@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MelodyMath · לוח הכיתה</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<meta name="description" content="לוח כיתה למורה: התקדמות מכמה מכשירים, בלי שרת ובלי חשבונות. הנתונים נשמרים רק במכשיר.">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{--ink:#1f1e1d;--muted:#6b6a65;--accent:#d97757;--accent-ink:#b45a3c;--accent-soft:#fbeee8;--bg:#faf9f5;--card:#ffffff;--line:#e8e6dc;--good:#2f7d4f;--good-soft:#e6f4ea;--warn:#a1502e;--warn-soft:#fdf0e6;--font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:root{--ink:#faf9f5;--muted:#a8a69f;--accent:#e08264;--accent-ink:#f0a58a;--accent-soft:#3a2a24;--bg:#1f1e1d;--card:#2b2a27;--line:#3e3d39;--good:#7fd19f;--good-soft:#203a2b;--warn:#f0a58a;--warn-soft:#3a2a24}}
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
+  .wrap{max-width:980px;margin-inline:auto;padding:16px 16px 64px}
+  header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+  h1{font-size:clamp(1.5rem,6vw,2.1rem);margin:4px 0}
+  h2{font-size:1.2rem;margin:0 0 8px}
+  h3{font-size:1.05rem;margin:0}
+  a{color:var(--accent-ink);font-weight:700}
+  .back{display:inline-flex;align-items:center;min-height:44px;padding-inline:4px;text-decoration:none}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:14px 0}
+  .note{color:var(--muted);font-size:.95rem;margin:6px 0}
+  label{display:block;margin:8px 0 4px;font-weight:700}
+  input,select,textarea{width:100%;min-height:48px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+  textarea{min-height:96px;font-family:ui-monospace,Consolas,monospace;font-size:.85rem;direction:ltr;text-align:left}
+  button,.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;min-width:48px;font:inherit;font-weight:700;padding:8px 16px;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;text-decoration:none}
+  button.secondary,.btn.secondary{background:var(--card);color:var(--accent-ink)}
+  button.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+  .row > *{flex:1 1 11rem}
+  .row > button{flex:0 1 auto}
+  .tabs{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+  .tabs button{flex:1 1 10rem;background:var(--card);color:var(--ink);border-color:var(--line)}
+  .tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .status{min-height:1.6em;margin:8px 0 0;font-weight:700}
+  .status.ok{color:var(--good)}
+  .status.err{color:var(--warn)}
+  .hidden{display:none !important}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:12px}
+  .kid{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .kid-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .kid-meta{color:var(--muted);font-size:.92rem}
+  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.88rem;font-weight:700;background:var(--accent-soft);color:var(--accent-ink);margin:2px 0 2px 4px}
+  .pill.good{background:var(--good-soft);color:var(--good)}
+  .sync{font-size:.92rem}
+  .sync.stale{color:var(--warn);font-weight:700}
+  .gaps{margin:0;padding:0;list-style:none}
+  .gaps li{margin:2px 0}
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th,td{border-bottom:1px solid var(--line);padding:10px 6px;text-align:start;vertical-align:top;overflow-wrap:anywhere}
+  th{color:var(--muted);font-weight:700}
+  .table-wrap{overflow-x:auto}
+  .empty ol{padding-inline-start:1.3em;margin:8px 0}
+  .empty li{margin:6px 0}
+  .qr{display:flex;justify-content:center;margin:10px 0}
+  .qr svg{width:min(260px,80vw);height:auto;background:#fff;border-radius:8px}
+  .privacy{background:var(--accent-soft);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:.95rem}
+  .task{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:6px;flex-wrap:wrap}
+  .task.done span{text-decoration:line-through;color:var(--muted)}
+  details > summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700;color:var(--accent-ink)}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  @media print{.no-print{display:none !important}body{background:#fff}.card,.kid{break-inside:avoid}}
+</style>
+</head>
+<body>
+<a class="sr-only" href="#main">דילוג לתוכן</a>
+<main id="main" class="wrap">
+  <header class="top">
+    <div>
+      <h1>לוח הכיתה</h1>
+      <p class="note">מעקב אחרי תלמידים שמתרגלים במכשירים שונים. בלי שרת ובלי חשבונות: כל תלמיד/ה שולח/ת קוד, והמורה קולט/ת אותו כאן.</p>
+    </div>
+    <a class="back no-print" href="index.html">← חזרה לתרגול</a>
+  </header>
+
+  <div class="tabs no-print" role="tablist" aria-label="מי משתמש/ת בדף">
+    <button type="button" role="tab" id="tabTeacher" aria-controls="teacherPane" aria-selected="true">אני מורה</button>
+    <button type="button" role="tab" id="tabStudent" aria-controls="studentPane" aria-selected="false">אני תלמיד/ה: שליחה למורה</button>
+  </div>
+
+  <!-- ===== Teacher ===== -->
+  <section id="teacherPane" role="tabpanel" aria-labelledby="tabTeacher">
+    <div id="gate" class="card" role="group" aria-labelledby="gateTitle">
+      <h2 id="gateTitle">הלוח פתוח רק למבוגר</h2>
+      <p class="note">שאלה קצרה כדי שילדים לא ייכנסו בטעות. זו לא סיסמה.</p>
+      <label for="gateAnswer" id="gateQ">כמה זה ?</label>
+      <input id="gateAnswer" inputmode="numeric" autocomplete="off">
+      <div class="row"><button type="button" id="gateOk">פתיחת הלוח</button></div>
+      <p id="gateMsg" class="status err" role="status" aria-live="polite"></p>
+    </div>
+
+    <div id="board" class="hidden">
+      <div class="card no-print">
+        <h2>הכיתה</h2>
+        <div class="row">
+          <div>
+            <label for="classPick">כיתה במכשיר הזה</label>
+            <select id="classPick"></select>
+          </div>
+          <div>
+            <label for="newClass">או כיתה חדשה (קוד כיתה)</label>
+            <input id="newClass" maxlength="24" autocomplete="off" placeholder="למשל ג2-שילוב">
+          </div>
+          <button type="button" id="newClassBtn" class="secondary">פתיחה</button>
+        </div>
+        <p class="note">קוד הכיתה מפריד בין כיתות במכשיר הזה. כדאי קוד בלי שם בית הספר.</p>
+      </div>
+
+      <div class="card no-print" id="importCard">
+        <h2>קליטת התקדמות מתלמיד/ה</h2>
+        <p class="note">הדביקו את הקוד שהתלמיד/ה שלח/ה (מתחיל ב־MM2), או בחרו את הקובץ ששלח/ה. אפשר לקלוט את אותו קוד שוב בלי חשש: שום דבר לא יוכפל.</p>
+        <label for="importText">קוד מהתלמיד/ה</label>
+        <textarea id="importText" spellcheck="false" autocomplete="off" placeholder="MM2…"></textarea>
+        <div class="row">
+          <button type="button" id="importBtn">קליטה</button>
+          <label class="btn secondary" for="importFile" style="margin:0">בחירת קובץ…</label>
+          <input id="importFile" type="file" accept=".json,.txt,application/json,text/plain" class="sr-only">
+        </div>
+        <p id="importMsg" class="status" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="tabs no-print" role="tablist" aria-label="תצוגת הלוח">
+        <button type="button" role="tab" id="viewStudentsBtn" aria-controls="viewStudents" aria-selected="true">לפי תלמיד/ה</button>
+        <button type="button" role="tab" id="viewTopicsBtn" aria-controls="viewTopics" aria-selected="false">לפי נושא</button>
+      </div>
+
+      <div id="empty" class="card empty hidden">
+        <h2>עוד אין תלמידים בכיתה <span id="emptyClass"></span></h2>
+        <p>כך מוסיפים תלמידים מכל מכשיר:</p>
+        <ol>
+          <li>התלמיד/ה פותח/ת את MelodyMath במכשיר שלו/ה, כותב/ת את קוד הכיתה ושם פרטי או כינוי, ומתרגל/ת.</li>
+          <li>בדף הזה, בלשונית «אני תלמיד/ה: שליחה למורה», לוחצים «יצירת קוד למורה» ושולחים את הקוד (העתקה, קובץ או QR).</li>
+          <li>כאן, בתיבה «קליטת התקדמות», מדביקים את הקוד ולוחצים «קליטה».</li>
+        </ol>
+        <details>
+          <summary>או להוסיף תלמיד/ה ידנית עכשיו</summary>
+          <div class="row">
+            <div><label for="addName">שם פרטי או כינוי</label><input id="addName" maxlength="24" autocomplete="off"></div>
+            <button type="button" id="addBtn" class="secondary">הוספה</button>
+          </div>
+          <p id="addMsg" class="status" role="status" aria-live="polite"></p>
+        </details>
+      </div>
+
+      <section id="viewStudents" role="tabpanel" aria-labelledby="viewStudentsBtn">
+        <div id="students" class="grid"></div>
+      </section>
+      <section id="viewTopics" role="tabpanel" aria-labelledby="viewTopicsBtn" class="hidden">
+        <div class="card">
+          <h2>לפי נושא</h2>
+          <div class="table-wrap"><table id="topics"><thead><tr><th scope="col">נושא</th><th scope="col">תלמידים שתרגלו</th><th scope="col">נכונות בכיתה</th><th scope="col">פער אצל</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+      <p class="note" id="gapRule"></p>
+
+      <div id="taskDialog" class="card hidden" role="dialog" aria-modal="false" aria-labelledby="taskTitle">
+        <h2 id="taskTitle">משימה ל־<span id="taskFor"></span></h2>
+        <label for="taskText">מה לתרגל</label>
+        <input id="taskText" maxlength="120" autocomplete="off" placeholder="למשל: 10 תרגילי חיסור עד 10">
+        <label for="taskTopic">נושא (רשות)</label>
+        <select id="taskTopic"></select>
+        <div class="row">
+          <button type="button" id="taskSave">שמירת המשימה</button>
+          <button type="button" id="taskCancel" class="ghost">ביטול</button>
+        </div>
+        <div id="taskShare" class="hidden">
+          <p class="note">כדי שהמשימה תגיע למכשיר של התלמיד/ה: שלחו את הקוד הזה. התלמיד/ה מדביק/ה אותו בלשונית «אני תלמיד/ה». הקוד מכיל רק את המשימות של התלמיד/ה הזה/ו.</p>
+          <label for="taskCode">קוד משימות</label>
+          <textarea id="taskCode" readonly spellcheck="false"></textarea>
+          <div class="row"><button type="button" id="taskCopy" class="secondary">העתקה</button><button type="button" id="taskDone" class="ghost">סגירה</button></div>
+          <div id="taskQr" class="qr"></div>
+        </div>
+        <p id="taskMsg" class="status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Student ===== -->
+  <section id="studentPane" role="tabpanel" aria-labelledby="tabStudent" class="hidden">
+    <div class="card">
+      <h2>שליחת ההתקדמות שלי למורה</h2>
+      <div id="meKnown" class="hidden"><p>אני <b id="meName"></b> מכיתה <b id="meClass"></b>. <button type="button" id="meChange" class="ghost">לא אני</button></p></div>
+      <div id="meForm">
+        <div class="row">
+          <div><label for="meClassInput">קוד הכיתה (מהמורה)</label><input id="meClassInput" maxlength="24" autocomplete="off"></div>
+          <div><label for="meNameInput">שם פרטי או כינוי</label><input id="meNameInput" maxlength="24" autocomplete="off"></div>
+          <button type="button" id="meSave" class="secondary">שמירה</button>
+        </div>
+      </div>
+      <p class="privacy">נשלחים רק: קוד הכיתה, שם פרטי או כינוי, הכיתה (א׳–ו׳), התרגולים במכשיר הזה והמשימות. בלי שם משפחה, בלי טלפון ובלי מייל. אין שרת: הקוד עובר רק בדרך שתבחרו.</p>
+      <p id="meSummary" class="note"></p>
+      <div class="row"><button type="button" id="makeCode">יצירת קוד למורה</button></div>
+      <p id="meMsg" class="status" role="status" aria-live="polite"></p>
+      <div id="codeBox" class="hidden">
+        <label for="codeOut">הקוד שלי</label>
+        <textarea id="codeOut" readonly spellcheck="false"></textarea>
+        <div class="row">
+          <button type="button" id="codeCopy" class="secondary">העתקה</button>
+          <button type="button" id="codeFile" class="secondary">שמירה כקובץ</button>
+        </div>
+        <div id="codeQr" class="qr" aria-label="קוד QR להעברה למורה"></div>
+        <p id="codeQrNote" class="note"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>המשימות שלי</h2>
+      <ul id="myTasks" class="gaps"></ul>
+      <details>
+        <summary>קיבלתי קוד משימות מהמורה</summary>
+        <label for="tasksIn">קוד המשימות</label>
+        <textarea id="tasksIn" spellcheck="false" autocomplete="off" placeholder="MM2…"></textarea>
+        <div class="row"><button type="button" id="tasksInBtn" class="secondary">קבלת המשימות</button></div>
+      </details>
+      <p id="tasksMsg" class="status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <p class="note">הנתונים נשמרים רק במכשיר הזה (localStorage). אין חשבון, אין שרת ואין ענן. <a href="privacy.html">פרטיות</a></p>
+</main>
+
+<script src="src/lib/teacherStore.js"></script>
+<script src="src/lib/adultGate.js"></script>
+<script src="src/lib/qrSync.js"></script>
+<script src="src/lib/classBoard/classSync.js"></script>
+<script src="src/lib/classBoard/boardModel.js"></script>
+<script src="src/lib/classBoard/classPage.js"></script>
+</body>
+</html>

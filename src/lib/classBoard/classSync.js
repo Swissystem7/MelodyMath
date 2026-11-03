@@ -520,6 +520,44 @@
     return { ok: true, kind: 'tasks', classCode: classCode, names: [decoded.name], added: added, tasks: r.tasks, tasksDone: r.tasksDone, unchanged: !r.tasks && !r.tasksDone && !added };
   }
 
+  // Teacher device: a new task on one student's row. Ids are unique per
+  // device and time so the same task can travel both ways without doubling.
+  function addTask(classCode, name, spec, storage, now) {
+    const n = label(name);
+    const s = spec || {};
+    const at = num(now) || Date.now();
+    const task = cleanTask({
+      id: 't' + at.toString(36) + Math.floor(Math.random() * 1296).toString(36),
+      title: s.title,
+      skill: s.skill,
+      assignedAt: at,
+      completed: false,
+    });
+    if (!n || !task) return null;
+    const roster = store.loadRoster(classCode, storage);
+    const target = Object.prototype.hasOwnProperty.call(roster.students, n) ? roster.students[n] : null;
+    if (!target) return null;
+    if (!Array.isArray(target.assignments)) target.assignments = [];
+    target.assignments.push(task);
+    return store.saveRoster(classCode, roster, storage) ? task : null;
+  }
+
+  // Student device: "I did it".
+  function completeTask(classCode, name, id, storage, now) {
+    const roster = store.loadRoster(classCode, storage);
+    const n = label(name);
+    const target = Object.prototype.hasOwnProperty.call(roster.students, n) ? roster.students[n] : null;
+    const task = target && Array.isArray(target.assignments)
+      ? target.assignments.find(function (a) { return a && String(a.id) === String(id); }) : null;
+    if (!task) return null;
+    if (!task.completed) {
+      task.completed = true;
+      task.completedAt = num(now) || Date.now();
+      store.saveRoster(classCode, roster, storage);
+    }
+    return task;
+  }
+
   const ERRORS = {
     empty: 'לא הודבק קוד. הדביקו את הקוד שקיבלתם מהתלמיד/ה, או בחרו קובץ.',
     invalid: 'הקוד לא תקין. בדקו שהעתקתם את כולו (הוא מתחיל ב־MM2).',
@@ -572,6 +610,8 @@
     classify: classify,
     mergeStudent: mergeStudent,
     applyDecoded: applyDecoded,
+    addTask: addTask,
+    completeTask: completeTask,
     summarize: summarize,
     canZip: canZip,
   };

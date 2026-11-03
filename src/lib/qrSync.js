@@ -1,4 +1,10 @@
 // MelodyMath — Offline QR Progress Sync between devices without cloud.
+//
+// The QR encoder follows ISO/IEC 18004 (byte mode, error-correction level L,
+// mask 0, versions 1-25): finder, timing and alignment patterns, format and
+// version information, and Reed-Solomon blocks interleaved as the standard
+// requires. Text longer than version 25 holds is never drawn as a broken
+// code: qrFits() says so, and generateQrSvg() draws a short notice instead.
 /* v8 ignore next 5 */
 (function (root, factory) {
   const api = factory();
@@ -13,104 +19,205 @@
   for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
   function gfMul(x, y) { return x === 0 || y === 0 ? 0 : EXP[LOG[x] + LOG[y]]; }
 
-  function rsEncode(data, ecCount) {
-    let gen = [1];
-    for (let i = 0; i < ecCount; i++) {
-      const next = new Array(gen.length + 1).fill(0);
-      for (let j = 0; j < gen.length; j++) { next[j] ^= gfMul(gen[j], EXP[i]); next[j + 1] ^= gen[j]; }
-      gen = next;
+  const MAX_VERSION = 25;
+  // Level L, index = version (ISO/IEC 18004, error correction table).
+  const EC_PER_BLOCK = [0, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26];
+  const BLOCKS = [0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12];
+
+  // Modules left for data and error correction after every function pattern.
+  function rawModules(ver) {
+    let n = (16 * ver + 128) * ver + 64;
+    if (ver >= 2) {
+      const align = Math.floor(ver / 7) + 2;
+      n -= (25 * align - 10) * align - 55;
+      if (ver >= 7) n -= 36;
     }
-    const res = new Uint8Array(ecCount);
-    for (let i = 0; i < data.length; i++) {
-      const fb = data[i] ^ res[0];
-      for (let j = 0; j < ecCount - 1; j++) res[j] = res[j + 1] ^ gfMul(fb, gen[gen.length - 2 - j]);
-      res[ecCount - 1] = gfMul(fb, gen[0]);
-    }
-    return res;
+    return n;
   }
 
-  const V_DATA = [0, 19, 34, 55, 80, 108, 136, 156, 194], V_EC = [0, 7, 10, 15, 20, 26, 36, 40, 48], V_ALIGN = [0, 0, 18, 22, 26, 30, 34, 38, 42];
+  function dataCodewords(ver) {
+    return Math.floor(rawModules(ver) / 8) - EC_PER_BLOCK[ver] * BLOCKS[ver];
+  }
+
+  function countBits(ver) { return ver < 10 ? 8 : 16; }
+
+  // Bytes of text one version holds in byte mode.
+  function capacity(ver) {
+    return Math.floor((dataCodewords(ver) * 8 - 4 - countBits(ver)) / 8);
+  }
+
   function pickVersion(len) {
-    for (let v = 1; v < V_DATA.length; v++) if (V_DATA[v] >= len + 2) return v;
-    return V_DATA.length - 1;
+    for (let v = 1; v <= MAX_VERSION; v++) if (capacity(v) >= len) return v;
+    return 0;
+  }
+
+  // Generator polynomial of degree `deg`, highest power first, leading 1 left out.
+  function rsDivisor(deg) {
+    const out = new Array(deg).fill(0);
+    out[deg - 1] = 1;
+    let root = 1;
+    for (let i = 0; i < deg; i++) {
+      for (let j = 0; j < deg; j++) {
+        out[j] = gfMul(out[j], root);
+        if (j + 1 < deg) out[j] ^= out[j + 1];
+      }
+      root = gfMul(root, 2);
+    }
+    return out;
+  }
+
+  function rsEncode(data, deg) {
+    const div = rsDivisor(deg);
+    const res = new Array(deg).fill(0);
+    for (let i = 0; i < data.length; i++) {
+      const f = data[i] ^ res.shift();
+      res.push(0);
+      for (let j = 0; j < deg; j++) res[j] ^= gfMul(div[j], f);
+    }
+    return res;
   }
 
   function utf8Encode(s) {
     return new TextEncoder().encode(s);
   }
 
-  function createBitStream(bytes, ver) {
-    const dataLen = V_DATA[ver], bits = [];
-    const push = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); };
-    push(4, 4); push(bytes.length, 8);
+  // Mode, count, data, terminator and pad bytes: the data codewords.
+  function dataStream(bytes, ver) {
+    const total = dataCodewords(ver), bits = [];
+    const push = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+    push(4, 4); push(bytes.length, countBits(ver));
     for (let i = 0; i < bytes.length; i++) push(bytes[i], 8);
-    for (let i = 0; i < 4 && bits.length < dataLen * 8; i++) bits.push(0);
+    for (let i = 0; i < 4 && bits.length < total * 8; i++) bits.push(0);
     while (bits.length % 8 !== 0) bits.push(0);
-    const pad = [0xec, 0x11]; let p = 0;
-    while (bits.length < dataLen * 8) { push(pad[p], 8); p ^= 1; }
-    const out = new Uint8Array(dataLen);
-    for (let i = 0; i < dataLen; i++) {
+    for (let p = 0xec; bits.length < total * 8; p ^= 0xec ^ 0x11) push(p, 8);
+    const out = [];
+    for (let i = 0; i < total; i++) {
       let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i * 8 + j];
-      out[i] = b;
+      out.push(b);
     }
     return out;
   }
 
-  function buildMatrix(bytes, ver) {
-    const size = 17 + 4 * ver, m = Array.from({ length: size }, () => new Int8Array(size).fill(-1));
-    const set = (r, c, val) => { if (r >= 0 && r < size && c >= 0 && c < size) m[r][c] = val ? 1 : 0; };
+  // Split into blocks, add error correction to each, interleave.
+  function interleave(data, ver) {
+    const nb = BLOCKS[ver], ec = EC_PER_BLOCK[ver];
+    const raw = Math.floor(rawModules(ver) / 8);
+    const shortLen = Math.floor(raw / nb), numShort = nb - raw % nb;
+    const blocks = [];
+    for (let i = 0, k = 0; i < nb; i++) {
+      const len = shortLen - ec + (i < numShort ? 0 : 1);
+      const d = data.slice(k, k + len);
+      k += len;
+      blocks.push({ d: d, e: rsEncode(d, ec) });
+    }
+    const out = [];
+    for (let i = 0; i <= shortLen - ec; i++) blocks.forEach((b) => { if (i < b.d.length) out.push(b.d[i]); });
+    for (let i = 0; i < ec; i++) blocks.forEach((b) => out.push(b.e[i]));
+    return out;
+  }
+
+  function alignmentPositions(ver) {
+    if (ver === 1) return [];
+    const n = Math.floor(ver / 7) + 2, size = 17 + 4 * ver;
+    const step = Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2;
+    const out = [6];
+    for (let pos = size - 7; out.length < n; pos -= step) out.splice(1, 0, pos);
+    return out;
+  }
+
+  // Level L (01) and mask 0 (000), BCH(15,5), XOR 0x5412.
+  function formatBits() {
+    const data = 1 << 3;
+    let rem = data;
+    for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+    return ((data << 10) | rem) ^ 0x5412;
+  }
+
+  // BCH(18,6) for versions 7 and up.
+  function versionBits(ver) {
+    let rem = ver;
+    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1f25);
+    return (ver << 12) | rem;
+  }
+
+  // m[row][col]: 1 dark, 0 light. fn[row][col]: 1 on a function pattern.
+  function buildMatrix(codewords, ver) {
+    const size = 17 + 4 * ver;
+    const m = Array.from({ length: size }, () => new Uint8Array(size));
+    const fn = Array.from({ length: size }, () => new Uint8Array(size));
+    const set = (r, c, val) => { if (r >= 0 && r < size && c >= 0 && c < size) { m[r][c] = val ? 1 : 0; fn[r][c] = 1; } };
+    for (let i = 0; i < size; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    // Finder: dark ring, light ring, dark 3x3 centre, light separator.
     const finder = (r, c) => {
-      for (let y = -1; y <= 7; y++) {
-        for (let x = -1; x <= 7; x++) {
-          if (y === -1 || y === 7 || x === -1 || x === 7 || (Math.abs(y - 3) === 1 && Math.abs(x - 3) <= 1) || (Math.abs(x - 3) === 1 && Math.abs(y - 3) <= 1)) set(r + y, c + x, 0);
-          else set(r + y, c + x, 1);
+      for (let y = -4; y <= 4; y++) {
+        for (let x = -4; x <= 4; x++) {
+          const d = Math.max(Math.abs(y), Math.abs(x));
+          set(r + y, c + x, d !== 2 && d !== 4);
         }
       }
     };
-    finder(0, 0); finder(0, size - 7); finder(size - 7, 0);
-    for (let i = 8; i < size - 8; i++) {
-      if (m[6][i] === -1) set(6, i, i % 2 === 0 ? 1 : 0);
-      if (m[i][6] === -1) set(i, 6, i % 2 === 0 ? 1 : 0);
+    finder(3, 3); finder(3, size - 4); finder(size - 4, 3);
+    const al = alignmentPositions(ver), last = al.length - 1;
+    for (let i = 0; i <= last; i++) {
+      for (let j = 0; j <= last; j++) {
+        if ((i === 0 && j === 0) || (i === 0 && j === last) || (i === last && j === 0)) continue;
+        for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) set(al[i] + y, al[j] + x, Math.max(Math.abs(y), Math.abs(x)) !== 1);
+      }
     }
-    const al = V_ALIGN[ver];
-    if (al > 0) {
-      for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) set(al + y, al + x, Math.abs(y) === 2 || Math.abs(x) === 2 || (!y && !x) ? 1 : 0);
-    }
-    const FMT = [0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0];
-    for (let i = 0; i < 6; i++) set(8, i, FMT[i]);
-    set(8, 7, FMT[6]); set(8, 8, FMT[7]); set(7, 8, FMT[8]);
-    for (let i = 9; i < 15; i++) set(14 - i, 8, FMT[i]);
-    for (let i = 0; i < 8; i++) set(size - 1 - i, 8, FMT[i]);
-    for (let i = 8; i < 15; i++) set(8, size - 15 + i, FMT[i]);
+    const f = formatBits(), bit = (v, i) => (v >>> i) & 1;
+    for (let i = 0; i <= 5; i++) set(i, 8, bit(f, i));
+    set(7, 8, bit(f, 6)); set(8, 8, bit(f, 7)); set(8, 7, bit(f, 8));
+    for (let i = 9; i < 15; i++) set(8, 14 - i, bit(f, i));
+    for (let i = 0; i < 8; i++) set(8, size - 1 - i, bit(f, i));
+    for (let i = 8; i < 15; i++) set(size - 15 + i, 8, bit(f, i));
     set(size - 8, 8, 1);
-
-    const ec = rsEncode(bytes, V_EC[ver]), full = [];
-    for (let i = 0; i < bytes.length; i++) for (let j = 7; j >= 0; j--) full.push((bytes[i] >> j) & 1);
-    for (let i = 0; i < ec.length; i++) for (let j = 7; j >= 0; j--) full.push((ec[i] >> j) & 1);
-
-    let idx = 0, up = true;
-    for (let c = size - 1; c > 0; c -= 2) {
-      if (c === 6) c--;
-      const rows = up ? Array.from({ length: size }, (_, i) => size - 1 - i) : Array.from({ length: size }, (_, i) => i);
-      for (let r of rows) {
-        for (let col = c; col >= c - 1; col--) {
-          if (m[r][col] === -1) {
-            let val = idx < full.length ? full[idx++] : 0;
-            if ((r + col) % 2 === 0) val ^= 1;
-            m[r][col] = val;
-          }
+    if (ver >= 7) {
+      const v = versionBits(ver);
+      for (let i = 0; i < 18; i++) {
+        const a = size - 11 + i % 3, b = Math.floor(i / 3);
+        set(b, a, bit(v, i)); set(a, b, bit(v, i));
+      }
+    }
+    // Zigzag placement, two columns at a time, skipping the timing column.
+    let i = 0;
+    const totalBits = codewords.length * 8;
+    for (let right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      const upward = ((right + 1) & 2) === 0;
+      for (let vert = 0; vert < size; vert++) {
+        for (let j = 0; j < 2; j++) {
+          const c = right - j, r = upward ? size - 1 - vert : vert;
+          if (fn[r][c]) continue;
+          let val = 0;
+          if (i < totalBits) { val = (codewords[i >>> 3] >>> (7 - (i & 7))) & 1; i++; }
+          if ((r + c) % 2 === 0) val ^= 1;
+          m[r][c] = val;
         }
       }
-      up = !up;
     }
     return m;
   }
 
+  function qrMatrix(text) {
+    const bytes = utf8Encode(String(text == null ? '' : text)), ver = pickVersion(bytes.length);
+    if (!ver) return null;
+    return buildMatrix(interleave(dataStream(bytes, ver), ver), ver);
+  }
+
+  function qrFits(text) {
+    return pickVersion(utf8Encode(String(text == null ? '' : text)).length) > 0;
+  }
+
   function generateQrSvg(text, opts) {
-    const o = opts || {}, m = o.margin != null ? o.margin : 2;
+    const o = opts || {}, m = o.margin != null ? o.margin : 4;
     const color = o.color || '#21183b', bg = o.background || '#ffffff';
-    const bytes = utf8Encode(String(text || '')), ver = pickVersion(bytes.length);
-    const matrix = buildMatrix(createBitStream(bytes, ver), ver), s = matrix.length, total = s + m * 2;
+    const matrix = qrMatrix(text);
+    if (!matrix) {
+      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" role="img" aria-label="הקוד ארוך מדי ל-QR" shape-rendering="crispEdges">'
+        + (bg !== 'none' ? '<rect width="240" height="60" fill="' + bg + '"/>' : '')
+        + '<text x="120" y="36" text-anchor="middle" font-size="12" fill="' + color + '">הקוד ארוך מדי ל-QR. שלחו בהעתקה או בקובץ.</text></svg>';
+    }
+    const s = matrix.length, total = s + m * 2;
     let rects = '';
     for (let r = 0; r < s; r++) {
       for (let c = 0; c < s; c++) if (matrix[r][c] === 1) rects += '<rect x="' + (c + m) + '" y="' + (r + m) + '" width="1" height="1"/>';
@@ -172,5 +279,5 @@
     return { ok: false, error: 'shape', message: 'פורמט הנתונים אינו מוכר.' };
   }
 
-  return { generateQrSvg, packStudent, packRoster, unpackPayload, importPayload, b64Encode, b64Decode };
+  return { generateQrSvg, qrFits, qrMatrix, packStudent, packRoster, unpackPayload, importPayload, b64Encode, b64Decode };
 });
