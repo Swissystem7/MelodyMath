@@ -194,5 +194,40 @@
     ],
   };
 
-  return { grade: 'א', ST: {}, items: [], music: music, sources: sources };
+  // Late items (MM-7xx stream B). New grade א׳ items live here, not in
+  // banks.js, and are NOT put in `items`: banks.js pushes `items` in the
+  // middle of its RAW list, so every item after them would get a new id and
+  // children's saved history would point at the wrong questions. Each late
+  // item instead carries its own stable key, and banks.js appends them after
+  // its last item (the hook is handed off in the stream B PR; until it lands
+  // these items do not ship). Shape, as `items` plus the key:
+  //   [skill, prompt, answer, hint, level 1-3, ST key of banks.js, { key }]
+  // The key is a number: task number × 100 + item number (MM-731 item 1 is
+  // 73101), far above any RAW index. A late item's id is `<grade>-<skill>-<key>`,
+  // so ids stay numeric like the rest. Keys never change or repeat.
+  // The music side comes from `music` above, like every other item: the
+  // primary way of the standard, by level.
+  const lateItems = [
+    // MM-731 · mm-cur-4 whole tens: basis and intermediate entry items.
+    // Newprogramgrade1.pdf p. 8 «חיבור וחיסור בעשרות שלמות» (MM-501, PR #949;
+    // gap G9 in docs/MM-700/curriculum-gaps.md, PR #951). The 9 items in
+    // banks.js are all challenge level, so the topic had no way in. Small
+    // tens first (to 50), then to 100. Solved with accentTens (TENS above):
+    // one accented beat per ten. No counted-beats cue, so the topic keeps
+    // that one way.
+    ['addition', 'תוף מדגיש כל עשירית: 10 פעימות ועוד 10 פעימות. כמה פעימות בסך הכול?', 20, 'עשרת אחת ועוד עשרת אחת', 1, 'TENS', { key: 73101 }],
+    ['addition', '2 תיבות של 10 פעימות ועוד תיבה אחת של 10 פעימות. כמה פעימות?', 30, '2 עשרות ועוד עשרת אחת', 1, 'TENS', { key: 73102 }],
+    ['addition', '20 + 20 = ?', 40, '2 הדגשות ועוד 2 הדגשות', 1, 'TENS', { key: 73103 }],
+    ['subtraction', 'ניגנו 30 פעימות, ותיבה אחת של 10 פעימות שתקה. כמה פעימות נשמעו?', 20, '3 עשרות פחות עשרת אחת', 1, 'TENS', { key: 73104 }],
+    ['subtraction', '40 − 10 = ?', 30, '4 הדגשות פחות הדגשה אחת', 1, 'TENS', { key: 73105 }],
+    ['subtraction', '50 − 20 = ?', 30, '5 עשרות פחות 2 עשרות', 1, 'TENS', { key: 73106 }],
+    ['addition', '40 + 50 = ?', 90, '4 עשרות ועוד 5 עשרות', 2, 'TENS', { key: 73107 }],
+    ['addition', '3 תיבות של 10 פעימות ועוד 4 תיבות של 10 פעימות. כמה פעימות?', 70, '3 עשרות ועוד 4 עשרות', 2, 'TENS', { key: 73108 }],
+    ['addition', '30 + 30 = ?', 60, '3 הדגשות ועוד 3 הדגשות', 2, 'TENS', { key: 73109 }],
+    ['subtraction', 'ניגנו 90 פעימות, ו־5 תיבות של 10 פעימות שתקו. כמה פעימות נשמעו?', 40, '9 עשרות פחות 5 עשרות', 2, 'TENS', { key: 73110 }],
+    ['subtraction', '60 − 40 = ?', 20, '6 הדגשות פחות 4 הדגשות', 2, 'TENS', { key: 73111 }],
+    ['subtraction', '100 − 30 = ?', 70, '10 עשרות פחות 3 עשרות', 2, 'TENS', { key: 73112 }],
+  ];
+
+  return { grade: 'א', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
 });
