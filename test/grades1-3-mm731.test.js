@@ -114,3 +114,11 @@ test('MM-731 items ship without moving any existing id or the diagnostic', { tod
     ['א-addition-35', 'א-addition-50', 'א-subtraction-73', 'א-subtraction-86']);
   assert.ok(banks.allItems().some((it) => it.id === 'ב-place_value-1295'), 'the last item before the late ones keeps its id');
 });
+
+test('prompts and hints stay within the 15-word card limit (#665)', () => {
+  const { countWords } = require('../src/lib/exercises/patternAndWorkedExample.js');
+  late.forEach((x) => {
+    assert.ok(countWords(x[1]) <= 15, x[6].key + ' prompt ' + countWords(x[1]));
+    assert.ok(countWords(x[3]) <= 15, x[6].key + ' hint ' + countWords(x[3]));
+  });
+});
