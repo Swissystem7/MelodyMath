@@ -41,7 +41,7 @@ test('the README names the secrets and the repo stores no Doppler value', () => 
   assert.doesNotMatch(blob, /dp\.(?:st|ct)\./);
   const wf = path.join(root, '.github', 'workflows');
   if (fs.existsSync(wf)) {
-    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
+    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml', 'plan-gate.yml', 'plan-router.yml'], 'only the CI pipeline and the factory plan workflows are allowed');
   }
   assert.equal(fs.existsSync(path.join(root, 'doppler.yaml')), false);
 });
