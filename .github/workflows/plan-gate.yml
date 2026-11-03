@@ -20,7 +20,7 @@ jobs:
           BODY: ${{ github.event.pull_request.body }}
         run: |
           plan=$(printf '%s\n' "$BODY" | awk '/^## Plan[[:space:]]*$/{f=1;next} /^## /{f=0} f' | sed 's/<!--.*-->//' | grep -v '^[[:space:]]*$' || true)
-          for field in "Goal:" "Acceptance criteria" "Owner"; do
+          for field in "Goal:" "Acceptance criteria" "Owner" "Reviewer"; do
             line=$(printf '%s\n' "$plan" | grep -m1 "$field" || true)
             if [ -z "$line" ]; then echo "::error::Plan is missing '$field'"; exit 1; fi
           done

@@ -12,7 +12,7 @@ Continuously improve this project: correctness, tests, performance, accessibilit
 2. Before writing code, open a **Draft PR** on a `copilot/` branch linked with `Closes #N`, with only the `## Plan` section of the PR template filled in. That section is the one living plan: when a finding changes it, edit it there and add a line under `## Plan changes`.
 3. Make the smallest change that solves it.
 4. Run the checks in `.github/copilot-instructions.md` and paste results in the PR.
-5. Independent review: the reviewer comments findings and never edits the code. Fix each finding yourself, reply on its thread and resolve it. If a finding changes the plan, update `## Plan` first.
+5. Independent review: the reviewer is a different agent than the builder (Copilot code review is an extra check, not the reviewer). The reviewer comments findings and never edits the code. A finding that changes the plan is written as a comment line `PLAN-CHANGE: <what> | IMPACT: <components> | OWNER: @<agent> | REQUIRES: <check>`; the Plan Router logs it and tags the owner. When tagged, update `## Plan` if needed, fix, reply on the finding's thread and resolve it.
 6. Comment on the issue with a summary and the PR link. Never merge and never push to the default branch.
 
 ## Self-improvement

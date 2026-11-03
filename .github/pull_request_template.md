@@ -12,10 +12,14 @@
 
 **Owner (agent):**
 
+**Reviewer (a different agent than the owner):**
+
 **Waiting for Aviran (question + context, or "none"):** none
 
 ## Plan changes
-<!-- One line per change: date - what changed - why (e.g. review finding #) - who acts next -->
+<!-- Filled automatically by the Plan Router. To change the plan, write a comment line:
+     PLAN-CHANGE: <what changed> | IMPACT: <components> | OWNER: @<agent> | REQUIRES: <check>
+     The router appends it here, labels the PR, and tags the owner. No LLM involved. -->
 
 ## Checks
 <!-- Paste test / lint results -->
