@@ -87,6 +87,26 @@ async function answer(page, digits) {
   return page.getByTestId('feedback');
 }
 
+// MM-601: the fraction rhythm exercise is answered by picking a rhythm, not typing.
+async function answerRhythm(page, choice) {
+  await page.getByTestId('choice-' + choice).click();
+  await expect(page.getByTestId('choice-' + choice)).toHaveAttribute('aria-pressed', 'true');
+  await page.getByTestId('check').click();
+  return page.getByTestId('feedback');
+}
+
+// Test hook of pilot/js/music.js: every planned play, with its notes.
+async function musicPlays(page) {
+  return page.evaluate(() => (window.__mmPilotMusic ? window.__mmPilotMusic.plays : []));
+}
+
+async function lastPlay(page, id) {
+  const plays = await musicPlays(page);
+  const hit = plays.filter((p) => !id || p.id === id).pop();
+  expect(hit, 'a play ' + (id || '') + ' was scheduled').toBeTruthy();
+  return hit;
+}
+
 async function expectQuestion(page, qid) {
   await expect(page.getByTestId('view-exercise')).toHaveAttribute('data-qid', qid);
 }
@@ -108,4 +128,4 @@ async function expectMobileFriendly(page) {
   expect(r.small, 'touch targets under 44px').toEqual([]);
 }
 
-module.exports = { PAGE, account, isolate, stubAudio, openDemo, signIn, signOut, type, answer, expectQuestion, expectMobileFriendly };
+module.exports = { PAGE, account, isolate, stubAudio, openDemo, signIn, signOut, type, answer, answerRhythm, musicPlays, lastPlay, expectQuestion, expectMobileFriendly };
