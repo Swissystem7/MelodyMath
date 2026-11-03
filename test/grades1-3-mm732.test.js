@@ -2,8 +2,8 @@
 // to at least 12 items each, every level present (gap G2 in
 // docs/MM-700/curriculum-gaps.md, PR #951). Official side: Newprogramgrade1.pdf
 // p. 11 (length) and p. 3 (money), via MM-501 (PR #949) and curriculum.js.
-// The items live in curriculum/grade1.js `lateItems` and ship once banks.js
-// appends late items (handoff in the PR); until then the ships tests are todo.
+// The items live in curriculum/grade1.js `lateItems` and ship through the
+// banks.js late-items hook (appended last, fixed keys).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
@@ -96,11 +96,10 @@ test('one primary music way per topic: cmNote (M3) for length, coinGroups (M2) f
   late.forEach((x) => assert.ok(!x[6].hear, x[6].key + ': no counted-beats cue'));
 });
 
-// ---------- once banks.js appends late items (handoff to the banks.js owner) ----------
+// ---------- shipped through the banks.js late-items hook ----------
 const shipped = banks.allItems().filter((it) => it.grade === 'א' && KEYS.includes(+it.id.split('-').pop()));
-const waiting = shipped.length ? false : 'awaiting the banks.js late-items hook (stream B PR handoff)';
 
-test('MM-732 items ship: mm-cur-9 and mm-cur-11 have ≥12 items with every level present', { todo: waiting }, () => {
+test('MM-732 items ship: mm-cur-9 and mm-cur-11 have ≥12 items with every level present', () => {
   assert.equal(shipped.length, 12);
   ['mm-cur-9', 'mm-cur-11'].forEach((id) => {
     const l = bankLevels(id);

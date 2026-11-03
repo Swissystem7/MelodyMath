@@ -3,8 +3,7 @@
 // (gap G9 in docs/MM-700/curriculum-gaps.md, PR #951). Official side:
 // Newprogramgrade1.pdf p. 8 «חיבור וחיסור בעשרות שלמות», via MM-501 (PR #949)
 // and curriculum.js. The items live in curriculum/grade1.js `lateItems`; they
-// ship once banks.js appends late items (handoff in the PR). Until then the
-// "ships" tests are todo, and the data tests below already guard the items.
+// ship through the banks.js late-items hook (appended last, fixed keys).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const banks = require('../src/lib/banks');
@@ -86,11 +85,10 @@ test('whole tens keeps its place in the progression: after the hundred chart, be
   assert.ok(links.buildsTo.includes('mm-cur-14'));
 });
 
-// ---------- once banks.js appends late items (handoff to the banks.js owner) ----------
+// ---------- shipped through the banks.js late-items hook ----------
 const shipped = banks.allItems().filter((it) => it.grade === 'א' && KEYS.includes(+it.id.split('-').pop()));
-const waiting = shipped.length ? false : 'awaiting the banks.js late-items hook (stream B PR handoff)';
 
-test('MM-731 items ship: mm-cur-4 has ≥4 basis and ≥4 intermediate items and keeps its 9 challenge items', { todo: waiting }, () => {
+test('MM-731 items ship: mm-cur-4 has ≥4 basis and ≥4 intermediate items and keeps its 9 challenge items', () => {
   const topic = cur.itemsForTopic('mm-cur-4', banks.allItems());
   const n = (lv) => topic.filter((it) => it.level === lv).length;
   assert.equal(shipped.length, 12);
@@ -104,7 +102,7 @@ test('MM-731 items ship: mm-cur-4 has ≥4 basis and ≥4 intermediate items and
   });
 });
 
-test('MM-731 items ship without moving any existing id or the diagnostic', { todo: waiting }, () => {
+test('MM-731 items ship without moving any existing id or the diagnostic', () => {
   assert.equal(shipped.length, 12);
   assert.deepEqual(cur.itemsForTopic('mm-cur-4', banks.allItems()).filter((it) => it.level === 3).map((it) => it.id), [
     'א-addition-68', 'א-addition-69', 'א-addition-70', 'א-addition-71', 'א-addition-72',

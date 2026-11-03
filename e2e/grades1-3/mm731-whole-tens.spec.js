@@ -5,8 +5,6 @@
 //
 // Part of the shared suite (AGENTS.md: Playwright is never in package.json):
 //   npx --yes playwright@1.49 test --config e2e/playwright.config.js e2e/grades1-3
-// The items ship once banks.js appends grade-file late items (handoff in the
-// stream B PR); until then this test skips itself and says why.
 'use strict';
 const { test, expect } = require('@playwright/test');
 
@@ -27,8 +25,6 @@ test('[MM-731] grade 1 reaches and answers a basis whole-tens item', async ({ pa
   page.on('pageerror', (e) => errors.push(String(e)));
 
   await page.goto('/program.html?grade=' + encodeURIComponent('א'));
-  const ships = await page.evaluate(() => allItems().some((it) => it.id === 'א-addition-73101'));
-  test.skip(!ships, 'MM-731 items wait for the banks.js late-items hook (stream B handoff)');
   const row = page.locator('li.topic', { has: page.locator('h3', { hasText: ROW }) });
   await expect(row).toHaveCount(1);
   const go = row.locator('a.go', { hasText: 'חיבור' });

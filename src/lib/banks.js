@@ -2164,6 +2164,23 @@
     I('ב', 'place_value', 'האם 6 פעימות הן מספר זוגי או אי-זוגי?', 'זוגי', '6 מתחלק לזוגות שווים', { standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 1, kind: 'even_odd' }),
     I('ב', 'place_value', 'האם 7 פעימות הן מספר זוגי או אי-זוגי?', 'אי-זוגי', 'ב־7 נשארת פעימה אחת ללא זוג', { standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 1, kind: 'even_odd' })
   );
+  // Late items of the grade files (MM-7xx): appended after every other item,
+  // so no id moves. Each carries a stable key, used in its id instead of the
+  // RAW index (fixed keys are ≥ 10000, task × 100 + n). Shape: as `items`, plus
+  // { key } and optional widget data. Approved on #955; ids proved unchanged by
+  // test/grades1-3-idStability.test.js.
+  GRADE_FILES.forEach(function (f) {
+    if (!f || !Array.isArray(f.lateItems)) return;
+    f.lateItems.forEach(function (x) {
+      const e = x[6] || {};
+      const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
+        : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
+      const raw = I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4],
+        widget: e.widget, chart: e.chart, ruler: e.ruler, clock: e.clock, hear: e.hear });
+      raw.key = e.key;
+      RAW.push(raw);
+    });
+  });
   musicForLate();
 
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
@@ -2342,7 +2359,7 @@
   RAW.forEach(function (raw, i) {
     if (!isShippable(raw)) return;
     const it = {
-      id: raw.grade + '-' + raw.skill + '-' + i,
+      id: raw.grade + '-' + raw.skill + '-' + (raw.key || i),
       skill: raw.skill,
       he: skillHe(raw.skill),
       grade: raw.grade,
