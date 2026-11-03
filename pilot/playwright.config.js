@@ -1,6 +1,9 @@
 // MM-600 pilot — Playwright config, self-contained in pilot/ (the repo's own
-// package.json, e2e/ and CI are untouched). Run:
+// e2e/ and CI are untouched; the root package.json only forwards to it). Run:
 //   cd pilot && npm ci && npx playwright install chromium && npm test
+//   (or, from the repo root after that setup: npm run test:pilot)
+// Service workers are blocked by default so page.route sees every request;
+// e2e/homeLinkOffline.spec.js allows them for its offline test.
 // Deterministic: one worker, no retries, a local server on 127.0.0.1, and
 // every request to any other host is aborted by the tests (page.route).
 'use strict';
@@ -19,7 +22,7 @@ module.exports = {
   retries: 0,
   forbidOnly: !!process.env.CI,
   reporter: [['list']],
-  use: { baseURL: BASE, locale: 'he-IL', timezoneId: 'Asia/Jerusalem', screenshot: 'only-on-failure', trace: 'off' },
+  use: { baseURL: BASE, serviceWorkers: 'block', locale: 'he-IL', timezoneId: 'Asia/Jerusalem', screenshot: 'only-on-failure', trace: 'off' },
   webServer: {
     command: 'node serve.js',
     cwd: __dirname,

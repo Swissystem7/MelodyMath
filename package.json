@@ -4,6 +4,7 @@
   "description": "Hebrew math practice and graph sonification — no install, no backend",
   "scripts": {
     "test": "node --test",
-    "coverage": "node tools/codecov.js"
+    "coverage": "node tools/codecov.js",
+    "test:pilot": "npm --prefix pilot test"
   }
 }

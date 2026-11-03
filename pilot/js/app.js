@@ -506,4 +506,15 @@
   if (acc) { state.account = acc; state.view = signedInView(acc); }
   render();
   document.documentElement.setAttribute('data-ready', '1');
+
+  // Offline after the first visit: register the site's own service worker
+  // (../sw.js, scope = site root, the same one every main page registers).
+  // It precaches the pilot files, so a teacher who opened the demo once can
+  // open it again without wifi. Needs https or localhost; a file:// page or a
+  // browser without service workers just keeps working online.
+  try {
+    if (G.navigator && G.navigator.serviceWorker && G.isSecureContext) {
+      G.navigator.serviceWorker.register('../sw.js').catch(function () {});
+    }
+  } catch (e) { /* no offline copy; the demo itself is unaffected */ }
 })();
