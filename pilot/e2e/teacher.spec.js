@@ -63,7 +63,7 @@ test.describe('teacher assign + report', () => {
   });
 
   test('reset clears the demo data on this device only after a second tap', async ({ page, baseURL }) => {
-    await h.openDemo(page, baseURL);
+    const blocked = await h.openDemo(page, baseURL);
     await h.signIn(page, 'teacher');
     await page.getByTestId('assign-submit').click();
     await expect(page.getByTestId('assignment-row')).toHaveCount(1);
@@ -73,5 +73,6 @@ test.describe('teacher assign + report', () => {
     await expect(page.getByTestId('view-login')).toBeVisible();
     await h.signIn(page, 'teacher');
     await expect(page.getByTestId('no-assignments')).toBeVisible();
+    expect(blocked).toEqual([]);
   });
 });
