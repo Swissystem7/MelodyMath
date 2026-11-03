@@ -155,5 +155,17 @@
   music.MUL_COMPARE = music.TIMES_MORE;
   music.NUM_10K = music.NUM10K;
 
-  return { grade: 'ג', ST: {}, items: [], music: music, sources: sources };
+  // Late items (MM-7xx stream B): appended last by banks.js with fixed keys
+  // (task × 100 + n), so no existing id moves. Shape as in grade1.js.
+  const lateItems = [
+    // MM-739 · mm-cur-29 shekels and agorot, 8 to 12 items (gap G2, PR #951).
+    // Newprogramgrade3.pdf p. 1 via MM-501 (PR #949). Solved with
+    // agorotTenGroups (M2), MONEY's one primary way above.
+    ['measurement', 'כמה אגורות יש ב־3 ₪?', 300, 'בכל שקל 100 אגורות', 1, 'MONEY', { key: 73901 }],
+    ['measurement', 'שני מטבעות של 50 אגורות ומטבע של 1 ₪. כמה ₪ ביחד?', 2, 'שני חצאי שקל הם שקל', 2, 'MONEY', { key: 73902 }],
+    ['measurement', 'קנינו עט ב־4 ₪ ו־50 אגורות ושילמנו ב־10 ₪. כמה אגורות עודף?', 550, 'ההפרש הוא 5 ₪ ו־50 אגורות', 3, 'MONEY', { key: 73903 }],
+    ['measurement', 'שלוש מחברות ב־2 ₪ ו־50 אגורות כל אחת. כמה אגורות בסך הכול?', 750, 'כל מחברת היא 250 אגורות', 3, 'MONEY', { key: 73904 }],
+  ];
+
+  return { grade: 'ג', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
 });
