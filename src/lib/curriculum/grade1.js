@@ -246,6 +246,17 @@
     ['measurement', 'כמה מטבעות של 5 ₪ שווים למטבע אחד של 10 ₪?', 2, 'כמה קבוצות של חמש יש בעשר', 2, 'MONEY', { key: 73210 }],
     ['measurement', 'מטבע של 10 ₪, מטבע של 5 ₪ ומטבע של 1 ₪. כמה ₪ ביחד?', 16, 'קודם המטבע הגדול, ואז ממשיכים לספור', 3, 'MONEY', { key: 73211 }],
     ['measurement', 'קנינו מדבקה ב־6 ₪ ושילמנו במטבע של 10 ₪. כמה ₪ עודף?', 4, '10 פחות 6', 3, 'MONEY', { key: 73212 }],
+    // MM-733 · mm-cur-10 whole-hour clock, 6 to 12 items (2 per level added;
+    // gap G2, PR #951). Newprogramgrade1.pdf p. 12 «קריאת שעון בשעות שלמות»
+    // (MM-501, PR #949). Solved with hourAccents (M2), CLOCK's one primary way.
+    // The clock widget prints the time it shows (clock-read), so no new item
+    // asks for that time: each asks one or more whole hours before or after.
+    ['measurement', 'מה תהיה השעה בעוד שעה אחת?', 4, 'המחוג הקטן זז מספר אחד קדימה', 1, 'CLOCK', { key: 73301, widget: 'clock', clock: { hour: 3 } }],
+    ['measurement', 'מה הייתה השעה לפני שעה אחת?', 7, 'המחוג הקטן חוזר מספר אחד אחורה', 1, 'CLOCK', { key: 73302, widget: 'clock', clock: { hour: 8 } }],
+    ['measurement', 'השיעור מתחיל בעוד 2 שעות. באיזו שעה הוא מתחיל?', 8, 'סופרים 2 מספרים קדימה בשעון', 2, 'CLOCK', { key: 73303, widget: 'clock', clock: { hour: 6 } }],
+    ['measurement', 'מה תהיה השעה בעוד שעתיים?', 1, 'אחרי 12 השעון מתחיל מחדש', 2, 'CLOCK', { key: 73304, widget: 'clock', clock: { hour: 11 } }],
+    ['measurement', 'ההופעה נגמרה בשעה שבשעון. היא התחילה 3 שעות קודם. באיזו שעה התחילה?', 6, 'סופרים 3 מספרים אחורה בשעון', 3, 'CLOCK', { key: 73305, widget: 'clock', clock: { hour: 9 } }],
+    ['measurement', 'החזרה מתחילה בשעה שבשעון ונגמרת בשעה 1. כמה שעות היא נמשכת?', 3, 'סופרים מהשעה שבשעון עד 1, דרך 12', 3, 'CLOCK', { key: 73306, widget: 'clock', clock: { hour: 10 } }],
   ];
 
   return { grade: 'א', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
