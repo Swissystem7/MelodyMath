@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MelodyMath · הדגמת פיילוט</title>
+<!-- MM-602: every file below carries the same ?v= (cache-busting). Change it in all of them
+     and in the pilot entries of sw.js together; test/pilotCacheBust.test.js checks they match. -->
+<link rel="stylesheet" href="pilot.css?v=cf3fe12">
+</head>
+<body>
+<a class="mm-skip" href="#mm-app">דילוג לתוכן</a>
+<div class="mm-demo-banner" role="note">הדגמה לפיילוט (MM-600) · כניסת הדגמה בצד הלקוח · הנתונים נשמרים רק במכשיר הזה</div>
+<main id="mm-app" class="mm-shell" tabindex="-1">
+  <noscript><p>ההדגמה צריכה JavaScript.</p></noscript>
+</main>
+<!-- Existing MelodyMath code, loaded read-only (not copied, not changed):
+     the shared music engine, the instrument voices and the official curriculum rows. -->
+<script src="../src/lib/musicEngine.js?v=cf3fe12"></script>
+<script src="../src/lib/instrumentVoices.js?v=cf3fe12"></script>
+<script src="../src/lib/curriculum.js?v=cf3fe12"></script>
+<!-- The pilot demo itself. -->
+<script src="seed/demo-accounts.js?v=cf3fe12"></script>
+<script src="js/unit.js?v=cf3fe12"></script>
+<script src="js/music.js?v=cf3fe12"></script>
+<script src="js/research.js?v=cf3fe12"></script>
+<script src="js/store.js?v=cf3fe12"></script>
+<script src="js/app.js?v=cf3fe12"></script>
+</body>
+</html>

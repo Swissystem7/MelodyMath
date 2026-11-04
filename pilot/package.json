@@ -1,0 +1,13 @@
+{
+  "name": "melodymath-pilot-demo",
+  "private": true,
+  "description": "MM-600 pilot demo: self-contained Playwright E2E setup (kept apart from the repo's dependency-free npm test).",
+  "scripts": {
+    "serve": "node serve.js",
+    "test": "playwright test --config playwright.config.js",
+    "capture": "node tools/capture.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

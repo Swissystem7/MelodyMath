@@ -26,7 +26,8 @@ test('the service worker precaches files that exist on disk', () => {
   assert.ok(listed.includes('src/lib/tabs.js'));
   listed.forEach((rel) => {
     if (rel === '' || rel === './') return;
-    assert.ok(fs.existsSync(path.join(root, rel)), rel);
+    // MM-602: pilot entries carry a cache-busting ?v= (the file on disk has no query).
+    assert.ok(fs.existsSync(path.join(root, rel.split('?')[0])), rel);
   });
 });
 
@@ -96,4 +97,21 @@ test('every script a page loads is in the precache list', () => {
       assert.ok(listed.has(m[1]), page + ' loads ' + m[1] + ' which sw.js does not precache');
     });
   });
+});
+
+test('the MM-600 pilot demo is precached with every file it loads, and the home page links to it', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const listed = new Set([...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]));
+  assert.ok(listed.has('pilot/index.html'), 'sw.js does not precache pilot/index.html');
+  const html = fs.readFileSync(path.join(root, 'pilot', 'index.html'), 'utf8');
+  const refs = [...html.matchAll(/<script src="([^"]+)"/g), ...html.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(refs.length >= 5, 'expected the pilot scripts and stylesheet');
+  refs.forEach((ref) => {
+    // MM-602: refs are versioned (file?v=...); sw.js precaches that exact URL.
+    const rel = path.posix.normalize('pilot/' + ref);
+    assert.ok(fs.existsSync(path.join(root, rel.split('?')[0])), ref + ' is missing on disk');
+    assert.ok(listed.has(rel), 'pilot/index.html loads ' + rel + ' which sw.js does not precache');
+  });
+  const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.match(index, /<a href="pilot\/index\.html"[^>]*>הדגמת פיילוט למורים<\/a>/);
 });
