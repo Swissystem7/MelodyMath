@@ -48,8 +48,10 @@ test.describe('offline after the first visit', () => {
     // First (online) visit: the service worker installs, precaches and takes control.
     await expect.poll(() => page.evaluate(async () => {
       if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return 'no controller';
-      const keys = ['pilot/index.html', 'pilot/pilot.css', 'pilot/js/app.js', 'pilot/js/store.js',
-        'pilot/js/unit.js', 'pilot/seed/demo-accounts.js', 'src/lib/musicEngine.js'];
+      // MM-602: the files are cached under the versioned URLs pilot/index.html loads.
+      const keys = ['pilot/index.html'].concat([...document.querySelectorAll('script[src], link[rel="stylesheet"]')]
+        .map((el) => new URL(el.getAttribute('src') || el.getAttribute('href'), location.href).pathname.slice(1)
+          + new URL(el.getAttribute('src') || el.getAttribute('href'), location.href).search));
       for (const k of keys) if (!(await caches.match(new URL('/' + k, location.origin).href))) return 'missing ' + k;
       return 'ready';
     }), { timeout: 20000 }).toBe('ready');
