@@ -143,6 +143,8 @@ const ASSETS = [
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
   './icons/qr-code.svg',
   // MM-600 pilot demo (pilot/index.html, linked from the teacher kit on the home page).
   // MM-602: pilot/index.html loads every file with one shared ?v= so a browser
