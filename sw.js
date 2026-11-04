@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v32';
+const CACHE = 'melodymath-offline-v33';
 const ASSETS = [
   './',
   './index.html',
@@ -143,6 +143,16 @@ const ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/qr-code.svg',
+  // MM-600 pilot demo (pilot/index.html, linked from the teacher kit on the home page).
+  './pilot/',
+  './pilot/index.html',
+  './pilot/pilot.css',
+  './pilot/seed/demo-accounts.js',
+  './pilot/js/unit.js',
+  './pilot/js/music.js',
+  './pilot/js/research.js',
+  './pilot/js/store.js',
+  './pilot/js/app.js',
 ];
 
 self.addEventListener('install', function (event) {
