@@ -18,6 +18,11 @@ const ASSETS = [
   './frequency.html',
   './check.html',
   './exercise.html',
+  // MM-7xx stream D teacher board (class.html), added in PR 953.
+  './class.html',
+  './src/lib/classBoard/classSync.js',
+  './src/lib/classBoard/boardModel.js',
+  './src/lib/classBoard/classPage.js',
   './privacy.html',
   './manifest.webmanifest',
   './src/lib/encouragingFeedback.js',
