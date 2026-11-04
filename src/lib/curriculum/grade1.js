@@ -257,6 +257,23 @@
     ['measurement', 'מה תהיה השעה בעוד שעתיים?', 1, 'אחרי 12 השעון מתחיל מחדש', 2, 'CLOCK', { key: 73304, widget: 'clock', clock: { hour: 11 } }],
     ['measurement', 'ההופעה נגמרה בשעה שבשעון. היא התחילה 3 שעות קודם. באיזו שעה התחילה?', 6, 'סופרים 3 מספרים אחורה בשעון', 3, 'CLOCK', { key: 73305, widget: 'clock', clock: { hour: 9 } }],
     ['measurement', 'החזרה מתחילה בשעה שבשעון ונגמרת בשעה 1. כמה שעות היא נמשכת?', 3, 'סופרים מהשעה שבשעון עד 1, דרך 12', 3, 'CLOCK', { key: 73306, widget: 'clock', clock: { hour: 10 } }],
+    // MM-735 · mm-cur-3 «איך חשבת?» strategy items (gap G5, PR #951):
+    // Newprogramgrade1.pdf p. 6 «חיבור וחיסור בתחום העשרים» via MM-501
+    // (PR #949). Each item names a make-ten or back-to-ten split of a sum
+    // across ten and asks for one number of that split, so the answer is a
+    // number the child types (the plan loop has no choice buttons). Inner
+    // numbers are words where needed, so variety.js retune() finds no digit
+    // pair that gives the answer and keeps the prompt as written. Tagged
+    // 'strategy'. Solved with the standard's primary way (ADD20 callResponse,
+    // SUB20 takeAwayBeats, M1); tenThenMore rides along as the extra way.
+    ['addition', 'איך חשבת 8 + 5? משלימים את 8 לעשר. כמה מוסיפים קודם?', 2, 'כמה חסר ל־8 כדי להגיע ל־10', 1, 'ADD20', { key: 73501, tags: ['strategy'] }],
+    ['addition', 'איך חשבת 9 + 4? קודם משלימים את תשע לעשר. כמה נשאר להוסיף?', 3, 'מתוך הארבע אחת כבר הלכה לעשר', 1, 'ADD20', { key: 73502, tags: ['strategy'] }],
+    ['addition', 'איך חשבת 7 + 6? משלימים את 7 לעשר. כמה נשאר מה־6?', 3, 'קודם משלימים את 7 לעשר, ואז מה שנשאר', 2, 'ADD20', { key: 73503, tags: ['strategy'] }],
+    ['addition', 'איך חשבת שמונה ועוד שבע? קודם משלימים לעשר. כמה זה ביחד?', 15, 'מתוך השבע נשארו עוד 5 אחרי העשר', 2, 'ADD20', { key: 73504, tags: ['strategy'] }],
+    ['addition', 'איך חשבת 6 + 8? מתחילים מ־8 ומשלימים לעשר. כמה מוסיפים קודם?', 2, 'כמה חסר ל־8 כדי להגיע ל־10', 2, 'ADD20', { key: 73505, tags: ['strategy'] }],
+    ['subtraction', 'איך חשבת 13 − 5? קודם יורדים מ־13 לעשר. כמה הורדנו?', 3, 'מ־13 עד 10 יש כמה צעדים', 2, 'SUB20', { key: 73506, tags: ['strategy'] }],
+    ['subtraction', 'איך חשבת 14 − 6? קודם יורדים לעשר. כמה עוד צריך להוריד?', 2, 'מתוך השש כבר הורדנו 4', 3, 'SUB20', { key: 73507, tags: ['strategy'] }],
+    ['subtraction', 'איך חשבת שתים־עשרה פחות חמש? קודם יורדים לעשר. מה התשובה?', 7, 'מה־10 מורידים עוד 3', 3, 'SUB20', { key: 73508, tags: ['strategy'] }],
   ];
 
   // Guided lessons of grade א׳ (MM-7xx stream B), served by interactiveLessons.js
