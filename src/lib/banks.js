@@ -2176,7 +2176,7 @@
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
       const raw = I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4],
-        widget: e.widget, chart: e.chart, ruler: e.ruler, clock: e.clock, hear: e.hear, table: e.table, tags: e.tags });
+        widget: e.widget, chart: e.chart, ruler: e.ruler, clock: e.clock, hear: e.hear, table: e.table, tags: e.tags, tolerance: e.tolerance });
       raw.key = e.key;
       RAW.push(raw);
     });

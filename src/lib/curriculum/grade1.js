@@ -274,6 +274,19 @@
     ['subtraction', 'איך חשבת 13 − 5? קודם יורדים מ־13 לעשר. כמה הורדנו?', 3, 'מ־13 עד 10 יש כמה צעדים', 2, 'SUB20', { key: 73506, tags: ['strategy'] }],
     ['subtraction', 'איך חשבת 14 − 6? קודם יורדים לעשר. כמה עוד צריך להוריד?', 2, 'מתוך השש כבר הורדנו 4', 3, 'SUB20', { key: 73507, tags: ['strategy'] }],
     ['subtraction', 'איך חשבת שתים־עשרה פחות חמש? קודם יורדים לעשר. מה התשובה?', 7, 'מה־10 מורידים עוד 3', 3, 'SUB20', { key: 73508, tags: ['strategy'] }],
+    // MM-736 · mm-cur-1 open quantity estimation (gap G7, PR #951):
+    // Newprogramgrade1.pdf p. 2 «מנייה עד 100, קיבוץ ל־10» via MM-501 (PR
+    // #949). «בערך כמה?» on a crowd of instruments; any answer within
+    // `tolerance` of the true count is right. index.html answerOk already
+    // checks tolerance with adaptive.js isWithinTolerance, so no page change
+    // is needed. Tagged 'estimate'. Solved with GROUP10's primary way
+    // (tenBeatBars, M2): group by eye into tens of beats.
+    ['counting', 'בערך כמה תופים? לא סופרים אחד־אחד. 🥁🥁🥁🥁🥁🥁🥁🥁🥁🥁🥁🥁 🥁🥁🥁🥁🥁🥁', 18, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 1, 'GROUP10', { key: 73601, tolerance: 3, tags: ['estimate'] }],
+    ['counting', 'בערך כמה תווים? לא סופרים אחד־אחד. 🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵 🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵 🎵', 25, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 1, 'GROUP10', { key: 73602, tolerance: 5, tags: ['estimate'] }],
+    ['counting', 'בערך כמה פעמונים? לא סופרים אחד־אחד. 🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔 🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔 🔔🔔🔔🔔🔔🔔🔔🔔🔔', 33, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 2, 'GROUP10', { key: 73603, tolerance: 5, tags: ['estimate'] }],
+    ['counting', 'בערך כמה גיטרות? לא סופרים אחד־אחד. 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸', 47, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 2, 'GROUP10', { key: 73604, tolerance: 7, tags: ['estimate'] }],
+    ['counting', 'בערך כמה פסנתרים? לא סופרים אחד־אחד. 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹', 62, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 3, 'GROUP10', { key: 73605, tolerance: 10, tags: ['estimate'] }],
+    ['counting', 'בערך כמה חצוצרות? לא סופרים אחד־אחד. 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺', 80, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 3, 'GROUP10', { key: 73606, tolerance: 10, tags: ['estimate'] }],
   ];
 
   // Guided lessons of grade א׳ (MM-7xx stream B), served by interactiveLessons.js
