@@ -1831,11 +1831,23 @@ function renderExportQr(type){
   if(type === 'roster'){
     packed = typeof packRoster === 'function' ? packRoster(who.classCode) : null;
   } else {
-    packed = typeof packStudent === 'function' ? packStudent(who.name || 'תלמיד', who.classCode) : null;
+    if(!who.name){
+      box.innerHTML = ''; lastPackedPayload = '';
+      if($('qrExportMsg')) $('qrExportMsg').textContent = 'עוד לא נבחר/ה תלמיד/ה. כתבו שם בסרגל ולחצו «שמירה במכשיר», ואז חוזרים לכאן.';
+      return;
+    }
+    packed = typeof packStudent === 'function' ? packStudent(who.name, who.classCode) : null;
   }
   if(packed && typeof generateQrSvg === 'function'){
     lastPackedPayload = packed.hash;
-    box.innerHTML = generateQrSvg(packed.url || packed.hash, { margin: 2 });
+    // Stream D handoff (#953): a code that does not fit one QR gets a notice, not a broken image.
+    const qrText = packed.url || packed.hash;
+    if(typeof qrFits === 'function' && !qrFits(qrText)){
+      box.innerHTML = '';
+      if($('qrExportMsg')) $('qrExportMsg').textContent = 'הנתונים ארוכים מדי לקוד QR אחד. אפשר להעתיק את קוד השיתוף, או להשתמש בלוח הכיתה.';
+      return;
+    }
+    box.innerHTML = generateQrSvg(qrText, { margin: 2 });
     if($('qrExportMsg')) $('qrExportMsg').textContent = (type === 'roster' ? 'קוד QR עבור כל הכיתה' : 'קוד QR עבור ' + (who.name || 'תלמיד/ה')) + ' מוכן לסריקה.';
   }
 }
