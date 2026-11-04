@@ -16,12 +16,42 @@
 
   const G = globalThis;
   const SEED = G.MM_PILOT_SEED || { accounts: [] };
-  const U = G.MMPilotUnit;
+  const BASE = G.MMPilotUnit;
   const M = music();
   const R = research();
-  const CURRICULUM = U.CURRICULUM || {};      // older unit.js (MM-600) had no curriculum ids
-  const CURRICULUM_NOTE = U.CURRICULUM_NOTE || {};
-  const UNIT = U.UNIT;
+  const CURRICULUM = BASE.CURRICULUM || {};      // older unit.js (MM-600) had no curriculum ids
+  const CURRICULUM_NOTE = BASE.CURRICULUM_NOTE || {};
+  // MM-610: many units. js/coverage.js lists them (the legacy "סופרים צלילים"
+  // first, then js/units.js); js/score.js plans the music of the new ones and
+  // js/checks.js holds the pre/post checks without music. Each is optional:
+  // a missing file leaves the legacy unit working as before.
+  const COV = coverage();
+  const S = G.MMPilotScore || { plan: function () { return { rows: [], notes: [], svg: '' }; }, describe: function () { return ''; } };
+  const K = G.MMPilotChecks || { checkFor: function () { return []; }, score: function () { return null; }, compare: function () { return {}; } };
+  const SOURCES = (G.MMPilotUnits && G.MMPilotUnits.SOURCES) || {};
+  const UNITS = COV.allUnits();
+  let UNIT = UNITS[0];
+  // The unit helpers of js/unit.js, bound to the open unit unless one is passed.
+  const U = Object.assign({}, BASE, {
+    topicReport: function (r, u) { return BASE.topicReport(r, u || UNIT); },
+    gaps: function (r, u) { return BASE.gaps(r, u || UNIT); },
+    stars: function (r, u) { return BASE.stars(r, u || UNIT); }
+  });
+
+  function coverage() {
+    const c = G.MMPilotCoverage;
+    if (c && typeof c.allUnits === 'function' && typeof c.map === 'function') return c;
+    try { G.console.warn('[MelodyMath pilot] js/coverage.js is unavailable: only the first unit is shown.'); } catch (e) { /* no console */ }
+    const legacy = Object.assign({}, BASE.UNIT, { legacy: true, topics: typeof BASE.topicsOf === 'function' ? BASE.topicsOf() : [] });
+    return {
+      allUnits: function () { return [legacy]; },
+      map: function () { return { total: 0, covered: 0, rows: [] }; },
+      currOf: function (u, q) { return CURRICULUM[q.topic] || []; }
+    };
+  }
+  function unitById(id) { return UNITS.filter(function (u) { return u.id === id; })[0] || null; }
+  function isLegacyQ(q) { return !q.kind || q.kind === 'rhythm'; }
+  function hasChecks(u) { return K.checkFor((u || UNIT).id, 'pre').length > 0; }
   const store = G.MMPilotStore.create(safeStorage());
   const root = document.getElementById('mm-app');
 
@@ -103,7 +133,7 @@
 
   // Plays a stage of the current exercise and lights each note on screen as it sounds.
   function playStage(q, stage, choice) {
-    const notes = M.plan(q, stage, choice);
+    const notes = isLegacyQ(q) ? M.plan(q, stage, choice) : S.plan(q.music, stage).notes;
     const audio = M.play(q.id + ':' + stage, notes, highlight);
     state.audio = audio;
     return audio;
@@ -143,11 +173,51 @@
   function starsText(n) { return '★'.repeat(n) + '☆'.repeat(3 - n); }
   function mathHtml(q) { return '<span class="ltr">' + esc(U.questionText(q)) + '</span>'; }
 
-  function unitStatus(p) {
+  function unitStatus(p, unit) {
+    const u = unit || UNIT;
+    if (p.completedAt && hasChecks(u) && !p.post) return { key: 'post', text: 'נשארה בדיקה קצרה אחרי' };
     if (p.completedAt) return { key: 'done', text: 'הושלמה' };
     const answered = Object.keys(p.results).filter(function (k) { return p.results[k].correct || p.results[k].revealed; }).length;
-    if (p.lessonDone || answered) return { key: 'progress', text: 'בתהליך · ' + answered + ' מתוך ' + UNIT.questions.length };
+    if (p.lessonDone || answered || p.pre) return { key: 'progress', text: 'בתהליך · ' + answered + ' מתוך ' + u.questions.length };
     return { key: 'new', text: 'טרם התחילו' };
+  }
+
+  // "לפני 1/3 · אחרי 3/3" — the checks without music, before and after the unit.
+  function prepostText(p) {
+    const c = K.compare(p.pre, p.post);
+    if (!c || !c.pre) return '';
+    return 'לפני ' + c.pre + (c.post ? ' · אחרי ' + c.post : ' · אחרי: עוד לא');
+  }
+  function prepostHtml(p, testid) {
+    const t = prepostText(p);
+    if (!t) return '';
+    const c = K.compare(p.pre, p.post);
+    return '<span class="mm-chip mm-chip--prepost" data-testid="' + testid + '" data-pre="' + esc(c.pre) + '" data-post="' + esc(c.post || '') + '"'
+      + (c.change != null ? ' data-change="' + c.change + '"' : '') + '><span class="ltr">' + esc(t) + '</span></span>';
+  }
+  function changeText(c) {
+    if (!c || c.change == null) return '';
+    return c.change > 0 ? 'שיפור של ' + c.change : c.change === 0 ? 'ללא שינוי' : 'ירידה של ' + (-c.change);
+  }
+
+  // Optional media slots (MM-614, content from later): a unit illustration,
+  // a child-level sentence per exercise (whyKid), and a narration per exercise.
+  // Each is hidden when its file is missing, so the demo never depends on them.
+  function unitArt(u) {
+    return '<img class="mm-unit-art" data-testid="unit-art" src="../assets/pilot/units/' + esc(u.id) + '.webp" alt="' + esc('איור ליחידה: ' + u.title) + '" width="96" height="96" loading="lazy" decoding="async">';
+  }
+  const narrationOk = {};
+  function narrationUrl(q) { return '../sounds/pilot/' + encodeURIComponent(q.id) + '.mp3'; }
+  function probeNarration(q) {
+    const btn = root.querySelector('[data-testid="narration"]');
+    if (!btn || !G.fetch) return;
+    const show = function () { const b = root.querySelector('[data-testid="narration"][data-q="' + q.id + '"]'); if (b) b.hidden = false; };
+    if (narrationOk[q.id] === true) { show(); return; }
+    if (narrationOk[q.id] === false) return;
+    G.fetch(narrationUrl(q), { method: 'HEAD' }).then(function (r) {
+      narrationOk[q.id] = !!(r && r.ok && /audio/.test(r.headers.get('content-type') || 'audio'));
+      if (narrationOk[q.id]) show();
+    }).catch(function () { narrationOk[q.id] = false; });
   }
 
   // ---------------------------------------------------------------- state
@@ -167,6 +237,7 @@
   }
 
   function signedInView(acc) { return acc.role === 'teacher' ? 'teacher' : 'student-home'; }
+  function signOutClean() { state.preview = null; UNIT = UNITS[0]; }
 
   // ---------------------------------------------------------------- views
   function topbar(title, sub, end) {
@@ -192,33 +263,55 @@
       + '</section>';
   }
 
+  // The unit shown first on the student's home: the newest assignment, else
+  // the unit last opened on this device, else the first unit.
+  function featuredUnit(acc) {
+    const tasks = store.assignmentsFor(acc.id).slice().sort(function (a, b) { return b.createdAt - a.createdAt; });
+    const fromTask = tasks.length ? unitById(tasks[0].unitId) : null;
+    return fromTask || unitById(typeof store.lastUnit === 'function' ? store.lastUnit() : null) || UNITS[0];
+  }
+
   function viewStudentHome() {
     const acc = state.account;
-    const p = store.progress(acc.id, UNIT.id);
-    const st = unitStatus(p);
-    const tasks = store.assignmentsFor(acc.id).filter(function (a) { return a.unitId === UNIT.id; });
-    const startLabel = p.completedAt ? 'לצפייה בסיכום' : (st.key === 'new' ? 'מתחילים ←' : 'ממשיכים מהמקום שעצרנו ←');
+    const unit = featuredUnit(acc);
+    const p = store.progress(acc.id, unit.id);
+    const st = unitStatus(p, unit);
+    const tasks = store.assignmentsFor(acc.id);
+    const startLabel = st.key === 'done' ? 'לצפייה בסיכום' : (st.key === 'new' ? 'מתחילים ←' : 'ממשיכים מהמקום שעצרנו ←');
     let html = '<section class="mm-view" data-testid="view-student-home">'
       + topbar('שלום, ' + acc.displayName, 'כיתה ' + (acc.grade || 'א׳–ג׳'))
       + '<h2 class="sr-only">המשימות שלי</h2>';
     if (tasks.length) {
       html += '<div class="mm-card mm-task" data-testid="assignment-card">'
         + '<span class="mm-chip mm-chip--yellow">משימה מהמורה</span>'
-        + '<h3 data-testid="assignment-title">' + esc(UNIT.title) + '</h3>'
         + tasks.map(function (t) {
-          return '<p class="mm-sub">הוקצתה ב־' + esc(fmtDate(t.createdAt)) + '</p>'
+          const u = unitById(t.unitId);
+          return '<h3 data-testid="assignment-title">' + esc(u ? u.title : t.unitId) + '</h3>'
+            + '<p class="mm-sub">הוקצתה ב־' + esc(fmtDate(t.createdAt)) + '</p>'
             + (t.note ? '<p class="mm-teacher-note" data-testid="assignment-note">' + esc(t.note) + '</p>' : '');
         }).join('')
         + '</div>';
     } else {
       html += '<div class="mm-card" data-testid="no-assignment"><p>אין עדיין משימה מהמורה. אפשר לתרגל את היחידה בינתיים.</p></div>';
     }
-    html += '<div class="mm-card mm-card--ink mm-task" data-testid="unit-card">'
-      + '<div class="mm-task__row"><h3>' + esc(UNIT.title) + '</h3><span class="mm-chip" data-testid="unit-status" data-status="' + st.key + '">' + esc(st.text) + '</span></div>'
-      + '<p class="mm-sub">' + esc(UNIT.subtitle) + ' · כיתות ' + esc(UNIT.grades) + ' · שיעור קצר ו־' + UNIT.questions.length + ' תרגילים</p>'
-      + (p.completedAt ? '<p data-testid="unit-stars" aria-label="' + U.stars(p.results) + ' כוכבים">' + starsText(U.stars(p.results)) + '</p>' : '')
-      + '<button type="button" class="mm-btn" data-act="open-unit" data-testid="open-unit">' + startLabel + '</button>'
-      + '</div>'
+    html += '<div class="mm-card mm-card--ink mm-task" data-testid="unit-card" data-unit="' + esc(unit.id) + '">'
+      + '<div class="mm-task__row"><h3>' + esc(unit.title) + '</h3><span class="mm-chip" data-testid="unit-status" data-status="' + st.key + '">' + esc(st.text) + '</span></div>'
+      + '<p class="mm-sub">' + esc(unit.subtitle) + ' · כיתות ' + esc(unit.grades) + ' · ' + (hasChecks(unit) ? 'בדיקה קצרה, ' : '') + 'שיעור קצר ו־' + unit.questions.length + ' תרגילים</p>'
+      + (st.key === 'done' ? '<p data-testid="unit-stars" aria-label="' + U.stars(p.results, unit) + ' כוכבים">' + starsText(U.stars(p.results, unit)) + '</p>' : '')
+      + prepostHtml(p, 'unit-prepost')
+      + '<button type="button" class="mm-btn" data-act="open-unit" data-unit="' + esc(unit.id) + '" data-testid="open-unit">' + startLabel + '</button>'
+      + '</div>';
+    // MM-610: every other unit of the demo, so a class can practise all of grades 1–3.
+    const others = UNITS.filter(function (u) { return u.id !== unit.id; });
+    html += '<div class="mm-card" data-testid="unit-list"><h3>עוד יחידות</h3><ul class="mm-unit-list">'
+      + others.map(function (u) {
+        const up = store.progress(acc.id, u.id);
+        const us = unitStatus(up, u);
+        return '<li class="mm-unit-row" data-testid="unit-row" data-unit="' + esc(u.id) + '">'
+          + '<div class="mm-unit-row__text"><strong>' + esc(u.title) + '</strong><span class="mm-sub">כיתות ' + esc(u.grades) + ' · ' + u.questions.length + ' תרגילים</span>'
+          + '<span class="mm-chip" data-testid="unit-row-status" data-status="' + us.key + '">' + esc(us.text) + '</span>' + prepostHtml(up, 'unit-row-prepost') + '</div>'
+          + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="open-unit" data-unit="' + esc(u.id) + '" data-testid="open-unit-' + esc(u.id) + '" aria-label="פתיחת היחידה ' + esc(u.title) + '">פתיחה</button></li>';
+      }).join('') + '</ul></div>'
       + '<p class="mm-note">ההתקדמות נשמרת אוטומטית במכשיר הזה.</p>'
       + '</section>';
     return html;
@@ -240,8 +333,8 @@
     };
   }
 
-  function curriculumBadge(topicId) {
-    const ids = CURRICULUM[topicId] || [];
+  function curriculumBadge(q) {
+    const ids = COV.currOf(UNIT, q) || [];
     const rows = ids.map(curriculumRow).filter(Boolean);
     if (!rows.length) return '';
     const text = rows.map(function (r) { return r.id + ' · ' + r.grade + '׳'; }).join(' | ');
@@ -312,9 +405,77 @@
     return '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="sound" data-testid="sound-toggle" aria-pressed="' + (off ? 'true' : 'false') + '">' + (off ? '🔇 בלי צליל' : '🔊 עם צליל') + '</button>';
   }
 
+  // ---------------------------------------------------------------- MM-610: new units' music on screen
+  const KIND_HE = {
+    beats: 'תיבות ופעמות', steps: 'צעדים בסולם', place: 'כלי לכל מקום במספר', pattern: 'דגם שחוזר',
+    pitch: 'עמודות שמתנגנות', durations: 'משכי תווים בתיבה', turn: 'סיבוב שלם = תיבה', shape: 'צורה = לולאה של פעמות', tempo: 'שני קצבים באותו זמן'
+  };
+
+  // The planned score (js/score.js) drawn as rows of groups of tokens; each
+  // token has the data-chip its note lights up, so sound and picture match.
+  function scoreHtml(plan) {
+    let count = 0;
+    const rows = plan.rows.map(function (r) {
+      return '<div class="mm-sc__row ' + esc(r.cls) + '">' + (r.label ? '<div class="mm-sc__label">' + esc(r.label) + '</div>' : '')
+        + '<div class="mm-sc__groups">' + r.groups.map(function (g) {
+          return '<div class="mm-sc__group ' + esc(g.cls) + '"><div class="mm-sc__tokens">' + g.tokens.map(function (k) {
+            if (k.role !== 'rest' && k.role !== 'silence') count++;
+            return '<span class="mm-tok mm-tok--' + esc(k.role) + '" data-chip="' + k.chip + '" data-role="' + esc(k.role) + '" style="--step:' + k.step + ';--w:' + k.w + '">' + esc(k.t) + '</span>';
+          }).join('') + '</div>' + (g.label ? '<span class="mm-sc__glabel">' + esc(g.label) + '</span>' : '') + '</div>';
+        }).join('') + '</div></div>';
+    }).join('');
+    return (plan.svg ? '<div class="mm-sc__art" aria-hidden="true">' + plan.svg + '</div>' : '')
+      + '<div class="mm-sc" dir="ltr" aria-hidden="true" data-testid="music-notes" data-count="' + count + '">' + rows + '</div>';
+  }
+
+  function scoreCard(q, stage) {
+    const solved = stage === 'right' || stage === 'reveal';
+    return '<div class="mm-card mm-music" data-testid="music-card" data-music-kind="' + esc(q.music.kind) + '">'
+      + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">שלב 2 · שומעים ורואים: ' + esc(KIND_HE[q.music.kind] || '') + '</span></div>'
+      + scoreHtml(S.plan(q.music, stage))
+      + '<p class="mm-caption" data-testid="music-caption" data-stage="' + (solved ? 'solved' : 'open') + '">' + esc(q.hear) + '</p>'
+      + '<p class="sr-only" data-testid="music-describe">' + esc(S.describe(q.music, stage)) + '</p>'
+      + '<div class="mm-row-actions">'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="replay" data-testid="replay">▶ ' + (solved ? 'להשמיע שוב, עם הסיום' : 'להשמיע') + '</button>'
+      + soundToggle()
+      + '</div></div>';
+  }
+
+  // Which musical skill builds which math skill, with the research it rests on.
+  function skillHtml(u, testid) {
+    const k = u.skill;
+    if (!k) return '';
+    const src = (k.sources || []).map(function (id) {
+      const s = SOURCES[id];
+      if (!s) return '<span class="ltr">' + esc(id) + '</span>';
+      return s.url ? '<a class="mm-link" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer"><span class="ltr">' + esc(s.cite) + '</span></a>' : '<span class="ltr">' + esc(s.cite) + '</span>';
+    }).join(' · ');
+    return '<div class="mm-skill" data-testid="' + (testid || 'unit-skill') + '" data-unit="' + esc(u.id) + '">'
+      + '<p><strong>🎵 ' + esc(k.music) + '</strong> ← בונה → <strong>🔢 ' + esc(k.math) + '</strong></p>'
+      + '<p class="mm-sub">' + esc(k.why) + '</p>'
+      + (k.limits ? '<p class="mm-sub">מה זה לא מראה: ' + esc(k.limits) + '</p>' : '')
+      + '<p class="mm-sub">רמת ראיה: <strong>' + esc(k.level) + '</strong>. מקורות (MM-503 §2): ' + src + '</p></div>';
+  }
+
   // ---------------------------------------------------------------- lesson
   function viewLesson() {
     const L = UNIT.lesson;
+    if (!UNIT.legacy) {
+      return '<section class="mm-view mm-view--lesson" data-testid="view-lesson" data-unit="' + esc(UNIT.id) + '">'
+        + topbar('שיעור', UNIT.title)
+        + '<div class="mm-card">' + unitArt(UNIT) + '<h2>' + esc(L.title) + '</h2><ul class="mm-lesson-lines">'
+        + L.lines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul></div>'
+        + '<div class="mm-card mm-music" data-testid="lesson-music"><div class="mm-music__head"><span class="mm-chip mm-chip--yellow">דוגמה</span></div>'
+        + scoreHtml(S.plan(L.demo, 'question'))
+        + '<p class="mm-caption" data-testid="lesson-caption">' + esc(L.caption) + '</p></div>'
+        + '<div class="mm-card"><h3>מה המוזיקה בונה כאן</h3>' + skillHtml(UNIT) + '</div>'
+        + '<button type="button" class="mm-play" data-act="lesson-play" data-testid="lesson-play" aria-label="השמעת הדוגמה"><span aria-hidden="true">▶</span>להשמיע</button>'
+        + '<div class="mm-status" aria-live="polite" data-testid="lesson-status" data-audio="' + esc(state.audio || '') + '">' + esc(state.lessonStatus) + '</div>'
+        + '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">'
+        + '<div class="mm-small-print">המנגינה תמיד נעצרת לפני שהתרגילים מתחילים</div>'
+        + '<button type="button" class="mm-btn mm-btn--white" data-act="lesson-done" data-testid="lesson-continue">לתרגילים ←</button>'
+        + '</div></section>';
+    }
     const demo = { id: 'lesson', music: 'join', a: L.demo.a, op: '+', b: L.demo.b };
     return '<section class="mm-view mm-view--lesson" data-testid="view-lesson">'
       + topbar('שיעור', UNIT.title)
@@ -325,6 +486,7 @@
       + chipsHtml(demo, 'right')
       + '<p class="mm-caption" data-testid="lesson-caption">שומעים <span class="ltr">3</span> צלילים ועוד <span class="ltr">2</span> = <span class="ltr">5</span> — שתי מנגינות קצרות מתחברות למנגינה אחת.</p>'
       + '</div>'
+      + (UNIT.skill ? '<div class="mm-card"><h3>מה המוזיקה בונה כאן</h3>' + skillHtml(UNIT) + '</div>' : '')
       + '<button type="button" class="mm-play" data-act="lesson-play" data-testid="lesson-play" aria-label="השמעת הדוגמה: 3 צלילים ועוד 2"><span aria-hidden="true">▶</span>להשמיע</button>'
       + '<div class="mm-status" aria-live="polite" data-testid="lesson-status" data-audio="' + esc(state.audio || '') + '">' + esc(state.lessonStatus) + '</div>'
       + '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">'
@@ -333,7 +495,29 @@
       + '</div></section>';
   }
 
-  function currentProgress() { return store.progress(state.account.id, UNIT.id); }
+  // ---------------------------------------------------------------- MM-610: checks before and after (no music)
+  function viewCheck(phase) {
+    const items = K.checkFor(UNIT.id, phase);
+    const pre = phase === 'pre';
+    return '<section class="mm-view" data-testid="view-check" data-phase="' + phase + '" data-unit="' + esc(UNIT.id) + '">'
+      + topbar(pre ? 'בדיקה קצרה — לפני' : 'בדיקה קצרה — אחרי', UNIT.title)
+      + '<div class="mm-card"><p>' + (pre
+        ? 'לפני שמתחילים: ' + items.length + ' שאלות קצרות, בלי מוזיקה ובלי רמזים. זה לא מבחן — רק כדי לראות אחר כך כמה התקדמתם.'
+        : 'סיימתם את התרגילים! עוד ' + items.length + ' שאלות קצרות בלי מוזיקה — לראות מה למדתם.') + '</p></div>'
+      + '<form class="mm-card" data-testid="check-form" data-phase="' + phase + '" novalidate>'
+      + items.map(function (it, i) {
+        return '<label class="mm-field" data-testid="check-item">' + (i + 1) + '. ' + esc(it.q)
+          + '<input name="' + esc(it.id) + '" data-testid="check-input-' + esc(it.id) + '" inputmode="numeric" autocomplete="off" dir="ltr" maxlength="6" aria-label="תשובה לשאלה ' + (i + 1) + '"></label>';
+      }).join('')
+      + '<button type="submit" class="mm-btn" data-testid="check-submit">' + (pre ? 'סיימתי, לשיעור ←' : 'סיימתי, לסיכום ←') + '</button>'
+      + '</form></section>';
+  }
+
+  function currentProgress() { return state.preview ? state.preview.p : store.progress(state.account.id, UNIT.id); }
+  function saveP(p) {
+    if (state.preview) { state.preview.p = p; return; }
+    store.saveProgress(state.account.id, UNIT.id, p);
+  }
 
   function currentQuestion() {
     const p = currentProgress();
@@ -341,21 +525,42 @@
     return UNIT.questions[state.qState === 'right' || state.qState === 'revealed' ? state.shownIndex : i];
   }
 
+  function thinkHtml(q) {
+    if (!q.think) return '';
+    return '<div class="mm-card mm-think" data-testid="think"><span class="mm-chip">שלב 1 · חושבים</span><p>' + esc(q.think) + '</p></div>';
+  }
+
+  // Step 3: why — after a right answer, after a wrong one, and when the answer is shown.
+  function whyHtml(q) {
+    const s = state.qState;
+    if (!(s === 'right' || s === 'wrong' || s === 'retry' || s === 'revealed') || !q.right) return '';
+    const kind = s === 'right' ? 'right' : s === 'revealed' ? 'reveal' : 'wrong';
+    const title = kind === 'right' ? 'שלב 3 · למה זה נכון?' : kind === 'reveal' ? 'שלב 3 · כך חושבים על זה:' : 'שלב 3 · בואו נבין:';
+    const text = kind === 'wrong' ? q.wrong : q.right;
+    return '<div class="mm-why-fb mm-why-fb--' + kind + '" data-testid="why-feedback" data-kind="' + kind + '"><strong>' + esc(title) + '</strong>'
+      + '<p data-testid="why-text">' + esc(text) + '</p>'
+      + (q.whyKid && kind !== 'wrong' ? '<p class="mm-why-kid" data-testid="why-kid">' + esc(q.whyKid) + '</p>' : '') + '</div>';
+  }
+
   // ---------------------------------------------------------------- exercise
   function viewExercise() {
     const p = currentProgress();
     const q = currentQuestion();
     const qi = UNIT.questions.indexOf(q);
-    const topic = U.TOPICS[q.topic];
+    const topic = U.topicsOf(UNIT).filter(function (t) { return t.id === q.topic; })[0] || { name: '' };
     const rhythm = q.kind === 'rhythm';
+    const picks = rhythm || q.kind === 'choice';
     const right = state.qState === 'right', wrong = state.qState === 'wrong', retry = state.qState === 'retry', revealed = state.qState === 'revealed';
     const locked = right || revealed;
-    const pending = rhythm ? state.choice : state.typed;
+    const pending = picks ? state.choice : state.typed;
     const empty = pending == null || pending === '';
     const stage = right ? 'right' : revealed ? 'reveal' : 'question';
     const ansCls = 'mm-answer' + (empty && !locked ? ' is-empty' : '') + (right ? ' is-right' : '') + (wrong || revealed ? ' is-wrong' : '');
-    const choiceText = function (id) { const c = M.CHOICES.filter(function (x) { return x.id === id; })[0]; return c ? c.fraction : ''; };
-    const shownAnswer = revealed ? String(U.answerOf(q)) : (empty ? '?' : rhythm ? choiceText(pending) : pending);
+    const choiceText = function (id) {
+      if (q.kind === 'choice') { const o = U.choiceOf(q, id); return o ? o.label : ''; }
+      const c = M.CHOICES.filter(function (x) { return x.id === id; })[0]; return c ? c.fraction : '';
+    };
+    const shownAnswer = revealed ? String(U.answerOf(q)) : (empty ? '?' : picks ? choiceText(pending) : pending);
 
     let fb = '';
     if (right) {
@@ -365,20 +570,27 @@
     } else if (wrong || retry) {
       fb = '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="' + (wrong ? 'wrong' : 'retry') + '" data-audio="' + esc(state.audio || '') + '">'
         + (wrong ? '<div>עוד לא. נסו שוב — יש לכם עוד ניסיון.</div><div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('רמז במוזיקה: מקשיבים שוב, לאט, והמנגינה עוד לא חוזרת הביתה.')) + '</div>' : '')
-        + '<div class="mm-hint"><div class="mm-hint__text" data-testid="hint">רמז: ' + esc(M.hint(q, state.lastChoice)) + '</div>'
+        + (!isLegacyQ(q) ? '</div>' : '<div class="mm-hint"><div class="mm-hint__text" data-testid="hint">רמז: ' + esc(M.hint(q, state.lastChoice)) + '</div>'
         + (U.hintGroups(q).length ? '<div class="mm-hint__groups" aria-hidden="true">' + U.hintGroups(q).map(function (n) {
           return '<div class="mm-hint__group">' + '<span class="mm-hint__dot"></span>'.repeat(n) + '</div>';
-        }).join('') + '</div>' : '') + '</div></div>';
+        }).join('') + '</div>' : '') + '</div></div>');
     } else if (revealed) {
       fb = '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="revealed" data-audio="' + esc(state.audio || '') + '">'
         + '<div>התשובה היא <span class="ltr">' + U.answerOf(q) + '</span>. נתרגל את זה שוב בפעם הבאה.</div>'
         + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('כך נשמעת המנגינה עם התשובה.')) + '</div></div>';
     } else {
-      fb = '<div class="mm-idle">' + (rhythm ? 'בחרו קצב ולחצו ״בדיקה״.' : 'כתבו תשובה ולחצו ״בדיקה״.') + '</div>';
+      fb = '<div class="mm-idle">' + (rhythm ? 'בחרו קצב ולחצו ״בדיקה״.' : picks ? 'בחרו תשובה ולחצו ״בדיקה״.' : 'כתבו תשובה ולחצו ״בדיקה״.') + '</div>';
     }
 
     let input;
-    if (rhythm) {
+    if (q.kind === 'choice') {
+      input = '<div class="mm-choices' + (q.choices.length === 4 ? ' mm-choices--4' : q.choices.length === 2 ? ' mm-choices--2' : '') + '" role="group" aria-label="בחרו תשובה" data-testid="choices">'
+        + q.choices.map(function (c, k) {
+          const on = state.choice === c.id;
+          return '<button type="button" class="mm-choice' + (on ? ' is-on' : '') + '" data-act="choose" data-choice="' + esc(c.id) + '" data-testid="choice-' + esc(c.id) + '" aria-pressed="' + on + '"' + (locked ? ' disabled' : '') + '>'
+            + (c.sym ? '<span class="mm-choice__sym" aria-hidden="true">' + esc(c.sym) + '</span>' : '') + '<span class="mm-choice__frac">' + esc(c.label) + '</span><span class="sr-only"> (מקש ' + (k + 1) + ')</span></button>';
+        }).join('') + '</div>';
+    } else if (rhythm) {
       input = '<div class="mm-choices" role="group" aria-label="בחרו את הקצב שממלא את סוף התיבה" data-testid="choices">'
         + M.CHOICES.map(function (c, k) {
           const on = state.choice === c.id;
@@ -396,26 +608,40 @@
 
     const isLast = qi === UNIT.questions.length - 1;
     const submit = locked
-      ? '<button type="button" class="mm-btn mm-btn--mint" data-act="next" data-testid="next">' + (isLast ? 'לסיכום ←' : 'לתרגיל הבא ←') + '</button>'
+      ? '<button type="button" class="mm-btn mm-btn--mint" data-act="next" data-testid="next">' + (isLast ? (state.preview ? 'חזרה ללוח המורה ←' : hasChecks() ? 'לבדיקה הקצרה ←' : 'לסיכום ←') : 'לתרגיל הבא ←') + '</button>'
       : '<button type="button" class="mm-btn" data-act="check" data-testid="check"' + (empty ? ' disabled' : '') + '>בדיקה</button>';
 
     const dots = UNIT.questions.map(function (_, k) {
       return '<span class="mm-dot' + (k < qi ? ' is-done' : k === qi ? ' is-now' : '') + '"></span>';
     }).join('');
 
-    return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-qid="' + q.id + '" data-kind="' + (rhythm ? 'rhythm' : 'keypad') + '">'
+    const legacy = isLegacyQ(q);
+    const qHead = legacy ? mathHtml(q)
+      : esc(q.q) + (q.show ? '<span class="mm-show" aria-hidden="false">' + esc(q.show) + '</span>' : '') + (q.expr ? '<span class="ltr mm-expr">' + esc(q.expr) + '</span>' : '');
+    return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-unit="' + esc(UNIT.id) + '" data-qid="' + q.id + '" data-kind="' + (rhythm ? 'rhythm' : picks ? 'choice' : 'keypad') + '"' + (state.preview ? ' data-preview="1"' : '') + '>'
       + topbar('תרגול', UNIT.title, '<span class="mm-badge" data-testid="star-count" aria-label="כוכבים">★ ' + firstTryCount(p) + '</span>')
+      + (state.preview ? '<div class="mm-preview-bar" data-testid="preview-bar"><span>תצוגה מקדימה למורה — לא נשמר בדוח</span><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="preview-exit" data-testid="preview-exit">חזרה ללוח</button></div>' : '')
       + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>'
-      + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(topic.name) + '</span>' + curriculumBadge(q.topic) + '</div>'
-      + '<h2 class="mm-question" data-testid="q-text">' + mathHtml(q) + '</h2></div>'
-      + musicCard(q, stage)
+      + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(topic.name) + '</span>' + curriculumBadge(q) + '</div>'
+      + '<h2 class="mm-question' + (legacy ? '' : ' mm-question--text') + '" data-testid="q-text">' + qHead + '</h2>'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="narrate" data-q="' + esc(q.id) + '" data-testid="narration" hidden>🔊 הקראה</button></div>'
+      + thinkHtml(q)
+      + (legacy ? musicCard(q, stage) : scoreCard(q, stage))
       + '<div class="' + ansCls + '" aria-live="polite" data-testid="answer" aria-label="התשובה שלכם">' + esc(shownAnswer) + '</div>'
-      + fb + input + submit
+      + fb + whyHtml(q) + input + submit
       + '</section>';
   }
 
   function firstTryCount(p) {
     return Object.keys(p.results).filter(function (k) { return p.results[k].firstTry; }).length;
+  }
+
+  function prepostCheer(p) {
+    const c = K.compare(p.pre, p.post);
+    if (!c || c.change == null) return '';
+    if (c.change > 0) return 'עליתם ב־' + c.change + ' — רואים שהתרגול עזר!';
+    if (p.post && p.post.score === p.post.total) return 'הכול נכון גם לפני וגם אחרי — כל הכבוד!';
+    return 'ממשיכים לתרגל — כל פעם קצת יותר.';
   }
 
   function viewSummary() {
@@ -430,70 +656,125 @@
         return '<li data-testid="summary-topic" data-topic="' + t.topic + '">' + esc(t.name) + ': ' + t.firstTry + ' מתוך ' + t.total + ' בניסיון ראשון'
           + (t.status === 'gap' ? ' — נתרגל עוד' : ' — מצוין') + '</li>';
       }).join('') + '</ul></div>'
+      + (p.pre ? '<div class="mm-card mm-prepost" data-testid="summary-prepost"><h3>בדיקה בלי מוזיקה: לפני ואחרי</h3>' + prepostHtml(p, 'prepost')
+        + '<p class="mm-sub">' + esc(prepostCheer(p)) + '</p></div>' : '')
       + '<div class="mm-saved" data-testid="saved">✓ ההתקדמות נשמרה במכשיר הזה. המורה יראה אותה בדוח.</div>'
       + '<button type="button" class="mm-btn" data-act="home" data-testid="home">חזרה למסך הבית</button>'
       + '</section>';
   }
 
   function teacherAssignments() {
-    const rows = store.assignments().filter(function (a) { return a.unitId === UNIT.id; });
+    const rows = store.assignments();
     if (!rows.length) return '<p data-testid="no-assignments">עדיין לא הוקצו משימות.</p>';
     return '<div class="mm-table-wrap"><table class="mm-table" data-testid="assignments-table"><thead><tr><th scope="col">תלמיד/ה</th><th scope="col">משימה</th><th scope="col">הוקצתה</th><th scope="col">מצב</th></tr></thead><tbody>'
       + rows.map(function (a) {
         const s = accountById(a.studentId);
-        const st = unitStatus(store.progress(a.studentId, a.unitId));
-        return '<tr data-testid="assignment-row"><td>' + esc(s ? s.displayName : a.studentId) + '</td><td>' + esc(UNIT.title) + '</td><td>' + esc(fmtDate(a.createdAt)) + '</td>'
+        const u = unitById(a.unitId) || UNITS[0];
+        const st = unitStatus(store.progress(a.studentId, a.unitId), u);
+        return '<tr data-testid="assignment-row" data-unit="' + esc(a.unitId) + '"><td>' + esc(s ? s.displayName : a.studentId) + '</td><td>' + esc(u.title) + '</td><td>' + esc(fmtDate(a.createdAt)) + '</td>'
           + '<td><span class="mm-chip' + (st.key === 'done' ? ' mm-chip--mint' : '') + '" data-testid="assignment-status" data-status="' + st.key + '">' + esc(st.text) + '</span></td></tr>';
       }).join('') + '</tbody></table></div>';
   }
 
-  const ADVICE = {
-    add: 'לנגן או למחוא שתי מנגינות קצרות אחת אחרי השנייה ולספור בקול את כל הצלילים — קודם את החלק הראשון, ואז להמשיך לספור קדימה.',
-    sub: 'לנגן מנגינה, לכסות את הצלילים האחרונים ביד (✕) ולספור אחורה צליל אחד לכל צליל שהורדנו.',
-    tens: 'לחזור על "צליל נמוך אחד = עשרת" עם לוח המאה: קודם הצליל הנמוך, ואז היחידות אחת־אחת.',
-    frac: 'למחוא תיבה של 4 פעמות, ואז להחזיק תו אחד לאורך 2 פעמות ולשאול: איזה חלק מהתיבה הוא מילא?'
-  };
+  function topicOf(unit, tid) { return U.topicsOf(unit).filter(function (t) { return t.id === tid; })[0] || {}; }
 
-  function curriculumIdsHtml(topicId) {
-    return (CURRICULUM[topicId] || []).map(function (id) {
+  function curriculumIdsHtml(unit, topicId) {
+    return (topicOf(unit, topicId).curr || []).map(function (id) {
       return '<span class="mm-chip mm-chip--curr ltr" data-testid="report-curriculum">' + esc(id) + '</span>';
     }).join(' ');
   }
 
+  // Per student, per unit with any data on this device: the before/after check
+  // (without music), the report by topic, and the gaps with a suggestion.
   function teacherReport() {
     return students().map(function (s) {
-      const p = store.progress(s.id, UNIT.id);
-      const rep = U.topicReport(p.results);
-      const any = rep.some(function (t) { return t.done; });
-      const gapRows = rep.filter(function (t) { return t.status === 'gap'; });
       let html = '<div class="mm-card" data-testid="report-student" data-student="' + esc(s.id) + '">'
-        + '<div class="mm-task__row"><h3>' + esc(s.displayName) + '</h3><span class="mm-chip" data-testid="report-unit-status">' + esc(unitStatus(p).text) + '</span></div>';
-      if (!any) return html + '<p data-testid="report-empty">אין עדיין תוצאות. הן יופיעו כאן אחרי שהתלמיד/ה יתרגל/תתרגל במכשיר הזה.</p></div>';
-      html += '<div class="mm-table-wrap"><table class="mm-table" data-testid="report-table"><thead><tr><th scope="col">נושא</th><th scope="col">בתוכנית</th><th scope="col">נענו</th><th scope="col">נכון בניסיון ראשון</th><th scope="col">מצב</th></tr></thead><tbody>'
-        + rep.map(function (t) {
-          const pct = t.rate == null ? 0 : Math.round(t.rate * 100);
-          const label = t.status === 'gap' ? 'פער' : t.status === 'ok' ? 'שולט/ת' : 'טרם';
-          return '<tr data-testid="report-row" data-topic="' + t.topic + '" data-status="' + t.status + '">'
-            + '<th scope="row">' + esc(t.name) + '</th><td>' + curriculumIdsHtml(t.topic) + '</td><td><span class="ltr">' + t.done + '/' + t.total + '</span></td>'
-            + '<td><div style="display:flex;align-items:center;gap:6px"><div class="mm-meter' + (t.status === 'gap' ? ' is-gap' : '') + '" role="img" aria-label="' + pct + ' אחוז"><span style="width:' + pct + '%"></span></div><span class="ltr" data-testid="report-pct">' + pct + '%</span></div></td>'
-            + '<td><span class="mm-chip' + (t.status === 'gap' ? ' mm-chip--rust' : t.status === 'ok' ? ' mm-chip--mint' : '') + '" data-testid="report-status">' + label + '</span></td></tr>';
-        }).join('') + '</tbody></table></div>';
-      html += '<h4 style="margin:6px 0 0">פערים</h4>';
-      html += gapRows.length
-        ? '<ul class="mm-gap-list" data-testid="gaps">' + gapRows.map(function (t) {
-          return '<li data-testid="gap" data-topic="' + t.topic + '"><strong>' + esc(t.name) + '</strong> (<span class="ltr">' + esc((CURRICULUM[t.topic] || []).join(', ')) + '</span>) — ' + t.firstTry + ' מתוך ' + t.done + ' בניסיון ראשון. הצעה: ' + esc(ADVICE[t.topic]) + '</li>';
-        }).join('') + '</ul>'
-        : '<p data-testid="no-gaps">לא נמצאו פערים ביחידה הזו.</p>';
-      return html + '</div>';
+        + '<div class="mm-task__row"><h3>' + esc(s.displayName) + '</h3></div>';
+      const blocks = UNITS.map(function (unit) {
+        const p = store.progress(s.id, unit.id);
+        const rep = U.topicReport(p.results, unit);
+        const any = rep.some(function (t) { return t.done; });
+        if (!any && !p.pre) return '';
+        const gapRows = rep.filter(function (t) { return t.status === 'gap'; });
+        const c = K.compare(p.pre, p.post);
+        let b = '<div class="mm-report-unit" data-testid="report-unit" data-unit="' + esc(unit.id) + '">'
+          + '<div class="mm-task__row"><h4>' + esc(unit.title) + '</h4><span class="mm-chip" data-testid="report-unit-status">' + esc(unitStatus(p, unit).text) + '</span></div>';
+        if (c && c.pre) {
+          b += '<p class="mm-prepost-line" data-testid="report-prepost" data-pre="' + esc(c.pre) + '" data-post="' + esc(c.post || '') + '"' + (c.change != null ? ' data-change="' + c.change + '"' : '') + '>'
+            + 'בדיקה בלי מוזיקה: לפני <span class="ltr">' + esc(c.pre) + '</span> · אחרי <span class="ltr">' + esc(c.post || '—') + '</span>'
+            + (c.change != null ? ' · <strong data-testid="report-change">' + esc(changeText(c)) + '</strong>' : '') + '</p>';
+        }
+        if (!any) return b + '<p class="mm-sub">התרגילים עוד לא התחילו.</p></div>';
+        b += '<div class="mm-table-wrap"><table class="mm-table" data-testid="report-table"><thead><tr><th scope="col">נושא</th><th scope="col">בתוכנית</th><th scope="col">נענו</th><th scope="col">נכון בניסיון ראשון</th><th scope="col">מצב</th></tr></thead><tbody>'
+          + rep.map(function (t) {
+            const pct = t.rate == null ? 0 : Math.round(t.rate * 100);
+            const label = t.status === 'gap' ? 'פער' : t.status === 'ok' ? 'שולט/ת' : 'טרם';
+            return '<tr data-testid="report-row" data-topic="' + t.topic + '" data-status="' + t.status + '">'
+              + '<th scope="row">' + esc(t.name) + '</th><td>' + curriculumIdsHtml(unit, t.topic) + '</td><td><span class="ltr">' + t.done + '/' + t.total + '</span></td>'
+              + '<td><div style="display:flex;align-items:center;gap:6px"><div class="mm-meter' + (t.status === 'gap' ? ' is-gap' : '') + '" role="img" aria-label="' + pct + ' אחוז"><span style="width:' + pct + '%"></span></div><span class="ltr" data-testid="report-pct">' + pct + '%</span></div></td>'
+              + '<td><span class="mm-chip' + (t.status === 'gap' ? ' mm-chip--rust' : t.status === 'ok' ? ' mm-chip--mint' : '') + '" data-testid="report-status">' + label + '</span></td></tr>';
+          }).join('') + '</tbody></table></div>';
+        b += '<h5 style="margin:6px 0 0;font-size:15px">פערים</h5>';
+        b += gapRows.length
+          ? '<ul class="mm-gap-list" data-testid="gaps">' + gapRows.map(function (t) {
+            const tp = topicOf(unit, t.topic);
+            return '<li data-testid="gap" data-topic="' + t.topic + '"><strong>' + esc(t.name) + '</strong> (<span class="ltr">' + esc((tp.curr || []).join(', ')) + '</span>) — ' + t.firstTry + ' מתוך ' + t.done + ' בניסיון ראשון. הצעה: ' + esc(tp.advice || '') + '</li>';
+          }).join('') + '</ul>'
+          : '<p data-testid="no-gaps">לא נמצאו פערים ביחידה הזו.</p>';
+        return b + '</div>';
+      }).join('');
+      if (!blocks) return html + '<p data-testid="report-empty">אין עדיין תוצאות. הן יופיעו כאן אחרי שהתלמיד/ה יתרגל/תתרגל במכשיר הזה.</p></div>';
+      return html + blocks + '</div>';
     }).join('');
+  }
+
+  // MM-610: every grades 1–3 topic of the official programme (read from
+  // src/lib/curriculum.js by js/coverage.js) → covered or not, with links that
+  // open each exercise as a teacher preview (nothing is saved to the report).
+  function coverageMapCard() {
+    const m = COV.map();
+    const byGrade = {};
+    m.rows.forEach(function (r) { (byGrade[r.grade] = byGrade[r.grade] || []).push(r); });
+    return '<div class="mm-card" data-testid="coverage-map"><h2>מפת כיסוי: כל נושאי כיתות א׳–ג׳</h2>'
+      + '<p class="mm-sub" data-testid="coverage-summary" data-covered="' + m.covered + '" data-total="' + m.total + '"><strong>' + m.covered + ' מתוך ' + m.total + '</strong> הנושאים של כיתות א׳–ג׳ בתוכנית משרד החינוך מתורגלים בהדגמה, בכל תרגיל עם מוזיקה ועם הסבר «למה». הרשימה נקראת מ־<span class="ltr">src/lib/curriculum.js</span>. תרגול בהדגמה לא אומר שהנושא כולו נלמד. לחיצה על תרגיל פותחת אותו בתצוגה מקדימה.</p>'
+      + Object.keys(byGrade).map(function (g) {
+        return '<h3 class="mm-cov-grade">כיתה ' + esc(g) + '׳</h3><ul class="mm-cov-list">' + byGrade[g].map(function (r) {
+          const ok = r.status === 'covered';
+          return '<li class="mm-cov-row" data-testid="coverage-map-row" data-topic-id="' + esc(r.id) + '" data-status="' + r.status + '">'
+            + '<div class="mm-cov-row__head"><span class="mm-chip mm-chip--curr ltr">' + esc(r.id) + '</span> <strong>' + esc(r.topic) + '</strong> '
+            + '<span class="mm-chip ' + (ok ? 'mm-chip--mint' : 'mm-chip--rust') + '" data-testid="coverage-map-status">' + (ok ? 'מכוסה' : 'לא מכוסה') + '</span></div>'
+            + (ok ? r.units.map(function (u) {
+              const unit = unitById(u.id);
+              return '<div class="mm-cov-unit"><span class="mm-sub">' + esc(u.title) + ':</span> ' + u.questions.map(function (qid) {
+                const n = unit ? unit.questions.findIndex(function (q) { return q.id === qid; }) + 1 : 0;
+                return '<a class="mm-ex-link" href="#preview/' + esc(u.id) + '/' + esc(qid) + '" data-act="preview" data-unit="' + esc(u.id) + '" data-q="' + esc(qid) + '" data-testid="coverage-ex-link" aria-label="תצוגה מקדימה: ' + esc(u.title) + ', תרגיל ' + n + '">תרגיל ' + n + '</a>';
+              }).join('') + '</div>';
+            }).join('') : '')
+            + '</li>';
+        }).join('') + '</ul>';
+      }).join('')
+      + '</div>';
+  }
+
+  // The demo's units: what each musical skill builds, and a preview link.
+  function unitsCard() {
+    return '<div class="mm-card" data-testid="units-card"><h2>יחידות ההדגמה: איזו מיומנות מוזיקלית בונה איזו מיומנות מתמטית</h2>'
+      + '<p class="mm-sub">' + UNITS.length + ' יחידות, ' + UNITS.reduce(function (n, u) { return n + u.questions.length; }, 0) + ' תרגילים. בכל יחידה בדיקה קצרה בלי מוזיקה לפני ואחרי. המקורות מתוך <span class="ltr">docs/research/MM-503-music.md</span> ו־<span class="ltr">docs/RESEARCH.md</span>; MelodyMath עצמו עוד לא נבדק בניסוי.</p>'
+      + '<ul class="mm-unit-list">' + UNITS.map(function (u) {
+        return '<li class="mm-unit-skill" data-testid="unit-skill-row" data-unit="' + esc(u.id) + '"><div class="mm-task__row"><h3>' + esc(u.title) + ' <span class="mm-sub">· כיתות ' + esc(u.grades) + ' · ' + u.questions.length + ' תרגילים</span></h3>'
+          + '<a class="mm-ex-link" href="#preview/' + esc(u.id) + '/' + esc(u.questions[0].id) + '" data-act="preview" data-unit="' + esc(u.id) + '" data-q="' + esc(u.questions[0].id) + '" data-testid="unit-preview-link">תצוגה מקדימה</a></div>'
+          + skillHtml(u, 'unit-skill') + '</li>';
+      }).join('') + '</ul></div>';
   }
 
   // Which official topics the unit practises: the rows come from src/lib/curriculum.js
   // (topic id, grade, name, the verbatim quote and its page in the Ministry PDF).
+  // MM-610: kept for "סופרים צלילים" (with quotes and PDF pages), under the full map.
   function coverageCard() {
+    const LU = UNITS[0];
     const read = G.SOURCE_READ ? ' (נקרא ב־' + G.SOURCE_READ + ')' : '';
     const rows = Object.keys(U.TOPICS).map(function (tid) {
-      const qs = UNIT.questions.filter(function (q) { return q.topic === tid; });
+      const qs = LU.questions.filter(function (q) { return q.topic === tid; });
       const curr = (CURRICULUM[tid] || []).map(curriculumRow).filter(Boolean);
       return '<tr data-testid="coverage-row" data-topic="' + tid + '">'
         + '<th scope="row">' + esc(U.TOPICS[tid].name) + '<div class="mm-sub">' + qs.length + ' ' + (qs.length === 1 ? 'תרגיל' : 'תרגילים') + ' · ' + esc(qs.map(function (q) { return U.questionText(q).replace(' = ?', '').replace(' + ? = 1', ' + ?'); }).join(' · ')) + '</div></th>'
@@ -507,9 +788,9 @@
         + (CURRICULUM_NOTE[tid] ? '<div class="mm-sub" data-testid="coverage-note">' + esc(CURRICULUM_NOTE[tid]) + '</div>' : '')
         + '</td></tr>';
     }).join('');
-    return '<div class="mm-card" data-testid="coverage"><h2>כיסוי תוכנית הלימודים</h2>'
+    return '<details class="mm-card mm-details" data-testid="coverage"><summary><h2>פירוט: «' + esc(LU.title) + '» מול התוכנית — ציטוטים ועמודים</h2></summary>'
       + '<p class="mm-sub">הנושאים הרשמיים (תוכנית משרד החינוך במתמטיקה ליסודי) שהיחידה מתרגלת. המזהים, השמות, הציטוטים והעמודים כפי שהם ב־<span class="ltr">src/lib/curriculum.js</span>' + esc(read) + '. תרגול בהדגמה לא אומר שהנושא כולו נלמד.</p>'
-      + '<div class="mm-table-wrap"><table class="mm-table mm-table--cov"><thead><tr><th scope="col">ביחידה</th><th scope="col">בתוכנית הרשמית</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+      + '<div class="mm-table-wrap"><table class="mm-table mm-table--cov"><thead><tr><th scope="col">ביחידה</th><th scope="col">בתוכנית הרשמית</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
   }
 
   function whyCard() {
@@ -542,16 +823,18 @@
       + '<label class="mm-field">תלמיד/ה<select name="student" data-testid="assign-student">'
       + students().map(function (s) { return '<option value="' + esc(s.id) + '">' + esc(s.displayName) + '</option>'; }).join('')
       + '</select></label>'
-      + '<label class="mm-field">יחידה<select name="unit" data-testid="assign-unit"><option value="' + esc(UNIT.id) + '">' + esc(UNIT.title) + '</option></select></label>'
+      + '<label class="mm-field">יחידה<select name="unit" data-testid="assign-unit">' + UNITS.map(function (u) { return '<option value="' + esc(u.id) + '">' + esc(u.title + ' (' + u.grades + ')') + '</option>'; }).join('') + '</select></label>'
       + '<label class="mm-field">הערה לתלמיד/ה (לא חובה)<textarea name="note" maxlength="140" data-testid="assign-note"></textarea></label>'
       + '<button type="submit" class="mm-btn" data-testid="assign-submit">הקצאה</button>'
       + '<div class="mm-status" aria-live="polite" data-testid="assign-status">' + esc(state.flash) + '</div>'
       + '</form>'
       + '<div class="mm-card"><h2>משימות שהוקצו</h2>' + teacherAssignments() + '</div>'
       + '</div>'
+      + coverageMapCard()
+      + unitsCard()
       + coverageCard()
       + '<section class="mm-view" aria-labelledby="report-title" data-testid="report"><h2 id="report-title" style="margin:6px 0 0">דוח לפי נושא ופערים</h2>'
-      + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. הנתונים מהמכשיר הזה בלבד.</p>'
+      + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. «לפני/אחרי» = בדיקה קצרה בלי מוזיקה, לפני היחידה ואחריה (2–3 שאלות: סימן, לא ציון). הנתונים מהמכשיר הזה בלבד.</p>'
       + teacherReport() + '</section>'
       + '<div class="mm-card"><h3>נתוני ההדגמה</h3><p class="mm-sub">מוחק את המשימות, ההתקדמות והכניסה מהדפדפן הזה בלבד.</p>'
       + '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="reset" data-testid="reset">'
@@ -569,8 +852,42 @@
       : v === 'lesson' ? viewLesson()
       : v === 'exercise' ? viewExercise()
       : v === 'summary' ? viewSummary()
+      : v === 'check-pre' ? viewCheck('pre')
+      : v === 'check-post' ? viewCheck('post')
       : viewTeacher();
     root.setAttribute('data-view', v);
+    if (v === 'exercise') probeNarration(currentQuestion());
+  }
+
+  // MM-610: opening a unit runs pre-check → lesson → exercises → post-check → summary.
+  function openUnit(id) {
+    UNIT = unitById(id) || UNITS[0];
+    state.preview = null;
+    if (typeof store.setLastUnit === 'function') store.setLastUnit(UNIT.id);
+    const p = currentProgress();
+    state.lessonStatus = '';
+    if (hasChecks() && !p.pre) go('check-pre');
+    else if (p.completedAt && hasChecks() && !p.post) go('check-post');
+    else if (p.completedAt) go('summary');
+    else if (!p.lessonDone) go('lesson');
+    else enterExercise();
+  }
+
+  // Teacher preview of one exercise (from the coverage map): nothing is saved.
+  function openPreview(unitId, qid) {
+    const u = unitById(unitId);
+    if (!u) return;
+    UNIT = u;
+    const i = Math.max(0, u.questions.findIndex(function (q) { return q.id === qid; }));
+    state.preview = { p: { lessonDone: true, index: i, results: {}, completedAt: null, startedAt: null } };
+    enterExercise();
+  }
+
+  function exitPreview() {
+    stopSound();
+    state.preview = null;
+    UNIT = UNITS[0];
+    go('teacher');
   }
 
   function saveResult(qid, row, advance) {
@@ -578,12 +895,18 @@
     p.results[qid] = row;
     if (advance) p.index = Math.max(p.index, UNIT.questions.findIndex(function (q) { return q.id === qid; }) + 1);
     if (!p.startedAt) p.startedAt = Date.now();
-    store.saveProgress(state.account.id, UNIT.id, p);
+    saveP(p);
   }
 
   function onKey(k) {
     if (state.qState === 'right' || state.qState === 'revealed') return;
-    if (currentQuestion().kind === 'rhythm') {
+    const cq = currentQuestion();
+    if (cq.kind === 'choice') {
+      const o = cq.choices[Number(k) - 1];
+      if (o) onChoose(o.id);
+      return;
+    }
+    if (cq.kind === 'rhythm') {
       const c = M.CHOICES[Number(k) - 1];
       if (c) onChoose(c.id);
       return;
@@ -591,7 +914,7 @@
     let t = state.qState === 'wrong' ? '' : state.typed;
     if (k === 'del') t = t.slice(0, -1);
     else if (k === 'clr') t = '';
-    else if (t.length < 2) t = (t === '0' ? '' : t) + k;
+    else if (t.length < (cq.kind === 'num' ? 5 : 2)) t = (t === '0' ? '' : t) + k;
     state.typed = t;
     if (state.qState === 'wrong') state.qState = 'retry';
     render();
@@ -609,7 +932,7 @@
   function onCheck() {
     const p = currentProgress();
     const q = UNIT.questions[Math.min(p.index, UNIT.questions.length - 1)];
-    const given = q.kind === 'rhythm' ? state.choice : state.typed;
+    const given = q.kind === 'rhythm' || q.kind === 'choice' ? state.choice : state.typed;
     if (given == null || given === '') return;
     const prev = p.results[q.id] || { tries: 0 };
     const tries = (prev.tries || 0) + 1;
@@ -644,9 +967,10 @@
   function onNext() {
     stopSound();
     const p = currentProgress();
+    if (state.preview && p.index >= UNIT.questions.length) { exitPreview(); return; }
     if (p.index >= UNIT.questions.length) {
-      if (!p.completedAt) { p.completedAt = Date.now(); store.saveProgress(state.account.id, UNIT.id, p); }
-      go('summary');
+      if (!p.completedAt) { p.completedAt = Date.now(); saveP(p); }
+      go(hasChecks() && !p.post ? 'check-post' : 'summary');
       return;
     }
     enterExercise();
@@ -656,13 +980,19 @@
     const btn = e.target.closest('[data-act]');
     if (!btn || btn.disabled) return;
     const act = btn.getAttribute('data-act');
-    if (act === 'signout') { store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); return; }
-    if (act === 'open-unit') {
-      const p = currentProgress();
-      state.lessonStatus = '';
-      if (p.completedAt) go('summary');
-      else if (!p.lessonDone) go('lesson');
-      else enterExercise();
+    if (act === 'signout') { signOutClean(); store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); return; }
+    if (act === 'open-unit') { openUnit(btn.getAttribute('data-unit') || UNITS[0].id); return; }
+    if (act === 'preview') { e.preventDefault(); openPreview(btn.getAttribute('data-unit'), btn.getAttribute('data-q')); return; }
+    if (act === 'preview-exit') { exitPreview(); return; }
+    if (act === 'narrate') {
+      try { const a = new G.Audio(narrationUrl(currentQuestion())); a.play().catch(function () {}); } catch (err) { /* no audio element */ }
+      return;
+    }
+    if (act === 'lesson-play' && !UNIT.legacy) {
+      state.audio = M.play('lesson:' + UNIT.id, S.plan(UNIT.lesson.demo, 'question').notes, highlight);
+      state.lessonStatus = (state.audio === 'played' ? '🔊 ' : '🔈 (בלי צליל במכשיר הזה) ') + UNIT.lesson.caption;
+      const st = root.querySelector('[data-testid="lesson-status"]');
+      if (st) { st.textContent = state.lessonStatus; st.setAttribute('data-audio', state.audio); }
       return;
     }
     if (act === 'lesson-play') {
@@ -679,7 +1009,7 @@
       const p = currentProgress();
       p.lessonDone = true;
       if (!p.startedAt) p.startedAt = Date.now();
-      store.saveProgress(state.account.id, UNIT.id, p);
+      saveP(p);
       enterExercise();
       return;
     }
@@ -707,7 +1037,7 @@
     if (act === 'choose') { onChoose(btn.getAttribute('data-choice')); return; }
     if (act === 'check') { onCheck(); return; }
     if (act === 'next') { onNext(); return; }
-    if (act === 'home') { go('student-home'); return; }
+    if (act === 'home') { if (state.account && state.account.role === 'teacher') exitPreview(); else go('student-home'); return; }
     if (act === 'reset') {
       if (!state.confirmReset) { state.confirmReset = true; render(); return; }
       state.confirmReset = false;
@@ -730,6 +1060,18 @@
       go(signedInView(acc));
       return;
     }
+    if (form.getAttribute('data-testid') === 'check-form') {
+      const phase = form.getAttribute('data-phase');
+      const answers = {};
+      K.checkFor(UNIT.id, phase).forEach(function (it) { answers[it.id] = form[it.id] ? form[it.id].value : ''; });
+      const p = currentProgress();
+      p[phase] = K.score(UNIT.id, phase, answers);
+      if (!p.startedAt) p.startedAt = Date.now();
+      saveP(p);
+      if (phase === 'post') { go('summary'); return; }
+      if (!p.lessonDone) go('lesson'); else enterExercise();
+      return;
+    }
     if (form.getAttribute('data-testid') === 'assign-form') {
       const sid = form.student.value;
       const s = accountById(sid);
@@ -749,6 +1091,11 @@
   });
 
   // ---------------------------------------------------------------- boot
+  // MM-610: an optional unit illustration that is not there yet hides itself.
+  root.addEventListener('error', function (e) {
+    const t = e.target;
+    if (t && t.classList && t.classList.contains('mm-unit-art')) t.hidden = true;
+  }, true);
   const sess = store.session();
   const acc = sess && accountById(sess.accountId);
   if (acc) { state.account = acc; state.view = signedInView(acc); }

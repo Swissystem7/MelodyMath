@@ -19,6 +19,7 @@ async function watch(page) {
 async function studentAnswersOne(page) {
   await h.signIn(page, 'student');
   await page.getByTestId('open-unit').click();
+  await h.passCheck(page, 'pre'); // MM-610: the short check before the unit
   await expect(page.getByTestId('view-lesson')).toBeVisible();
   await page.getByTestId('lesson-play').click();                 // plays nothing, does not throw
   await expect(page.getByTestId('lesson-status')).not.toHaveAttribute('data-audio', 'played');

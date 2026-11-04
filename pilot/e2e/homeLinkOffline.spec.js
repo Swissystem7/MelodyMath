@@ -68,6 +68,7 @@ test.describe('offline after the first visit', () => {
       await expect(page.getByTestId('view-login')).toBeVisible();
       await h.signIn(page, 'student');
       await page.getByTestId('open-unit').click();
+      await h.passCheck(page, 'pre'); // MM-610: the short check before the unit
       await page.getByTestId('lesson-continue').click();
       await h.expectQuestion(page, 'q1');
       await h.answer(page, 7);

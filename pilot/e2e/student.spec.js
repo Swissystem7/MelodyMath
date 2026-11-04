@@ -30,6 +30,7 @@ test.describe('student unit flow (grades 1–3)', () => {
 
     // Lesson: "every note is 1" — 3 notes and 2 more; the play button sends notes to the shared engine.
     await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre'); // MM-610: the short check before the unit
     await expect(page.getByTestId('view-lesson')).toBeVisible();
     await h.expectMobileFriendly(page);
     await page.getByTestId('lesson-play').click();
@@ -76,6 +77,7 @@ test.describe('student unit flow (grades 1–3)', () => {
     await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'progress');
     await expect(page.getByTestId('unit-status')).toContainText('2 מתוך 7');
     await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre'); // MM-610: the short check before the unit
     await h.expectQuestion(page, 'q3');
 
     // q3 9-4 right; q4 15-6 wrong twice, so the answer is shown and we move on.
@@ -115,6 +117,7 @@ test.describe('student unit flow (grades 1–3)', () => {
     await page.getByTestId('next').click();
 
     // Summary: saved, per topic (4 of 7 right on the first try = one star).
+    await h.passCheck(page, 'post'); // MM-610: the short check after the unit
     await expect(page.getByTestId('view-summary')).toBeVisible();
     await expect(page.getByTestId('saved')).toBeVisible();
     await expect(page.getByTestId('summary-stars')).toHaveText('★☆☆');
