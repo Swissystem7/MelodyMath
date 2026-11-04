@@ -75,6 +75,7 @@ const ASSETS = [
   './src/lib/graphListen.js',
   './src/lib/listenLessons.js',
   './src/lib/onboard.js',
+  './src/lib/account/account.js',
   './src/lib/contact.js',
   './src/lib/offer.js',
   './src/lib/tabs.js',
