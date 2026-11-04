@@ -361,13 +361,15 @@
     return { rows: out.board.rows, notes: notes, svg: out.svg || '' };
   }
 
-  // The same picture in words, for screen readers (never the result).
+  // The same picture in words, for screen readers. It never counts the notes of a
+  // group (in a division or a remainder exercise that count IS the answer): the
+  // listener counts them in the sound, as a sighted child counts them in the picture.
   function describe(spec, stage) {
     const p = plan(spec, stage);
     return p.rows.map(function (r) {
       return (r.label ? r.label + ': ' : '') + r.groups.map(function (g) {
         const ts = g.tokens.filter(function (k) { return k.role !== 'rest' || k.t; });
-        const words = ts.length && ts.every(function (k) { return !k.t; }) ? ts.length + ' צלילים' : ts.map(function (k) { return k.t || '♪'; }).join(' ');
+        const words = ts.length && ts.every(function (k) { return !k.t; }) ? 'צלילים' : ts.map(function (k) { return k.t || '♪'; }).join(' ');
         return (g.label ? g.label + ' — ' : '') + words;
       }).join('; ');
     }).join('. ');
