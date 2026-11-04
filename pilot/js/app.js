@@ -17,8 +17,10 @@
   const G = globalThis;
   const SEED = G.MM_PILOT_SEED || { accounts: [] };
   const U = G.MMPilotUnit;
-  const M = G.MMPilotMusic;
-  const R = G.MMPilotResearch || { CLAIMS: [], HONESTY: '', FROM: '' };
+  const M = music();
+  const R = research();
+  const CURRICULUM = U.CURRICULUM || {};      // older unit.js (MM-600) had no curriculum ids
+  const CURRICULUM_NOTE = U.CURRICULUM_NOTE || {};
   const UNIT = U.UNIT;
   const store = G.MMPilotStore.create(safeStorage());
   const root = document.getElementById('mm-app');
@@ -32,6 +34,68 @@
     } catch (e) { return null; } // private mode: an in-memory store, said on screen
   }
   const PERSISTENT = !!safeStorage();
+
+  // ---------------------------------------------------------------- fail-safe globals (MM-602)
+  // The pilot is several files. A browser that cached an older copy of one of
+  // them (e.g. MM-600's page without js/music.js) can run it next to this
+  // newer app.js. Every call into js/music.js therefore goes through music():
+  // if MMPilotMusic is missing, lacks a function, or a function throws, the
+  // demo warns once in the console, plays no sound, and keeps working: the
+  // pictures, captions and the rhythm bar fall back to the plain versions below.
+  function music() {
+    const NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
+    const live = G.MMPilotMusic;
+    let warned = false;
+    function warn(why) {
+      if (warned) return;
+      warned = true;
+      try { G.console.warn('[MelodyMath pilot] music is unavailable (' + why + '): the demo continues without sound.'); } catch (e) { /* no console */ }
+    }
+    const CHOICE_BEATS = { quarter: 1, half: 2, whole: 4 };
+    let muted = false;
+    const fallback = {
+      CHOICES: [
+        { id: 'quarter', symbol: '♩', fraction: '1/4', he: 'רבע תיבה' },
+        { id: 'half', symbol: '𝅗𝅥', fraction: '1/2', he: 'חצי תיבה' },
+        { id: 'whole', symbol: '𝅝', fraction: '1', he: 'תיבה שלמה' }
+      ],
+      GIVEN: [{ note: 'E4', fraction: '1/4' }, { note: 'D4', fraction: '1/4' }],
+      chips: function () { return []; },
+      plan: function () { return []; },
+      barFill: function (id) {
+        const c = CHOICE_BEATS[id] || 0;
+        const beats = 2 + c;
+        return { status: beats === 4 ? 'full' : beats < 4 ? 'short' : 'over', beats: beats, choiceBeats: c };
+      },
+      caption: function () { return ''; },
+      hint: function (q) { return U.hintText(q); },
+      describe: function () { return ''; },
+      play: function () { return 'silent'; },
+      stop: function () {},
+      setMuted: function (v) { muted = !!v; },
+      isMuted: function () { return muted; }
+    };
+    const missing = !live ? ['MMPilotMusic'] : NEEDED.filter(function (k) { return typeof live[k] !== 'function'; });
+    const ok = missing.length === 0 && Array.isArray(live.CHOICES) && Array.isArray(live.GIVEN);
+    if (!ok) warn(missing.length ? 'missing ' + missing.join(', ') : 'missing CHOICES/GIVEN');
+    const safe = { CHOICES: ok ? live.CHOICES : fallback.CHOICES, GIVEN: ok ? live.GIVEN : fallback.GIVEN };
+    NEEDED.forEach(function (k) {
+      safe[k] = function () {
+        if (ok) {
+          try { return live[k].apply(live, arguments); } catch (e) { warn(k + ' threw: ' + (e && e.message)); }
+        }
+        return fallback[k].apply(null, arguments);
+      };
+    });
+    return safe;
+  }
+
+  function research() {
+    const r = G.MMPilotResearch;
+    if (r && Array.isArray(r.CLAIMS)) return r;
+    try { G.console.warn('[MelodyMath pilot] research claims are unavailable: the panel shows none.'); } catch (e) { /* no console */ }
+    return { CLAIMS: [], HONESTY: '', FROM: '' };
+  }
 
   // ---------------------------------------------------------------- audio
   const engine = G.musicEngine || null;
@@ -177,7 +241,7 @@
   }
 
   function curriculumBadge(topicId) {
-    const ids = U.CURRICULUM[topicId] || [];
+    const ids = CURRICULUM[topicId] || [];
     const rows = ids.map(curriculumRow).filter(Boolean);
     if (!rows.length) return '';
     const text = rows.map(function (r) { return r.id + ' · ' + r.grade + '׳'; }).join(' | ');
@@ -391,7 +455,7 @@
   };
 
   function curriculumIdsHtml(topicId) {
-    return (U.CURRICULUM[topicId] || []).map(function (id) {
+    return (CURRICULUM[topicId] || []).map(function (id) {
       return '<span class="mm-chip mm-chip--curr ltr" data-testid="report-curriculum">' + esc(id) + '</span>';
     }).join(' ');
   }
@@ -417,7 +481,7 @@
       html += '<h4 style="margin:6px 0 0">פערים</h4>';
       html += gapRows.length
         ? '<ul class="mm-gap-list" data-testid="gaps">' + gapRows.map(function (t) {
-          return '<li data-testid="gap" data-topic="' + t.topic + '"><strong>' + esc(t.name) + '</strong> (<span class="ltr">' + esc((U.CURRICULUM[t.topic] || []).join(', ')) + '</span>) — ' + t.firstTry + ' מתוך ' + t.done + ' בניסיון ראשון. הצעה: ' + esc(ADVICE[t.topic]) + '</li>';
+          return '<li data-testid="gap" data-topic="' + t.topic + '"><strong>' + esc(t.name) + '</strong> (<span class="ltr">' + esc((CURRICULUM[t.topic] || []).join(', ')) + '</span>) — ' + t.firstTry + ' מתוך ' + t.done + ' בניסיון ראשון. הצעה: ' + esc(ADVICE[t.topic]) + '</li>';
         }).join('') + '</ul>'
         : '<p data-testid="no-gaps">לא נמצאו פערים ביחידה הזו.</p>';
       return html + '</div>';
@@ -430,7 +494,7 @@
     const read = G.SOURCE_READ ? ' (נקרא ב־' + G.SOURCE_READ + ')' : '';
     const rows = Object.keys(U.TOPICS).map(function (tid) {
       const qs = UNIT.questions.filter(function (q) { return q.topic === tid; });
-      const curr = (U.CURRICULUM[tid] || []).map(curriculumRow).filter(Boolean);
+      const curr = (CURRICULUM[tid] || []).map(curriculumRow).filter(Boolean);
       return '<tr data-testid="coverage-row" data-topic="' + tid + '">'
         + '<th scope="row">' + esc(U.TOPICS[tid].name) + '<div class="mm-sub">' + qs.length + ' ' + (qs.length === 1 ? 'תרגיל' : 'תרגילים') + ' · ' + esc(qs.map(function (q) { return U.questionText(q).replace(' = ?', '').replace(' + ? = 1', ' + ?'); }).join(' · ')) + '</div></th>'
         + '<td>' + (curr.length ? curr.map(function (r) {
@@ -440,7 +504,7 @@
             + '<a class="mm-link" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer" data-testid="coverage-source">' + esc(r.file) + (r.page ? ', עמ׳ ' + r.page : '') + '</a>'
             + '</div>';
         }).join('') : '<span class="mm-sub">—</span>')
-        + (U.CURRICULUM_NOTE[tid] ? '<div class="mm-sub" data-testid="coverage-note">' + esc(U.CURRICULUM_NOTE[tid]) + '</div>' : '')
+        + (CURRICULUM_NOTE[tid] ? '<div class="mm-sub" data-testid="coverage-note">' + esc(CURRICULUM_NOTE[tid]) + '</div>' : '')
         + '</td></tr>';
     }).join('');
     return '<div class="mm-card" data-testid="coverage"><h2>כיסוי תוכנית הלימודים</h2>'
