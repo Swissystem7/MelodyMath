@@ -41,7 +41,8 @@ function childText(q) {
   return q.q + (q.expr ? ' (' + q.expr + ')' : '') + (q.choices ? ' — אפשרויות: ' + q.choices.map((c) => c.label).join(' / ') : '');
 }
 
-const esc = (s) => String(s == null ? '' : s).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+// Markdown table cell: escape backslashes first, then the pipe; one line.
+const esc = (s) => String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/[\r\n]+/g, ' ');
 const out = [];
 out.push('# MM-610 — יחידות ותרגילי הפיילוט');
 out.push('');
