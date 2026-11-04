@@ -115,7 +115,7 @@
 
   function viewLogin() {
     return '<section class="mm-view" data-testid="view-login" aria-labelledby="login-title">'
-      + '<div class="mm-hero"><h1 id="login-title">MelodyMath</h1><p>הדגמת פיילוט · כיתות א׳–ג׳</p></div>'
+      + '<div class="mm-hero">' + mascot('lg', 'תו מוזיקלי חייכני עם עיפרון, הדמות של MelodyMath') + '<h1 id="login-title">MelodyMath</h1><p>הדגמת פיילוט · כיתות א׳–ג׳</p></div>'
       + '<form class="mm-card" data-testid="login-form" novalidate>'
       + '<h2>כניסה לחשבון הדגמה</h2>'
       + '<label class="mm-field">שם משתמש<input name="username" data-testid="login-username" autocomplete="off" autocapitalize="none" spellcheck="false" dir="ltr" required></label>'
@@ -295,7 +295,7 @@
 
     let fb = '';
     if (right) {
-      fb = '<div class="mm-fb mm-fb--right" role="status" data-testid="feedback" data-result="right" data-audio="' + esc(state.audio) + '">'
+      fb = '<div class="mm-fb mm-fb--right" role="status" data-testid="feedback" data-result="right" data-audio="' + esc(state.audio) + '">' + mascot('sm', 'התו המוזיקלי שמח איתכם')
         + '<div>כל הכבוד! ' + mathHtml(q).replace('?', String(U.answerOf(q))) + '</div>'
         + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('המנגינה התחברה וחזרה הביתה.')) + '</div></div>';
     } else if (wrong || retry) {
@@ -359,7 +359,7 @@
     const rep = U.topicReport(p.results);
     return '<section class="mm-view" data-testid="view-summary">'
       + topbar('סיימתם!', UNIT.title)
-      + '<div class="mm-card" style="align-items:center;text-align:center"><div class="mm-stars" data-testid="summary-stars" aria-label="' + U.stars(p.results) + ' מתוך 3 כוכבים">' + starsText(U.stars(p.results)) + '</div>'
+      + '<div class="mm-card" style="align-items:center;text-align:center">' + mascot('lg', 'התו המוזיקלי מריע לכם על סיום היחידה') + '<div class="mm-stars" data-testid="summary-stars" aria-label="' + U.stars(p.results) + ' מתוך 3 כוכבים">' + starsText(U.stars(p.results)) + '</div>'
       + '<h2>כל הכבוד על היחידה!</h2><p class="mm-sub">' + firstTryCount(p) + ' מתוך ' + UNIT.questions.length + ' תרגילים נפתרו בניסיון הראשון</p></div>'
       + '<div class="mm-card"><h3>לפי נושא</h3><ul class="mm-gap-list">'
       + rep.map(function (t) {
@@ -495,6 +495,13 @@
       + '</section>';
   }
 
+  // MM-508: the music mascot (MM-505, Meta AI). Decorative but named for screen readers;
+  // hidden if the file cannot load (e.g. offline before sw.js precaches it).
+  function mascot(size, alt) {
+    return '<img class="mm-mascot mm-mascot--' + size + '" data-testid="mascot" src="../assets/mascot/mascot-' + (size === 'lg' ? 320 : 96)
+      + '.png" width="' + (size === 'lg' ? 160 : 64) + '" height="' + (size === 'lg' ? 160 : 64) + '" alt="' + esc(alt) + '" decoding="async">';
+  }
+
   // ---------------------------------------------------------------- render + events
   function render() {
     const wide = state.view === 'teacher';
@@ -588,6 +595,9 @@
     enterExercise();
   }
 
+  root.addEventListener('error', function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains('mm-mascot')) e.target.hidden = true;
+  }, true);
   root.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-act]');
     if (!btn || btn.disabled) return;
