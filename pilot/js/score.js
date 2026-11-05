@@ -348,7 +348,116 @@
     return { board: b, notes: notes, end: at };
   }
 
-  const KINDS = { beats: beats, steps: steps, place: place, pattern: pattern, pitch: pitch, durations: durations, turn: turn, shape: shape, tempo: tempo };
+  // ---- MM-610 part 2: four more musical structures, so the music fits the
+  // topic and the child meets more instruments (body percussion, voice).
+  //
+  //   contrast  a few sounds that differ in ONE attribute — pitch (high/low),
+  //             tempo (fast/slow), loudness (loud/soft) or length (long/short):
+  //             comparing numbers (higher = bigger), measurable attributes,
+  //             rounding (how far from the round number), estimation.
+  //   canon     the same phrases in another order or added and taken away:
+  //             a + b = b + a, (a + b) − b = a, × 1 and × 0, order of
+  //             operations with brackets, a line and its mirror (symmetry).
+  //   body      body percussion counting: a clap on every number, a stomp on
+  //             the marked ones — skip counting by 2/5/10/25/50, even and odd,
+  //             divisibility by 2, 5 and 10, sequences of products.
+  //   solid     a solid as three sounds: taps for its vertices, plucks for its
+  //             edges, held organ notes for its faces (and a box net as faces
+  //             folded one by one).
+  function contrast(spec, stage, slow) {
+    const b = Board();
+    const notes = [];
+    const row = b.row(spec.label || '', 'is-contrast');
+    let at = 0;
+    (spec.items || []).forEach(function (it, i) {
+      const g = b.group(row, it.label || '', 'is-item');
+      const n = it.n || 1;
+      const len = it.len || 1;
+      const rate = it.rate || 2.2; // notes per second: tempo is the attribute
+      const role = it.role || 'cmp' + (i % 4);
+      for (let j = 0; j < n; j++) {
+        const k = b.token(g, it.sym || '', role, it.deg || 0, len);
+        notes.push(note(it.deg || 0, at, Math.max(0.12, 0.45 * len) * slow, it.voice || 'keys', role, k.chip, it.gain == null ? 0.2 : it.gain, it.hz));
+        at += (1 / rate) * slow;
+      }
+      at += 0.55 * slow;
+    });
+    return { board: b, notes: notes, end: at };
+  }
+
+  function canon(spec, stage, slow) {
+    const b = Board();
+    const notes = [];
+    const beat = 0.3 * slow;
+    let at = 0;
+    (spec.rows || [['a', 'b'], ['b', 'a']]).forEach(function (seq, ri) {
+      const row = b.row((spec.labels || [])[ri] || '', 'is-canon');
+      seq.forEach(function (key) {
+        const removed = key.charAt(0) === '-';
+        const kk = removed ? key.slice(1) : key;
+        const cnt = spec[kk] || 0;
+        const g = b.group(row, (spec.names || {})[kk] || '', removed ? 'is-removed' : '');
+        if (!cnt) { b.token(g, 'שקט', 'silence', 0); at += 0.3 * slow; return; }
+        for (let j = 0; j < cnt; j++) {
+          const d = kk === 'a' ? TUNE[j % TUNE.length] : (kk === 'b' ? 4 + (j % 3) : (j % 2 ? 2 : 0));
+          const k = b.token(g, '', removed ? 'removed' : 'pat-' + kk, d);
+          notes.push(note(d, at, beat * 0.85, removed ? 'pluck' : (spec.voices || {})[kk] || (kk === 'a' ? 'keys' : kk === 'b' ? 'woodBar' : 'voiceAh'), removed ? 'removed' : 'phrase', k.chip, removed ? 0.09 : 0.2));
+          at += beat;
+        }
+        at += beat * 0.5;
+      });
+      at += beat * 1.2;
+    });
+    return { board: b, notes: notes, end: at };
+  }
+
+  function body(spec, stage, slow) {
+    const b = Board();
+    const notes = [];
+    const solved = solvedStage(stage);
+    const row = b.row(spec.label || '', 'is-body');
+    const g = b.group(row, '');
+    const from = spec.from == null ? 1 : spec.from;
+    const step = spec.step || 1;
+    const marks = spec.marks || [];
+    let at = 0;
+    for (let i = 0; i < spec.count; i++) {
+      const v = from + i * step;
+      const strong = spec.every ? v % spec.every === 0 : marks.indexOf(v) >= 0;
+      const last = i === spec.count - 1;
+      const asked = !!spec.ask && last;
+      const label = asked && !solved ? '?' : (spec.numbers === false ? '' : String(v));
+      const k = b.token(g, label, asked ? 'asked' : (strong ? 'stomp' : 'clap'), strong ? 0 : 4);
+      notes.push(note(0, at, 0.12, strong ? 'stomp' : 'clap', strong ? 'stomp' : 'clap', k.chip, strong ? 0.26 : 0.15, strong ? 70 : 1600));
+      at += (strong ? 0.36 : 0.3) * slow;
+    }
+    return { board: b, notes: notes, end: at };
+  }
+
+  const SOLID_PART = {
+    vertex: { voice: 'woodClick', hz: 1800, role: 'vertex', he: 'קודקודים', dur: 0.08, gap: 0.22 },
+    edge: { voice: 'pluck', hz: 196, role: 'edge', he: 'מקצועות', dur: 0.2, gap: 0.24 },
+    face: { voice: 'organ', hz: 262, role: 'face', he: 'פאות', dur: 0.45, gap: 0.5 }
+  };
+  function solid(spec, stage, slow) {
+    const b = Board();
+    const notes = [];
+    const row = b.row(spec.label || '', 'is-solid');
+    let at = 0;
+    (spec.parts || []).forEach(function (p) {
+      const P = SOLID_PART[p.kind] || SOLID_PART.face;
+      const g = b.group(row, p.label || P.he, 'is-place');
+      for (let j = 0; j < p.n; j++) {
+        const k = b.token(g, p.sym || '', P.role, p.kind === 'face' ? -7 : p.kind === 'edge' ? 0 : 7);
+        notes.push(note(0, at, P.dur * slow, P.voice, P.role, k.chip, 0.2, P.hz * (p.kind === 'face' ? Math.pow(2, (j % 4) / 12) : 1)));
+        at += P.gap * slow;
+      }
+      at += 0.4 * slow;
+    });
+    return { board: b, notes: notes, end: at };
+  }
+
+  const KINDS = { beats: beats, steps: steps, place: place, pattern: pattern, pitch: pitch, durations: durations, turn: turn, shape: shape, tempo: tempo, contrast: contrast, canon: canon, body: body, solid: solid };
 
   // stage: 'question' | 'hint' (slower, never resolves) | 'right' | 'reveal'
   function plan(spec, stage) {

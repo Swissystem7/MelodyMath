@@ -38,6 +38,14 @@
     drone: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.2]], sweep: 1, noise: 0.08, filter: ['lowpass', 700], attack: 0.1, decay: 1.2, hz: 73, vibrato: [6, 2] },
     keys: { wave: 'triangle', partials: [[1, 0.6], [2, 0.2], [3, 0.08]], sweep: 1, noise: 0.01, filter: ['lowpass', 4000], attack: 0.004, decay: 0.8, hz: 262 },
     organ: { wave: 'sine', partials: [[1, 0.5], [2, 0.3], [4, 0.15]], sweep: 1, noise: 0, filter: null, attack: 0.03, decay: 1, hz: 262 },
+    // MM-610 body percussion and voice (pilot/js/score.js kinds body, canon,
+    // contrast, solid): a hand clap, a foot stomp, a shaker, a sung "ah" and
+    // a whistle, so the pilot is not only keys, xylophone and drums.
+    clap: { wave: 'triangle', partials: [[1, 0.05]], sweep: 1, noise: 0.9, filter: ['bandpass', 1600], attack: 0.001, decay: 0.09, hz: 1600 },
+    stomp: { wave: 'sine', partials: [[1, 1]], sweep: 0.5, noise: 0.25, filter: ['lowpass', 400], attack: 0.002, decay: 0.3, hz: 70 },
+    shaker: { wave: 'square', partials: [[1, 0.03]], sweep: 1, noise: 0.8, filter: ['highpass', 4500], attack: 0.001, decay: 0.07, hz: 6000 },
+    voiceAh: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.25], [3, 0.12]], sweep: 1, noise: 0.02, filter: ['bandpass', 900], attack: 0.07, decay: 1.1, hz: 262, vibrato: [5.5, 6] },
+    whistle: { wave: 'sine', partials: [[1, 0.9]], sweep: 1, noise: 0.03, filter: ['highpass', 800], attack: 0.03, decay: 0.6, hz: 1047, vibrato: [6, 10] },
   };
 
   const MAX_GAIN = 0.3; // same ceiling idea as musicEngine.MAX_GAIN: gentle on small ears
