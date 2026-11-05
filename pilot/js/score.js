@@ -7,7 +7,9 @@
 //            optional SVG), so every exercise works with the sound off.
 //
 // Kinds (each one is a musical structure that IS the math structure):
-//   beats     bars of equal beats, the first beat of each bar accented:
+//   beats     bars of equal beats, the first beat of each bar accented and a
+//             softer secondary accent inside it (4/4 → beat 3, a 10-beat cycle →
+//             beat 6 = 5 + 5, 5/4 → beat 4 = 3 + 2), as in real metre:
 //             counting, grouping by 10, multiplication, division, remainder,
 //             area, volume, money, minutes. A bar can be one long "block" note
 //             (a ten, a hundred) when it is too long to play beat by beat.
@@ -18,12 +20,15 @@
 //             number-line jumps, the 12-step clock cycle, counting up change.
 //   place     one instrument per place value (gong 1000, organ 100, bass 10,
 //             xylophone 1); ten of one instrument = one of the next.
-//   pattern   a repeating melodic unit: patterns, pairs (even/odd), tallies.
+//   pattern   a repeating melodic unit: patterns, pairs (even/odd), tallies;
+//             `pan` moves a step left/right in stereo and `path` draws it on a
+//             3×3 grid (right/left = where it sounds, up/down = how high).
 //   pitch     data: each category plays its count as repeated notes at its
 //             own pitch (a pictogram you hear).
 //   durations note lengths inside a bar (4 beats, or 10/12/20 ticks): half a
 //             bar = half an hour, two half-shekels fill a bar, a coin lasts
-//             its value in ticks, a pencil lasts its length on a ticking ruler.
+//             its value in ticks, a pencil lasts its length on a ticking ruler;
+//             `shape` draws the (rotated) triangle whose sides the notes measure.
 //   turn      a full turn is one 4/4 bar; a held note of 1 beat is a quarter
 //             turn (a right angle), 2 beats a straight angle, 1.5 an obtuse
 //             one; `arms` draws long or short arms and `starts` rotates the
@@ -62,9 +67,19 @@
   const PLAYER_VOICES = ['keys', 'woodBar', 'steelPan', 'tine', 'reed', 'bowed'];
 
   function r3(x) { return Math.round(x * 1000) / 1000; }
-  function note(d, at, dur, voice, role, chip, gain, hz) {
+  function note(d, at, dur, voice, role, chip, gain, hz, pan) {
     const p = hz ? { hz: hz, name: '' } : deg(d);
-    return { note: p.name, hz: p.hz, at: r3(at), dur: r3(dur), voice: voice, role: role, chip: chip == null ? null : chip, gain: gain == null ? 0.2 : gain };
+    const o = { note: p.name, hz: p.hz, at: r3(at), dur: r3(dur), voice: voice, role: role, chip: chip == null ? null : chip, gain: gain == null ? 0.2 : gain };
+    if (pan) o.pan = Math.max(-1, Math.min(1, pan));
+    return o;
+  }
+  // The secondary accent of a bar (0-based beat), as the metre has it: 4/4 on
+  // beat 3, a 10-beat cycle on beat 6 (5 + 5), 5/4 on beat 4 (3 + 2), 8 on 5,
+  // 12 on 7. `sub: false` turns it off; `sub: n` sets it.
+  function subAccent(spec, size) {
+    if (spec.sub === false) return -1;
+    if (typeof spec.sub === 'number') return spec.sub;
+    return { 4: 2, 5: 3, 8: 4, 10: 5, 12: 6 }[size] == null ? -1 : { 4: 2, 5: 3, 8: 4, 10: 5, 12: 6 }[size];
   }
   function home(at) {
     return [0, 2, 4].map(function (d) { return note(d, at, 0.9, 'keys', 'home', null, 0.12); });
@@ -104,12 +119,16 @@
         at += 0.75 * slow;
         return;
       }
+      const sub = subAccent(spec, size);
       for (let j = 0; j < size; j++) {
         const d = TUNE[t++ % TUNE.length];
-        const k = b.token(g, '', silent.indexOf(i) >= 0 ? 'rest' : (j === 0 ? 'accent' : 'beat'), d);
+        const role = j === 0 ? 'accent' : j === sub ? 'accent2' : 'beat';
+        const k = b.token(g, '', silent.indexOf(i) >= 0 ? 'rest' : role, d);
         if (silent.indexOf(i) < 0) {
-          notes.push(note(d, at, beat * 0.85, voice, j === 0 ? 'accent' : 'beat', k.chip, j === 0 ? 0.26 : 0.17));
+          notes.push(note(d, at, beat * 0.85, voice, role, k.chip, j === 0 ? 0.26 : j === sub ? 0.21 : 0.17));
           if (j === 0) notes.push(note(0, at, 0.12, 'frameDrum', 'drum', null, 0.2, 110));
+          // the secondary accent: a lighter drum, so 5 + 5 (or 2 + 2) is heard inside the bar
+          if (j === sub) notes.push(note(0, at, 0.1, 'frameDrum', 'drum', null, 0.11, 110));
           // the bell sounds WITH the last beat of a bar: it marks the end of a group and adds nothing
           if (spec.barEnd && j === size - 1) notes.push(note(7, at, beat * 0.9, spec.barEnd, 'bell', null, 0.18));
         }
@@ -203,10 +222,29 @@
       const asked = spec.ask && i === seq.length - 1;
       const d = key === '?' ? 0 : (spec.deg[key] || 0);
       const k = b.token(g, key === '?' ? '?' : spec.sym[key], asked ? 'asked' : 'pat-' + key, d);
-      if (key !== '?') notes.push(note(d, at, 0.26 * slow, spec.voice || 'woodBar', asked ? 'asked' : 'pat', k.chip, 0.2));
+      if (key !== '?') notes.push(note(d, at, 0.26 * slow, spec.voice || 'woodBar', asked ? 'asked' : 'pat', k.chip, 0.2, null, spec.pan ? spec.pan[key] : 0));
       at += 0.36 * slow;
     });
-    return { board: b, notes: notes, end: at };
+    return { board: b, notes: notes, end: at, svg: spec.path ? grid(spec.path, solved) : '' };
+  }
+
+  // A 3×3 grid (columns left→right, rows bottom→top) with the walked path: the
+  // start cell is ⌂, the end cell '?' until the exercise is solved.
+  function grid(path, solved) {
+    const cell = 26, pad = 6;
+    const xy = function (p) { return [pad + (p[0] - 1) * cell + cell / 2, pad + (3 - p[1]) * cell + cell / 2]; };
+    let s = '<svg viewBox="0 0 90 90" width="90" height="90" aria-hidden="true" focusable="false" class="mm-sc-svg">';
+    for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) s += '<rect x="' + (pad + c * cell) + '" y="' + (pad + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="#FFF8E1" stroke="currentColor" stroke-width="2"/>';
+    for (let i = 1; i < path.length; i++) {
+      const a = xy(path[i - 1]), z = xy(path[i]);
+      s += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + z[0] + '" y2="' + z[1] + '" stroke="#1B1446" stroke-width="3" stroke-linecap="round"/>';
+      s += '<circle cx="' + z[0] + '" cy="' + z[1] + '" r="4" fill="#1B1446"/>';
+    }
+    const st = xy(path[0]), en = xy(path[path.length - 1]);
+    s += '<text x="' + st[0] + '" y="' + (st[1] + 5) + '" font-size="14" font-weight="700" text-anchor="middle" fill="#1B1446">⌂</text>';
+    s += '<circle cx="' + en[0] + '" cy="' + en[1] + '" r="9" fill="' + (solved ? '#FFE79A' : '#fff') + '" stroke="#1B1446" stroke-width="2"' + (solved ? '' : ' stroke-dasharray="3 2"') + '/>';
+    s += '<text x="' + en[0] + '" y="' + (en[1] + 4) + '" font-size="11" font-weight="900" text-anchor="middle" fill="#1B1446">' + (solved ? '●' : '?') + '</text>';
+    return s + '</svg>';
   }
 
   function pitch(spec, stage, slow) {
@@ -244,14 +282,40 @@
       }
       let used = 0;
       bar.forEach(function (n, j) {
-        const k = b.token(g, n.label, n.rest ? 'rest' : 'held', j * 2, n.len);
+        const k = b.token(g, n.label == null ? '' : n.label, n.rest ? 'rest' : 'held', j * 2, n.len);
         if (!n.rest) notes.push(note(j * 2, at + used * beat, n.len * beat * 0.92, n.voice || spec.voice || 'keys', 'held', k.chip, 0.22, n.hz));
         used += n.len;
       });
       if (used < per) b.token(g, 'שקט', 'rest', 0, per - used);
       at += per * beat + 0.2 * slow;
     });
-    return { board: b, notes: notes, end: at };
+    return { board: b, notes: notes, end: at, svg: spec.shape ? triangle(spec.shape.sides, spec.shape.rotate || 0) : '' };
+  }
+
+  // A triangle from its three side lengths (a = base, then b, then c back to the
+  // start), rotated by `rot` degrees: the lengths are what the notes measure.
+  function triangle(sides, rot) {
+    const a = sides[0], bb = sides[1], c = sides[2];
+    const x = (a * a + c * c - bb * bb) / (2 * a);
+    const y = Math.sqrt(Math.max(0, c * c - x * x));
+    const raw = [[0, 0], [a, 0], [x, y]];
+    const cx = (0 + a + x) / 3, cy = y / 3;
+    const s = 56 / Math.max(a, y, 1);
+    const th = rot * Math.PI / 180;
+    const pts = raw.map(function (p) {
+      const dx = (p[0] - cx) * s, dy = (p[1] - cy) * s;
+      return [45 + dx * Math.cos(th) - dy * Math.sin(th), 45 - (dx * Math.sin(th) + dy * Math.cos(th))];
+    });
+    let lab = '';
+    for (let i = 0; i < 3; i++) {
+      const p = pts[i], q = pts[(i + 1) % 3];
+      const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+      const ox = mx - 45, oy = my - 45, n = Math.max(1, Math.hypot(ox, oy));
+      lab += '<text x="' + r3(mx + ox / n * 9) + '" y="' + r3(my + oy / n * 9 + 4) + '" font-size="11" font-weight="700" text-anchor="middle">' + sides[i] + '</text>';
+    }
+    return '<svg viewBox="0 0 90 90" width="90" height="90" aria-hidden="true" focusable="false" class="mm-sc-svg">'
+      + '<polygon points="' + pts.map(function (p) { return r3(p[0]) + ',' + r3(p[1]); }).join(' ') + '" fill="#FFE79A" stroke="currentColor" stroke-width="3"/>'
+      + pts.map(function (p) { return '<circle cx="' + r3(p[0]) + '" cy="' + r3(p[1]) + '" r="4" fill="#1B1446"/>'; }).join('') + lab + '</svg>';
   }
 
   function wedge(beatsOfFour, arm, start) {
@@ -470,6 +534,22 @@
         at += P.gap * slow;
       }
       at += 0.4 * slow;
+    });
+    // faces as motifs (b09): a face is a short rhythm; congruent faces (a pair
+    // of opposite faces, the four triangles of a pyramid) play exactly the same
+    // motif, so "the side you cannot see" is heard. Same pitch and voice: only
+    // the rhythm tells one class of faces from another.
+    (spec.faces || []).forEach(function (f) {
+      const labels = f.labels || [];
+      for (let i = 0; i < (f.n || labels.length || 1); i++) {
+        const g = b.group(row, labels[i] || f.label || SOLID_PART.face.he, 'is-place is-face');
+        f.motif.forEach(function (len, j) {
+          const k = b.token(g, '', 'face', -7, len);
+          notes.push(note(0, at, 0.3 * len * slow * 0.9, 'organ', 'face', k.chip, 0.2, 262));
+          at += 0.3 * len * slow;
+        });
+        at += 0.35 * slow;
+      }
     });
     return { board: b, notes: notes, end: at };
   }

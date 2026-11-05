@@ -309,7 +309,7 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
 .mm-sc__row.is-bars .mm-sc__group.per-10 .mm-sc__tokens { grid-template-columns: repeat(10, minmax(0, 1fr)); }
 .mm-sc__row.is-bars .mm-sc__group.per-12 .mm-sc__tokens { grid-template-columns: repeat(12, minmax(0, 1fr)); }
 .mm-sc__row.is-bars .mm-sc__group.per-20 .mm-sc__tokens { grid-template-columns: repeat(20, minmax(0, 1fr)); }
-.mm-sc__row.is-bars .mm-sc__group.per-12, .mm-sc__row.is-bars .mm-sc__group.per-20 { flex-basis: 100%; }
+.mm-sc__row.is-bars .mm-sc__group.per-10, .mm-sc__row.is-bars .mm-sc__group.per-12, .mm-sc__row.is-bars .mm-sc__group.per-20 { flex-basis: 100%; }
 .mm-sc__row.is-bars .mm-sc__group.per-10 .mm-tok, .mm-sc__row.is-bars .mm-sc__group.per-12 .mm-tok, .mm-sc__row.is-bars .mm-sc__group.per-20 .mm-tok { font-size: 10px; padding: 0 2px; overflow: hidden; white-space: nowrap; }
 .mm-sc__art { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; color: var(--mm-ink); }
 .mm-sc-svg { max-width: 100%; height: auto; }
@@ -320,6 +320,7 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
   margin-bottom: calc(max(var(--step), -3) * 2px + 6px); transition: transform .12s, box-shadow .12s;
 }
 .mm-tok--accent { background: var(--mm-ink); color: var(--mm-white); min-width: 20px; height: 20px; }
+.mm-tok--accent2 { background: var(--mm-ink-soft); color: var(--mm-white); min-width: 19px; height: 19px; }
 .mm-tok--beat, .mm-tok--side0 { background: var(--mm-yellow); }
 .mm-tok--side1 { background: var(--mm-violet); }
 .mm-tok--extra { background: var(--mm-orange); }
