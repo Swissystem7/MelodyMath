@@ -214,3 +214,31 @@ test.describe('playing the answer', () => {
     await expect(page.getByTestId('answer')).toHaveText('1');
   });
 });
+
+// Every exercise with a drum pad can be answered by tapping alone, and the pad
+// keeps the page usable at phone width.
+test.describe('playing the answer, every pad', () => {
+  const Cov = require('../js/coverage.js');
+  // the teacher's preview links come from the grades 1–3 coverage map; the grade 4
+  // unit (frac-4) is played through by a student in units.spec.js instead
+  const linked = new Set(Cov.map().rows.flatMap((r) => r.units.flatMap((u) => u.questions.map((qid) => u.id + '/' + qid))));
+  const taps = Cov.allUnits().flatMap((u) => u.questions.filter((q) => q.tap && linked.has(u.id + '/' + q.id)).map((q) => [u.id, q]));
+  test('each pad: tapping the answer is checked right, and the page does not scroll sideways', async ({ page, baseURL }) => {
+    test.setTimeout(240000);
+    expect(taps.length).toBeGreaterThanOrEqual(25);
+    await h.openDemo(page, baseURL);
+    await h.signIn(page, 'teacher');
+    for (const [unit, q] of taps) {
+      await page.locator('[data-act="preview"][data-unit="' + unit + '"][data-q="' + q.id + '"]').first().click();
+      await h.expectQuestion(page, q.id);
+      for (let i = 0; i < q.answer; i++) await page.getByTestId('tap').click();
+      await expect(page.getByTestId('answer')).toHaveText(String(q.answer));
+      await expect(page.getByTestId('tap-pad')).toHaveAttribute('data-count', String(q.answer));
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), q.id).toBeLessThanOrEqual(0);
+      await page.getByTestId('check').click();
+      await expect(page.getByTestId('feedback'), q.id).toHaveAttribute('data-result', 'right');
+      await page.getByTestId('preview-exit').click();
+      await expect(page.getByTestId('view-teacher')).toBeVisible();
+    }
+  });
+});
