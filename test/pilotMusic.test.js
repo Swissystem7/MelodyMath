@@ -196,8 +196,10 @@ test('score.js: secondary accent, stereo pan on a grid, a drawn triangle, face-p
   assert.equal(n[0].hz, n[1].hz, 'a step to the right does not change the pitch');
   assert.ok(n[2].hz > n[1].hz, 'a step up raises the pitch');
   assert.equal(n[3].hz, n[2].hz);
-  assert.match(S.plan(at5.music, 'question').svg, /\?<\/text>/);
-  assert.doesNotMatch(S.plan(at5.music, 'right').svg, /\?<\/text>/);
+  assert.doesNotMatch(S.plan(at5.music, 'question').svg, /<line|●/, 'the picture does not show the path or the end before the answer');
+  assert.match(S.plan(at5.music, 'right').svg, /<line[\s\S]*●/);
+  assert.match(S.plan(byId('sd1').music, 'question').svg, /קדימה/);
+  assert.match(S.plan(byId('sd2').music, 'question').svg, /בסיס/);
   // b06: three equal sides = three equal durations, the triangle is drawn rotated
   const sd4 = byId('sd4');
   const p4 = S.plan(sd4.music, 'question');
