@@ -183,3 +183,34 @@ test.describe('teacher: curriculum coverage and why it works', () => {
     expect(blocked).toEqual([]);
   });
 });
+
+// "Play the answer": exercises whose answer is a number of beats have a drum pad.
+test.describe('playing the answer', () => {
+  test('taps sound a beat, fill bars, set the answer and are checked like a typed number', async ({ page, baseURL }) => {
+    await h.openDemo(page, baseURL);
+    await startUnit(page);
+    await h.expectQuestion(page, 'q1');
+    const pad = page.getByTestId('tap-pad');
+    await expect(pad).toHaveAttribute('data-count', '0');
+    await expect(page.getByTestId('untap')).toBeDisabled();
+    for (let i = 0; i < 8; i++) await page.getByTestId('tap').click();
+    await expect(page.getByTestId('answer')).toHaveText('8');
+    await page.getByTestId('untap').click();
+    await expect(pad).toHaveAttribute('data-count', '7');
+    await expect(pad.locator('.mm-tap__dot:not(.is-empty)')).toHaveCount(7);
+    const tap = await h.lastPlay(page, 'q1:tap');
+    expect(tap.audio).toBe('played');
+    expect(tap.notes[0].role).toBe('tap');
+    await h.expectMobileFriendly(page);
+    await page.getByTestId('check').click();
+    await expect(page.getByTestId('feedback')).toHaveAttribute('data-result', 'right');
+    await expect(page.getByTestId('tap')).toBeDisabled();
+    await page.getByTestId('next').click();
+    // the keypad and the pad show the same number; a wrong answer starts the taps again
+    await h.expectQuestion(page, 'q2');
+    await h.answer(page, 12);
+    await expect(page.getByTestId('tap-pad')).toHaveAttribute('data-count', '0');
+    await page.getByTestId('tap').click();
+    await expect(page.getByTestId('answer')).toHaveText('1');
+  });
+});

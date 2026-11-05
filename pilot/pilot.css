@@ -182,6 +182,12 @@ body {
 }
 .mm-key:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--mm-ink); }
 .mm-key--tool { background: var(--mm-lavender); font-size: 18px; }
+.mm-tap__bars { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; margin: 8px 0; }
+.mm-tap__bar { display: inline-flex; gap: 3px; padding: 4px; border: 2px solid var(--mm-ink); border-radius: 10px; background: var(--mm-white); }
+.mm-tap__dot { width: 14px; height: 14px; border-radius: 7px; border: 2px solid var(--mm-ink); background: var(--mm-yellow); }
+.mm-tap__dot.is-first { background: var(--mm-ink); }
+.mm-tap__dot.is-empty { background: transparent; border-style: dashed; border-color: var(--mm-ink-soft); }
+.mm-tap__drum { flex: 1 1 auto; min-height: 56px; font-size: 20px; }
 
 /* summary */
 .mm-stars { font-size: 44px; text-align: center; color: var(--mm-ink); letter-spacing: 4px; }

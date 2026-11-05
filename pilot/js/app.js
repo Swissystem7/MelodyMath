@@ -618,6 +618,32 @@
       }).join('') + '</div>';
     }
 
+    // "Play the answer": a drum pad for exercises whose answer is a number of
+    // beats. A tap sounds a beat, fills a dot in a bar of `per` beats and is the
+    // answer; the keypad below writes the same number.
+    let tapPad = '';
+    if (q.kind === 'num' && q.tap) {
+      const per = q.tap.per || 4;
+      const n = empty || wrong ? 0 : Math.min(TAP_MAX, Number(pending) || 0);
+      let bars = '';
+      for (let b = 0; b * per < Math.max(n, 1); b++) {
+        let dots = '';
+        for (let j = 0; j < per; j++) {
+          const i = b * per + j;
+          dots += '<span class="mm-tap__dot' + (i >= n ? ' is-empty' : j === 0 ? ' is-first' : '') + '"></span>';
+        }
+        bars += '<span class="mm-tap__bar">' + dots + '</span>';
+      }
+      tapPad = '<div class="mm-card mm-tap" data-testid="tap-pad" data-count="' + n + '">'
+        + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">מנגנים את התשובה</span></div>'
+        + '<p class="mm-sub">הקישו על התוף פעם אחת לכל פעימה. אפשר גם לכתוב את המספר במקלדת.</p>'
+        + '<div class="mm-tap__bars" dir="ltr" aria-hidden="true">' + bars + '</div>'
+        + '<div class="mm-row-actions">'
+        + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (locked ? ' disabled' : '') + '>🥁 פעימה</button>'
+        + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פעימה אחת"' + (locked || !n ? ' disabled' : '') + '>↶ פעימה אחורה</button>'
+        + '</div></div>';
+    }
+
     const isLast = qi === UNIT.questions.length - 1;
     const submit = locked
       ? '<button type="button" class="mm-btn mm-btn--mint" data-act="next" data-testid="next">' + (isLast ? (state.preview ? 'חזרה ללוח המורה ←' : hasChecks() ? 'לבדיקה הקצרה ←' : 'לסיכום ←') : 'לתרגיל הבא ←') + '</button>'
@@ -640,7 +666,7 @@
       + thinkHtml(q)
       + (legacy ? musicCard(q, stage) : scoreCard(q, stage))
       + '<div class="' + ansCls + '" aria-live="polite" data-testid="answer" aria-label="התשובה שלכם">' + esc(shownAnswer) + '</div>'
-      + fb + whyHtml(q) + input + submit
+      + fb + whyHtml(q) + tapPad + input + submit
       + '</section>';
   }
 
@@ -932,6 +958,28 @@
     render();
   }
 
+  // One tap = one beat of the answer. The first beat of each bar is lower and
+  // gets a drum, so the child hears the grouping while playing it.
+  const TAP_MAX = 40;
+  function onTap(d) {
+    if (state.qState === 'right' || state.qState === 'revealed') return;
+    const cq = currentQuestion();
+    if (!cq || cq.kind !== 'num' || !cq.tap) return;
+    let n = state.qState === 'wrong' ? 0 : (Number(state.typed) || 0);
+    n = Math.max(0, Math.min(TAP_MAX, n + d));
+    state.typed = n ? String(n) : '';
+    if (state.qState === 'wrong') state.qState = 'retry';
+    if (d > 0 && n > 0) {
+      const first = (n - 1) % (cq.tap.per || 4) === 0;
+      const notes = [{ note: '', hz: first ? 392 : 523.25, at: 0, dur: 0.18, voice: cq.tap.voice || 'woodBar', role: 'tap', chip: null, gain: first ? 0.26 : 0.2 }];
+      if (first) notes.push({ note: '', hz: 110, at: 0, dur: 0.12, voice: 'frameDrum', role: 'drum', chip: null, gain: 0.2 });
+      M.play(cq.id + ':tap', notes);
+    }
+    render();
+    const b = root.querySelector('[data-act="tap"]');
+    if (b) b.focus();
+  }
+
   function onChoose(id) {
     if (state.qState === 'right' || state.qState === 'revealed') return;
     state.choice = id;
@@ -1046,6 +1094,8 @@
       return;
     }
     if (act === 'key') { onKey(btn.getAttribute('data-key')); return; }
+    if (act === 'tap') { onTap(1); return; }
+    if (act === 'untap') { onTap(-1); return; }
     if (act === 'choose') { onChoose(btn.getAttribute('data-choice')); return; }
     if (act === 'check') { onCheck(); return; }
     if (act === 'next') { onNext(); return; }
