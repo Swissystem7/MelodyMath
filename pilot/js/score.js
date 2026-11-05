@@ -229,21 +229,25 @@
   }
 
   // A 3×3 grid (columns left→right, rows bottom→top) with the walked path: the
-  // start cell is ⌂, the end cell '?' until the exercise is solved.
+  // start cell is ⌂; the path and the end cell are drawn once the exercise is solved.
   function grid(path, solved) {
     const cell = 26, pad = 6;
     const xy = function (p) { return [pad + (p[0] - 1) * cell + cell / 2, pad + (3 - p[1]) * cell + cell / 2]; };
     let s = '<svg viewBox="0 0 90 90" width="90" height="90" aria-hidden="true" focusable="false" class="mm-sc-svg">';
     for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) s += '<rect x="' + (pad + c * cell) + '" y="' + (pad + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="#FFF8E1" stroke="currentColor" stroke-width="2"/>';
-    for (let i = 1; i < path.length; i++) {
+    for (let i = 1; solved && i < path.length; i++) {
       const a = xy(path[i - 1]), z = xy(path[i]);
       s += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + z[0] + '" y2="' + z[1] + '" stroke="#1B1446" stroke-width="3" stroke-linecap="round"/>';
       s += '<circle cx="' + z[0] + '" cy="' + z[1] + '" r="4" fill="#1B1446"/>';
     }
     const st = xy(path[0]), en = xy(path[path.length - 1]);
     s += '<text x="' + st[0] + '" y="' + (st[1] + 5) + '" font-size="14" font-weight="700" text-anchor="middle" fill="#1B1446">⌂</text>';
-    s += '<circle cx="' + en[0] + '" cy="' + en[1] + '" r="9" fill="' + (solved ? '#FFE79A' : '#fff') + '" stroke="#1B1446" stroke-width="2"' + (solved ? '' : ' stroke-dasharray="3 2"') + '/>';
-    s += '<text x="' + en[0] + '" y="' + (en[1] + 4) + '" font-size="11" font-weight="900" text-anchor="middle" fill="#1B1446">' + (solved ? '●' : '?') + '</text>';
+    // before the answer the picture shows only where the sound starts: the child
+    // follows the steps by ear (and in the words), the end cell is the answer
+    if (solved) {
+      s += '<circle cx="' + en[0] + '" cy="' + en[1] + '" r="9" fill="#FFE79A" stroke="#1B1446" stroke-width="2"/>';
+      s += '<text x="' + en[0] + '" y="' + (en[1] + 4) + '" font-size="11" font-weight="900" text-anchor="middle" fill="#1B1446">●</text>';
+    }
     return s + '</svg>';
   }
 
@@ -282,7 +286,7 @@
       }
       let used = 0;
       bar.forEach(function (n, j) {
-        const k = b.token(g, n.label == null ? '' : n.label, n.rest ? 'rest' : 'held', j * 2, n.len);
+        const k = b.token(g, n.label == null ? '' : n.label, n.rest ? 'rest' : (n.alt ? 'heldb' : 'held'), j * 2, n.len);
         if (!n.rest) notes.push(note(j * 2, at + used * beat, n.len * beat * 0.92, n.voice || spec.voice || 'keys', 'held', k.chip, 0.22, n.hz));
         used += n.len;
       });
@@ -551,7 +555,26 @@
         at += 0.35 * slow;
       }
     });
-    return { board: b, notes: notes, end: at };
+    return { board: b, notes: notes, end: at, svg: spec.draw ? solidSvg(spec.draw) : '' };
+  }
+
+  // A box (three visible faces named) or a square pyramid: the faces the motifs
+  // belong to. The hidden faces are dashed.
+  function solidSvg(kind) {
+    const head = '<svg viewBox="0 0 120 90" width="120" height="90" aria-hidden="true" focusable="false" class="mm-sc-svg">';
+    const t = function (x, y, w) { return '<text x="' + x + '" y="' + y + '" font-size="10" font-weight="700" text-anchor="middle" fill="#1B1446">' + w + '</text>'; };
+    if (kind === 'pyramid') {
+      return head + '<polygon points="14,66 74,66 104,50 44,50" fill="#FFF8E1" stroke="#1B1446" stroke-width="2" stroke-dasharray="4 3"/>'
+        + '<polygon points="14,66 74,66 60,8" fill="#FFE79A" stroke="#1B1446" stroke-width="3" stroke-linejoin="round"/>'
+        + '<polygon points="74,66 104,50 60,8" fill="#B9A6FF" stroke="#1B1446" stroke-width="3" stroke-linejoin="round"/>'
+        + '<line x1="44" y1="50" x2="60" y2="8" stroke="#1B1446" stroke-width="2" stroke-dasharray="4 3"/>'
+        + t(46, 84, 'בסיס ריבוע') + '</svg>';
+    }
+    return head + '<polygon points="12,30 72,30 72,80 12,80" fill="#FFE79A" stroke="#1B1446" stroke-width="3" stroke-linejoin="round"/>'
+      + '<polygon points="12,30 38,10 98,10 72,30" fill="#FFF8E1" stroke="#1B1446" stroke-width="3" stroke-linejoin="round"/>'
+      + '<polygon points="72,30 98,10 98,60 72,80" fill="#B9A6FF" stroke="#1B1446" stroke-width="3" stroke-linejoin="round"/>'
+      + '<path d="M12 80 L38 60 L98 60 M38 60 L38 10" fill="none" stroke="#1B1446" stroke-width="1.5" stroke-dasharray="4 3"/>'
+      + t(42, 59, 'קדימה') + t(56, 24, 'למעלה') + t(86, 48, 'ימין') + '</svg>';
   }
 
   const KINDS = { beats: beats, steps: steps, place: place, pattern: pattern, pitch: pitch, durations: durations, turn: turn, shape: shape, tempo: tempo, contrast: contrast, canon: canon, body: body, solid: solid };
