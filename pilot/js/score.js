@@ -228,13 +228,17 @@
     return { board: b, notes: notes, end: at, svg: spec.path ? grid(spec.path, solved) : '' };
   }
 
-  // A 3×3 grid (columns left→right, rows bottom→top) with the walked path: the
+  // A grid of cells (columns left→right, rows bottom→top) with the walked path: the
   // start cell is ⌂; the path and the end cell are drawn once the exercise is solved.
   function grid(path, solved) {
-    const cell = 26, pad = 6;
-    const xy = function (p) { return [pad + (p[0] - 1) * cell + cell / 2, pad + (3 - p[1]) * cell + cell / 2]; };
-    let s = '<svg viewBox="0 0 90 90" width="90" height="90" aria-hidden="true" focusable="false" class="mm-sc-svg">';
-    for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) s += '<rect x="' + (pad + c * cell) + '" y="' + (pad + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="#FFF8E1" stroke="currentColor" stroke-width="2"/>';
+    // the grid is as wide and as high as the path needs (at least 3 × 2)
+    const cols = Math.max(3, Math.max.apply(null, path.map(function (p) { return p[0]; })));
+    const rows = Math.max(2, Math.max.apply(null, path.map(function (p) { return p[1]; })));
+    const cell = 24, pad = 6;
+    const W = pad * 2 + cols * cell, H = pad * 2 + rows * cell;
+    const xy = function (p) { return [pad + (p[0] - 1) * cell + cell / 2, pad + (rows - p[1]) * cell + cell / 2]; };
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" aria-hidden="true" focusable="false" class="mm-sc-svg">';
+    for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) s += '<rect x="' + (pad + c * cell) + '" y="' + (pad + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="#FFF8E1" stroke="currentColor" stroke-width="2"/>';
     for (let i = 1; solved && i < path.length; i++) {
       const a = xy(path[i - 1]), z = xy(path[i]);
       s += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + z[0] + '" y2="' + z[1] + '" stroke="#1B1446" stroke-width="3" stroke-linecap="round"/>';
