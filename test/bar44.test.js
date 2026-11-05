@@ -119,3 +119,26 @@ test('melodic symmetry functions support retrograde and pitch inversion', () => 
   assert.equal(bar.isMeter34(6), true);
   assert.equal(bar.isMeter34(8), false);
 });
+
+// A practice question shows the bar as a still picture: the line that names the
+// filled fraction is the answer, so it is not printed, and a tap writes nothing.
+test('picture mode: the bar does not print the filled fraction and is not interactive', () => {
+  const quiet = bar.renderBar44Html({ fraction: '1/2' }, false, true);
+  assert.doesNotMatch(quiet, /מלא: /);
+  assert.doesNotMatch(quiet, /1\/2/);
+  assert.equal((quiet.match(/bar44-cell on/g) || []).length, 4, 'the filled cells are still drawn');
+  const root = { innerHTML: '', querySelectorAll() { throw new Error('picture mode binds no taps'); } };
+  let picked = 0;
+  const api = bar.bindBar44(root, { filled: 2 }, () => { picked++; }, { picture: true });
+  assert.doesNotMatch(root.innerHTML, /מלא: |1\/4/);
+  assert.match(root.innerHTML, / disabled/);
+  assert.equal(api.fraction(), '1/4');
+  assert.equal(picked, 0);
+});
+
+test('grade ד fraction prompts do not print their own answer in brackets', () => {
+  const BANKS = require('../src/lib/banks');
+  const rows = BANKS.practiceItems(null, 'ד').filter((x) => x.widget === 'bar44');
+  assert.ok(rows.length >= 15);
+  rows.forEach((x) => assert.ok(!x.prompt.includes("(" + x.answer + ")"), x.prompt));
+});

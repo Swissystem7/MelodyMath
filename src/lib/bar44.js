@@ -90,7 +90,9 @@
     return { filled: filled, total: BAR_EIGHTHS };
   }
 
-  function renderBar44Html(bar, interactive) {
+  // quiet === true: the bar is the picture of an open question, so the line that
+  // names the filled fraction ("מלא: 1/2 מהתיבה") is not printed — it is the answer.
+  function renderBar44Html(bar, interactive, quiet) {
     const B = normalizeBar(bar);
     const cells = [];
     for (let i = 0; i < BAR_EIGHTHS; i++) {
@@ -111,14 +113,26 @@
       + '<p class="bar44-label">תיבה 4/4 · 8 שמיניות</p>'
       + '<div class="bar44-track" role="group" aria-label="תיבה מוזיקלית 4/4">'
       + cells.join('') + '</div>'
-      + '<p class="bar44-read" aria-live="polite">מלא: ' + frac + ' מהתיבה</p>'
+      + (quiet === true
+        ? '<p class="bar44-read">ספרו את התאים המלאים: כל תא הוא שמינית, כל פעימה היא רבע.</p>'
+        : '<p class="bar44-read" aria-live="polite">מלא: ' + frac + ' מהתיבה</p>')
       + '</div>';
   }
 
-  function bindBar44(root, bar, onPick) {
+  // opts.picture === true: a still picture for a practice question. The child
+  // reads the bar and writes the answer; a tap neither changes the picture nor
+  // writes the fraction into the answer box.
+  function bindBar44(root, bar, onPick, opts) {
     if (!root) return null;
     const B = normalizeBar(bar);
     let filled = B.filled;
+    if (opts && opts.picture === true) {
+      root.innerHTML = renderBar44Html({ filled: filled }, false, true);
+      return {
+        fraction: function () { return fractionFromEighths(filled); },
+        eighths: function () { return filled; },
+      };
+    }
     function paint() {
       root.innerHTML = renderBar44Html({ filled: filled }, true);
       root.querySelectorAll('.bar44-cell').forEach(function (btn) {
