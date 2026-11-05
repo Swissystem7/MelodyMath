@@ -176,6 +176,7 @@
   function unitStatus(p, unit) {
     const u = unit || UNIT;
     if (p.completedAt && hasChecks(u) && !p.post) return { key: 'post', text: 'נשארה בדיקה קצרה אחרי' };
+    if (p.completedAt && typeof K.laterDue === 'function' && K.laterDue(p)) return { key: 'later', text: 'מחכה בדיקת המשך' };
     if (p.completedAt) return { key: 'done', text: 'הושלמה' };
     const answered = Object.keys(p.results).filter(function (k) { return p.results[k].correct || p.results[k].revealed; }).length;
     if (p.lessonDone || answered || p.pre) return { key: 'progress', text: 'בתהליך · ' + answered + ' מתוך ' + u.questions.length };
@@ -243,7 +244,7 @@
   // Inside a unit a student can go back to the list of units without signing
   // out; progress is already saved per exercise, so the unit resumes where it
   // was. A teacher preview has its own "חזרה ללוח" bar, so it gets no second one.
-  const IN_UNIT = ['lesson', 'exercise', 'check-pre', 'check-post'];
+  const IN_UNIT = ['lesson', 'exercise', 'check-pre', 'check-post', 'check-later'];
   function topbar(title, sub, end) {
     const back = state.account && state.account.role !== 'teacher' && !state.preview && IN_UNIT.indexOf(state.view) >= 0;
     return '<div class="mm-topbar">'
@@ -518,17 +519,19 @@
   function viewCheck(phase) {
     const items = K.checkFor(UNIT.id, phase);
     const pre = phase === 'pre';
+    const later = phase === 'later';
     return '<section class="mm-view" data-testid="view-check" data-phase="' + phase + '" data-unit="' + esc(UNIT.id) + '">'
-      + topbar(pre ? 'בדיקה קצרה — לפני' : 'בדיקה קצרה — אחרי', UNIT.title)
+      + topbar(pre ? 'בדיקה קצרה — לפני' : later ? 'בדיקת המשך' : 'בדיקה קצרה — אחרי', UNIT.title)
       + '<div class="mm-card"><p>' + (pre
         ? 'לפני שמתחילים: ' + items.length + ' שאלות קצרות, בלי מוזיקה ובלי רמזים. זה לא מבחן — רק כדי לראות אחר כך כמה התקדמתם.'
+        : later ? 'עבר שבוע מאז שסיימתם את היחידה. ' + items.length + ' שאלות קצרות בלי מוזיקה — לראות מה זוכרים.'
         : 'סיימתם את התרגילים! עוד ' + items.length + ' שאלות קצרות בלי מוזיקה — לראות מה למדתם.') + '</p></div>'
       + '<form class="mm-card" data-testid="check-form" data-phase="' + phase + '" novalidate>'
       + items.map(function (it, i) {
         return '<label class="mm-field" data-testid="check-item">' + (i + 1) + '. ' + esc(it.q)
           + '<input name="' + esc(it.id) + '" data-testid="check-input-' + esc(it.id) + '" inputmode="numeric" autocomplete="off" dir="ltr" maxlength="6" aria-label="תשובה לשאלה ' + (i + 1) + '"></label>';
       }).join('')
-      + '<button type="submit" class="mm-btn" data-testid="check-submit">' + (pre ? 'סיימתי, לשיעור ←' : 'סיימתי, לסיכום ←') + '</button>'
+      + '<button type="submit" class="mm-btn" data-testid="check-submit">' + (pre ? 'סיימתי, לשיעור ←' : later ? 'סיימתי ←' : 'סיימתי, לסיכום ←') + '</button>'
       + '</form></section>';
   }
 
@@ -736,7 +739,7 @@
     students().forEach(function (s) {
       UNITS.forEach(function (unit) {
         const p = store.progress(s.id, unit.id);
-        if (p.pre) rows.push({ student: s.displayName, unit: unit.id, pre: p.pre, post: p.post || null });
+        if (p.pre) rows.push({ student: s.displayName, unit: unit.id, pre: p.pre, post: p.post || null, later: p.later || null });
       });
     });
     return rows;
@@ -759,6 +762,8 @@
         + '<strong>' + a.children + '</strong> ' + (a.children === 1 ? 'ילד/ה' : 'ילדים') + ', <strong>' + a.n + '</strong> זוגות של לפני ואחרי: ממוצע <span class="ltr">' + a.pre + '%</span> לפני ו־<span class="ltr">' + a.post + '%</span> אחרי, '
         + 'שינוי של <strong class="ltr">' + sign(a.gain) + '</strong> נקודות אחוז. השתפרו ' + a.improved + ', ללא שינוי ' + a.same + ', ירדו ' + a.declined + '.'
         + (a.d != null ? ' גודל אפקט (לפני־אחרי) <span class="ltr">d = ' + a.d + '</span>.' : '') + '</p>'
+        + (a.laterN ? '<p data-testid="class-gain-later" data-n="' + a.laterN + '" data-later="' + a.later + '">בדיקת המשך אחרי שבוע, ב־' + a.laterN + ' זוגות: <span class="ltr">' + a.laterPost + '%</span> מיד אחרי היחידה, <span class="ltr">' + a.later + '%</span> אחרי שבוע.</p>'
+          : '<p class="mm-sub" data-testid="class-gain-later-none">בדיקת המשך נפתחת לכל ילד/ה ' + (K.LATER_DAYS || 7) + ' ימים אחרי הבדיקה שאחרי, עם אותן שאלות, כדי לראות מה נשאר.</p>')
         + '<div class="mm-table-wrap"><table class="mm-table" data-testid="class-gain-table"><thead><tr><th scope="col">יחידה</th><th scope="col">זוגות</th><th scope="col">לפני</th><th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>'
         + sum.byUnit.map(function (u) {
           return '<tr data-testid="class-gain-row" data-unit="' + esc(u.unit) + '" data-gain="' + u.gain + '"><th scope="row">' + esc(title(u.unit)) + '</th><td>' + u.n + '</td>'
@@ -961,6 +966,7 @@
       : v === 'summary' ? viewSummary()
       : v === 'check-pre' ? viewCheck('pre')
       : v === 'check-post' ? viewCheck('post')
+      : v === 'check-later' ? viewCheck('later')
       : viewTeacher();
     root.setAttribute('data-view', v);
     if (v === 'exercise') probeNarration(currentQuestion());
@@ -975,6 +981,7 @@
     state.lessonStatus = '';
     if (hasChecks() && !p.pre) go('check-pre');
     else if (p.completedAt && hasChecks() && !p.post) go('check-post');
+    else if (p.completedAt && typeof K.laterDue === 'function' && K.laterDue(p)) go('check-later');
     else if (p.completedAt) go('summary');
     else if (!p.lessonDone) go('lesson');
     else enterExercise();
@@ -1200,7 +1207,7 @@
       p[phase] = K.score(UNIT.id, phase, answers);
       if (!p.startedAt) p.startedAt = Date.now();
       saveP(p);
-      if (phase === 'post') { go('summary'); return; }
+      if (phase === 'post' || phase === 'later') { go('summary'); return; }
       if (!p.lessonDone) go('lesson'); else enterExercise();
       return;
     }

@@ -232,7 +232,28 @@ test('checks CSV: one line per student and unit with a check before, quoted when
     { student: 'c', unit: 'line-1', pre: null, post: null }
   ]).trim().split('\n');
   assert.equal(csv.length, 3);
-  assert.equal(csv[0], 'student,unit,pre_score,pre_total,post_score,post_total,change,pre_at,post_at');
+  assert.equal(csv[0], 'student,unit,pre_score,pre_total,post_score,post_total,change,pre_at,post_at,later_score,later_total,later_at');
   assert.match(csv[1], /^"דנה, כהן",music-1,1,3,3,3,2,/);
-  assert.equal(csv[2], 'b,times-1,0,3,,,,,');
+  assert.equal(csv[2], 'b,times-1,0,3,,,,,,,,');
+});
+
+// The follow-up check a week after the check "after": the same items, to see what stayed.
+test('follow-up check: due 7 days after the check after, same items, counted apart in the summary and the CSV', () => {
+  const day = 24 * 60 * 60 * 1000;
+  const post = { score: 3, total: 3, at: 1000 };
+  assert.equal(K.LATER_DAYS, 7);
+  assert.equal(K.laterDue({ post }, 1000 + 6 * day), false, 'not before a week');
+  assert.equal(K.laterDue({ post }, 1000 + 7 * day), true);
+  assert.equal(K.laterDue({ post: { score: 3, total: 3, at: 0 } }, 7 * day), true, 'a time of 0 still counts');
+  assert.equal(K.laterDue({ post, later: { score: 2, total: 3 } }, 1000 + 9 * day), false, 'only once');
+  assert.equal(K.laterDue({ pre: post }, 1000 + 9 * day), false, 'not without the check after');
+  UNITS.forEach((u) => assert.deepEqual(K.checkFor(u.id, 'later'), K.checkFor(u.id, 'post'), u.id + ': the follow-up repeats the check after'));
+  const s = K.classSummary([
+    { student: 'a', unit: 'u', pre: { score: 1, total: 3 }, post: { score: 3, total: 3 }, later: { score: 2, total: 3 } },
+    { student: 'b', unit: 'u', pre: { score: 0, total: 3 }, post: { score: 2, total: 3 } }
+  ]);
+  assert.deepEqual([s.all.laterN, s.all.laterPost, s.all.later], [1, 100, 66.7], 'compared with the same children right after the unit');
+  const csv = K.toCsv([{ student: 'a', unit: 'u', pre: { score: 1, total: 3 }, post: { score: 3, total: 3 }, later: { score: 2, total: 3 } }]).trim().split('\n');
+  assert.match(csv[0], /,later_score,later_total,later_at$/);
+  assert.match(csv[1], /,2,3,$/);
 });

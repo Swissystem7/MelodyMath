@@ -195,3 +195,47 @@ test.describe('pre-check → unit → post-check, and the teacher sees before/af
     expect(blocked).toEqual([]);
   });
 });
+
+// A week after the check "after", the unit asks for a follow-up check with the
+// same items; the teacher sees what stayed.
+test.describe('follow-up check a week later', () => {
+  test('due after 7 days, done once, and shown in the class summary', async ({ page, baseURL }) => {
+    await h.openDemo(page, baseURL);
+    await h.signIn(page, 'student');
+    const unit = Cov.unitById('music-1');
+    await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre', { 'm1-pre1': '12' });
+    await page.getByTestId('lesson-continue').click();
+    for (const q of unit.questions) {
+      await h.expectQuestion(page, q.id);
+      await give(page, rightOf(q));
+      await page.getByTestId('next').click();
+    }
+    await h.passCheck(page, 'post');
+    await page.getByTestId('home').click();
+    await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'done');
+    // move the check "after" 8 days back, as if a week went by
+    await page.evaluate(() => {
+      const key = Object.keys(localStorage).find((k) => /progress$/.test(k));
+      const all = JSON.parse(localStorage.getItem(key));
+      Object.values(all).forEach((units) => { if (units['music-1'] && units['music-1'].post) units['music-1'].post.at -= 8 * 24 * 60 * 60 * 1000; });
+      localStorage.setItem(key, JSON.stringify(all));
+    });
+    await page.reload();
+    await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'later');
+    await page.getByTestId('open-unit').click();
+    await expect(page.locator('[data-testid="view-check"][data-phase="later"]')).toBeVisible();
+    await expect(page.getByTestId('check-item')).toHaveCount(3);
+    await expect(page.getByTestId('music-card')).toHaveCount(0);
+    await h.expectMobileFriendly(page);
+    await h.passCheck(page, 'later', { 'm1-post2': '8' }); // 2 of 3 a week later
+    await expect(page.getByTestId('view-summary')).toBeVisible();
+    await page.getByTestId('home').click();
+    await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'done'); // only once
+    await h.signOut(page);
+    await h.signIn(page, 'teacher');
+    const later = page.getByTestId('class-gain-later');
+    await expect(later).toHaveAttribute('data-n', '1');
+    await expect(later).toHaveAttribute('data-later', '66.7');
+  });
+});

@@ -71,8 +71,8 @@
       const p = allProgress();
       const row = p[studentId] && p[studentId][unitId];
       return row && typeof row === 'object'
-        ? { lessonDone: !!row.lessonDone, index: Number(row.index) || 0, results: row.results || {}, completedAt: row.completedAt || null, startedAt: row.startedAt || null, pre: checkRow(row.pre), post: checkRow(row.post) }
-        : { lessonDone: false, index: 0, results: {}, completedAt: null, startedAt: null, pre: null, post: null };
+        ? { lessonDone: !!row.lessonDone, index: Number(row.index) || 0, results: row.results || {}, completedAt: row.completedAt || null, startedAt: row.startedAt || null, pre: checkRow(row.pre), post: checkRow(row.post), later: checkRow(row.later) }
+        : { lessonDone: false, index: 0, results: {}, completedAt: null, startedAt: null, pre: null, post: null, later: null };
     }
 
     // MM-610: the check without music before/after a unit: { score, total, answers, at }.
