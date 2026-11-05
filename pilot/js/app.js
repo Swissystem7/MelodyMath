@@ -442,6 +442,16 @@
       + '</div></div>';
   }
 
+  // The child's lesson screen: only which musical skill builds which math skill.
+  // The research behind it (evidence level, sources, limits) is for adults and
+  // stays in the teacher view (unitsCard) — MM-610 audit 5.11, section ג.
+  function childSkillHtml(u) {
+    const k = u.skill;
+    if (!k) return '';
+    return '<div class="mm-skill" data-testid="unit-skill" data-unit="' + esc(u.id) + '">'
+      + '<p><strong>🎵 ' + esc(k.music) + '</strong> ← בונה → <strong>🔢 ' + esc(k.math) + '</strong></p></div>';
+  }
+
   // Which musical skill builds which math skill, with the research it rests on.
   function skillHtml(u, testid) {
     const k = u.skill;
@@ -469,7 +479,7 @@
         + '<div class="mm-card mm-music" data-testid="lesson-music"><div class="mm-music__head"><span class="mm-chip mm-chip--yellow">דוגמה</span></div>'
         + scoreHtml(S.plan(L.demo, 'question'))
         + '<p class="mm-caption" data-testid="lesson-caption">' + esc(L.caption) + '</p></div>'
-        + '<div class="mm-card"><h3>מה המוזיקה בונה כאן</h3>' + skillHtml(UNIT) + '</div>'
+        + '<div class="mm-card"><h3>מה המוזיקה בונה כאן</h3>' + childSkillHtml(UNIT) + '</div>'
         + '<button type="button" class="mm-play" data-act="lesson-play" data-testid="lesson-play" aria-label="השמעת הדוגמה"><span aria-hidden="true">▶</span>להשמיע</button>'
         + '<div class="mm-status" aria-live="polite" data-testid="lesson-status" data-audio="' + esc(state.audio || '') + '">' + esc(state.lessonStatus) + '</div>'
         + '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">'
@@ -487,7 +497,7 @@
       + chipsHtml(demo, 'right')
       + '<p class="mm-caption" data-testid="lesson-caption">שומעים <span class="ltr">3</span> צלילים ועוד <span class="ltr">2</span> = <span class="ltr">5</span> — שתי מנגינות קצרות מתחברות למנגינה אחת.</p>'
       + '</div>'
-      + (UNIT.skill ? '<div class="mm-card"><h3>מה המוזיקה בונה כאן</h3>' + skillHtml(UNIT) + '</div>' : '')
+      + (UNIT.skill ? '<div class="mm-card"><h3>מה המוזיקה בונה כאן</h3>' + childSkillHtml(UNIT) + '</div>' : '')
       + '<button type="button" class="mm-play" data-act="lesson-play" data-testid="lesson-play" aria-label="השמעת הדוגמה: 3 צלילים ועוד 2"><span aria-hidden="true">▶</span>להשמיע</button>'
       + '<div class="mm-status" aria-live="polite" data-testid="lesson-status" data-audio="' + esc(state.audio || '') + '">' + esc(state.lessonStatus) + '</div>'
       + '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">'

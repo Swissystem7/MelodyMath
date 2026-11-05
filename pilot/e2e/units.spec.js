@@ -11,6 +11,13 @@ const U = require('../js/unit.js');
 
 const UNITS = Cov.allUnits();
 
+// The child's screens never show the research behind a unit (evidence level,
+// sources, limits): that is teacher-view text (MM-610 audit 5.11, section ג).
+const RESEARCH_TEXT = /רמת ראיה|מקורות|MM-503|מה זה לא מראה|מטא־אנליזה|Akın|Sala|Azaryahu|Courey|Moreno|Das 2023|Rusconi|Möhring/;
+async function expectNoResearch(page) {
+  expect(await page.locator('#mm-app').innerText()).not.toMatch(RESEARCH_TEXT);
+}
+
 function rightOf(q) {
   if (q.kind === 'choice' || q.kind === 'rhythm') return { pick: q.answer };
   if (!q.kind) return { type: U.answerOf(q) };
@@ -48,6 +55,7 @@ test.describe('every unit: thinking step, music, why after right and wrong', () 
       await h.signIn(page, 'student');
       await openUnit(page, unit);
       if (unit.skill) await expect(page.getByTestId('unit-skill')).toContainText(unit.skill.math);
+      await expectNoResearch(page);
       await h.expectMobileFriendly(page);
       await page.getByTestId('lesson-play').click();
       await expect(page.getByTestId('lesson-status')).toHaveAttribute('data-audio', 'played');
@@ -82,6 +90,7 @@ test.describe('every unit: thinking step, music, why after right and wrong', () 
       fb = await give(page, rightOf(q2));
       await expect(fb).toHaveAttribute('data-result', 'right');
       await expect(page.getByTestId('why-text')).toHaveText(q2.right);
+      await expectNoResearch(page);
       expect(errors).toEqual([]);
       expect(blocked).toEqual([]);
     });
@@ -102,6 +111,7 @@ test.describe('teacher: coverage of every grades 1–3 topic', () => {
     expect(ids.sort()).toEqual(Array.from({ length: 31 }, (_, i) => 'mm-cur-' + i).sort());
     expect(await map.getByTestId('coverage-ex-link').count()).toBeGreaterThanOrEqual(31);
     await expect(page.getByTestId('unit-skill-row')).toHaveCount(UNITS.length);
+    await expect(page.getByTestId('units-card')).toContainText('רמת ראיה'); // the research stays in the teacher view
     await h.expectMobileFriendly(page);
 
     // mm-cur-27 (angles) → its first exercise opens as a preview, and the student report stays empty.
@@ -132,6 +142,7 @@ test.describe('pre-check → unit → post-check, and the teacher sees before/af
     await page.getByTestId('open-unit').click();
     await expect(page.locator('[data-testid="view-check"][data-phase="pre"]')).toBeVisible();
     await expect(page.getByTestId('music-card')).toHaveCount(0); // the check has no music
+    await expectNoResearch(page);
     await expect(page.getByTestId('check-item')).toHaveCount(3);
     await h.expectMobileFriendly(page);
     await h.passCheck(page, 'pre', { 'pt-pre1': '9', 'pt-pre2': '5' }); // 1 of 3 right before
