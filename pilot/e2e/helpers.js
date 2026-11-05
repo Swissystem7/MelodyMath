@@ -95,6 +95,23 @@ async function answerRhythm(page, choice) {
   return page.getByTestId('feedback');
 }
 
+// MM-610: the short check without music before and after a unit. Fills every
+// item (with the right answers unless `answers` maps item id → typed value) and
+// submits. Does nothing when the check is not on screen (already done).
+const CHECKS = require('../js/checks.js');
+async function passCheck(page, phase, answers) {
+  const view = page.locator('[data-testid="view-check"][data-phase="' + phase + '"]');
+  if (!(await view.count())) return false;
+  const unit = await view.getAttribute('data-unit');
+  for (const it of CHECKS.checkFor(unit, phase)) {
+    const v = answers && Object.prototype.hasOwnProperty.call(answers, it.id) ? answers[it.id] : it.answer;
+    await page.getByTestId('check-input-' + it.id).fill(String(v));
+  }
+  await page.getByTestId('check-submit').click();
+  await expect(view).toHaveCount(0);
+  return true;
+}
+
 // Test hook of pilot/js/music.js: every planned play, with its notes.
 async function musicPlays(page) {
   return page.evaluate(() => (window.__mmPilotMusic ? window.__mmPilotMusic.plays : []));
@@ -128,4 +145,4 @@ async function expectMobileFriendly(page) {
   expect(r.small, 'touch targets under 44px').toEqual([]);
 }
 
-module.exports = { PAGE, account, isolate, stubAudio, openDemo, signIn, signOut, type, answer, answerRhythm, musicPlays, lastPlay, expectQuestion, expectMobileFriendly };
+module.exports = { passCheck, PAGE, account, isolate, stubAudio, openDemo, signIn, signOut, type, answer, answerRhythm, musicPlays, lastPlay, expectQuestion, expectMobileFriendly };

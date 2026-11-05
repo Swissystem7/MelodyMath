@@ -11,7 +11,7 @@
   'use strict';
 
   const PREFIX = 'mmPilot.v1.';
-  const KEYS = { session: PREFIX + 'session', assignments: PREFIX + 'assignments', progress: PREFIX + 'progress' };
+  const KEYS = { session: PREFIX + 'session', assignments: PREFIX + 'assignments', progress: PREFIX + 'progress', lastUnit: PREFIX + 'lastUnit' };
 
   function create(storage) {
     const mem = {};
@@ -71,9 +71,19 @@
       const p = allProgress();
       const row = p[studentId] && p[studentId][unitId];
       return row && typeof row === 'object'
-        ? { lessonDone: !!row.lessonDone, index: Number(row.index) || 0, results: row.results || {}, completedAt: row.completedAt || null, startedAt: row.startedAt || null }
-        : { lessonDone: false, index: 0, results: {}, completedAt: null, startedAt: null };
+        ? { lessonDone: !!row.lessonDone, index: Number(row.index) || 0, results: row.results || {}, completedAt: row.completedAt || null, startedAt: row.startedAt || null, pre: checkRow(row.pre), post: checkRow(row.post) }
+        : { lessonDone: false, index: 0, results: {}, completedAt: null, startedAt: null, pre: null, post: null };
     }
+
+    // MM-610: the check without music before/after a unit: { score, total, answers, at }.
+    function checkRow(c) {
+      return c && typeof c === 'object' && Number.isFinite(Number(c.score)) && Number(c.total) > 0
+        ? { score: Number(c.score), total: Number(c.total), answers: c.answers || {}, at: c.at || null } : null;
+    }
+
+    // MM-610: the unit last opened on this device (shown first on the student's home).
+    function lastUnit() { return read(KEYS.lastUnit, null); }
+    function setLastUnit(id) { write(KEYS.lastUnit, id); }
 
     function saveProgress(studentId, unitId, row) {
       const p = allProgress();
@@ -89,7 +99,8 @@
     return {
       KEYS: KEYS, session: session, signIn: signIn, signOut: signOut,
       assignments: assignments, assign: assign, assignmentsFor: assignmentsFor,
-      progress: progress, saveProgress: saveProgress, resetAll: resetAll
+      progress: progress, saveProgress: saveProgress, resetAll: resetAll,
+      lastUnit: lastUnit, setLastUnit: setLastUnit
     };
   }
 

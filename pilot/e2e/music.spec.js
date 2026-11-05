@@ -13,6 +13,7 @@ const counted = (play) => play.notes.filter((n) => ['a', 'b', 'one', 'ten', 'rem
 async function startUnit(page) {
   await h.signIn(page, 'student');
   await page.getByTestId('open-unit').click();
+  await h.passCheck(page, 'pre'); // MM-610: the short check before the unit
   await page.getByTestId('lesson-continue').click();
 }
 

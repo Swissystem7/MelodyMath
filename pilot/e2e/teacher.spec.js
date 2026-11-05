@@ -28,6 +28,7 @@ test.describe('teacher assign + report', () => {
     await expect(page.getByTestId('assignment-card')).toBeVisible();
     await expect(page.getByTestId('assignment-note')).toHaveText(NOTE);
     await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre'); // MM-610: the short check before the unit
     await page.getByTestId('lesson-continue').click();
     const plan = [['q1', [7]], ['q2', [13]], ['q3', [6, 5]], ['q4', [9]], ['q5', [16]], ['q6', [10]], ['q7', ['half']]];
     for (const [qid, tries] of plan) {
@@ -36,6 +37,7 @@ test.describe('teacher assign + report', () => {
       await expect(page.getByTestId('feedback')).toHaveAttribute('data-result', 'right');
       await page.getByTestId('next').click();
     }
+    await h.passCheck(page, 'post'); // MM-610: the short check after the unit
     await expect(page.getByTestId('view-summary')).toBeVisible();
     await h.signOut(page);
 

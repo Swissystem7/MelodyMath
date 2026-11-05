@@ -15,6 +15,14 @@ const fs = require('node:fs');
 const { spawn } = require('node:child_process');
 const { chromium } = require('@playwright/test');
 const SEED = require('../seed/demo-accounts.js');
+const K = require('../js/checks.js');
+
+// MM-610: a unit now opens with a short check without music; fill it in.
+async function preCheck(page) {
+  if (!(await page.getByTestId('view-check').count())) return;
+  for (const it of K.checkFor('music-1', 'pre')) await page.getByTestId('check-input-' + it.id).fill(String(it.answer));
+  await page.getByTestId('check-submit').click();
+}
 
 const PORT = Number(process.env.PILOT_PORT) || 8171;
 const BASE = 'http://127.0.0.1:' + PORT;
@@ -65,6 +73,7 @@ async function shots(browser) {
     await page.getByTestId('signout').click();
     await signIn(page, 'student');
     await page.getByTestId('open-unit').click();
+    await preCheck(page);
     await page.getByTestId('lesson-continue').click();
     await sleep(900); // the melody plays and the notes light up
     await shot('01-student-music-caption');
@@ -106,6 +115,7 @@ async function video(browser) {
   await signIn(page, 'student');
   await sleep(700);
   await page.getByTestId('open-unit').click();
+  await preCheck(page);
   await sleep(900);
   await page.getByTestId('lesson-play').click();
   await sleep(1600);

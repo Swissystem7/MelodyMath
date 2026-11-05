@@ -33,6 +33,11 @@ in the repository is missing from this file.
 | `drone` | drones (didgeridoo) | synthesised | project code |
 | `keys` | piano and keyboards | synthesised | project code |
 | `organ` | organ, harmonium, accordion | synthesised, additive | project code |
+| `clap` | hand clap (body percussion) | synthesised, noise burst | project code |
+| `stomp` | foot stomp (body percussion) | synthesised, low thud | project code |
+| `shaker` | shaker, maracas | synthesised, filtered noise | project code |
+| `voiceAh` | a sung "ah" | synthesised, sawtooth with vibrato and a vowel band | project code |
+| `whistle` | whistle | synthesised, sine with vibrato | project code |
 
 ## Audio files
 
