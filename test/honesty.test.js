@@ -9,11 +9,11 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
-test('the only GitHub Actions workflow is the CI pipeline', () => {
+test('the only GitHub Actions workflows are the CI pipeline and the factory plan gate and router', () => {
   const wf = path.join(root, '.github', 'workflows');
   if (!fs.existsSync(wf)) return; // no workflows at all is still fine
   const files = fs.readdirSync(wf).sort();
-  assert.deepEqual(files, ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
+  assert.deepEqual(files, ['ci.yml', 'plan-gate.yml', 'plan-router.yml'], 'only the CI pipeline and the factory plan workflows are allowed');
 });
 
 test('the unused factory lib/ folder is gone', () => {
