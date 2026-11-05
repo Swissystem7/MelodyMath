@@ -95,8 +95,17 @@
     }
   });
 
+  // A week after the check "after", the same items come back as the follow-up
+  // check ("later"): same questions, so the score shows what stayed.
+  const LATER_DAYS = 7;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  function laterDue(p, now) {
+    return !!(p && p.post && Number.isFinite(p.post.at) && !p.later && (now == null ? Date.now() : now) - p.post.at >= LATER_DAYS * DAY_MS);
+  }
+
   function checkFor(unitId, phase) {
     const c = CHECKS[unitId];
+    if (phase === 'later') return c ? c.post : [];
     return c && c[phase] ? c[phase] : [];
   }
 
@@ -150,7 +159,17 @@
       same: gain.filter(function (v) { return v === 0; }).length,
       declined: gain.filter(function (v) { return v < 0; }).length,
       ceiling: pre.filter(function (v) { return v === 100; }).length,
-      d: sd ? Math.round(g / sd * 100) / 100 : null
+      d: sd ? Math.round(g / sd * 100) / 100 : null,
+      // the follow-up a week later, only for the pairs that already did it
+      laterN: pairs.filter(function (r) { return r.later && r.later.total; }).length,
+      later: (function () {
+        const l = pairs.filter(function (r) { return r.later && r.later.total; });
+        return l.length ? r1(mean(l.map(function (r) { return pct(r.later); }))) : null;
+      })(),
+      laterPost: (function () {
+        const l = pairs.filter(function (r) { return r.later && r.later.total; });
+        return l.length ? r1(mean(l.map(function (r) { return pct(r.post); }))) : null;
+      })()
     };
   }
   function classSummary(rows) {
@@ -167,13 +186,14 @@
   // One line per student and unit, for a spreadsheet.
   function toCsv(rows) {
     const cell = function (v) { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const head = ['student', 'unit', 'pre_score', 'pre_total', 'post_score', 'post_total', 'change', 'pre_at', 'post_at'];
+    const head = ['student', 'unit', 'pre_score', 'pre_total', 'post_score', 'post_total', 'change', 'pre_at', 'post_at', 'later_score', 'later_total', 'later_at'];
     const iso = function (t) { return t ? new Date(t).toISOString() : ''; };
     return [head.join(',')].concat((rows || []).filter(function (r) { return r && r.pre; }).map(function (r) {
       return [r.student, r.unit, r.pre.score, r.pre.total, r.post ? r.post.score : '', r.post ? r.post.total : '',
-        r.post ? r.post.score - r.pre.score : '', iso(r.pre.at), r.post ? iso(r.post.at) : ''].map(cell).join(',');
+        r.post ? r.post.score - r.pre.score : '', iso(r.pre.at), r.post ? iso(r.post.at) : '',
+        r.later ? r.later.score : '', r.later ? r.later.total : '', r.later ? iso(r.later.at) : ''].map(cell).join(',');
     })).join('\n') + '\n';
   }
 
-  return { CHECKS: CHECKS, checkFor: checkFor, isRight: isRight, score: score, compare: compare, classSummary: classSummary, toCsv: toCsv };
+  return { CHECKS: CHECKS, checkFor: checkFor, isRight: isRight, score: score, compare: compare, classSummary: classSummary, toCsv: toCsv, LATER_DAYS: LATER_DAYS, laterDue: laterDue };
 });
