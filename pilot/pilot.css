@@ -68,6 +68,7 @@ body {
 /* top bar (design 2b/2a header) */
 .mm-topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .mm-topbar__title { text-align: center; flex: 1; min-width: 0; }
+.mm-topbar__actions { display: flex; gap: 6px; flex: 0 0 auto; }
 .mm-topbar__title h1, .mm-topbar__title h2 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -.5px; line-height: 1.15; }
 .mm-topbar__title p { margin: 0; font-size: 13px; font-weight: 500; color: var(--mm-ink-soft); }
 .mm-icon-btn {
