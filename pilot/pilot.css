@@ -335,6 +335,7 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
 .mm-tok--from { background: var(--mm-white); }
 .mm-tok--asked { min-width: 30px; height: 26px; border-radius: 8px; font-size: 14px; background: var(--mm-white); border-style: dashed; box-shadow: 0 -5px 0 var(--mm-orange); }
 .mm-tok--held { background: var(--mm-violet); }
+.mm-tok--heldb { background: var(--mm-yellow); }
 .mm-tok--col0 { background: var(--mm-yellow); }
 .mm-tok--col1 { background: var(--mm-violet); }
 .mm-tok--col2 { background: var(--mm-mint); }

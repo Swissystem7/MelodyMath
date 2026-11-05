@@ -547,7 +547,8 @@
     if (!(s === 'right' || s === 'wrong' || s === 'retry' || s === 'revealed') || !q.right) return '';
     const kind = s === 'right' ? 'right' : s === 'revealed' ? 'reveal' : 'wrong';
     const title = kind === 'right' ? 'שלב 3 · למה זה נכון?' : kind === 'reveal' ? 'שלב 3 · כך חושבים על זה:' : 'שלב 3 · בואו נבין:';
-    const text = kind === 'wrong' ? q.wrong : q.right;
+    // shown after two wrong tries: the same explanation, without the praise that opens it
+    const text = kind === 'wrong' ? q.wrong : kind === 'reveal' ? q.right.replace(/^נכון(?:\s*[—–-]|[!.,:])?\s*/, '') : q.right;
     return '<div class="mm-why-fb mm-why-fb--' + kind + '" data-testid="why-feedback" data-kind="' + kind + '"><strong>' + esc(title) + '</strong>'
       + '<p data-testid="why-text">' + esc(text) + '</p>'
       + (q.whyKid && kind !== 'wrong' ? '<p class="mm-why-kid" data-testid="why-kid">' + esc(q.whyKid) + '</p>' : '') + '</div>';
