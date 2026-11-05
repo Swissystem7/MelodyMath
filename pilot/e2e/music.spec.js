@@ -7,7 +7,6 @@
 const { test, expect } = require('@playwright/test');
 const h = require('./helpers');
 
-const TUNE = ['C4', 'C4', 'G4', 'G4', 'A4', 'A4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4', 'G4'];
 const counted = (play) => play.notes.filter((n) => ['a', 'b', 'one', 'ten', 'removed', 'removed-ten'].includes(n.role));
 
 async function startUnit(page) {
@@ -22,50 +21,52 @@ test.describe('music in every exercise', () => {
     const blocked = await h.openDemo(page, baseURL);
     await startUnit(page);
 
-    // q1 4 + 3: two phrases, piano then xylophone, the opening of the tune.
+    // q1 4 + 3 (a04): a strip of 10 beats, planned by score.js. The 3 added beats
+    // are one held note of 2 beats and one short note: beats are counted, not notes.
     await h.expectQuestion(page, 'q1');
     let play = await h.lastPlay(page, 'q1:question');
     expect(play.audio).toBe('played');
-    expect(play.notes.filter((n) => n.role === 'a').map((n) => n.note)).toEqual(TUNE.slice(0, 4));
-    expect(play.notes.filter((n) => n.role === 'b').map((n) => n.note)).toEqual(TUNE.slice(4, 7));
-    expect(new Set(play.notes.filter((n) => n.role === 'a').map((n) => n.voice))).toEqual(new Set(['keys']));
-    expect(new Set(play.notes.filter((n) => n.role === 'b').map((n) => n.voice))).toEqual(new Set(['woodBar']));
+    let held = play.notes.filter((n) => n.role === 'held');
+    expect(held).toHaveLength(6);
+    expect(held.filter((n) => n.voice === 'keys')).toHaveLength(4);
+    expect(held.filter((n) => n.voice === 'woodBar')).toHaveLength(2);
+    expect(held.filter((n) => n.dur > 1.5 * held[0].dur)).toHaveLength(1);
+    expect(play.notes.filter((n) => n.role === 'click')).toHaveLength(10);
     expect(play.notes.some((n) => n.role === 'home')).toBe(false);
-    await expect(page.getByTestId('music-notes')).toHaveAttribute('data-count', '7');
-    await expect(page.getByTestId('music-caption')).toContainText('4 צלילים בפסנתר ועוד 3');
+    await expect(page.getByTestId('music-notes')).toHaveAttribute('data-count', '6');
+    await expect(page.getByTestId('music-caption')).toContainText('4 פעימות בפסנתר');
     await expect(page.getByTestId('music-caption')).not.toContainText('7');
     await expect(page.getByTestId('music-describe')).not.toContainText('7');
     await expect(page.getByTestId('q-curriculum')).toContainText('mm-cur-3');
     await h.answer(page, 7);
     play = await h.lastPlay(page, 'q1:right');
-    expect(counted(play)).toHaveLength(7);
     expect(play.notes.filter((n) => n.role === 'home').map((n) => n.note)).toEqual(['C4', 'E4', 'G4']);
     await expect(page.getByTestId('music-caption')).toHaveAttribute('data-stage', 'solved');
-    await expect(page.getByTestId('music-caption')).toContainText('= 7');
+    await expect(page.getByTestId('why-text')).toContainText('= 7');
     await page.getByTestId('next').click();
 
-    // q2 8 + 5, wrong first: the hint replays the phrases slower and stops before home.
+    // q2 8 + 5, wrong first: the held note fills the cycle to 10 and 3 beats go on;
+    // the hint replays the same strip slower and stops before home.
     await h.expectQuestion(page, 'q2');
     const q2 = await h.lastPlay(page, 'q2:question');
     await h.answer(page, 12);
     const hint = await h.lastPlay(page, 'q2:hint');
-    expect(counted(hint)).toHaveLength(13);
+    expect(hint.notes.filter((n) => n.role === 'held')).toHaveLength(12);
     expect(hint.notes.some((n) => n.role === 'home')).toBe(false);
     expect(hint.notes[hint.notes.length - 1].at).toBeGreaterThan(q2.notes[q2.notes.length - 1].at);
-    await expect(page.getByTestId('hint')).not.toContainText('13');
+    await expect(page.getByTestId('why-text')).not.toContainText('13');
     await h.answer(page, 13);
     await page.getByTestId('next').click();
 
-    // q3 9 − 4: nine notes, the last four taken away (softer, crossed out); solved = five notes left.
+    // q3 9 − 4: the last four beats are taken away (✕, silent); five beats still sound.
     await h.expectQuestion(page, 'q3');
     play = await h.lastPlay(page, 'q3:question');
-    expect(play.notes.filter((n) => n.role === 'a')).toHaveLength(5);
-    expect(play.notes.filter((n) => n.role === 'removed')).toHaveLength(4);
-    await expect(page.locator('[data-testid="music-notes"] [data-role="removed"]')).toHaveCount(4);
+    expect(play.notes.filter((n) => n.role === 'held')).toHaveLength(5);
+    await expect(page.locator('[data-testid="music-notes"] [data-role="rest"]').filter({ hasText: '✕' })).toHaveCount(4);
     await expect(page.getByTestId('music-caption')).not.toContainText('5');
     await h.answer(page, 5);
     play = await h.lastPlay(page, 'q3:right');
-    expect(counted(play).map((n) => n.note)).toEqual(TUNE.slice(0, 5));
+    expect(play.notes.filter((n) => n.role === 'held')).toHaveLength(5);
     await page.getByTestId('next').click();
     await h.answer(page, 9);
     await page.getByTestId('next').click();
@@ -117,7 +118,7 @@ test.describe('music in every exercise', () => {
     const started = await page.evaluate(() => window.__mmAudio.started);
     await page.getByTestId('replay').click();
     expect((await h.lastPlay(page, 'q1:question')).audio).toBe('silent');
-    await expect(page.getByTestId('music-notes')).toHaveAttribute('data-count', '7');
+    await expect(page.getByTestId('music-notes')).toHaveAttribute('data-count', '6');
     await expect(page.getByTestId('music-caption')).toContainText('בפסנתר');
     const fb = await h.answer(page, 7);
     await expect(fb).toHaveAttribute('data-audio', 'silent');

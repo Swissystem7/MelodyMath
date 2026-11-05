@@ -52,7 +52,8 @@ test.describe('student unit flow (grades 1–3)', () => {
     await expect(fb).toHaveAttribute('data-result', 'right');
     await expect(fb).toHaveAttribute('data-audio', 'played');
     await expect(page.getByTestId('feedback-sound')).toContainText('הביתה');
-    await expect(page.getByTestId('music-caption')).toContainText('= 7');
+    await expect(page.getByTestId('music-caption')).toHaveAttribute('data-stage', 'solved');
+    await expect(page.getByTestId('why-text')).toContainText('= 7');
     expect(await page.evaluate(() => window.__mmAudio.started)).toBeGreaterThan(before);
     await expect(page.getByTestId('star-count')).toContainText('1');
     await h.expectMobileFriendly(page);
@@ -63,8 +64,8 @@ test.describe('student unit flow (grades 1–3)', () => {
     fb = await h.answer(page, 12);
     await expect(fb).toHaveAttribute('data-result', 'wrong');
     await expect(fb).toHaveAttribute('data-audio', 'played');
-    await expect(page.getByTestId('hint')).toContainText('קדימה');
-    await expect(page.getByTestId('hint')).not.toContainText('13');
+    await expect(page.getByTestId('why-feedback')).toHaveAttribute('data-kind', 'wrong'); // a04: q1–q4 explain why, the hint is the slow replay
+    await expect(page.getByTestId('why-text')).not.toContainText('13');
     await h.expectMobileFriendly(page);
     fb = await h.answer(page, 13);
     await expect(fb).toHaveAttribute('data-result', 'right');

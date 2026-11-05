@@ -260,7 +260,15 @@
             soft.gain.value = 0.4;
             soft.connect(bus);
             notes.forEach(function (n) {
-              root.playVoice(ac, n.voice, n.hz, t0 + n.at, n.gain < 0.15 ? soft : bus, { dur: n.dur, gain: 0.17 });
+              let dest = n.gain < 0.15 ? soft : bus;
+              // a note with `pan` (−1 left … 1 right) sounds from that side: right/left on a grid (a08)
+              if (n.pan && typeof ac.createStereoPanner === 'function') {
+                const p = ac.createStereoPanner();
+                p.pan.value = n.pan;
+                p.connect(dest);
+                dest = p;
+              }
+              root.playVoice(ac, n.voice, n.hz, t0 + n.at, dest, { dur: n.dur, gain: 0.17 });
             });
           } else if (typeof engine.playSequence === 'function') {
             // No instrument voices: the engine's plain tones, same notes and timing.
@@ -270,7 +278,7 @@
         }
       } catch (e) { audio = 'silent'; }
     }
-    hook.plays.push({ id: id, audio: audio, notes: notes.map(function (n) { return { note: n.note, hz: n.hz, at: n.at, dur: n.dur, voice: n.voice, role: n.role }; }) });
+    hook.plays.push({ id: id, audio: audio, notes: notes.map(function (n) { return { note: n.note, hz: n.hz, at: n.at, dur: n.dur, voice: n.voice, role: n.role, pan: n.pan || 0 }; }) });
     if (typeof onNote === 'function' && typeof setTimeout === 'function') {
       notes.forEach(function (n) {
         timers.push(setTimeout(function () { onNote(n); }, Math.round(n.at * 1000) + 60));
