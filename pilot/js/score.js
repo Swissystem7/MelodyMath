@@ -18,8 +18,9 @@
 //   pattern   a repeating melodic unit: patterns, pairs (even/odd), tallies.
 //   pitch     data: each category plays its count as repeated notes at its
 //             own pitch (a pictogram you hear).
-//   durations note lengths inside a 4/4 bar: half a bar = half an hour,
-//             two half-shekels fill a bar.
+//   durations note lengths inside a bar (4 beats, or 10/12/20 ticks): half a
+//             bar = half an hour, two half-shekels fill a bar, a coin lasts
+//             its value in ticks, a pencil lasts its length on a ticking ruler.
 //   turn      a full turn is one 4/4 bar; a held note of 1 beat is a quarter
 //             turn (a right angle), 2 beats a straight angle.
 //   shape     a polygon is a loop: one accented beat per corner; a side of n cm
@@ -220,17 +221,22 @@
   function durations(spec, stage, slow) {
     const b = Board();
     const notes = [];
-    const beat = 0.5 * slow;
+    const beat = (spec.beat || 0.5) * slow;
     const per = spec.beats || 4;
     const row = b.row('', 'is-bars');
     let at = 0;
     (spec.bars || []).forEach(function (bar, i) {
-      const g = b.group(row, (spec.labels || [])[i] || '', 'is-bar');
-      for (let c = 0; c < per; c++) notes.push(note(7, at + c * beat, 0.05, 'woodClick', 'click', null, c === 0 ? 0.16 : 0.1, c === 0 ? 1500 : 1200));
+      const g = b.group(row, (spec.labels || [])[i] || '', 'is-bar per-' + per);
+      // the click track: the first click of a bar is stronger, and in a long bar
+      // (10, 12, 20 ticks: a ruler, a coin, a note) every fifth one too
+      for (let c = 0; c < per; c++) {
+        const strong = c === 0 || (per > 4 && c % 5 === 0);
+        notes.push(note(7, at + c * beat, 0.05, 'woodClick', 'click', null, strong ? 0.16 : 0.1, strong ? 1500 : 1200));
+      }
       let used = 0;
       bar.forEach(function (n, j) {
         const k = b.token(g, n.label, n.rest ? 'rest' : 'held', j * 2, n.len);
-        if (!n.rest) notes.push(note(j * 2, at + used * beat, n.len * beat * 0.92, 'keys', 'held', k.chip, 0.22));
+        if (!n.rest) notes.push(note(j * 2, at + used * beat, n.len * beat * 0.92, n.voice || spec.voice || 'keys', 'held', k.chip, 0.22));
         used += n.len;
       });
       if (used < per) b.token(g, 'שקט', 'rest', 0, per - used);
