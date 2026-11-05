@@ -1330,7 +1330,7 @@ function renderWidget(hostId, item, inputId){
     bindNumberLine(host, item.line, fill);
   } else if(item.widget==='bar44' && typeof bindBar44==='function'){
     host.classList.remove('hidden');
-    bindBar44(host, item.bar||{fraction:item.answer}, function(frac){ fill(frac); });
+    bindBar44(host, item.bar||{fraction:item.answer}, null, {picture:true});
   } else if(item.widget==='g1' && item.g1 && typeof bindGrade1==='function'){
     host.classList.remove('hidden');
     if(!bindGrade1(host, item.g1)) host.classList.add('hidden');
