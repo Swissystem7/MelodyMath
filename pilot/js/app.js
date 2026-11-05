@@ -730,6 +730,67 @@
     }).join(' ');
   }
 
+  // Every student × unit with a check before, for the class summary and the CSV.
+  function checkRows() {
+    const rows = [];
+    students().forEach(function (s) {
+      UNITS.forEach(function (unit) {
+        const p = store.progress(s.id, unit.id);
+        if (p.pre) rows.push({ student: s.displayName, unit: unit.id, pre: p.pre, post: p.post || null });
+      });
+    });
+    return rows;
+  }
+
+  // How much the class improved on the checks without music, and what that does
+  // and does not show. The numbers are percent of the check items answered right.
+  function classGainCard() {
+    if (typeof K.classSummary !== 'function') return '';
+    const rows = checkRows();
+    const sum = K.classSummary(rows);
+    const title = function (id) { const u = unitById(id); return u ? u.title : id; };
+    const sign = function (v) { return (v > 0 ? '+' : '') + v; };
+    let body;
+    if (!sum.all.n) {
+      body = '<p class="mm-sub" data-testid="class-gain-empty">' + (sum.started ? 'יש בדיקות לפני, אבל עוד אין תלמיד/ה שעשה/תה גם את הבדיקה אחרי.' : 'אין עדיין בדיקות במכשיר הזה.') + '</p>';
+    } else {
+      const a = sum.all;
+      body = '<p data-testid="class-gain-all" data-n="' + a.n + '" data-gain="' + a.gain + '">'
+        + 'ב־<strong>' + a.n + '</strong> זוגות של לפני ואחרי: ממוצע <span class="ltr">' + a.pre + '%</span> לפני ו־<span class="ltr">' + a.post + '%</span> אחרי, '
+        + 'שינוי של <strong class="ltr">' + sign(a.gain) + '</strong> נקודות אחוז. השתפרו ' + a.improved + ', ללא שינוי ' + a.same + ', ירדו ' + a.declined + '.'
+        + (a.d != null ? ' גודל אפקט (לפני־אחרי) <span class="ltr">d = ' + a.d + '</span>.' : '') + '</p>'
+        + '<div class="mm-table-wrap"><table class="mm-table" data-testid="class-gain-table"><thead><tr><th scope="col">יחידה</th><th scope="col">זוגות</th><th scope="col">לפני</th><th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>'
+        + sum.byUnit.map(function (u) {
+          return '<tr data-testid="class-gain-row" data-unit="' + esc(u.unit) + '" data-gain="' + u.gain + '"><th scope="row">' + esc(title(u.unit)) + '</th><td>' + u.n + '</td>'
+            + '<td><span class="ltr">' + u.pre + '%</span></td><td><span class="ltr">' + u.post + '%</span></td><td><strong class="ltr">' + sign(u.gain) + '</strong></td></tr>';
+        }).join('') + '</tbody></table></div>'
+        + (a.ceiling ? '<p class="mm-sub">' + a.ceiling + ' מהזוגות התחילו עם הכול נכון כבר לפני, ולכן לא יכלו להראות שיפור.</p>' : '');
+    }
+    return '<div class="mm-card" data-testid="class-gain"><h3>כמה הכיתה השתפרה? בדיקה בלי מוזיקה, לפני ואחרי</h3>' + body
+      + '<p class="mm-sub" data-testid="class-gain-limits">מה זה לא מראה: אין כאן קבוצת השוואה, כל בדיקה היא 2–3 שאלות, והבדיקה אחרי נעשית מיד בסוף היחידה. '
+      + 'שיפור כאן יכול לבוא גם מעצם התרגול. כדי לדעת כמה המוזיקה עצמה תורמת, משווים לכיתה דומה שמתרגלת את אותו חומר בלי מוזיקה, באותו זמן, עם אותן בדיקות.'
+      + (sum.all.n && sum.all.n < 10 ? ' עם פחות מ־10 זוגות התוצאה עוד לא יציבה.' : '') + '</p>'
+      + (rows.length ? '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="export-checks" data-testid="export-checks">הורדת הנתונים לגיליון (CSV)</button></div>' : '')
+      + '</div>';
+  }
+
+  // The check results as a CSV file on this device (nothing is sent anywhere).
+  function exportChecks() {
+    if (typeof K.toCsv !== 'function') return;
+    const csv = K.toCsv(checkRows());
+    try {
+      const blob = new G.Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+      const a = G.document.createElement('a');
+      a.href = G.URL.createObjectURL(blob);
+      a.download = 'melodymath-checks-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.setAttribute('data-testid', 'export-link');
+      G.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { G.URL.revokeObjectURL(a.href); }, 1000);
+    } catch (e) { /* no download in this browser */ }
+  }
+
   // Per student, per unit with any data on this device: the before/after check
   // (without music), the report by topic, and the gaps with a suggestion.
   function teacherReport() {
@@ -881,7 +942,7 @@
       + coverageCard()
       + '<section class="mm-view" aria-labelledby="report-title" data-testid="report"><h2 id="report-title" style="margin:6px 0 0">דוח לפי נושא ופערים</h2>'
       + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. «לפני/אחרי» = בדיקה קצרה בלי מוזיקה, לפני היחידה ואחריה (2–3 שאלות: סימן, לא ציון). הנתונים מהמכשיר הזה בלבד.</p>'
-      + teacherReport() + '</section>'
+      + classGainCard() + teacherReport() + '</section>'
       + '<div class="mm-card"><h3>נתוני ההדגמה</h3><p class="mm-sub">מוחק את המשימות, ההתקדמות והכניסה מהדפדפן הזה בלבד.</p>'
       + '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="reset" data-testid="reset">'
       + (state.confirmReset ? 'לחצו שוב לאישור המחיקה' : 'איפוס נתוני ההדגמה') + '</button></div></div>'
@@ -1108,6 +1169,7 @@
     if (act === 'check') { onCheck(); return; }
     if (act === 'next') { onNext(); return; }
     if (act === 'home') { if (state.account && state.account.role === 'teacher') exitPreview(); else go('student-home'); return; }
+    if (act === 'export-checks') { exportChecks(); return; }
     if (act === 'reset') {
       if (!state.confirmReset) { state.confirmReset = true; render(); return; }
       state.confirmReset = false;

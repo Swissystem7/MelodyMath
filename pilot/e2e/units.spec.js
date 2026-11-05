@@ -173,6 +173,19 @@ test.describe('pre-check → unit → post-check, and the teacher sees before/af
     const rp = block.getByTestId('report-prepost');
     await expect(rp).toHaveAttribute('data-pre', '1/3');
     await expect(rp).toHaveAttribute('data-post', '3/3');
+    // the class summary: one pair, 33% → 100% (+66.7 points), with what it does not show
+    const all = page.getByTestId('class-gain-all');
+    await expect(all).toHaveAttribute('data-n', '1');
+    await expect(all).toHaveAttribute('data-gain', '66.7');
+    await expect(page.locator('[data-testid="class-gain-row"][data-unit="' + unit.id + '"]')).toHaveCount(1);
+    await expect(page.getByTestId('class-gain-limits')).toContainText('קבוצת השוואה');
+    const dl = page.waitForEvent('download');
+    await page.getByTestId('export-checks').click();
+    const file = await dl;
+    expect(file.suggestedFilename()).toMatch(/^melodymath-checks-[0-9]{4}-[0-9]{2}-[0-9]{2}[.]csv$/);
+    const csv = require('fs').readFileSync(await file.path(), 'utf8');
+    expect(csv).toContain('student,unit,pre_score,pre_total,post_score,post_total,change');
+    expect(csv).toContain(',' + unit.id + ',1,3,3,3,2,');
     await expect(rp).toHaveAttribute('data-change', '2');
     await expect(block.getByTestId('report-change')).toHaveText('שיפור של 2');
     await expect(block.getByTestId('report-table')).toBeVisible();

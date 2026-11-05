@@ -197,3 +197,36 @@ test('reuse of PR #955 items is marked, and every grade-1–3 unit plays a diffe
   const kinds = new Set(UNITS.flatMap((u) => u.questions).filter((q) => q.music && q.music.kind).map((q) => q.music.kind));
   S.KINDS.forEach((k) => assert.ok(kinds.has(k), 'music kind ' + k + ' is used'));
 });
+
+// The teacher's class summary of the checks without music.
+test('class summary: only pairs with both checks count, percent per unit and pooled, paired effect size', () => {
+  const r = (student, unit, pre, post, total) => ({ student, unit, pre: { score: pre, total }, post: post == null ? null : { score: post, total } });
+  const empty = K.classSummary([]);
+  assert.equal(empty.all.n, 0);
+  assert.equal(empty.started, 0);
+  const one = K.classSummary([r('a', 'u1', 1, 3, 3), r('b', 'u1', 2, null, 3)]);
+  assert.equal(one.started, 2);
+  assert.equal(one.all.n, 1);
+  assert.equal(one.all.gain, 66.7);
+  assert.equal(one.all.d, null, 'no effect size from one pair');
+  const s = K.classSummary([r('a', 'u1', 1, 3, 3), r('b', 'u1', 2, 2, 3), r('c', 'u1', 3, 2, 3), r('a', 'u2', 0, 2, 2)]);
+  assert.equal(s.all.n, 4);
+  assert.deepEqual([s.all.improved, s.all.same, s.all.declined, s.all.ceiling], [2, 1, 1, 1]);
+  assert.deepEqual(s.byUnit.map((u) => [u.unit, u.n]), [['u1', 3], ['u2', 1]]);
+  assert.equal(s.byUnit[1].gain, 100);
+  assert.ok(s.all.d > 0 && s.all.d < 2, 'd = mean gain / SD of gains: ' + s.all.d);
+  const same = K.classSummary([r('a', 'u1', 1, 2, 3), r('b', 'u1', 1, 2, 3)]);
+  assert.equal(same.all.d, null, 'no effect size when every gain is the same');
+});
+
+test('checks CSV: one line per student and unit with a check before, quoted when needed', () => {
+  const csv = K.toCsv([
+    { student: 'דנה, כהן', unit: 'music-1', pre: { score: 1, total: 3, at: 0 }, post: { score: 3, total: 3, at: 1 } },
+    { student: 'b', unit: 'times-1', pre: { score: 0, total: 3 }, post: null },
+    { student: 'c', unit: 'line-1', pre: null, post: null }
+  ]).trim().split('\n');
+  assert.equal(csv.length, 3);
+  assert.equal(csv[0], 'student,unit,pre_score,pre_total,post_score,post_total,change,pre_at,post_at');
+  assert.match(csv[1], /^"דנה, כהן",music-1,1,3,3,3,2,/);
+  assert.equal(csv[2], 'b,times-1,0,3,,,,,');
+});

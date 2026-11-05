@@ -123,5 +123,54 @@
     return out;
   }
 
-  return { CHECKS: CHECKS, checkFor: checkFor, isRight: isRight, score: score, compare: compare };
+  // How much did the class improve on the checks without music? rows: one per
+  // student and unit, { student, unit, pre, post } (pre/post as from score()).
+  // Only pairs with both checks count. Scores are in percent of the items, so
+  // units with 2 or 3 items can be pooled. d = mean gain / SD of the gains (a
+  // paired effect size); reported only from 2 pairs and when the gains vary.
+  // This is change from before to after the unit in this app, not a comparison
+  // with children who practised the same math without music.
+  function pct(s) { return s && s.total ? s.score / s.total * 100 : null; }
+  function stats(pairs) {
+    const n = pairs.length;
+    if (!n) return { n: 0 };
+    const pre = pairs.map(function (r) { return pct(r.pre); });
+    const post = pairs.map(function (r) { return pct(r.post); });
+    const gain = post.map(function (v, i) { return v - pre[i]; });
+    const mean = function (a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; };
+    const g = mean(gain);
+    const sd = n > 1 ? Math.sqrt(gain.reduce(function (x, v) { return x + (v - g) * (v - g); }, 0) / (n - 1)) : null;
+    const r1 = function (v) { return Math.round(v * 10) / 10; };
+    return {
+      n: n, pre: r1(mean(pre)), post: r1(mean(post)), gain: r1(g),
+      improved: gain.filter(function (v) { return v > 0; }).length,
+      same: gain.filter(function (v) { return v === 0; }).length,
+      declined: gain.filter(function (v) { return v < 0; }).length,
+      ceiling: pre.filter(function (v) { return v === 100; }).length,
+      d: sd ? Math.round(g / sd * 100) / 100 : null
+    };
+  }
+  function classSummary(rows) {
+    const all = (rows || []).filter(Boolean);
+    const pairs = all.filter(function (r) { return r.pre && r.post && r.pre.total && r.post.total; });
+    const units = [];
+    pairs.forEach(function (r) { if (units.indexOf(r.unit) < 0) units.push(r.unit); });
+    return {
+      started: all.filter(function (r) { return r.pre; }).length,
+      all: stats(pairs),
+      byUnit: units.map(function (u) { const s = stats(pairs.filter(function (r) { return r.unit === u; })); s.unit = u; return s; })
+    };
+  }
+  // One line per student and unit, for a spreadsheet.
+  function toCsv(rows) {
+    const cell = function (v) { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const head = ['student', 'unit', 'pre_score', 'pre_total', 'post_score', 'post_total', 'change', 'pre_at', 'post_at'];
+    const iso = function (t) { return t ? new Date(t).toISOString() : ''; };
+    return [head.join(',')].concat((rows || []).filter(function (r) { return r && r.pre; }).map(function (r) {
+      return [r.student, r.unit, r.pre.score, r.pre.total, r.post ? r.post.score : '', r.post ? r.post.total : '',
+        r.post ? r.post.score - r.pre.score : '', iso(r.pre.at), r.post ? iso(r.post.at) : ''].map(cell).join(',');
+    })).join('\n') + '\n';
+  }
+
+  return { CHECKS: CHECKS, checkFor: checkFor, isRight: isRight, score: score, compare: compare, classSummary: classSummary, toCsv: toCsv };
 });
