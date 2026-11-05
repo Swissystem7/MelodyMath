@@ -301,6 +301,11 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
 .mm-sc__row.is-bars .mm-sc__group { flex: 1 1 140px; }
 .mm-sc__row.is-bars .mm-sc__tokens { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; }
 .mm-sc__row.is-bars .mm-tok { grid-column: span var(--w); width: auto; border-radius: 10px; height: 30px; margin: 0; font-size: 12px; }
+.mm-sc__row.is-bars .mm-sc__group.per-10 .mm-sc__tokens { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.mm-sc__row.is-bars .mm-sc__group.per-12 .mm-sc__tokens { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.mm-sc__row.is-bars .mm-sc__group.per-20 .mm-sc__tokens { grid-template-columns: repeat(20, minmax(0, 1fr)); }
+.mm-sc__row.is-bars .mm-sc__group.per-12, .mm-sc__row.is-bars .mm-sc__group.per-20 { flex-basis: 100%; }
+.mm-sc__row.is-bars .mm-sc__group.per-10 .mm-tok, .mm-sc__row.is-bars .mm-sc__group.per-12 .mm-tok, .mm-sc__row.is-bars .mm-sc__group.per-20 .mm-tok { font-size: 10px; padding: 0 2px; overflow: hidden; white-space: nowrap; }
 .mm-sc__art { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; color: var(--mm-ink); }
 .mm-sc-svg { max-width: 100%; height: auto; }
 .mm-tok {
