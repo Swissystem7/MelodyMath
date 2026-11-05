@@ -240,9 +240,17 @@
   function signOutClean() { state.preview = null; UNIT = UNITS[0]; }
 
   // ---------------------------------------------------------------- views
+  // Inside a unit a student can go back to the list of units without signing
+  // out; progress is already saved per exercise, so the unit resumes where it
+  // was. A teacher preview has its own "חזרה ללוח" bar, so it gets no second one.
+  const IN_UNIT = ['lesson', 'exercise', 'check-pre', 'check-post'];
   function topbar(title, sub, end) {
+    const back = state.account && state.account.role !== 'teacher' && !state.preview && IN_UNIT.indexOf(state.view) >= 0;
     return '<div class="mm-topbar">'
+      + '<div class="mm-topbar__actions">'
       + '<button type="button" class="mm-icon-btn" data-act="signout" data-testid="signout">יציאה</button>'
+      + (back ? '<button type="button" class="mm-icon-btn" data-act="home" data-testid="units-home" aria-label="חזרה לרשימת היחידות">היחידות</button>' : '')
+      + '</div>'
       + '<div class="mm-topbar__title"><h1>' + esc(title) + '</h1>' + (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div>'
       + (end || '<span class="mm-badge mm-badge--quiet" aria-hidden="true">הדגמה</span>')
       + '</div>';

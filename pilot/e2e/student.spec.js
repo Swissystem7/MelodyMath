@@ -133,3 +133,40 @@ test.describe('student unit flow (grades 1–3)', () => {
     expect(blocked).toEqual([]);
   });
 });
+
+// A student can leave a unit for the list of units without signing out, and
+// the unit resumes at the same exercise (Aviran, 5.11: a teacher trying the demo
+// as a student got stuck inside a unit).
+test.describe('back to the list of units', () => {
+  test('from an exercise: the list opens, the unit is in progress, and it resumes at the same exercise', async ({ page, baseURL }) => {
+    await h.openDemo(page, baseURL);
+    await h.signIn(page, 'student');
+    await expect(page.getByTestId('units-home')).toHaveCount(0); // not on the home screen itself
+    await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre');
+    await expect(page.getByTestId('units-home')).toBeVisible(); // also on the lesson
+    await page.getByTestId('lesson-continue').click();
+    await h.expectQuestion(page, 'q1');
+    await h.answer(page, 7);
+    await page.getByTestId('next').click();
+    await h.expectQuestion(page, 'q2');
+    await h.expectMobileFriendly(page);
+    await page.getByTestId('units-home').click();
+    await expect(page.getByTestId('view-student-home')).toBeVisible();
+    await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'progress');
+    // still signed in: another unit can be opened from the list
+    await expect(page.getByTestId('open-unit-line-1')).toBeVisible();
+    await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre');
+    await h.expectQuestion(page, 'q2');
+  });
+
+  test('a teacher preview keeps only its own way back to the board', async ({ page, baseURL }) => {
+    await h.openDemo(page, baseURL);
+    await h.signIn(page, 'teacher');
+    await page.locator('[data-act="preview"][data-unit="music-1"][data-q="q1"]').first().click();
+    await h.expectQuestion(page, 'q1');
+    await expect(page.getByTestId('units-home')).toHaveCount(0);
+    await expect(page.getByTestId('preview-exit')).toBeVisible();
+  });
+});
