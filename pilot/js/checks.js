@@ -144,7 +144,8 @@
     const sd = n > 1 ? Math.sqrt(gain.reduce(function (x, v) { return x + (v - g) * (v - g); }, 0) / (n - 1)) : null;
     const r1 = function (v) { return Math.round(v * 10) / 10; };
     return {
-      n: n, pre: r1(mean(pre)), post: r1(mean(post)), gain: r1(g),
+      n: n, children: pairs.map(function (r) { return r.student; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).length,
+      pre: r1(mean(pre)), post: r1(mean(post)), gain: r1(g),
       improved: gain.filter(function (v) { return v > 0; }).length,
       same: gain.filter(function (v) { return v === 0; }).length,
       declined: gain.filter(function (v) { return v < 0; }).length,

@@ -216,6 +216,7 @@ test('class summary: only pairs with both checks count, percent per unit and poo
   assert.equal(one.all.d, null, 'no effect size from one pair');
   const s = K.classSummary([r('a', 'u1', 1, 3, 3), r('b', 'u1', 2, 2, 3), r('c', 'u1', 3, 2, 3), r('a', 'u2', 0, 2, 2)]);
   assert.equal(s.all.n, 4);
+  assert.equal(s.all.children, 3, 'pairs and children are counted apart');
   assert.deepEqual([s.all.improved, s.all.same, s.all.declined, s.all.ceiling], [2, 1, 1, 1]);
   assert.deepEqual(s.byUnit.map((u) => [u.unit, u.n]), [['u1', 3], ['u2', 1]]);
   assert.equal(s.byUnit[1].gain, 100);

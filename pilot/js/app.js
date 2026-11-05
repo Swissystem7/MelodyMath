@@ -755,8 +755,8 @@
       body = '<p class="mm-sub" data-testid="class-gain-empty">' + (sum.started ? 'יש בדיקות לפני, אבל עוד אין תלמיד/ה שעשה/תה גם את הבדיקה אחרי.' : 'אין עדיין בדיקות במכשיר הזה.') + '</p>';
     } else {
       const a = sum.all;
-      body = '<p data-testid="class-gain-all" data-n="' + a.n + '" data-gain="' + a.gain + '">'
-        + 'ב־<strong>' + a.n + '</strong> זוגות של לפני ואחרי: ממוצע <span class="ltr">' + a.pre + '%</span> לפני ו־<span class="ltr">' + a.post + '%</span> אחרי, '
+      body = '<p data-testid="class-gain-all" data-n="' + a.n + '" data-children="' + a.children + '" data-gain="' + a.gain + '">'
+        + '<strong>' + a.children + '</strong> ' + (a.children === 1 ? 'ילד/ה' : 'ילדים') + ', <strong>' + a.n + '</strong> זוגות של לפני ואחרי: ממוצע <span class="ltr">' + a.pre + '%</span> לפני ו־<span class="ltr">' + a.post + '%</span> אחרי, '
         + 'שינוי של <strong class="ltr">' + sign(a.gain) + '</strong> נקודות אחוז. השתפרו ' + a.improved + ', ללא שינוי ' + a.same + ', ירדו ' + a.declined + '.'
         + (a.d != null ? ' גודל אפקט (לפני־אחרי) <span class="ltr">d = ' + a.d + '</span>.' : '') + '</p>'
         + '<div class="mm-table-wrap"><table class="mm-table" data-testid="class-gain-table"><thead><tr><th scope="col">יחידה</th><th scope="col">זוגות</th><th scope="col">לפני</th><th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>'
@@ -769,7 +769,7 @@
     return '<div class="mm-card" data-testid="class-gain"><h3>כמה הכיתה השתפרה? בדיקה בלי מוזיקה, לפני ואחרי</h3>' + body
       + '<p class="mm-sub" data-testid="class-gain-limits">מה זה לא מראה: אין כאן קבוצת השוואה, כל בדיקה היא 2–3 שאלות, והבדיקה אחרי נעשית מיד בסוף היחידה. '
       + 'שיפור כאן יכול לבוא גם מעצם התרגול. כדי לדעת כמה המוזיקה עצמה תורמת, משווים לכיתה דומה שמתרגלת את אותו חומר בלי מוזיקה, באותו זמן, עם אותן בדיקות.'
-      + (sum.all.n && sum.all.n < 10 ? ' עם פחות מ־10 זוגות התוצאה עוד לא יציבה.' : '') + '</p>'
+      + (sum.all.n && sum.all.children < 10 ? ' עם פחות מ־10 ילדים התוצאה עוד לא יציבה, גם כשיש הרבה יחידות.' : '') + '</p>'
       + (rows.length ? '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="export-checks" data-testid="export-checks">הורדת הנתונים לגיליון (CSV)</button></div>' : '')
       + '</div>';
   }
