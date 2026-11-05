@@ -220,3 +220,40 @@ test('score.js: secondary accent, stereo pan on a grid, a drawn triangle, face-p
   assert.equal(pyr.length, 5);
   assert.equal(new Set(pyr.slice(1).map(motif)).size, 1, 'the four triangles are congruent');
 });
+
+// "Play the answer": a drum pad for exercises whose answer is a number of beats.
+test('tap exercises: the answer is a number of beats the child can play, grouped in bars', () => {
+  const X = require('../pilot/js/coverage.js');
+  const taps = X.allUnits().flatMap((u) => u.questions).filter((q) => q.tap);
+  assert.ok(taps.length >= 15, 'tap exercises: ' + taps.length);
+  taps.forEach((q) => {
+    assert.equal(q.kind, 'num', q.id);
+    assert.ok(Number.isInteger(q.answer) && q.answer >= 1 && q.answer <= 40, q.id + ' can be tapped: ' + q.answer);
+    assert.ok(Number.isInteger(q.tap.per) && q.tap.per >= 2 && q.tap.per <= 10, q.id + ' bar size');
+    assert.ok(!q.tolerance, q.id + ' is an exact count');
+  });
+});
+
+// The grade ד unit: every fraction is the part of a 4/4 bar that a note lasts.
+test('frac-4: note lengths in eighths match the fractions on their labels, and equivalent fractions last the same', () => {
+  const S = require('../pilot/js/score.js');
+  const X = require('../pilot/js/coverage.js');
+  const u = X.unitById('frac-4');
+  assert.ok(u && u.grades === 'ד׳' && u.questions.length >= 6);
+  assert.deepEqual(u.skill.sources, ['E4', 'E5']);
+  const eighths = { '1/2': 4, '1/4': 2, '1/8': 1, '3/8': 3 };
+  u.questions.concat([{ id: 'lesson', music: u.lesson.demo }]).forEach((q) => {
+    assert.equal(q.music.kind, 'durations', q.id);
+    const per = q.music.beats;
+    q.music.bars.forEach((bar) => {
+      assert.ok(bar.reduce((s, n) => s + n.len, 0) <= per, q.id + ' fits the bar');
+      bar.forEach((n) => { if (eighths[n.label]) assert.equal(n.len * (8 / per), eighths[n.label], q.id + ' ' + n.label); });
+    });
+  });
+  const fr3 = u.questions.find((q) => q.id === 'fr3');
+  const len = (bar) => bar.filter((n) => !n.rest).reduce((s, n) => s + n.len, 0);
+  assert.equal(len(fr3.music.bars[0]), len(fr3.music.bars[1]), '2/4 and 4/8 last the same');
+  assert.equal(fr3.music.bars[1].length, fr3.answer);
+  const fr4 = S.plan(u.questions.find((q) => q.id === 'fr4').music, 'question').notes.filter((n) => n.role === 'held');
+  assert.ok(fr4[0].dur > fr4[1].dur && fr4[0].hz === fr4[1].hz, '3/8 lasts longer than 1/4, at the same pitch');
+});
