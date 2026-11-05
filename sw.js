@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v37';
+const CACHE = 'melodymath-offline-v38';
 const ASSETS = [
   './',
   './index.html',
@@ -152,21 +152,21 @@ const ASSETS = [
   // fails when they differ.
   './pilot/',
   './pilot/index.html',
-  './pilot/pilot.css?v=20261106',
-  './src/lib/musicEngine.js?v=20261106',
-  './src/lib/instrumentVoices.js?v=20261106',
-  './src/lib/curriculum.js?v=20261106',
-  './pilot/seed/demo-accounts.js?v=20261106',
-  './pilot/js/unit.js?v=20261106',
-  './pilot/js/units.js?v=20261106',
-  './pilot/js/units-extra.js?v=20261106',
-  './pilot/js/checks.js?v=20261106',
-  './pilot/js/coverage.js?v=20261106',
-  './pilot/js/score.js?v=20261106',
-  './pilot/js/music.js?v=20261106',
-  './pilot/js/research.js?v=20261106',
-  './pilot/js/store.js?v=20261106',
-  './pilot/js/app.js?v=20261106',
+  './pilot/pilot.css?v=20261107',
+  './src/lib/musicEngine.js?v=20261107',
+  './src/lib/instrumentVoices.js?v=20261107',
+  './src/lib/curriculum.js?v=20261107',
+  './pilot/seed/demo-accounts.js?v=20261107',
+  './pilot/js/unit.js?v=20261107',
+  './pilot/js/units.js?v=20261107',
+  './pilot/js/units-extra.js?v=20261107',
+  './pilot/js/checks.js?v=20261107',
+  './pilot/js/coverage.js?v=20261107',
+  './pilot/js/score.js?v=20261107',
+  './pilot/js/music.js?v=20261107',
+  './pilot/js/research.js?v=20261107',
+  './pilot/js/store.js?v=20261107',
+  './pilot/js/app.js?v=20261107',
 ];
 
 self.addEventListener('install', function (event) {

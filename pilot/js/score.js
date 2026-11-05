@@ -115,7 +115,7 @@
       for (let j = 0; j < spec.extra; j++) {
         const d = TUNE[t++ % TUNE.length];
         const k = b.token(g, '', 'extra', d);
-        notes.push(note(d, at, beat * 0.85, 'pluck', 'extra', k.chip, 0.17));
+        notes.push(note(d, at, beat * 0.85, spec.extraVoice || 'pluck', 'extra', k.chip, 0.17));
         at += beat;
       }
     }
