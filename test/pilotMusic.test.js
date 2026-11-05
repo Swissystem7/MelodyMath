@@ -192,10 +192,12 @@ test('score.js: secondary accent, stereo pan on a grid, a drawn triangle, face-p
   // a08: right/left is stereo, up/down is pitch — a step right keeps the pitch
   const at5 = byId('at5');
   const n = S.plan(at5.music, 'question').notes;
-  assert.deepEqual(n.map((x) => x.pan || 0), [0, 1, 1, 0]);
-  assert.equal(n[0].hz, n[1].hz, 'a step to the right does not change the pitch');
-  assert.ok(n[2].hz > n[1].hz, 'a step up raises the pitch');
-  assert.equal(n[3].hz, n[2].hz);
+  assert.deepEqual(n.map((x) => x.pan || 0), [0, 0.33, 0.67, 1, 1, 0.67, 0.33], '3 right, 1 up, 2 left: the last note is still a little to the right');
+  assert.equal(new Set(n.slice(0, 4).map((x) => x.hz)).size, 1, 'steps to the right do not change the pitch');
+  assert.ok(n[4].hz > n[3].hz, 'a step up raises the pitch');
+  assert.equal(n[4].pan, n[3].pan, 'a step up does not move the sound sideways');
+  assert.equal(new Set(n.slice(4).map((x) => x.hz)).size, 1);
+  assert.equal(at5.answer, 3 - 2, 'the net steps to the right, as in the check without music');
   assert.doesNotMatch(S.plan(at5.music, 'question').svg, /<line|●/, 'the picture does not show the path or the end before the answer');
   assert.match(S.plan(at5.music, 'right').svg, /<line[\s\S]*●/);
   assert.match(S.plan(byId('sd1').music, 'question').svg, /קדימה/);
