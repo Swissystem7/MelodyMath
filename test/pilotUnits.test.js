@@ -149,7 +149,9 @@ test('every unit has a 2–3 item check before and after, without music, in para
       assert.ok(items.length >= 2 && items.length <= 3, u.id + (i ? ' post' : ' pre') + ': ' + items.length);
       items.forEach((it) => {
         assert.equal(it.music, undefined, it.id + ' has no music');
-        assert.deepEqual(Object.keys(it).sort(), ['answer', 'id', 'q'], it.id + ' is plain math: id, question, answer');
+        assert.deepEqual(Object.keys(it).sort(), ['answer', 'id', 'q', 'skill'], it.id + ' is plain math: id, question, answer, and the skill it measures');
+        assert.ok(u.topics.some((t) => t.id === it.skill), it.id + ' measures ' + it.skill + ', a topic the unit practises');
+        assert.ok(u.questions.some((q) => q.topic === it.skill), it.id + ': at least one exercise of the unit practises ' + it.skill);
         assert.ok(Number.isInteger(it.answer), it.id);
         assert.ok(!leaksNum(it.q.replace('?', ''), it.answer), it.id + ' does not name its answer: ' + it.q);
         assert.ok(!exerciseTexts.has(it.q), it.id + ' is not a unit exercise');
@@ -157,6 +159,9 @@ test('every unit has a 2–3 item check before and after, without music, in para
         all.push(it);
       });
     });
+    // parallel forms: item i before and item i after measure the same skill
+    assert.equal(pre.length, post.length, u.id + ': as many items after as before');
+    pre.forEach((it, i) => assert.equal(post[i].skill, it.skill, u.id + ' item ' + (i + 1) + ': before measures ' + it.skill + ', after measures ' + post[i].skill));
     const preQ = new Set(pre.map((it) => it.q));
     post.forEach((it) => assert.ok(!preQ.has(it.q), u.id + ': ' + it.id + ' repeats a pre item'));
   });
@@ -168,11 +173,11 @@ test('check scoring and the before/after comparison', () => {
   const pre = K.score('times-1', 'pre', { 'tm-pre1': '20', 'tm-pre2': '17', 'tm-pre3': '' });
   assert.equal(pre.score, 1);
   assert.equal(pre.total, 3);
-  const post = K.score('times-1', 'post', { 'tm-post1': '16', 'tm-post2': '28', 'tm-post3': '12' });
+  const post = K.score('times-1', 'post', { 'tm-post1': '16', 'tm-post2': '28', 'tm-post3': '19' });
   assert.equal(post.score, 3);
   assert.deepEqual(K.compare(pre, post), { pre: '1/3', post: '3/3', change: 2 });
   assert.deepEqual(K.compare(pre, null), { pre: '1/3', post: null, change: null });
-  assert.equal(K.score('place-1', 'post', { 'pv-post3': '3,700' }).score, 1, 'a typed thousands comma is accepted');
+  assert.equal(K.score('place-1', 'pre', { 'pv-pre1': ' 427 ' }).score, 1, 'spaces around the answer are accepted');
 });
 
 test('topic report and stars work for a new unit', () => {
