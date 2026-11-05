@@ -11,6 +11,9 @@
 //             counting, grouping by 10, multiplication, division, remainder,
 //             area, volume, money, minutes. A bar can be one long "block" note
 //             (a ten, a hundred) when it is too long to play beat by beat.
+//             `barEnd` rings a bell WITH the last beat of each bar (one more bar
+//             = one more group, not one more sound); `missing` draws the
+//             remainder inside a dashed bar that did not fill.
 //   steps     one scale step per number: counting on/back, skip counting,
 //             number-line jumps, the 12-step clock cycle, counting up change.
 //   place     one instrument per place value (gong 1000, organ 100, bass 10,
@@ -22,7 +25,8 @@
 //             bar = half an hour, two half-shekels fill a bar, a coin lasts
 //             its value in ticks, a pencil lasts its length on a ticking ruler.
 //   turn      a full turn is one 4/4 bar; a held note of 1 beat is a quarter
-//             turn (a right angle), 2 beats a straight angle.
+//             turn (a right angle), 2 beats a straight angle, 1.5 an obtuse
+//             one; `arms` draws long or short arms — the turn does not change.
 //   shape     a polygon is a loop: one accented beat per corner; a side of n cm
 //             plays n notes (perimeter = all the notes of one loop).
 //   tempo     two drums in the same time span: "how many times faster".
@@ -105,19 +109,23 @@
         if (silent.indexOf(i) < 0) {
           notes.push(note(d, at, beat * 0.85, voice, j === 0 ? 'accent' : 'beat', k.chip, j === 0 ? 0.26 : 0.17));
           if (j === 0) notes.push(note(0, at, 0.12, 'frameDrum', 'drum', null, 0.2, 110));
+          // the bell sounds WITH the last beat of a bar: it marks the end of a group and adds nothing
+          if (spec.barEnd && j === size - 1) notes.push(note(7, at, beat * 0.9, spec.barEnd, 'bell', null, 0.18));
         }
         at += beat;
       }
       at += beat * 0.6; // a breath between bars: the grouping is heard
     });
     if (spec.extra) {
-      const g = b.group(row, spec.extraLabel || 'מחוץ לתיבה', 'is-extra');
+      const g = b.group(row, spec.extraLabel || 'מחוץ לתיבה', 'is-extra' + (spec.missing ? ' is-missing' : ''));
       for (let j = 0; j < spec.extra; j++) {
         const d = TUNE[t++ % TUNE.length];
         const k = b.token(g, '', 'extra', d);
         notes.push(note(d, at, beat * 0.85, spec.extraVoice || 'pluck', 'extra', k.chip, 0.17));
         at += beat;
       }
+      // the remainder sits inside a bar that did not fill: its empty beats are drawn, not heard
+      if (spec.missing) for (let j = spec.extra; j < (bars[bars.length - 1] || 4); j++) b.token(g, '', 'rest', 0);
     }
     return { board: b, notes: notes, end: at };
   }
@@ -236,7 +244,7 @@
       let used = 0;
       bar.forEach(function (n, j) {
         const k = b.token(g, n.label, n.rest ? 'rest' : 'held', j * 2, n.len);
-        if (!n.rest) notes.push(note(j * 2, at + used * beat, n.len * beat * 0.92, n.voice || spec.voice || 'keys', 'held', k.chip, 0.22));
+        if (!n.rest) notes.push(note(j * 2, at + used * beat, n.len * beat * 0.92, n.voice || spec.voice || 'keys', 'held', k.chip, 0.22, n.hz));
         used += n.len;
       });
       if (used < per) b.token(g, 'שקט', 'rest', 0, per - used);
@@ -245,17 +253,19 @@
     return { board: b, notes: notes, end: at };
   }
 
-  function wedge(beatsOfFour) {
-    // The angle drawn as two rays from a corner: 1 beat of 4 = 90°.
+  function wedge(beatsOfFour, arm) {
+    // The angle drawn as two rays from a corner: 1 beat of 4 = 90°. The arm
+    // length (c08) changes the picture only — the turn, and the sound, stay.
+    const R = arm || 40;
     const a = beatsOfFour * 90 * Math.PI / 180;
-    const x = 50 + 40 * Math.cos(a);
-    const y = 50 - 40 * Math.sin(a);
+    const x = 50 + R * Math.cos(a);
+    const y = 50 - R * Math.sin(a);
     const arcR = 14;
     const ax = 10 + arcR * Math.cos(a);
     const ay = 50 - arcR * Math.sin(a);
     const large = beatsOfFour > 2 ? 1 : 0;
     return '<svg viewBox="0 0 100 60" width="100" height="60" aria-hidden="true" focusable="false" class="mm-sc-svg">'
-      + '<g transform="translate(-40 0)"><line x1="50" y1="50" x2="90" y2="50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+      + '<g transform="translate(-40 0)"><line x1="50" y1="50" x2="' + (50 + R) + '" y2="50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
       + '<line x1="50" y1="50" x2="' + r3(x) + '" y2="' + r3(y) + '" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
       + '<path d="M ' + (50 + arcR) + ' 50 A ' + arcR + ' ' + arcR + ' 0 ' + large + ' 0 ' + r3(ax + 40) + ' ' + r3(ay) + '" fill="none" stroke="#FF8A3D" stroke-width="3"/></g></svg>';
   }
@@ -273,7 +283,7 @@
       const k = b.token(g, '↻', 'held', i * 2, len);
       notes.push(note(i * 2, at, len * beat * 0.95, 'bowed', 'held', k.chip, 0.22));
       if (len < 4) b.token(g, '', 'rest', 0, 4 - len);
-      svg += wedge(len);
+      svg += wedge(len, (spec.arms || [])[i]);
       at += 4 * beat + 0.25 * slow;
     });
     return { board: b, notes: notes, end: at, svg: svg };
