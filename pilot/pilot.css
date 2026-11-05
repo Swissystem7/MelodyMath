@@ -363,3 +363,21 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
 .mm-preview-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--mm-yellow); border: var(--mm-border); border-radius: 16px; padding: 6px 10px; font-weight: 700; font-size: 14px; }
 .mm-unit-art { display: block; width: 96px; height: 96px; object-fit: contain; align-self: center; }
 @media (prefers-reduced-motion: reduce) { .mm-tok.is-on { transform: none; } }
+
+/* MM-610 part 2 (js/units-extra.js): tokens of the contrast, canon, body and solid kinds. */
+.mm-sc__row.is-contrast .mm-sc__group { background: var(--mm-cream); }
+.mm-sc__row.is-contrast .mm-tok { width: calc(18px * var(--w)); min-width: 18px; max-width: 100%; border-radius: 8px; }
+.mm-tok--cmp0 { background: var(--mm-yellow); }
+.mm-tok--cmp1 { background: var(--mm-violet); }
+.mm-tok--cmp2 { background: var(--mm-mint); }
+.mm-tok--cmp3 { background: var(--mm-orange); }
+.mm-sc__row.is-canon .mm-sc__group { background: var(--mm-white); }
+.mm-tok--pat-a { background: var(--mm-yellow); }
+.mm-tok--pat-b { background: var(--mm-violet); }
+.mm-tok--pat-c { background: var(--mm-mint); }
+.mm-sc__row.is-body .mm-tok { min-width: 26px; height: 26px; border-radius: 8px; font-size: 12px; }
+.mm-tok--clap { background: var(--mm-yellow-soft); }
+.mm-tok--stomp { background: var(--mm-ink); color: var(--mm-yellow); }
+.mm-tok--vertex { background: var(--mm-yellow); }
+.mm-tok--edge { background: var(--mm-violet); min-width: 22px; }
+.mm-tok--face { background: var(--mm-teal); color: var(--mm-white); min-width: 28px; height: 24px; border-radius: 8px; }

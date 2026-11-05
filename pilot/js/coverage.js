@@ -6,8 +6,8 @@
 (function (root, factory) {
   const IN_NODE = typeof module === 'object' && !!module.exports;
   const deps = IN_NODE
-    ? { U: require('./unit.js'), X: require('./units.js'), C: require('../../src/lib/curriculum.js') }
-    : { U: root.MMPilotUnit, X: root.MMPilotUnits, C: root };
+    ? { U: require('./unit.js'), X: require('./units.js'), X2: require('./units-extra.js'), C: require('../../src/lib/curriculum.js') }
+    : { U: root.MMPilotUnit, X: root.MMPilotUnits, X2: root.MMPilotUnitsExtra, C: root };
   const api = factory(deps);
   if (IN_NODE) module.exports = api;
   else root.MMPilotCoverage = api;
@@ -27,6 +27,8 @@
       });
     }
     ((deps.X && deps.X.UNITS) || []).forEach(function (u) { list.push(u); });
+    // MM-610 part 2: the sub-topic units (js/units-extra.js), after the first eleven.
+    ((deps.X2 && deps.X2.UNITS) || []).forEach(function (u) { list.push(u); });
     return list;
   }
 

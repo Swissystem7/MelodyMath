@@ -408,7 +408,8 @@
   // ---------------------------------------------------------------- MM-610: new units' music on screen
   const KIND_HE = {
     beats: 'תיבות ופעמות', steps: 'צעדים בסולם', place: 'כלי לכל מקום במספר', pattern: 'דגם שחוזר',
-    pitch: 'עמודות שמתנגנות', durations: 'משכי תווים בתיבה', turn: 'סיבוב שלם = תיבה', shape: 'צורה = לולאה של פעמות', tempo: 'שני קצבים באותו זמן'
+    pitch: 'עמודות שמתנגנות', durations: 'משכי תווים בתיבה', turn: 'סיבוב שלם = תיבה', shape: 'צורה = לולאה של פעמות', tempo: 'שני קצבים באותו זמן',
+    contrast: 'גבוה או נמוך, ארוך או קצר', canon: 'אותם משפטים, סדר אחר', body: 'מחיאות ורקיעות', solid: 'קודקוד, מקצוע, פאה'
   };
 
   // The planned score (js/score.js) drawn as rows of groups of tokens; each
