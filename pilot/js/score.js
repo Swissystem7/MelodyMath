@@ -26,7 +26,8 @@
 //             its value in ticks, a pencil lasts its length on a ticking ruler.
 //   turn      a full turn is one 4/4 bar; a held note of 1 beat is a quarter
 //             turn (a right angle), 2 beats a straight angle, 1.5 an obtuse
-//             one; `arms` draws long or short arms — the turn does not change.
+//             one; `arms` draws long or short arms and `starts` rotates the
+//             drawing — the turn does not change.
 //   shape     a polygon is a loop: one accented beat per corner; a side of n cm
 //             plays n notes (perimeter = all the notes of one loop).
 //   tempo     two drums in the same time span: "how many times faster".
@@ -253,7 +254,7 @@
     return { board: b, notes: notes, end: at };
   }
 
-  function wedge(beatsOfFour, arm) {
+  function wedge(beatsOfFour, arm, start) {
     // The angle drawn as two rays from a corner: 1 beat of 4 = 90°. The arm
     // length (c08) changes the picture only — the turn, and the sound, stay.
     const R = arm || 40;
@@ -265,7 +266,7 @@
     const ay = 50 - arcR * Math.sin(a);
     const large = beatsOfFour > 2 ? 1 : 0;
     return '<svg viewBox="0 0 100 60" width="100" height="60" aria-hidden="true" focusable="false" class="mm-sc-svg">'
-      + '<g transform="translate(-40 0)"><line x1="50" y1="50" x2="' + (50 + R) + '" y2="50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+      + '<g transform="translate(-40 0)' + (start ? ' rotate(' + (-start) + ' 50 50)' : '') + '"><line x1="50" y1="50" x2="' + (50 + R) + '" y2="50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
       + '<line x1="50" y1="50" x2="' + r3(x) + '" y2="' + r3(y) + '" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
       + '<path d="M ' + (50 + arcR) + ' 50 A ' + arcR + ' ' + arcR + ' 0 ' + large + ' 0 ' + r3(ax + 40) + ' ' + r3(ay) + '" fill="none" stroke="#FF8A3D" stroke-width="3"/></g></svg>';
   }
@@ -283,7 +284,7 @@
       const k = b.token(g, '↻', 'held', i * 2, len);
       notes.push(note(i * 2, at, len * beat * 0.95, 'bowed', 'held', k.chip, 0.22));
       if (len < 4) b.token(g, '', 'rest', 0, 4 - len);
-      svg += wedge(len, (spec.arms || [])[i]);
+      svg += wedge(len, (spec.arms || [])[i], (spec.starts || [])[i]);
       at += 4 * beat + 0.25 * slow;
     });
     return { board: b, notes: notes, end: at, svg: svg };
