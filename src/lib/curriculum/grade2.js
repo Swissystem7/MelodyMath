@@ -194,5 +194,18 @@
     ],
   };
 
-  return { grade: 'ב', ST: {}, items: [], music: music, sources: sources };
+  // Late items (MM-7xx stream B): appended last by banks.js with fixed keys
+  // (task × 100 + n), so no existing id moves. Shape as in grade1.js, with
+  // { table } so mastery keeps 2/4/5/10 gating.
+  const lateItems = [
+    // MM-739 · mm-cur-16 division, 4 more challenge items (gap G9, PR #951).
+    // Newprogramgrade2.pdf p. 10 via MM-501 (PR #949). Solved with
+    // phraseShare (M2), the one primary way of DIV_PART and DIV_QUOT above.
+    ['division', 'מנגינה של 90 פעימות מחולקת למשפטים של 10 פעימות. כמה משפטים?', 9, 'כמה פעמים 10 ב־90', 3, 'DIV_QUOT', { key: 73905, table: 10 }],
+    ['division', '35 תווים לחמישה נגנים בשווה. כמה תווים לכל נגן?', 7, 'חלוקה לחמישה חלקים שווים', 3, 'DIV_PART', { key: 73906, table: 5 }],
+    ['division', 'איזה מספר מחלקים ל־5 ומקבלים 8?', 40, 'כפל הפוך: 8 קבוצות של 5', 3, 'DIV_QUOT', { key: 73907, table: 5 }],
+    ['division', '70 פעימות ועוד 30 פעימות, במשפטים של 5. כמה משפטים בסך הכול?', 20, 'קודם כמה פעימות בסך הכול', 3, 'DIV_QUOT', { key: 73908, table: 5 }],
+  ];
+
+  return { grade: 'ב', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
 });
