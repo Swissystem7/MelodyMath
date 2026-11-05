@@ -362,6 +362,8 @@ input[dir=ltr]::placeholder{direction:rtl}
 .roster-chips button.on{background:var(--confidence);color:var(--card);border-color:var(--confidence)}
 .pwa-banner{flex-basis:100%;margin:0;font-size:.82rem;color:var(--muted);font-weight:700;line-height:1.5}
 .metro-bar{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding-inline:16px;padding-block:12px;margin-block-end:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;box-shadow:var(--e-1)}
+/* MM-711: adult blocks folded under the child start card */
+.adult-area{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding-inline:16px;padding-block:4px;margin-block-end:18px;box-shadow:var(--e-1)}.adult-area>summary{margin-block-end:0}.adult-area[open]>summary{margin-block-end:12px}
 .metro-bar button{width:auto;min-height:44px;min-width:44px}
 .metro-bar label{font-size:.85rem;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:8px}
 .metro-bar input[type=number]{width:76px;padding-inline:10px;padding-block:8px;min-height:44px}
@@ -567,11 +569,34 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
 <meta name="sentry-dsn" content="__SENTRY_DSN__">
 </head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
-<main class="wrap" id="main" tabindex="-1"><header><div><div class="brand"><span class="neo-header-stars" aria-hidden="true">★ ★ ★</span>♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>תרגילים לכל כיתה מא׳ עד ו׳, ומקצב שאפשר להפעיל כדי לתרגל לפי הקצב.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">צלילים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
-<div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
-  <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
-  <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
+<main class="wrap" id="main" tabindex="-1"><div id="welcomeHero" class="card welcome-hero" role="region" aria-label="ברוכים הבאים ל-MelodyMath">
+  <span class="tag">ברוכים הבאים · תרגול יסודי א׳–ו׳</span>
+  <h2 style="font-size:1.65rem;margin:8px 0 6px;">מנגנים ולומדים חשבון ברוגע ♫</h2>
+  <div id="qsFlow" class="qs-flow" style="margin-top:8px;">
+    <div id="qsIntro">
+      <button type="button" id="qsStartBtn" class="primary" style="font-size:1.15rem;padding-inline:28px;padding-block:14px;width:auto;min-width:200px;min-height:48px;">מתחילים עכשיו ✨</button>
+    </div>
+    <div id="qsSteps" class="hidden" style="margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:16px;">
+      <div id="qsGradeStep" style="margin-bottom:14px;">
+        <p style="font-weight:700;margin:0 0 8px;font-size:1.05rem;">שלב 1 מתוך 2: באיזו כיתה נתרגל היום?</p>
+        <div class="grade-filter-pills" id="qsGradePills" role="group" aria-label="בחירת כיתה"></div>
+      </div>
+      <div id="qsInstStep" class="hidden" style="margin-bottom:14px;">
+        <p style="font-weight:700;margin:0 0 8px;font-size:1.05rem;">שלב 2 מתוך 2: באיזה כלי נגינה ננגן?</p>
+        <div class="grade-filter-pills" id="qsInstPills" role="group" aria-label="בחירת כלי נגינה"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button type="button" id="qsLaunchBtn" class="primary hidden" style="font-size:1.15rem;padding-inline:24px;padding-block:12px;width:auto;min-height:48px;">קדימה, לתרגיל הראשון! 🚀</button>
+        <button type="button" id="qsCancelBtn" class="secondary" style="width:auto;min-height:48px;">סגירה</button>
+      </div>
+    </div>
+  </div>
+  <p style="margin:14px 0 0;line-height:1.6;color:var(--ink);max-width:44rem;">
+    <strong>מה זה MelodyMath:</strong> סביבת תרגול שקטה וחמה המשלבת מתמטיקה עם מקצב אישי וצלילים מעולם המוזיקה, בקצב שלכם ובלי שום לחץ.<br>
+    <strong>למי זה מתאים:</strong> לילדים בכיתות א׳ עד ו׳, לתלמידים עם קשיי קשב ולחינוך מיוחד. ללא ציונים מלחיצים, פועל ישירות במכשיר וללא שום איסוף מידע.
+  </p>
 </div>
+<header><div><div class="brand"><span class="neo-header-stars" aria-hidden="true">★ ★ ★</span>♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>תרגילים לכל כיתה מא׳ עד ו׳, ומקצב שאפשר להפעיל כדי לתרגל לפי הקצב.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">צלילים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
 <div id="qrModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
   <div class="modal-card">
     <button type="button" class="modal-close" id="qrCloseBtn" aria-label="סגירה">✕</button>
@@ -614,6 +639,12 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
     </div>
   </div>
 </div>
+<details class="adult-area no-print" id="adultArea">
+  <summary>👩‍🏫 למבוגרים: שם התלמיד/ה, כיתה, מדריך למורה ועוד</summary>
+<div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
+  <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
+  <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
+</div>
 <div class="who-bar" id="whoBar">
   <label>קוד כיתה <input id="classCode" maxlength="24" autocomplete="off" placeholder="למשל שילוב-ג"></label>
   <label>שם או קוד תלמיד/ה <input id="studentName" maxlength="24" autocomplete="off" placeholder="למשל נועה / נ-14"></label>
@@ -633,16 +664,6 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   <label class="metro-acc"><input type="checkbox" id="metroAccel"> האצה כל 3 נכונות</label>
   <span class="note teacher-only hidden">נקישה לקצב התרגול במכשיר. שליטה בקצב הפעימות. לא טיפול ואין טענת יעילות.</span>
 </details>
-<details class="metro-bar no-print" id="mySong">
-  <summary>🎶 השיר שלי — המשפטים שפתחתם ב־5 נכונות ברצף</summary>
-  <div id="mySongList" role="group" aria-label="השיר שלי"></div>
-</details>
-<p id="mySongNew" class="mm-unlock hidden" role="status"></p>
-<div class="metro-bar no-print" id="setlistGoal" role="group" aria-label="היעד שלי להיום">
-  <strong>🎤 היעד שלי להיום — כל תשובה נכונה מוסיפה תיבה לשיר</strong>
-  <div id="setlistBody" class="sg-body"></div>
-  <span id="setlistSay" class="note" role="status"></span>
-</div>
 <p class="mm-product-banner"><b>תרגול יסודי א׳–ו׳.</b> כיתה נבחרת למטה. <a href="curriculum.html" style="display:inline-block;min-height:44px;min-width:44px;line-height:44px">כיסוי מול התוכנית — כולל מה שאין</a>.</p>
 <div class="who-bar" id="gradeBar">
   <span class="note" style="flex-basis:100%;margin:0;font-weight:800;color:var(--ink)">כיתה לתוכנית — בנק נפרד לכל שכבה</span>
@@ -656,33 +677,18 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
   <a class="navcard" href="offer.html"><strong>ניסוי כיתתי · 4 שבועות · חינם</strong><span>מכתב מוכן למנהל/ת ודף אחד להדפסה. בלי חשבונית ובלי טענת יעילות.</span></a>
   <a class="navcard" href="frequency.html"><strong>מעבדת תדרים · העשרה ה׳–ו׳</strong><span>אוקטבה פי 2, קווינטה 3:2, טור הרמוני ומונוכורד. שומעים את היחס ומחשבים אותו.</span></a>
 </nav>
-<section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation"><div id="welcomeHero" class="card welcome-hero" role="region" aria-label="ברוכים הבאים ל-MelodyMath">
-  <span class="tag">ברוכים הבאים · תרגול יסודי א׳–ו׳</span>
-  <h2 style="font-size:1.65rem;margin:8px 0 6px;">מנגנים ולומדים חשבון ברוגע ♫</h2>
-  <p style="margin:0 0 12px;line-height:1.6;color:var(--ink);max-width:44rem;">
-    <strong>מה זה MelodyMath:</strong> סביבת תרגול שקטה וחמה המשלבת מתמטיקה עם מקצב אישי וצלילים מעולם המוזיקה, בקצב שלכם ובלי שום לחץ.<br>
-    <strong>למי זה מתאים:</strong> לילדים בכיתות א׳ עד ו׳, לתלמידים עם קשיי קשב ולחינוך מיוחד. ללא ציונים מלחיצים, פועל ישירות במכשיר וללא שום איסוף מידע.
-  </p>
-  <div id="qsFlow" class="qs-flow" style="margin-top:8px;">
-    <div id="qsIntro">
-      <button type="button" id="qsStartBtn" class="primary" style="font-size:1.15rem;padding-inline:28px;padding-block:14px;width:auto;min-width:200px;min-height:48px;">מתחילים עכשיו ✨</button>
-    </div>
-    <div id="qsSteps" class="hidden" style="margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:16px;">
-      <div id="qsGradeStep" style="margin-bottom:14px;">
-        <p style="font-weight:700;margin:0 0 8px;font-size:1.05rem;">שלב 1 מתוך 2: באיזו כיתה נתרגל היום?</p>
-        <div class="grade-filter-pills" id="qsGradePills" role="group" aria-label="בחירת כיתה"></div>
-      </div>
-      <div id="qsInstStep" class="hidden" style="margin-bottom:14px;">
-        <p style="font-weight:700;margin:0 0 8px;font-size:1.05rem;">שלב 2 מתוך 2: באיזה כלי נגינה ננגן?</p>
-        <div class="grade-filter-pills" id="qsInstPills" role="group" aria-label="בחירת כלי נגינה"></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <button type="button" id="qsLaunchBtn" class="primary hidden" style="font-size:1.15rem;padding-inline:24px;padding-block:12px;width:auto;min-height:48px;">קדימה, לתרגיל הראשון! 🚀</button>
-        <button type="button" id="qsCancelBtn" class="secondary" style="width:auto;min-height:48px;">סגירה</button>
-      </div>
-    </div>
-  </div>
+</details>
+<details class="metro-bar no-print" id="mySong">
+  <summary>🎶 השיר שלי — המשפטים שפתחתם ב־5 נכונות ברצף</summary>
+  <div id="mySongList" role="group" aria-label="השיר שלי"></div>
+</details>
+<p id="mySongNew" class="mm-unlock hidden" role="status"></p>
+<div class="metro-bar no-print" id="setlistGoal" role="group" aria-label="היעד שלי להיום">
+  <strong>🎤 היעד שלי להיום — כל תשובה נכונה מוסיפה תיבה לשיר</strong>
+  <div id="setlistBody" class="sg-body"></div>
+  <span id="setlistSay" class="note" role="status"></span>
 </div>
+<section id="remediation" class="panel active" role="tabpanel" aria-labelledby="tab-remediation">
 <div id="rmStart" class="card"><span class="tag" id="rmGradeTag">אבחון קצר · כיתה א׳</span><h2>מדגם לפי הכיתה שנבחרה</h2><p id="rmStartBlurb">מכל מיומנות — שאלה ברמת בסיס ואחריה שאלה ברמת ביניים. בסוף — סיכום במכשיר הזה, ותרגול על מה שפספסנו. זה מדגם קצר, לא אבחון קליני.</p><div id="gateNote" class="mm-product-banner hidden">בתרגול האישי, לוח 3, 6, 7, 8, 9 נפתח רק אחרי שתי תשובות נכונות נפרדות בכל אחד מלוחות 2, 4, 5 ו־10.<span id="gateNoteDiag" class="hidden"> האבחון עצמו בודק גם לוחות שעוד לא נפתחו — כדי לדעת מאיפה להתחיל.</span></div><button type="button" id="rmBegin" class="primary">מתחילים אבחון</button><div id="rmStruggleList" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div></div>
 <div id="mixtapeCard" class="card"><span class="tag">חזרה מעורבת · מיקסטייפ</span><h2>🎧 מיקסטייפ</h2><p id="mixtapeLock">המיקסטייפ נפתח אחרי ששולטים בשני נושאים</p><button type="button" id="mixtapeStart" class="primary" disabled>🎧 מיקסטייפ</button></div>
 <div id="mixtapePlay" class="card hidden"><div class="topline"><span id="mixtapeTag" class="tag"></span><span id="mixtapeCounter"></span></div><h2 id="mixtapePrompt" class="prompt"></h2><div class="answer-row"><label class="sr-only" for="mixtapeAnswer">תשובה</label><input id="mixtapeAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="mixtapeCheck" data-tap="xylo">בדיקה</button></div><div id="mixtapeFeedback" class="feedback hidden" role="status" aria-live="polite"></div></div>
@@ -1064,7 +1070,7 @@ function confirmAdultGate(){const v=$('adultGateAnswer').value;if(!String(v).tri
 let adultHoldAt=null;
 function holdAdultGate(phase,now){if(phase==='start'){if(adultHoldAt===null)adultHoldAt=now;return null}const t=adultHoldAt;adultHoldAt=null;if(!holdLongEnough(t,now)){$('adultGateMsg').textContent='לחצו והחזיקו «אישור» 3 שניות.';return false}return confirmAdultGate()}
 function cancelAdultGate(){show('adultGate',false);adultQ=null;const cur=document.querySelector('.tabs [role="tab"][aria-selected="true"]');if(cur&&typeof cur.focus==='function')cur.focus()}
-function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;if(btn.dataset.tab==='teacherReport'&&!adultOk){openAdultGate(btn);return}adultOk=btn.dataset.tab==='teacherReport';document.body.classList.toggle('adult-ok',adultOk);show('adultGate',false);document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
+function activateHomeTab(btn){if(!btn||!btn.dataset.tab)return;if(btn.dataset.tab==='teacherReport'&&!adultOk){openAdultGate(btn);return}adultOk=btn.dataset.tab==='teacherReport';document.body.classList.toggle('adult-ok',adultOk);show('adultGate',false);document.querySelectorAll('.tabs [role="tab"]').forEach(x=>{const on=x===btn;x.classList.toggle('active',on);x.setAttribute('aria-selected',on?'true':'false');x.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(x=>{const on=x.id===btn.dataset.tab;x.classList.toggle('active',on);x.hidden=!on;x.setAttribute('aria-hidden',on?'false':'true')});if($('welcomeHero'))$('welcomeHero').hidden=btn.dataset.tab!=='remediation';if(btn.dataset.tab!=='playground'&&typeof rgActive!=='undefined'&&rgActive){toggleRgPlay();}if(btn.dataset.tab!=='lessons'){if(typeof cancelStepSpeech==='function')cancelStepSpeech();if(typeof clearStepPulseHint==='function')clearStepPulseHint();}if(btn.dataset.tab!=='classMode'&&typeof quietEndClass==='function'&&typeof classEndsAt!=='undefined'&&classEndsAt>Date.now()){quietEndClass();}if(btn.dataset.tab!=='beatMode'&&typeof quietEndBeat==='function'){quietEndBeat();}if(btn.dataset.tab==='teacherReport'){if(typeof renderTeacherReport==='function')renderTeacherReport();if(typeof renderClassBoard==='function')renderClassBoard()}if(btn.dataset.tab==='classMode'&&typeof renderClassKids==='function')renderClassKids();if(btn.dataset.tab==='lessons'&&typeof renderLessonsUI==='function')renderLessonsUI();if(typeof refreshSpeakNow==='function')refreshSpeakNow()}
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.onclick=()=>activateHomeTab(b));
 if($('adultGateOk')){$('adultGateOk').onpointerdown=()=>holdAdultGate('start',Date.now());$('adultGateOk').onpointerup=()=>holdAdultGate('end',Date.now());$('adultGateOk').onpointerleave=()=>{adultHoldAt=null};$('adultGateOk').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();holdAdultGate('start',Date.now())}};$('adultGateOk').onkeyup=e=>{if(e.key==='Enter'||e.key===' ')holdAdultGate('end',Date.now())}}if($('adultGateCancel'))$('adultGateCancel').onclick=cancelAdultGate;if($('adultGateAnswer'))$('adultGateAnswer').onkeydown=e=>{if(e.key==='Enter'){if(typeof $('adultGateOk').focus==='function')$('adultGateOk').focus()}else if(e.key==='Escape')cancelAdultGate()};
 // playRhythmClicks מגיע מ-src/lib/sonify.js (פעימות אחרי מיומנות). מעבדת התדר הוצאה מהדף (CUT, 28.9.2026).
@@ -1567,7 +1573,7 @@ function cubeChoice(which,value){
 }
 function nextClassQuestion(){classAnswered=false;cubeRound='together';const random=rng(classSeed++);const pool=classPool();const q=pool[Math.floor(random()*pool.length)];classCurrent=q;if($('classItemTag'))setItemTag($('classItemTag'),q);setMath($('classPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('classNumberPlay',q);if(typeof setMusicWay==='function')setMusicWay('classWay',q);renderWidget('classWidget',q,null);$('classWho').textContent=who.name||'';show('classFeedback',false);const opts=makeChoices(q.answer,random);const box=$('classChoices');box.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.dir='ltr';b.textContent=String(v);b.setAttribute('aria-label','תשובה: '+String(v));if(!q.noMusic)b.setAttribute('data-tap','xylo');b.onclick=()=>pickClass(v,b);box.appendChild(b)});const firstChoice=box.querySelector('button');if(firstChoice&&typeof firstChoice.focus==='function')firstChoice.focus();maybeHear(q);maybeSpeak(q.prompt)}
 function pickClass(value,btn){if(classAnswered||!classCurrent)return;if(cubeChoice('class',value))return;classAnswered=true;const correct=isCorrect(value,classCurrent.answer);classHist.push({id:classCurrent.id,correct:correct});noteMetro(correct,classCurrent.skill,classCurrent);logTeacherItem({kind:'class',skill:classCurrent.he||classCurrent.skill,prompt:classCurrent.prompt,answer:classCurrent.answer,given:value,correct});[...$('classChoices').children].forEach(b=>{b.disabled=true;if(isCorrect(b.textContent,classCurrent.answer))b.classList.add('picked-good')});if(!correct)btn.classList.add('picked-bad');$('classFeedback').className=`feedback ${correct?'good':'bad'}`;$('classFeedback').innerHTML=`<strong>${correct?'נכון.':'זו לא התשובה.'}</strong> ${mathHtml(classCurrent.hint)}`;show('classFeedback',true);revealWidget('classWidget');const wait=typeof waitAfterAnswer==='function'?waitAfterAnswer(prefsNow(),preferLessMotion()):(preferLessMotion()?200:700);setTimeout(()=>{if(classEndsAt>Date.now())nextClassQuestion()},wait)}
-function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';if($('classGateMsg')){$('classGateMsg').textContent='יש לבחור תלמיד/ה מהרשימה או להזין שם בסרגל למעלה.';show('classGateMsg',true)}if($('studentName')&&typeof $('studentName').focus==='function')$('studentName').focus();return}if($('classGateMsg'))show('classGateMsg',false);endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classHist=[];classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
+function startClassSession(){if(!who.name){$('whoStatus').textContent='קודם שומרים שם תלמיד/ה בסרגל.';if($('classGateMsg')){$('classGateMsg').textContent='יש לבחור תלמיד/ה מהרשימה או להזין שם בסרגל למעלה.';show('classGateMsg',true)}if($('adultArea'))$('adultArea').open=true;if($('studentName')&&typeof $('studentName').focus==='function')$('studentName').focus();return}if($('classGateMsg'))show('classGateMsg',false);endTeacherSession();ensureTeacherSession('class');classSeed=Date.now()&0x7fffffff;classHist=[];classEndsAt=Date.now()+CLASS_MS;document.body.classList.add('class-live');showClassCard('classPlay');nextClassQuestion();if(classTimerId)clearInterval(classTimerId);classTick();classTimerId=setInterval(classTick,preferLessMotion()?1000:250)}
 function endClassSession(){classEndsAt=0;if(classTimerId){clearInterval(classTimerId);classTimerId=null}document.body.classList.remove('class-live');const ended=endTeacherSession();const last=ended&&ended.kind==='class'?ended:null;const n=last?(last.items||[]).length:0;const ok=last?(last.items||[]).filter(it=>it.correct).length:0;$('classDoneStats').innerHTML=`<div class="stat"><strong>${ok}/${n}</strong>נכונות במפגש</div><div class="stat"><strong>${n?Math.round(100*ok/n):0}%</strong>דיוק במפגש</div>`;showClassCard('classDone');if($('classAgain')&&typeof $('classAgain').focus==='function')$('classAgain').focus()}
 if($('classStart'))$('classStart').onclick=startClassSession;
 if($('classStop'))$('classStop').onclick=()=>endClassSession();
