@@ -11,7 +11,7 @@
   'use strict';
 
   const PREFIX = 'mmPilot.v1.';
-  const KEYS = { session: PREFIX + 'session', assignments: PREFIX + 'assignments', progress: PREFIX + 'progress', lastUnit: PREFIX + 'lastUnit' };
+  const KEYS = { session: PREFIX + 'session', assignments: PREFIX + 'assignments', progress: PREFIX + 'progress', lastUnit: PREFIX + 'lastUnit', classSize: PREFIX + 'classSize' };
 
   function create(storage) {
     const mem = {};
@@ -85,6 +85,18 @@
     function lastUnit() { return read(KEYS.lastUnit, null); }
     function setLastUnit(id) { write(KEYS.lastUnit, id); }
 
+    // Class mode: how many children share the student sign-in on this device
+    // (0 = off). Each child is a number; no names are stored.
+    const CLASS_MAX = 40;
+    function classSize() {
+      const n = Math.floor(Number(read(KEYS.classSize, 0)));
+      return Number.isFinite(n) && n >= 2 && n <= CLASS_MAX ? n : 0;
+    }
+    function setClassSize(n) {
+      const v = Math.floor(Number(n));
+      return write(KEYS.classSize, Number.isFinite(v) && v >= 2 ? Math.min(CLASS_MAX, v) : 0);
+    }
+
     function saveProgress(studentId, unitId, row) {
       const p = allProgress();
       p[studentId] = p[studentId] || {};
@@ -100,7 +112,7 @@
       KEYS: KEYS, session: session, signIn: signIn, signOut: signOut,
       assignments: assignments, assign: assign, assignmentsFor: assignmentsFor,
       progress: progress, saveProgress: saveProgress, resetAll: resetAll,
-      lastUnit: lastUnit, setLastUnit: setLastUnit
+      lastUnit: lastUnit, setLastUnit: setLastUnit, classSize: classSize, setClassSize: setClassSize, CLASS_MAX: CLASS_MAX
     };
   }
 
