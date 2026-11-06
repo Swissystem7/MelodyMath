@@ -54,6 +54,15 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 .onboard-now{background:#f4f0fc;border-radius:12px;padding:12px 14px}
 .onboard-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .onboard-actions .primary{width:auto}
+.child-start{background:#fff;border:2px solid var(--purple);border-radius:18px;padding:18px 20px;margin:0 0 16px}
+.child-start h2{margin:4px 0 6px;font-size:1.6rem}
+.child-start p{margin:4px 0}
+.child-grades{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.child-grades button{width:auto;min-height:56px;min-width:64px;padding:12px 16px;font-size:1.15rem;background:#f0ebff;color:var(--ink);border:2px solid var(--line)}
+.child-grades button[aria-pressed="true"]{background:var(--purple);color:#fff;border-color:var(--purple)}
+.child-start .primary{min-height:60px;font-size:1.3rem}
+.child-grownups{font-size:.9rem;color:var(--muted)}
+.child-grownups button{width:auto;min-height:44px}
 .beat-window{height:10px;background:color-mix(in srgb, var(--confidence) 10%, var(--card));border-radius:99px;overflow:hidden;margin:10px 0}
 .beat-window span{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--pink),var(--purple));transform-origin:right center}
 .cert{border:4px double var(--purple);border-radius:18px;padding:28px 24px;text-align:center;max-width:40rem;margin:12px auto}
@@ -168,6 +177,13 @@ html,body{overflow-x:hidden}img,svg,canvas{max-width:100%}.prompt,.hint,.feedbac
 </style><link rel="stylesheet" href="src/sefirot.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/components/jam.css"></head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand">♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>בנקים נפרדים לכיתות א׳–ד׳, כל פריט מתויג לנושא ולסעיף בתוכנית. מקצב אופציונלי לפסינג. אין טענת יעילות. סוניפיקציית גרפים היא מוצר אחר.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">מרווחים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+<section class="child-start no-print" id="childStart" aria-labelledby="childStartTitle">
+  <h2 id="childStartTitle">שלום! מתחילים לתרגל?</h2>
+  <p>בחרו כיתה, ולחצו על הכפתור הגדול. קודם כמה שאלות קצרות — ואז מתרגלים.</p>
+  <div class="child-grades" id="childGradePick" role="group" aria-label="בחירת כיתה לתרגול"></div>
+  <button type="button" id="childStartBtn" class="primary">▶ מתחילים לתרגל</button>
+  <p class="child-grownups">מורה או הורה? <button type="button" id="childTeacherBtn" class="secondary">למצב כיתה ולכלים של המורה</button></p>
+</section>
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
   <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
   <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
@@ -727,9 +743,9 @@ function paintGrade(){
   const box=$('gradePick'); if(!box) return;
   box.innerHTML=GRADES.map(g=>{
     const on=g===selectedGrade;
-    return '<button type="button" data-grade="'+g+'" aria-pressed="'+(on?'true':'false')+'">'+g+'׳</button>';
+    return '<button type="button" data-grade="'+g+'" aria-pressed="'+(on?'true':'false')+'" aria-label="כיתה '+g+'׳">'+g+'׳</button>';
   }).join('');
-  box.querySelectorAll('button').forEach(b=>b.onclick=()=>saveGrade(b.dataset.grade));
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>saveGrade(b.dataset.grade)); const childBox=$('childGradePick'); if(childBox){ childBox.innerHTML=GRADES.map(g=>{ const on=g===selectedGrade; return '<button type="button" data-grade="'+g+'" aria-pressed="'+(on?'true':'false')+'" aria-label="כיתה '+g+'׳">כיתה '+g+'׳</button>'; }).join(''); childBox.querySelectorAll('button').forEach(b=>b.onclick=()=>saveGrade(b.dataset.grade)); } const childBtn=$('childStartBtn'); if(childBtn) childBtn.setAttribute('aria-label','מתחילים לתרגל, כיתה '+selectedGrade+'׳');
   if($('gradeNote')) $('gradeNote').textContent=GRADE_NOTE[selectedGrade]||'';
   if($('rmGradeTag')) $('rmGradeTag').textContent='אבחון קצר · כיתה '+selectedGrade+'׳';
   if($('gateNote')) $('gateNote').classList.toggle('hidden', selectedGrade!=='ג' && selectedGrade!=='ב');
@@ -868,6 +884,7 @@ function rpPick(){const st=rmPlan[rpStep];const gated=typeof gateItemsOrAll==='f
 function rpRender(){const st=rmPlan[rpStep];const it=rpPick();st.current=it;rpAnswered=false;$('rmPlanSkill').textContent=st.he+(it.level?' · '+levelHe(it.level):'');$('rmPlanCounter').textContent=`שלב ${rpStep+1}/${rmPlan.length} · תרגיל ${(st.history||[]).length+1}/${PLAN_PER_SKILL}`;if($('rmPlanTag'))setItemTag($('rmPlanTag'),it);setMath($('rmPlanPrompt'),it.prompt);setMusicWay('rmPlanWay',it);renderWidget('rmPlanWidget',it,'rmPlanAnswer');$('rmPlanAnswer').value='';$('rmPlanAnswer').disabled=false;$('rmPlanCheck').disabled=false;show('rmPlanFeedback',false);show('rmReward',false);show('rmPlanNext',false);maybeHear(it);maybeSpeak(it.prompt);setTimeout(()=>$('rmPlanAnswer').focus(),0)}
 function rpCheck(){if(rpAnswered)return;if(!normalizeAnswer($('rmPlanAnswer').value))return askForAnswer('rmPlanAnswer','rmPlanFeedback');rpAnswered=true;const st=rmPlan[rpStep];const it=st.current;const correct=answerOk(it,$('rmPlanAnswer').value);st.history=st.history||[];st.history.push({id:it.id,correct});st.lastId=it.id;const lv0=it.level||st.level||1;st.level=nextLevel(lv0,st.history.slice(-2));noteMetro(correct);if(st.level>lv0&&typeof playLevelTune==='function')playLevelTune();logTeacherItem({kind:'plan',skill:st.he,prompt:it.prompt,answer:it.answer,given:$('rmPlanAnswer').value,correct});$('rmPlanFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmPlanFeedback').innerHTML=`<strong>${correct?'יפה מאוד! 🎵':'ננסה שוב בפעם הבאה.'}</strong><div class="hint">${mathHtml(answerHint(it,$('rmPlanAnswer').value,correct))}. התשובה: <b>${mathHtml(it.answer)}</b></div>${musicSourceHtml(it)}`;show('rmPlanFeedback',true);revealWidget('rmPlanWidget');$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;show('rmPlanNext',true);const last=(st.history||[]).length>=PLAN_PER_SKILL;$('rmPlanNext').textContent=last?(rpStep<rmPlan.length-1?'לשלב הבא':'סיום'):'הבא';if($('rmPlanNext')&&typeof $('rmPlanNext').focus==='function')$('rmPlanNext').focus();}
 function rpAdvance(){const st=rmPlan[rpStep];if((st.history||[]).length<PLAN_PER_SKILL){rpRender();return}if(rpStep<rmPlan.length-1){const done=st.he;rpStep++;rpItem=0;const reward=generateRhythmExercise(2,.8);if(!prefsNow().quiet)playRhythmClicks(reward.pattern,reward.bpm);$('rmReward').innerHTML=`סיימתם את ${done}. ${reward.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);setTimeout(rpRender,1300)}else{const finale=generateRhythmExercise(3,.9);if(!prefsNow().quiet)playRhythmClicks(finale.pattern,finale.bpm);endTeacherSession();$('rmPlanPrompt').textContent='סיימתם את מסלול התרגול על מה שפספסנו.';$('rmReward').innerHTML=`${finale.fractionPattern}`;show('rmReward',true);show('rmPlanNext',false);show('rmPlanFeedback',false);show('rmPlanDoneActions',true);$('rmPlanAnswer').disabled=true;$('rmPlanCheck').disabled=true;if($('rmPlanRestart'))$('rmPlanRestart').focus()}}
+if($('childStartBtn'))$('childStartBtn').onclick=()=>{const tab=$('tab-remediation'); if(tab&&typeof activateHomeTab==='function') activateHomeTab(tab); $('rmBegin').click();}; if($('childTeacherBtn'))$('childTeacherBtn').onclick=()=>{const tab=$('tab-classMode'); if(tab) tab.click(); const cm=$('classMode'); if(cm&&cm.scrollIntoView) cm.scrollIntoView({block:'start'});};
 $('rmBegin').onclick=()=>{RM_DIAG=currentDiag();rmIdx=0;rmAns=[];show('rmStart',false);show('rmReport',false);show('rmPlan',false);show('rmPlanDoneActions',false);show('rmQuiz',true);rmRender()};
 $('rmCheck').onclick=rmCheck;$('rmAnswer').onkeydown=e=>{if(e.key==='Enter')rmCheck()};$('rmNext').onclick=rmAdvance;
 $('rmPractice').onclick=()=>{rpStep=0;rpItem=0;show('rmReport',false);show('rmPlanDoneActions',false);show('rmPlan',true);rpRender()};
