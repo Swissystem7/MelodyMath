@@ -165,8 +165,28 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function accountById(id) { return SEED.accounts.filter(function (a) { return a.id === id; })[0] || null; }
-  function students() { return SEED.accounts.filter(function (a) { return a.role === 'student'; }); }
+  // Class mode: a child is the shared student account plus a number, id
+  // "<student id>#<n>". Everything that is kept per student (progress, checks,
+  // assignments, the report) then works per child without any name.
+  function classSize() { return typeof store.classSize === 'function' ? store.classSize() : 0; }
+  function childOf(base, n) {
+    return { id: base.id + '#' + n, baseId: base.id, child: n, role: 'student', username: base.username, grade: base.grade, displayName: 'ילד/ה ' + n };
+  }
+  function accountById(id) {
+    const m = /^(.*)#(\d+)$/.exec(String(id || ''));
+    const base = SEED.accounts.filter(function (a) { return a.id === (m ? m[1] : id); })[0] || null;
+    if (!m || !base) return base;
+    const n = Number(m[2]);
+    return base.role === 'student' && n >= 1 && n <= classSize() ? childOf(base, n) : null;
+  }
+  function students() {
+    const seed = SEED.accounts.filter(function (a) { return a.role === 'student'; });
+    const size = classSize();
+    if (!size) return seed;
+    const out = [];
+    seed.forEach(function (base) { for (let n = 1; n <= size; n++) out.push(childOf(base, n)); });
+    return out;
+  }
   function fmtDate(ms) {
     try { return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' }); } catch (e) { return ''; }
   }
@@ -237,7 +257,8 @@
     G.scrollTo(0, 0);
   }
 
-  function signedInView(acc) { return acc.role === 'teacher' ? 'teacher' : 'student-home'; }
+  // In class mode the shared student sign-in is followed by "who am I?".
+  function signedInView(acc) { return acc.role === 'teacher' ? 'teacher' : (classSize() && !acc.child ? 'who' : 'student-home'); }
   function signOutClean() { state.preview = null; UNIT = UNITS[0]; }
 
   // ---------------------------------------------------------------- views
@@ -278,6 +299,17 @@
     const tasks = store.assignmentsFor(acc.id).slice().sort(function (a, b) { return b.createdAt - a.createdAt; });
     const fromTask = tasks.length ? unitById(tasks[0].unitId) : null;
     return fromTask || unitById(typeof store.lastUnit === 'function' ? store.lastUnit() : null) || UNITS[0];
+  }
+
+  // Class mode: the child taps their number. No names on the device.
+  function viewWho() {
+    const size = classSize();
+    let btns = '';
+    for (let n = 1; n <= size; n++) btns += '<button type="button" class="mm-key" data-act="child" data-child="' + n + '" data-testid="child-' + n + '" aria-label="ילד או ילדה מספר ' + n + '">' + n + '</button>';
+    return '<section class="mm-view" data-testid="view-who">'
+      + topbar('מי אני?', 'בוחרים את המספר שקיבלתם מהמורה')
+      + '<div class="mm-card"><p>לחצו על המספר שלכם. כך התרגול והבדיקות נשמרים רק לכם.</p>'
+      + '<div class="mm-who" role="group" aria-label="המספר שלי">' + btns + '</div></div></section>';
   }
 
   function viewStudentHome() {
@@ -733,6 +765,21 @@
     }).join(' ');
   }
 
+  // Class mode on this device: how many children share the student sign-in.
+  function classModeCard() {
+    if (typeof store.setClassSize !== 'function') return '';
+    const size = classSize();
+    let opts = '<option value="0"' + (size ? '' : ' selected') + '>כבוי — תלמיד/ה אחד/ת</option>';
+    for (let n = 5; n <= (store.CLASS_MAX || 40); n += 5) opts += '<option value="' + n + '"' + (size === n ? ' selected' : '') + '>' + n + ' ילדים</option>';
+    return '<form class="mm-card" data-testid="class-form" novalidate><h2>מצב כיתה במכשיר הזה</h2>'
+      + '<p class="mm-sub">כמה ילדים מתרגלים בחשבון התלמיד במכשיר הזה. כל ילד/ה בוחר/ת מספר אחרי הכניסה, והתרגול, הבדיקות והדוח נשמרים לפי המספר. '
+      + 'במכשיר לא נשמרים שמות: את הרשימה של מי קיבל איזה מספר שומרים על דף.</p>'
+      + '<label class="mm-field">מספר הילדים<select name="size" data-testid="class-size">' + opts + '</select></label>'
+      + '<button type="submit" class="mm-btn mm-btn--white mm-btn--small" data-testid="class-save">שמירה</button>'
+      + '<div class="mm-status" aria-live="polite" data-testid="class-status" data-size="' + size + '">' + (size ? 'מצב כיתה פעיל: ' + size + ' ילדים.' : 'מצב כיתה כבוי.') + '</div>'
+      + '</form>';
+  }
+
   // Every student × unit with a check before, for the class summary and the CSV.
   function checkRows() {
     const rows = [];
@@ -835,6 +882,7 @@
           : '<p data-testid="no-gaps">לא נמצאו פערים ביחידה הזו.</p>';
         return b + '</div>';
       }).join('');
+      if (!blocks && s.child) return '';
       if (!blocks) return html + '<p data-testid="report-empty">אין עדיין תוצאות. הן יופיעו כאן אחרי שהתלמיד/ה יתרגל/תתרגל במכשיר הזה.</p></div>';
       return html + blocks + '</div>';
     }).join('');
@@ -930,6 +978,7 @@
     return '<section class="mm-view" data-testid="view-teacher">'
       + topbar('שלום, ' + acc.displayName, 'לוח המורה · הדגמה')
       + whyCard()
+      + classModeCard()
       + '<div class="mm-grid">'
       + '<form class="mm-card" data-testid="assign-form" novalidate><h2>הקצאת משימה</h2>'
       + '<label class="mm-field">תלמיד/ה<select name="student" data-testid="assign-student">'
@@ -960,6 +1009,7 @@
     root.className = 'mm-shell' + (wide ? ' mm-shell--wide' : '');
     const v = state.view;
     root.innerHTML = v === 'login' ? viewLogin()
+      : v === 'who' ? viewWho()
       : v === 'student-home' ? viewStudentHome()
       : v === 'lesson' ? viewLesson()
       : v === 'exercise' ? viewExercise()
@@ -1170,6 +1220,16 @@
       return;
     }
     if (act === 'key') { onKey(btn.getAttribute('data-key')); return; }
+    if (act === 'child') {
+      const base = state.account && accountById(state.account.baseId || state.account.id);
+      const n = Number(btn.getAttribute('data-child'));
+      if (!base || base.role !== 'student' || !(n >= 1 && n <= classSize())) return;
+      state.account = childOf(base, n);
+      store.signIn(state.account.id);
+      UNIT = UNITS[0];
+      go('student-home');
+      return;
+    }
     if (act === 'tap') { onTap(1); return; }
     if (act === 'untap') { onTap(-1); return; }
     if (act === 'choose') { onChoose(btn.getAttribute('data-choice')); return; }
@@ -1209,6 +1269,11 @@
       saveP(p);
       if (phase === 'post' || phase === 'later') { go('summary'); return; }
       if (!p.lessonDone) go('lesson'); else enterExercise();
+      return;
+    }
+    if (form.getAttribute('data-testid') === 'class-form') {
+      store.setClassSize(form.size.value);
+      render();
       return;
     }
     if (form.getAttribute('data-testid') === 'assign-form') {

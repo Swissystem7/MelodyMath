@@ -83,3 +83,63 @@ test.describe('teacher assign + report', () => {
     expect(blocked).toEqual([]);
   });
 });
+
+// Class mode: several children share the student sign-in on one device. Each
+// picks a number; nothing is kept by name.
+test.describe('class mode: a number per child, no names', () => {
+  test('two children on one device keep separate progress, and the teacher sees each by number', async ({ page, baseURL }) => {
+    await h.openDemo(page, baseURL);
+    await h.signIn(page, 'teacher');
+    await expect(page.getByTestId('class-status')).toHaveAttribute('data-size', '0');
+    await page.getByTestId('class-size').selectOption('5');
+    await page.getByTestId('class-save').click();
+    await expect(page.getByTestId('class-status')).toHaveAttribute('data-size', '5');
+    await expect(page.locator('[data-testid="assign-student"] option')).toHaveCount(5);
+    await h.expectMobileFriendly(page);
+    await h.signOut(page);
+
+    // child 3: the check before, with one right answer
+    const a = h.account('student');
+    await page.getByTestId('login-username').fill(a.username);
+    await page.getByTestId('login-password').fill(a.password);
+    await page.getByTestId('login-submit').click();
+    await expect(page.getByTestId('view-who')).toBeVisible();
+    await expect(page.locator('[data-act="child"]')).toHaveCount(5);
+    await h.expectMobileFriendly(page);
+    await page.getByTestId('child-3').click();
+    await expect(page.getByTestId('view-student-home')).toBeVisible();
+    await expect(page.locator('h1')).toContainText('ילד/ה 3');
+    await page.getByTestId('open-unit').click();
+    await h.passCheck(page, 'pre', { 'm1-pre1': '12', 'm1-pre2': '5' });
+    await expect(page.getByTestId('view-lesson')).toBeVisible();
+    // a reload keeps the same child signed in
+    await page.reload();
+    await expect(page.getByTestId('view-student-home')).toBeVisible();
+    await expect(page.locator('h1')).toContainText('ילד/ה 3');
+    await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'progress');
+    await h.signOut(page);
+
+    // child 4 starts from nothing
+    await page.getByTestId('login-username').fill(a.username);
+    await page.getByTestId('login-password').fill(a.password);
+    await page.getByTestId('login-submit').click();
+    await page.getByTestId('child-4').click();
+    await expect(page.locator('h1')).toContainText('ילד/ה 4');
+    await expect(page.getByTestId('unit-status')).toHaveAttribute('data-status', 'new');
+    await h.signOut(page);
+
+    // the teacher sees child 3 only (child 4 has no data), by number
+    await h.signIn(page, 'teacher');
+    await expect(page.getByTestId('report-student')).toHaveCount(1);
+    await expect(page.getByTestId('report-student')).toContainText('ילד/ה 3');
+    await expect(page.getByTestId('report-prepost')).toHaveAttribute('data-pre', '1/3');
+    const dl = page.waitForEvent('download');
+    await page.getByTestId('export-checks').click();
+    const csv = require('fs').readFileSync(await (await dl).path(), 'utf8');
+    expect(csv).toContain('ילד/ה 3,music-1,1,3,');
+    // turning class mode off brings back the single student
+    await page.getByTestId('class-size').selectOption('0');
+    await page.getByTestId('class-save').click();
+    await expect(page.locator('[data-testid="assign-student"] option')).toHaveCount(1);
+  });
+});
