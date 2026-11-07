@@ -100,6 +100,10 @@
     'mult-5-strategy': {
       pre: [I('m5-pre1', '3 × 5 = ?', 15, 'strat5'), I('m5-pre2', '7 × 5 = ?', 35, 'strat5')],
       post: [I('m5-post1', '5 × 5 = ?', 25, 'strat5'), I('m5-post2', '9 × 5 = ?', 45, 'strat5')]
+    },
+    'parity-rhythm': {
+      pre: [I('pr-pre1', 'כמה זוגות של 2 יש במספר 8?', 4, 'parity'), I('pr-pre2', 'כמה זוגות של 2 יש במספר 14?', 7, 'parity')],
+      post: [I('pr-post1', 'כמה זוגות של 2 יש במספר 6?', 3, 'parity'), I('pr-post2', 'כמה זוגות של 2 יש במספר 12?', 6, 'parity')]
     }
   });
 
