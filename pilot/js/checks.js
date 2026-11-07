@@ -96,6 +96,10 @@
     'mult-9-strategy': {
       pre: [I('m9-pre1', '4 × 9 = ?', 36, 'strat9'), I('m9-pre2', '7 × 9 = ?', 63, 'strat9')],
       post: [I('m9-post1', '3 × 9 = ?', 27, 'strat9'), I('m9-post2', '8 × 9 = ?', 72, 'strat9')]
+    },
+    'mult-5-strategy': {
+      pre: [I('m5-pre1', '3 × 5 = ?', 15, 'strat5'), I('m5-pre2', '7 × 5 = ?', 35, 'strat5')],
+      post: [I('m5-post1', '5 × 5 = ?', 25, 'strat5'), I('m5-post2', '9 × 5 = ?', 45, 'strat5')]
     }
   });
 
