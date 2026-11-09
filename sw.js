@@ -166,6 +166,7 @@ const ASSETS = [
   './pilot/js/music.js?v=20261119',
   './pilot/js/research.js?v=20261119',
   './pilot/js/store.js?v=20261119',
+  './pilot/js/exportValidator.js?v=20261119',
   './pilot/js/app.js?v=20261119',
 ];
 
