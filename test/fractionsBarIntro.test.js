@@ -66,8 +66,8 @@ test('mathematical correctness for exercises and checks', () => {
     'fbi-pre2': { ans: 4, expr: 'כמה רבעים יש בשלם?' },
     'fbi-pre3': { ans: 2, expr: 'כמה רבעים יש בחצי?' },
     'fbi-pre4': { ans: 8, expr: 'כמה רבעים יש בשני שלמים?' },
-    'fbi-post1': { ans: 2, expr: 'כמה חלקי חצי דרושים לשלם?' },
-    'fbi-post2': { ans: 4, expr: 'כמה חלקי רבע דרושים לשלם?' },
+    'fbi-post1': { ans: 8, expr: 'כמה חצאים יש בארבעה שלמים?' },
+    'fbi-post2': { ans: 12, expr: 'כמה רבעים יש בשלושה שלמים?' },
     'fbi-post3': { ans: 4, expr: 'כמה חצאים יש בשני שלמים?' },
     'fbi-post4': { ans: 6, expr: 'כמה חצאים יש בשלושה שלמים?' }
   };
@@ -103,6 +103,12 @@ test('pre and post checks have parallel structure', () => {
     allIds.add(it.id);
     allPrompts.add(it.q);
   });
+
+  for (let k = 0; k < 4; k++) {
+    assert.notEqual(pre[k].q, post[k].q, `pre item ${k + 1} and post item ${k + 1} must not share question text`);
+  }
+  assert.notEqual(pre[0].answer, post[0].answer, `item 1 must have different answers between pre and post`);
+  assert.notEqual(pre[1].answer, post[1].answer, `item 2 must have different answers between pre and post`);
 
   // Non-repeating with respect to exercise prompts
   const unit = Cov.unitById('fractions-bar-intro');
