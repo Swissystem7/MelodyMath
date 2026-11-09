@@ -17,6 +17,7 @@ const INTENTIONALLY_UNUSED = {
   'partnerSchool.js': 'partner school 4-week pilot protocol and evaluation module (Refs #17)',
   'vendorPortfolio.js': 'vendor portfolio checklist and self-audit module (Refs #18)',
   'mult4Strategy.js': 'pure mental-math multiplication-by-4 double-double strategy helper awaiting UI integration',
+  'divStrategy.js': 'pure division-as-equal-beat-sharing and inverse-multiplication helper awaiting UI integration',
 };
 
 function loadedByPages() {
