@@ -28,6 +28,9 @@ test('there are five Hebrew steps and no mastery promise', () => {
   assert.match(blob, /נגישות/);
   assert.match(blob, /על הפעימה/);
   assert.match(blob, /לא ציון/);
+  assert.match(blob, /שימו לב לצליל/);
+  assert.match(blob, /אוזניות/);
+  assert.match(blob, /געו במסך להפעלת השמע/);
   assert.doesNotMatch(blob, /טיפול|משפר מתמטיקה|סוגר פערים|שליטה מצוינת/);
 });
 
@@ -96,3 +99,9 @@ test('demo video walkthrough has 4 Hebrew scenes, צפו בסרטון link, and 
   assert.doesNotMatch(demoPage, /סוגרים פערים במתמטיקה|ADHD|דיסקלקול/i);
 });
 
+test('renderOnboardHtml includes speaker/headphones/tap-to-enable audio guidance', () => {
+  const html = onboard.renderOnboardHtml({ step: 0 });
+  assert.match(html, /שימו לב לצליל/);
+  assert.match(html, /אוזניות/);
+  assert.match(html, /געו במסך להפעלת השמע/);
+});
