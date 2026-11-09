@@ -20,6 +20,7 @@ const INTENTIONALLY_UNUSED = {
   'divStrategy.js': 'pure division-as-equal-beat-sharing and inverse-multiplication helper awaiting UI integration',
   'clockMath.js': 'pure clock arithmetic, 12/24h conversion and quarter-hour fraction helper awaiting UI integration',
   'fractionArithmetic.js': 'pure fraction simplify/add and beats-in-a-bar helper awaiting UI integration',
+  'geometryMath.js': 'pure geometry classification and note duration helper awaiting UI integration',
 };
 
 function loadedByPages() {
