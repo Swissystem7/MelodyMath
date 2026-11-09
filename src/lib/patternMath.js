@@ -2,7 +2,6 @@ function detectPatternCycle(sequence) {
 	if (!Array.isArray(sequence) || sequence.length < 2) return null;
 	const maxLen = Math.floor(sequence.length / 2);
 	for (let len = 1; len <= maxLen; len++) {
-		if (sequence.length % len !== 0) continue;
 		const pattern = sequence.slice(0, len);
 		let ok = true;
 		for (let i = 0; i < sequence.length; i++) {
