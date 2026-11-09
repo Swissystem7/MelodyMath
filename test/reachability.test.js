@@ -26,6 +26,7 @@ const INTENTIONALLY_UNUSED = {
   'patternMath.js': 'pure pattern-cycle and next-element helper awaiting UI integration',
   'moneyMath.js': 'pure Israeli-currency bills/coins/change helper awaiting UI integration',
   'dataRepresentationMath.js': 'pure category-comparison and pictogram helper awaiting UI integration',
+  'multPropertiesMath.js': 'pure multiplication-properties helper awaiting UI integration',
 };
 
 function loadedByPages() {
