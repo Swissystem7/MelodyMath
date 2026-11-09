@@ -568,11 +568,31 @@ footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
 #qsGradePills button{min-height:48px;min-width:48px;padding-inline:8px}
 .qs-teacher-link{display:inline-flex;align-items:center;font-size:.85rem;color:var(--muted);text-decoration:underline;text-underline-offset:3px;min-height:44px}
 .qs-teacher-link:hover,.qs-teacher-link:focus-visible{color:var(--confidence)}
+
+body.theme-high-contrast {
+  --ink:#000; --muted:#111; --bg:#fff; --card:#fff; --line:#000;
+  background:#fff; color:#000;
+}
+body.theme-high-contrast a { color:#0000ee; text-decoration:underline; }
+body.text-large, body.text-large button, body.text-large input, body.text-large select, body.text-large textarea {
+  font-size:1.25em !important;
+  line-height:1.55 !important;
+}
+.a11y-tools { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 12px; }
+.a11y-tools button[aria-pressed="true"] { outline:2px solid var(--purple,#9a3412); }
+
 </style><link rel="stylesheet" href="src/sefirot.css"><link rel="stylesheet" href="src/theme.css"><link rel="stylesheet" href="src/components/jam.css">
 <meta name="sentry-dsn" content="__SENTRY_DSN__">
 </head><body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1"><header><div><div class="brand"><span class="neo-header-stars" aria-hidden="true">★ ★ ★</span>♫ MELODYMATH · תרגול יסודי</div><h1>תרגול מתמטיקה בעברית — לפי כיתה, בטאבלט או על דף.</h1><p>תרגילים לכל כיתה מא׳ עד ו׳, ומקצב שאפשר להפעיל כדי לתרגל לפי הקצב.</p></div><nav class="tabs" role="tablist" aria-label="אזורי תרגול" aria-orientation="horizontal"><button type="button" class="tab active" role="tab" id="tab-remediation" aria-controls="remediation" aria-selected="true" tabindex="0" data-tab="remediation">תרגול לפי כיתה</button><button type="button" class="tab" role="tab" id="tab-lessons" aria-controls="lessons" aria-selected="false" tabindex="-1" data-tab="lessons">🎓 שיעורים מודרכים</button><button type="button" class="tab" role="tab" id="tab-practice" aria-controls="practice" aria-selected="false" tabindex="-1" data-tab="practice">צלילים וטמפו</button><button type="button" class="tab" role="tab" id="tab-playground" aria-controls="playground" aria-selected="false" tabindex="-1" data-tab="playground">מעבדה</button><button type="button" class="tab" role="tab" id="tab-musicGames" aria-controls="musicGames" aria-selected="false" tabindex="-1" data-tab="musicGames">🎵 משחקי מוזיקה</button><button type="button" class="tab" role="tab" id="tab-classMode" aria-controls="classMode" aria-selected="false" tabindex="-1" data-tab="classMode">מצב כיתה</button><button type="button" class="tab" role="tab" id="tab-beatMode" aria-controls="beatMode" aria-selected="false" tabindex="-1" data-tab="beatMode">על הפעימה</button><button type="button" class="tab" role="tab" id="tab-teacherReport" aria-controls="teacherReport" aria-selected="false" tabindex="-1" data-tab="teacherReport">דוח מורה</button></nav></header>
+
+<div class="a11y-tools no-print" role="toolbar" aria-label="נגישות">
+  <button type="button" id="btn-toggle-contrast" class="secondary" aria-pressed="false">ניגודיות גבוהה</button>
+  <button type="button" id="btn-toggle-font" class="secondary" aria-pressed="false">טקסט גדול</button>
+  <button type="button" id="btn-toggle-mute" class="secondary" aria-pressed="false">השתק צלילים</button>
+</div>
+
 <div class="quick-tools no-print" role="region" aria-label="כלי הקרנה ושיתוף לכיתה">
   <button type="button" id="smartboardToggle" class="secondary" aria-pressed="false">🖥️ מצב לוח חכם / מקרן</button>
   <button type="button" id="qrShareBtn" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="qrModal">📱 קוד QR ושיתוף מהיר</button>
@@ -3627,4 +3647,57 @@ try{const q=new URLSearchParams(location.search),card=q.get('screen')&&MM_BALANC
 <div class="card mm-game" id="rpCard" aria-label="שעון קצב: מצולעים, זוויות וסיבוב"></div>
 <script src="src/lib/music/rhythmPolygon.js"></script><script src="src/lib/music/polygonCheck.js"></script><script src="src/components/RhythmPolygon.js"></script>
 <script src="src/lib/music/musicianship.js"></script><script src="src/components/MusicianshipPath.js"></script>
+
+<script>
+(function () {
+  var KEYS = {
+    contrast: 'mm_a11y_contrast',
+    font: 'mm_a11y_font',
+    mute: 'mm_a11y_mute'
+  };
+  function $(id) { return document.getElementById(id); }
+  function setPressed(btn, on) {
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  function applyContrast(on) {
+    document.body.classList.toggle('theme-high-contrast', !!on);
+    setPressed($('btn-toggle-contrast'), on);
+    try { sessionStorage.setItem(KEYS.contrast, on ? '1' : '0'); } catch (e) {}
+  }
+  function applyFont(on) {
+    document.body.classList.toggle('text-large', !!on);
+    setPressed($('btn-toggle-font'), on);
+    try { sessionStorage.setItem(KEYS.font, on ? '1' : '0'); } catch (e) {}
+  }
+  function applyMute(on) {
+    window.__mmAudioMuted = !!on;
+    setPressed($('btn-toggle-mute'), on);
+    try { sessionStorage.setItem(KEYS.mute, on ? '1' : '0'); } catch (e) {}
+  }
+  function readFlag(key) {
+    try { return sessionStorage.getItem(key) === '1'; } catch (e) { return false; }
+  }
+  function boot() {
+    applyContrast(readFlag(KEYS.contrast));
+    applyFont(readFlag(KEYS.font));
+    applyMute(readFlag(KEYS.mute));
+    var c = $('btn-toggle-contrast');
+    var f = $('btn-toggle-font');
+    var m = $('btn-toggle-mute');
+    if (c) c.addEventListener('click', function () {
+      applyContrast(!document.body.classList.contains('theme-high-contrast'));
+    });
+    if (f) f.addEventListener('click', function () {
+      applyFont(!document.body.classList.contains('text-large'));
+    });
+    if (m) m.addEventListener('click', function () {
+      applyMute(!window.__mmAudioMuted);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+
 </body></html>
