@@ -104,6 +104,10 @@
     'parity-rhythm': {
       pre: [I('pr-pre1', 'כמה זוגות של 2 יש במספר 8?', 4, 'parity'), I('pr-pre2', 'כמה זוגות של 2 יש במספר 14?', 7, 'parity')],
       post: [I('pr-post1', 'כמה זוגות של 2 יש במספר 6?', 3, 'parity'), I('pr-post2', 'כמה זוגות של 2 יש במספר 12?', 6, 'parity')]
+    },
+    'fractions-bar-intro': {
+      pre: [I('fbi-pre1', 'כמה חצאים יש בשלם אחד?', 2, 'frac-bar'), I('fbi-pre2', 'כמה רבעים יש בשלם?', 4, 'frac-bar')],
+      post: [I('fbi-post1', 'כמה חלקי חצי דרושים לשלם?', 2, 'frac-bar'), I('fbi-post2', 'כמה חלקי רבע דרושים לשלם?', 4, 'frac-bar')]
     }
   });
 
