@@ -28,3 +28,8 @@ test("weekly backup recommendation", () => {
 });
 test("invalid estimate", () => assert.equal(estimateStorageBytes(null), 0));
 test("invalid quota args", () => assert.equal(isStorageQuotaSafe(-1), false));
+
+test("formatBytesHebrew invalid returns empty", () => {
+	assert.equal(formatBytesHebrew(-5), "");
+	assert.equal(formatBytesHebrew(NaN), "");
+});
