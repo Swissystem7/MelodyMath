@@ -32,5 +32,66 @@
 <script src="js/research.js?v=20261119"></script>
 <script src="js/store.js?v=20261119"></script>
 <script src="js/app.js?v=20261119"></script>
+<script>
+// MM-705: control-group wiring belongs here so the shared pilot files stay unchanged.
+((root) => {
+  'use strict';
+  const storeApi = root.MMPilotStore;
+  if (!storeApi || typeof storeApi.create !== 'function') return;
+  let storage = null;
+  try { storage = root.localStorage; } catch (_e) { /* private mode */ }
+  const store = storeApi.create(storage);
+  const isControl = () => store.controlMode() === true;
+
+  function applyAudio() {
+    const music = root.MMPilotMusic;
+    if (!music || typeof music.setMuted !== 'function') return;
+    if (!music.__mmControlModeWrapped) {
+      const setMuted = music.setMuted;
+      music.setMuted = function (muted) { return setMuted.call(this, isControl() ? true : muted); };
+      music.__mmControlModeWrapped = true;
+    }
+    if (isControl()) music.setMuted(true);
+  }
+
+  function wrapCsv() {
+    const checks = root.MMPilotChecks;
+    if (!checks || typeof checks.toCsv !== 'function' || checks.__mmControlModeWrapped) return;
+    const toCsv = checks.toCsv;
+    checks.toCsv = function (rows) {
+      const csv = String(toCsv.call(this, rows));
+      const group = isControl() ? 'control' : 'intervention';
+      const lines = csv.split('\n');
+      if (lines.length && lines[lines.length - 1] === '') lines.pop();
+      if (!lines.length) return csv;
+      return `${lines.map((line) => `${line},${line === lines[0] ? 'group_type' : group}`).join('\n')}\n`;
+    };
+    checks.__mmControlModeWrapped = true;
+  }
+
+  function addControlUi() {
+    if (!root.document?.body || typeof root.document.createElement !== 'function') return;
+    if (root.document.getElementById('mm-control-mode')) return;
+    const panel = root.document.createElement('div');
+    panel.id = 'mm-control-mode';
+    panel.style.cssText = 'position:fixed;bottom:10px;left:10px;z-index:10;background:#fff;padding:6px 9px;border:1px solid #ddd;border-radius:6px;font-size:13px';
+    panel.innerHTML = '<label><input type="checkbox" data-control-mode> מצב השוואה (ללא צלילים)</label><div role="status" data-control-status hidden>מצב השוואה: הצלילים כבויים</div>';
+    root.document.body.appendChild(panel);
+    const checkbox = panel.querySelector('[data-control-mode]');
+    const status = panel.querySelector('[data-control-status]');
+    checkbox.checked = isControl();
+    status.hidden = !isControl();
+    checkbox.addEventListener('change', () => {
+      store.setControlMode(checkbox.checked);
+      status.hidden = !checkbox.checked;
+      applyAudio();
+    });
+  }
+
+  applyAudio();
+  wrapCsv();
+  addControlUi();
+})(globalThis);
+</script>
 </body>
 </html>
