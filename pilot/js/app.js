@@ -829,7 +829,19 @@
   // The check results as a CSV file on this device (nothing is sent anywhere).
   function exportChecks() {
     if (typeof K.toCsv !== 'function') return;
-    const csv = K.toCsv(checkRows());
+    const rows = checkRows();
+    if (typeof G.MMPilotExportValidator?.validateExportDataset === 'function') {
+      const res = G.MMPilotExportValidator.validateExportDataset(rows);
+      if (res && !res.valid) {
+        const firstErrors = (res.errors || []).slice(0, 5).join('\n');
+        const alertMsg = `לא ניתן לייצא את הנתונים עקב שגיאות אימות:\n${firstErrors}`;
+        if (typeof G.alert === 'function') {
+          G.alert(alertMsg);
+        }
+        return;
+      }
+    }
+    const csv = K.toCsv(rows);
     try {
       const blob = new G.Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
       const a = G.document.createElement('a');
