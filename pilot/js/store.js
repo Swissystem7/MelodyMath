@@ -11,7 +11,7 @@
   'use strict';
 
   const PREFIX = 'mmPilot.v1.';
-  const KEYS = { session: PREFIX + 'session', assignments: PREFIX + 'assignments', progress: PREFIX + 'progress', lastUnit: PREFIX + 'lastUnit', classSize: PREFIX + 'classSize' };
+  const KEYS = { session: `${PREFIX}session`, assignments: `${PREFIX}assignments`, progress: `${PREFIX}progress`, lastUnit: `${PREFIX}lastUnit`, classSize: `${PREFIX}classSize`, controlMode: `${PREFIX}controlMode` };
 
   function create(storage) {
     const mem = {};
@@ -70,9 +70,10 @@
     function progress(studentId, unitId) {
       const p = allProgress();
       const row = p[studentId] && p[studentId][unitId];
-      return row && typeof row === 'object'
-        ? { lessonDone: !!row.lessonDone, index: Number(row.index) || 0, results: row.results || {}, completedAt: row.completedAt || null, startedAt: row.startedAt || null, pre: checkRow(row.pre), post: checkRow(row.post), later: checkRow(row.later) }
-        : { lessonDone: false, index: 0, results: {}, completedAt: null, startedAt: null, pre: null, post: null, later: null };
+      if (!row || typeof row !== 'object') return { lessonDone: false, index: 0, results: {}, completedAt: null, startedAt: null, pre: null, post: null, later: null };
+      const out = { lessonDone: !!row.lessonDone, index: Number(row.index) || 0, results: row.results || {}, completedAt: row.completedAt || null, startedAt: row.startedAt || null, pre: checkRow(row.pre), post: checkRow(row.post), later: checkRow(row.later) };
+      if (row.controlMode === true) out.controlMode = true;
+      return out;
     }
 
     // MM-610: the check without music before/after a unit: { score, total, answers, at }.
@@ -97,10 +98,13 @@
       return write(KEYS.classSize, Number.isFinite(v) && v >= 2 ? Math.min(CLASS_MAX, v) : 0);
     }
 
+    function controlMode() { return read(KEYS.controlMode, false) === true; }
+    function setControlMode(on) { return write(KEYS.controlMode, !!on); }
+
     function saveProgress(studentId, unitId, row) {
       const p = allProgress();
       p[studentId] = p[studentId] || {};
-      p[studentId][unitId] = row;
+      p[studentId][unitId] = controlMode() ? Object.assign({}, row, { controlMode: true }) : row;
       return write(KEYS.progress, p);
     }
 
@@ -112,7 +116,8 @@
       KEYS: KEYS, session: session, signIn: signIn, signOut: signOut,
       assignments: assignments, assign: assign, assignmentsFor: assignmentsFor,
       progress: progress, saveProgress: saveProgress, resetAll: resetAll,
-      lastUnit: lastUnit, setLastUnit: setLastUnit, classSize: classSize, setClassSize: setClassSize, CLASS_MAX: CLASS_MAX
+      lastUnit: lastUnit, setLastUnit: setLastUnit, classSize: classSize, setClassSize: setClassSize,
+      controlMode: controlMode, setControlMode: setControlMode, CLASS_MAX: CLASS_MAX
     };
   }
 
