@@ -18,6 +18,7 @@ const INTENTIONALLY_UNUSED = {
   'vendorPortfolio.js': 'vendor portfolio checklist and self-audit module (Refs #18)',
   'mult4Strategy.js': 'pure mental-math multiplication-by-4 double-double strategy helper awaiting UI integration',
   'divStrategy.js': 'pure division-as-equal-beat-sharing and inverse-multiplication helper awaiting UI integration',
+  'clockMath.js': 'pure clock arithmetic, 12/24h conversion and quarter-hour fraction helper awaiting UI integration',
 };
 
 function loadedByPages() {
