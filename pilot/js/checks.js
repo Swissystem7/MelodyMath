@@ -107,7 +107,7 @@
     },
     'fractions-bar-intro': {
       pre: [I('fbi-pre1', 'כמה חצאים יש בשלם אחד?', 2, 'frac-bar'), I('fbi-pre2', 'כמה רבעים יש בשלם?', 4, 'frac-bar'), I('fbi-pre3', 'כמה רבעים יש בחצי?', 2, 'frac-bar'), I('fbi-pre4', 'כמה רבעים יש בשני שלמים?', 8, 'frac-bar')],
-      post: [I('fbi-post1', 'כמה חלקי חצי דרושים לשלם?', 2, 'frac-bar'), I('fbi-post2', 'כמה חלקי רבע דרושים לשלם?', 4, 'frac-bar'), I('fbi-post3', 'כמה חצאים יש בשני שלמים?', 4, 'frac-bar'), I('fbi-post4', 'כמה חצאים יש בשלושה שלמים?', 6, 'frac-bar')]
+      post: [I('fbi-post1', 'כמה חצאים יש בארבעה שלמים?', 8, 'frac-bar'), I('fbi-post2', 'כמה רבעים יש בשלושה שלמים?', 12, 'frac-bar'), I('fbi-post3', 'כמה חצאים יש בשני שלמים?', 4, 'frac-bar'), I('fbi-post4', 'כמה חצאים יש בשלושה שלמים?', 6, 'frac-bar')]
     }
   });
 

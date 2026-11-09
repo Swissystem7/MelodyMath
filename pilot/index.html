@@ -54,19 +54,193 @@
     if (isControl()) music.setMuted(true);
   }
 
+  function wrapScore() {
+    const checks = root.MMPilotChecks;
+    if (!checks || typeof checks.score !== 'function' || checks.__mmControlScoreWrapped) return;
+    const origScore = checks.score;
+    checks.score = function (...args) {
+      const res = origScore.apply(this, args);
+      if (res && typeof res === 'object') {
+        res.group = isControl() ? 'control' : 'intervention';
+      }
+      return res;
+    };
+    checks.__mmControlScoreWrapped = true;
+  }
+
+  function wrapStoreInstance(sInst, sStorage) {
+    if (!sInst || sInst.__mmControlStoreWrapped) return;
+    const origSave = sInst.saveProgress;
+    if (typeof origSave === 'function') {
+      sInst.saveProgress = function (studentId, unitId, row, ...rest) {
+        if (row && typeof row === 'object') {
+          const grp = sInst.controlMode() ? 'control' : 'intervention';
+          if (row.pre && typeof row.pre === 'object' && !row.pre.group) row.pre.group = grp;
+          if (row.post && typeof row.post === 'object' && !row.post.group) row.post.group = grp;
+          if (row.later && typeof row.later === 'object' && !row.later.group) row.later.group = grp;
+        }
+        return origSave.call(this, studentId, unitId, row, ...rest);
+      };
+    }
+    const origProgress = sInst.progress;
+    if (typeof origProgress === 'function') {
+      sInst.progress = function (...args) {
+        const out = origProgress.apply(this, args);
+        try {
+          const rawStr = sStorage ? sStorage.getItem(sInst.KEYS.progress) : null;
+          if (rawStr) {
+            const rawAll = JSON.parse(rawStr);
+            const studentId = args[0];
+            const unitId = args[1];
+            const rawRow = rawAll?.[studentId]?.[unitId];
+            if (rawRow) {
+              if (out.pre && rawRow.pre?.group) out.pre.group = rawRow.pre.group;
+              else if (out.pre && rawRow.controlMode) out.pre.group = 'control';
+              if (out.post && rawRow.post?.group) out.post.group = rawRow.post.group;
+              else if (out.post && rawRow.controlMode) out.post.group = 'control';
+              if (out.later && rawRow.later?.group) out.later.group = rawRow.later.group;
+              else if (out.later && rawRow.controlMode) out.later.group = 'control';
+              out.group = out.post?.group || out.pre?.group || (rawRow.controlMode ? 'control' : 'intervention');
+            }
+          }
+        } catch (_e) { /* ignore parse error */ }
+        return out;
+      };
+    }
+    sInst.__mmControlStoreWrapped = true;
+  }
+
+  function wrapStore() {
+    if (storeApi.__mmControlStoreWrapped) return;
+    const origCreate = storeApi.create;
+    storeApi.create = function (sStorage) {
+      const sInst = origCreate.call(this, sStorage);
+      wrapStoreInstance(sInst, sStorage);
+      return sInst;
+    };
+    storeApi.__mmControlStoreWrapped = true;
+  }
+
   function wrapCsv() {
     const checks = root.MMPilotChecks;
     if (!checks || typeof checks.toCsv !== 'function' || checks.__mmControlModeWrapped) return;
     const toCsv = checks.toCsv;
     checks.toCsv = function (rows) {
       const csv = String(toCsv.call(this, rows));
-      const group = isControl() ? 'control' : 'intervention';
       const lines = csv.split('\n');
       if (lines.length && lines[lines.length - 1] === '') lines.pop();
       if (!lines.length) return csv;
-      return `${lines.map((line) => `${line},${line === lines[0] ? 'group_type' : group}`).join('\n')}\n`;
+      const getRowGroup = (idx) => {
+        const r = rows?.[idx - 1];
+        if (r) {
+          const g = r.group || r.post?.group || r.pre?.group;
+          if (g === 'control' || g === 'intervention') return g;
+        }
+        return isControl() ? 'control' : 'intervention';
+      };
+      return `${lines.map((line, i) => `${line},${i === 0 ? 'group_type' : getRowGroup(i)}`).join('\n')}\n`;
     };
     checks.__mmControlModeWrapped = true;
+  }
+
+  let lastCardRows = null;
+  let isUpdatingCompare = false;
+  function wrapSummary() {
+    const checks = root.MMPilotChecks;
+    if (!checks || typeof checks.classSummary !== 'function' || checks.__mmControlSummaryWrapped) return;
+    const origSummary = checks.classSummary;
+    checks.classSummary = function (...args) {
+      if (isUpdatingCompare) {
+        return origSummary.apply(this, args);
+      }
+      lastCardRows = args[0];
+      const res = origSummary.apply(this, args);
+      isUpdatingCompare = true;
+      try {
+        updateClassGainCompare();
+      } finally {
+        isUpdatingCompare = false;
+      }
+      return res;
+    };
+    checks.__mmControlSummaryWrapped = true;
+  }
+
+  function getFallbackRows() {
+    const accounts = (root.MM_PILOT_SEED?.accounts || []).filter((a) => a.role === 'student');
+    const units = root.MMPilotUnits?.UNITS || [];
+    const size = typeof store.classSize === 'function' ? store.classSize() : 0;
+    const list = size > 0
+      ? Array.from({ length: size }, (_, i) => ({ id: `child-${i + 1}`, displayName: `ילד/ה ${i + 1}` }))
+      : accounts;
+    const rows = [];
+    list.forEach((s) => {
+      units.forEach((u) => {
+        const p = store.progress(s.id, u.id);
+        if (p?.pre) rows.push({ student: s.displayName, unit: u.id, pre: p.pre, post: p.post || null, later: p.later || null });
+      });
+    });
+    return rows;
+  }
+
+  function updateClassGainCompare() {
+    if (!root.document?.querySelector) return;
+    const card = root.document.querySelector('[data-testid="class-gain"]');
+    if (!card) return;
+
+    const checks = root.MMPilotChecks;
+    if (!checks || typeof checks.classSummary !== 'function') return;
+
+    const rows = (lastCardRows?.length ? lastCardRows : getFallbackRows()) || [];
+    if (!rows.length) {
+      card.querySelector('[data-testid="class-gain-compare"]')?.remove();
+      return;
+    }
+
+    const isControlRow = (r) => {
+      const g = r?.group || r?.post?.group || r?.pre?.group;
+      return g === 'control';
+    };
+
+    const musicRows = rows.filter((r) => !isControlRow(r));
+    const controlRows = rows.filter((r) => isControlRow(r));
+
+    const musicSum = checks.classSummary(musicRows);
+    const controlSum = checks.classSummary(controlRows);
+
+    if (!musicSum?.all?.n || !controlSum?.all?.n) {
+      card.querySelector('[data-testid="class-gain-compare"]')?.remove();
+      return;
+    }
+
+    const musicGain = musicSum.all.gain;
+    const controlGain = controlSum.all.gain;
+    const net = Math.round((musicGain - controlGain) * 10) / 10;
+    const sign = (v) => (v > 0 ? `+${v}` : `${v}`);
+
+    let compareEl = card.querySelector('[data-testid="class-gain-compare"]');
+    if (!compareEl) {
+      compareEl = root.document.createElement('p');
+      compareEl.setAttribute('data-testid', 'class-gain-compare');
+      const allP = card.querySelector('[data-testid="class-gain-all"]');
+      if (allP && typeof allP.insertAdjacentElement === 'function') {
+        allP.insertAdjacentElement('afterend', compareEl);
+      } else if (allP?.parentNode) {
+        allP.parentNode.insertBefore(compareEl, allP.nextSibling);
+      } else {
+        const h3 = card.querySelector('h3');
+        if (h3 && typeof h3.insertAdjacentElement === 'function') {
+          h3.insertAdjacentElement('afterend', compareEl);
+        } else {
+          card.appendChild(compareEl);
+        }
+      }
+    }
+
+    compareEl.setAttribute('data-music-gain', String(musicGain));
+    compareEl.setAttribute('data-control-gain', String(controlGain));
+    compareEl.setAttribute('data-net', String(net));
+    compareEl.textContent = `שיפור ממוצע בקבוצת המוזיקה: ${sign(musicGain)} נקודות; בקבוצת ההשוואה: ${sign(controlGain)} נקודות; הפרש נטו: ${sign(net)} נקודות.`;
   }
 
   function addControlUi() {
@@ -85,12 +259,44 @@
       store.setControlMode(checkbox.checked);
       status.hidden = !checkbox.checked;
       applyAudio();
+      updateClassGainCompare();
     });
   }
 
+  function hookRender() {
+    const appEl = root.document?.getElementById?.('mm-app');
+    if (appEl && typeof appEl.setAttribute === 'function') {
+      const origSetAttribute = appEl.setAttribute;
+      appEl.setAttribute = function (...args) {
+        const ret = origSetAttribute.apply(this, args);
+        if (args[0] === 'data-view') {
+          updateClassGainCompare();
+        }
+        return ret;
+      };
+    }
+    if (typeof root.MutationObserver === 'function' && root.document?.body) {
+      const observer = new root.MutationObserver(() => {
+        updateClassGainCompare();
+      });
+      observer.observe(root.document.body, { childList: true, subtree: true });
+    }
+    ['click', 'submit', 'change'].forEach((ev) => {
+      root.document?.addEventListener?.(ev, () => {
+        setTimeout(updateClassGainCompare, 0);
+      });
+    });
+  }
+
+  wrapStoreInstance(store, storage);
+  wrapStore();
+  wrapScore();
   applyAudio();
   wrapCsv();
+  wrapSummary();
   addControlUi();
+  hookRender();
+  updateClassGainCompare();
 })(globalThis);
 </script>
 </body>
