@@ -2,9 +2,9 @@
 	const api = factory();
 	if (typeof module === "object" && module.exports) {
 		module.exports = api;
-	} else {
-		root.MMPilotExportValidator = api;
 	}
+	// Also expose on the root (browser window / globalThis) so pilots can call it without a bundler.
+	root.MMPilotExportValidator = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, () => {
 	const SYSTEM_WORDS = new Set([
 		"ילד",

@@ -235,3 +235,105 @@ test("MMPilotExportValidator registers on root global when in browser environmen
 		"function",
 	);
 });
+
+// codecov gap fill — hit remaining branches in exportValidator.js
+test("isAnonymousName rejects non-string non-number and quote-only shells", () => {
+	assert.equal(validator.isAnonymousName({}), false);
+	assert.equal(validator.isAnonymousName([]), false);
+	assert.equal(validator.isAnonymousName("«»"), false);
+	assert.equal(validator.isAnonymousName('""'), false);
+});
+
+test("isAnonymousName rejects tokens that fail the single-word nickname pattern", () => {
+	// punctuation mid-token fails /^[\p{L}\p{M}/]+(?:-?#?\d+)?$/u -> hits return false
+	assert.equal(validator.isAnonymousName("כוכב_7"), false);
+	assert.equal(validator.isAnonymousName("a.b"), false);
+});
+
+test("validateExportRow rejects null/non-object rows", () => {
+	assert.equal(validator.validateExportRow(null).valid, false);
+	assert.equal(validator.validateExportRow(undefined).valid, false);
+	assert.equal(validator.validateExportRow("x").valid, false);
+	assert.match(validator.validateExportRow(null).errors[0], /שורת הנתונים/);
+});
+
+test("validateExportRow accepts string scores and Date timestamps", () => {
+	const row = {
+		student: "כוכב",
+		group_type: "control",
+		pre: "80",
+		post: "90",
+		later: "85",
+		pre_score: "70",
+		at: new Date("2026-01-15T10:00:00Z"),
+	};
+	const res = validator.validateExportRow(row);
+	assert.equal(res.valid, true, res.errors.join("; "));
+});
+
+test("validateExportRow checks scalar pre/post/later and nested later.at", () => {
+	const bad = {
+		student: "נמר",
+		group_type: "intervention",
+		pre: 101,
+		post: -1,
+		later: { score: 50, at: "not-a-date" },
+		session_at: "also-bad",
+	};
+	const res = validator.validateExportRow(bad);
+	assert.equal(res.valid, false);
+	assert.ok(res.errors.length >= 3);
+});
+
+test("validateExportRow accepts nested pre/post objects with scores and dates", () => {
+	const row = {
+		name: "שמש",
+		group: "control",
+		pre: { score: 40, at: "2026-02-01" },
+		post: { score: 55, at: 1700000000000 },
+		later: { score: 60, at: "2026-03-01T12:00:00Z" },
+	};
+	const res = validator.validateExportRow(row);
+	assert.equal(res.valid, true, res.errors.join("; "));
+});
+
+test("isValidDate paths via empty string and unsupported types on date keys", () => {
+	const row = {
+		student: "ירח",
+		group_type: "control",
+		created_at: "   ",
+		updatedAt: { nope: true },
+	};
+	const res = validator.validateExportRow(row);
+	assert.equal(res.valid, false);
+});
+
+test("browser global registration path can be exercised without module.exports", () => {
+	const fs = require("node:fs");
+	const path = require("node:path");
+	const vm = require("node:vm");
+	const src = fs.readFileSync(
+		path.join(__dirname, "..", "pilot", "js", "exportValidator.js"),
+		"utf8",
+	);
+	const sandbox = { globalThis: {} };
+	// Do not provide `module` so the UMD else-branch assigns root.MMPilotExportValidator.
+	vm.createContext(sandbox);
+	vm.runInContext(src, sandbox);
+	assert.equal(
+		typeof sandbox.globalThis.MMPilotExportValidator.validateExportDataset,
+		"function",
+	);
+});
+
+test("isAnonymousName rejects 05x phone-shaped tokens and isScoreValid rejects blank/non-numeric strings", () => {
+	// fewer than 7 digits so the dedicated 05x branch runs (not the digitsOnly>=7 branch)
+	assert.equal(validator.isAnonymousName("050-1"), false);
+	assert.equal(validator.isAnonymousName("a050-1"), false);
+	const rowOk = { student: "כוכב", group_type: "control" };
+	assert.equal(validator.validateExportRow(rowOk).valid, true);
+	const row2 = { student: "כוכב", group_type: "control", score: true };
+	assert.equal(validator.validateExportRow(row2).valid, false);
+	const rowBlank = { student: "כוכב", group_type: "control", score: "   " };
+	assert.equal(validator.validateExportRow(rowBlank).valid, false);
+});
