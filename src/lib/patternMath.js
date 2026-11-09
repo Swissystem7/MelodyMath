@@ -1,10 +1,13 @@
 function detectPatternCycle(sequence) {
 	if (!Array.isArray(sequence) || sequence.length < 2) return null;
-	const maxLen = Math.floor(sequence.length / 2);
-	for (let len = 1; len <= maxLen; len++) {
+	const n = sequence.length;
+	// Prefer shortest cycle. Allow an incomplete trailing period once a full
+	// motif has been seen at least once (n > len).
+	for (let len = 1; len < n; len++) {
+		if (n <= len) continue;
 		const pattern = sequence.slice(0, len);
 		let ok = true;
-		for (let i = 0; i < sequence.length; i++) {
+		for (let i = 0; i < n; i++) {
 			if (sequence[i] !== pattern[i % len]) {
 				ok = false;
 				break;
