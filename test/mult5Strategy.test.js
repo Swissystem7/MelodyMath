@@ -54,8 +54,12 @@ test('mathematical correctness for exercises and checks', () => {
   const checkExpected = {
     'm5-pre1': { n: 3, ans: 15, expr: '3 × 5 = ?' },
     'm5-pre2': { n: 7, ans: 35, expr: '7 × 5 = ?' },
+    'm5-pre3': { n: 6, ans: 30, expr: '6 × 5 = ?' },
+    'm5-pre4': { n: 8, ans: 40, expr: '8 × 5 = ?' },
     'm5-post1': { n: 5, ans: 25, expr: '5 × 5 = ?' },
-    'm5-post2': { n: 9, ans: 45, expr: '9 × 5 = ?' }
+    'm5-post2': { n: 9, ans: 45, expr: '9 × 5 = ?' },
+    'm5-post3': { n: 4, ans: 20, expr: '4 × 5 = ?' },
+    'm5-post4': { n: 2, ans: 10, expr: '2 × 5 = ?' }
   };
 
   [...pre, ...post].forEach((it) => {
@@ -72,8 +76,8 @@ test('pre and post checks have parallel structure', () => {
   const pre = K.checkFor('mult-5-strategy', 'pre');
   const post = K.checkFor('mult-5-strategy', 'post');
 
-  assert.equal(pre.length, 2, 'pre check must have exactly 2 items');
-  assert.equal(post.length, 2, 'post check must have exactly 2 items');
+  assert.equal(pre.length, 4, 'pre check must have exactly 4 items');
+  assert.equal(post.length, 4, 'post check must have exactly 4 items');
 
   const allItems = [...pre, ...post];
   const allIds = new Set();

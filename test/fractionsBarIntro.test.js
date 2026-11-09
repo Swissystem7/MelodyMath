@@ -64,8 +64,12 @@ test('mathematical correctness for exercises and checks', () => {
   const checkExpected = {
     'fbi-pre1': { ans: 2, expr: 'כמה חצאים יש בשלם אחד?' },
     'fbi-pre2': { ans: 4, expr: 'כמה רבעים יש בשלם?' },
+    'fbi-pre3': { ans: 2, expr: 'כמה רבעים יש בחצי?' },
+    'fbi-pre4': { ans: 8, expr: 'כמה רבעים יש בשני שלמים?' },
     'fbi-post1': { ans: 2, expr: 'כמה חלקי חצי דרושים לשלם?' },
-    'fbi-post2': { ans: 4, expr: 'כמה חלקי רבע דרושים לשלם?' }
+    'fbi-post2': { ans: 4, expr: 'כמה חלקי רבע דרושים לשלם?' },
+    'fbi-post3': { ans: 4, expr: 'כמה חצאים יש בשני שלמים?' },
+    'fbi-post4': { ans: 6, expr: 'כמה חצאים יש בשלושה שלמים?' }
   };
 
   [...pre, ...post].forEach((it) => {
@@ -81,8 +85,8 @@ test('pre and post checks have parallel structure', () => {
   const pre = K.checkFor('fractions-bar-intro', 'pre');
   const post = K.checkFor('fractions-bar-intro', 'post');
 
-  assert.equal(pre.length, 2, 'pre check must have exactly 2 items');
-  assert.equal(post.length, 2, 'post check must have exactly 2 items');
+  assert.equal(pre.length, 4, 'pre check must have exactly 4 items');
+  assert.equal(post.length, 4, 'post check must have exactly 4 items');
 
   const allItems = [...pre, ...post];
   const allIds = new Set();
