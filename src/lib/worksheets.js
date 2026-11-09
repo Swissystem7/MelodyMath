@@ -128,7 +128,10 @@
   function renderWorksheetHtml(sheet) {
     const s = sheet || buildWorksheet({});
     const who = [s.studentName, s.classCode].filter(Boolean).join(' · ');
+    const nickFields = '<p class="sheet-nick-fields" dir="rtl">הכינוי שלי: ___________ | קוד כיתה: ___________</p>'
+      + '<p class="sheet-nick-hint" dir="rtl">כתבו כינוי, לא שם אמיתי</p>';
     const head = '<p class="sheet-kicker">' + escapeHtml(s.title) + (who ? ' — ' + escapeHtml(who) : '') + '</p>'
+      + nickFields
       + '<p class="sheet-note">' + escapeHtml(s.note) + '</p>';
     const blanks = s.items.map(function (it, i) {
       return '<div class="sheet-item"><span class="n">' + (i + 1) + '.</span> '
@@ -137,7 +140,7 @@
         + printableWidget(it)
         + '<div class="sheet-blank">תשובה: ________________</div></div>';
     }).join('');
-    let html = '<div class="sheet-page">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
+    let html = '<div class="sheet-page" dir="rtl">' + head + '<div class="sheet-grid">' + blanks + '</div></div>';
     if (s.withAnswers) {
       const key = s.items.map(function (it, i) {
         return '<li>' + (i + 1) + '. ' + BIDI.mathHtml(String(it.answer))
