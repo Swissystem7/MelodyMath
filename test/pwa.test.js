@@ -36,6 +36,9 @@ test('shared chrome registers the service worker', () => {
   assert.match(core, /serviceWorker/);
   assert.match(core, /sw\.js/);
   assert.match(core, /manifest/);
+  assert.match(core, /scope: rootHref \|\| '\.\/'/);
+  assert.match(core, /updateViaCache: 'none'/);
+  assert.match(core, /apple-mobile-web-app-capable/);
 });
 
 test('the service-worker cache moved past v6, which holds the curriculum.html that threw on load', () => {
@@ -114,4 +117,78 @@ test('the MM-600 pilot demo is precached with every file it loads, and the home 
   });
   const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.match(index, /<a href="pilot\/index\.html"[^>]*>הדגמת פיילוט למורים<\/a>/);
+});
+
+function pngSize(file) {
+  const buf = fs.readFileSync(file);
+  assert.equal(buf.toString('ascii', 12, 16), 'IHDR');
+  return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+
+test('the manifest id and scope stay relative so GitHub Pages and a local server share one file', () => {
+  const m = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
+  assert.equal(m.id, './');
+  assert.equal(m.scope, './');
+  assert.equal(m.lang, 'he');
+  assert.equal(m.dir, 'rtl');
+  assert.equal(m.theme_color, '#6946e8');
+  const maskable = m.icons.filter((icon) => icon.purpose === 'maskable');
+  assert.deepEqual(maskable.map((icon) => icon.sizes).sort(), ['192x192', '512x512']);
+  maskable.forEach((icon) => {
+    const size = Number(icon.sizes.split('x')[0]);
+    const got = pngSize(path.join(root, icon.src));
+    assert.equal(got.width, size);
+    assert.equal(got.height, size);
+  });
+});
+
+test('every entry page links the manifest, icon and iOS install tags without dropping Hebrew RTL', () => {
+  const pages = {
+    'index.html': '',
+    'landing.html': '',
+    'curriculum.html': '',
+    'functions.html': '',
+    'offer.html': '',
+    'exercise.html': '',
+    'frequency.html': '',
+    'privacy.html': '',
+    'program.html': '',
+    'check.html': '',
+    'demo.html': '',
+    '807.html': '',
+    'pilot/index.html': '../',
+    'tools/record-voice.html': '../',
+  };
+  for (const [page, prefix] of Object.entries(pages)) {
+    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    assert.match(html, /<html\s+lang="he"\s+dir="rtl"/i, page);
+    assert.match(html, new RegExp('rel="manifest"\\s+href="' + prefix.replace(/[.]/g, '\\.') + 'manifest\\.webmanifest"'), page);
+    assert.match(html, new RegExp('rel="apple-touch-icon"\\s+href="' + prefix.replace(/[.]/g, '\\.') + 'icons/icon-192\\.png"'), page);
+    assert.match(html, /name="theme-color"\s+content="#6946e8"/, page);
+    assert.match(html, /name="apple-mobile-web-app-capable"\s+content="yes"/, page);
+    assert.match(html, /name="apple-mobile-web-app-title"\s+content="MelodyMath"/, page);
+    const refsCore = html.includes('src/lib/core.js');
+    if (!refsCore) {
+      const inline = html.includes('serviceWorker.register');
+      const viaScript = [...html.matchAll(/<script src="([^"]+)"/g)].some((match) => {
+        const src = match[1].split('?')[0];
+        const file = path.join(root, path.dirname(page), src);
+        return fs.existsSync(file) && fs.readFileSync(file, 'utf8').includes('serviceWorker.register');
+      });
+      assert.ok(inline || viaScript, page + ' does not register the service worker');
+    }
+  }
+});
+
+test('installation survives one missing precache file, and offline navigations fall back to the home page', () => {
+  const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const version = sw.match(/const CACHE = 'melodymath-offline-v(\d+)'/);
+  assert.ok(version, 'CACHE constant not found');
+  // v52 and earlier called cache.addAll on the whole list, so one 404 rejected install.
+  assert.ok(Number(version[1]) >= 53, 'CACHE is v' + version[1]);
+  assert.match(sw, /function addBestEffort/);
+  assert.match(sw, /cache\.addAll\(SHELL\)/);
+  assert.match(sw, /addBestEffort\(cache, ASSETS\)/);
+  assert.match(sw, /event\.request\.mode === 'navigate'/);
+  assert.match(sw, /caches\.match\('\.\/index\.html'\)/);
 });

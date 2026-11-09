@@ -1313,7 +1313,11 @@
   // browser without service workers just keeps working online.
   try {
     if (G.navigator && G.navigator.serviceWorker && G.isSecureContext) {
-      G.navigator.serviceWorker.register('../sw.js').catch(function () {});
+      var scopeUrl = new URL('../', location.href);
+      G.navigator.serviceWorker.register('../sw.js', {
+        scope: scopeUrl.href,
+        updateViaCache: 'none'
+      }).catch(function () {});
     }
   } catch (e) { /* no offline copy; the demo itself is unaffected */ }
 })();
