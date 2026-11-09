@@ -725,6 +725,22 @@
     return 'ממשיכים לתרגל — כל פעם קצת יותר.';
   }
 
+  function sessionEndApi() {
+    if (typeof G !== 'undefined' && G.MMPilotSessionEnd) return G.MMPilotSessionEnd;
+    if (typeof globalThis !== 'undefined' && globalThis.MMPilotSessionEnd) return globalThis.MMPilotSessionEnd;
+    if (typeof window !== 'undefined' && window.MMPilotSessionEnd) return window.MMPilotSessionEnd;
+    try { return require('./sessionEnd.js'); } catch (e) { return null; }
+  }
+
+  function viewSessionEnd() {
+    const api = sessionEndApi();
+    const topicName = UNIT && UNIT.title ? UNIT.title : '';
+    if (api && typeof api.renderSessionEnd === 'function') {
+      return api.renderSessionEnd({ topicName: topicName });
+    }
+    return '<section class="mm-view" data-testid="view-session-end" data-screen="AG11"><h2>עבדת יפה היום.</h2></section>';
+  }
+
   function viewSummary() {
     const p = currentProgress();
     const rep = U.topicReport(p.results);
@@ -1056,6 +1072,7 @@
       : v === 'student-home' ? viewStudentHome()
       : v === 'lesson' ? viewLesson()
       : v === 'exercise' ? viewExercise()
+      : v === 'session-end' ? viewSessionEnd()
       : v === 'summary' ? viewSummary()
       : v === 'check-pre' ? viewCheck('pre')
       : v === 'check-post' ? viewCheck('post')
@@ -1199,7 +1216,7 @@
     if (state.preview && p.index >= UNIT.questions.length) { exitPreview(); return; }
     if (p.index >= UNIT.questions.length) {
       if (!p.completedAt) { p.completedAt = Date.now(); saveP(p); }
-      go(hasChecks() && !p.post ? 'check-post' : 'summary');
+      go(hasChecks() && !p.post ? 'check-post' : 'session-end');
       return;
     }
     enterExercise();
@@ -1279,6 +1296,16 @@
     if (act === 'check') { onCheck(); return; }
     if (act === 'next') { onNext(); return; }
     if (act === 'home') { if (state.account && state.account.role === 'teacher') exitPreview(); else go('student-home'); return; }
+    if (act === 'session-done') { go('student-home'); return; }
+    if (act === 'session-again') {
+      const p2 = currentProgress();
+      p2.completedAt = null;
+      p2.index = 0;
+      p2.results = {};
+      saveP(p2);
+      enterExercise();
+      return;
+    }
     if (act === 'export-checks') { exportChecks(); return; }
     if (act === 'reset') {
       if (!state.confirmReset) { state.confirmReset = true; render(); return; }
