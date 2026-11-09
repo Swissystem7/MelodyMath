@@ -26,3 +26,20 @@ test("generate avoids existing list", () => {
 		existing.push(generateAnonymousNickname(existing));
 	assert.equal(new Set(existing).size, 8);
 });
+
+test("rejects too long", () =>
+	assert.equal(isValidAnonymousNickname("א".repeat(17)), false));
+test("sanitize null/undefined", () => {
+	assert.equal(sanitizeNickname(null), "");
+	assert.equal(sanitizeNickname(undefined), "");
+});
+test("rejects two non-allowed words as personal name", () => {
+	assert.equal(isValidAnonymousNickname("יוסי כהן"), false);
+});
+test("allows allowed word plus digit with space", () => {
+	assert.equal(isValidAnonymousNickname("נמר 3"), true);
+});
+test("generateAnonymousNickname non-array existing", () => {
+	const n = generateAnonymousNickname(null);
+	assert.match(n, /^.+[1-9]$/);
+});
