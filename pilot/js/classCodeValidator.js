@@ -3,21 +3,22 @@
 	if (typeof module === "object" && module.exports) module.exports = api;
 	root.MMPilotClassCodeValidator = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, () => {
-	// Figma MM-506: 5 chars from [A-HJ-NP-Z2-9] (no O,I,0,1)
 	const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 	const CODE_RE = /^[A-HJ-NP-Z2-9]{5}$/;
 
-	function formatClassCode(input) {
+	function cleanClassCode(input) {
 		if (input == null) return "";
 		return String(input)
 			.toUpperCase()
-			.replace(/[^A-HJ-NP-Z2-9]/g, "")
-			.slice(0, 5);
+			.replace(/[^A-HJ-NP-Z2-9]/g, "");
+	}
+
+	function formatClassCode(input) {
+		return cleanClassCode(input).slice(0, 5);
 	}
 
 	function isValidClassCode(code) {
-		const normalized = formatClassCode(code);
-		return CODE_RE.test(normalized) && normalized.length === 5;
+		return CODE_RE.test(cleanClassCode(code));
 	}
 
 	function generateRandomClassCode() {
