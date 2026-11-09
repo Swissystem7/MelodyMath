@@ -21,6 +21,7 @@ const INTENTIONALLY_UNUSED = {
   'clockMath.js': 'pure clock arithmetic, 12/24h conversion and quarter-hour fraction helper awaiting UI integration',
   'fractionArithmetic.js': 'pure fraction simplify/add and beats-in-a-bar helper awaiting UI integration',
   'geometryMath.js': 'pure geometry classification and note duration helper awaiting UI integration',
+  'measurementConversion.js': 'pure measurement conversion and rectangle/square helper awaiting UI integration',
 };
 
 function loadedByPages() {
