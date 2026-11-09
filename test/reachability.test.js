@@ -24,6 +24,7 @@ const INTENTIONALLY_UNUSED = {
   'measurementConversion.js': 'pure measurement conversion and rectangle/square helper awaiting UI integration',
   'numberLineMath.js': 'pure number-line jump helper awaiting UI integration',
   'patternMath.js': 'pure pattern-cycle and next-element helper awaiting UI integration',
+  'moneyMath.js': 'pure Israeli-currency bills/coins/change helper awaiting UI integration',
 };
 
 function loadedByPages() {
