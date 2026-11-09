@@ -792,6 +792,28 @@
     return rows;
   }
 
+  // MM-714: Cohen's d for the class improvement card (>10 students).
+  function computeClassCohenD(rows, sum) {
+    if (!rows) return null;
+    const s = sum || (typeof K.classSummary === 'function' ? K.classSummary(rows) : null);
+    if (!s?.all || s.all.children <= 10) return null;
+    const Stats = G.MMPilotAnalyticsStats;
+    if (!Stats || typeof Stats.calculatePooledStd !== 'function' || typeof Stats.calculateCohensD !== 'function') {
+      return null;
+    }
+    try {
+      const pairs = rows.filter((r) => r?.pre?.total && r?.post?.total);
+      if (pairs.length < 2) return null;
+      const preScores = pairs.map((r) => (r.pre.score / r.pre.total) * 100);
+      const postScores = pairs.map((r) => (r.post.score / r.post.total) * 100);
+      const pooledStd = Stats.calculatePooledStd(postScores, preScores);
+      if (pooledStd == null) return null;
+      return Stats.calculateCohensD(s.all.post, s.all.pre, pooledStd);
+    } catch {
+      return null;
+    }
+  }
+
   // How much the class improved on the checks without music, and what that does
   // and does not show. The numbers are percent of the check items answered right.
   function classGainCard() {
@@ -805,10 +827,19 @@
       body = '<p class="mm-sub" data-testid="class-gain-empty">' + (sum.started ? 'יש בדיקות לפני, אבל עוד אין תלמיד/ה שעשה/תה גם את הבדיקה אחרי.' : 'אין עדיין בדיקות במכשיר הזה.') + '</p>';
     } else {
       const a = sum.all;
+      const cohenD = computeClassCohenD(rows, sum);
+      const effectCls = (cohenD != null && typeof G.MMPilotAnalyticsStats?.classifyEffectSize === 'function')
+        ? G.MMPilotAnalyticsStats.classifyEffectSize(cohenD)
+        : null;
+      const dDisplay = (() => {
+        if (cohenD == null) return '';
+        const clsText = effectCls ? ` (${effectCls})` : '';
+        return ` גודל אפקט (לפני־אחרי) <span class="ltr">d = ${cohenD}</span>${clsText}.`;
+      })();
       body = '<p data-testid="class-gain-all" data-n="' + a.n + '" data-children="' + a.children + '" data-gain="' + a.gain + '">'
         + '<strong>' + a.children + '</strong> ' + (a.children === 1 ? 'ילד/ה' : 'ילדים') + ', <strong>' + a.n + '</strong> זוגות של לפני ואחרי: ממוצע <span class="ltr">' + a.pre + '%</span> לפני ו־<span class="ltr">' + a.post + '%</span> אחרי, '
         + 'שינוי של <strong class="ltr">' + sign(a.gain) + '</strong> נקודות אחוז. השתפרו ' + a.improved + ', ללא שינוי ' + a.same + ', ירדו ' + a.declined + '.'
-        + (a.d != null ? ' גודל אפקט (לפני־אחרי) <span class="ltr">d = ' + a.d + '</span>.' : '') + '</p>'
+        + dDisplay + '</p>'
         + (a.laterN ? '<p data-testid="class-gain-later" data-n="' + a.laterN + '" data-later="' + a.later + '">בדיקת המשך אחרי שבוע, ב־' + a.laterN + ' זוגות: <span class="ltr">' + a.laterPost + '%</span> מיד אחרי היחידה, <span class="ltr">' + a.later + '%</span> אחרי שבוע.</p>'
           : '<p class="mm-sub" data-testid="class-gain-later-none">בדיקת המשך נפתחת לכל ילד/ה ' + (K.LATER_DAYS || 7) + ' ימים אחרי הבדיקה שאחרי, עם אותן שאלות, כדי לראות מה נשאר.</p>')
         + '<div class="mm-table-wrap"><table class="mm-table" data-testid="class-gain-table"><thead><tr><th scope="col">יחידה</th><th scope="col">זוגות</th><th scope="col">לפני</th><th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>'
