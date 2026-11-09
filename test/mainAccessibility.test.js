@@ -28,3 +28,9 @@ test("welcomeHero structure remains present and unchanged id", () => {
 	assert.match(html, /id="welcomeHero"/);
 	assert.match(html, /class="card welcome-hero"/);
 });
+
+test("mute toggle script persists mm_a11y_mute in sessionStorage", () => {
+	assert.match(html, /mm_a11y_mute/);
+	assert.match(html, /btn-toggle-mute/);
+	assert.match(html, /__mmAudioMuted/);
+});
