@@ -22,6 +22,7 @@ const INTENTIONALLY_UNUSED = {
   'fractionArithmetic.js': 'pure fraction simplify/add and beats-in-a-bar helper awaiting UI integration',
   'geometryMath.js': 'pure geometry classification and note duration helper awaiting UI integration',
   'measurementConversion.js': 'pure measurement conversion and rectangle/square helper awaiting UI integration',
+  'numberLineMath.js': 'pure number-line jump helper awaiting UI integration',
 };
 
 function loadedByPages() {
