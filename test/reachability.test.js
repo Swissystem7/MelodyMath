@@ -16,13 +16,14 @@ const INTENTIONALLY_UNUSED = {
   'narrationPlayer.js': 'pre-recorded Hebrew narration generator and audio player (Refs #515)',
   'partnerSchool.js': 'partner school 4-week pilot protocol and evaluation module (Refs #17)',
   'vendorPortfolio.js': 'vendor portfolio checklist and self-audit module (Refs #18)',
+  'mult4Strategy.js': 'pure mental-math multiplication-by-4 double-double strategy helper awaiting UI integration',
 };
 
 function loadedByPages() {
   const loaded = new Set();
   fs.readdirSync(root).filter((f) => f.endsWith('.html')).forEach((page) => {
     const html = fs.readFileSync(path.join(root, page), 'utf8');
-    [...html.matchAll(/ src="src\/lib\/([^"]+\.js)"/g)].forEach((m) => loaded.add(m[1]));
+    [...html.matchAll(/ src="src\/lib\/([^"]+\.js)"/g)].forEach((m) => { loaded.add(m[1]); });
   });
   return loaded;
 }
