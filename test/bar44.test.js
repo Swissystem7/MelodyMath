@@ -140,5 +140,81 @@ test('grade ד fraction prompts do not print their own answer in brackets', () =
   const BANKS = require('../src/lib/banks');
   const rows = BANKS.practiceItems(null, 'ד').filter((x) => x.widget === 'bar44');
   assert.ok(rows.length >= 15);
-  rows.forEach((x) => assert.ok(!x.prompt.includes("(" + x.answer + ")"), x.prompt));
+  rows.forEach((x) => {
+    assert.ok(!x.prompt.includes(`(${x.answer})`), x.prompt);
+  });
+});
+
+test('canAddNote allows valid durations that fit under capacity', () => {
+  // Adding '1/4' to empty measure -> 2 <= 8
+  assert.equal(bar.canAddNote([], '1/4'), true);
+  // Adding '1/8' to ['1/2', '1/4'] -> 4 + 2 + 1 = 7 eighths <= 8
+  assert.equal(bar.canAddNote(['1/2', '1/4'], '1/8'), true);
+  // Adding '1/2' to ['1/4'] -> 2 + 4 = 6 eighths <= 8
+  assert.equal(bar.canAddNote(['1/4'], '1/2'), true);
+  // Adding whole note '1' to empty measure -> 8 <= 8
+  assert.equal(bar.canAddNote([], '1'), true);
+  // Adding Unicode fraction '¼' to ['½'] -> 4 + 2 = 6 <= 8
+  assert.equal(bar.canAddNote(['½'], '¼'), true);
+});
+
+test('canAddNote allows exact capacity fill', () => {
+  // Adding '1/8' to 7 eighths filled -> total 8 eighths -> true
+  assert.equal(bar.canAddNote(['1/2', '1/4', '1/8'], '1/8'), true);
+  // Adding '1/4' to 6 eighths filled -> total 8 eighths -> true
+  assert.equal(bar.canAddNote(['1/2', '1/4'], '1/4'), true);
+  // Adding '1/2' to 4 eighths filled -> total 8 eighths -> true
+  assert.equal(bar.canAddNote(['1/2'], '1/2'), true);
+  // Adding whole note '1' to empty bar -> exactly 8 eighths -> true
+  assert.equal(bar.canAddNote([], '1'), true);
+});
+
+test('canAddNote blocks overflow beyond 4 beats', () => {
+  // Adding '1/2' (4 eighths) to ['1/2', '1/4'] (6 eighths) -> total 10 eighths > 8 -> returns false
+  assert.equal(bar.canAddNote(['1/2', '1/4'], '1/2'), false);
+  // Adding any note to a full bar -> returns false
+  assert.equal(bar.canAddNote(['1/2', '1/2'], '1/8'), false);
+  assert.equal(bar.canAddNote(['1'], '1/8'), false);
+  assert.equal(bar.canAddNote(['1/4', '1/4', '1/4', '1/4'], '1/4'), false);
+  // Adding a whole note '1' to a non-empty bar -> returns false
+  assert.equal(bar.canAddNote(['1/8'], '1'), false);
+  // Adding '3/4' (6 eighths) to ['1/2'] (4 eighths) -> 10 eighths > 8 -> returns false
+  assert.equal(bar.canAddNote(['1/2'], '3/4'), false);
+});
+
+test('canAddNote handles edge cases, bad inputs, and custom maxEighths capacities', () => {
+  // Edge cases and bad inputs for newNote: null, undefined, empty string, malformed strings
+  assert.equal(bar.canAddNote([], null), false);
+  assert.equal(bar.canAddNote([], undefined), false);
+  assert.equal(bar.canAddNote([], ''), false);
+  assert.equal(bar.canAddNote([], '   '), false);
+  assert.equal(bar.canAddNote([], 'banana'), false);
+  assert.equal(bar.canAddNote([], '3/7'), false);
+  assert.equal(bar.canAddNote([], '0/4'), false);
+  assert.equal(bar.canAddNote([], '-1/4'), false);
+  assert.equal(bar.canAddNote([], {}), false);
+  assert.equal(bar.canAddNote([], 123), false);
+
+  // Non-array existingNotes gracefully handled (treated as empty array)
+  assert.equal(bar.canAddNote(null, '1/4'), true);
+  assert.equal(bar.canAddNote(undefined, '1/4'), true);
+  assert.equal(bar.canAddNote('invalid', '1/4'), true);
+  assert.equal(bar.canAddNote(123, '1/4'), true);
+  assert.equal(bar.canAddNote({}, '1/4'), true);
+
+  // Custom maxEighths capacities (e.g. 3/4 time signature = 6 eighths, 2/4 = 4 eighths)
+  assert.equal(bar.canAddNote(['1/4', '1/4'], '1/4', 6), true); // 2 + 2 + 2 = 6 <= 6
+  assert.equal(bar.canAddNote(['1/4', '1/4'], '1/2', 6), false); // 2 + 2 + 4 = 8 > 6
+  assert.equal(bar.canAddNote([], '1/4', 2), true); // 2 <= 2
+  assert.equal(bar.canAddNote([], '1/2', 2), false); // 4 > 2
+  assert.equal(bar.canAddNote(['1/4'], '1/4', '4'), true); // string '4' capacity: 2 + 2 = 4 <= 4
+
+  // Fallback to BAR_EIGHTHS when maxEighths is invalid, non-positive, or non-finite
+  assert.equal(bar.canAddNote(['1/2'], '1/4', 0), true); // fallback to 8: 4 + 2 = 6 <= 8
+  assert.equal(bar.canAddNote(['1/2'], '1/4', -2), true); // fallback to 8
+  assert.equal(bar.canAddNote(['1/2'], '1/4', NaN), true); // fallback to 8
+  assert.equal(bar.canAddNote(['1/2'], '1/4', Infinity), true); // fallback to 8
+  assert.equal(bar.canAddNote(['1/2'], '1/4', null), true); // fallback to 8
+  assert.equal(bar.canAddNote(['1/2'], '1/4', 'banana'), true); // fallback to 8
+  assert.equal(bar.canAddNote(['1/2', '1/2'], '1/8', -1), false); // fallback to 8: 8 + 1 = 9 > 8 -> false
 });
