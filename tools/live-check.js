@@ -173,4 +173,5 @@ module.exports = {
   youtubeEmbeds,
   sizeVerdict,
   demoVideoLinkedFromOnboard,
+  row,
 };
