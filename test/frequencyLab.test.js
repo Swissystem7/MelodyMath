@@ -88,7 +88,7 @@ function runPage() {
     setTimeout, clearTimeout, localStorage: undefined,
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)).forEach((m) => {
+  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script\s*>/gi)).forEach((m) => {
     if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
     else vm.runInContext(m[2], ctx, { filename: 'frequency.html inline script' });
   });

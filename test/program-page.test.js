@@ -64,7 +64,7 @@ test('program.html renders the chosen grade in order with official and in-app li
   const document = { readyState: 'loading', addEventListener() {}, getElementById: (id) => els[id] || null };
   const ctx = vm.createContext({ document, localStorage: { getItem: () => 'ג' } });
   const html = read('program.html');
-  for (const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)) vm.runInContext(read(m[1]), ctx, { filename: m[1] });
+  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script\s*>/gi)) vm.runInContext(read(m[1]), ctx, { filename: m[1] });
   const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
   vm.runInContext(inline, ctx, { filename: 'program.html inline script' });
   const out = els.programGrade.innerHTML;
