@@ -9,6 +9,7 @@ const {
   youtubeEmbeds,
   sizeVerdict,
   demoVideoLinkedFromOnboard,
+  row,
 } = require('../tools/live-check');
 
 const root = path.join(__dirname, '..');
@@ -72,4 +73,11 @@ test('sizeVerdict tells a lagging deploy from a match', () => {
   assert.match(sizeVerdict(110, 100), /שונה/);
   assert.equal(sizeVerdict(null, 100), 'חסר באתר');
   assert.equal(sizeVerdict(100, null), 'חסר ב־ref');
+});
+
+test('row escapes backslashes and pipes in markdown table cells', () => {
+  assert.equal(row(['ok']), '| ok |');
+  assert.equal(row(['a|b']), '| a\\|b |');
+  assert.equal(row(['a\\b']), '| a\\\\b |');
+  assert.equal(row(['a\\|b']), '| a\\\\\\|b |');
 });
