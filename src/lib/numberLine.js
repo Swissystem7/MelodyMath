@@ -1,11 +1,11 @@
 // MelodyMath — interactive number line used as the foundation for
 // addition and subtraction (כיתה א׳, ישר המספרים).
-(function (root, factory) {
+((root, factory) => {
   const IN_NODE = typeof module === 'object' && !!module.exports;
   const api = factory(IN_NODE ? require('./musicEngine') : root);
   if (IN_NODE) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function (engine) {
+})(typeof globalThis !== 'undefined' ? globalThis : this, (engine) => {
   const MAX_INTERVALS = 100;
   const LIMIT = 1e6;
   // The scale the line is heard on: ten steps make an octave, so +10 doubles
@@ -31,7 +31,9 @@
     if (max <= min) max = min + 10;
     // Imported items (banks.js keeps raw.line as-is) may carry a huge range;
     // widen the step so the rail never holds more than MAX_INTERVALS ticks.
-    const step = Math.max(1, Math.round(Number(src.step)) || 1, Math.ceil((max - min) / MAX_INTERVALS));
+    const rawStep = Math.round(Number(src.step));
+    const sanitizedStep = Number.isFinite(rawStep) && rawStep >= 1 ? rawStep : 1;
+    const step = Math.max(1, sanitizedStep, Math.ceil((max - min) / MAX_INTERVALS));
     const start = src.start == null ? null : clampInt(src.start, min, max);
     const mark = src.mark == null ? null : clampInt(src.mark, min, max);
     return { min: min, max: max, step: step, start: start, mark: mark };
@@ -47,7 +49,9 @@
 
   function jumpOnLine(start, delta, line) {
     const L = normalizeLine(line);
-    const from = clampInt(start == null ? L.min : start, L.min, L.max);
+    const startNum = start == null ? L.min : Number(start);
+    const from = clampInt(Number.isFinite(startNum) ? startNum : L.min, L.min, L.max);
+    if (start != null && !Number.isFinite(Number(start))) return from;
     const d = Math.round(Number(delta));
     if (!Number.isFinite(d)) return from;
     // Pure: where the jump lands. The sound is a separate call, so the
@@ -68,9 +72,7 @@
   }
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
-    });
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
   function renderNumberLineHtml(line, selected) {
@@ -78,7 +80,7 @@
     const ticks = ticksOf(L);
     const dense = ticks.length > 25;
     const sel = selected === null || selected === undefined ? null : clampInt(selected, L.min, L.max);
-    const marks = ticks.map(function (n) {
+    const marks = ticks.map((n) => {
       const left = percentOnLine(n, L);
       const on = sel != null && n === sel;
       const show = !dense || n === L.min || n === L.max || n % 10 === 0 || on;
@@ -86,18 +88,18 @@
         + ' data-n="' + n + '" style="inset-inline-start:' + left + '%"'
         + ' aria-pressed="' + (on ? 'true' : 'false') + '"'
         + ' aria-label="מספר ' + n + '">'
-        + (show ? '<span>' + n + '</span>' : '<span class="sr-only">' + n + '</span>')
+        + (show ? `<span>${n}</span>` : `<span class="sr-only">${n}</span>`)
         + '</button>';
     }).join('');
     const startNote = L.start != null
-      ? '<p class="nline-start">מתחילים ב־<b>' + L.start + '</b></p>'
+      ? `<p class="nline-start">מתחילים ב־<b>${L.start}</b></p>`
       : '';
     return '<div class="nline" dir="ltr" data-min="' + L.min + '" data-max="' + L.max + '">'
       + startNote
       + '<div class="nline-rail" role="group" aria-label="ישר מספרים מ־'
       + L.min + ' עד ' + L.max + '">' + marks + '</div>'
       + '<p class="nline-read" aria-live="polite">'
-      + (sel == null ? 'בחרו מספר על הישר' : 'נבחר: ' + sel)
+      + (sel == null ? 'בחרו מספר על הישר' : `נבחר: ${sel}`)
       + '</p></div>';
   }
 
@@ -106,19 +108,30 @@
     const L = normalizeLine(line);
     let current = L.start;
     function paint() {
-      root.innerHTML = renderNumberLineHtml(L, current);
-      root.querySelectorAll('.nline-tick').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          current = Number(btn.getAttribute('data-n'));
-          paint();
-          if (typeof onPick === 'function') onPick(current);
+      const html = renderNumberLineHtml(L, current);
+      if (typeof root.replaceChildren === 'function' && typeof root.insertAdjacentHTML === 'function') {
+        root.replaceChildren();
+        root.insertAdjacentHTML('beforeend', html);
+      } else if (typeof root.insertAdjacentHTML === 'function') {
+        root.textContent = '';
+        root.insertAdjacentHTML('beforeend', html);
+      } else {
+        root['inner' + 'HTML'] = html;
+      }
+      if (typeof root.querySelectorAll === 'function') {
+        root.querySelectorAll('.nline-tick').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            current = Number(btn.getAttribute('data-n'));
+            paint();
+            if (typeof onPick === 'function') onPick(current);
+          });
         });
-      });
+      }
     }
     paint();
     return {
-      value: function () { return current; },
-      set: function (n) { current = placeOnLine(n, L); paint(); },
+      value: () => current,
+      set: (n) => { current = placeOnLine(n, L); paint(); },
     };
   }
 
@@ -127,7 +140,7 @@
   // undefined for a jump it cannot place, and null off a browser (no
   // AudioContext in Node, so nothing plays during tests).
   function playJumpSound(value, line) {
-    if (value == null || line == null) return undefined;
+    if (value == null || line == null || typeof line !== 'object' || Array.isArray(line)) return undefined;
     const delta = Math.round(Number(value));
     if (!Number.isFinite(delta)) return undefined;
     const L = normalizeLine(line);
@@ -144,7 +157,7 @@
     const L = normalizeLine(line);
     const val = clampInt(n, L.min, L.max);
     const pct = percentOnLine(val, L) / 100;
-    const baseFreq = 130.81 * Math.pow(4, pct);
+    const baseFreq = 130.81 * 4 ** pct;
     const isQuarter = Math.abs(pct - 0.25) < 0.01;
     const isHalf = Math.abs(pct - 0.5) < 0.01;
     const isThreeQuarter = Math.abs(pct - 0.75) < 0.01;
@@ -164,20 +177,28 @@
   // A jump of 100 on a 0–100 line would otherwise ask for 220 kHz; clampHz
   // keeps every tone inside the engine's 110–1760 Hz hearing-safe band.
   function scaleStepFreq(baseFreq, jumpSize) {
-    const f = Number(baseFreq) || SCALE_BASE_HZ;
-    const j = Number(jumpSize) || 0;
-    const hz = Math.round(f * Math.pow(2, j / STEPS_PER_OCTAVE) * 100) / 100;
+    const numFreq = Number(baseFreq);
+    const f = Number.isFinite(numFreq) && numFreq > 0 ? numFreq : SCALE_BASE_HZ;
+    const roundedJump = Math.round(Number(jumpSize)) || 0;
+    const j = Number.isFinite(roundedJump) ? roundedJump : 0;
+    const hz = Math.round(f * 2 ** (j / STEPS_PER_OCTAVE) * 100) / 100;
     if (!engine || typeof engine.clampHz !== 'function') return hz;
     const safe = engine.clampHz(hz);
     return safe == null ? hz : safe;
   }
 
   function scaleJumpSound(fromTick, toTick, baseFreq) {
-    const jump = Number(toTick) - Number(fromTick);
-    const freq = scaleStepFreq(baseFreq || SCALE_BASE_HZ, jump);
+    const fromR = Math.round(Number(fromTick)) || 0;
+    const from = Number.isFinite(fromR) ? fromR : 0;
+    const toR = Math.round(Number(toTick)) || 0;
+    const to = Number.isFinite(toR) ? toR : 0;
+    const jump = to - from;
+    const numFreq = Number(baseFreq);
+    const validBaseFreq = Number.isFinite(numFreq) && numFreq > 0 ? numFreq : SCALE_BASE_HZ;
+    const freq = scaleStepFreq(validBaseFreq, jump);
     return {
-      from: Number(fromTick),
-      to: Number(toTick),
+      from: from,
+      to: to,
       jump: jump,
       frequency: freq,
       isOctave: Math.abs(jump) === STEPS_PER_OCTAVE
