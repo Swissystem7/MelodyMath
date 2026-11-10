@@ -120,3 +120,151 @@ test('hex, exponent and binary spellings do not pass as the number they encode',
   assert.equal(isCorrect('.75', '0.75'), true);
   assert.equal(isCorrect('-2,5', '-2.5'), true);
 });
+
+test('prolonged error streak: step-by-step nextLevel drops and clamps at MIN_LEVEL', () => {
+  let level = MAX_LEVEL; // start at 3
+  const expectedLevels = [3, 2, 1, 1, 1, 1, 1]; // turn 1: 1 wrong (holds), turn 2: 2 wrong (drops to 2), turn 3: drops to 1, turn 4+: clamps at 1
+  const answers = [];
+
+  for (let turn = 0; turn < expectedLevels.length; turn++) {
+    answers.push(wrong);
+    level = nextLevel(level, answers.slice(-2));
+    assert.equal(level, expectedLevels[turn], `Turn ${turn + 1} expected level ${expectedLevels[turn]} but got ${level}`);
+    assert.ok(level >= MIN_LEVEL, `Level ${level} must not fall below MIN_LEVEL (${MIN_LEVEL})`);
+    assert.ok(level <= MAX_LEVEL, `Level ${level} must not exceed MAX_LEVEL (${MAX_LEVEL})`);
+  }
+  assert.equal(level, MIN_LEVEL);
+});
+
+test('prolonged error streak: eligibleExercises clamps at MIN_LEVEL, prioritizes missed items for retry, and bounds accuracy rate', () => {
+  const multiLevelBank = [
+    { id: 'item_1a', level: 1 },
+    { id: 'item_1b', level: 1 },
+    { id: 'item_1c', level: 1 },
+    { id: 'item_2a', level: 2 },
+    { id: 'item_2b', level: 2 },
+    { id: 'item_3a', level: 3 },
+    { id: 'item_3b', level: 3 },
+  ];
+
+  // 6 consecutive wrong answers across items
+  const errorHistory = [
+    { id: 'item_3a', correct: false },
+    { id: 'item_3b', correct: false },
+    { id: 'item_2a', correct: false },
+    { id: 'item_1a', correct: false },
+    { id: 'item_1b', correct: false },
+    { id: 'item_1c', correct: false },
+  ];
+
+  const accuracyRate = errorHistory.filter((h) => h.correct).length / errorHistory.length;
+  assert.equal(accuracyRate, 0.0);
+  assert.ok(accuracyRate >= 0 && accuracyRate <= 1, 'Accuracy rate must be bounded within [0, 1]');
+
+  // In eligibleExercises: last question was item_1c (level 1), lastTwo are errors.
+  const pool = eligibleExercises(multiLevelBank, errorHistory, 'item_1c', MIN_LEVEL);
+
+  // Pool must be non-empty and strictly at MIN_LEVEL
+  assert.ok(pool.length > 0, 'Candidate pool should not be empty');
+  assert.ok(pool.every((item) => item.level === MIN_LEVEL), 'Chosen level must remain clamped at MIN_LEVEL (1)');
+
+  // Missed items (item_1a, item_1b) must stay in pool and be prioritized for retry (excluding lastId item_1c)
+  const poolIds = pool.map((item) => item.id);
+  assert.ok(poolIds.includes('item_1a'), 'Missed item_1a should be prioritized in pool');
+  assert.ok(poolIds.includes('item_1b'), 'Missed item_1b should be prioritized in pool');
+  assert.ok(!poolIds.includes('item_1c'), 'Last item item_1c should not be immediately repeated when others exist');
+});
+
+test('rapid success streak: step-by-step nextLevel advances and clamps at MAX_LEVEL', () => {
+  let level = MIN_LEVEL; // start at 1
+  const expectedLevels = [1, 2, 3, 3, 3, 3, 3]; // turn 1: 1 right (holds), turn 2: 2 right (advances to 2), turn 3: advances to 3, turn 4+: clamps at 3
+  const answers = [];
+
+  for (let turn = 0; turn < expectedLevels.length; turn++) {
+    answers.push(right);
+    level = nextLevel(level, answers.slice(-2));
+    assert.equal(level, expectedLevels[turn], `Turn ${turn + 1} expected level ${expectedLevels[turn]} but got ${level}`);
+    assert.ok(level >= MIN_LEVEL, `Level ${level} must not fall below MIN_LEVEL (${MIN_LEVEL})`);
+    assert.ok(level <= MAX_LEVEL, `Level ${level} must not exceed MAX_LEVEL (${MAX_LEVEL})`);
+  }
+  assert.equal(level, MAX_LEVEL);
+});
+
+test('rapid success streak: eligibleExercises selects candidate pool at MAX_LEVEL, drops mastered items, and bounds accuracy rate', () => {
+  const multiLevelBank = [
+    { id: 'q1_a', level: 1 },
+    { id: 'q1_b', level: 1 },
+    { id: 'q2_a', level: 2 },
+    { id: 'q2_b', level: 2 },
+    { id: 'q3_a', level: 3 },
+    { id: 'q3_b', level: 3 },
+    { id: 'q3_c', level: 3 },
+    { id: 'q3_d', level: 3 },
+  ];
+
+  // 6 consecutive correct answers
+  const successHistory = [
+    { id: 'q1_a', correct: true },
+    { id: 'q1_b', correct: true },
+    { id: 'q2_a', correct: true },
+    { id: 'q2_b', correct: true },
+    { id: 'q3_a', correct: true },
+    { id: 'q3_b', correct: true },
+  ];
+
+  const accuracyRate = successHistory.filter((h) => h.correct).length / successHistory.length;
+  assert.equal(accuracyRate, 1.0);
+  assert.ok(accuracyRate >= 0 && accuracyRate <= 1, 'Accuracy rate must be bounded within [0, 1]');
+
+  const pool = eligibleExercises(multiLevelBank, successHistory, 'q3_b', MAX_LEVEL);
+
+  // Mastered items must drop out
+  const masteredIds = successHistory.filter((h) => h.correct).map((h) => h.id);
+  assert.ok(pool.length > 0, 'Candidate pool should not be empty');
+  for (const item of pool) {
+    assert.ok(!masteredIds.includes(item.id), `Mastered item ${item.id} should have dropped out of pool`);
+  }
+
+  // Candidate pool selects at MAX_LEVEL (remaining unmastered level 3 items: q3_c, q3_d)
+  assert.ok(pool.every((item) => item.level === MAX_LEVEL), 'Candidate pool must select at MAX_LEVEL (3)');
+  assert.deepEqual(pool.map((item) => item.id).sort(), ['q3_c', 'q3_d']);
+});
+
+test('mixed recovery transition: 5 errors followed by 5 successes keeps level and accuracy bounded at every turn', () => {
+  let level = MAX_LEVEL; // start at 3
+  const sequence = [
+    ...Array(5).fill(wrong), // 5 errors
+    ...Array(5).fill(right), // 5 successes
+  ];
+
+  const history = [];
+  const expectedLevels = [
+    3, // turn 1: [wrong] -> holds at 3
+    2, // turn 2: [wrong, wrong] -> drops to 2
+    1, // turn 3: [wrong, wrong] -> drops to 1
+    1, // turn 4: [wrong, wrong] -> clamps at 1
+    1, // turn 5: [wrong, wrong] -> clamps at 1
+    1, // turn 6: [wrong, right] -> mixed holds at 1
+    2, // turn 7: [right, right] -> advances to 2
+    3, // turn 8: [right, right] -> advances to 3
+    3, // turn 9: [right, right] -> clamps at 3
+    3, // turn 10: [right, right] -> clamps at 3
+  ];
+
+  for (let turn = 0; turn < sequence.length; turn++) {
+    history.push({ id: `item_${turn + 1}`, correct: sequence[turn].correct });
+    level = nextLevel(level, history.slice(-2));
+
+    const correctCount = history.filter((h) => h.correct).length;
+    const accuracyRate = correctCount / history.length;
+
+    assert.equal(level, expectedLevels[turn], `Turn ${turn + 1} expected level ${expectedLevels[turn]} but got ${level}`);
+    assert.ok(level >= MIN_LEVEL && level <= MAX_LEVEL, `Turn ${turn + 1}: level ${level} must stay within [${MIN_LEVEL}, ${MAX_LEVEL}]`);
+    assert.ok(accuracyRate >= 0.0 && accuracyRate <= 1.0, `Turn ${turn + 1}: running accuracy rate ${accuracyRate} must stay within [0, 1]`);
+  }
+
+  // Final assertions after 5 errors + 5 successes
+  assert.equal(level, MAX_LEVEL);
+  const finalAccuracy = history.filter((h) => h.correct).length / history.length;
+  assert.equal(finalAccuracy, 0.5);
+});
