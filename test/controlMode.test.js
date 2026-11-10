@@ -43,8 +43,8 @@ test("control mode tags only progress saved while enabled", () => {
 test("index wiring blocks audio and adds CSV group type", () => {
 	const html = fs.readFileSync(require.resolve("../pilot/index.html"), "utf8");
 	const script = html
-		.match(/<script>\s*\/\/ MM-705[\s\S]*?<\/script>/)[0]
-		.replace(/^<script>|<\/script>$/g, "");
+		.match(/<script>\s*\/\/ MM-705[\s\S]*?<\/script>/i)[0]
+		.replace(/^<script>|<\/script>$/gi, "");
 	const listeners = {};
 	const checkbox = {
 		checked: false,
