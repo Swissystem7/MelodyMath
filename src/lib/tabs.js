@@ -3,11 +3,11 @@
 // Special-ed tablets are often used with a keyboard or switch. A role=tablist
 // that only responds to clicks is not usable. These helpers are the tested
 // reading-order rules; pages still own what a click does.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const KEYS = {
     LEFT: 'ArrowLeft',
     RIGHT: 'ArrowRight',
@@ -18,8 +18,8 @@
   function isRtl(el) {
     if (!el) return false;
     const node = el.closest ? (el.closest('[dir]') || el) : el;
-    const dir = (node.getAttribute && node.getAttribute('dir'))
-      || (typeof document !== 'undefined' && document.documentElement.getAttribute('dir'))
+    const dir = (node.getAttribute?.('dir'))
+      || (typeof document !== 'undefined' && document.documentElement && typeof document.documentElement.getAttribute === 'function' ? document.documentElement.getAttribute('dir') : null)
       || 'rtl';
     return String(dir).toLowerCase() === 'rtl';
   }
@@ -53,20 +53,20 @@
     }
     const isRtlMode = typeof rtl === 'boolean'
       ? rtl
-      : (rtl === 'rtl' || Boolean(rtl && rtl.rtl));
+      : (rtl === 'rtl' || Boolean(rtl?.rtl));
     const nextIdx = tabIndexAfterKey(idx, count, key, isRtlMode);
     return tabIds[nextIdx];
   }
 
   function tabsOf(list) {
-    if (!list || !list.querySelectorAll) return [];
+    if (!list?.querySelectorAll) return [];
     return Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
   }
 
   function syncRovingTabindex(tabs) {
     const all = Array.isArray(tabs) ? tabs : [];
-    all.forEach(function (tab) {
-      if (!tab || !tab.setAttribute) return;
+    all.forEach((tab) => {
+      if (!tab?.setAttribute) return;
       const on = tab.getAttribute('aria-selected') === 'true';
       tab.tabIndex = on ? 0 : -1;
     });
@@ -82,10 +82,11 @@
       list.setAttribute('aria-orientation', 'horizontal');
     }
     syncRovingTabindex(tabsOf(list));
-    list.addEventListener('keydown', function (e) {
+    list.addEventListener('keydown', (e) => {
       if (!isTabKey(e.key)) return;
       const all = tabsOf(list);
-      const i = all.indexOf(e.target);
+      const targetTab = (e.target?.closest) ? (e.target.closest('[role="tab"]') || e.target) : e.target;
+      const i = all.indexOf(targetTab);
       if (i < 0) return;
       const next = tabIndexAfterKey(i, all.length, e.key, isRtl(list));
       if (next === i && e.key !== KEYS.HOME && e.key !== KEYS.END) return;
@@ -97,7 +98,7 @@
       if (typeof tab.focus === 'function') tab.focus();
       syncRovingTabindex(tabsOf(list));
     });
-    list.addEventListener('click', function () {
+    list.addEventListener('click', () => {
       syncRovingTabindex(tabsOf(list));
     });
     return list;
@@ -105,9 +106,9 @@
 
   function bindAllTablists(root) {
     const doc = root || (typeof document !== 'undefined' ? document : null);
-    if (!doc || !doc.querySelectorAll) return [];
+    if (!doc?.querySelectorAll) return [];
     const lists = Array.prototype.slice.call(doc.querySelectorAll('[role="tablist"]'));
-    return lists.map(function (list) { return bindTablist(list); }).filter(Boolean);
+    return lists.map((list) => bindTablist(list)).filter(Boolean);
   }
 
   return {
