@@ -162,3 +162,108 @@ test('jumpOnLine rounds non-integer delta and returns from on non-finite inputs'
   assert.equal(line.jumpOnLine(NaN, 5, { min: 0, max: 20 }), 0);
   assert.equal(line.jumpOnLine('not-a-number', 5, { min: 0, max: 20 }), 0);
 });
+
+function tickButtonsFromHtml(html) {
+  const ticks = [];
+  for (const m of html.matchAll(/data-n="(-?\d+)"/g)) {
+    const n = m[1];
+    const btn = {
+      getAttribute(name) { return name === 'data-n' ? n : null; },
+      addEventListener(type, fn) { if (type === 'click') btn._click = fn; },
+      click() { if (typeof btn._click === 'function') btn._click(); },
+    };
+    ticks.push(btn);
+  }
+  return ticks;
+}
+
+function fakeRoot(mode) {
+  const root = { html: '', ticks: [] };
+  const parse = (html) => {
+    root.html = html;
+    root.ticks = tickButtonsFromHtml(html);
+  };
+  if (mode === 'replace') {
+    root.replaceChildren = () => { root.html = ''; root.ticks = []; };
+    root.insertAdjacentHTML = (_pos, html) => { parse((root.html || '') + html); };
+  } else if (mode === 'insert') {
+    root.textContent = 'stale';
+    Object.defineProperty(root, 'textContent', {
+      set() { root.html = ''; root.ticks = []; },
+      get() { return root.html; },
+    });
+    root.insertAdjacentHTML = (_pos, html) => { parse((root.html || '') + html); };
+  } else if (mode === 'inner') {
+    Object.defineProperty(root, 'innerHTML', {
+      set(v) { parse(v); },
+      get() { return root.html; },
+    });
+  }
+  if (mode !== 'no-qsa') {
+    root.querySelectorAll = (sel) => (sel === '.nline-tick' ? root.ticks : []);
+  }
+  return root;
+}
+
+test('bindNumberLine returns null without a root and paints through replaceChildren plus insertAdjacentHTML', () => {
+  assert.equal(line.bindNumberLine(null, { min: 0, max: 10, start: 2 }), null);
+  assert.equal(line.bindNumberLine(undefined, { min: 0, max: 10, start: 2 }), null);
+
+  const picks = [];
+  const root = fakeRoot('replace');
+  const api = line.bindNumberLine(root, { min: 0, max: 10, start: 2 }, (n) => { picks.push(n); });
+  assert.equal(typeof api.value, 'function');
+  assert.equal(api.value(), 2);
+  assert.match(root.html, /data-n="2"/);
+  assert.match(root.html, /נבחר: 2/);
+
+  const tick4 = root.ticks.find((btn) => btn.getAttribute('data-n') === '4');
+  assert.ok(tick4);
+  tick4.click();
+  assert.equal(api.value(), 4);
+  assert.deepEqual(picks, [4]);
+  assert.match(root.html, /נבחר: 4/);
+
+  api.set(8);
+  assert.equal(api.value(), 8);
+  assert.match(root.html, /נבחר: 8/);
+});
+
+test('bindNumberLine falls back to textContent plus insertAdjacentHTML when replaceChildren is missing', () => {
+  const root = fakeRoot('insert');
+  const api = line.bindNumberLine(root, { min: 0, max: 6, start: 0 });
+  assert.equal(api.value(), 0);
+  assert.match(root.html, /data-n="0"/);
+  assert.doesNotMatch(root.html, /stale/);
+  api.set(6);
+  assert.equal(api.value(), 6);
+  assert.match(root.html, /נבחר: 6/);
+});
+
+test('bindNumberLine falls back to innerHTML and skips clicks when querySelectorAll is missing', () => {
+  const picks = [];
+  const withQsa = fakeRoot('inner');
+  const api = line.bindNumberLine(withQsa, { min: 0, max: 4, start: 1 }, (n) => { picks.push(n); });
+  assert.equal(api.value(), 1);
+  assert.match(withQsa.html, /data-n="1"/);
+  const tick3 = withQsa.ticks.find((btn) => btn.getAttribute('data-n') === '3');
+  tick3.click();
+  assert.equal(api.value(), 3);
+  assert.deepEqual(picks, [3]);
+
+  const noQsa = fakeRoot('inner');
+  delete noQsa.querySelectorAll;
+  const silent = line.bindNumberLine(noQsa, { min: 0, max: 4, start: 1 }, (n) => { picks.push(n); });
+  assert.equal(silent.value(), 1);
+  assert.match(noQsa.html, /data-n="1"/);
+  silent.set(4);
+  assert.equal(silent.value(), 4);
+  assert.match(noQsa.html, /נבחר: 4/);
+  assert.deepEqual(picks, [3]);
+});
+
+test('escapeHtml encodes markup characters and treats null as empty', () => {
+  assert.equal(line.escapeHtml(null), '');
+  assert.equal(line.escapeHtml(undefined), '');
+  assert.equal(line.escapeHtml('a&b<c>"\''), 'a&amp;b&lt;c&gt;&quot;&#39;');
+});
