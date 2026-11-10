@@ -68,7 +68,7 @@ test('clicking a grade button saves mm-grade in localStorage and updates active 
   });
 
   const html = read('program.html');
-  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script\s*>/gi)) {
+  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script[^>]*>/gi)) {
     vm.runInContext(read(m[1]), ctx, { filename: m[1] });
   }
   const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
@@ -112,7 +112,7 @@ test('program.html initializes grade from URLSearchParams query param if present
   });
 
   const html = read('program.html');
-  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script\s*>/gi)) {
+  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script[^>]*>/gi)) {
     vm.runInContext(read(m[1]), ctx, { filename: m[1] });
   }
   const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
@@ -144,7 +144,7 @@ test('program.html renders empty state message if grade has no curriculum rows',
   });
 
   const html = read('program.html');
-  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script\s*>/gi)) {
+  for (const m of html.matchAll(/<script\s+src="([^"]+)"\s*>\s*<\/script[^>]*>/gi)) {
     vm.runInContext(read(m[1]), ctx, { filename: m[1] });
   }
 
