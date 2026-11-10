@@ -11,6 +11,35 @@ const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const OFFICIAL = /^https:\/\/(pop|meyda)\.education\.gov\.il\//;
 
+
+/** Collect <script> tags without a tag-filter regexp (CodeQL js/bad-tag-filter). */
+function htmlScripts(html) {
+  const out = [];
+  const src = String(html);
+  const lower = src.toLowerCase();
+  let from = 0;
+  while (from < src.length) {
+    const open = lower.indexOf('<script', from);
+    if (open === -1) break;
+    const boundary = src[open + 7];
+    if (boundary && !/[\s>/]/.test(boundary)) { from = open + 7; continue; }
+    const tagEnd = src.indexOf('>', open);
+    if (tagEnd === -1) break;
+    const openTag = src.slice(open, tagEnd + 1);
+    let scriptSrc = '';
+    const attr = openTag.match(/\ssrc\s*=\s*("[^"]*"|'[^']*')/i);
+    if (attr) scriptSrc = attr[1].slice(1, -1);
+    const close = lower.indexOf('</script', tagEnd + 1);
+    if (close === -1) break;
+    const closeGt = src.indexOf('>', close);
+    if (closeGt === -1) break;
+    out.push({ src: scriptSrc, body: src.slice(tagEnd + 1, close) });
+    from = closeGt + 1;
+  }
+  return out;
+}
+
+
 test('the official order lists every verified א׳–ו׳ row once, by page, and only rows with a quote', () => {
   assert.deepEqual(cur.programGrades(), ['א', 'ב', 'ג', 'ד', 'ה', 'ו']);
   assert.deepEqual(cur.programGrades(), cur.grades().filter((g) => cur.OFFICIAL_ORDER[g]));
@@ -64,9 +93,12 @@ test('program.html renders the chosen grade in order with official and in-app li
   const document = { readyState: 'loading', addEventListener() {}, getElementById: (id) => els[id] || null };
   const ctx = vm.createContext({ document, localStorage: { getItem: () => 'ג' } });
   const html = read('program.html');
-  for (const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)) vm.runInContext(read(m[1]), ctx, { filename: m[1] });
-  const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
-  vm.runInContext(inline, ctx, { filename: 'program.html inline script' });
+  const scripts = htmlScripts(html);
+  for (const s of scripts) {
+    if (s.src) vm.runInContext(read(s.src), ctx, { filename: s.src });
+  }
+  const inline = [...scripts].reverse().find((s) => !s.src);
+  vm.runInContext(inline.body, ctx, { filename: 'program.html inline script' });
   const out = els.programGrade.innerHTML;
   const rows = cur.programForGrade('ג', banks.itemsForGrade('ג')).rows;
   assert.equal((out.match(/<li class="topic">/g) || []).length, rows.length);

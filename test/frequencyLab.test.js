@@ -14,6 +14,34 @@ const page = fs.readFileSync(path.join(root, 'frequency.html'), 'utf8');
 // A fake DOM just big enough for frequency.html: elements appear on demand, and
 // a fake AudioContext records every oscillator so the test can check what would
 // have sounded. readyState 'loading' keeps core.js from installing the chrome.
+
+/** Collect <script> tags without a tag-filter regexp (CodeQL js/bad-tag-filter). */
+function htmlScripts(html) {
+  const out = [];
+  const src = String(html);
+  const lower = src.toLowerCase();
+  let from = 0;
+  while (from < src.length) {
+    const open = lower.indexOf('<script', from);
+    if (open === -1) break;
+    const boundary = src[open + 7];
+    if (boundary && !/[\s>/]/.test(boundary)) { from = open + 7; continue; }
+    const tagEnd = src.indexOf('>', open);
+    if (tagEnd === -1) break;
+    const openTag = src.slice(open, tagEnd + 1);
+    let scriptSrc = '';
+    const attr = openTag.match(/\ssrc\s*=\s*("[^"]*"|'[^']*')/i);
+    if (attr) scriptSrc = attr[1].slice(1, -1);
+    const close = lower.indexOf('</script', tagEnd + 1);
+    if (close === -1) break;
+    const closeGt = src.indexOf('>', close);
+    if (closeGt === -1) break;
+    out.push({ src: scriptSrc, body: src.slice(tagEnd + 1, close) });
+    from = closeGt + 1;
+  }
+  return out;
+}
+
 function runPage() {
   const sounded = [];
   const gains = [];
@@ -88,9 +116,9 @@ function runPage() {
     setTimeout, clearTimeout, localStorage: undefined,
   });
   ctx.globalThis = ctx;
-  Array.from(page.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)).forEach((m) => {
-    if (m[1]) vm.runInContext(fs.readFileSync(path.join(root, m[1]), 'utf8'), ctx, { filename: m[1] });
-    else vm.runInContext(m[2], ctx, { filename: 'frequency.html inline script' });
+  htmlScripts(page).forEach((s) => {
+    if (s.src) vm.runInContext(fs.readFileSync(path.join(root, s.src), 'utf8'), ctx, { filename: s.src });
+    else vm.runInContext(s.body, ctx, { filename: 'frequency.html inline script' });
   });
   return { els, get: (id) => document.getElementById(id), docHandlers, sounded, gains, errors };
 }

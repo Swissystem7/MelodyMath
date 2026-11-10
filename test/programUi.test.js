@@ -19,6 +19,35 @@ function createMockElement(id) {
   };
 }
 
+
+/** Collect <script> tags without a tag-filter regexp (CodeQL js/bad-tag-filter). */
+function htmlScripts(html) {
+  const out = [];
+  const src = String(html);
+  const lower = src.toLowerCase();
+  let from = 0;
+  while (from < src.length) {
+    const open = lower.indexOf('<script', from);
+    if (open === -1) break;
+    const boundary = src[open + 7];
+    if (boundary && !/[\s>/]/.test(boundary)) { from = open + 7; continue; }
+    const tagEnd = src.indexOf('>', open);
+    if (tagEnd === -1) break;
+    const openTag = src.slice(open, tagEnd + 1);
+    let scriptSrc = '';
+    const attr = openTag.match(/\ssrc\s*=\s*("[^"]*"|'[^']*')/i);
+    if (attr) scriptSrc = attr[1].slice(1, -1);
+    const close = lower.indexOf('</script', tagEnd + 1);
+    if (close === -1) break;
+    const closeGt = src.indexOf('>', close);
+    if (closeGt === -1) break;
+    out.push({ src: scriptSrc, body: src.slice(tagEnd + 1, close) });
+    from = closeGt + 1;
+  }
+  return out;
+}
+
+
 test('program.html buttons have accessible aria-labels and aria-pressed attributes', () => {
   const html = read('program.html');
   assert.match(html, /aria-label="כיתה '\s*\+\s*g\s*\+\s*'׳"/);
@@ -68,11 +97,12 @@ test('clicking a grade button saves mm-grade in localStorage and updates active 
   });
 
   const html = read('program.html');
-  for (const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)) {
-    vm.runInContext(read(m[1]), ctx, { filename: m[1] });
+  const scripts = htmlScripts(html);
+  for (const s of scripts) {
+    if (s.src) vm.runInContext(read(s.src), ctx, { filename: s.src });
   }
-  const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
-  vm.runInContext(inline, ctx, { filename: 'program.html inline script' });
+  const inline = [...scripts].reverse().find((s) => !s.src);
+  vm.runInContext(inline.body, ctx, { filename: 'program.html inline script' });
 
   // Default is 'א'
   assert.match(els.programGrade.innerHTML, /<h2>כיתה א׳<\/h2>/);
@@ -112,11 +142,12 @@ test('program.html initializes grade from URLSearchParams query param if present
   });
 
   const html = read('program.html');
-  for (const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)) {
-    vm.runInContext(read(m[1]), ctx, { filename: m[1] });
+  const scripts = htmlScripts(html);
+  for (const s of scripts) {
+    if (s.src) vm.runInContext(read(s.src), ctx, { filename: s.src });
   }
-  const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
-  vm.runInContext(inline, ctx, { filename: 'program.html inline script' });
+  const inline = [...scripts].reverse().find((s) => !s.src);
+  vm.runInContext(inline.body, ctx, { filename: 'program.html inline script' });
 
   // URL search parameter ?grade=ה takes precedence over localStorage 'ב'
   assert.match(els.programGrade.innerHTML, /<h2>כיתה ה׳<\/h2>/);
@@ -144,15 +175,16 @@ test('program.html renders empty state message if grade has no curriculum rows',
   });
 
   const html = read('program.html');
-  for (const m of html.matchAll(/<script src="([^"]+)"><\/script>/g)) {
-    vm.runInContext(read(m[1]), ctx, { filename: m[1] });
+  const scripts = htmlScripts(html);
+  for (const s of scripts) {
+    if (s.src) vm.runInContext(read(s.src), ctx, { filename: s.src });
   }
 
   // Override programForGrade in context to return empty rows
   ctx.programForGrade = () => ({ rows: [], pdfUrl: 'https://pop.education.gov.il/test.pdf', untagged: 0 });
 
-  const inline = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
-  vm.runInContext(inline, ctx, { filename: 'program.html inline script' });
+  const inline = [...scripts].reverse().find((s) => !s.src);
+  vm.runInContext(inline.body, ctx, { filename: 'program.html inline script' });
 
   assert.match(els.programGrade.innerHTML, /id="programEmpty"/);
   assert.match(els.programGrade.innerHTML, /אין נושאים להצגה לכיתה זו/);
