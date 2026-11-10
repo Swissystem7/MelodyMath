@@ -3,11 +3,11 @@
 // One מחנכת שילוב, shared school tablets, no accounts. A class code only
 // namespaces keys on THIS device. The same code on another tablet does not
 // sync. Reports are a local record, not a claim of mastery.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const assignmentApi = (typeof module === 'object' && module.exports)
     ? require('./assignment')
     : (typeof globalThis !== 'undefined' ? globalThis : {});
@@ -41,12 +41,12 @@
   }
 
   function studentGrade(student) {
-    return gradeLabel(student && student.grade);
+    return gradeLabel(student?.grade);
   }
 
   function ownStudent(roster, label) {
-    const students = roster && roster.students;
-    if (!students || !label || !Object.prototype.hasOwnProperty.call(students, label)) return null;
+    const students = roster?.students;
+    if (!students || !label || !Object.hasOwn(students, label)) return null;
     return students[label] || null;
   }
 
@@ -62,7 +62,7 @@
 
   function cleanStudents(map) {
     const out = {};
-    Object.keys(map).forEach(function (key) {
+    Object.keys(map).forEach((key) => {
       if (key in Object.prototype) return;
       if (!isStudentRow(map[key])) return;
       out[key] = map[key];
@@ -77,7 +77,7 @@
   function defaultStorage() {
     try {
       if (typeof localStorage !== 'undefined') return localStorage;
-    } catch (e) { /* private mode */ }
+    } catch (_e) { /* private mode */ }
     return null;
   }
 
@@ -97,7 +97,7 @@
         return fallback;
       }
       return { classCode: normalizeCode(data.classCode) || fallback.classCode, students: cleanStudents(data.students) };
-    } catch (e) {
+    } catch (_e) {
       return fallback;
     }
   }
@@ -108,22 +108,18 @@
     try {
       ls.setItem(storageKey(classCode), JSON.stringify(roster));
       return true;
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }
 
   function listStudents(classCode, storage) {
-    return listClassStudents(classCode, storage).map(function (row) {
-      return row.name;
-    });
+    return listClassStudents(classCode, storage).map((row) => row.name);
   }
 
   function listClassStudents(classCode, storage) {
     const roster = loadRoster(classCode, storage);
-    return Object.keys(roster.students).sort(function (a, b) {
-      return a.localeCompare(b, 'he');
-    }).map(function (name) {
+    return Object.keys(roster.students).sort((a, b) => a.localeCompare(b, 'he')).map((name) => {
       const student = roster.students[name];
       return { name: student.name, created: student.created, grade: studentGrade(student) };
     });
@@ -173,7 +169,7 @@
     const student = upsertStudent(classCode, name, storage);
     if (!student) return null;
     const session = {
-      id: 's' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36),
+      id: `s${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`,
       kind: kind || 'practice',
       started: Date.now(),
       ended: null,
@@ -196,7 +192,7 @@
     const roster = loadRoster(classCode, storage);
     const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
-    const session = student.sessions.find(function (s) { return s && s.id === sessionId; });
+    const session = student.sessions.find((s) => s && s.id === sessionId);
     if (!session) return null;
     if (!Array.isArray(session.items)) session.items = [];
     const row = {
@@ -217,7 +213,7 @@
     const roster = loadRoster(classCode, storage);
     const student = ensureSessions(ownStudent(roster, label));
     if (!student) return null;
-    const session = student.sessions.find(function (s) { return s && s.id === sessionId; });
+    const session = student.sessions.find((s) => s && s.id === sessionId);
     if (!session) return null;
     session.ended = Date.now();
     saveRoster(classCode, roster, storage);
@@ -226,8 +222,8 @@
 
   function allItems(student) {
     if (!student || !Array.isArray(student.sessions)) return [];
-    return student.sessions.reduce(function (acc, session) {
-      ((session && session.items) || []).forEach(function (it) { if (it) acc.push(it); });
+    return student.sessions.reduce((acc, session) => {
+      ((session?.items) || []).forEach((it) => { if (it) acc.push(it); });
       return acc;
     }, []);
   }
@@ -238,15 +234,18 @@
     // prototype key (constructor, __proto__) must count like any other text
     // instead of vanishing from the report and writing into Object.prototype.
     const bySkill = Object.create(null);
-    items.forEach(function (it) {
+    items.forEach((it) => {
       const k = it.skill || 'אחר';
-      const g = bySkill[k] || (bySkill[k] = { skill: k, total: 0, correct: 0 });
+      if (!bySkill[k]) {
+        bySkill[k] = { skill: k, total: 0, correct: 0 };
+      }
+      const g = bySkill[k];
       g.total += 1;
       if (it.correct) g.correct += 1;
     });
     let current = 0;
     let best = 0;
-    items.forEach(function (it) {
+    items.forEach((it) => {
       if (it.correct) {
         current += 1;
         if (current > best) best = current;
@@ -255,32 +254,30 @@
       }
     });
     const missCount = Object.create(null);
-    items.forEach(function (it) {
+    items.forEach((it) => {
       if (it.correct) return;
       const key = it.prompt || it.skill || '?';
       if (!missCount[key]) missCount[key] = { prompt: key, skill: it.skill || '', count: 0 };
       missCount[key].count += 1;
     });
     const repeatingErrors = Object.keys(missCount)
-      .map(function (k) { return missCount[k]; })
-      .filter(function (x) { return x.count >= 2; })
-      .sort(function (a, b) { return b.count - a.count; });
-    const sessions = ((student && student.sessions) || []).filter(function (s) {
-      return s && typeof s === 'object';
-    });
+      .map((k) => missCount[k])
+      .filter((x) => x.count >= 2)
+      .sort((a, b) => b.count - a.count);
+    const sessions = ((student?.sessions) || []).filter((s) => s && typeof s === 'object');
     return {
-      name: student && student.name ? student.name : '',
+      name: student?.name ? student.name : '',
       total: items.length,
-      correct: items.filter(function (it) { return it.correct; }).length,
-      perSkill: Object.keys(bySkill).map(function (k) {
+      correct: items.filter((it) => it.correct).length,
+      perSkill: Object.keys(bySkill).map((k) => {
         const g = bySkill[k];
         return { skill: g.skill, total: g.total, correct: g.correct, accuracy: g.total ? g.correct / g.total : 0 };
       }),
       streak: { current: current, best: best },
       repeatingErrors: repeatingErrors,
-      sessions: sessions.map(function (s) {
+      sessions: sessions.map((s) => {
         const n = (s.items || []).length;
-        const ok = (s.items || []).filter(function (it) { return it.correct; }).length;
+        const ok = (s.items || []).filter((it) => it.correct).length;
         return {
           id: s.id,
           kind: s.kind,
@@ -336,9 +333,9 @@
   }
 
   function listClassStudentsProgress(classCode, storage) {
-    return listClassStudents(classCode, storage).map(function (row) {
+    return listClassStudents(classCode, storage).map((row) => {
       const tasks = listStudentProgress(classCode, row.name, storage) || [];
-      const done = tasks.filter(function (t) { return t.completed; }).length;
+      const done = tasks.filter((t) => t.completed).length;
       return {
         name: row.name,
         created: row.created,
@@ -376,7 +373,7 @@
   // Two tablets never share a clock reading to the millisecond by accident, so
   // the timestamp plus the text is enough to tell a re-import from a new note.
   function noteKey(note) {
-    return String(note && note.at != null ? note.at : '') + ' ' + noteText(note);
+    return `${String(note && note.at != null ? note.at : '')} ${noteText(note)}`;
   }
 
   // Notes come off another tablet's JSON file: keep the shape addNote writes,
@@ -385,7 +382,7 @@
     if (!Array.isArray(list)) return [];
     const seen = Object.create(null);
     const out = [];
-    list.forEach(function (n) {
+    list.forEach((n) => {
       const text = noteText(n);
       if (!text) return;
       const at = Number(n.at);
@@ -406,7 +403,7 @@
     if (!Array.isArray(list)) return [];
     const seen = Object.create(null);
     const out = [];
-    list.forEach(function (raw) {
+    list.forEach((raw) => {
       if (!raw || typeof raw !== 'object') return;
       const row = assignmentApi.normalizeAssignment
         ? assignmentApi.normalizeAssignment(raw)
@@ -430,7 +427,7 @@
     if (!Array.isArray(list)) return [];
     const seen = Object.create(null);
     const out = [];
-    list.forEach(function (s) {
+    list.forEach((s) => {
       if (!s || typeof s !== 'object' || Array.isArray(s)) return;
       if (s.id != null) {
         const key = String(s.id);
@@ -438,7 +435,7 @@
         seen[key] = true;
       }
       const items = Array.isArray(s.items)
-        ? s.items.filter(function (it) { return it && typeof it === 'object'; })
+        ? s.items.filter((it) => it && typeof it === 'object')
         : [];
       out.push(Object.assign({}, s, { items: items }));
     });
@@ -449,7 +446,7 @@
     const all = allItems(student);
     const since = Number(sinceTs);
     if (!Number.isFinite(since)) return all;
-    return all.filter(function (it) { return Number(it.at) >= since; });
+    return all.filter((it) => Number(it.at) >= since);
   }
 
   // The class board names the most recent session. Sessions are stored in
@@ -460,7 +457,7 @@
   function latestSession(sessions) {
     let best = null;
     let bestAt = -Infinity;
-    (Array.isArray(sessions) ? sessions : []).forEach(function (s) {
+    (Array.isArray(sessions) ? sessions : []).forEach((s) => {
       if (!s || typeof s !== 'object') return;
       const at = Number(s.started);
       const when = Number.isFinite(at) ? at : -Infinity;
@@ -471,10 +468,8 @@
 
   function buildClassOverview(classCode, storage) {
     const roster = loadRoster(classCode, storage);
-    const names = Object.keys(roster.students).sort(function (a, b) {
-      return a.localeCompare(b, 'he');
-    });
-    return names.map(function (name) {
+    const names = Object.keys(roster.students).sort((a, b) => a.localeCompare(b, 'he'));
+    return names.map((name) => {
       const student = roster.students[name];
       const report = buildReport(student);
       const sessions = student.sessions || [];
@@ -508,7 +503,7 @@
     } else if (typeof rawOrCode === 'string' && rawOrCode.trim().startsWith('{')) {
       try {
         roster = JSON.parse(rawOrCode);
-      } catch (e) {
+      } catch (_e) {
         roster = loadRoster(rawOrCode, storage);
       }
     } else if (typeof rawOrCode === 'string' || rawOrCode == null) {
@@ -516,14 +511,12 @@
     } else {
       roster = { students: {} };
     }
-    const studentsMap = (roster && roster.students) || {};
-    const names = Object.keys(studentsMap).sort(function (a, b) {
-      return a.localeCompare(b, 'he');
-    });
-    return names.map(function (name) {
+    const studentsMap = (roster?.students) || {};
+    const names = Object.keys(studentsMap).sort((a, b) => a.localeCompare(b, 'he'));
+    return names.map((name) => {
       const student = studentsMap[name];
       const report = buildReport(student);
-      const sessions = (student && student.sessions) || [];
+      const sessions = (student?.sessions) || [];
       const last = latestSession(sessions);
       return {
         name: name,
@@ -547,9 +540,7 @@
   }
 
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
-    });
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
   function buildParentNote(student, extras) {
@@ -558,7 +549,7 @@
     const items = itemsSince(student, since);
     const report = buildReport(student ? { name: student.name, sessions: [{ items: items }] } : null);
     // Rebuild per-skill from the (possibly sliced) items while keeping name/errors.
-    const name = student && student.name ? student.name : '';
+    const name = student?.name ? student.name : '';
     const classCode = o.classCode || '';
     const observation = String(o.observation || '').replace(/\s+/g, ' ').trim().slice(0, 280);
     const lastNotes = listNotes(student);
@@ -598,7 +589,7 @@
   function buildCertificate(student, extras) {
     const o = extras || {};
     const report = buildReport(student);
-    const name = student && student.name ? student.name : '';
+    const name = student?.name ? student.name : '';
     const when = o.when || '';
     return {
       title: 'תעודת תרגול — MelodyMath',
@@ -608,7 +599,7 @@
       total: report.total,
       correct: report.correct,
       perSkill: report.perSkill,
-      line: (name ? name + ' תרגל/ה' : 'תרגול') + ' במכשיר הזה.',
+      line: `${name ? `${name} תרגל/ה` : 'תרגול'} במכשיר הזה.`,
       disclaimer: 'זו ספירה של תרגילים במכשיר — לא ציון, לא הצטיינות, לא אבחון, ולא הוכחה שהתרגול עוזר. MelodyMath הוא דף דפדפן בלי שרת.',
     };
   }
@@ -616,16 +607,14 @@
   function renderCertificateHtml(cert) {
     const c = cert || buildCertificate(null, {});
     const who = [c.name, c.classCode].filter(Boolean).join(' · ');
-    const skills = (c.perSkill || []).map(function (s) {
-      return '<li>' + escapeHtml(s.skill) + ': ' + s.correct + ' מתוך ' + s.total + '</li>';
-    }).join('');
+    const skills = (c.perSkill || []).map((s) => `<li>${escapeHtml(s.skill)}: ${s.correct} מתוך ${s.total}</li>`).join('');
     return '<article class="cert">'
       + '<p class="sheet-kicker">' + escapeHtml(c.title) + '</p>'
       + '<h2>' + escapeHtml(c.line) + '</h2>'
-      + (who ? '<p class="cert-who">' + escapeHtml(who) + '</p>' : '')
-      + (c.when ? '<p>' + escapeHtml(c.when) + '</p>' : '')
+      + (who ? `<p class="cert-who">${escapeHtml(who)}</p>` : '')
+      + (c.when ? `<p>${escapeHtml(c.when)}</p>` : '')
       + '<p class="cert-count"><b>' + c.correct + '</b> נכונות מתוך <b>' + c.total + '</b> במכשיר הזה.</p>'
-      + (skills ? '<ul class="err-list">' + skills + '</ul>' : '<p>עדיין אין פירוט מיומנות.</p>')
+      + (skills ? `<ul class="err-list">${skills}</ul>` : '<p>עדיין אין פירוט מיומנות.</p>')
       + '<p class="sheet-note">' + escapeHtml(c.disclaimer) + '</p>'
       + '</article>';
   }
@@ -633,27 +622,23 @@
   function renderParentNoteHtml(note) {
     const n = note || buildParentNote(null, {});
     const who = [n.name, n.classCode].filter(Boolean).join(' · ');
-    const skills = (n.perSkill || []).map(function (s) {
-      return '<li>' + escapeHtml(s.skill) + ': ' + s.correct + ' מתוך ' + s.total + '</li>';
-    }).join('');
-    const errs = (n.repeatingErrors || []).map(function (e) {
-      return '<li>' + escapeHtml(e.prompt) + ' — ' + e.count + ' פעמים</li>';
-    }).join('');
+    const skills = (n.perSkill || []).map((s) => `<li>${escapeHtml(s.skill)}: ${s.correct} מתוך ${s.total}</li>`).join('');
+    const errs = (n.repeatingErrors || []).map((e) => `<li>${escapeHtml(e.prompt)} — ${e.count} פעמים</li>`).join('');
     return '<article class="parent-note">'
-      + '<p class="sheet-kicker">' + escapeHtml(n.title) + (who ? ' — ' + escapeHtml(who) : '') + '</p>'
+      + '<p class="sheet-kicker">' + escapeHtml(n.title) + (who ? ` — ${escapeHtml(who)}` : '') + '</p>'
       + '<p>שלום,</p>'
       + '<p>במכשיר בבית הספר נרשם תרגול קצר'
-      + (n.name ? ' של <b>' + escapeHtml(n.name) + '</b>' : '')
+      + (n.name ? ` של <b>${escapeHtml(n.name)}</b>` : '')
       + '. זה דף סיכום להורה, לא מבחן.</p>'
       + '<p><b>במכשיר:</b> ' + n.correct + ' נכונות מתוך ' + n.total + '.</p>'
-      + (skills ? '<p><b>לפי מיומנות</b></p><ul class="err-list">' + skills + '</ul>' : '')
+      + (skills ? `<p><b>לפי מיומנות</b></p><ul class="err-list">${skills}</ul>` : '')
       + (n.planTopic ? '<section class="parent-plan"><h3>על מה ' + escapeHtml(n.name || 'הילד/ה') + ' עובד/ת עכשיו</h3>'
-        + '<p>' + escapeHtml(n.planTopic) + (n.planHook ? ' — <span class="parent-plan-hook">' + escapeHtml(n.planHook) + '</span>' : '')
+        + '<p>' + escapeHtml(n.planTopic) + (n.planHook ? ` — <span class="parent-plan-hook">${escapeHtml(n.planHook)}</span>` : '')
         + '. ' + n.paceDone + ' מתוך ' + n.paceExpected + ' מפגשים השבוע.</p>'
         + '<p><b>5 דקות בבית:</b> ' + escapeHtml(n.homeTip) + '</p></section>' : '')
       + '<p><b>תרגילים שחזרו כשגיאה</b></p>'
-      + (errs ? '<ul class="err-list">' + errs + '</ul>' : '<p>אין תרגיל שנפסל פעמיים או יותר במדגם הזה.</p>')
-      + (n.observation ? '<p><b>הערת המורה:</b> ' + escapeHtml(n.observation) + '</p>' : '')
+      + (errs ? `<ul class="err-list">${errs}</ul>` : '<p>אין תרגיל שנפסל פעמיים או יותר במדגם הזה.</p>')
+      + (n.observation ? `<p><b>הערת המורה:</b> ${escapeHtml(n.observation)}</p>` : '')
       + '<p class="sheet-note">' + escapeHtml(n.disclaimer) + '</p>'
       + '</article>';
   }
@@ -673,7 +658,7 @@
     let data;
     try {
       data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    } catch (e) {
+    } catch (_e) {
       return { ok: false, error: 'not-json' };
     }
     if (!data || typeof data !== 'object' || typeof data.students !== 'object' || !data.students) {
@@ -685,7 +670,7 @@
     let notes = 0;
     let assignments = 0;
     let skipped = 0;
-    Object.keys(data.students).forEach(function (rawName) {
+    Object.keys(data.students).forEach((rawName) => {
       const incoming = data.students[rawName];
       // Same rule as loadRoster: a row that is not an object holds a value
       // every reader would throw on. Count it so the teacher sees it was
@@ -720,9 +705,9 @@
       }
       const have = {};
       ensureSessions(roster.students[name]);
-      roster.students[name].sessions.forEach(function (s) { if (s && s.id) have[s.id] = true; });
-      sessions.forEach(function (s) {
-        if (s && s.id && !have[s.id]) {
+      roster.students[name].sessions.forEach((s) => { if (s?.id) have[s.id] = true; });
+      sessions.forEach((s) => {
+        if (s?.id && !have[s.id]) {
           roster.students[name].sessions.push(s);
           have[s.id] = true;
           merged += 1;
@@ -731,8 +716,8 @@
       const target = roster.students[name];
       if (!Array.isArray(target.notes)) target.notes = [];
       const haveNotes = Object.create(null);
-      target.notes.forEach(function (n) { haveNotes[noteKey(n)] = true; });
-      incomingNotes.forEach(function (n) {
+      target.notes.forEach((n) => { haveNotes[noteKey(n)] = true; });
+      incomingNotes.forEach((n) => {
         const key = noteKey(n);
         if (haveNotes[key]) return;
         haveNotes[key] = true;
@@ -744,8 +729,8 @@
       // task completed on this tablet is not reset by a stale export.
       if (!Array.isArray(target.assignments)) target.assignments = [];
       const haveAssignments = Object.create(null);
-      target.assignments.forEach(function (a) { if (a && a.id) haveAssignments[String(a.id)] = true; });
-      incomingAssignments.forEach(function (a) {
+      target.assignments.forEach((a) => { if (a?.id) haveAssignments[String(a.id)] = true; });
+      incomingAssignments.forEach((a) => {
         if (haveAssignments[String(a.id)]) return;
         haveAssignments[String(a.id)] = true;
         target.assignments.push(a);
@@ -760,21 +745,21 @@
   // returns is named, so the teacher sees that notes and tasks came along too
   // and that rows with an unusable name were dropped instead of vanishing.
   function summarizeImport(res) {
-    if (!res || !res.ok) {
+    if (!res?.ok) {
       return res && res.error === 'not-json' ? 'הקובץ אינו JSON תקין.' : 'מבנה הקובץ לא מתאים.';
     }
-    const n = function (v) { return Number.isFinite(v) && v > 0 ? Math.floor(v) : 0; };
+    const n = (v) => Number.isFinite(v) && v > 0 ? Math.floor(v) : 0;
     const added = n(res.added), merged = n(res.merged), notes = n(res.notes);
     const assignments = n(res.assignments), skipped = n(res.skipped);
     const parts = [];
-    if (added) parts.push(added + ' תלמידים חדשים');
-    if (merged) parts.push(merged + ' מפגשים שמוזגו');
-    if (notes) parts.push(notes + ' הערות מורה');
-    if (assignments) parts.push(assignments + ' משימות');
+    if (added) parts.push(`${added} תלמידים חדשים`);
+    if (merged) parts.push(`${merged} מפגשים שמוזגו`);
+    if (notes) parts.push(`${notes} הערות מורה`);
+    if (assignments) parts.push(`${assignments} משימות`);
     let text = parts.length
-      ? 'יובא: ' + parts.join(', ') + '.'
+      ? `יובא: ${parts.join(', ')}.`
       : 'הקובץ נקרא, אבל לא היה בו דבר חדש למכשיר הזה.';
-    if (skipped) text += ' ' + skipped + ' שורות לא תקינות (שם או מבנה) לא יובאו.';
+    if (skipped) text += ` ${skipped} שורות לא תקינות (שם או מבנה) לא יובאו.`;
     return text;
   }
 
@@ -788,7 +773,7 @@
       const raw = JSON.parse(ls.getItem(WHO_KEY) || 'null');
       if (!raw || typeof raw !== 'object') return { classCode: '', name: '' };
       return { classCode: normalizeCode(raw.classCode), name: studentLabel(raw.name) };
-    } catch (e) {
+    } catch (_e) {
       return { classCode: '', name: '' };
     }
   }
@@ -800,7 +785,7 @@
     if (/^\d+\/\d+$/.test(raw) || raw === '½' || raw === '¼' || raw === '⅛') {
       const pool = ['1/2', '1/4', '1/8', '1', '3/4', '0'];
       const opts = [raw === '½' ? '1/2' : raw === '¼' ? '1/4' : raw === '⅛' ? '1/8' : raw];
-      pool.forEach(function (c) {
+      pool.forEach((c) => {
         if (opts.length >= 4) return;
         if (opts.indexOf(c) === -1) opts.push(c);
       });
@@ -816,7 +801,7 @@
     if (!Number.isFinite(n)) return [String(answer)];
     const opts = [n];
     const around = [n - 1, n + 1, n - 2, n + 2, n + 3, n - 3, n + 4, Math.max(0, n - 4), n === 0 ? 1 : 0];
-    around.forEach(function (c) {
+    around.forEach((c) => {
       if (opts.length >= 4) return;
       if (Number.isFinite(c) && c >= 0 && opts.indexOf(c) === -1) opts.push(c);
     });
@@ -835,28 +820,33 @@
   }
 
   function jsonKey(key) {
-    return 'mm:v1:' + String(key || '');
+    if (key == null) return '';
+    const clean = String(key).trim();
+    if (!clean) return '';
+    return `mm:v1:${clean}`;
   }
 
   function loadJson(key, fallback, storage) {
+    if (key == null || !String(key).trim()) return fallback;
     const ls = storage || defaultStorage();
     if (!ls) return fallback;
     try {
       const raw = ls.getItem(jsonKey(key)) || ls.getItem(String(key));
       if (raw == null) return fallback;
       return JSON.parse(raw);
-    } catch (e) {
+    } catch (_e) {
       return fallback;
     }
   }
 
   function saveJson(key, value, storage) {
+    if (key == null || !String(key).trim()) return false;
     const ls = storage || defaultStorage();
     if (!ls) return false;
     try {
       ls.setItem(jsonKey(key), JSON.stringify(value));
       return true;
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }
@@ -866,10 +856,10 @@
     if (!ls) return;
     try {
       ls.setItem(WHO_KEY, JSON.stringify({
-        classCode: normalizeCode(who && who.classCode),
-        name: studentLabel(who && who.name),
+        classCode: normalizeCode(who?.classCode),
+        name: studentLabel(who?.name),
       }));
-    } catch (e) { /* quota */ }
+    } catch (_e) { /* quota */ }
   }
 
   return {
