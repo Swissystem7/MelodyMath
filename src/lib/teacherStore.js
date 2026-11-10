@@ -376,7 +376,7 @@
   // Two tablets never share a clock reading to the millisecond by accident, so
   // the timestamp plus the text is enough to tell a re-import from a new note.
   function noteKey(note) {
-    return String(note && note.at != null ? note.at : '') + ' ' + noteText(note);
+    return String(note && note.at != null ? note.at : '') + '\u0000' + noteText(note);
   }
 
   // Notes come off another tablet's JSON file: keep the shape addNote writes,
