@@ -118,6 +118,11 @@ body {
 .mm-hero { text-align: center; padding: 18px 0 6px; }
 .mm-hero h1 { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -.5px; }
 .mm-hero p { margin: 4px 0 0; color: var(--mm-ink-soft); }
+/* MM-508: music mascot (assets/mascot, from MM-505) */
+.mm-mascot { display: block; margin-inline: auto; height: auto; }
+.mm-mascot--lg { width: 160px; max-width: 45vw; }
+.mm-mascot--sm { width: 64px; }
+.mm-mascot[hidden] { display: none; }
 .mm-field { display: flex; flex-direction: column; gap: 6px; font-weight: 700; }
 .mm-field input, .mm-field select, .mm-field textarea {
   min-height: 52px; border-radius: 16px; border: var(--mm-border); background: var(--mm-white);
