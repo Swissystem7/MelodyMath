@@ -194,5 +194,142 @@
     ],
   };
 
-  return { grade: 'א', ST: {}, items: [], music: music, sources: sources };
+  // Late items (MM-7xx stream B). New grade א׳ items live here, not in
+  // banks.js, and are NOT put in `items`: banks.js pushes `items` in the
+  // middle of its RAW list, so every item after them would get a new id and
+  // children's saved history would point at the wrong questions. Each late
+  // item instead carries its own stable key, and banks.js appends them after
+  // its last item (the hook is handed off in the stream B PR; until it lands
+  // these items do not ship). Shape, as `items` plus the key:
+  //   [skill, prompt, answer, hint, level 1-3, ST key of banks.js, { key }]
+  // The key is a number: task number × 100 + item number (MM-731 item 1 is
+  // 73101), far above any RAW index. A late item's id is `<grade>-<skill>-<key>`,
+  // so ids stay numeric like the rest. Keys never change or repeat.
+  // The music side comes from `music` above, like every other item: the
+  // primary way of the standard, by level.
+  const lateItems = [
+    // MM-731 · mm-cur-4 whole tens: basis and intermediate entry items.
+    // Newprogramgrade1.pdf p. 8 «חיבור וחיסור בעשרות שלמות» (MM-501, PR #949;
+    // gap G9 in docs/MM-700/curriculum-gaps.md, PR #951). The 9 items in
+    // banks.js are all challenge level, so the topic had no way in. Small
+    // tens first (to 50), then to 100. Solved with accentTens (TENS above):
+    // one accented beat per ten. No counted-beats cue, so the topic keeps
+    // that one way.
+    ['addition', 'תוף מדגיש כל עשירית: 10 פעימות ועוד 10 פעימות. כמה פעימות בסך הכול?', 20, 'עשרת אחת ועוד עשרת אחת', 1, 'TENS', { key: 73101 }],
+    ['addition', '2 תיבות של 10 פעימות ועוד תיבה אחת של 10 פעימות. כמה פעימות?', 30, '2 עשרות ועוד עשרת אחת', 1, 'TENS', { key: 73102 }],
+    ['addition', '20 + 20 = ?', 40, '2 הדגשות ועוד 2 הדגשות', 1, 'TENS', { key: 73103 }],
+    ['subtraction', 'ניגנו 30 פעימות, ותיבה אחת של 10 פעימות שתקה. כמה פעימות נשמעו?', 20, '3 עשרות פחות עשרת אחת', 1, 'TENS', { key: 73104 }],
+    ['subtraction', '40 − 10 = ?', 30, '4 הדגשות פחות הדגשה אחת', 1, 'TENS', { key: 73105 }],
+    ['subtraction', '50 − 20 = ?', 30, '5 עשרות פחות 2 עשרות', 1, 'TENS', { key: 73106 }],
+    ['addition', '40 + 50 = ?', 90, '4 עשרות ועוד 5 עשרות', 2, 'TENS', { key: 73107 }],
+    ['addition', '3 תיבות של 10 פעימות ועוד 4 תיבות של 10 פעימות. כמה פעימות?', 70, '3 עשרות ועוד 4 עשרות', 2, 'TENS', { key: 73108 }],
+    ['addition', '30 + 30 = ?', 60, '3 הדגשות ועוד 3 הדגשות', 2, 'TENS', { key: 73109 }],
+    ['subtraction', 'ניגנו 90 פעימות, ו־5 תיבות של 10 פעימות שתקו. כמה פעימות נשמעו?', 40, '9 עשרות פחות 5 עשרות', 2, 'TENS', { key: 73110 }],
+    ['subtraction', '60 − 40 = ?', 20, '6 הדגשות פחות 4 הדגשות', 2, 'TENS', { key: 73111 }],
+    ['subtraction', '100 − 30 = ?', 70, '10 עשרות פחות 3 עשרות', 2, 'TENS', { key: 73112 }],
+    // MM-732 · mm-cur-9 length and mm-cur-11 coins, 6 to 12 items each, every
+    // level present (gap G2 in docs/MM-700/curriculum-gaps.md, PR #951).
+    // Newprogramgrade1.pdf: length p. 11 «מדידת אורך», money p. 3 (MM-501,
+    // PR #949). Length is solved with cmNote (M3), coins with coinGroups (M2),
+    // the one primary way of each standard above. The ruler widget prints the
+    // length it shows, so no new ruler item asks for that length: each asks
+    // for one step more (longer, shorter, half, twice, up to 20).
+    ['measurement', 'בתמונה שורת קוביות אורך. מוסיפים עוד 2 קוביות. כמה קוביות יש עכשיו?', 6, 'ספרו את הקוביות שבתמונה והמשיכו עוד 2', 1, 'LENGTH', { key: 73201, widget: 'ruler', ruler: { unit: 'unit', length: 4 } }],
+    ['measurement', 'העיפרון בתמונה נמדד בקוביות. עיפרון אחר קצר ממנו בקובייה אחת. כמה קוביות בו?', 4, 'ספרו את הקוביות שבתמונה, ואז קובייה אחת פחות', 1, 'LENGTH', { key: 73202, widget: 'ruler', ruler: { unit: 'unit', length: 5 } }],
+    ['measurement', 'מדדו את הצעצוע בסרגל. צעצוע שני ארוך ממנו ב־3 ס״מ. כמה ס״מ הוא?', 10, 'קראו את הסרגל, ואז הוסיפו 3', 2, 'LENGTH', { key: 73203, widget: 'ruler', ruler: { unit: 'cm', length: 7 } }],
+    ['measurement', 'מדדו את החבל בסרגל. חותכים אותו לשני חלקים שווים. כמה ס״מ אורכו של כל חלק?', 6, 'חצי מהאורך שעל הסרגל', 3, 'LENGTH', { key: 73204, widget: 'ruler', ruler: { unit: 'cm', length: 12 } }],
+    ['measurement', 'מדדו את המקל בסרגל. שני מקלות כאלה זה אחרי זה — כמה ס״מ יחד?', 14, 'פעמיים האורך שעל הסרגל', 3, 'LENGTH', { key: 73205, widget: 'ruler', ruler: { unit: 'cm', length: 7 } }],
+    ['measurement', 'מדדו את הסרט בסרגל. כמה ס״מ חסרים לו כדי להגיע ל־20 ס״מ?', 7, 'מהאורך שעל הסרגל סופרים הלאה עד 20', 3, 'LENGTH', { key: 73206, widget: 'ruler', ruler: { unit: 'cm', length: 13 } }],
+    ['measurement', 'שני מטבעות של 1 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 4, '1 ועוד 1 ועוד 2', 1, 'MONEY', { key: 73207 }],
+    ['measurement', 'מטבע של 5 ₪ ומטבע של 1 ₪. כמה ₪ ביחד?', 6, 'מתחילים מ־5 וסופרים עוד 1', 1, 'MONEY', { key: 73208 }],
+    ['measurement', 'שני מטבעות של 5 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 12, 'שתי חמישיות הן עשר, ועוד 2', 2, 'MONEY', { key: 73209 }],
+    ['measurement', 'כמה מטבעות של 5 ₪ שווים למטבע אחד של 10 ₪?', 2, 'כמה קבוצות של חמש יש בעשר', 2, 'MONEY', { key: 73210 }],
+    ['measurement', 'מטבע של 10 ₪, מטבע של 5 ₪ ומטבע של 1 ₪. כמה ₪ ביחד?', 16, 'קודם המטבע הגדול, ואז ממשיכים לספור', 3, 'MONEY', { key: 73211 }],
+    ['measurement', 'קנינו מדבקה ב־6 ₪ ושילמנו במטבע של 10 ₪. כמה ₪ עודף?', 4, '10 פחות 6', 3, 'MONEY', { key: 73212 }],
+    // MM-733 · mm-cur-10 whole-hour clock, 6 to 12 items (2 per level added;
+    // gap G2, PR #951). Newprogramgrade1.pdf p. 12 «קריאת שעון בשעות שלמות»
+    // (MM-501, PR #949). Solved with hourAccents (M2), CLOCK's one primary way.
+    // The clock widget prints the time it shows (clock-read), so no new item
+    // asks for that time: each asks one or more whole hours before or after.
+    ['measurement', 'מה תהיה השעה בעוד שעה אחת?', 4, 'המחוג הקטן זז מספר אחד קדימה', 1, 'CLOCK', { key: 73301, widget: 'clock', clock: { hour: 3 } }],
+    ['measurement', 'מה הייתה השעה לפני שעה אחת?', 7, 'המחוג הקטן חוזר מספר אחד אחורה', 1, 'CLOCK', { key: 73302, widget: 'clock', clock: { hour: 8 } }],
+    ['measurement', 'השיעור מתחיל בעוד 2 שעות. באיזו שעה הוא מתחיל?', 8, 'סופרים 2 מספרים קדימה בשעון', 2, 'CLOCK', { key: 73303, widget: 'clock', clock: { hour: 6 } }],
+    ['measurement', 'מה תהיה השעה בעוד שעתיים?', 1, 'אחרי 12 השעון מתחיל מחדש', 2, 'CLOCK', { key: 73304, widget: 'clock', clock: { hour: 11 } }],
+    ['measurement', 'ההופעה נגמרה בשעה שבשעון. היא התחילה 3 שעות קודם. באיזו שעה התחילה?', 6, 'סופרים 3 מספרים אחורה בשעון', 3, 'CLOCK', { key: 73305, widget: 'clock', clock: { hour: 9 } }],
+    ['measurement', 'החזרה מתחילה בשעה שבשעון ונגמרת בשעה 1. כמה שעות היא נמשכת?', 3, 'סופרים מהשעה שבשעון עד 1, דרך 12', 3, 'CLOCK', { key: 73306, widget: 'clock', clock: { hour: 10 } }],
+    // MM-735 · mm-cur-3 «איך חשבת?» strategy items (gap G5, PR #951):
+    // Newprogramgrade1.pdf p. 6 «חיבור וחיסור בתחום העשרים» via MM-501
+    // (PR #949). Each item names a make-ten or back-to-ten split of a sum
+    // across ten and asks for one number of that split, so the answer is a
+    // number the child types (the plan loop has no choice buttons). Inner
+    // numbers are words where needed, so variety.js retune() finds no digit
+    // pair that gives the answer and keeps the prompt as written. Tagged
+    // 'strategy'. Solved with the standard's primary way (ADD20 callResponse,
+    // SUB20 takeAwayBeats, M1); tenThenMore rides along as the extra way.
+    ['addition', 'איך חשבת 8 + 5? משלימים את 8 לעשר. כמה מוסיפים קודם?', 2, 'כמה חסר ל־8 כדי להגיע ל־10', 1, 'ADD20', { key: 73501, tags: ['strategy'] }],
+    ['addition', 'איך חשבת 9 + 4? קודם משלימים את תשע לעשר. כמה נשאר להוסיף?', 3, 'מתוך הארבע אחת כבר הלכה לעשר', 1, 'ADD20', { key: 73502, tags: ['strategy'] }],
+    ['addition', 'איך חשבת 7 + 6? משלימים את 7 לעשר. כמה נשאר מה־6?', 3, 'קודם משלימים את 7 לעשר, ואז מה שנשאר', 2, 'ADD20', { key: 73503, tags: ['strategy'] }],
+    ['addition', 'איך חשבת שמונה ועוד שבע? קודם משלימים לעשר. כמה זה ביחד?', 15, 'מתוך השבע נשארו עוד 5 אחרי העשר', 2, 'ADD20', { key: 73504, tags: ['strategy'] }],
+    ['addition', 'איך חשבת 6 + 8? מתחילים מ־8 ומשלימים לעשר. כמה מוסיפים קודם?', 2, 'כמה חסר ל־8 כדי להגיע ל־10', 2, 'ADD20', { key: 73505, tags: ['strategy'] }],
+    ['subtraction', 'איך חשבת 13 − 5? קודם יורדים מ־13 לעשר. כמה הורדנו?', 3, 'מ־13 עד 10 יש כמה צעדים', 2, 'SUB20', { key: 73506, tags: ['strategy'] }],
+    ['subtraction', 'איך חשבת 14 − 6? קודם יורדים לעשר. כמה עוד צריך להוריד?', 2, 'מתוך השש כבר הורדנו 4', 3, 'SUB20', { key: 73507, tags: ['strategy'] }],
+    ['subtraction', 'איך חשבת שתים־עשרה פחות חמש? קודם יורדים לעשר. מה התשובה?', 7, 'מה־10 מורידים עוד 3', 3, 'SUB20', { key: 73508, tags: ['strategy'] }],
+    // MM-736 · mm-cur-1 open quantity estimation (gap G7, PR #951):
+    // Newprogramgrade1.pdf p. 2 «מנייה עד 100, קיבוץ ל־10» via MM-501 (PR
+    // #949). «בערך כמה?» on a crowd of instruments; any answer within
+    // `tolerance` of the true count is right. index.html answerOk already
+    // checks tolerance with adaptive.js isWithinTolerance, so no page change
+    // is needed. Tagged 'estimate'. Solved with GROUP10's primary way
+    // (tenBeatBars, M2): group by eye into tens of beats.
+    ['counting', 'בערך כמה תופים? לא סופרים אחד־אחד. 🥁🥁🥁🥁🥁🥁🥁🥁🥁🥁🥁🥁 🥁🥁🥁🥁🥁🥁', 18, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 1, 'GROUP10', { key: 73601, tolerance: 3, tags: ['estimate'] }],
+    ['counting', 'בערך כמה תווים? לא סופרים אחד־אחד. 🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵 🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵 🎵', 25, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 1, 'GROUP10', { key: 73602, tolerance: 5, tags: ['estimate'] }],
+    ['counting', 'בערך כמה פעמונים? לא סופרים אחד־אחד. 🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔 🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔🔔 🔔🔔🔔🔔🔔🔔🔔🔔🔔', 33, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 2, 'GROUP10', { key: 73603, tolerance: 5, tags: ['estimate'] }],
+    ['counting', 'בערך כמה גיטרות? לא סופרים אחד־אחד. 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸 🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸🎸', 47, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 2, 'GROUP10', { key: 73604, tolerance: 7, tags: ['estimate'] }],
+    ['counting', 'בערך כמה פסנתרים? לא סופרים אחד־אחד. 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹🎹 🎹🎹', 62, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 3, 'GROUP10', { key: 73605, tolerance: 10, tags: ['estimate'] }],
+    ['counting', 'בערך כמה חצוצרות? לא סופרים אחד־אחד. 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺🎺 🎺🎺🎺🎺🎺🎺🎺🎺', 80, 'קבצו בעיניים קבוצות של עשר וספרו את הקבוצות', 3, 'GROUP10', { key: 73606, tolerance: 10, tags: ['estimate'] }],
+  ];
+
+  // Guided lessons of grade א׳ (MM-7xx stream B), served by interactiveLessons.js
+  // through the MMLessonRegistry contract (shape at the top of that file).
+  const lessons = [
+    // MM-734 · mm-cur-3 make ten (gap G3/G5, PR #951). Newprogramgrade1.pdf
+    // p. 6 «פירוקי 10; חיבור בתחום העשרים» via MM-501 (PR #949). The music
+    // model is the ten-beat bar of accent groups (M2, das2023), as in TENS.
+    {
+      id: 'g1-make-ten',
+      title: 'השלמה לעשר: ממלאים תיבה של 10 פעימות',
+      grade: 'א',
+      strand: 'מספרים ופעולות',
+      topicId: 'mm-cur-3',
+      icon: '🥁',
+      summary: 'מחברים מעבר לעשר: קודם ממלאים תיבה של 10 פעימות, ואת מה שנשאר מנגנים בתיבה חדשה.',
+      steps: [
+        {
+          title: 'תיבה של עשר פעימות',
+          body: 'תיבה מלאה היא 10 פעימות, והפעימה הראשונה בכל תיבה מודגשת. כש־8 פעימות כבר נשמעו, חסרות 2 כדי למלא את התיבה. זו השלמה לעשר.'
+        },
+        {
+          title: 'קודם משלימים, אחר כך ממשיכים',
+          body: '8 + 5: מתוך ה־5 לוקחים 2 וממלאים את התיבה — 10. נשארו 3 פעימות, ומנגנים אותן בתיבה חדשה עם הדגשה בהתחלה: 10 ועוד 3 הם 13.'
+        },
+        {
+          title: 'נסו עם מחיאות',
+          body: '9 + 4: מחאו 9 פעמים. עוד מחיאה אחת ממלאת את התיבה. כמה מחיאות נשארו לתיבה החדשה? שלוש — ולכן ביחד 13.'
+        },
+        {
+          title: 'בדיקת הבנה מודרכת',
+          body: 'איך כדאי לחשב 7 + 5 בעזרת תיבה של עשר?',
+          options: ['7 + 3 + 2', '7 + 5 + 10', '5 + 5 + 5', '7 + 1 + 1 + 1'],
+          correctIndex: 0,
+          explanation: '3 פעימות משלימות את 7 לתיבה של 10, ונשארו עוד 2 לתיבה החדשה: 10 ועוד 2 הם 12.'
+        }
+      ]
+    },
+  ];
+  // Order-independent: whichever file loads first creates the array.
+  const reg = (typeof globalThis !== 'undefined' ? globalThis : {});
+  const list = (reg.MMLessonRegistry = reg.MMLessonRegistry || []);
+  lessons.forEach(function (l) { if (list.indexOf(l) === -1) list.push(l); });
+
+  return { grade: 'א', ST: {}, items: [], lateItems: lateItems, lessons: lessons, music: music, sources: sources };
 });

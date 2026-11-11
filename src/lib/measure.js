@@ -33,57 +33,81 @@
     return { unit: unit, length: length, label: label };
   }
 
-  function renderRulerHtml(ruler) {
+  // opts.hideRead (the practice widget, bindRuler): the printed length is the
+  // answer of a "read the ruler" item, so it waits in data-reveal until
+  // index.html's revealWidget runs after the child answers, and the aria-label
+  // does not name it either. Without opts the full read-out is kept (answer
+  // keys and older callers).
+  function renderRulerHtml(ruler, opts) {
     const R = normalizeRuler(ruler);
+    const hide = !!(opts && opts.hideRead);
     const label = escapeHtml(R.label);
     const cells = [];
     for (let i = 0; i < R.length; i++) {
       cells.push('<span class="ruler-cell" aria-hidden="true">' + (R.unit === 'cm' ? '▮' : '🟫') + '</span>');
     }
-    return '<div class="ruler" dir="ltr" role="img" aria-label="עצם שאורכו ' + R.length + ' ' + label + '">'
+    const read = R.length + ' ' + label;
+    return '<div class="ruler" dir="ltr" role="img" aria-label="' + (hide ? 'עצם על סרגל — ספרו את היחידות' : 'עצם שאורכו ' + read) + '">'
       + '<div class="ruler-track">' + cells.join('') + '</div>'
-      + '<p class="ruler-read">' + R.length + ' ' + label + '</p>'
+      + (hide ? '<p class="ruler-read" data-reveal="' + read + '">? ' + label + '</p>' : '<p class="ruler-read">' + read + '</p>')
       + '</div>';
   }
 
   function bindRuler(root, ruler) {
     if (!root) return null;
-    root.innerHTML = renderRulerHtml(ruler);
+    root.innerHTML = renderRulerHtml(ruler, { hideRead: true });
     return {};
   }
 
+  // `minutes` (MM-738, grade ג׳): 0-59, default 0, so whole-hour items of
+  // grades א׳-ב׳ draw exactly as before.
   function normalizeClock(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     let hour = Math.round(Number(src.hour));
     if (!Number.isFinite(hour) || hour < 1 || hour > 12) hour = 12;
-    return { hour: hour };
+    let minutes = Math.round(Number(src.minutes));
+    if (!Number.isFinite(minutes) || minutes < 0 || minutes > 59) minutes = 0;
+    return { hour: hour, minutes: minutes };
   }
 
-  function clockHandAngle(hour) {
-    // Whole hours only: minute hand always at 12 (0°). Hour hand at 30° per hour.
-    return (hour % 12) * 30;
+  // Hour hand: 30° per hour plus 0.5° per minute (it creeps toward the next
+  // hour). Minute hand: 6° per minute; at a whole hour it points at 12 (0°).
+  function clockHandAngle(hour, minutes) {
+    return (hour % 12) * 30 + (Number(minutes) || 0) / 2;
+  }
+  function minuteHandAngle(minutes) {
+    return (Number(minutes) || 0) * 6;
+  }
+  function clockText(C) {
+    return C.hour + ':' + (C.minutes < 10 ? '0' : '') + C.minutes;
   }
 
-  function renderClockHtml(clock) {
+  // opts.hideRead (the practice widget, bindClock): the printed time is the
+  // answer of a "read the clock" item, so it waits in data-reveal until
+  // revealWidget runs, and the aria-label does not name it.
+  function renderClockHtml(clock, opts) {
     const C = normalizeClock(clock);
-    const angle = clockHandAngle(C.hour);
+    const hide = !!(opts && opts.hideRead);
+    const angle = clockHandAngle(C.hour, C.minutes);
+    const minAngle = minuteHandAngle(C.minutes);
+    const text = clockText(C);
     const numbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function (n) {
       const a = (n % 12) * 30;
       return '<span class="clock-num" style="transform:rotate(' + a + 'deg) translateY(-42%) rotate(-' + a + 'deg)">' + n + '</span>';
     }).join('');
-    return '<div class="clock" role="img" aria-label="שעון מראה השעה ' + C.hour + ':00">'
+    return '<div class="clock" role="img" aria-label="' + (hide ? 'שעון מחוגים — קראו את השעה' : 'שעון מראה השעה ' + text) + '">'
       + '<div class="clock-face">' + numbers
       + '<div class="clock-hand clock-hour" style="transform:rotate(' + angle + 'deg)"></div>'
-      + '<div class="clock-hand clock-min" style="transform:rotate(0deg)"></div>'
+      + '<div class="clock-hand clock-min" style="transform:rotate(' + minAngle + 'deg)"></div>'
       + '<div class="clock-center"></div>'
       + '</div>'
-      + '<p class="clock-read">' + C.hour + ':00</p>'
+      + (hide ? '<p class="clock-read" data-reveal="' + text + '">?</p>' : '<p class="clock-read">' + text + '</p>')
       + '</div>';
   }
 
   function bindClock(root, clock) {
     if (!root) return null;
-    root.innerHTML = renderClockHtml(clock);
+    root.innerHTML = renderClockHtml(clock, { hideRead: true });
     return {};
   }
 
@@ -189,6 +213,7 @@
     bindRuler: bindRuler,
     normalizeClock: normalizeClock,
     clockHandAngle: clockHandAngle,
+    minuteHandAngle: minuteHandAngle,
     renderClockHtml: renderClockHtml,
     bindClock: bindClock,
     convertUnits: convertUnits,

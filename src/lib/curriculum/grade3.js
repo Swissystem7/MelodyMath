@@ -155,5 +155,32 @@
   music.MUL_COMPARE = music.TIMES_MORE;
   music.NUM_10K = music.NUM10K;
 
-  return { grade: 'ג', ST: {}, items: [], music: music, sources: sources };
+  // Late items (MM-7xx stream B): appended last by banks.js with fixed keys
+  // (task × 100 + n), so no existing id moves. Shape as in grade1.js.
+  const lateItems = [
+    // MM-739 · mm-cur-29 shekels and agorot, 8 to 12 items (gap G2, PR #951).
+    // Newprogramgrade3.pdf p. 1 via MM-501 (PR #949). Solved with
+    // agorotTenGroups (M2), MONEY's one primary way above.
+    ['measurement', 'כמה אגורות יש ב־3 ₪?', 300, 'בכל שקל 100 אגורות', 1, 'MONEY', { key: 73901 }],
+    ['measurement', 'שני מטבעות של 50 אגורות ומטבע של 1 ₪. כמה ₪ ביחד?', 2, 'שני חצאי שקל הם שקל', 2, 'MONEY', { key: 73902 }],
+    ['measurement', 'קנינו עט ב־4 ₪ ו־50 אגורות ושילמנו ב־10 ₪. כמה אגורות עודף?', 550, 'ההפרש הוא 5 ₪ ו־50 אגורות', 3, 'MONEY', { key: 73903 }],
+    ['measurement', 'שלוש מחברות ב־2 ₪ ו־50 אגורות כל אחת. כמה אגורות בסך הכול?', 750, 'כל מחברת היא 250 אגורות', 3, 'MONEY', { key: 73904 }],
+    // MM-738 · mm-cur-28 hours and minutes on a drawn clock (the clock widget
+    // was used in grades א׳-ב׳ only). Newprogramgrade3.pdf p. 19 «שעות ודקות;
+    // משך זמן» via MM-501 (PR #949); partial row in PR #951. The clock now
+    // takes `minutes` (measure.js); its read-out stays hidden until the child
+    // answers. Every answer is a number of minutes or a whole hour, typed as
+    // usual. Solved with MINUTES' primary ways (hourTwelveGroups,
+    // fiveMinuteAccents; M2).
+    ['measurement', 'כמה דקות עברו מהשעה העגולה? קראו את המחוג הארוך.', 15, 'כל מספר בשעון הוא 5 דקות', 1, 'MINUTES', { key: 73801, widget: 'clock', clock: { hour: 3, minutes: 15 } }],
+    ['measurement', 'לפי המחוג הארוך: כמה דקות אחרי השעה העגולה?', 30, 'המחוג הארוך עבר חצי סיבוב', 1, 'MINUTES', { key: 73802, widget: 'clock', clock: { hour: 6, minutes: 30 } }],
+    ['measurement', 'כמה דקות אחרי השעה העגולה מראה השעון?', 45, 'ספרו בקפיצות של 5 מה־12', 1, 'MINUTES', { key: 73803, widget: 'clock', clock: { hour: 9, minutes: 45 } }],
+    ['measurement', 'כמה דקות חסרות עד השעה העגולה הבאה?', 20, 'שעה שלמה היא 60 דקות', 2, 'MINUTES', { key: 73804, widget: 'clock', clock: { hour: 2, minutes: 40 } }],
+    ['measurement', 'השיעור התחיל בשעה שבשעון ונמשך 35 דקות. כמה דקות אחרי העגולה הוא נגמר?', 45, 'מוסיפים 35 לדקות שבשעון', 2, 'MINUTES', { key: 73805, widget: 'clock', clock: { hour: 4, minutes: 10 } }],
+    ['measurement', 'באיזו שעה עגולה יראה השעון בעוד 35 דקות?', 8, 'עוד 35 דקות משלימות ל־60', 2, 'MINUTES', { key: 73806, widget: 'clock', clock: { hour: 7, minutes: 25 } }],
+    ['measurement', 'הסרט מתחיל בעוד 25 דקות. כמה דקות אחרי השעה העגולה הוא יתחיל?', 15, 'אחרי 60 דקות מתחילה שעה חדשה', 3, 'MINUTES', { key: 73807, widget: 'clock', clock: { hour: 11, minutes: 50 } }],
+    ['measurement', 'כמה דקות עברו מהשעה 12 עד השעה שבשעון?', 80, 'שעה שלמה היא 60 דקות, ועוד הדקות', 3, 'MINUTES', { key: 73808, widget: 'clock', clock: { hour: 1, minutes: 20 } }],
+  ];
+
+  return { grade: 'ג', ST: {}, items: [], lateItems: lateItems, music: music, sources: sources };
 });

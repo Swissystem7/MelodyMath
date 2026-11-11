@@ -161,8 +161,11 @@ test('the ruler and clock items of א׳–ב׳ keep their ids', () => {
   const ids = banks.allItems().map((it) => it.id);
   ['א-measurement-321', 'א-data-345'].forEach((id) => assert.ok(ids.includes(id), id));
   const ruler = (it) => it.standard === ST.LENGTH || it.standard === ST.CLOCK;
-  const oldIds = banks.allItems().filter(ruler).map((it) => Number(it.id.split('-').pop()));
-  const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it))
+  // Late items of the grade files (MM-7xx) carry fixed keys ≥ 10000 and are
+  // appended after everything; they are not part of this older ordering.
+  const notLate = (it) => Number(it.id.split('-').pop()) < 10000;
+  const oldIds = banks.allItems().filter(notLate).filter(ruler).map((it) => Number(it.id.split('-').pop()));
+  const newIds = banks.allItems().filter(notLate).filter((it) => it.skill === 'measurement' && !ruler(it))
     .map((it) => Number(it.id.split('-').pop()));
   assert.ok(Math.min(...newIds) > Math.max(...oldIds), 'the later items sit after the older ones');
 });
