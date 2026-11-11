@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const { adultQuestion, adultAnswerOk, holdLongEnough, HOLD_MS } = require('../src/lib/adultGate.js');
+const { adultQuestion, adultAnswerOk, holdLongEnough, HOLD_MS, pickNum } = require('../src/lib/adultGate.js');
 
 // #737: a child must not reach the teacher tab without an adult answering
 // a fresh three-digit × two-digit product and a 3-second hold.
@@ -30,7 +30,12 @@ function page() {
   const panels = ids.map(id => Object.assign({ id, hidden: id !== 'remediation', classList: classList() }, attrs()));
   tabs[0].setAttribute('aria-selected', 'true');
   const els = {};
-  const $ = id => els[id] || (els[id] = { id, value: '', textContent: '', classList: classList(), focus() {} });
+  const $ = id => {
+    if (!els[id]) {
+      els[id] = { id, value: '', textContent: '', classList: classList(), focus() {} };
+    }
+    return els[id];
+  };
   $('adultGate').classList.add('hidden');
   const ctx = {
     $,
@@ -173,4 +178,171 @@ test('the gate is labelled, announced and keyboard-operable', () => {
   assert.match(indexHtml, /\$\('adultGateAnswer'\)\.onkeydown=e=>\{if\(e\.key==='Enter'\)\{[^}]*focus\(\)\}else if\(e\.key==='Escape'\)cancelAdultGate\(\)\};/);
   assert.match(indexHtml, /onpointerdown=\(\)=>holdAdultGate\('start'/);
   assert.match(indexHtml, /onkeyup=e=>\{if\(e\.key==='Enter'\|\|e\.key===' '\)holdAdultGate\('end'/);
+});
+
+test('pickNum clamps rand edge values and keeps non-round-ten adjustments within bounds', () => {
+  // Clamping rand() >= 1 or float rounding to hi
+  assert.equal(pickNum(() => 1, 10, 20), 19); // 20 % 10 === 0 -> adjusted down to 19, within [10, 20]
+  assert.equal(pickNum(() => 1.5, 10, 20), 19);
+  assert.equal(pickNum(() => -0.5, 10, 20), 11); // 10 % 10 === 0 -> adjusted up to 11, within [10, 20]
+  assert.equal(pickNum(() => 0, 10, 20), 11);
+  assert.equal(pickNum(() => 0.999, 10, 20), 19);
+
+  // When clamped to boundary that is round ten, does not exceed hi
+  assert.equal(pickNum(() => 1, 10, 10), 10);
+  assert.equal(pickNum(() => 1, 100, 100), 100);
+
+  // Exact bounds when non-round
+  assert.equal(pickNum(() => 1, 13, 99), 99);
+  assert.equal(pickNum(() => 0, 13, 99), 13);
+  assert.equal(pickNum(() => 1, 101, 999), 999);
+  assert.equal(pickNum(() => 0, 101, 999), 101);
+});
+
+test('adultAnswerOk rejects invalid or malformed q', () => {
+  assert.equal(adultAnswerOk(null, '30856'), false);
+  assert.equal(adultAnswerOk(undefined, '30856'), false);
+  assert.equal(adultAnswerOk('string', '30856'), false);
+  assert.equal(adultAnswerOk(12345, '30856'), false);
+  assert.equal(adultAnswerOk([], '30856'), false);
+  assert.equal(adultAnswerOk({}, '30856'), false);
+  assert.equal(adultAnswerOk({ answer: NaN }, '30856'), false);
+  assert.equal(adultAnswerOk({ answer: Infinity }, '30856'), false);
+  assert.equal(adultAnswerOk({ answer: -Infinity }, '30856'), false);
+  assert.equal(adultAnswerOk({ answer: null }, '30856'), false);
+  assert.equal(adultAnswerOk({ answer: undefined }, '30856'), false);
+  assert.equal(adultAnswerOk({ answer: '30856' }, '30856'), false);
+});
+
+test('adultAnswerOk rejects invalid given inputs (objects, booleans, decimals, negatives, letters, exponential notation)', () => {
+  const q = { answer: 30856 };
+  // Objects
+  assert.equal(adultAnswerOk(q, {}), false);
+  assert.equal(adultAnswerOk(q, { value: 30856 }), false);
+  assert.equal(adultAnswerOk(q, [30856]), false);
+  assert.equal(adultAnswerOk(q, new Date()), false);
+
+  // Booleans
+  assert.equal(adultAnswerOk(q, true), false);
+  assert.equal(adultAnswerOk(q, false), false);
+
+  // Decimals
+  assert.equal(adultAnswerOk(q, '30856.0'), false);
+  assert.equal(adultAnswerOk(q, '30856.5'), false);
+  assert.equal(adultAnswerOk(q, 30856.5), false);
+  assert.equal(adultAnswerOk(q, '.30856'), false);
+
+  // Negatives
+  assert.equal(adultAnswerOk(q, '-30856'), false);
+  assert.equal(adultAnswerOk(q, -30856), false);
+
+  // Letters and non-digits
+  assert.equal(adultAnswerOk(q, 'abc'), false);
+  assert.equal(adultAnswerOk(q, '30856a'), false);
+  assert.equal(adultAnswerOk(q, 'a30856'), false);
+  assert.equal(adultAnswerOk(q, '308 56x'), false);
+
+  // Exponential notation
+  assert.equal(adultAnswerOk(q, '1e5'), false);
+  assert.equal(adultAnswerOk(q, '30856e0'), false);
+  assert.equal(adultAnswerOk(q, '3.0856e4'), false);
+  assert.equal(adultAnswerOk(q, '1E5'), false);
+
+  // Null, undefined, empty
+  assert.equal(adultAnswerOk(q, null), false);
+  assert.equal(adultAnswerOk(q, undefined), false);
+  assert.equal(adultAnswerOk(q, ''), false);
+  assert.equal(adultAnswerOk(q, '   '), false);
+
+  // Valid integers and whitespace/comma-formatted inputs
+  assert.equal(adultAnswerOk(q, '30856'), true);
+  assert.equal(adultAnswerOk(q, 30856), true);
+  assert.equal(adultAnswerOk(q, ' 30,856 '), true);
+  assert.equal(adultAnswerOk(q, '30 856'), true);
+});
+
+test('holdLongEnough rejects NaN, non-finite values, and inverted timestamps', () => {
+  // Valid hold
+  assert.equal(holdLongEnough(1000, 4000), true);
+  assert.equal(holdLongEnough(0, 3000), true);
+  assert.equal(holdLongEnough(1000, 5000), true);
+
+  // Shorter than HOLD_MS
+  assert.equal(holdLongEnough(1000, 3999), false);
+
+  // Inverted timestamps (endMs < startMs)
+  assert.equal(holdLongEnough(4000, 1000), false);
+  assert.equal(holdLongEnough(3000, 0), false);
+  assert.equal(holdLongEnough(100, 99), false);
+
+  // NaN
+  assert.equal(holdLongEnough(NaN, 4000), false);
+  assert.equal(holdLongEnough(1000, NaN), false);
+  assert.equal(holdLongEnough(NaN, NaN), false);
+
+  // Non-finite (Infinity, -Infinity)
+  assert.equal(holdLongEnough(Infinity, 4000), false);
+  assert.equal(holdLongEnough(1000, Infinity), false);
+  assert.equal(holdLongEnough(-Infinity, 4000), false);
+  assert.equal(holdLongEnough(1000, -Infinity), false);
+  assert.equal(holdLongEnough(Infinity, Infinity), false);
+
+  // Non-numbers
+  assert.equal(holdLongEnough(null, 4000), false);
+  assert.equal(holdLongEnough(1000, null), false);
+  assert.equal(holdLongEnough(undefined, 4000), false);
+  assert.equal(holdLongEnough('1000', '4000'), false);
+  assert.equal(holdLongEnough({}, {}), false);
+});
+
+test('adultQuestion supports dynamic options (operators and custom bounds) while preserving default compatibility', () => {
+  // Default call backward compatibility
+  const qDefault = adultQuestion();
+  assert.ok(qDefault.a >= 101 && qDefault.a <= 999 && qDefault.a % 10 !== 0);
+  assert.ok(qDefault.b >= 13 && qDefault.b <= 99 && qDefault.b % 10 !== 0);
+  assert.equal(qDefault.answer, qDefault.a * qDefault.b);
+  assert.match(qDefault.text, /^כמה זה \d{3} × \d\d\?$/);
+
+  // Dynamic addition
+  const qAdd = adultQuestion(() => 0.5, { op: '+' });
+  assert.equal(qAdd.answer, qAdd.a + qAdd.b);
+  assert.equal(qAdd.text, `כמה זה ${qAdd.a} + ${qAdd.b}?`);
+  assert.equal(adultAnswerOk(qAdd, String(qAdd.answer)), true);
+
+  // Dynamic subtraction (non-negative)
+  const qSub = adultQuestion(() => 0.5, { op: '-' });
+  assert.ok(qSub.a >= qSub.b, 'subtraction minuend >= subtrahend');
+  assert.equal(qSub.answer, qSub.a - qSub.b);
+  assert.equal(qSub.text, `כמה זה ${qSub.a} - ${qSub.b}?`);
+  assert.equal(adultAnswerOk(qSub, String(qSub.answer)), true);
+
+  // Dynamic operator selection
+  const seenOps = new Set();
+  for (let i = 0; i < 50; i++) {
+    const qDyn = adultQuestion(Math.random, { op: 'dynamic' });
+    assert.ok(adultAnswerOk(qDyn, String(qDyn.answer)));
+    if (qDyn.text.includes('+')) seenOps.add('+');
+    if (qDyn.text.includes('-')) seenOps.add('-');
+    if (qDyn.text.includes('×')) seenOps.add('×');
+  }
+  assert.ok(seenOps.size >= 2, 'multiple operators selected across dynamic questions');
+
+  // Custom bounds
+  const qBounds = adultQuestion(Math.random, { minA: 200, maxA: 250, minB: 20, maxB: 30, op: '+' });
+  assert.ok(qBounds.a >= 200 && qBounds.a <= 250);
+  assert.ok(qBounds.b >= 20 && qBounds.b <= 30);
+  assert.equal(qBounds.answer, qBounds.a + qBounds.b);
+
+  // Array bounds [lo, hi]
+  const qArrBounds = adultQuestion(Math.random, { boundsA: [301, 350], boundsB: [15, 25] });
+  assert.ok(qArrBounds.a >= 301 && qArrBounds.a <= 350);
+  assert.ok(qArrBounds.b >= 15 && qArrBounds.b <= 25);
+  assert.equal(qArrBounds.answer, qArrBounds.a * qArrBounds.b);
+
+  // Passing opts as first argument
+  const qOptsFirst = adultQuestion({ op: '+', minA: 50, maxA: 60, minB: 50, maxB: 60 });
+  assert.ok(qOptsFirst.a >= 50 && qOptsFirst.a <= 60);
+  assert.ok(qOptsFirst.b >= 50 && qOptsFirst.b <= 60);
+  assert.equal(qOptsFirst.answer, qOptsFirst.a + qOptsFirst.b);
+  assert.equal(qOptsFirst.text, `כמה זה ${qOptsFirst.a} + ${qOptsFirst.b}?`);
 });
