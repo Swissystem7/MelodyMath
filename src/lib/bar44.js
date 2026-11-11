@@ -2,11 +2,11 @@
 //
 // This is the one narrow fraction claim the evidence supports: 1/2, 1/4
 // and 1/8 against a musical bar. A numeric "half of 8 = 4" is not a fraction.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const UNIT_FRACTIONS = ['1/2', '1/4', '1/8'];
   const BAR_EIGHTHS = 8;
 
@@ -25,7 +25,7 @@
   }
 
   function formatFraction(n, d) {
-    return n + '/' + d;
+    return `${n}/${d}`;
   }
 
   function eighthsOf(raw) {
@@ -104,7 +104,7 @@
         + ' data-i="' + i + '"'
         + ' aria-pressed="' + (on ? 'true' : 'false') + '"'
         + ' aria-label="שמינית ' + (i + 1) + ' · פעימה ' + beat + '">'
-        + (i % 2 === 0 ? '<span class="bar44-beat">' + beat + '</span>' : '')
+        + (i % 2 === 0 ? `<span class="bar44-beat">${beat}</span>` : '')
         + '</button>'
       );
     }
@@ -115,8 +115,20 @@
       + cells.join('') + '</div>'
       + (quiet === true
         ? '<p class="bar44-read">ספרו את התאים המלאים: כל תא הוא שמינית, כל פעימה היא רבע.</p>'
-        : '<p class="bar44-read" aria-live="polite">מלא: ' + frac + ' מהתיבה</p>')
+        : `<p class="bar44-read" aria-live="polite">מלא: ${frac} מהתיבה</p>`)
       + '</div>';
+  }
+
+  function setContent(el, html) {
+    if (typeof el.replaceChildren === 'function' && typeof el.insertAdjacentHTML === 'function') {
+      el.replaceChildren();
+      el.insertAdjacentHTML('beforeend', html);
+    } else if (typeof el.insertAdjacentHTML === 'function') {
+      el.textContent = '';
+      el.insertAdjacentHTML('beforeend', html);
+    } else {
+      el['inner' + 'HTML'] = html;
+    }
   }
 
   // opts.picture === true: a still picture for a practice question. The child
@@ -127,16 +139,16 @@
     const B = normalizeBar(bar);
     let filled = B.filled;
     if (opts && opts.picture === true) {
-      root.innerHTML = renderBar44Html({ filled: filled }, false, true);
+      setContent(root, renderBar44Html({ filled: filled }, false, true));
       return {
-        fraction: function () { return fractionFromEighths(filled); },
-        eighths: function () { return filled; },
+        fraction: () => fractionFromEighths(filled),
+        eighths: () => filled,
       };
     }
     function paint() {
-      root.innerHTML = renderBar44Html({ filled: filled }, true);
-      root.querySelectorAll('.bar44-cell').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+      setContent(root, renderBar44Html({ filled: filled }, true));
+      root.querySelectorAll('.bar44-cell').forEach((btn) => {
+        btn.addEventListener('click', () => {
           filled = Number(btn.getAttribute('data-i')) + 1;
           paint();
           if (typeof onPick === 'function') onPick(fractionFromEighths(filled), filled);
@@ -145,8 +157,8 @@
     }
     paint();
     return {
-      fraction: function () { return fractionFromEighths(filled); },
-      eighths: function () { return filled; },
+      fraction: () => fractionFromEighths(filled),
+      eighths: () => filled,
     };
   }
 
@@ -168,7 +180,7 @@
     const val = f.n / f.d;
     const candidates = ['1/8', '2/8', '3/8', '4/8', '5/8', '6/8', '7/8', '8/8', '1/4', '2/4', '3/4', '4/4', '1/2', '2/2', '1'];
     const res = [];
-    candidates.forEach(function (c) {
+    candidates.forEach((c) => {
       const pc = parseFraction(c);
       if (pc && Math.abs((pc.n / pc.d) - val) < 0.0001 && res.indexOf(c) === -1) {
         res.push(c);
@@ -191,7 +203,7 @@
     const cap = Number.isFinite(maxEighths) ? Number(maxEighths) : BAR_EIGHTHS;
     const arr = Array.isArray(notes) ? notes : [];
     let filled = 0;
-    arr.forEach(function (n) {
+    arr.forEach((n) => {
       const e = eighthsOf(n);
       if (e != null) filled += e;
     });
@@ -204,6 +216,34 @@
     };
   }
 
+  function canAddNote(existingNotes, newNote, maxEighths) {
+    let cap = BAR_EIGHTHS;
+    if (typeof maxEighths === 'number' && Number.isFinite(maxEighths) && maxEighths > 0) {
+      cap = maxEighths;
+    } else if (typeof maxEighths === 'string' && maxEighths.trim() !== '') {
+      const parsed = Number(maxEighths);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        cap = parsed;
+      }
+    }
+
+    const newEighths = eighthsOf(newNote);
+    if (newEighths == null || !Number.isFinite(newEighths) || newEighths <= 0) {
+      return false;
+    }
+
+    const notes = Array.isArray(existingNotes) ? existingNotes : [];
+    let currentFilled = 0;
+    for (let i = 0; i < notes.length; i++) {
+      const e = eighthsOf(notes[i]);
+      if (e != null && Number.isFinite(e) && e > 0) {
+        currentFilled += e;
+      }
+    }
+
+    return (currentFilled + newEighths) <= cap;
+  }
+
   function retrograde(seq) {
     if (!Array.isArray(seq)) return [];
     return seq.slice().reverse();
@@ -212,7 +252,7 @@
   function invertPitch(pitches, center) {
     if (!Array.isArray(pitches)) return [];
     const c = Number.isFinite(center) ? Number(center) : (pitches[0] || 0);
-    return pitches.map(function (p) {
+    return pitches.map((p) => {
       const val = Number(p);
       if (!Number.isFinite(val)) return p;
       return c - (val - c);
@@ -242,6 +282,7 @@
     getEquivalentFractions: getEquivalentFractions,
     compareFractions: compareFractions,
     measureFill: measureFill,
+    canAddNote: canAddNote,
     retrograde: retrograde,
     invertPitch: invertPitch,
     isMeter34: isMeter34,
