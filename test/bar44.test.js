@@ -218,3 +218,89 @@ test('canAddNote handles edge cases, bad inputs, and custom maxEighths capacitie
   assert.equal(bar.canAddNote(['1/2'], '1/4', 'banana'), true); // fallback to 8
   assert.equal(bar.canAddNote(['1/2', '1/2'], '1/8', -1), false); // fallback to 8: 8 + 1 = 9 > 8 -> false
 });
+
+function stubBar44Root(mode) {
+  const root = {
+    innerHTML: '',
+    textContent: '',
+    querySelectorAll(selector) {
+      if (selector !== '.bar44-cell') return [];
+      this._cells = this._cells || {};
+      const cells = [];
+      const re = /<button\b[^>]*>/gi;
+      let m;
+      while ((m = re.exec(this.innerHTML))) {
+        const tag = m[0];
+        const i = /data-i="(\d+)"/.exec(tag);
+        if (!i) continue;
+        const key = i[1];
+        if (!this._cells[key]) {
+          this._cells[key] = {
+            getAttribute(name) { return name === 'data-i' ? key : null; },
+            addEventListener(type, fn) { if (type === 'click') this._onClick = fn; },
+            click() { if (this._onClick) this._onClick(); },
+          };
+        }
+        cells.push(this._cells[key]);
+      }
+      return cells;
+    },
+  };
+  if (mode === 'modern') {
+    root.replaceChildren = function () {
+      this.innerHTML = '';
+      this.textContent = '';
+    };
+    root.insertAdjacentHTML = function (position, html) {
+      if (position === 'beforeend') this.innerHTML += html;
+    };
+  } else if (mode === 'insertOnly') {
+    root.insertAdjacentHTML = function (position, html) {
+      if (position === 'beforeend') this.innerHTML += html;
+    };
+  }
+  return root;
+}
+
+test('formatFraction returns n/d and fractionFromEighths uses it for 5/8 and 7/8', () => {
+  assert.equal(bar.formatFraction(5, 8), '5/8');
+  assert.equal(bar.formatFraction(7, 8), '7/8');
+  assert.equal(bar.fractionFromEighths(5), '5/8');
+  assert.equal(bar.fractionFromEighths(7), '7/8');
+});
+
+test('bindBar44 picture mode uses replaceChildren and insertAdjacentHTML when both exist', () => {
+  const root = stubBar44Root('modern');
+  const api = bar.bindBar44(root, { filled: 2 }, () => {}, { picture: true });
+  assert.match(root.innerHTML, / disabled/);
+  assert.doesNotMatch(root.innerHTML, /מלא: /);
+  assert.equal(api.fraction(), '1/4');
+  assert.equal(api.eighths(), 2);
+});
+
+test('bindBar44 picture mode falls back to insertAdjacentHTML without replaceChildren', () => {
+  const root = stubBar44Root('insertOnly');
+  const api = bar.bindBar44(root, { filled: 4 }, () => {}, { picture: true });
+  assert.match(root.innerHTML, /bar44-cell/);
+  assert.doesNotMatch(root.innerHTML, /מלא: /);
+  assert.equal(api.fraction(), '1/2');
+  assert.equal(api.eighths(), 4);
+});
+
+test('bindBar44 interactive paint binds cell taps and reports the chosen fraction', () => {
+  const root = stubBar44Root('modern');
+  const picks = [];
+  const api = bar.bindBar44(root, { filled: 2 }, (frac, eighths) => {
+    picks.push([frac, eighths]);
+  });
+  assert.match(root.innerHTML, /מלא: 1\/4 מהתיבה/);
+  assert.equal(api.fraction(), '1/4');
+  assert.equal(api.eighths(), 2);
+  const cells = root.querySelectorAll('.bar44-cell');
+  assert.equal(cells.length, 8);
+  cells[4].click();
+  assert.equal(api.eighths(), 5);
+  assert.equal(api.fraction(), '5/8');
+  assert.match(root.innerHTML, /מלא: 5\/8 מהתיבה/);
+  assert.deepEqual(picks, [['5/8', 5]]);
+});
