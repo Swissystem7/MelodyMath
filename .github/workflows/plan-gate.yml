@@ -1,0 +1,29 @@
+name: Plan Gate
+
+# Fails while the PR body has no filled-in "## Plan" section, so auto-merge
+# cannot land a change whose plan was never written down.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: Plan present
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR plan
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          plan=$(printf '%s\n' "$BODY" | awk '/^## Plan[[:space:]]*$/{f=1;next} /^## /{f=0} f' | sed 's/<!--.*-->//' | grep -v '^[[:space:]]*$' || true)
+          for field in "Goal:" "Acceptance criteria" "Owner" "Reviewer"; do
+            line=$(printf '%s\n' "$plan" | grep -m1 "$field" || true)
+            if [ -z "$line" ]; then echo "::error::Plan is missing '$field'"; exit 1; fi
+          done
+          goal=$(printf '%s\n' "$plan" | grep -m1 'Goal:' | sed 's/.*Goal:\**//' | tr -d '[:space:]')
+          if [ -z "$goal" ]; then echo "::error::Plan 'Goal' is empty"; exit 1; fi
+          echo "Plan found."

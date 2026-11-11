@@ -1,0 +1,79 @@
+name: Plan Router
+
+# Routes plan-changing findings straight to the agent who must act, without
+# an LLM call and without a manager relaying them. A comment line of the form
+#   PLAN-CHANGE: <what> | IMPACT: <components> | OWNER: @<agent> | REQUIRES: <check>
+# is appended to the PR's "## Plan changes" section, the PR is labeled
+# plan-changed, and the owner is tagged in a reply.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  route:
+    name: Route plan changes
+    if: >-
+      (github.event.issue.pull_request || github.event.pull_request) &&
+      contains(github.event.comment.body || github.event.review.body || '', 'PLAN-CHANGE:')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const src = context.payload.comment || context.payload.review;
+            const assoc = src.author_association;
+            const isBot = src.user.type === 'Bot';
+            if (!isBot && !['OWNER', 'MEMBER', 'COLLABORATOR'].includes(assoc)) {
+              core.notice(`Ignored PLAN-CHANGE from ${src.user.login} (${assoc})`);
+              return;
+            }
+            const number = (context.payload.issue || context.payload.pull_request).number;
+            const { owner, repo } = context.repo;
+
+            const changes = [];
+            for (const line of (src.body || '').split('\n')) {
+              const m = line.match(/PLAN-CHANGE:\s*(.+)/);
+              if (!m) continue;
+              const fields = { what: '', IMPACT: '', OWNER: '', REQUIRES: '' };
+              const parts = m[1].split('|').map(s => s.trim());
+              fields.what = parts.shift();
+              for (const p of parts) {
+                const kv = p.match(/^(IMPACT|OWNER|REQUIRES):\s*(.*)$/i);
+                if (kv) fields[kv[1].toUpperCase()] = kv[2];
+              }
+              if (!fields.OWNER) {
+                core.setFailed(`PLAN-CHANGE without OWNER: "${line.trim()}"`);
+                return;
+              }
+              changes.push(fields);
+            }
+            if (!changes.length) return;
+
+            const pr = await github.rest.pulls.get({ owner, repo, pull_number: number });
+            const date = new Date().toISOString().slice(0, 10);
+            const entries = changes.map(c =>
+              `- ${date} - ${c.what} | IMPACT: ${c.IMPACT || '-'} | OWNER: ${c.OWNER} | REQUIRES: ${c.REQUIRES || '-'} | from @${src.user.login} (${src.html_url})`
+            ).join('\n');
+            let body = pr.data.body || '';
+            const header = /^## Plan changes[^\n]*\n/m;
+            body = header.test(body)
+              ? body.replace(header, h => `${h}${entries}\n`)
+              : `${body}\n\n## Plan changes\n${entries}\n`;
+            await github.rest.pulls.update({ owner, repo, pull_number: number, body });
+
+            await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: ['plan-changed'] });
+            const owners = [...new Set(changes.map(c => c.OWNER))].join(' ');
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: number,
+              body: `${owners} the plan changed (see "## Plan changes"). Update "## Plan" if needed, fix, reply on the finding's thread and resolve it. The next review must also check this fix.`
+            });
