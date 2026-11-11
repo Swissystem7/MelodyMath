@@ -27,6 +27,7 @@ const INTENTIONALLY_UNUSED = {
   'moneyMath.js': 'pure Israeli-currency bills/coins/change helper awaiting UI integration',
   'dataRepresentationMath.js': 'pure category-comparison and pictogram helper awaiting UI integration',
   'multPropertiesMath.js': 'pure multiplication-properties helper awaiting UI integration',
+  'starProgressCard.js': 'child-friendly visual progress card helper module with star ratings and session progress chart awaiting UI integration',
 };
 
 function loadedByPages() {
