@@ -128,11 +128,15 @@
   ];
 
   function lessonById(id) {
-    return LESSONS.find(function (L) { return L.id === id; }) || null;
+    if (id == null) return null;
+    const target = String(id);
+    return LESSONS.find(function (L) { return L.id === target; }) || null;
   }
 
   function lessonIndex(id) {
-    return LESSONS.findIndex(function (L) { return L.id === id; });
+    if (id == null) return -1;
+    const target = String(id);
+    return LESSONS.findIndex(function (L) { return L.id === target; });
   }
 
   function nextLesson(id) {
@@ -147,7 +151,10 @@
   }
 
   function classifyHearing(summary) {
-    const s = summary || {};
+    if (!summary || typeof summary !== 'object') {
+      return { trend: 'flat', hasRoot: false, rootCount: 0, hasAsymptote: false, hasUndefined: false };
+    }
+    const s = summary;
     const roots = (s.roots || []).length;
     const asy = (s.asymptotes || []).length;
     const undef = (s.undefinedSpans || []).length;
@@ -175,6 +182,7 @@
   }
 
   function compareHearing(sumA, sumB) {
+    if (!sumA || !sumB) return { a: classifyHearing(sumA), b: classifyHearing(sumB), sameTrend: true, cueHe: '' };
     const a = classifyHearing(sumA);
     const b = classifyHearing(sumB);
     const bits = [];
