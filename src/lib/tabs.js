@@ -93,15 +93,27 @@
       e.preventDefault();
       const tab = all[next];
       if (!tab) return;
+      updateAriaSelected(list, next);
+      syncRovingTabindex(tabsOf(list));
       if (typeof options.onActivate === 'function') options.onActivate(tab, next);
       else if (typeof tab.click === 'function') tab.click();
       if (typeof tab.focus === 'function') tab.focus();
+      updateAriaSelected(list, next);
       syncRovingTabindex(tabsOf(list));
     });
     list.addEventListener('click', () => {
       syncRovingTabindex(tabsOf(list));
     });
     return list;
+  }
+  function updateAriaSelected(list, activeIndex) {
+    const all = tabsOf(list);
+    all.forEach((tab, idx) => {
+      const selected = idx === activeIndex ? 'true' : 'false';
+      if (tab.getAttribute('aria-selected') !== selected) {
+        tab.setAttribute('aria-selected', selected);
+      }
+    });
   }
 
   function bindAllTablists(root) {
