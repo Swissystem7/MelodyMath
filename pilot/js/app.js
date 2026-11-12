@@ -597,10 +597,8 @@
       + (q.whyKid && kind !== 'wrong' ? '<p class="mm-why-kid" data-testid="why-kid">' + esc(q.whyKid) + '</p>' : '') + '</div>';
   }
 
-  // ---------------------------------------------------------------- exercise
-  function viewExercise() {
-    const p = currentProgress();
-    const q = currentQuestion();
+  // ---------------------------------------------------------------- exercise helpers
+  function getExerciseContext(p, q) {
     const qi = UNIT.questions.indexOf(q);
     const topic = U.topicsOf(UNIT).filter(function (t) { return t.id === q.topic; })[0] || { name: '' };
     const rhythm = q.kind === 'rhythm';
@@ -616,100 +614,107 @@
       const c = M.CHOICES.filter(function (x) { return x.id === id; })[0]; return c ? c.fraction : '';
     };
     const shownAnswer = revealed ? String(U.answerOf(q)) : (empty ? '?' : picks ? choiceText(pending) : pending);
+    return { qi, topic, rhythm, picks, right, wrong, retry, revealed, locked, pending, empty, stage, ansCls, shownAnswer };
+  }
 
-    let fb = '';
-    if (right) {
-      fb = '<div class="mm-fb mm-fb--right" role="status" data-testid="feedback" data-result="right" data-audio="' + esc(state.audio) + '">'
+  function renderFeedback(q, ctx) {
+    if (ctx.right) {
+      return '<div class="mm-fb mm-fb--right" role="status" data-testid="feedback" data-result="right" data-audio="' + esc(state.audio) + '">'
         + '<div>כל הכבוד! ' + mathHtml(q).replace('?', String(U.answerOf(q))) + '</div>'
         + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('המנגינה התחברה וחזרה הביתה.')) + '</div></div>';
-    } else if (wrong || retry) {
-      fb = '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="' + (wrong ? 'wrong' : 'retry') + '" data-audio="' + esc(state.audio || '') + '">'
-        + (wrong ? '<div>עוד לא. נסו שוב — יש לכם עוד ניסיון.</div><div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('רמז במוזיקה: מקשיבים שוב, לאט, והמנגינה עוד לא חוזרת הביתה.')) + '</div>' : '')
+    }
+    if (ctx.wrong || ctx.retry) {
+      return '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="' + (ctx.wrong ? 'wrong' : 'retry') + '" data-audio="' + esc(state.audio || '') + '">'
+        + (ctx.wrong ? '<div>עוד לא. נסו שוב — יש לכם עוד ניסיון.</div><div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('רמז במוזיקה: מקשיבים שוב, לאט, והמנגינה עוד לא חוזרת הביתה.')) + '</div>' : '')
         + (!isLegacyQ(q) ? '</div>' : '<div class="mm-hint"><div class="mm-hint__text" data-testid="hint">רמז: ' + esc(M.hint(q, state.lastChoice)) + '</div>'
         + (U.hintGroups(q).length ? '<div class="mm-hint__groups" aria-hidden="true">' + U.hintGroups(q).map(function (n) {
           return '<div class="mm-hint__group">' + '<span class="mm-hint__dot"></span>'.repeat(n) + '</div>';
         }).join('') + '</div>' : '') + '</div></div>');
-    } else if (revealed) {
-      fb = '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="revealed" data-audio="' + esc(state.audio || '') + '">'
+    }
+    if (ctx.revealed) {
+      return '<div class="mm-fb mm-fb--wrong" role="status" data-testid="feedback" data-result="revealed" data-audio="' + esc(state.audio || '') + '">'
         + '<div>התשובה היא <span class="ltr">' + U.answerOf(q) + '</span>. נתרגל את זה שוב בפעם הבאה.</div>'
         + '<div class="mm-fb__sound" data-testid="feedback-sound">' + esc(soundLine('כך נשמעת המנגינה עם התשובה.')) + '</div></div>';
-    } else {
-      fb = '<div class="mm-idle">' + (rhythm ? 'בחרו קצב ולחצו ״בדיקה״.' : picks ? 'בחרו תשובה ולחצו ״בדיקה״.' : 'כתבו תשובה ולחצו ״בדיקה״.') + '</div>';
     }
+    return '<div class="mm-idle">' + (ctx.rhythm ? 'בחרו קצב ולחצו ״בדיקה״.' : ctx.picks ? 'בחרו תשובה ולחצו ״בדיקה״.' : 'כתבו תשובה ולחצו ״בדיקה״.') + '</div>';
+  }
 
-    let input;
+  function renderInputControls(q, ctx) {
     if (q.kind === 'choice') {
-      input = '<div class="mm-choices' + (q.choices.length === 4 ? ' mm-choices--4' : q.choices.length === 2 ? ' mm-choices--2' : '') + '" role="group" aria-label="בחרו תשובה" data-testid="choices">'
+      return '<div class="mm-choices' + (q.choices.length === 4 ? ' mm-choices--4' : q.choices.length === 2 ? ' mm-choices--2' : '') + '" role="group" aria-label="בחרו תשובה" data-testid="choices">'
         + q.choices.map(function (c, k) {
           const on = state.choice === c.id;
-          return '<button type="button" class="mm-choice' + (on ? ' is-on' : '') + '" data-act="choose" data-choice="' + esc(c.id) + '" data-testid="choice-' + esc(c.id) + '" aria-pressed="' + on + '"' + (locked ? ' disabled' : '') + '>'
+          return '<button type="button" class="mm-choice' + (on ? ' is-on' : '') + '" data-act="choose" data-choice="' + esc(c.id) + '" data-testid="choice-' + esc(c.id) + '" aria-pressed="' + on + '"' + (ctx.locked ? ' disabled' : '') + '>'
             + (c.sym ? '<span class="mm-choice__sym" aria-hidden="true">' + esc(c.sym) + '</span>' : '') + '<span class="mm-choice__frac">' + esc(c.label) + '</span><span class="sr-only"> (מקש ' + (k + 1) + ')</span></button>';
         }).join('') + '</div>';
-    } else if (rhythm) {
-      input = '<div class="mm-choices" role="group" aria-label="בחרו את הקצב שממלא את סוף התיבה" data-testid="choices">'
+    }
+    if (ctx.rhythm) {
+      return '<div class="mm-choices" role="group" aria-label="בחרו את הקצב שממלא את סוף התיבה" data-testid="choices">'
         + M.CHOICES.map(function (c, k) {
           const on = state.choice === c.id;
-          return '<button type="button" class="mm-choice' + (on ? ' is-on' : '') + '" data-act="choose" data-choice="' + c.id + '" data-testid="choice-' + c.id + '" aria-pressed="' + on + '"' + (locked ? ' disabled' : '') + '>'
+          return '<button type="button" class="mm-choice' + (on ? ' is-on' : '') + '" data-act="choose" data-choice="' + c.id + '" data-testid="choice-' + c.id + '" aria-pressed="' + on + '"' + (ctx.locked ? ' disabled' : '') + '>'
             + '<span class="mm-choice__sym" aria-hidden="true">' + c.symbol + '</span><span>' + esc(c.he) + '</span><span class="ltr mm-choice__frac">' + c.fraction + '</span><span class="sr-only"> (מקש ' + (k + 1) + ')</span></button>';
         }).join('') + '</div>';
-    } else {
-      const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clr', '0', 'del'];
-      input = '<div class="mm-keypad" role="group" aria-label="מקלדת מספרים">' + keys.map(function (k) {
-        const label = k === 'del' ? '⌫' : k === 'clr' ? 'נקה' : k;
-        const aria = k === 'del' ? 'מחיקה' : k === 'clr' ? 'ניקוי' : k;
-        return '<button type="button" class="mm-key' + (k === 'del' || k === 'clr' ? ' mm-key--tool' : '') + '" data-act="key" data-key="' + k + '" data-testid="key-' + k + '" aria-label="' + aria + '"' + (locked ? ' disabled' : '') + '>' + label + '</button>';
-      }).join('') + '</div>';
     }
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clr', '0', 'del'];
+    return '<div class="mm-keypad" role="group" aria-label="מקלדת מספרים">' + keys.map(function (k) {
+      const label = k === 'del' ? '⌫' : k === 'clr' ? 'נקה' : k;
+      const aria = k === 'del' ? 'מחיקה' : k === 'clr' ? 'ניקוי' : k;
+      return '<button type="button" class="mm-key' + (k === 'del' || k === 'clr' ? ' mm-key--tool' : '') + '" data-act="key" data-key="' + k + '" data-testid="key-' + k + '" aria-label="' + aria + '"' + (ctx.locked ? ' disabled' : '') + '>' + label + '</button>';
+    }).join('') + '</div>';
+  }
 
-    // "Play the answer": a drum pad for exercises whose answer is a number of
-    // beats. A tap sounds a beat, fills a dot in a bar of `per` beats and is the
-    // answer; the keypad below writes the same number.
-    let tapPad = '';
-    if (q.kind === 'num' && q.tap) {
-      const per = q.tap.per || 4;
-      const n = empty || wrong ? 0 : Math.min(TAP_MAX, Number(pending) || 0);
-      let bars = '';
-      for (let b = 0; b * per < Math.max(n, 1); b++) {
-        let dots = '';
-        for (let j = 0; j < per; j++) {
-          const i = b * per + j;
-          dots += '<span class="mm-tap__dot' + (i >= n ? ' is-empty' : j === 0 ? ' is-first' : '') + '"></span>';
-        }
-        bars += '<span class="mm-tap__bar">' + dots + '</span>';
+  function renderTapPad(q, ctx) {
+    if (!(q.kind === 'num' && q.tap)) return '';
+    const per = q.tap.per || 4;
+    const n = ctx.empty || ctx.wrong ? 0 : Math.min(TAP_MAX, Number(ctx.pending) || 0);
+    let bars = '';
+    for (let b = 0; b * per < Math.max(n, 1); b++) {
+      let dots = '';
+      for (let j = 0; j < per; j++) {
+        const i = b * per + j;
+        dots += '<span class="mm-tap__dot' + (i >= n ? ' is-empty' : j === 0 ? ' is-first' : '') + '"></span>';
       }
-      tapPad = '<div class="mm-card mm-tap" data-testid="tap-pad" data-count="' + n + '">'
-        + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">מנגנים את התשובה</span></div>'
-        + '<p class="mm-sub">הקישו על התוף פעם אחת לכל פעימה. אפשר גם לכתוב את המספר במקלדת.</p>'
-        + '<div class="mm-tap__bars" dir="ltr" aria-hidden="true">' + bars + '</div>'
-        + '<div class="mm-row-actions">'
-        + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (locked ? ' disabled' : '') + '>🥁 פעימה</button>'
-        + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פעימה אחת"' + (locked || !n ? ' disabled' : '') + '>↶ פעימה אחורה</button>'
-        + '</div></div>';
+      bars += '<span class="mm-tap__bar">' + dots + '</span>';
     }
+    return '<div class="mm-card mm-tap" data-testid="tap-pad" data-count="' + n + '">'
+      + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">מנגנים את התשובה</span></div>'
+      + '<p class="mm-sub">הקישו על התוף פעם אחת לכל פעימה. אפשר גם לכתוב את המספר במקלדת.</p>'
+      + '<div class="mm-tap__bars" dir="ltr" aria-hidden="true">' + bars + '</div>'
+      + '<div class="mm-row-actions">'
+      + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (ctx.locked ? ' disabled' : '') + '>🥁 פעימה</button>'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פעימה אחת"' + (ctx.locked || !n ? ' disabled' : '') + '>↶ פעימה אחורה</button>'
+      + '</div></div>';
+  }
 
-    const isLast = qi === UNIT.questions.length - 1;
-    const submit = locked
+  function viewExercise() {
+    const p = currentProgress();
+    const q = currentQuestion();
+    const ctx = getExerciseContext(p, q);
+    const isLast = ctx.qi === UNIT.questions.length - 1;
+    const submit = ctx.locked
       ? '<button type="button" class="mm-btn mm-btn--mint" data-act="next" data-testid="next">' + (isLast ? (state.preview ? 'חזרה ללוח המורה ←' : hasChecks() ? 'לבדיקה הקצרה ←' : 'לסיכום ←') : 'לתרגיל הבא ←') + '</button>'
-      : '<button type="button" class="mm-btn" data-act="check" data-testid="check"' + (empty ? ' disabled' : '') + '>בדיקה</button>';
+      : '<button type="button" class="mm-btn" data-act="check" data-testid="check"' + (ctx.empty ? ' disabled' : '') + '>בדיקה</button>';
 
     const dots = UNIT.questions.map(function (_, k) {
-      return '<span class="mm-dot' + (k < qi ? ' is-done' : k === qi ? ' is-now' : '') + '"></span>';
+      return '<span class="mm-dot' + (k < ctx.qi ? ' is-done' : k === ctx.qi ? ' is-now' : '') + '"></span>';
     }).join('');
 
     const legacy = isLegacyQ(q);
     const qHead = legacy ? mathHtml(q)
       : esc(q.q) + (q.show ? '<span class="mm-show" aria-hidden="false">' + esc(q.show) + '</span>' : '') + (q.expr ? '<span class="ltr mm-expr">' + esc(q.expr) + '</span>' : '');
-    return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-unit="' + esc(UNIT.id) + '" data-qid="' + q.id + '" data-kind="' + (rhythm ? 'rhythm' : picks ? 'choice' : 'keypad') + '"' + (state.preview ? ' data-preview="1"' : '') + '>'
+
+    return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-unit="' + esc(UNIT.id) + '" data-qid="' + q.id + '" data-kind="' + (ctx.rhythm ? 'rhythm' : ctx.picks ? 'choice' : 'keypad') + '"' + (state.preview ? ' data-preview="1"' : '') + '>'
       + topbar('תרגול', UNIT.title, '<span class="mm-badge" data-testid="star-count" aria-label="כוכבים">★ ' + firstTryCount(p) + '</span>')
       + (state.preview ? '<div class="mm-preview-bar" data-testid="preview-bar"><span>תצוגה מקדימה למורה — לא נשמר בדוח</span><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="preview-exit" data-testid="preview-exit">חזרה ללוח</button></div>' : '')
-      + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>'
-      + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(topic.name) + '</span>' + curriculumBadge(q) + '</div>'
+      + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (ctx.qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>'
+      + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(ctx.topic.name) + '</span>' + curriculumBadge(q) + '</div>'
       + '<h2 class="mm-question' + (legacy ? '' : ' mm-question--text') + '" data-testid="q-text">' + qHead + '</h2>'
       + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="narrate" data-q="' + esc(q.id) + '" data-testid="narration" hidden>🔊 הקראה</button></div>'
       + thinkHtml(q)
-      + (legacy ? musicCard(q, stage) : scoreCard(q, stage))
-      + '<div class="' + ansCls + '" aria-live="polite" data-testid="answer" aria-label="התשובה שלכם">' + esc(shownAnswer) + '</div>'
-      + fb + whyHtml(q) + tapPad + input + submit
+      + (legacy ? musicCard(q, ctx.stage) : scoreCard(q, ctx.stage))
+      + '<div class="' + ctx.ansCls + '" aria-live="polite" data-testid="answer" aria-label="התשובה שלכם">' + esc(ctx.shownAnswer) + '</div>'
+      + renderFeedback(q, ctx) + whyHtml(q) + renderTapPad(q, ctx) + renderInputControls(q, ctx) + submit
       + '</section>';
   }
 
