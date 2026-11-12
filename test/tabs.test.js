@@ -423,3 +423,37 @@ test('isRtl document.documentElement inspection is robust against incomplete or 
     else delete global.document;
   }
 });
+
+test('Home key updates aria-selected and tabindex on the first tab', () => {
+  const { list, tabs: t } = setupTablist(4, { selected: 2 });
+  tabs.bindTablist(list);
+  const e = createKeyEvent('Home', t[2]);
+  list.dispatch('keydown', e);
+  assert.equal(e.defaultPrevented, true);
+  assert.equal(t[0].getAttribute('aria-selected'), 'true');
+  assert.equal(t[0].tabIndex, 0);
+  assert.equal(t[2].getAttribute('aria-selected'), 'false');
+  assert.equal(t[2].tabIndex, -1);
+});
+
+test('End key updates aria-selected and tabindex on the last tab', () => {
+  const { list, tabs: t } = setupTablist(4, { selected: 0 });
+  tabs.bindTablist(list);
+  const e = createKeyEvent('End', t[0]);
+  list.dispatch('keydown', e);
+  assert.equal(e.defaultPrevented, true);
+  assert.equal(t[3].getAttribute('aria-selected'), 'true');
+  assert.equal(t[3].tabIndex, 0);
+  assert.equal(t[0].getAttribute('aria-selected'), 'false');
+  assert.equal(t[0].tabIndex, -1);
+});
+
+test('arrow key navigation correctly updates aria-selected across active elements', () => {
+  const { list, tabs: t } = setupTablist(3, { listAttrs: { dir: 'ltr' } });
+  tabs.bindTablist(list);
+  const e = createKeyEvent('ArrowRight', t[0]);
+  list.dispatch('keydown', e);
+  assert.equal(t[0].getAttribute('aria-selected'), 'false');
+  assert.equal(t[1].getAttribute('aria-selected'), 'true');
+  assert.equal(t[1].tabIndex, 0);
+});
