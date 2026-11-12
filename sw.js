@@ -1,10 +1,16 @@
-/* MelodyMath — cache the demo so a school tablet survives wifi drops.
-   First visit on https still needs a network. After that the listed files
-   come from this cache, and every online visit refreshes the copy in the
-   background (stale-while-revalidate), so a fix shipped to the site reaches
-   a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
-   is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v52';
+/* MelodyMath — offline copy for a school tablet.
+   CACHE is the version. Activate deletes every other cache, so bumping it
+   drops a bad copy at once (see pwa.test.js). While the name stays, each
+   visit refreshes cached files in the background (stale-while-revalidate):
+   this load keeps the page and its scripts on one version, and the next
+   load sees the fix. Navigations use that same policy. HTML and scripts
+   share unversioned URLs, so a network-first document would mix a new page
+   with an old script.
+   Install caches the shell with addAll. Every other file is best-effort:
+   one missing URL must not stop the service worker from installing.
+   A navigation that cannot reach the network uses the cached page, then
+   ./index.html. Scope is this file's directory (/MelodyMath/ on GitHub Pages). */
+const CACHE = 'melodymath-offline-v53';
 const ASSETS = [
   './',
   './index.html',
@@ -142,6 +148,8 @@ const ASSETS = [
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
   './icons/qr-code.svg',
   // MM-600 pilot demo (pilot/index.html, linked from the teacher kit on the home page).
   // MM-602: pilot/index.html loads every file with one shared ?v= so a browser
@@ -171,10 +179,31 @@ const ASSETS = [
   './pilot/js/app.js?v=20261119',
 ];
 
+// The shell is what installability and the offline launch need. ASSETS is the
+// full precache; a 404 in that long list must not reject installation.
+const SHELL = [
+  './index.html',
+  './manifest.webmanifest',
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
+  './src/lib/core.js',
+];
+
+function addBestEffort(cache, urls) {
+  return Promise.all(urls.map(function (url) {
+    return cache.add(url).catch(function () { return null; });
+  }));
+}
+
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
-      return cache.addAll(ASSETS);
+      return cache.addAll(SHELL).then(function () {
+        return addBestEffort(cache, ASSETS);
+      });
     }).then(function () {
       return self.skipWaiting();
     })
