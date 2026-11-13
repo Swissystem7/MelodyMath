@@ -107,10 +107,10 @@ test('only for its tags, and only when the sounds give exactly the answer', () =
   assert.equal(B.specForItem(null), null);
 });
 
-test('the bank: big-number items of grades 3–5 are heard; no answer in the picture before it is given', () => {
+test('the bank: big-number items of grades 2–5 are heard; no answer in the picture before it is given', () => {
   const list = banks.allItems().filter((it) => B.specForItem(it));
   assert.ok(list.length >= 60, 'played ' + list.length);
-  assert.deepEqual([...new Set(list.map((it) => it.grade))].sort(), ['ג', 'ד', 'ה']);
+  assert.deepEqual([...new Set(list.map((it) => it.grade))].sort(), ['ב', 'ג', 'ד', 'ה']);
   const word = (h, w) => new RegExp('(^|[\\s.,:;—>(])' + w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '($|[\\s.,:;—<)?])').test(h);
   list.forEach((it) => {
     const s = B.specForItem(it), h = B.html(s), a = String(it.answer);
@@ -131,6 +131,22 @@ test('play: every event goes to playVoice on the shared clock; without audio it 
   assert.deepEqual(B.play(s, {}), { notes: n, silent: true });
   assert.equal(B.play(null, env), null);
   assert.equal(B.html(null), '');
+});
+
+test('vertical multiplication as partial products; taking away hundreds by counting up', () => {
+  const e = ev('repeatedBars', 'חשבו במאונך: 586 × 7 (כתבו בלי פסיק)', 4102);
+  assert.deepEqual(spec('repeatedBars', 'חשבו במאונך: 586 × 7 (כתבו בלי פסיק)', 4102).parts, [3500, 560, 42]);
+  assert.equal(stage(e, 'partialSign').length, 3);
+  assert.deepEqual(spec('regroupAllLevels', 'חשבו במאונך: 1,234 × 56 (כתבו בלי פסיק)', 69104).parts, [61700, 7404]);
+  assert.equal(spec('repeatedBars', '4 × 5 = ?', 20), null, 'the new tags use only the new rules: TimesTable keeps its table');
+  assert.deepEqual(spec('repeatedBars', '25 × 36 = ?', 900).parts, [750, 150]);
+  const up = spec('takeAwayBeats', 'היו 300 כיסאות באולם. הוציאו 145 לצורך אירוע אחר. כמה כיסאות נשארו?', 155);
+  assert.deepEqual(up.jumps, [[0, 5], [1, 5], [2, 1]]);
+});
+
+test('the modules that already own an item keep it', () => {
+  const owners = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace'].map((f) => require('../src/lib/music/' + f));
+  banks.allItems().filter((it) => B.specForItem(it)).forEach((it) => owners.forEach((o) => assert.equal(o.specForItem(it), null, 'both play: ' + it.prompt)));
 });
 
 test('index.html renders the widget and reveals after the answer; sw.js caches it', () => {
