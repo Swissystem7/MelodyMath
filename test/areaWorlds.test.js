@@ -81,6 +81,27 @@ test('prisms and pyramids: a face is a held tone, an edge a click, a corner a de
   assert.equal(stage(ev('solidFaceMotif', 'בפריסה של פירמידה שבסיסה משושה, כמה משולשים יש?', 6), 'sideFace').length, 6);
 });
 
+test('heights: a dum for each side and a tak for the height to it; parallel sides share one tak', () => {
+  const tri = ev('areaScore', 'כמה גבהים יש לכל משולש?', 3);
+  assert.equal(new Set(stage(tri, 'height').map((n) => n.hz)).size, 3);
+  const par = ev('areaScore', 'כמה גבהים שונים, לפי הצלעות, יש למקבילית?', 2);
+  assert.equal(stage(par, 'side').length, 4);
+  assert.equal(new Set(stage(par, 'height').map((n) => n.hz)).size, 2);
+  assert.equal(stage(ev('areaScore', 'במשולש קהה־זווית, האם גובה יכול ליפול מחוץ למשולש? (כן/לא)', 'כן'), 'beyond').length, 2);
+});
+
+test('a height from an area: the rectangle in rows of the base; the other height of a parallelogram; two of a kind', () => {
+  const h = ev('areaScore', 'שטח משולש 20 סמ״ר והבסיס 8 ס״מ. מה הגובה לבסיס זה בס״מ?', 5);
+  assert.equal(stage(h, 'row').length, 5);
+  assert.equal(stage(h, 'dum').length, 40, 'the rectangle is twice the triangle');
+  const o = ev('areaScore', 'במקבילית צלעות של 10 ס״מ ו־6 ס״מ. הגובה לצלע של 10 ס״מ הוא 3 ס״מ. מה הגובה לצלע של 6 ס״מ, בס״מ?', 5);
+  assert.equal(stage(o, 'row').length, 3);
+  assert.equal(stage(o, 'row2').length, 5);
+  const two = ev('partsRowGroups', 'מצולע מורכב משתי מקביליות זהות, בסיס כל אחת 6 ס״מ וגובהה 4 ס״מ. מה שטחו בסמ״ר?', 48);
+  assert.equal(stage(two, 'dum').length, 24);
+  assert.equal(stage(two, 'copy').length, 1);
+});
+
 test('only when the sounds give exactly the answer', () => {
   assert.equal(spec('sideNotes', 'לריבוע צלע של 3 ס״מ. מה ההיקף בס״מ?', 9), null, 'a wrong key is never set to sound');
   assert.equal(spec('areaScore', 'קיר בצורת מקבילית: אורך הצלע 86 מטרים והגובה אליה 55 מטרים. מה השטח במ״ר? (כתבו בלי פסיק)', 4730), null);
