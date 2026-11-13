@@ -268,3 +268,38 @@ test('mixed recovery transition: 5 errors followed by 5 successes keeps level an
   const finalAccuracy = history.filter((h) => h.correct).length / history.length;
   assert.equal(finalAccuracy, 0.5);
 });
+
+test('boundary guard: nextLevel handles out-of-range, NaN, and malformed history safely', () => {
+  assert.equal(nextLevel(NaN, [right, right]), 2);
+  assert.equal(nextLevel(99, [right, right]), MAX_LEVEL);
+  assert.equal(nextLevel(-5, [wrong, wrong]), MIN_LEVEL);
+  assert.equal(nextLevel(2, null), 2);
+  assert.equal(nextLevel(2, [null, null]), 2);
+});
+
+test('boundary guard: eligibleExercises handles NaN/invalid chosenLevel and malformed history gracefully', () => {
+  const sampleBank = [
+    { id: 'a1', level: 1 },
+    { id: 'b1', level: 2 },
+    { id: 'c1', level: 3 }
+  ];
+  const pool = eligibleExercises(sampleBank, [null, { id: 'a1', correct: false }], 'a1', NaN);
+  assert.ok(Array.isArray(pool));
+  assert.ok(pool.length > 0);
+  assert.ok(pool.every((item) => item.level >= MIN_LEVEL && item.level <= MAX_LEVEL));
+});
+
+test('boundary guard: extreme rapid success and error sequences clamp level strictly within MIN_LEVEL and MAX_LEVEL', () => {
+  let lvl = 2;
+  for (let i = 0; i < 50; i++) {
+    lvl = nextLevel(lvl, [right, right]);
+    assert.ok(lvl >= MIN_LEVEL && lvl <= MAX_LEVEL);
+  }
+  assert.equal(lvl, MAX_LEVEL);
+
+  for (let i = 0; i < 50; i++) {
+    lvl = nextLevel(lvl, [wrong, wrong]);
+    assert.ok(lvl >= MIN_LEVEL && lvl <= MAX_LEVEL);
+  }
+  assert.equal(lvl, MIN_LEVEL);
+});
