@@ -253,6 +253,7 @@
       a: extra.a,
       b: extra.b,
       total: extra.total, research: extra.research,
+      band: extra.band,
     };
   }
 
@@ -1923,7 +1924,7 @@
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
-      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart }));
+      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart, band: e.band }));
     });
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
@@ -2166,6 +2167,31 @@
   );
   musicForLate();
 
+  // ---------- BandShare: percent with a changing base (grade ו׳) ----------
+  // music/bandShare.js. The whole is a band of one musical world, a different
+  // world in each item (docs/research/percent-band-share-2026-11-13.md).
+  // Appended last so ids stay put.
+  function BAND_SHARE(std, prompt, answer, hint, level, band) {
+    return I('ו', 'percent', prompt, answer, hint, { standard: ST[std], strand: STRAND.NUM, level: level, band: band });
+  }
+  RAW.push(
+    BAND_SHARE('G6_PCT_WHOLE', 'בתח׳ת 6 נגנים, ו־3 מנגנים בכלי מיתר. איזה אחוז הם? (מספר בלבד)', 50, 'כמה נגנים בתח׳ת כולו, וכמה מהם במיתרים?', 1,
+      { kind: 'percentOf', ensemble: 'takht', sections: 6, whole: 6, part: 3, pick: [0, 1, 3] }),
+    BAND_SHARE('G6_PCT_WHOLE', 'בלהקת כליזמר 5 נגנים. איזה אחוז מהלהקה הוא נגן הקלרינט? (מספר בלבד)', 20, 'הלהקה כולה היא 100%', 1,
+      { kind: 'percentOf', ensemble: 'klezmer', sections: 5, whole: 5, part: 1, pick: 'קלרינט' }),
+    BAND_SHARE('G6_PCT_WHOLE', '5 נגני גנגסה הם 25% מגמלן. 10 הם 25% מגמלן כפול. כמה נגנים בו?', 40, 'אותו אחוז, חלק גדול יותר — ומה עם השלם?', 1,
+      { kind: 'twoWholes', ensemble: 'gamelan', pick: 'גנגסה', a: { sections: 4, percent: 25, part: 5 }, b: { sections: 4, percent: 25, part: 10 }, ask: 'second' }),
+    BAND_SHARE('G6_PCT_WHOLE', '10 נגני כלי קשת הם 25% מתזמורת קאמרית. כמה נגנים בתזמורת?', 40, 'כמה חלקים כמו כלי הקשת יש בתזמורת?', 2,
+      { kind: 'wholeFrom', ensemble: 'chamber', sections: 4, percent: 25, part: 10, pick: 'כלי קשת' }),
+    BAND_SHARE('G6_PCT_WHOLE', '12 נגני טמבורים הם 30% מבטריה של סמבה. כמה נגנים בבטריה?', 40, 'כמה נגנים הם 10%?', 2,
+      { kind: 'wholeFrom', ensemble: 'samba', sections: 10, percent: 30, part: 12, pick: 'טמבורים' }),
+    BAND_SHARE('G6_PCT_WHOLE', '15 נגנים הם 30% מפסטיבל רוק א׳ ו־50% מפסטיבל ב׳. בכמה א׳ גדול מב׳?', 20, 'מצאו את השלם של כל פסטיבל לחוד', 3,
+      { kind: 'twoWholes', ensemble: 'rock', a: { sections: 10, percent: 30, part: 15 }, b: { sections: 6, percent: 50, part: 15 }, ask: 'difference' }),
+    BAND_SHARE('G6_PCT_CHANGE', 'בתזמורת סימפונית 50 נגנים. 20% יוצאים, ואז מספרם גדל ב־20%. כמה עכשיו?', 48, 'ה־20% השני נמדד מהתזמורת שנשארה', 3,
+      { kind: 'change', ensemble: 'symphony', sections: 5, whole: 50, down: 20, up: 20, pick: 'כלי נשיפה ממתכת' })
+  );
+  musicForLate();
+
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
   // way and music activity uses one of 14 mechanisms; the peer-reviewed
   // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:
@@ -2197,7 +2223,7 @@
       tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'g1CountOn'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
-      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'listToGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
+      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'bandShare', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'listToGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
         'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'g3Chant', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
@@ -2363,6 +2389,7 @@
     if (raw.ruler) it.ruler = raw.ruler;
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
+    if (raw.band) it.band = raw.band;
     if (raw.vert) it.vert = raw.vert;
     if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
