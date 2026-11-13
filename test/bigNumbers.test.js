@@ -107,10 +107,10 @@ test('only for its tags, and only when the sounds give exactly the answer', () =
   assert.equal(B.specForItem(null), null);
 });
 
-test('the bank: big-number items of grades 2–5 are heard; no answer in the picture before it is given', () => {
+test('the bank: big-number items of grades 2–6 are heard; no answer in the picture before it is given', () => {
   const list = banks.allItems().filter((it) => B.specForItem(it));
   assert.ok(list.length >= 60, 'played ' + list.length);
-  assert.deepEqual([...new Set(list.map((it) => it.grade))].sort(), ['ב', 'ג', 'ד', 'ה']);
+  assert.deepEqual([...new Set(list.map((it) => it.grade))].sort(), ['ב', 'ג', 'ד', 'ה', 'ו']);
   const word = (h, w) => new RegExp('(^|[\\s.,:;—>(])' + w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '($|[\\s.,:;—<)?])').test(h);
   list.forEach((it) => {
     const s = B.specForItem(it), h = B.html(s), a = String(it.answer);
@@ -144,8 +144,14 @@ test('vertical multiplication as partial products; taking away hundreds by count
   assert.deepEqual(up.jumps, [[0, 5], [1, 5], [2, 1]]);
 });
 
+test('differences in tables by counting up; a sum of two shows in columns', () => {
+  assert.equal(spec('rowCellGroups', 'בטבלת המבקרים בתערוכה: 2024 — 125,400 מבקרים, 2025 — 131,900 מבקרים. בכמה מבקרים יותר היו ב־2025? (כתבו בלי פסיק)', 6500).kind, 'up');
+  assert.equal(spec('tableRowGroups', 'בטבלת נקודות: קבוצה א׳ — 25, קבוצה ב׳ — 18. בכמה נקודות מובילה קבוצה א׳?', 7).value, 7);
+  assert.equal(spec('callResponse', 'בהצגה הראשונה נכחו 180 צופים, ובשנייה 215. כמה צופים נכחו בסך הכול בשתי ההצגות?', 395).kind, 'add');
+});
+
 test('the modules that already own an item keep it', () => {
-  const owners = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace'].map((f) => require('../src/lib/music/' + f));
+  const owners = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats'].map((f) => require('../src/lib/music/' + f));
   banks.allItems().filter((it) => B.specForItem(it)).forEach((it) => owners.forEach((o) => assert.equal(o.specForItem(it), null, 'both play: ' + it.prompt)));
 });
 

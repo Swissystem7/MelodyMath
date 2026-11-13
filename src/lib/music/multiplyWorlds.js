@@ -85,7 +85,8 @@
     } else if ((m = /(\d+) (?:תווים|מכות|מתופפים),? ו\S+ (?:\S+ )?פי (\d+)/.exec(p))) {
       const a = +m[1], k = +m[2];
       const voices = /גיטרה/.test(p) ? ['pluck', 'keys'] : /מקהלה/.test(p) ? ['drumLow', 'voiceAh'] : ['drumHigh', 'drumLow'];
-      s = { kind: 'groups', a: a, k: k, value: a * k, voices: voices, world: WORLDS.repeat };
+      // a big product: the group is heard once in full, then each copy is one bundle sound (never 42 beats)
+      s = { kind: 'groups', a: a, k: k, value: a * k, voices: voices, bundled: a * (k + 1) > 40 && a <= MAX_RUN && k <= 10, world: WORLDS.repeat };
     } else if ((m = /^([\d,]+) ([×:]) (10|100|1,000) = \?/.exec(p)) && POW[num(m[3])]) {
       const n = num(m[1]), f = num(m[3]), shift = POW[f] * (m[2] === '×' ? 1 : -1);
       const ds = digitsOf(n), top = ds.length - 1 + shift, low = ds.findIndex((d) => d > 0) + shift;
@@ -168,6 +169,7 @@
       case 'groups': {
         const group = (voice, g, stage) => { for (let i = 0; i < spec.a; i++) { hit(voice, voice === 'voiceAh' ? 392 : voice === 'keys' ? 523 + 30 * i : 196, 0.14, i === 0 ? 0.26 : 0.18, stage, { group: g, accent: i === 0 }); t += STEP * 0.8; } t += GAP; };
         group(spec.voices[0], 0, 'base');
+        if (spec.bundled) { hit('gong', 165, 0.5, 0.2, 'bundleDemo'); t += 0.8 + GAP; for (let g = 0; g < spec.k; g++) { hit('gong', 165, 0.45, 0.2, 'bundle', { group: g }); t += 0.55; } break; }
         t += GAP;
         for (let g = 0; g < spec.k; g++) group(spec.voices[1], g, 'times');
         break;
@@ -269,6 +271,7 @@
     tempo: 'קודם הגימברי מנגן משפט אחד לאט. אחר כך, באותו זמן בדיוק, הקרקבים מנגנים את המשפט שוב ושוב. כמה פעמים הוא נכנס? "פי כמה" זה לא "בכמה יותר".',
     ladder: 'הצליל הנמוך, ואז סולם של שלבים שווים — כל שלב הוא עוד פעם הצליל הנמוך — עד הצליל הגבוה. סופרים שלבים. האוקטבה היא השלב השני.',
     chorus: 'השיר הקצר הוא פזמון אחד. השיר הארוך הוא אותו פזמון שוב ושוב. כמה פזמונים?',
+    groupsBundled: 'קודם קבוצה אחת, פעמה אחרי פעמה, ומיד אחריה גונג — הגונג שווה לכל הקבוצה. אחר כך גונג לכל עותק. כמה גונגים, וכמה בכל אחד?',
     groups: 'קודם קבוצה אחת. אחר כך אותה קבוצה כמה פעמים. שתי שאלות: כמה קבוצות? כמה בכל קבוצה? רק אז — כמה בסך הכול.',
     pack: 'אותו מספר צלילים לפני ואחרי — אבל כל חפץ הפך לאריזה הבאה (או חזר לקודמת). לא "מוסיפים אפס": כל ספרה שווה עכשיו פי עשרה.',
     columns: 'מתחילים מהעפרונות. כל שורה היא עוד עותק של המספר. כשמצטברים עשרה — הם נארזים לקופסה אחת שעוברת לעמודה הבאה.',
@@ -280,7 +283,7 @@
   function html(spec, opts) {
     if (!spec) return '';
     const revealed = !!(opts && opts.revealed);
-    const how = spec.kind === 'deal' && spec.ask === 'remainder' ? HOW.dealRemainder : HOW[spec.kind];
+    const how = spec.kind === 'deal' && spec.ask === 'remainder' ? HOW.dealRemainder : spec.kind === 'groups' && spec.bundled ? HOW.groupsBundled : HOW[spec.kind];
     const legend = (spec.kind === 'pack' || spec.kind === 'columns' || spec.kind === 'deal') ? PACK_LEGEND : '';
     return '<div class="multiply-worlds">'
       + '<p class="band-note">' + esc(spec.world.he + ': ' + spec.world.why + '.') + '</p>'

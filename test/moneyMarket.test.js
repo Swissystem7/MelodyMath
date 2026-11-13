@@ -101,7 +101,11 @@ test('sharing is dealt in rounds: each child gets one coin per round', () => {
 
 test('only when the sounds give exactly the answer; never more than 12 sounds in a row', () => {
   assert.equal(M.specForItem(item('coinGroups', 'מטבע של 5 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 8)), null, 'a wrong key is never set to sound');
-  assert.equal(M.specForItem(item('agorotTenGroups', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 40)), null);
+  assert.equal(M.specForItem(item('agorotTenGroups', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 39)), null, 'two half-shekels are one more shekel, never forgotten');
+  const hj = M.soundEvents(M.specForItem(item('agorotTenGroups', 'קנייה של 24 ₪ ו־50 אגורות ועוד קנייה של 15 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 40)));
+  assert.equal(hj.filter((n) => n.stage === 'half').length, 2);
+  assert.equal(hj.filter((n) => n.stage === 'cup').length, 1, 'the two halves fill one cup');
+  assert.equal(M.specForItem(item('shekelHundredGroups', 'קנייה של 350 אגורות ועוד קנייה של 6 ₪ ו־50 אגורות. כמה ₪ בסך הכול?', 10)).a, 3);
   assert.equal(M.specForItem(item('nextBeat', 'מטבע של 5 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 7)), null);
   assert.equal(M.specForItem(Object.assign(item('coinGroups', 'מטבע של 5 ₪ ומטבע של 2 ₪. כמה ₪ ביחד?', 7), { noMusic: true })), null);
   assert.equal(M.specForItem(null), null);

@@ -144,6 +144,14 @@ test('play: every event goes to playVoice on the shared clock; without audio it 
   assert.equal(M.html(null), '');
 });
 
+test('a big product in bundles: the group once in full, a gong equal to it, then a gong for every copy', () => {
+  const e = M.soundEvents(M.specForItem({ music: 'phraseFits', standard: 'השוואה כפלית — פי כמה', prompt: 'דנה מתופפת 7 מכות, ויובל מתופף פי 6. כמה מכות מתופף יובל?', answer: 42 }));
+  assert.equal(e.filter((n) => n.stage === 'base').length, 7);
+  assert.equal(e.filter((n) => n.stage === 'bundleDemo').length, 1);
+  assert.equal(e.filter((n) => n.stage === 'bundle').length, 6);
+  assert.ok(e.length < 20, 'never 42 beats');
+});
+
 test('index.html renders the widget and reveals after the answer; sw.js caches it', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(html, /MM_MULTIPLY_WORLDS\.play\(mw\)/);
