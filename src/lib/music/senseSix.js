@@ -29,7 +29,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['roundToGroup', 'shortenNote', 'quarterCount', 'roundBars', 'piBarsAround']);
+  const TAGS = Object.freeze(['roundToGroup', 'shortenNote', 'quarterCount', 'roundBars', 'piBarsAround', 'sectorAsNote']);
   const MAX_RUN = 12;
   const MAX_EVENTS = 44;
   const STEP = 0.28, GAP = 0.8;
@@ -41,6 +41,7 @@
     canon: { he: 'שיר סבב (קאנון)', why: 'אותו משפט, באותו קצב — רק החלק שאומרים לנגן. קצר יותר — אבל באותה עוצמה ובאותה מהירות' },
     circle: { he: 'דבקה והורה', why: 'דבקה היא ריקוד שורה — קו ישר, כמו הקוטר. הורה היא ריקוד מעגל — הליכה סביב, כמו ההיקף' },
     cajon: { he: 'קחון', why: 'תוף ארגז: מכה עמוקה מכסה גוש אחד — ריבוע שצלעו הרדיוס' },
+    circleParts: { he: 'דבקה והורה', why: 'דבקה היא ריקוד שורה — צעד בקו ישר. הורה היא ריקוד מעגל — צעד לאורך המעגל. גונג הוא המרכז, ומחיאת כף היא נקודה על המעגל' },
   });
 
   const PKG = [[10000, 'gong', 55, 'עשרת אלפים'], [1000, 'gong', 82, 'אלף'], [100, 'gong', 165, 'מאה'], [10, 'metalBell', 1047, 'עשר'], [1, 'woodClick', 1800, 'אחד']];
@@ -80,12 +81,32 @@
       const w = +m[1], a = +m[2], d = +m[3], k = +m[4], opts = [+m[5], +m[6], +m[7]];
       const exact = (w + a / d) * k, best = opts.reduce((x, y) => (Math.abs(y - exact) < Math.abs(x - exact) ? y : x));
       if (d <= 8 && w <= 3 && k <= 6) s = { kind: 'almost', whole: w, a: a, d: d, k: k, value: best, world: WORLDS.canon };
-    } else if ((m = /^קוטר המעגל (\d+) ס״מ\. מה היקפו בס״מ\? \(π ≈ 3\.14\)$/.exec(p))) {
+    } else if ((m = /^קוטר המעגל (\d+) ס״מ\. מה (?:היקפו|ההיקף) בס״מ\? \(π ≈ 3\.14\)$/.exec(p))) {
       const d = +m[1];
       if (d % 10 === 0) s = { kind: 'around', d: d, unit: 10, value: r2(PI * d), world: WORLDS.circle };
-    } else if ((m = /^היקף המעגל ([\d.]+) ס״מ\. מה הקוטר בס״מ\? \(π ≈ 3\.14\)$/.exec(p))) {
-      const C = +m[1], d = r2(C / PI);
-      if (Number.isInteger(d)) s = { kind: 'around', d: d, unit: d, back: true, value: d, world: WORLDS.circle };
+    } else if ((m = /^רדיוס המעגל (\d+) ס״מ\. מה ההיקף בס״מ\? \(π ≈ 3\.14\)$/.exec(p))) {
+      // the diameter is two radii through the centre; then around: three diameters and a bit
+      const r = +m[1];
+      s = { kind: 'around', d: 2 * r, unit: r, fromRadius: true, value: r2(PI * 2 * r), world: WORLDS.circle };
+    } else if ((m = /^היקף המעגל ([\d.]+) ס״מ\. מה (הקוטר|הרדיוס) בס״מ\? \(π ≈ 3\.14\)$/.exec(p))) {
+      const C = +m[1], d = r2(C / PI), toRadius = m[2] === 'הרדיוס';
+      if (Number.isInteger(d)) s = { kind: 'around', d: d, unit: d, back: true, toRadius: toRadius, value: toRadius ? d / 2 : d, world: WORLDS.circle };
+    } else if ((m = /^רדיוס (?:מעגל הקווינטות|המעגל) (\d+) ס״מ\. מה הקוטר בס״מ\?$/.exec(p))) {
+      s = { kind: 'diameter', r: +m[1], value: 2 * +m[1], world: WORLDS.circle };
+    } else if ((m = /^ארבעה עיגולים חופפים ברדיוס ([\d.]+) ס״מ צמודים זה לזה בתוך ריבוע, שניים בכל שורה\. מה אורך צלע הריבוע בס״מ\?$/.exec(p))) {
+      s = { kind: 'circlesRow', r: +m[1], n: 2, value: r2(4 * +m[1]), world: WORLDS.circle };
+    } else if ((m = /^איך נקרא (.+)\?$/.exec(p)) && item.music === 'sectorAsNote') {
+      // naming the parts of a circle: the centre is a gong, a point on the circle a clap, a straight stride
+      // is dabke, a step along the circle is hora — the child hears the path and names it
+      const NAMES = [
+        [/^קטע שמחבר את מרכז המעגל לנקודה על המעגל$/, ['center', 'straight', 'point'], 'רדיוס'],
+        [/^המיתר הארוך ביותר במעגל$/, ['point', 'straight', 'center', 'straight', 'point'], 'קוטר'],
+        [/^קטע שמחבר שתי נקודות על המעגל$/, ['point', 'straight', 'point'], 'מיתר'],
+        [/^החלק של המעגל שבין שתי נקודות עליו$/, ['point', 'along', 'along', 'along', 'point'], 'קשת'],
+        [/^החלק של העיגול שבין שני רדיוסים לקשת שביניהם$/, ['center', 'straight', 'point', 'along', 'along', 'along', 'point', 'straight', 'center'], 'גזרה'],
+      ];
+      const hit = NAMES.find(([re]) => re.test(m[1]));
+      if (hit) s = { kind: 'name', path: hit[1], value: hit[2], world: WORLDS.circleParts };
     } else if ((m = /^רדיוס העיגול (\d+) (ס״מ|מ׳)\. מה (שטחו|שטח חצי העיגול) ב(?:סמ״ר|מ״ר)\? \(π ≈ 3\.14\)$/.exec(p))) {
       const r = +m[1], half = /חצי/.test(m[3]);
       s = { kind: 'blocks', r: r, half: half, value: r2(PI * r * r / (half ? 2 : 1)), world: WORLDS.cajon };
@@ -165,10 +186,26 @@
         break;
       case 'around': {
         const strides = spec.back ? 1 : spec.d / spec.unit;
-        for (let i = 0; i < strides; i++) { hit('stomp', 90, 0.3, 0.26, 'diameter'); t += 0.45; }     // the straight diameter (dabke)
+        for (let i = 0; i < strides; i++) {                                                              // the straight diameter (dabke)
+          hit('stomp', 90, 0.3, 0.26, spec.fromRadius ? 'radius' : 'diameter'); t += 0.45;
+          if (spec.fromRadius && i === 0) { hit('gong', 196, 0.4, 0.2, 'center'); t += 0.5; }           // two radii meet at the centre
+        }
         t += GAP;
         for (let k = 0; k < 3; k++) { for (let i = 0; i < strides; i++) { hit('drumLow', 110, 0.3, 0.24, 'around', { lap: k }); t += 0.45; } t += 0.3; }
         hit('woodClick', 2200, 0.04, 0.16, 'bit');                                                        // a bit more — less than a stride
+        if (spec.toRadius) { t += GAP; hit('gong', 196, 0.4, 0.2, 'center'); t += 0.5; hit('stomp', 90, 0.3, 0.26, 'radius'); t += 0.45; }   // half of it, from the centre
+        break;
+      }
+      case 'diameter':
+        hit('stomp', 90, 0.3, 0.26, 'radius'); t += 0.45; hit('gong', 196, 0.4, 0.2, 'center'); t += 0.5; hit('stomp', 90, 0.3, 0.26, 'radius');
+        break;
+      case 'circlesRow':
+        // across the square: each circle is a radius, its centre, a radius
+        for (let c = 0; c < spec.n; c++) { hit('stomp', 90, 0.3, 0.26, 'radius', { c: c }); t += 0.45; hit('gong', 196, 0.4, 0.2, 'center', { c: c }); t += 0.5; hit('stomp', 90, 0.3, 0.26, 'radius', { c: c }); t += 0.6; }
+        break;
+      case 'name': {
+        const SND = { center: ['gong', 196, 0.4, 0.5], point: ['clap', 1000, 0.1, 0.45], straight: ['stomp', 90, 0.3, 0.45], along: ['drumLow', 110, 0.3, 0.45] };
+        spec.path.forEach((step, i) => { const v = SND[step]; hit(v[0], v[1], v[2], 0.22, step, { i: i }); t += v[3]; });
         break;
       }
       case 'blocks':
@@ -213,6 +250,11 @@
     half: 'קודם השלמים, ואחר כך חצי מהם. יותר או פחות?',
     almost: 'תיבות מלאות, ואחריהן תיבה שחסרה בה נקישה אחת — כמעט מלאה. אחר כך מכה לכל עותק. בערך כמה שלמים בכל עותק?',
     around: 'צעדי הדבקה הם הקוטר — קו ישר. אחר כך הולכים סביב במעגל ההורה: שלוש פעמים קוטר, ועוד נקישה קטנה — קצת, פחות מצעד. פאי הוא קצת יותר משלוש.',
+    aroundRadius: 'צעד דבקה, הגונג של המרכז, ועוד צעד — שני רדיוסים הם קוטר. אחר כך הולכים סביב במעגל ההורה: שלוש פעמים קוטר, ועוד נקישה קטנה. פאי הוא קצת יותר משלוש.',
+    aroundToRadius: 'סביב במעגל ההורה: שלוש פעמים קוטר ועוד נקישה קטנה. אחר כך — מהגונג של המרכז, צעד אחד בלבד: חצי מהקוטר.',
+    diameter: 'צעד דבקה מהקצה, הגונג של המרכז, ועוד צעד עד הקצה השני.',
+    circlesRow: 'חוצים את הריבוע: בכל עיגול צעד, הגונג של המרכז שלו, ועוד צעד.',
+    name: 'הקשיבו לדרך: מאיפה מתחילים, איך הולכים — בקו ישר או לאורך המעגל — ואיפה נגמרים.',
     blocks: 'מכה אחת היא גוש: ריבוע שצלעו הרדיוס. העיגול הוא שלושה גושים ועוד קצת.',
     grow: 'גוש אחד; אחריו — כשהרדיוס גדל פי שניים — הגושים בשתי שורות של שניים. כמה גושים?',
   };
@@ -221,7 +263,7 @@
     const revealed = !!(opts && opts.revealed);
     return '<div class="sense-six">'
       + '<p class="band-note">' + esc(spec.world.he + ': ' + spec.world.why + '.') + '</p>'
-      + '<p class="band-note">' + esc(HOW[spec.kind] + (spec.kind === 'blocks' && spec.half ? ' ואז — חצי מזה.' : '')) + '</p>'
+      + '<p class="band-note">' + esc((spec.fromRadius ? HOW.aroundRadius : spec.toRadius ? HOW.aroundToRadius : HOW[spec.kind]) + (spec.kind === 'blocks' && spec.half ? ' ואז — חצי מזה.' : '')) + '</p>'
       + (revealed
         ? '<p class="band-predict ss-silent">עכשיו בלי צליל: כתבו את האומדן במספרים עגולים, ובדקו אם התשובה בתוך הטווח.</p>'
         : '<p class="band-predict">לפני שלוחצים — נחשו. אחר כך הקשיבו: כמה שווה צליל אחד?</p>')

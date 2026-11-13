@@ -65,6 +65,27 @@ test('the circle: a straight diameter, then three strides around and a small tic
   assert.equal(spec('piBarsAround', 'היקף המעגל 31.4 ס״מ. מה הקוטר בס״מ? (π ≈ 3.14)', 10).value, 10);
 });
 
+test('the circle from a radius: two radii meet at the centre gong; back from the circumference to half a diameter', () => {
+  const r = ev('sectorAsNote', 'רדיוס המעגל 7 ס״מ. מה ההיקף בס״מ? (π ≈ 3.14)', 43.96);
+  assert.equal(stage(r, 'radius').length, 2);
+  assert.equal(stage(r, 'center').length, 1);
+  assert.equal(stage(r, 'around').length, 6, 'each lap is a diameter: two radius strides');
+  const back = ev('sectorAsNote', 'היקף המעגל 62.8 ס״מ. מה הרדיוס בס״מ? (π ≈ 3.14)', 10);
+  assert.equal(stage(back, 'radius').length, 1);
+  assert.equal(stage(ev('sectorAsNote', 'רדיוס מעגל הקווינטות 5 ס״מ. מה הקוטר בס״מ?', 10), 'radius').length, 2);
+  assert.equal(stage(ev('sectorAsNote', 'ארבעה עיגולים חופפים ברדיוס 3.5 ס״מ צמודים זה לזה בתוך ריבוע, שניים בכל שורה. מה אורך צלע הריבוע בס״מ?', 14), 'radius').length, 4);
+});
+
+test('naming the parts of a circle: the path is heard — centre gong, straight dabke, hora along, a clap on the circle', () => {
+  const path = (prompt, a) => ev('sectorAsNote', prompt, a).map((n) => n.stage).join(' ');
+  assert.equal(path('איך נקרא קטע שמחבר את מרכז המעגל לנקודה על המעגל?', 'רדיוס'), 'center straight point');
+  assert.equal(path('איך נקרא המיתר הארוך ביותר במעגל?', 'קוטר'), 'point straight center straight point');
+  assert.equal(path('איך נקרא קטע שמחבר שתי נקודות על המעגל?', 'מיתר'), 'point straight point', 'a chord never passes the centre');
+  assert.equal(path('איך נקרא החלק של המעגל שבין שתי נקודות עליו?', 'קשת'), 'point along along along point');
+  assert.match(path('איך נקרא החלק של העיגול שבין שני רדיוסים לקשת שביניהם?', 'גזרה'), /^center straight point( along)+ point straight center$/);
+  assert.equal(spec('sectorAsNote', 'איך נקרא קטע שמחבר שתי נקודות על המעגל?', 'קוטר'), null, 'a wrong key is never set to sound');
+});
+
 test('circle area: one r × r block, then three blocks and a bit; doubling the radius is four blocks', () => {
   const e = ev('piBarsAround', 'רדיוס העיגול 10 ס״מ. מה שטחו בסמ״ר? (π ≈ 3.14)', 314);
   assert.equal(stage(e, 'rBlock').length, 1);
