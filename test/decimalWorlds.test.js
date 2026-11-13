@@ -29,17 +29,18 @@ test('places: one timbre per place, and a turn marker even where the digit is ze
   assert.equal(stage(thou, 'digit').length, 3);
 });
 
-test('comparing: the numbers start together; 0.5 stops later than 0.45 although it has fewer sounds', () => {
+test('comparing: one held tone per number, all starting together, the same stop marker — nothing to count (Meta AI)', () => {
   const e = ev('tenthNotes', 'מה גדול יותר, 0.5 או 0.45? כתבו את הגדול.', '0.5');
-  const stops = stage(e, 'stop');
-  const s05 = stops.find((n) => n.voice === 0), s045 = stops.find((n) => n.voice === 1);
-  assert.ok(s05.at > s045.at);
-  assert.ok(e.filter((n) => n.voice === 0 && n.stage !== 'stop').length < e.filter((n) => n.voice === 1 && n.stage !== 'stop').length, 'more sounds, yet smaller');
+  const runs = stage(e, 'run'), stops = stage(e, 'stop');
+  assert.equal(runs.length, 2, 'one sound per number — 0.45 cannot sound like "more"');
+  assert.ok(runs.every((n) => n.at === 0), 'they start together');
+  assert.equal(new Set(stops.map((n) => n.voice + n.hz)).size, 1, 'an identical stop marker');
+  assert.ok(stops.find((n) => n.voiceIndex === 0).at > stops.find((n) => n.voiceIndex === 1).at);
   const tiny = ev('tenthNotes', 'מה גדול יותר, 0.09 או 0.1? כתבו את הגדול.', '0.1');
   const st = stage(tiny, 'stop');
-  assert.ok(st.find((n) => n.voice === 1).at > st.find((n) => n.voice === 0).at, 'nine hundredths end before one tenth');
+  assert.ok(st.find((n) => n.voiceIndex === 1).at - st.find((n) => n.voiceIndex === 0).at >= 0.3, 'zoomed into the first tenth so the gap is audible');
   const order = stage(ev('tenthNotes', 'סדרו מהקטן לגדול: 0.6, 0.75, 0.5, 0.8. מהו המספר השני בסדר?', '0.6'), 'stop').sort((a, b) => a.at - b.at);
-  assert.equal(order[1].voice, 0, 'the second stop is 0.6');
+  assert.equal(order[1].voiceIndex, 0, 'the second stop is 0.6');
 });
 
 test('1/4: one pop beat sounds and three are silent; then the same moment in tenths and hundredths', () => {

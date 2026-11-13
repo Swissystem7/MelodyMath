@@ -212,17 +212,29 @@
         phrase(spec.str, 'digit', spec.lowest);
         break;
       case 'race': {
-        const hz = [900, 1200, 1500, 1800];
-        let end = 0;
-        spec.nums.forEach((n, i) => { end = Math.max(end, inTime(+n, 0, hz[i % 4], 'run', { voice: i })); });
+        // Meta AI: never let the child count sounds here (0.45 must not sound like "more").
+        // Each number is ONE held tone that starts with the others; the same stop marker ends each one.
+        // When all numbers are within the first tenth, zoom in: that tenth fills the whole bar.
+        const zoom = spec.nums.every((n) => +n <= 0.1) ? 10 : 1;
+        const bar = 10 * TICK * zoom;
+        const voices = [['bowed', 262], ['reed', 330], ['voiceAh', 392], ['breathy', 523]];
+        spec.nums.forEach((n, i) => {
+          const len = +n * bar, v = voices[i % 4];
+          ev.push({ at: 0, voice: v[0], hz: v[1], dur: len, gain: 0.14, stage: 'run', voiceIndex: i, zoom: zoom });
+          ev.push({ at: len, voice: 'woodClick', hz: 2000, dur: 0.05, gain: 0.2, stage: 'stop', voiceIndex: i });
+        });
         break;
       }
       case 'quarter': {
-        // the 4/4 bar: the sounding beats, the rest real silence; then the same bar in tenths and hundredths
+        // the 4/4 bar: the sounding beats, the rest real silence; then the same moment in tenths, and — zoomed — hundredths
         const bar = 10 * TICK;
         for (let b = 0; b < 4; b++) { if (b < spec.beats) ev.push({ at: b * bar / 4, voice: 'drumLow', hz: 110, dur: 0.3, gain: 0.24, stage: 'popBeat' }); }
-        const t0 = bar + GAP;
-        inTime(spec.beats / 4, t0, 1300, 'decimal');
+        t = bar + GAP;
+        const v = Math.round(spec.beats / 4 * 100);
+        for (let i = 0; i < Math.floor(v / 10); i++) { placeHit(-1, 'decimal'); t += TICK; }
+        t += GAP;
+        hit('metalBell', 1568, 0.3, 0.1, 'zoom'); t += 0.5;                  // zoom into the next tenth
+        for (let i = 0; i < v % 10; i++) { placeHit(-2, 'decimalFine'); t += 0.28; }
         break;
       }
       case 'beat': {
@@ -388,7 +400,7 @@
   const HOW = {
     cycle: 'המחזור הוא שלם אחד של עשר פעמות. כמה פעמות נשמעות, וכמה הן שקט אמיתי?',
     places: 'כל כלי הוא מקום: תוף נמוך — שלמים, וודבלוק — עשיריות, שייקר — מאיות. סימן תור רך נשמע גם כשהמקום ריק. כמה פעמים מנגן כל כלי?',
-    race: 'הקולות מתחילים יחד. נקישה היא עשירית, רפרוף קטן הוא מאיות. כל קול עוצר בפעמון כשהמספר שלו נגמר. ספרות רבות יותר אינן אומרות גדול יותר — מי עוצר מאוחר יותר?',
+    race: 'כל מספר הוא צליל אחד ארוך, וכולם מתחילים יחד. אותה נקישה עוצרת כל אחד במקום שבו המספר שלו נגמר. כאן אין מה לספור — רק להקשיב: מי עוצר מאוחר יותר? ספרות רבות יותר אינן אומרות גדול יותר.',
     quarter: 'קודם תיבת פופ של ארבע פעמות — רק חלק מהן נשמע, והשאר שקט. אחר כך אותו רגע בעשיריות ובמאיות. איפה עוצרים?',
     beat: 'נקישות דקות מחלקות כל שנייה לעשר עשיריות, ונקישה חזקה פותחת כל שנייה. התוף הוא המטרונום. כמה עשיריות בין שתי מכות תוף?',
     shift: 'אותו מספר צלילים לפני ואחרי — כל צליל עובר לגוון של מקום אחר. סימן התור נשמע גם במקום ריק.',
