@@ -108,6 +108,11 @@ test('a mean that does not share out evenly: whole rounds, then each unit left b
   assert.equal(stage(b, 'target').length, 4, 'the mean asked for is four above it — out of reach');
 });
 
+test('parts of one whole: the parts walk around the hora circle and close it', () => {
+  const e = ev('showAsBar', 'רוצים להראות איזה חלק מהכיתה בחר כל ענף ספורט. מה מתאים יותר: עוגה או עמודות?', 'עוגה');
+  assert.equal(new Set(stage(e, 'part').map((n) => n.part)).size, 4);
+  assert.equal(stage(e, 'closed').length, 1);
+});
 test('only when the sounds give exactly the answer; TakeAwayTen keeps its place-value items', () => {
   assert.equal(spec('alternateDrums', '9 זוגי או אי־זוגי?', 'זוגי'), null, 'a wrong key is never set to sound');
   assert.equal(spec('levelNotes', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.5), null);
