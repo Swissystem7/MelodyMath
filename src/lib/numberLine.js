@@ -14,17 +14,31 @@
   const SCALE_BASE_HZ = 220;
 
   function clampInt(n, min, max) {
+    let lower = Math.round(Number(min));
+    let upper = Math.round(Number(max));
+    if (!Number.isFinite(lower)) lower = 0;
+    if (!Number.isFinite(upper)) upper = 20;
+    // Callers always pass lower <= upper (normalizeLine orders them first).
     const v = Math.round(Number(n));
-    if (!Number.isFinite(v)) return min;
-    return Math.min(max, Math.max(min, v));
+    if (!Number.isFinite(v)) return lower;
+    return Math.min(upper, Math.max(lower, v));
   }
 
   function normalizeLine(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
-    let min = Math.round(Number(src.min));
-    let max = Math.round(Number(src.max));
-    if (!Number.isFinite(min)) min = 0;
-    if (!Number.isFinite(max)) max = 20;
+    const hasMin = src.min != null && Number.isFinite(Number(src.min));
+    const hasMax = src.max != null && Number.isFinite(Number(src.max));
+    let min = hasMin ? Math.round(Number(src.min)) : 0;
+    let max = hasMax ? Math.round(Number(src.max)) : 20;
+    if (hasMin && !hasMax && min >= max) {
+      max = min + 10;
+    } else if (!hasMin && hasMax && max <= min) {
+      min = max - 10;
+    } else if (min > max) {
+      const tmp = min;
+      min = max;
+      max = tmp;
+    }
     // Past 2^53 n += step stops moving and ticksOf never ends; keep integers exact.
     min = clampInt(min, -LIMIT, LIMIT - 10);
     max = clampInt(max, -LIMIT, LIMIT);
@@ -34,15 +48,20 @@
     const rawStep = Math.round(Number(src.step));
     const sanitizedStep = Number.isFinite(rawStep) && rawStep >= 1 ? rawStep : 1;
     const step = Math.max(1, sanitizedStep, Math.ceil((max - min) / MAX_INTERVALS));
-    const start = src.start == null ? null : clampInt(src.start, min, max);
-    const mark = src.mark == null ? null : clampInt(src.mark, min, max);
+    const start = (src.start == null || !Number.isFinite(Number(src.start)))
+      ? null
+      : clampInt(src.start, min, max);
+    const mark = (src.mark == null || !Number.isFinite(Number(src.mark)))
+      ? null
+      : clampInt(src.mark, min, max);
     return { min: min, max: max, step: step, start: start, mark: mark };
   }
 
   function ticksOf(line) {
     const L = normalizeLine(line);
     const ticks = [];
-    for (let n = L.min; n <= L.max; n += L.step) ticks.push(n);
+    const step = Number.isFinite(L.step) && L.step >= 1 ? L.step : 1;
+    for (let n = L.min; n <= L.max; n += step) ticks.push(n);
     if (ticks[ticks.length - 1] !== L.max) ticks.push(L.max);
     return ticks;
   }
@@ -61,14 +80,18 @@
 
   function placeOnLine(value, line) {
     const L = normalizeLine(line);
-    return clampInt(value, L.min, L.max);
+    const num = Number(value);
+    if (!Number.isFinite(num)) return L.min;
+    return clampInt(num, L.min, L.max);
   }
 
   function percentOnLine(value, line) {
     const L = normalizeLine(line);
-    const v = clampInt(value, L.min, L.max);
+    const num = Number(value);
+    const v = Number.isFinite(num) ? clampInt(num, L.min, L.max) : L.min;
     if (L.max === L.min) return 0;
-    return ((v - L.min) / (L.max - L.min)) * 100;
+    const pct = ((v - L.min) / (L.max - L.min)) * 100;
+    return Number.isFinite(pct) ? Math.min(100, Math.max(0, pct)) : 0;
   }
 
   function escapeHtml(s) {
@@ -79,7 +102,7 @@
     const L = normalizeLine(line);
     const ticks = ticksOf(L);
     const dense = ticks.length > 25;
-    const sel = selected === null || selected === undefined ? null : clampInt(selected, L.min, L.max);
+    const sel = (selected == null || !Number.isFinite(Number(selected))) ? null : clampInt(selected, L.min, L.max);
     const marks = ticks.map((n) => {
       const left = percentOnLine(n, L);
       const on = sel != null && n === sel;
@@ -131,7 +154,14 @@
     paint();
     return {
       value: () => current,
-      set: (n) => { current = placeOnLine(n, L); paint(); },
+      set: (n) => {
+        if (n == null || !Number.isFinite(Number(n))) {
+          current = null;
+        } else {
+          current = placeOnLine(n, L);
+        }
+        paint();
+      },
     };
   }
 
