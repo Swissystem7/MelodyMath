@@ -113,6 +113,10 @@
       const qty = m.length === 3 && /עולה/.test(p) ? +m[2] : count(m[1]);
       const price = /עולה/.test(p) ? +m[1] : +m[2];
       if (qty) s = { kind: 'times', qty: qty, price: price, value: qty * price, world: WORLDS.stall, legend: LEGEND.shekel };
+    } else if ((m = /^קנייה של (\d+) ₪ ו־50 אגורות ועוד קנייה של (\d+) ₪ ו־50 אגורות\. כמה ₪ בסך הכול\?$/.exec(p.trim())) || (m = /^קנייה של (\d+) אגורות ועוד קנייה של (\d+) ₪ ו־50 אגורות\. כמה ₪ בסך הכול\?$/.exec(p.trim()))) {
+      // two half-shekels fill one cup: the shekels of each purchase, and one more whole shekel
+      const a = /^קנייה של \d+ אגורות/.test(p.trim()) ? (+m[1] % 100 === 50 ? (+m[1] - 50) / 100 : null) : +m[1], b = +m[2];
+      if (a != null) s = { kind: 'halvesJoin', a: a, b: b, value: a + b + 1, world: WORLDS.tray, legend: LEGEND.shekel };
     } else if (/כמה ₪/.test(p)) {
       const ps = pieces(p);
       if (ps.length >= 2 || (ps.length === 1 && /ביחד|בסך הכול/.test(p))) s = { kind: 'sum', pieces: ps, value: total(ps), world: WORLDS.tray, legend: LEGEND.shekel };
@@ -188,6 +192,13 @@
         gatherShekel();
         for (let i = 0; i < spec.shekels; i++) cup('count', { n: i });
         break;
+      case 'halvesJoin':
+        value(spec.a, { n: 0 }); t += GAP;
+        value(spec.b, { n: 1 }); t += GAP;
+        hit('metalBell', 1319, 0.12, 0.18, 'half', { n: 0 }); t += STEP;
+        hit('metalBell', 1319, 0.12, 0.18, 'half', { n: 1 }); t += STEP;
+        cup('cup');
+        break;
       case 'halves':
         for (let i = 0; i < spec.coins; i++) {
           hit('metalBell', 1319, 0.12, 0.18, 'half', { n: i }); t += STEP;
@@ -245,6 +256,7 @@
   // ---------------------------------------------------------------- picture
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const HOW = {
+    halvesJoin: 'קודם השקלים של כל קנייה: מכה עמוקה היא עשרה, נקישה היא שקל אחד. אחר כך שני חצאי השקל — ושניהם יחד ממלאים כוס: עוד שקל שלם.',
     sum: 'שתי שאלות שונות: כמה מטבעות ושטרות שמעתם? וכמה כסף זה? מתחילים מהגדול וסופרים הלאה.',
     compare: 'קודם הכסף של הראשון, אחר כך של השני. יותר צלילי מטבע לא אומר יותר כסף — מקשיבים לערך.',
     fill: 'אותו מטבע שוב ושוב, ואחריו כמה הוא שווה. הפעמון מצלצל כשמגיעים לסכום — סופרים את המטבעות, לא את הפעמון.',

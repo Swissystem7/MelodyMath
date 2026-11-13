@@ -25,14 +25,14 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels', 'repeatedBars', 'takeAwayBeats']);
+  const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels', 'repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse']);
   // the modules that already own repeatedBars / takeAwayBeats items keep them
-  const EXTRA_TAGS = ['repeatedBars', 'takeAwayBeats'];   // only the vertical-multiplication and counting-up rules use these
-  const OWNERS = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace'];
+  const EXTRA_TAGS = ['repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse'];   // only the vertical-multiplication and counting-up rules use these
+  const OWNERS = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats'];
   const nodeOwners = [];
   if (typeof module === 'object' && module.exports && typeof require === 'function') OWNERS.forEach((f) => { try { nodeOwners.push(require('./' + f + '.js')); } catch (e) { /* absent */ } });
   const otherPlays = (item) => {
-    const mods = nodeOwners.length ? nodeOwners : [root && root.MM_MULTIPLY_WORLDS, root && root.MM_TIMES_TABLE, root && root.MM_TAKEAWAY_TEN, root && root.MM_DRAG_PLACE];
+    const mods = nodeOwners.length ? nodeOwners : [root && root.MM_MULTIPLY_WORLDS, root && root.MM_TIMES_TABLE, root && root.MM_TAKEAWAY_TEN, root && root.MM_DRAG_PLACE, root && root.MM_DATA_WORLDS, root && root.MM_EARLY_BEATS];
     return mods.some((mod) => { try { return !!(mod && mod.specForItem && mod.specForItem(item)); } catch (e) { return false; } });
   };
   const MAX_RUN = 12;
@@ -126,6 +126,14 @@
       if (parts.length >= 2 && parts.length <= 3) return { kind: 'partials', parts: parts.reverse(), value: parts.reduce((x, y) => x + y, 0) };
     } else if ((m = /^היו (\d+) [^.]+\. (?:נמכרו|הוציאו|חולקו) (\d+)[^.]*\. כמה \S+ נשארו\?$/.exec(p))) {
       return upPlan(+m[2], +m[1]);
+    } else if ((m = /^בטבלת נקודות: קבוצה א׳ — (\d+), קבוצה ב׳ — (\d+)\. בכמה נקודות מובילה קבוצה א׳\?$/.exec(p))) {
+      return upPlan(+m[2], +m[1]);
+    } else if ((m = /^בטבלת \S+ \S+: \d+ — ([\d,]+) \S+, \d+ — ([\d,]+) \S+\. בכמה \S+ יותר היו ב־\d+\?/.exec(p))) {
+      return upPlan(num(m[1]), num(m[2]));
+    } else if ((m = /^בטבלה: בעיר א׳ ([\d,]+) תושבים, בעיר ב׳ ([\d,]+) ובעיר ג׳ ([\d,]+)\. בכמה תושבים עיר ג׳ גדולה מעיר ב׳\?/.exec(p))) {
+      return upPlan(num(m[2]), num(m[3]));
+    } else if ((m = /^בהצגה הראשונה נכחו (\d+) צופים, ובשנייה (\d+)\. כמה צופים נכחו בסך הכול בשתי ההצגות\?$/.exec(p))) {
+      return { kind: 'add', a: +m[1], b: +m[2], value: +m[1] + +m[2] };
     }
     return null;
   }
