@@ -69,6 +69,12 @@
       s = { kind: 'tens', tens: Math.floor(+m[1] / 10), ones: +m[1] % 10, value: +m[1] % 10, ask: 'ones', world: WORLDS.tombak };
     } else if ((m = /מ־(\d+), כמה חסר לעשר הבאה/.exec(p))) {
       const n = +m[1]; s = { kind: 'tens', tens: Math.floor(n / 10), ones: n % 10, missing: 10 - (n % 10), value: 10 - (n % 10), ask: 'missing', world: WORLDS.tombak };
+    } else if (item.music === 'tenThenMore' && (m = /^([\d\s+]+)=\s*\?/.exec(p)) && nums(m[1]).length >= 3 && nums(m[1]).reduce((a, b) => a + b, 0) > 15 && nums(m[1]).reduce((a, b) => a + b, 0) <= 30) {
+      // too many to hear one by one: ten is made first, then more (the tombak gather)
+      const parts = nums(m[1]);
+      s = { kind: 'makeTen', parts: parts, value: parts.reduce((a, b) => a + b, 0), world: WORLDS.tombak };
+    } else if (item.music === 'tenThenMore' && (m = /^(\d+) − (\d+) − (\d+) = \?$/.exec(p)) && [m[1], m[2], m[3]].every((x) => +x % 10 === 0) && +m[1] <= 100) {
+      s = { kind: 'tensChain', a: +m[1], value: +m[1] - +m[2] - +m[3], world: WORLDS.tombak };
     } else if (item.music === 'tenThenMore' && (m = /^([\d\s+]+)=\s*\?/.exec(p))) {
       const parts = nums(m[1]);
       if (parts.length < 3 || parts.length > 4) return null;
@@ -126,6 +132,26 @@
         }
         t += 0.25;
       }
+      return ev;
+    }
+    if (spec.kind === 'makeTen') {
+      // each addend as baks; the moment ten are together they gather into one tom — then the rest goes on
+      let held = 0;
+      spec.parts.forEach((n, pi) => {
+        for (let i = 0; i < n; i++) {
+          hit(w.a, 523, 0.1, 0.2, 'bak', { part: pi }); t += STEP; held++;
+          if (held === 10) { t += 0.1; hit(w.b, 98, 0.4, 0.3, 'gatherTom', { part: pi }); t += 0.6; held = 0; }
+        }
+        t += 0.35;
+      });
+      return ev;
+    }
+    if (spec.kind === 'tensChain') {
+      // toms only: the first number, then the same slots again — what is taken away is silent
+      for (let i = 0; i < spec.a / 10; i++) { hit(w.b, 98, 0.35, 0.3, 'start', { i: i }); t += STEP * 1.3; }
+      t += 0.6;
+      const keep = spec.value / 10;
+      for (let i = 0; i < spec.a / 10; i++) { if (i < keep) hit(w.b, 98, 0.35, 0.3, 'left', { i: i }); t += STEP * 1.3; }
       return ev;
     }
     if (spec.kind === 'tens') {
@@ -197,6 +223,8 @@
     countOn: 'הצליל הארוך הוא המספר הראשון — שמים אותו בראש ולא סופרים אותו שוב. אחרי שקט קצר: צעד לכל אחד שמוסיפים.',
     compare: 'רקיעה ומחיאה יחד, פעימה מול פעימה. מה שנשמע לבד בסוף — זה ההפרש.',
     parts: 'כל מחובר בצליל משלו: דום, טק, קה. סופרים את כולם יחד.',
+    makeTen: 'כל מחובר בבקים. ברגע שעשרה בקים יחד — הם מתקבצים לתום אחד, וממשיכים. כמה תומים, וכמה בקים נשארו?',
+    tensChain: 'רק תומים — כל תום הוא עשר. קודם המספר הראשון, ואחר כך אותם מקומות שוב: מה שמורידים נשמע כשקט. כמה תומים נשארו?',
   };
   function html(spec, opts) {
     if (!spec) return '';

@@ -144,6 +144,11 @@ test('play: every event goes to playVoice on the shared clock; without audio it 
   assert.equal(S.html(null), '');
 });
 
+test('at most one right corner in a triangle: after two, nothing is left for the third and it never closes', () => {
+  const s = S.specForItem({ music: 'triangleMotif', grade: 'ג', standard: 'מיון משולשים לפי זוויות ולפי צלעות', prompt: 'כמה זוויות ישרות יכולות להיות לכל היותר במשולש אחד?', answer: 1 });
+  assert.deepEqual(s.corners, [90, 90, 0]);
+  assert.match(S.html(s), /לא נסגר/);
+});
 test('index.html renders the widget and reveals after the answer; sw.js caches it', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(html, /MM_SHAPE_WALK\.play\(sw\)/);
