@@ -26,7 +26,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['groupsFirstLongChain', 'barFill', 'reciprocalNotes', 'bracketNoteFirst', 'bracketBeatsFirst', 'barCount']);
+  const TAGS = Object.freeze(['groupsFirstLongChain', 'barFill', 'reciprocalNotes', 'bracketNoteFirst', 'bracketBeatsFirst', 'barCount', 'balanceBars']);
   const MAX_RUN = 12;
   const MAX_EVENTS = 56;
   const GAP = 0.7;
@@ -46,6 +46,10 @@
   let nodeJumpLine = null;
   if (typeof module === 'object' && module.exports && typeof require === 'function') { try { nodeJumpLine = require('./jumpLine.js'); } catch (e) { nodeJumpLine = null; } }
   const jumpLinePlays = (item) => { const j = nodeJumpLine || (root && root.MM_JUMP_LINE); try { return !!(j && j.specForItem && j.specForItem(item)); } catch (e) { return false; } };
+  // BalanceBars keeps the equations and inequalities it already plays (two players that end together or apart)
+  let nodeBalance = null;
+  if (typeof module === 'object' && module.exports && typeof require === 'function') { try { nodeBalance = require('./balanceBars.js'); } catch (e) { nodeBalance = null; } }
+  const balancePlays = (item) => { const b = nodeBalance || (root && root.MM_BALANCE_BARS); try { return !!(b && b.specForItem && b.specForItem(item)); } catch (e) { return false; } };
 
   // an expression with one level of brackets → stages in the order they are done: [sign, value of that step]
   function orderStages(expr) {
@@ -108,6 +112,19 @@
       // grade 4 order of operations: brackets, then × and : from the left, then + and − from the left
       const stages = orderStages(m[1]);
       if (stages) s = st(stages);
+    } else if (item.music === 'balanceBars' && !balancePlays(item) && (m = /^נכון או לא נכון: ([\d()+−×: ]+) ([<>=]) ([\d()+−×: ]+)$/.exec(p))) {
+      // each side in its own stages, one after the other; then the child compares the two results
+      const A = orderStages(m[1]), B = orderStages(m[3]);
+      if (A && B) {
+        const a = A[A.length - 1][1], b = B[B.length - 1][1], ok = m[2] === '<' ? a < b : m[2] === '>' ? a > b : a === b;
+        s = { kind: 'twoSides', sides: [A, B], rel: m[2], value: ok ? 'נכון' : 'לא נכון', world: WORLDS.stages };
+      }
+    } else if (item.music === 'balanceBars' && !balancePlays(item) && (m = /^מהו המספר השלם (הגדול|הקטן) ביותר שמתאים ל־☐: ☐ × (\d+) ([<>]) ([\d,]+)$/.exec(p))) {
+      // try the multiplier near the bound and the next one: which product still fits?
+      const k = +m[2], lim = +m[4].replace(/,/g, ''), less = m[3] === '<';
+      const best = less ? Math.ceil(lim / k) - 1 : Math.floor(lim / k) + 1;
+      const tries = less ? [best, best + 1] : [best - 1, best];
+      s = { kind: 'bound', tries: tries.map((x) => [x * k, less ? x * k < lim : x * k > lim]), value: best, world: WORLDS.stages };
     } else if ((m = /^(\S+) קוראת (\d+) עמודים בכל יום\. אחרי (\d) שבועות נשארו לה (\d+) עמודים\. כמה עמודים יש בספר\?$/.exec(p))) {
       const perDay = +m[2], days = 7 * +m[3], read = perDay * days;
       s = st([['×', days], ['×', read], ['+', read + +m[4]]]);
@@ -153,6 +170,13 @@
     switch (spec.kind) {
       case 'stages':
         spec.stages.forEach(([op, val], i) => { sign(op, { n: i }); packages(val, 'result', { n: i }); });
+        break;
+      case 'twoSides':
+        spec.sides.forEach((side, k) => { side.forEach(([op, val], i) => { sign(op, { side: k, n: i }); packages(val, 'result', { side: k, n: i }); }); t += GAP; });
+        break;
+      case 'bound':
+        // each try: the product, then a bell when it still fits, real silence when it does not
+        spec.tries.forEach(([prod, fits], i) => { sign('×', { n: i }); packages(prod, 'try', { n: i }); if (fits) { hit('metalBell', 1568, 0.3, 0.14, 'fits', { n: i }); } t += 0.6; });
         break;
       case 'relation':
         packages(spec.known, 'known');
@@ -220,6 +244,8 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const LEGEND = 'גונג עמוק = אלף, גונג אמצעי = מאה, תוף = עשר, נקישה = אחד, צליל דק = עשירית.';
   const HOW = {
+    twoSides: 'כל צד בשלבים משלו: הסימן, ואחריו התוצאה בחבילות. קודם הצד השמאלי, אחריו הימני. אחר כך משווים: האם היחס שבתרגיל מתקיים?',
+    bound: 'מנסים כופל ליד הגבול: המכפלה בחבילות, ופעמון אם היא עדיין מתאימה — שקט אם כבר לא. אחר כך הכופל הבא. איזה כופל הוא האחרון שמתאים, או הראשון?',
     stages: 'כל פעולה היא שלב עם סימן משלו: מחיאה פותחת את הסוגריים, ואחר כך כפל וחילוק משמאל לימין, ובסוף חיבור וחיסור. אחרי כל שלב — התוצאה שלו.',
     stagesUndo: 'הולכים אחורה: כל שלב מבטל את הפעולה האחרונה, עד שמגיעים למשבצת.',
     relation: 'קודם מה שידוע. אחר כך רק השינוי — ומה הוא עושה לתוצאה. אין צורך לחשב מחדש.',

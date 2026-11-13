@@ -80,6 +80,15 @@ test('grade 4 order of operations: brackets, then × and : from the left, then +
   assert.equal(spec('barCount', '2 + 3 × 4 = ?', 14), null, 'JumpLine keeps the small bracket items');
 });
 
+test('true or false: each side in its own stages; the largest or smallest box number by trying near the bound', () => {
+  const two = spec('balanceBars', 'נכון או לא נכון: 3 × (20 + 5) = 3 × 20 + 5', 'לא נכון');
+  assert.deepEqual(two.sides.map((s) => s[s.length - 1][1]), [75, 65]);
+  assert.equal(spec('balanceBars', 'נכון או לא נכון: 8 × 7 > 50 + 5', 'נכון').value, 'נכון');
+  const b = spec('balanceBars', 'מהו המספר השלם הגדול ביותר שמתאים ל־☐: ☐ × 7 < 50', 7);
+  assert.deepEqual(b.tries, [[49, true], [56, false]]);
+  assert.equal(stage(L.soundEvents(b), 'fits').length, 1, 'a bell only for the product that still fits');
+  assert.deepEqual(spec('balanceBars', 'מהו המספר השלם הקטן ביותר שמתאים ל־☐: ☐ × 25 > 1,000', 41).tries, [[1000, false], [1025, true]]);
+});
 test('only when the sounds give exactly the answer', () => {
   assert.equal(spec('groupsFirstLongChain', '120 − 8 × (20 − 15) = ?', 100), null, 'a wrong key is never set to sound');
   assert.equal(spec('nextBeat', '120 − 8 × (20 − 15) = ?', 80), null);
