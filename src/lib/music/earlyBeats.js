@@ -87,6 +87,9 @@
       const x = +m[1], y = +m[2];
       // counting on starts from the bigger number: the order does not change the sum
       s = { kind: 'countOn', a: Math.max(x, y), b: Math.min(x, y), swapped: x < y, value: x + y, world: WORLDS.xylophone };
+    } else if (item.music === 'callResponse' && (m = /^ראו: (\d+) \S+ ועוד (\d+) \S+ הם (\d+) צלילים\.$/.exec(p.trim())) && +m[1] + +m[2] === +m[3]) {
+      const x = +m[1], y = +m[2];
+      s = { kind: 'countOn', a: Math.max(x, y), b: Math.min(x, y), swapped: x < y, value: x + y, world: WORLDS.xylophone };
     } else if ((m = /^10 - (\d+) = \?$/.exec(p))) {
       s = { kind: 'compare', a: 10, b: +m[1], value: 10 - +m[1], world: WORLDS.body, takeFromTen: true };
     }

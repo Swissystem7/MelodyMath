@@ -150,6 +150,10 @@ test('differences in tables by counting up; a sum of two shows in columns', () =
   assert.equal(spec('callResponse', 'בהצגה הראשונה נכחו 180 צופים, ובשנייה 215. כמה צופים נכחו בסך הכול בשתי ההצגות?', 395).kind, 'add');
 });
 
+test('how many hundreds in a jump: counting up in two jumps, thousands then hundreds', () => {
+  const s = spec('romanGroupSymbols', 'כדי להפוך את 210,000 ל־217,800 מוסיפים 7 אלפים ועוד כמה מאות?', 8);
+  assert.deepEqual(s.jumps, [[3, 7], [2, 8]]);
+});
 test('the modules that already own an item keep it', () => {
   const owners = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats'].map((f) => require('../src/lib/music/' + f));
   banks.allItems().filter((it) => B.specForItem(it)).forEach((it) => owners.forEach((o) => assert.equal(o.specForItem(it), null, 'both play: ' + it.prompt)));

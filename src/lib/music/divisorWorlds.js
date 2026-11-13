@@ -43,7 +43,7 @@
     pan: { he: 'סטילפאן מטרינידד', why: 'הכלי שנולד בקרנבל של טרינידד. מחלקים באים בזוגות: כל מחלק שנמצא מצלצל, ועוצרים כשהזוגות מתחילים לחזור' },
     funk: { he: 'פאנק — ה־One', why: 'בפאנק של שנות השישים והשבעים ה־One הוא מקום בזמן ולא עוצמה. זוגות שלמים נוחתים על ה־One' },
   };
-  const KIND_WORLD = { leftover: 'tala', measure: 'banjo', share: 'banjo', rect: 'tango', rectGiven: 'tango', factor: 'samul', by5: 'son', digitSum: 'son', walk: 'pan', evenPrime: 'pan', threeNotSix: 'funk' };
+  const KIND_WORLD = { twoThrees: 'samul', leftover: 'tala', measure: 'banjo', share: 'banjo', rect: 'tango', rectGiven: 'tango', factor: 'samul', by5: 'son', digitSum: 'son', walk: 'pan', evenPrime: 'pan', threeNotSix: 'funk' };
   // samul nori: kkwaenggwari (small gong), janggu (hourglass drum), buk (barrel drum), jing (large gong)
   const SAMUL = { 2: ['metalBell', 1400], 3: ['drumHigh', 330], 5: ['drumLow', 98], 7: ['gong', 130] };
 
@@ -90,6 +90,14 @@
       const f = primeFactors(+m[1]);
       if (f.every((x) => SAMUL[x])) s = { kind: 'factor', n: +m[1], known: f.slice(0, -1), last: f[f.length - 1], largest: true, value: f[f.length - 1] };
     } else if (/^מספר מתחלק ב־3 אבל לא ב־6\. האם הוא יכול להיות זוגי\? \(כן\/לא\)$/.test(p)) s = { kind: 'threeNotSix', mults: [3, 6, 9, 12], value: 'לא' };
+    else if ((m = /^מהו המספר הראשוני הגדול ביותר שקטן מ־(\d+)\?$/.exec(p))) {
+      // the first candidate below the bound, walked from one to the middle: only one and itself ring
+      let n = +m[1] - 1;
+      while (n > 2 && divisorCount(n) !== 2) n--;
+      if (n <= 31) s = { kind: 'walk', n: n, prime: true, value: n };
+    } else if ((m = /^([\d,]+) ו־([\d,]+) הם כפולות של 3\. האם המכפלה שלהם מתחלקת ב־9\? \(כן\/לא\)$/.exec(p))) {
+      s = { kind: 'twoThrees', value: 'כן' };
+    }
     if (!s || String(s.value) !== raw) return null;   // the sounds give exactly the answer
     s.world = WORLDS[KIND_WORLD[s.kind]];
     s.answer = String(s.value);
@@ -213,6 +221,14 @@
         });
         break;
       }
+      case 'twoThrees': {
+        // each number brings a factor of three (three janggu strokes); in the product both are there: three times three
+        const j = SAMUL[3];
+        strokes(3, j[0], j[1], 'factor', { from: 0 }); pause(0.4);
+        strokes(3, j[0], j[1], 'factor', { from: 1 }); pause();
+        for (let g = 0; g < 3; g++) { strokes(3, 'clap', 1000, 'nine', { g: g }); pause(0.35); }
+        break;
+      }
       case 'threeNotSix':
         // each multiple of three in triples; then where it lands: the One for whole pairs, the "and" otherwise;
         // landing on the One also rings the bell of six — two and three together
@@ -260,6 +276,7 @@
     factor: 'כל גורם מחלק לקבוצות: מספר המכות הוא מספר הקבוצות. מה שנשאר בסוף, בכלי שלו — הגורם האחרון.',
     by5: 'כל עשרת היא שתי חמישיות שלמות, ולכן הטרס מנגן רק את האחדות. הגווירו מסמן חמישייה שנסגרה.',
     digitSum: 'עשרת אחת היא קבוצות שלמות ועוד אחת — לכן כל ספרה משאירה בדיוק את עצמה. הקלאווה מנגנת את הספרות זו אחר זו, והגווירו מסמן כל קבוצה שנסגרה. נשאר משהו בסוף?',
+    twoThrees: 'כל אחד משני המספרים מביא גורם של שלוש: שלוש מכות בג׳אנגו. במכפלה שני הגורמים יחד — שלוש קבוצות של שלוש. מה זה אומר על תשע?',
     threeNotSix: 'כל כפולה של שלוש, בשלישיות. אחריה הנחיתה: ה־One לזוגי, ה־and לאי־זוגי. כשנוחתים על ה־One מצלצל גם הפעמון של שש, כי שתיים ושלוש יחד הן שש.',
   };
   function html(spec, opts) {

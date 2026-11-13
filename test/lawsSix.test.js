@@ -89,6 +89,9 @@ test('true or false: each side in its own stages; the largest or smallest box nu
   assert.equal(stage(L.soundEvents(b), 'fits').length, 1, 'a bell only for the product that still fits');
   assert.deepEqual(spec('balanceBars', 'מהו המספר השלם הקטן ביותר שמתאים ל־☐: ☐ × 25 > 1,000', 41).tries, [[1000, false], [1025, true]]);
 });
+test('twice as long: the first verse in beats, then twice that', () => {
+  assert.deepEqual(spec('groupsThenMore', 'הבית הראשון בשיר הוא 6 תיבות של 4 פעמות. הבית השני ארוך פי 2. כמה פעמות בבית השני?', 48).stages, [['×', 24], ['×', 48]]);
+});
 test('only when the sounds give exactly the answer', () => {
   assert.equal(spec('groupsFirstLongChain', '120 − 8 × (20 − 15) = ?', 100), null, 'a wrong key is never set to sound');
   assert.equal(spec('nextBeat', '120 − 8 × (20 − 15) = ?', 80), null);
