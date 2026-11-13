@@ -267,3 +267,79 @@ test('escapeHtml encodes markup characters and treats null as empty', () => {
   assert.equal(line.escapeHtml(undefined), '');
   assert.equal(line.escapeHtml('a&b<c>"\''), 'a&amp;b&lt;c&gt;&quot;&#39;');
 });
+
+test('zero or negative step input is safely normalized without infinite loop', () => {
+  const normZero = line.normalizeLine({ min: 0, max: 20, step: 0 });
+  assert.equal(normZero.step, 1);
+  const normNeg = line.normalizeLine({ min: 0, max: 20, step: -4 });
+  assert.equal(normNeg.step, 1);
+
+  const ticksZero = line.ticksOf({ min: 0, max: 10, step: 0 });
+  assert.deepEqual(ticksZero, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+  const ticksNeg = line.ticksOf({ min: 0, max: 5, step: -3 });
+  assert.deepEqual(ticksNeg, [0, 1, 2, 3, 4, 5]);
+
+  const html = line.renderNumberLineHtml({ min: 0, max: 4, step: 0 });
+  assert.match(html, /data-min="0"/);
+  assert.match(html, /data-max="4"/);
+  const tickCount = (html.match(/class="nline-tick/g) || []).length;
+  assert.equal(tickCount, 5);
+});
+
+test('NaN inputs normalize safely without producing NaN labels in the UI', () => {
+  const norm = line.normalizeLine({ min: NaN, max: NaN, step: NaN, start: NaN, mark: NaN });
+  assert.equal(norm.min, 0);
+  assert.equal(norm.max, 20);
+  assert.equal(norm.step, 1);
+  assert.equal(norm.start, null);
+  assert.equal(norm.mark, null);
+
+  const ticks = line.ticksOf({ min: NaN, max: NaN, step: NaN });
+  assert.equal(ticks.length, 21);
+  assert.equal(ticks.every((n) => Number.isFinite(n)), true);
+
+  assert.equal(line.jumpOnLine(NaN, 5, { min: NaN, max: NaN }), 0);
+  assert.equal(line.jumpOnLine(5, NaN, { min: 0, max: 20 }), 5);
+  assert.equal(line.placeOnLine(NaN, { min: NaN, max: NaN }), 0);
+  assert.equal(line.percentOnLine(NaN, { min: NaN, max: NaN }), 0);
+
+  const sound = line.soundForTick(NaN, { min: NaN, max: NaN });
+  assert.equal(Number.isFinite(sound.frequency), true);
+  assert.equal(sound.value, 0);
+  assert.equal(sound.percent, 0);
+
+  const htmlAllNaN = line.renderNumberLineHtml({ min: NaN, max: NaN, step: NaN, start: NaN }, NaN);
+  assert.equal(htmlAllNaN.includes('NaN'), false, 'HTML must not contain NaN');
+  assert.match(htmlAllNaN, /בחרו מספר על הישר/);
+
+  const htmlSelectedNaN = line.renderNumberLineHtml({ min: 0, max: 10 }, NaN);
+  assert.equal(htmlSelectedNaN.includes('NaN'), false, 'HTML with NaN selected must not contain NaN');
+  assert.match(htmlSelectedNaN, /בחרו מספר על הישר/);
+  assert.doesNotMatch(htmlSelectedNaN, /class="nline-tick on"/);
+});
+
+test('inverted boundaries normalize safely and swap endpoints', () => {
+  const norm1 = line.normalizeLine({ min: 20, max: 0 });
+  assert.equal(norm1.min, 0);
+  assert.equal(norm1.max, 20);
+
+  const norm2 = line.normalizeLine({ min: 50, max: -10, start: 0 });
+  assert.equal(norm2.min, -10);
+  assert.equal(norm2.max, 50);
+  assert.equal(norm2.start, 0);
+
+  const ticks = line.ticksOf({ min: 10, max: 0 });
+  assert.deepEqual(ticks, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+  assert.equal(line.jumpOnLine(4, 3, { min: 20, max: 0 }), 7);
+  assert.equal(line.placeOnLine(15, { min: 20, max: 0 }), 15);
+  assert.equal(line.placeOnLine(-5, { min: 20, max: 0 }), 0);
+  assert.equal(line.percentOnLine(10, { min: 20, max: 0 }), 50);
+
+  const html = line.renderNumberLineHtml({ min: 10, max: 0 }, 5);
+  assert.match(html, /data-min="0"/);
+  assert.match(html, /data-max="10"/);
+  assert.match(html, /class="nline-tick on"[^>]*data-n="5"/);
+  assert.match(html, /נבחר: 5/);
+});
