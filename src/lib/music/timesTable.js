@@ -55,6 +55,10 @@
     } else if ((m = /(\d+) תיבות (?:במשקל|של) (3\/4|6\/8)/.exec(p)) || (m = /ב־(\d+) תיבות של (3\/4|6\/8)/.exec(p)) || (m = /^ואלס של (\d+) תיבות (3\/4)/.exec(p))) {
       const bars = +m[1], meter = m[2];
       s = { kind: 'bars', bars: bars, meter: meter, value: bars * (meter === '3/4' ? 3 : 6), world: meter === '3/4' ? WORLDS.waltz : WORLDS.jig };
+    } else if ((m = /^במשקל 3\/4(?: סופרים את כל הפעימות מההתחלה\.|,) פעימה (\d+) — היא מודגשת\? \(כתבו כן או לא\)$/.exec(p))) {
+      // counting from 1, as musicians count: the strong beat opens every bar of three (1, 4, 7, ...)
+      const n = +m[1];
+      if (n <= 36) s = { kind: 'accent', n: n, value: (n - 1) % 3 === 0 ? 'כן' : 'לא', world: WORLDS.waltz };
     } else if ((m = /^במשקל 6\/8, שמינית (\d+) — היא סוגרת תיבה\? \(כתבו כן או לא\)$/.exec(p))) {
       const n = +m[1];
       s = { kind: 'closes', n: n, value: n % 6 === 0 ? 'כן' : 'לא', world: WORLDS.jig };
@@ -179,6 +183,14 @@
         }
         break;
       }
+      case 'accent': {
+        // the whole bars before it as bundles (a bundle is one bar of three), then its own bar beat by beat
+        const before = Math.floor((spec.n - 1) / 3);
+        for (let bar = 0; bar < before; bar++) { hit('drumLow', 110, 0.3, 0.22, 'barBundle', { bar: bar, worth: 3 }); t += 0.45; }
+        t += 0.3;
+        for (let i = 0; i <= (spec.n - 1) % 3; i++) { const strong = i === 0; hit('pluck', strong ? 196 : 294, 0.12, strong ? 0.24 : 0.14, 'beat', { strong: strong, last: i === (spec.n - 1) % 3 }); t += 0.3; }
+        break;
+      }
       case 'closes': {
         const bars = Math.ceil(spec.n / 6);
         for (let bar = 0; bar < bars; bar++) { hit('drumLow', 110, 0.3, 0.22, 'barBundle', { bar: bar, worth: 6 }); t += 0.45; }
@@ -222,6 +234,7 @@
     split: 'כל קבוצה נשמעת בשני חלקים: חבילה גדולה ואחריה כמה פעמות קטנות. כמה פעמות קטנות בכל קבוצה?',
     missing: 'החבילה שווה לקבוצה אחת. כמה חבילות צריך כדי להגיע לכל הסכום?',
     bars: 'כל תיבה היא ביטוי, ובין התיבות נשימה. סופרים תיבות, וכופלים בגודל התיבה.',
+    accent: 'כל חבילה היא תיבה שלמה של ואלס: חזק, חלש, חלש. אחר כך התיבה של הפעימה ששואלים עליה, פעמה אחרי פעמה. הפעמה האחרונה ששומעים — חזקה או חלשה?',
     closes: 'כל חבילה היא תיבה שלמה של שש שמיניות. הפעמון הוא הפעמה החזקה של התיבה הבאה. השמינית שעליה שואלים — האחרונה בתיבה?',
   };
   function html(spec, opts) {
