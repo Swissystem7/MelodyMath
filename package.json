@@ -5,6 +5,13 @@
   "scripts": {
     "test": "node --test",
     "coverage": "node tools/codecov.js",
-    "test:pilot": "npm --prefix pilot test"
+    "test:pilot": "npm --prefix pilot test",
+    "knip": "knip",
+    "size": "size-limit"
+  },
+  "devDependencies": {
+    "@size-limit/file": "14.3.0",
+    "knip": "6.45.1",
+    "size-limit": "14.3.0"
   }
 }
