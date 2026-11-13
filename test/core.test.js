@@ -134,3 +134,38 @@ test('core functions handle empty strings safely and preserve valid fallback beh
   assert.match(navEmpty, /href="index\.html" aria-current="page"/);
   assert.match(navWhitespace, /href="index\.html" aria-current="page"/);
 });
+
+function finishDoc(statsHtml, summaryHidden) {
+  const els = {
+    summary: summaryHidden == null ? null : { classList: { contains: (c) => c === 'hidden' && summaryHidden } },
+    stats: statsHtml == null ? null : { innerHTML: statsHtml, parentNode: { insertBefore: () => {} }, nextSibling: null },
+    exerciseCorrectCount: { textContent: '' },
+  };
+  return { els, getElementById: (id) => els[id] || null };
+}
+
+test('hookPracticeFinishSummary wraps finish once and writes the correct count', () => {
+  const calls = [];
+  const g = { finish() { calls.push('orig'); } };
+  const doc = finishDoc('<strong>7/10</strong>', false);
+  assert.equal(core.hookPracticeFinishSummary(g, doc), true);
+  assert.equal(core.hookPracticeFinishSummary(g, doc), false, 'second hook is a no-op');
+  g.finish();
+  assert.deepEqual(calls, ['orig']);
+  assert.equal(doc.els.exerciseCorrectCount.textContent, 'היום פתרת נכון 7 שאלות');
+});
+
+test('hookPracticeFinishSummary skips bad inputs and hidden or missing panels', () => {
+  assert.equal(core.hookPracticeFinishSummary(null, finishDoc('', false)), false);
+  assert.equal(core.hookPracticeFinishSummary({ finish() {} }, null), false);
+  assert.equal(core.hookPracticeFinishSummary({ finish() {} }, {}), false);
+  assert.equal(core.hookPracticeFinishSummary({}, finishDoc('', false)), false);
+
+  for (const doc of [finishDoc('<strong>3/4</strong>', true), finishDoc('<strong>3/4</strong>', null),
+    finishDoc(null, false), finishDoc('no score here', false)]) {
+    const g = { finish() {} };
+    core.hookPracticeFinishSummary(g, doc);
+    g.finish();
+    assert.equal(doc.els.exerciseCorrectCount.textContent, '');
+  }
+});

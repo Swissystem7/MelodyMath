@@ -123,7 +123,7 @@
       document.head.appendChild(link);
     }
     installPwaHooks();
-    hookPracticeFinishSummary();
+    hookPracticeFinishSummary(typeof globalThis !== 'undefined' ? globalThis : root, document);
     installAccessBar();
     if (typeof bindAllTablists === 'function') bindAllTablists(document);
     if (typeof refreshSpeakNow === 'function') refreshSpeakNow(document);
@@ -232,24 +232,24 @@
     return { correct: correct, total: total };
   }
 
-  function hookPracticeFinishSummary() {
-    if (IN_NODE || typeof document === 'undefined') return;
-    const g = typeof globalThis !== 'undefined' ? globalThis : root;
-    if (!g || typeof g.finish !== 'function' || g.finish.__mmExerciseSummary) return;
+  // Wraps a page's global finish() so the summary also shows the correct count.
+  // Takes the global object and document so it can be exercised in Node tests.
+  function hookPracticeFinishSummary(g, doc) {
+    if (!g || !doc || typeof doc.getElementById !== 'function') return false;
+    if (typeof g.finish !== 'function' || g.finish.__mmExerciseSummary) return false;
     const previous = g.finish;
     g.finish = function mmFinishWithSummary() {
       previous.call(this);
-      if (typeof document === 'undefined') return;
-      const summary = document.getElementById('summary');
+      const summary = doc.getElementById('summary');
       if (!summary || (summary.classList && typeof summary.classList.contains === 'function' && summary.classList.contains('hidden'))) return;
-      const stats = document.getElementById('stats');
+      const stats = doc.getElementById('stats');
       if (!stats) return;
       const match = String(stats.innerHTML || '').match(/<strong>(\d+)\/(\d+)<\/strong>/);
       if (!match) return;
-      const parsed = parseInt(match[1], 10);
-      renderExerciseCorrectCount(document, Number.isFinite(parsed) ? parsed : 0);
+      renderExerciseCorrectCount(doc, parseInt(match[1], 10));
     };
     g.finish.__mmExerciseSummary = true;
+    return true;
   }
 
   function installAccessBar() {
@@ -313,6 +313,7 @@
       installAccessBar: installAccessBar,
       countSessionCorrectAnswers: countSessionCorrectAnswers,
       showExerciseSessionSummary: showExerciseSessionSummary,
+      hookPracticeFinishSummary: hookPracticeFinishSummary,
       siteNavHtml: siteNavHtml,
     });
   }
