@@ -97,9 +97,20 @@ test('a prime cannot be split into equal bars — 51 can: three bars of seventee
   assert.equal(stage(ev('stickingParity', 'האם 2,345 מתחלק ב־5? (כן/לא)', 'כן'), 'one').length, 5);
 });
 
+test('a mean that does not share out evenly: whole rounds, then each unit left breaks into one piece per dancer', () => {
+  const e = ev('levelNotes', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.75);
+  assert.equal(stage(e, 'share').length, 4, 'one whole round');
+  assert.equal(stage(e, 'piece').length, 12, 'three units left, each in four pieces: three quarters for every dancer');
+  assert.equal(spec('levelNotes', 'הממוצע של 4, 6 ו־8 הוא 6. מוסיפים לקבוצה את 0. מה הממוצע החדש?', 4.5).values.length, 4);
+  assert.equal(spec('levelNotes', 'בארבע כיתות יש 30, 31, 29 ו־28 תלמידים. מה מספר התלמידים הממוצע לכיתה?', 29.5).floor, 28);
+  const b = ev('levelNotes', 'בקבוצת מספרים הקטן הוא 3 והממוצע הוא 7. האם הגדול יכול להיות 6? (כן/לא)', 'לא');
+  assert.equal(stage(b, 'above').length, 3, 'the best case: at most three above the smallest');
+  assert.equal(stage(b, 'target').length, 4, 'the mean asked for is four above it — out of reach');
+});
+
 test('only when the sounds give exactly the answer; TakeAwayTen keeps its place-value items', () => {
   assert.equal(spec('alternateDrums', '9 זוגי או אי־זוגי?', 'זוגי'), null, 'a wrong key is never set to sound');
-  assert.equal(spec('levelNotes', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.75), null);
+  assert.equal(spec('levelNotes', 'הקשתם 4 פעמים: 80, 81, 82 ו־84 BPM. מה הקצב הממוצע?', 81.5), null);
   assert.equal(spec('nextBeat', '9 זוגי או אי־זוגי?', 'אי-זוגי'), null);
   assert.equal(D.specForItem(null), null);
   banks.allItems().forEach((it) => assert.ok(!(TT.specForItem(it) && D.specForItem(it)), 'both play: ' + it.prompt));

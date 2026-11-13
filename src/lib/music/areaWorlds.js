@@ -102,6 +102,19 @@
     } else if ((m = /^שטח מקבילית (\d+) סמ״ר והגובה (\d+) ס״מ\. מה אורך הצלע שאליה הגובה/.exec(p))) {
       const b = +m[1] / +m[2];
       if (Number.isInteger(b)) s = { kind: 'parallelogram', base: b, height: +m[2], value: b, world: WORLDS.darbuka };
+    // ---- heights (darbuka: dum along a side, tak for the height to it)
+    } else if (/^כמה גבהים יש לכל משולש\?$/.test(p)) s = { kind: 'heights', pattern: [0, 1, 2], value: 3, world: WORLDS.darbuka };
+    else if (/^כמה גבהים שונים, לפי הצלעות, יש למקבילית\?$/.test(p)) s = { kind: 'heights', pattern: [0, 1, 0, 1], value: 2, world: WORLDS.darbuka };
+    else if (/^במשולש קהה־זווית, האם גובה יכול ליפול מחוץ למשולש\? \(כן\/לא\)$/.test(p)) s = { kind: 'outside', base: 4, beyond: 2, value: 'כן', world: WORLDS.darbuka };
+    else if ((m = /^שטח משולש (\d+) סמ״ר והבסיס (\d+) ס״מ\. מה הגובה לבסיס זה בס״מ\?$/.exec(p))) {
+      const A = +m[1], b = +m[2], h = 2 * A / b;
+      if (Number.isInteger(h) && b <= MAX_RUN && b * h <= 40) s = { kind: 'heightFromArea', base: b, rows: h, value: h, world: WORLDS.darbuka };
+    } else if ((m = /^במקבילית צלעות של (\d+) ס״מ ו־(\d+) ס״מ\. הגובה לצלע של \1 ס״מ הוא (\d+) ס״מ\. מה הגובה לצלע של \2 ס״מ, בס״מ\?$/.exec(p))) {
+      const a = +m[1], b = +m[2], h1 = +m[3], h2 = a * h1 / b;
+      if (Number.isInteger(h2) && a <= MAX_RUN && a * h1 <= 30) s = { kind: 'otherHeight', a: a, h1: h1, b: b, rows: h2, value: h2, world: WORLDS.darbuka };
+    } else if ((m = /^מצולע מורכב משתי מקביליות זהות, בסיס כל אחת (\d+) ס״מ וגובהה (\d+) ס״מ\. מה שטחו בסמ״ר\?$/.exec(p))) {
+      const b = +m[1], h = +m[2];
+      if (b * h <= 30) s = { kind: 'twoPar', base: b, height: h, value: 2 * b * h, world: WORLDS.darbuka };
     // ---- prisms and pyramids (gamelan)
     } else if ((m = /^כמה (פאות|קודקודים|מקצועות) יש ל(מנסרה משולשת|פירמידה שבסיסה ריבוע|מנסרה שבסיסה מחומש)\?$/.exec(p))) {
       const k = /משולשת/.test(m[2]) ? 3 : /ריבוע/.test(m[2]) ? 4 : 5, pyr = /פירמידה/.test(m[2]);
@@ -185,6 +198,34 @@
         if (spec.kind !== 'squareTriangle') voice('voiceB', 330, n);
         break;
       }
+      case 'heights':
+        // around the shape: a dum for each side, then a tak for the height to it — parallel sides share one height
+        spec.pattern.forEach((h, i) => { hit('drumLow', 110, 0.16, 0.24, 'side', { i: i }); t += 0.35; hit('drumHigh', 560 + 140 * h, 0.08, 0.2, 'height', { i: i, h: h }); t += BREATH + 0.2; });
+        break;
+      case 'outside':
+        for (let i = 0; i < spec.base; i++) { hit('drumLow', 110, 0.16, 0.24, 'dum', { i: i }); t += STEP; }
+        t += 0.2;
+        for (let i = 0; i < spec.beyond; i++) { hit('frameDrum', 160, 0.12, 0.18, 'beyond', { i: i }); t += STEP; }   // the base line goes on, outside the triangle
+        hit('drumHigh', 660, 0.08, 0.2, 'height');
+        break;
+      case 'heightFromArea':
+      case 'otherHeight':
+      case 'twoPar': {
+        const rows = (base, n, stage) => { for (let r = 0; r < n; r++) { for (let i = 0; i < base; i++) { hit('drumLow', 110, 0.16, 0.24, 'dum', { row: r, part: stage }); t += STEP; } hit('drumHigh', 660, 0.08, 0.2, stage, { row: r }); t += BREATH; } };
+        if (spec.kind === 'heightFromArea') {
+          hit('voiceAh', 440, 0.3, 0.16, 'voiceA'); t += 0.45; hit('voiceAh', 330, 0.3, 0.16, 'voiceB'); t += GAP;   // the triangle and its partner: a rectangle
+          rows(spec.base, spec.rows, 'row');
+        } else if (spec.kind === 'otherHeight') {
+          rows(spec.a, spec.h1, 'row');
+          t += GAP;
+          for (let i = 0; i < spec.b; i++) { hit('drumLow', 110, 0.16, 0.24, 'dum2', { row: 0 }); t += STEP; }        // the same area, rows along the other side
+          for (let r = 0; r < spec.rows; r++) { hit('drumHigh', 660, 0.08, 0.2, 'row2', { row: r }); t += BREATH; }
+        } else {
+          rows(spec.base, spec.height, 'row');
+          t += 0.3; hit('gong', 165, 0.6, 0.16, 'copy'); t += 0.8;                                                 // and one more just like it
+        }
+        break;
+      }
       case 'parallelogram': {
         hit('bowed', 220, 0.6, 0.12, 'slant'); t += 0.9;                                  // the slanted side: a glide, not counted
         [523, 659, 784].forEach((hz) => { hit('pluck', hz, 0.1, 0.16, 'cutLeft'); t += 0.18; }); t += 0.4;
@@ -249,6 +290,11 @@
     triangle: 'אחרי החיתוך: קול אחד הוא המשולש, וקול שני הוא המשולש שמשלים אותו. יחד הם המלבן. האם שני הקולות שווים?',
     twoTriangles: 'קול אחד הוא המשולש, וקול שני — המשולש שמשלים אותו למקבילית. כמה קולות כאלה במקבילית?',
     squareTriangle: 'קודם הריבוע בטפיחות ובשורות, אחר כך קול שהוא המשולש שמעליו. כמה בסך הכול?',
+    heights: 'הליכה סביב הצורה: דום לכל צלע, ואחריו טק — הגובה אל הצלע הזאת. לצלעות מקבילות אותו גובה, ואותו טק. כמה טקים שונים נשמעים?',
+    outside: 'דום לכל צעד בבסיס, ואחריהם צעדים בהמשך הקו — מחוץ לצורה. הטק של הגובה נוחת אחרי הצעדים שבחוץ.',
+    heightFromArea: 'שני קולות: המשולש ושותפו יוצרים מלבן, כפול בשטחו. אחר כך המלבן בשורות: דום לכל צעד בבסיס, טק בסוף כל שורה. כמה שורות?',
+    otherHeight: 'קודם המקבילית בשורות לפי צלע אחת: דום לכל צעד, טק בסוף כל שורה. אחר כך אותו שטח בשורות לפי הצלע השנייה: שורה אחת בדומים, ואחריה רק הטקים. כמה שורות?',
+    twoPar: 'מקבילית אחת בשורות: דום לכל צעד בבסיס, טק בסוף כל שורה. הגונג אומר: ועוד אחת זהה לה.',
     parallelogram: 'ההחלקה היא הצלע המשופעת — לא סופרים אותה. מוטיב קצר עובר משמאל לימין: המשולש שנחתך עבר צד. אחר כך שורות: דום לכל צעד בבסיס, טק לכל צעד בגובה.',
     faces: 'כל פאה היא צליל מתכת מתמשך: קודם הבסיס, אחר כך הפאות שבצד.',
     vertices: 'כל פינה היא מכה עמוקה: קודם הפינות שלמטה, אחר כך שלמעלה.',

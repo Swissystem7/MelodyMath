@@ -26,7 +26,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['groupsFirstLongChain', 'barFill', 'reciprocalNotes', 'bracketNoteFirst', 'bracketBeatsFirst']);
+  const TAGS = Object.freeze(['groupsFirstLongChain', 'barFill', 'reciprocalNotes', 'bracketNoteFirst', 'bracketBeatsFirst', 'barCount']);
   const MAX_RUN = 12;
   const MAX_EVENTS = 56;
   const GAP = 0.7;
@@ -41,6 +41,43 @@
   const SIGN = { '(': ['clap', 1600, 'bracket'], '×': ['shaker', 300, 'times'], ':': ['shaker', 620, 'share'], '+': ['metalBell', 784, 'join'], '−': ['bowed', 196, 'take'], 'undo': ['bowed', 330, 'undo'], 'half': ['shaker', 520, 'halve'], 'ten': ['shaker', 260, 'tenfold'] };
   const PKG = [[1000, 'gong', 82], [100, 'gong', 165], [10, 'drumLow', 110], [1, 'woodClick', 1600], [0.1, 'tine', 2400], [0.01, 'jingle', 3000]];
   const r4 = (x) => Math.round(x * 10000) / 10000;
+
+  // JumpLine keeps the small bracket items it already plays (brackets as a pizmon, in beats)
+  let nodeJumpLine = null;
+  if (typeof module === 'object' && module.exports && typeof require === 'function') { try { nodeJumpLine = require('./jumpLine.js'); } catch (e) { nodeJumpLine = null; } }
+  const jumpLinePlays = (item) => { const j = nodeJumpLine || (root && root.MM_JUMP_LINE); try { return !!(j && j.specForItem && j.specForItem(item)); } catch (e) { return false; } };
+
+  // an expression with one level of brackets → stages in the order they are done: [sign, value of that step]
+  function orderStages(expr) {
+    let toks = expr.replace(/\s+/g, '').match(/\d+|[()+−×:]/g);
+    if (!toks) return null;
+    const stages = [];
+    const calc = (a, op, b) => (op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b);
+    const flat = (list, record) => {
+      let l = list.slice();
+      for (const ops of [['×', ':'], ['+', '−']]) {
+        for (let i = 1; i < l.length; i += 2) {
+          if (ops.indexOf(l[i]) < 0) continue;
+          const v = calc(+l[i - 1], l[i], +l[i + 1]);
+          if (!Number.isInteger(v) || v < 0) return null;
+          if (record) stages.push([l[i], v]);
+          l.splice(i - 1, 3, String(v)); i -= 2;
+        }
+      }
+      return l.length === 1 ? +l[0] : null;
+    };
+    const open = toks.indexOf('(');
+    if (open >= 0) {
+      const close = toks.indexOf(')');
+      if (close < open || toks.indexOf('(', open + 1) >= 0) return null;
+      const inner = flat(toks.slice(open + 1, close), false);
+      if (inner == null) return null;
+      stages.push(['(', inner]);
+      toks = toks.slice(0, open).concat([String(inner)], toks.slice(close + 1));
+    }
+    const total = flat(toks, true);
+    return total == null || !stages.length || stages.length > 4 ? null : stages;
+  }
 
   // stage lists for each item: [sign, valueAfter]
   function plan(item) {
@@ -67,6 +104,13 @@
     } else if ((m = /^חבילת אריחים עולה (\d+) ש״ח\. רעות קנתה (\d+) חבילות, כל אחת יקרה ב־(\d+) ש״ח\. כמה שילמה\?/.exec(p))) {
       const base = +m[1], k = +m[2], extra = +m[3];
       s = { kind: 'layers', a: k * base, b: k * extra, value: k * (base + extra), world: WORLDS.layers };
+    } else if (item.music === 'barCount' && !jumpLinePlays(item) && (m = /^([\d()+−×: ]+) = \?(?: \(כתבו בלי פסיק\))?$/.exec(p))) {
+      // grade 4 order of operations: brackets, then × and : from the left, then + and − from the left
+      const stages = orderStages(m[1]);
+      if (stages) s = st(stages);
+    } else if ((m = /^(\S+) קוראת (\d+) עמודים בכל יום\. אחרי (\d) שבועות נשארו לה (\d+) עמודים\. כמה עמודים יש בספר\?$/.exec(p))) {
+      const perDay = +m[2], days = 7 * +m[3], read = perDay * days;
+      s = st([['×', days], ['×', read], ['+', read + +m[4]]]);
     } else if (/^מהו המספר ההופכי ל־2\/5\? \(כשבר\)$/.test(p)) s = { kind: 'reciprocal', bar: 5, part: 2, value: '5/2', world: WORLDS.bar };
     else if (/^3\/4 × 5 × 4\/3 = \?$/.test(p)) s = { kind: 'undoPair', wholes: 5, d: 4, n: 3, value: 5, world: WORLDS.bar };
     else if (/^חילוק ב־1\/3 שווה לכפל באיזה מספר\?$/.test(p)) s = { kind: 'thirds', value: 3, world: WORLDS.bar };

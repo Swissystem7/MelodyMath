@@ -86,6 +86,14 @@
     } else if ((m = /^(?:הקשתם \d+ פעמים|שקלו \d+ \S+): ([\d, ו־]+?) (?:BPM|גרם)\. מה (?:הקצב|המשקל) הממוצע/.exec(p))) {
       const vs = nums(m[1]);
       s = meanPlan(vs);
+    } else if ((m = /^הממוצע של ([\d, ו־]+) הוא (\d+)\. מוסיפים לקבוצה את (\d+)\. מה הממוצע החדש\?$/.exec(p))) {
+      s = meanPlan(nums(m[1]).concat([+m[3]]));
+    } else if ((m = /^ב\S+ \S+ יש ([\d, ו־]+) \S+\. מה מספר ה\S+ הממוצע ל\S+\?$/.exec(p))) {
+      s = meanPlan(nums(m[1]));
+    } else if ((m = /^בקבוצת מספרים הקטן הוא (\d+) והממוצע הוא (\d+)\. האם הגדול יכול להיות (\d+)\? \(כן\/לא\)$/.exec(p))) {
+      // the best case: two numbers, the smallest and the largest — even then the level stays below the mean asked for
+      const lo = +m[1], mean = +m[2], hi = +m[3];
+      if (hi > lo && hi - lo <= MAX_RUN && mean - lo <= MAX_RUN) s = { kind: 'meanBound', values: [lo, hi], units: [0, hi - lo], target: mean - lo, value: hi >= mean ? 'כן' : 'לא', world: WORLDS.hora };
     } else if ((m = /^הממוצע של (\d+) מספרים הוא (\d+)\. מה סכום המספרים\?$/.exec(p))) {
       const n = +m[1], mean = +m[2], unit = [10, 5, 2, 1].find((u) => mean % u === 0 && mean / u <= MAX_RUN);
       if (unit && n <= 6) s = { kind: 'meanSum', n: n, mean: mean, unit: unit, value: n * mean, world: WORLDS.hora };
@@ -177,11 +185,19 @@
     if (!vs || vs.length < 2 || vs.length > 5) return null;
     const floor = Math.min.apply(null, vs);
     const extra = vs.map((v) => v - floor);
-    const unit = [10, 5, 2, 1].find((u) => extra.every((e) => e % u === 0 && e / u <= MAX_RUN) && (extra.reduce((a, b) => a + b, 0) / u) % vs.length === 0);
-    if (!unit) return null;
-    const units = extra.map((e) => e / unit), share = units.reduce((a, b) => a + b, 0) / vs.length;
-    const mean = floor + share * unit;
-    return { kind: 'mean', values: vs, floor: floor, unit: unit, units: units, share: share, value: mean, world: WORLDS.hora };
+    let unit = [10, 5, 2, 1].find((u) => extra.every((e) => e % u === 0 && e / u <= MAX_RUN) && (extra.reduce((a, b) => a + b, 0) / u) % vs.length === 0);
+    let left = 0;
+    if (!unit) {
+      // the units do not share out evenly: whole rounds first, then each unit that is left breaks into one piece per dancer
+      unit = [10, 5, 2, 1].find((u) => extra.every((e) => e % u === 0 && e / u <= MAX_RUN));
+      if (!unit) return null;
+      left = (extra.reduce((a, b) => a + b, 0) / unit) % vs.length;
+      if (left * vs.length > MAX_RUN) return null;
+    }
+    const units = extra.map((e) => e / unit), total = units.reduce((a, b) => a + b, 0);
+    const share = (total - left) / vs.length;
+    const mean = Math.round((floor + (share + left / vs.length) * unit) * 1000) / 1000;
+    return { kind: 'mean', values: vs, floor: floor, unit: unit, units: units, share: share, left: left, value: mean, world: WORLDS.hora };
   }
   function specForItem(item) { return plan(item); }
 
@@ -229,8 +245,15 @@
         spec.units.forEach((u, d) => { hit('drumLow', 98, 0.3, 0.22, 'floor', { d: d }); t += 0.35; for (let i = 0; i < u; i++) { hit('woodClick', 1300 + 120 * d, 0.05, 0.2, 'above', { d: d }); t += STEP; } t += GAP; });
         // then the extras are shared out: one round gives one to every dancer
         for (let r = 0; r < spec.share; r++) { for (let d = 0; d < spec.values.length; d++) { hit('metalBell', 1047 + 60 * d, 0.1, 0.16, 'share', { d: d, round: r }); t += STEP; } t += 0.45; }
+        // what is left breaks into one small piece per dancer, and every dancer gets a piece of each
+        for (let u = 0; u < (spec.left || 0); u++) { for (let d = 0; d < spec.values.length; d++) { hit('tine', 2093, 0.05, 0.12, 'piece', { d: d, unit: u }); t += 0.12; } t += 0.45; }
         break;
       }
+      case 'meanBound':
+        // the best the group can do: everyone but the smallest stands at the largest — and the fair share still stays below
+        spec.units.forEach((u, d) => { hit('drumLow', 98, 0.3, 0.22, 'floor', { d: d }); t += 0.35; for (let i = 0; i < u; i++) { hit('woodClick', 1300 + 120 * d, 0.05, 0.2, 'above', { d: d }); t += STEP; } t += GAP; });
+        for (let i = 0; i < spec.target; i++) { hit('jingle', 1568, 0.08, 0.12, 'target', { i: i }); t += STEP; }
+        break;
       case 'meanSum':
         for (let d = 0; d < spec.n; d++) { for (let i = 0; i < spec.mean / spec.unit; i++) { hit('woodClick', 1300, 0.05, 0.2, 'level', { d: d }); t += STEP; } t += GAP; }
         break;
@@ -305,6 +328,7 @@
     mean: 'כל רוקד: מכה עמוקה (כולם עומדים על הקטן ביותר) ואחריה מה שיש לו מעל. אחר כך מחלקים את העודף בסבבים — אחד לכל רוקד בכל סבב. לאף אחד לא היה הערך הזה בהתחלה — בנינו אותו.',
     meanNotValue: 'כל רוקד: מכה עמוקה ואחריה מה שיש לו מעל הקטן ביותר. אחר כך מחלקים את העודף בסבבים. האם למישהו היה בהתחלה בדיוק מה שיצא לכל אחד?',
     meanSum: 'כל אחד בדיוק בגובה הממוצע: אותה קבוצה לכל אחד. כמה קבוצות, וכמה בכל קבוצה?',
+    meanBound: 'המקרה הטוב ביותר: הקטן ביותר, ולידו מספר בגובה הגדול ביותר. אחר כך — הגובה שהממוצע צריך להגיע אליו מעל הקטן ביותר. האם חלוקה הוגנת יכולה להגיע עד שם?',
     pie: 'העוגה היא מעגל ההורה: כל רוקד הוא חלק שווה. גוון אחד לבעד, גוון אחר לנגד.',
     symbols: 'קודם סמל אחד נפתח ליחידות שלו. אחר כך כל סמל שווה את כולן. כמה סמלים?',
     sector: 'סיבוב שלם בנקישות שוות, כל נקישה שלושים מעלות. אחר כך רק הגזרה.',

@@ -71,6 +71,15 @@ test('undoing to find the box: walk back stage by stage', () => {
   assert.equal(Math.round(e.filter((n) => n.stage === 'result' && n.n === 1).reduce((a, n) => a + n.worth, 0) * 10), 74);
 });
 
+test('grade 4 order of operations: brackets, then × and : from the left, then + and −; each stage ends in its result', () => {
+  assert.deepEqual(spec('barCount', '36 − 12 : 4 + 2 = ?', 35).stages, [[':', 3], ['−', 33], ['+', 35]]);
+  assert.deepEqual(spec('barCount', '48 : 6 : 2 = ?', 4).stages, [[':', 8], [':', 4]], 'from the left');
+  assert.deepEqual(spec('barCount', '(100 + 20) × 50 = ? (כתבו בלי פסיק)', 6000).stages, [['(', 120], ['×', 6000]]);
+  assert.deepEqual(spec('barCount', '100 + 20 × 50 = ? (כתבו בלי פסיק)', 1100).stages, [['×', 1000], ['+', 1100]]);
+  assert.equal(spec('barCount', 'תמר קוראת 36 עמודים בכל יום. אחרי 3 שבועות נשארו לה 127 עמודים. כמה עמודים יש בספר?', 883).value, 883);
+  assert.equal(spec('barCount', '2 + 3 × 4 = ?', 14), null, 'JumpLine keeps the small bracket items');
+});
+
 test('only when the sounds give exactly the answer', () => {
   assert.equal(spec('groupsFirstLongChain', '120 − 8 × (20 − 15) = ?', 100), null, 'a wrong key is never set to sound');
   assert.equal(spec('nextBeat', '120 − 8 × (20 − 15) = ?', 80), null);
