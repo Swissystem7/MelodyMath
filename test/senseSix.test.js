@@ -95,6 +95,11 @@ test('circle area: one r × r block, then three blocks and a bit; doubling the r
   assert.equal(stage(ev('piBarsAround', 'מגדילים את רדיוס העיגול פי 2. פי כמה גדל השטח?', 4), 'big').length, 4);
 });
 
+test('an estimate of two almost-wholes: each bar with its missing ticks silent, then a deep stroke', () => {
+  const e = ev('roundBars', 'אומדן: 7/8 + 12/13 קרוב יותר ל־1 או ל־2? כתבו את המספר.', 2);
+  assert.equal(stage(e, 'barEnd').length, 2);
+  assert.equal(stage(e, 'tick').length, 19);
+});
 test('only when the sounds give exactly the answer', () => {
   assert.equal(spec('roundToGroup', 'בלי לחשב במדויק: האם 3,024 : 6 = 504 נכון? (כן/לא)', 'לא'), null, 'a wrong key is never set to sound');
   assert.equal(spec('nextBeat', 'קוטר המעגל 20 ס״מ. מה היקפו בס״מ? (π ≈ 3.14)', 62.8), null);

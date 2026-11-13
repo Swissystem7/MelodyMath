@@ -81,6 +81,10 @@
       const w = +m[1], a = +m[2], d = +m[3], k = +m[4], opts = [+m[5], +m[6], +m[7]];
       const exact = (w + a / d) * k, best = opts.reduce((x, y) => (Math.abs(y - exact) < Math.abs(x - exact) ? y : x));
       if (d <= 8 && w <= 3 && k <= 6) s = { kind: 'almost', whole: w, a: a, d: d, k: k, value: best, world: WORLDS.canon };
+    } else if ((m = /^אומדן: (\d+)\/(\d+) \+ (\d+)\/(\d+) קרוב יותר ל־(\d) או ל־(\d)\? כתבו את המספר\.$/.exec(p))) {
+      // two bars, each with a tick or two missing: together almost two wholes
+      const bars = [[+m[1], +m[2]], [+m[3], +m[4]]], sum = bars.reduce((x, [a, d]) => x + a / d, 0), o = [+m[5], +m[6]];
+      if (bars.every(([a, d]) => d <= 13 && a < d && a <= MAX_RUN)) s = { kind: 'almostSum', bars: bars, value: Math.abs(sum - o[0]) < Math.abs(sum - o[1]) ? o[0] : o[1], world: WORLDS.canon };
     } else if ((m = /^קוטר המעגל (\d+) ס״מ\. מה (?:היקפו|ההיקף) בס״מ\? \(π ≈ 3\.14\)$/.exec(p))) {
       const d = +m[1];
       if (d % 10 === 0) s = { kind: 'around', d: d, unit: 10, value: r2(PI * d), world: WORLDS.circle };
@@ -177,6 +181,10 @@
         for (let i = 0; i < spec.n; i++) { hit('drumLow', 98, 0.4, 0.24, 'whole'); t += 0.5; } t += GAP;
         for (let i = 0; i < spec.n / 2; i++) { hit('drumLow', 98, 0.4, 0.24, 'halfOf'); t += 0.5; }
         break;
+      case 'almostSum':
+        // each bar with its missing ticks silent; a deep stroke closes each bar
+        spec.bars.forEach(([a, d], b) => { for (let i = 0; i < d; i++) { if (i < a) hit('woodClick', 1500, 0.05, 0.18, 'tick', { bar: b }); t += 0.2; } hit('drumLow', 110, 0.35, 0.24, 'barEnd', { bar: b }); t += GAP; });
+        break;
       case 'almost':
         // whole bars of d ticks, then a bar with one tick missing (silence is silence), then k copy strokes
         for (let b = 0; b < spec.whole; b++) { for (let i = 0; i < spec.d; i++) { hit('woodClick', 1500, 0.05, 0.18, 'tick', { bar: b }); t += 0.2; } t += 0.4; }
@@ -248,6 +256,7 @@
     partOf: 'קודם המשפט השלם, ואחריו רק החלק שהשבר אומר — באותו קצב. קצר יותר או ארוך יותר?',
     fit: 'קודם השלמים. אחר כך כל שלם מתפרק לרבעים. כמה רבעים נכנסים — יותר או פחות מהשלמים?',
     half: 'קודם השלמים, ואחר כך חצי מהם. יותר או פחות?',
+    almostSum: 'כל שבר הוא תיבה שחסר בה מעט — שקט במקום הנקישות החסרות — ומכה עמוקה סוגרת אותה. כמה תיבות כמעט מלאות שמעתם?',
     almost: 'תיבות מלאות, ואחריהן תיבה שחסרה בה נקישה אחת — כמעט מלאה. אחר כך מכה לכל עותק. בערך כמה שלמים בכל עותק?',
     around: 'צעדי הדבקה הם הקוטר — קו ישר. אחר כך הולכים סביב במעגל ההורה: שלוש פעמים קוטר, ועוד נקישה קטנה — קצת, פחות מצעד. פאי הוא קצת יותר משלוש.',
     aroundRadius: 'צעד דבקה, הגונג של המרכז, ועוד צעד — שני רדיוסים הם קוטר. אחר כך הולכים סביב במעגל ההורה: שלוש פעמים קוטר, ועוד נקישה קטנה. פאי הוא קצת יותר משלוש.',

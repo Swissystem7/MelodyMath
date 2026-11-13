@@ -101,6 +101,9 @@
       s = meanPlan([60, 70, 80, 90]);
       if (s) { s.kind = 'meanNotValue'; s.value = 'לא'; }
     // ---- displays
+    } else if (/^רוצים להראות איזה חלק מ\S+ בחר כל \S+ \S+\. מה מתאים יותר: עוגה או עמודות\?$/.test(p)) {
+      // parts of one whole: the hora walks the parts around and closes the circle back where it started
+      s = { kind: 'wholeParts', sizes: [3, 2, 4, 3], value: 'עוגה', world: WORLDS.hora };
     } else if ((m = /^מציגים (\d+) בעד ו־(\d+) נגד בדיאגרמת עוגה של (\d+) חלקים שווים\. כמה חלקים יהיו «בעד»\?$/.exec(p))) {
       const a = +m[1], b = +m[2], parts = +m[3], unit = (a + b) / parts;
       if (Number.isInteger(unit) && a % unit === 0) s = { kind: 'pie', parts: parts, yes: a / unit, value: a / unit, world: WORLDS.hora };
@@ -260,6 +263,12 @@
       case 'pie':
         for (let i = 0; i < spec.parts; i++) { hit(i < spec.yes ? 'pluck' : 'bowed', i < spec.yes ? 196 : 330, 0.2, 0.22, i < spec.yes ? 'yes' : 'no', { part: i }); t += 0.5; }
         break;
+      case 'wholeParts': {
+        const tim = [['pluck', 196], ['bowed', 330], ['metalBell', 784], ['woodClick', 1500]];
+        spec.sizes.forEach((n, k) => { for (let i = 0; i < n; i++) { hit(tim[k][0], tim[k][1], 0.15, 0.2, 'part', { part: k }); t += 0.3; } t += 0.25; });
+        hit('gong', 165, 0.6, 0.16, 'closed'); t += 0.8;
+        break;
+      }
       case 'symbols':
         // the first symbol opens into its units, then each symbol stands for them
         for (let i = 0; i < spec.per; i++) { hit('woodClick', 1500, 0.05, 0.16, 'unit'); t += 0.2; }
@@ -329,6 +338,7 @@
     meanNotValue: 'כל רוקד: מכה עמוקה ואחריה מה שיש לו מעל הקטן ביותר. אחר כך מחלקים את העודף בסבבים. האם למישהו היה בהתחלה בדיוק מה שיצא לכל אחד?',
     meanSum: 'כל אחד בדיוק בגובה הממוצע: אותה קבוצה לכל אחד. כמה קבוצות, וכמה בכל קבוצה?',
     meanBound: 'המקרה הטוב ביותר: הקטן ביותר, ולידו מספר בגובה הגדול ביותר. אחר כך — הגובה שהממוצע צריך להגיע אליו מעל הקטן ביותר. האם חלוקה הוגנת יכולה להגיע עד שם?',
+    wholeParts: 'השאלה היא איזה חלק מהשלם. החלקים נשמעים בהליכה סביב המעגל, כל חלק בגוון משלו, וכולם יחד סוגרים אותו בחזרה לנקודת ההתחלה — השלם כולו. איזו דיאגרמה מראה חלקים של שלם אחד?',
     pie: 'העוגה היא מעגל ההורה: כל רוקד הוא חלק שווה. גוון אחד לבעד, גוון אחר לנגד.',
     symbols: 'קודם סמל אחד נפתח ליחידות שלו. אחר כך כל סמל שווה את כולן. כמה סמלים?',
     sector: 'סיבוב שלם בנקישות שוות, כל נקישה שלושים מעלות. אחר כך רק הגזרה.',
