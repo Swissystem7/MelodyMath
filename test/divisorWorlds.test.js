@@ -119,7 +119,7 @@ test('play: every event goes to playVoice on the shared clock; without audio it 
 test('index.html renders the widget and reveals after the answer; sw.js caches it', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(html, /MM_DIVISOR_WORLDS\.play\(dw\)/);
-  assert.match(html, /host\._divSpec && typeof MM_DIVISOR_WORLDS!=='undefined'/);
+  assert.match(html, /host\._divisorSpec && typeof MM_DIVISOR_WORLDS!=='undefined'/);
   assert.match(html, /src="src\/lib\/music\/divisorWorlds\.js"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/divisorWorlds\.js'/);
 });
