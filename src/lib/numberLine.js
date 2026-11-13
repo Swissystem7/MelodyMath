@@ -18,11 +18,7 @@
     let upper = Math.round(Number(max));
     if (!Number.isFinite(lower)) lower = 0;
     if (!Number.isFinite(upper)) upper = 20;
-    if (lower > upper) {
-      const t = lower;
-      lower = upper;
-      upper = t;
-    }
+    // Callers always pass lower <= upper (normalizeLine orders them first).
     const v = Math.round(Number(n));
     if (!Number.isFinite(v)) return lower;
     return Math.min(upper, Math.max(lower, v));

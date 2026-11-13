@@ -343,3 +343,25 @@ test('inverted boundaries normalize safely and swap endpoints', () => {
   assert.match(html, /class="nline-tick on"[^>]*data-n="5"/);
   assert.match(html, /נבחר: 5/);
 });
+
+test('a single given endpoint opens a 10-step line on the missing side', () => {
+  const onlyMin = line.normalizeLine({ min: 50 });
+  assert.equal(onlyMin.min, 50);
+  assert.equal(onlyMin.max, 60);
+  const onlyMax = line.normalizeLine({ max: -5 });
+  assert.equal(onlyMax.min, -15);
+  assert.equal(onlyMax.max, -5);
+});
+
+test('set(null) or set(NaN) clears the selection on a bound line', () => {
+  const root = fakeRoot('inner');
+  delete root.querySelectorAll;
+  const api = line.bindNumberLine(root, { min: 0, max: 4, start: 2 });
+  assert.equal(api.value(), 2);
+  api.set(null);
+  assert.equal(api.value(), null);
+  assert.match(root.html, /בחרו מספר על הישר/);
+  api.set(3);
+  api.set(NaN);
+  assert.equal(api.value(), null);
+});
