@@ -254,6 +254,7 @@
       b: extra.b,
       total: extra.total, research: extra.research,
       band: extra.band,
+      fence: extra.fence,
     };
   }
 
@@ -2192,6 +2193,28 @@
   );
   musicForLate();
 
+  // ---------- FenceFloor: perimeter vs area of the same rectangle (grade ה׳) ----------
+  // music/fenceFloor.js. One musical world per item
+  // (docs/research/perimeter-area-fence-floor-2026-11-13.md). Appended last so ids stay put.
+  function FENCE(prompt, answer, hint, level, fence) {
+    return I('ה', 'geometry', prompt, answer, hint, { standard: ST.PERIMETER, strand: STRAND.GEO, level: level, fence: fence });
+  }
+  RAW.push(
+    FENCE('ל־1×8 ול־2×4 אותו שטח. בכמה ס״מ ההיקף של 1×8 ארוך יותר?', 6, 'הקיפו כל מלבן צלע אחרי צלע', 1,
+      { world: 'jazz', rects: [[1, 8], [2, 4]], ask: 'perimeterDiff' }),
+    FENCE('מ־6 משבצות בונים 1×6 ו־2×3. מה ההפרש בין ההיקפים שלהם?', 4, 'לא הוספנו משבצות — אבל מה קרה לגדר?', 1,
+      { world: 'balkan', rects: [[1, 6], [2, 3]], ask: 'perimeterDiff' }),
+    FENCE('מסובבים מלבן 2×4 ל־4×2. מה ההיקף אחרי הסיבוב?', 12, 'האם נוספה או נעלמה צלע?', 1,
+      { world: 'andes', rects: [[2, 4], [4, 2]], ask: 'perimeterOf', index: 1 }),
+    FENCE('ל־1×9 היקף 20, ול־3×4 היקף 14. מה השטח הגדול מבין השניים?', 12, 'גדר ארוכה יותר לא אומרת רצפה גדולה יותר', 2,
+      { world: 'mande', rects: [[1, 9], [3, 4]], ask: 'areaMax' }),
+    FENCE('ל־1×5 ול־2×4 אותו היקף. מה השטח הגדול מבין השניים?', 8, 'ספרו משבצות בכל מלבן לחוד', 2,
+      { world: 'japan', rects: [[1, 5], [2, 4]], ask: 'areaMax' }),
+    FENCE('מלבנים בהיקף 12: 1×5, 2×4 ו־3×3. מה השטח הגדול ביותר?', 9, 'מה קורה כשהמלבן מתקרב לריבוע?', 3,
+      { world: 'gospel', rects: [[1, 5], [2, 4], [3, 3]], ask: 'areaMax' })
+  );
+  musicForLate();
+
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
   // way and music activity uses one of 14 mechanisms; the peer-reviewed
   // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:
@@ -2243,7 +2266,7 @@
         'shapeLoop', 'stairRows', 'columnPattern', 'tensSequence', 'digitMotif', 'sideCountMotif', 'foldCorner', 'hourCycle', 'cubeRowPattern', 'tableRowPattern'] },
     M7: { he: 'הליכה ופנייה בקצב — זוויות, היקף ומצולעים', sources: ['shoval2011', 'smith2014', 'moore2012'],
       finding: 'Movement-based, not music alone: pupils learned angles through mindful body movement in cooperative groups (Shoval 2011) and body-scale angle actions (Smith et al. 2014); a third-grade dance and geometry unit (Moore & Linder 2012, practice report).',
-      tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
+      tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'fenceFloor', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
         'floorWalkSides', 'turnCount', 'armQuarterTurn', 'joinWalk', 'heelToeSteps', 'clockWalk', 'barStepWalk', 'addWalkLine', 'subWalkBack', 'subColumnSteps', 'zeroStartSteps', 'handTurnBody', 'halfTurnBody', 'rowStepsCompare', 'barTowerSteps', 'splitWalk'] },
     M8: { he: 'טמפו ו־BPM — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
       tags: ['sixtyBeats', 'tempoPercent', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
@@ -2390,6 +2413,7 @@
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
     if (raw.band) it.band = raw.band;
+    if (raw.fence) it.fence = raw.fence;
     if (raw.vert) it.vert = raw.vert;
     if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
