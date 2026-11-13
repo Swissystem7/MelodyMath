@@ -26,7 +26,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['groupsFirstLongChain', 'barFill', 'reciprocalNotes', 'bracketNoteFirst', 'bracketBeatsFirst', 'barCount', 'balanceBars']);
+  const TAGS = Object.freeze(['groupsFirstLongChain', 'barFill', 'reciprocalNotes', 'bracketNoteFirst', 'bracketBeatsFirst', 'barCount', 'balanceBars', 'groupsThenMore']);
   const MAX_RUN = 12;
   const MAX_EVENTS = 56;
   const GAP = 0.7;
@@ -125,6 +125,9 @@
       const best = less ? Math.ceil(lim / k) - 1 : Math.floor(lim / k) + 1;
       const tries = less ? [best, best + 1] : [best - 1, best];
       s = { kind: 'bound', tries: tries.map((x) => [x * k, less ? x * k < lim : x * k > lim]), value: best, world: WORLDS.stages };
+    } else if (item.music === 'groupsThenMore' && !jumpLinePlays(item) && (m = /^הבית הראשון בשיר הוא (\d+) תיבות של (\d+) פעמות\. הבית השני ארוך פי (\d+)\. כמה פעמות בבית השני\?$/.exec(p))) {
+      const first = +m[1] * +m[2];
+      s = st([['×', first], ['×', first * +m[3]]]);
     } else if ((m = /^(\S+) קוראת (\d+) עמודים בכל יום\. אחרי (\d) שבועות נשארו לה (\d+) עמודים\. כמה עמודים יש בספר\?$/.exec(p))) {
       const perDay = +m[2], days = 7 * +m[3], read = perDay * days;
       s = st([['×', days], ['×', read], ['+', read + +m[4]]]);

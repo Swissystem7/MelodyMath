@@ -84,6 +84,14 @@ test('parity (funk): every even multiple of three lands on the One and rings six
   assert.deepEqual(stage(e, 'and').map((n) => n.m), [3, 9]);
 });
 
+test('the largest prime below 30 walks 29 to the middle — only one and itself ring; two multiples of 3 make a 9', () => {
+  const w = ev('meterGroups', 'מהו המספר הראשוני הגדול ביותר שקטן מ־30?', 29);
+  assert.equal(stage(w, 'divisor').length, 2);
+  assert.deepEqual([...new Set(stage(w, 'try').map((n) => n.a))], [1, 2, 3, 4, 5]);
+  const t = ev('stickingParity', '219 ו־29,253 הם כפולות של 3. האם המכפלה שלהם מתחלקת ב־9? (כן/לא)', 'כן');
+  assert.equal(stage(t, 'factor').length, 6);
+  assert.equal(stage(t, 'nine').length, 9);
+});
 test('only for its tags and phrasings', () => {
   assert.equal(spec('meters', 'במשקל 3/4, פעימה 20 — היא מודגשת? (כתבו כן או לא)', 'לא'), null);
   assert.equal(spec('remainders', '56 ÷ 7 = ?', 8), null);

@@ -25,9 +25,9 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels', 'repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse']);
+  const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels', 'repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols']);
   // the modules that already own repeatedBars / takeAwayBeats items keep them
-  const EXTRA_TAGS = ['repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse'];   // only the vertical-multiplication and counting-up rules use these
+  const EXTRA_TAGS = ['repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols'];   // only the vertical-multiplication and counting-up rules use these
   const OWNERS = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats'];
   const nodeOwners = [];
   if (typeof module === 'object' && module.exports && typeof require === 'function') OWNERS.forEach((f) => { try { nodeOwners.push(require('./' + f + '.js')); } catch (e) { /* absent */ } });
@@ -132,6 +132,11 @@
       return upPlan(num(m[1]), num(m[2]));
     } else if ((m = /^בטבלה: בעיר א׳ ([\d,]+) תושבים, בעיר ב׳ ([\d,]+) ובעיר ג׳ ([\d,]+)\. בכמה תושבים עיר ג׳ גדולה מעיר ב׳\?/.exec(p))) {
       return upPlan(num(m[2]), num(m[3]));
+    } else if ((m = /^כדי להפוך את ([\d,]+) ל־([\d,]+) מוסיפים (\d+) אלפים ועוד כמה מאות\?$/.exec(p))) {
+      // counting up: the thousands jump the text gives, and the hundreds jump the child hears
+      const u = upPlan(num(m[1]), num(m[2]));
+      const th = u && u.jumps.find(([pl]) => pl === 3), hu = u && u.jumps.find(([pl]) => pl === 2);
+      if (u && th && th[1] === +m[3] && hu && u.jumps.length === 2) { u.value = hu[1]; u.ask = 'hundreds'; return u; }
     } else if ((m = /^בהצגה הראשונה נכחו (\d+) צופים, ובשנייה (\d+)\. כמה צופים נכחו בסך הכול בשתי ההצגות\?$/.exec(p))) {
       return { kind: 'add', a: +m[1], b: +m[2], value: +m[1] + +m[2] };
     }
