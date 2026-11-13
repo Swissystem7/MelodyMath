@@ -73,6 +73,7 @@
   }
 
   function isSonifyPage(here) {
+    if (typeof here !== 'string') return false;
     return here === 'functions.html' || here === '807.html' || here === 'frequency.html';
   }
 
@@ -80,7 +81,12 @@
   // product: elementary practice. Sonification (high school) keeps its full
   // two-product nav on its own pages and is described on landing.html.
   function siteNavHtml(page) {
-    const here = String(page || '').toLowerCase();
+    let here = '';
+    if (typeof page === 'string') {
+      here = page.trim().toLowerCase();
+    } else if (typeof page === 'number' && Number.isFinite(page)) {
+      here = String(page).toLowerCase();
+    }
     const sonify = isSonifyPage(here);
     function link(file, label) {
       const current = here === file || (here === '' && file === 'index.html');
@@ -149,71 +155,99 @@
 
   function countSessionCorrectAnswers(history) {
     if (!Array.isArray(history)) return 0;
-    return history.filter(function (x) { return x && x.correct; }).length;
+    return history.filter(function (x) {
+      if (!x || typeof x !== 'object') return false;
+      if (x.correct === true) return true;
+      if (typeof x.correct === 'number') return Number.isFinite(x.correct) && x.correct > 0;
+      return false;
+    }).length;
+  }
+
+  function toFiniteCount(val) {
+    if (val == null || val === '') return 0;
+    const num = typeof val === 'number' ? val : Number(val);
+    return Number.isFinite(num) ? Math.max(0, Math.floor(num)) : 0;
   }
 
   function renderExerciseCorrectCount(doc, correct) {
     if (!doc || typeof doc.getElementById !== 'function') return null;
-    var el = doc.getElementById('exerciseCorrectCount');
+    const safeCorrect = toFiniteCount(correct);
+    let el = doc.getElementById('exerciseCorrectCount');
     if (!el && typeof doc.createElement === 'function') {
       el = doc.createElement('p');
       el.id = 'exerciseCorrectCount';
       el.className = 'exercise-correct-count';
-      el.setAttribute('role', 'status');
-      el.setAttribute('aria-live', 'polite');
-      var stats = doc.getElementById('stats');
-      if (stats && stats.parentNode) stats.parentNode.insertBefore(el, stats.nextSibling);
+      if (typeof el.setAttribute === 'function') {
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+      }
+      const stats = doc.getElementById('stats');
+      if (stats && stats.parentNode && typeof stats.parentNode.insertBefore === 'function') {
+        stats.parentNode.insertBefore(el, stats.nextSibling);
+      }
     }
-    if (el) el.textContent = 'היום פתרת נכון ' + correct + ' שאלות';
+    if (el) el.textContent = 'היום פתרת נכון ' + safeCorrect + ' שאלות';
     return el;
   }
 
   function showExerciseSessionSummary(doc, history, options) {
-    options = options || {};
-    if (!doc || !Array.isArray(history)) return { correct: 0, total: 0 };
-    var correct = countSessionCorrectAnswers(history);
-    var total = history.length;
-    var levelForId = options.levelForId || function () { return 1; };
-    var maxLevel = 1;
+    const opts = options && typeof options === 'object' ? options : {};
+    if (!doc || typeof doc.getElementById !== 'function' || !Array.isArray(history)) {
+      return { correct: 0, total: 0 };
+    }
+    const correct = countSessionCorrectAnswers(history);
+    const total = history.length;
+    const levelForId = typeof opts.levelForId === 'function' ? opts.levelForId : function () { return 1; };
+    let maxLevel = 1;
     history.forEach(function (x) {
-      var lv = levelForId(x.id);
+      if (!x || typeof x !== 'object') return;
+      const rawLv = levelForId(x.id);
+      const lv = typeof rawLv === 'number' && Number.isFinite(rawLv) ? rawLv : 1;
       if (lv > maxLevel) maxLevel = lv;
     });
-    var statsEl = doc.getElementById(options.statsId || 'stats');
+    const safeMaxLevel = typeof maxLevel === 'number' && Number.isFinite(maxLevel) ? maxLevel : 1;
+    const pct = total > 0 && Number.isFinite(correct / total) ? Math.round((correct / total) * 100) : 0;
+    const safePct = Number.isFinite(pct) && pct >= 0 ? pct : 0;
+    const statsId = typeof opts.statsId === 'string' && opts.statsId ? opts.statsId : 'stats';
+    const statsEl = doc.getElementById(statsId);
     if (statsEl) {
-      statsEl.innerHTML = '<div class="stat"><strong>' + correct + '/' + total + '</strong>נכונות</div>'
-        + '<div class="stat"><strong>' + (total ? Math.round(correct / total * 100) : 0) + '%</strong>דיוק בסבב</div>'
-        + '<div class="stat"><strong>' + maxLevel + '</strong>רמה מרבית בסבב</div>';
+      statsEl['innerHTML'] = '<div class="stat"><strong>' + correct + '/' + total + '</strong>נכונות</div>'
+        + '<div class="stat"><strong>' + safePct + '%</strong>דיוק בסבב</div>'
+        + '<div class="stat"><strong>' + safeMaxLevel + '</strong>רמה מרבית בסבב</div>';
     }
     renderExerciseCorrectCount(doc, correct);
-    var summaryTextEl = doc.getElementById(options.summaryTextId || 'summaryText');
+    const summaryTextId = typeof opts.summaryTextId === 'string' && opts.summaryTextId ? opts.summaryTextId : 'summaryText';
+    const summaryTextEl = doc.getElementById(summaryTextId);
     if (summaryTextEl) {
-      summaryTextEl.textContent = options.summaryText
-        || 'ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.';
+      summaryTextEl.textContent = typeof opts.summaryText === 'string' && opts.summaryText
+        ? opts.summaryText
+        : 'ספירה של הסבב הזה במכשיר — לא ציון ולא הוכחה שהתרגול עוזר. תרגיל שטעו בו יחזור מוקדם יותר בסבב הבא.';
     }
-    if (options.showPanels) {
-      var quiz = doc.getElementById('quiz');
-      var summary = doc.getElementById('summary');
-      if (quiz && quiz.classList) quiz.classList.toggle('hidden', true);
-      if (summary && summary.classList) summary.classList.toggle('hidden', false);
+    if (opts.showPanels) {
+      const quiz = doc.getElementById('quiz');
+      const summary = doc.getElementById('summary');
+      if (quiz && quiz.classList && typeof quiz.classList.toggle === 'function') quiz.classList.toggle('hidden', true);
+      if (summary && summary.classList && typeof summary.classList.toggle === 'function') summary.classList.toggle('hidden', false);
     }
     return { correct: correct, total: total };
   }
 
   function hookPracticeFinishSummary() {
     if (IN_NODE || typeof document === 'undefined') return;
-    var g = typeof globalThis !== 'undefined' ? globalThis : root;
+    const g = typeof globalThis !== 'undefined' ? globalThis : root;
     if (!g || typeof g.finish !== 'function' || g.finish.__mmExerciseSummary) return;
-    var previous = g.finish;
+    const previous = g.finish;
     g.finish = function mmFinishWithSummary() {
       previous.call(this);
-      var summary = document.getElementById('summary');
-      if (!summary || summary.classList.contains('hidden')) return;
-      var stats = document.getElementById('stats');
+      if (typeof document === 'undefined') return;
+      const summary = document.getElementById('summary');
+      if (!summary || (summary.classList && typeof summary.classList.contains === 'function' && summary.classList.contains('hidden'))) return;
+      const stats = document.getElementById('stats');
       if (!stats) return;
-      var match = String(stats.innerHTML).match(/<strong>(\d+)\/(\d+)<\/strong>/);
+      const match = String(stats.innerHTML || '').match(/<strong>(\d+)\/(\d+)<\/strong>/);
       if (!match) return;
-      renderExerciseCorrectCount(document, parseInt(match[1], 10));
+      const parsed = parseInt(match[1], 10);
+      renderExerciseCorrectCount(document, Number.isFinite(parsed) ? parsed : 0);
     };
     g.finish.__mmExerciseSummary = true;
   }
