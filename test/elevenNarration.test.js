@@ -77,8 +77,8 @@ test('tools/elevenNarration runs as standalone CLI and reports missing key', () 
 });
 
 test('NarrationPlayer returns asset paths and handles unknown keys', () => {
-  assert.equal(NarrationPlayer.getAudioPath('addition'), 'sounds/voice/he/prompt_addition.mp3');
-  assert.equal(NarrationPlayer.getAudioPath('feedback_good'), 'sounds/voice/he/feedback_good.mp3');
+  assert.equal(NarrationPlayer.getAudioPath('addition'), 'sounds/voice/he/prompt_addition.wav');
+  assert.equal(NarrationPlayer.getAudioPath('feedback_good'), 'sounds/voice/he/feedback_correct.wav');
   assert.equal(NarrationPlayer.getAudioPath('non_existent'), null);
 });
 

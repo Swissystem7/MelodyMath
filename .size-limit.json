@@ -1,0 +1,12 @@
+[
+  {
+    "name": "index.html — מעטפת הדף הראשי",
+    "path": "index.html",
+    "limit": "70 kB"
+  },
+  {
+    "name": "ספריית המקור שמגיעה לדפדפן (src/**/*.js)",
+    "path": "src/**/*.js",
+    "limit": "645 kB"
+  }
+]

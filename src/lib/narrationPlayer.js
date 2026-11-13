@@ -10,12 +10,12 @@
   'use strict';
 
   const NARRATION_ASSETS = {
-    addition: 'sounds/voice/he/prompt_addition.mp3',
-    subtraction: 'sounds/voice/he/prompt_subtraction.mp3',
-    multiplication: 'sounds/voice/he/prompt_multiplication.mp3',
-    division: 'sounds/voice/he/prompt_division.mp3',
-    feedback_good: 'sounds/voice/he/feedback_good.mp3',
-    feedback_retry: 'sounds/voice/he/feedback_retry.mp3'
+    addition: 'sounds/voice/he/prompt_addition.wav',
+    subtraction: 'sounds/voice/he/prompt_subtraction.wav',
+    multiplication: 'sounds/voice/he/prompt_multiplication.wav',
+    division: 'sounds/voice/he/prompt_division.wav',
+    feedback_good: 'sounds/voice/he/feedback_correct.wav',
+    feedback_retry: 'sounds/voice/he/feedback_retry.wav'
   };
 
   function getAudioPath(key) {
