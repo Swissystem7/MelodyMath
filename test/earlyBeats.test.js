@@ -152,6 +152,15 @@ test('play: every event goes to playVoice on the shared clock; fade plays only t
   assert.equal(E.play(null, env), null);
 });
 
+test('ten first, then more: 6 + 7 + 7 gathers into two toms; 30 − 10 − 10 leaves one tom', () => {
+  const e = E.soundEvents(E.specForItem({ music: 'tenThenMore', prompt: '6 + 7 + 7 = ?', answer: 20 }));
+  assert.equal(e.filter((n) => n.stage === 'gatherTom').length, 2);
+  assert.equal(e.filter((n) => n.stage === 'bak').length, 20);
+  const c = E.soundEvents(E.specForItem({ music: 'tenThenMore', prompt: '30 − 10 − 10 = ?', answer: 10 }));
+  assert.equal(c.filter((n) => n.stage === 'start').length, 3);
+  assert.equal(c.filter((n) => n.stage === 'left').length, 1);
+  assert.equal(E.specForItem({ music: 'tenThenMore', prompt: '2 + 3 + 4 = ?', answer: 9 }).kind, 'parts', 'small sums keep their darbuka parts');
+});
 test('index.html renders the widget, plays with the button mode, and reveals after the answer; sw.js caches it', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(html, /MM_EARLY_BEATS\.play\(eb, null, b\.getAttribute\('data-mode'\)\)/);

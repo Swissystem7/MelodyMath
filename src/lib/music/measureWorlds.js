@@ -81,6 +81,13 @@
     } else if (!s && (m = /^המקצוע של קובייה גדל מ־(\d+) ס״מ ל־(\d+) ס״מ\. פי כמה גדל שטח הפנים\?$/.exec(p))) {
       const a = +m[1], b = +m[2];
       s = { kind: 'coverGrow', faces: [[a, a], [b, b]], value: (b * b) / (a * a), world: WORLDS.cajon };
+    } else if (!s && (m = /^בתיבה (\d+) קוביות\. הוצאנו (\d+)\. כמה קוביות נשארו\?$/.exec(p))) {
+      // the box full, then the same places again: the cubes taken out are silent
+      const n = +m[1], out = +m[2];
+      if (n <= MAX_RUN && out < n) s = { kind: 'takeOut', n: n, out: out, value: n - out, world: WORLDS.cajon };
+    } else if (!s && (m = /^תיבה אחת בנויה מ־(\d+) שכבות של (\d+) קוביות, ותיבה שנייה מ־(\d+) שכבות של (\d+) קוביות\. בכמה קוביות יש בראשונה יותר\?$/.exec(p))) {
+      const a = [+m[1], +m[2]], b = [+m[3], +m[4]], va = a[0] * a[1], vb = b[0] * b[1];
+      if (va > vb && va <= 16 && vb <= 16) s = { kind: 'layersCompare', a: a, b: b, value: va - vb, world: WORLDS.cajon };
     } else if (!s && (m = /^תיבה בנויה מ־(\d+) קוביות של 1 סמ״ק\. מה נפחה בסמ״ק\?$/.exec(p))) {
       const n = +m[1];
       if (n === 12) s = { kind: 'fill', dims: [3, 2, 2], value: n, world: WORLDS.cajon };
@@ -170,6 +177,18 @@
       case 'fill':
         for (let l = 0; l < spec.dims[2]; l++) fillLayer(spec.dims[0], spec.dims[1], { layer: l });
         break;
+      case 'takeOut':
+        for (let i = 0; i < spec.n; i++) { hit('drumLow', 82, 0.18, 0.26, 'fill', { i: i }); t += ROW; }
+        t += LONG;
+        for (let i = 0; i < spec.n; i++) { if (i < spec.value) hit('drumLow', 82, 0.18, 0.26, 'left', { i: i }); t += ROW; }
+        break;
+      case 'layersCompare': {
+        // each box layer by layer (a deep stroke closes every layer); then counting on from the smaller box to the bigger one
+        const box = (dims, tag) => { for (let l = 0; l < dims[0]; l++) { for (let c = 0; c < dims[1]; c++) { hit('drumLow', 82, 0.18, 0.26, 'cube', { box: tag, layer: l }); t += ROW; } hit('drumLow', 55, 0.4, 0.26, 'layer', { box: tag, layer: l }); t += SHORT; } t += LONG; };
+        box(spec.a, 0); box(spec.b, 1);
+        for (let i = 0; i < spec.value; i++) { hit('drumHigh', 523, 0.12, 0.2, 'more', { i: i }); t += ROW; }
+        break;
+      }
       case 'height':
         // one row of unit cubes, then a stroke for every row of a layer, then a deep stroke for every layer
         for (let c = 0; c < spec.row; c++) { hit('drumLow', 82, 0.16, 0.22, 'fill', { row: 0 }); t += ROW; }
@@ -212,6 +231,8 @@
     coverPairs: 'לכל סוג פאה: מכסים אותה, ומכה עמוקה אחת היא התאומה שלה בצד השני. אחרי כל זוג — עצרו ואמרו כמה עד עכשיו.',
     coverGrow: 'פאה קטנה, ואחריה פאה שהמקצוע שלה גדל. האם רק השורה התארכה — או שגם מספר השורות גדל?',
     fill: 'נפח הוא מילוי: מכה עמוקה לכל קובייה, שקט קצר בסוף שורה, שקט ארוך בסוף שכבה. כמה בשכבה, וכמה שכבות?',
+    takeOut: 'מכה לכל קובייה בתיבה. אחר כך אותם מקומות שוב — הקוביות שהוצאו נשמעות כשקט. כמה מכות נשארו?',
+    layersCompare: 'כל תיבה שכבה אחרי שכבה: מכה לכל קובייה, ומכה עמוקה סוגרת כל שכבה. אחר כך סופרים קדימה מהתיבה הקטנה עד הגדולה. כמה מכות נוספו?',
     height: 'קודם שורה אחת של קוביות. אחר כך מכה לכל שורה בשכבה, ואחר כך גונג לכל שכבה. כמה שכבות — זה הגובה.',
   };
   const WORTH_HE = { 1: 'אחד', 10: 'עשרה', 100: 'מאה' };

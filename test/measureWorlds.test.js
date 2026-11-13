@@ -97,10 +97,19 @@ test('only when the sounds give exactly the answer', () => {
   assert.equal(M.specForItem(null), null);
 });
 
-test('the bank: measurement items of grades 4 and 6 are heard; no answer in the picture before it is given', () => {
+test('cubes taken out are silent in their places; two boxes compared layer by layer, then counting on', () => {
+  const t = M.soundEvents(M.specForItem({ music: 'cubeLayerGroups', prompt: 'בתיבה 10 קוביות. הוצאנו 3. כמה קוביות נשארו?', answer: 7 }));
+  assert.equal(t.filter((n) => n.stage === 'fill').length, 10);
+  assert.equal(t.filter((n) => n.stage === 'left').length, 7);
+  const c = M.soundEvents(M.specForItem({ music: 'cubeLayerGroups', prompt: 'תיבה אחת בנויה מ־2 שכבות של 6 קוביות, ותיבה שנייה מ־3 שכבות של 3 קוביות. בכמה קוביות יש בראשונה יותר?', answer: 3 }));
+  assert.equal(c.filter((n) => n.stage === 'layer').length, 5);
+  assert.equal(c.filter((n) => n.stage === 'more').length, 3);
+});
+
+test('the bank: measurement items of grades 2, 4 and 6 are heard; no answer in the picture before it is given', () => {
   const list = banks.allItems().filter((it) => M.specForItem(it));
   assert.ok(list.length >= 22, 'played ' + list.length);
-  assert.deepEqual([...new Set(list.map((it) => it.grade))].sort(), ['ד', 'ו']);
+  assert.deepEqual([...new Set(list.map((it) => it.grade))].sort(), ['ב', 'ד', 'ו']);
   list.forEach((it) => {
     const s = M.specForItem(it), h = M.html(s), a = String(it.answer);
     assert.ok(/^\d+$/.test(a) ? !(h.match(/\d+/g) || []).includes(a) : !h.includes(a), 'leak: ' + it.prompt);

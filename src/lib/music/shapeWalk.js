@@ -83,6 +83,9 @@
     } else if ((m = /זוויות המשולש הן (\d+), (\d+) ו־(\d+) מעלות/.exec(p))) {
       const cs = [+m[1], +m[2], +m[3]];
       if (cs[0] + cs[1] + cs[2] === 180) s = { kind: 'triangle', corners: cs, value: triClass(cs), world: WORLDS.hora };
+    } else if (/^כמה זוויות ישרות יכולות להיות לכל היותר במשולש אחד\?$/.test(p)) {
+      // two right corners use up the whole half turn: nothing is left for the third corner, the triangle never closes
+      s = { kind: 'triangle', corners: [90, 90, 0], maxRight: true, value: 1, world: WORLDS.hora };
     } else if (/למשולש יש בדיוק שתי צלעות שוות/.test(p)) {
       s = { kind: 'triSides', sides: [0.8, 0.8, 0.5], value: 'שווה־שוקיים', world: WORLDS.hora };
     } else if (/שני ישרים שלעולם אינם נפגשים/.test(p)) {
@@ -260,6 +263,7 @@
     name: 'רקיעה היא פינה, השקט שאחריה הוא צלע. ספרו רקיעות — ואז תנו לצורה את שמה.',
     compareShapes: 'כל צורה בתורה, לפי הסדר שבשאלה, עם הפסקה ביניהן. ספרו כמה רקיעות בכל אחת.',
     rightCorners: 'אחרי כל רקיעה — הפינה בנקישות. השוו כל פינה לדגם. כמה פינות זהות לדגם?',
+    maxRight: 'קודם דגם של פינה ישרה. אחר כך הולכים סביב משולש עם שתי פינות ישרות: אחרי השתיים לא נשארו נקישות לפינה השלישית, והמשולש לא נסגר. כמה פינות ישרות אפשר?',
     triangle: 'אחרי כל רקיעה — הפינה בנקישות. השוו כל פינה לדגם: צרה יותר, זהה, או רחבה יותר?',
     quad: 'שתי שאלות: האם השתיקות (הצלעות) שוות? האם הפינות זהות לדגם?',
     triSides: 'שתי שאלות: כמה רקיעות שמעתם? וכמה מהשתיקות היו שוות באורכן?',
@@ -277,7 +281,7 @@
     const revealed = !!(opts && opts.revealed);
     return '<div class="shape-walk">'
       + '<p class="band-note">' + esc(spec.world.he + ': ' + spec.world.why + '.') + '</p>'
-      + '<p class="band-note">' + esc(HOW[spec.kind]) + '</p>'
+      + '<p class="band-note">' + esc(spec.maxRight ? HOW.maxRight : HOW[spec.kind]) + '</p>'
       + (revealed
         ? '<p class="band-predict sw-silent">עכשיו בלי צליל: אמרו במילים מה שמעתם, ואז ציירו — גם מסובב, גם בגודל אחר.</p>'
         : '<p class="band-predict">לפני שלוחצים — נחשו. אחר כך הקשיבו וספרו.</p>')
