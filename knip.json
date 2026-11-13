@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "sw.js",
+    "src/data/struggleTopics.js",
+    "test/**/*.js",
+    "tools/**/*.js"
+  ],
+  "project": [
+    "src/**/*.js",
+    "test/**/*.js",
+    "tools/**/*.js"
+  ]
+}
