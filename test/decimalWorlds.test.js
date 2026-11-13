@@ -139,6 +139,15 @@ test('play: every event goes to playVoice on the shared clock; without audio it 
   assert.equal(D.html(null), '');
 });
 
+test('hundredths: a loop of copies in bundles packs into tenths; dealing breaks every tenth into hundredths', () => {
+  const l = D.soundEvents(D.specForItem({ music: 'decimalNoteScale', prompt: '0.04 × 12 = ?', answer: '0.48' }));
+  assert.equal(l.filter((n) => n.stage === 'copy').length, 12);
+  assert.equal(l.filter((n) => n.stage === 'resultTenth').length, 4);
+  assert.equal(l.filter((n) => n.stage === 'resultHundredth').length, 8);
+  const d = D.soundEvents(D.specForItem({ music: 'decimalNoteScale', prompt: '0.32 : 4 = ?', answer: '0.08' }));
+  assert.equal(d.filter((n) => n.stage === 'break').length, 3);
+  assert.equal(d.filter((n) => n.stage === 'dealHundredth' && n.kid === 0).length, 8);
+});
 test('index.html renders the widget and reveals after the answer; sw.js caches it', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(html, /MM_DECIMAL_WORLDS\.play\(dw2\)/);

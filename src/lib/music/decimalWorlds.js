@@ -112,7 +112,17 @@
       if (Math.floor(a) === lim - 1 && b < 1) s = { kind: 'cross', a: m[1], tenthsB: Math.round(b * 10), lim: lim, value: a + b > lim ? 'כן' : 'לא', world: WORLDS.kit };
     }
     // ---- multiplying and dividing decimals
-    else if ((m = /^([\d.]+) × (\d+) = \?$/.exec(p)) && /\./.test(m[1])) { const a = m[1], k = +m[2]; if (k <= 4 && +a < 2) s = { kind: 'loop', a: a, k: k, value: fmt(+a * k), world: WORLDS.loop }; }
+    else if ((m = /^([\d.]+) × (\d+) = \?$/.exec(p)) && /\./.test(m[1]) && +m[2] <= 4) { const a = m[1], k = +m[2]; if (k <= 4 && +a < 2) s = { kind: 'loop', a: a, k: k, value: fmt(+a * k), world: WORLDS.loop }; }
+    else if ((m = /^0\.0(\d) × (\d+) = \?$/.exec(p)) && +m[2] > 4 && +m[2] <= 12) {
+      // hundredths in a loop: one copy in full, then a bundle for every copy; ten hundredths pack into a tenth
+      const h = +m[1], k = +m[2], total = h * k;
+      if (total < 100) s = { kind: 'loopHundredths', h: h, k: k, tenths: Math.floor(total / 10), hundredths: total % 10, value: fmt(total / 100), world: WORLDS.loop };
+    }
+    else if ((m = /^0\.(\d)(\d) : (\d) = \?$/.exec(p)) && +m[2] > 0) {
+      // each tenth breaks into ten hundredths, then the hundredths are dealt out one round at a time
+      const total = +m[1] * 10 + +m[2], k = +m[3];
+      if (total % k === 0 && total / k <= 10 && k <= 4) s = { kind: 'dealHundredths', tenths: +m[1], total: total, k: k, value: fmt(total / k / 100), world: WORLDS.loop };
+    }
     else if (/^0\.3 × 0\.2 = \?$/.test(p)) s = { kind: 'partOfPart', of: 2, take: 3, value: '0.06', world: WORLDS.loop };
     else if ((m = /^([\d.]+) : (\d) = \?$/.exec(p)) && /\./.test(m[1])) { const a = +m[1], k = +m[2]; const tenths = Math.round(a * 10); if (Number.isInteger(a * 10) && tenths % k === 0) s = { kind: 'deal', wholes: Math.floor(a), tenths: tenths % 10, k: k, value: fmt(a / k), world: WORLDS.loop }; }
     else if ((m = /^([\d.]+) : 0\.(\d+) = \?$/.exec(p))) {
@@ -320,6 +330,22 @@
           t += GAP;
         }
         break;
+      case 'loopHundredths':
+        for (let i = 0; i < spec.h; i++) { placeHit(-2, 'copyHundredth', { copy: 0 }); t += 0.26; }
+        hit('gong', 196, 0.4, 0.14, 'bundleDemo'); t += 0.8;
+        for (let c = 0; c < spec.k; c++) { hit('gong', 196, 0.35, 0.14, 'copy', { copy: c }); t += 0.42; }
+        t += GAP;
+        for (let i = 0; i < spec.tenths; i++) { placeHit(-1, 'resultTenth'); t += 0.32; }
+        t += 0.3;
+        for (let i = 0; i < spec.hundredths; i++) { placeHit(-2, 'resultHundredth'); t += 0.26; }
+        break;
+      case 'dealHundredths': {
+        const hzK = [262, 330, 392, 494];
+        for (let i = 0; i < spec.tenths; i++) { hit('shaker', 520, 0.3, 0.12, 'break'); t += 0.4; }
+        t += 0.3;
+        for (let r = 0; r < spec.total / spec.k; r++) { for (let c = 0; c < spec.k; c++) { hit('tine', hzK[c] * 4, 0.05, 0.18, 'dealHundredth', { kid: c }); t += 0.24; } t += 0.35; }
+        break;
+      }
       case 'deal': {
         const hz = [262, 330, 392, 494];
         for (let r = 0; r < Math.floor(spec.wholes / spec.k); r++) { for (let c = 0; c < spec.k; c++) { hit('drumLow', 110 * (1 + c * 0.12), 0.25, 0.22, 'dealWhole', { kid: c }); t += 0.3; } t += 0.4; }
@@ -411,6 +437,8 @@
     cross: 'מהמספר מוסיפים עשיריות. פעמון — עברנו שלם. האם נשמע פעמון?',
     loop: 'אותו משפט חוזר, ושקט בין החזרות. כל עשר עשיריות נארזות לשלם אחד.',
     partOfPart: 'קודם העשיריות. עשירית אחת נפתחת לעשר מאיות, ומכל עשירית לוקחים רק חלק. כמה מאיות בסך הכול?',
+    loopHundredths: 'עותק אחד של המאיות במלואו, ומיד אחריו גונג ששווה לו. אחר כך גונג לכל עותק. ובסוף התוצאה: כל עשר מאיות נארזות לעשירית אחת.',
+    dealHundredths: 'כל עשירית נשברת לעשר מאיות. אחר כך מחלקים את המאיות בסבבים, אחת לכל קול. כמה קיבל קול אחד?',
     deal: 'מחלקים בסבבים, אחד לכל קול. שלם שלא מספיק לכולם נשבר לעשיריות. מה קיבל הקול הראשון?',
     fit: 'כמה קבוצות כאלה נכנסות בכל העשיריות?',
     fitQuarter: 'שלם אחד נפתח לרבעים. אחר כך כל השלמים. כמה רבעים בכולם?',
