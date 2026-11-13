@@ -25,7 +25,16 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (root) {
   'use strict';
 
-  const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels']);
+  const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels', 'repeatedBars', 'takeAwayBeats']);
+  // the modules that already own repeatedBars / takeAwayBeats items keep them
+  const EXTRA_TAGS = ['repeatedBars', 'takeAwayBeats'];   // only the vertical-multiplication and counting-up rules use these
+  const OWNERS = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace'];
+  const nodeOwners = [];
+  if (typeof module === 'object' && module.exports && typeof require === 'function') OWNERS.forEach((f) => { try { nodeOwners.push(require('./' + f + '.js')); } catch (e) { /* absent */ } });
+  const otherPlays = (item) => {
+    const mods = nodeOwners.length ? nodeOwners : [root && root.MM_MULTIPLY_WORLDS, root && root.MM_TIMES_TABLE, root && root.MM_TAKEAWAY_TEN, root && root.MM_DRAG_PLACE];
+    return mods.some((mod) => { try { return !!(mod && mod.specForItem && mod.specForItem(item)); } catch (e) { return false; } });
+  };
   const MAX_RUN = 12;
   const MAX_EVENTS = 60;
   const STEP = 0.24, SLOT = 0.9, GAP = 0.6;
@@ -44,7 +53,9 @@
     const raw = String(item.answer).trim();
     let m, s = null;
     const PL = { 'האחדות': 0, 'העשרות': 1, 'המאות': 2, 'האלפים': 3, 'עשרות האלפים': 4, 'מאות האלפים': 5, 'המיליונים': 6 };
-    if ((m = /^מה הספרה במקום (האחדות|העשרות|המאות|האלפים) במספר ([\d,]+)\?$/.exec(p)) || (m = /^במספר ([\d,]+), מהי ספרת (מאות האלפים|עשרות האלפים|המיליונים|האלפים|המאות)\?$/.exec(p))) {
+    if (otherPlays(item)) return null;   // DragPlace, MultiplyWorlds, TimesTable and TakeAwayTen keep what they already play
+    if (EXTRA_TAGS.indexOf(item.music) >= 0) s = extraPlan(p);
+    else if ((m = /^מה הספרה במקום (האחדות|העשרות|המאות|האלפים) במספר ([\d,]+)\?$/.exec(p)) || (m = /^במספר ([\d,]+), מהי ספרת (מאות האלפים|עשרות האלפים|המיליונים|האלפים|המאות)\?$/.exec(p))) {
       const place = PL[m[1]] != null ? PL[m[1]] : PL[m[2]], n = num(PL[m[1]] != null ? m[2] : m[1]);
       s = { kind: 'number', n: n, ask: place, value: digits(n)[place] || 0 };
     } else if ((m = /^צליל של (\d+) הרץ\. (?:כמה אלפים יש במספר|מה ספרת (המאות|העשרות))\?$/.exec(p))) {
@@ -94,6 +105,7 @@
     else if ((m = /^נתון: (\d+) × (\d+) = ([\d,]+)\. כמה זה \3 : \2\?/.exec(p))) s = { kind: 'inverse', known: num(m[3]), value: +m[1] };
     else if ((m = /^\(([\d,]+) − ([\d,]+)\) × (\d+) : (\d+) = \?/.exec(p))) { const b = num(m[1]) - num(m[2]), x = b * +m[3]; s = { kind: 'stages', stages: [['(', b], ['×', x], [':', x / +m[4]]], value: x / +m[4] }; }
     else if ((m = /^(\d+) × (\d+) \+ (\d+) = \?/.exec(p))) { const x = +m[1] * +m[2]; s = { kind: 'stages', stages: [['×', x], ['+', x + +m[3]]], value: x + +m[3] }; }
+    if (!s && item.music === 'regroupAllLevels') s = extraPlan(p);   // vertical multiplication up to the millions too
     if (!s || String(s.value) !== raw) return null;   // the sounds give exactly the answer
     s.world = WORLD;
     s.answer = String(s.value);
@@ -101,6 +113,21 @@
     try { ev = soundEvents(s); } catch (e) { return null; }
     if (!ev.length || longestRun(ev) > MAX_RUN || ev.length > MAX_EVENTS) return null;
     return s;
+  }
+
+  // repeatedBars / takeAwayBeats: vertical multiplication as partial products, and taking away by counting up
+  function extraPlan(p) {
+    let m;
+    if ((m = /^חשבו במאונך: ([\d,]+) × (\d+)(?: \(כתבו בלי פסיק\))?$/.exec(p)) || (m = /^(\d\d) × (\d\d) = \?$/.exec(p))) {
+      // every digit times the multiplier is one whole number of the ensemble
+      const a = num(m[1]), b = +m[2], parts = [];
+      if (b < 10) digits(a).forEach((d, place) => { if (d) parts.push(d * b * Math.pow(10, place)); });
+      else digits(b).forEach((d, place) => { if (d) parts.push(a * d * Math.pow(10, place)); });
+      if (parts.length >= 2 && parts.length <= 3) return { kind: 'partials', parts: parts.reverse(), value: parts.reduce((x, y) => x + y, 0) };
+    } else if ((m = /^היו (\d+) [^.]+\. (?:נמכרו|הוציאו|חולקו) (\d+)[^.]*\. כמה \S+ נשארו\?$/.exec(p))) {
+      return upPlan(+m[2], +m[1]);
+    }
+    return null;
   }
 
   // counting up from a to b: first up to the next round number, place by place, then the big jumps
@@ -193,6 +220,10 @@
           if (k) { hit('metalBell', 1047, 0.3, 0.14, 'timesTen', { k: k }); t += 0.6; }
           if (k === 0 || k === spec.times) number(spec.a * Math.pow(10, k), k ? 'shifted' : 'start');
         }
+        break;
+      case 'partials':
+        // one partial product after another, each a whole number of the ensemble; together they are the product
+        spec.parts.forEach((v, i) => { hit('metalBell', 784, 0.25, 0.14, 'partialSign', { n: i }); t += 0.5; number(v, 'partial'); });
         break;
       case 'timesOne':
         frame(); number(spec.n, 'once'); frame();
@@ -311,6 +342,7 @@
     regroup: 'האלפים, ואחריהם המאות: עשר מאות נארזות לעוד אלף, ומה שנשאר נשאר מאות.',
     shift: 'כפל בעשר מעביר כל נגינה לכלי של המקום הבא: אותה תבנית, מקום אחד למעלה.',
     timesOne: 'קבוצה אחת בלבד, בתוך מסגרת: המספר עצמו.',
+    partials: 'כפל במאונך בחלקים: כל ספרה כפול הכופל היא מספר שלם של ההרכב, מהאחדות כלפי מעלה. פעמון לפני כל חלק. כמה הם יחד?',
     timesZero: 'אפס קבוצות: תיבה של שקט אמיתי בין שתי מסגרות.',
     estimate: 'קודם מעגלים למספר נוח, ואחר כך כופלים. כמה מקומות נפתחים בתוצאה?',
     add: 'עמודה אחרי עמודה מהאחדות: שכבה ראשונה, שכבה שנייה, וכשמגיעים לעשר — צליל אריזה, ואחד עובר למקום הבא.',
