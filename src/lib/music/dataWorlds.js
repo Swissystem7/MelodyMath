@@ -72,7 +72,11 @@
     const raw = String(item.answer).trim();
     let m, s = null;
     // ---- even / odd and divisibility (dabke)
-    if ((m = /^(?:האם )?(\d+)(?: פעימות הן מספר| הוא מספר)? זוגי או אי[־-]זוגי\?/.exec(p))) {
+    if ((m = /^(\d) \+ (\d) — זוגי או אי[־-]זוגי\?$/.exec(p))) {
+      // odd + odd: each leaves one step alone, and the two alone steps meet as a pair
+      const a = +m[1], b = +m[2];
+      s = { kind: 'sumParity', a: a, b: b, value: (a + b) % 2 === 0 ? 'זוגי' : 'אי-זוגי', world: WORLDS.dabke };
+    } else if ((m = /^(?:האם )?(\d+)(?: פעימות הן מספר| הוא מספר)? זוגי או אי[־-]זוגי\?/.exec(p))) {
       const n = +m[1];
       s = { kind: 'parity', n: n, value: n % 2 === 0 ? 'זוגי' : 'אי-זוגי', world: WORLDS.dabke };
     } else if ((m = /^האם (\d+) הוא מספר ראשוני\? \(כן\/לא\)$/.exec(p))) {
@@ -294,6 +298,19 @@
         if (k % 2) { t += GAP; step('alone'); }
         break;
       }
+      case 'sumParity': {
+        // each number in pairs; an odd one leaves one step alone after a silence;
+        // two alone steps then meet and step together as one more pair
+        const alone = [];
+        [spec.a, spec.b].forEach((k, w) => {
+          for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i, of: w }); step('pair', { i: i, of: w }, 120); t += 0.3; }
+          if (k % 2) { t += GAP; step('alone', { of: w }); alone.push(w); }
+          t += GAP;
+        });
+        if (alone.length === 2) { step('meet'); step('meet', {}, 120); }
+        else if (alone.length === 1) { t += GAP; step('alone', { last: true }); }
+        break;
+      }
       case 'prime': {
         const per = spec.n / spec.bars, tens = Math.floor(per / 10), ones = per % 10;
         for (let b = 0; b < spec.bars; b++) { for (let i = 0; i < tens; i++) { hit('drumLow', 98, 0.3, 0.24, 'barTen', { bar: b }); t += 0.42; } for (let i = 0; i < ones; i++) step('beat', { bar: b }); t += GAP; }
@@ -343,6 +360,7 @@
     symbols: 'קודם סמל אחד נפתח ליחידות שלו. אחר כך כל סמל שווה את כולן. כמה סמלים?',
     sector: 'סיבוב שלם בנקישות שוות, כל נקישה שלושים מעלות. אחר כך רק הגזרה.',
     families: 'קבוצה לכל משפחה, גוון לכל סוג משפחה. כמה משפחות, כמה ילדים בכל אחת?',
+    sumParity: 'כל מספר בצעדים בזוגות. צעד בלי זוג נשמע לבד אחרי שקט. בסוף: אם שני צעדים נשארו לבד, הם נפגשים ורוקדים יחד כזוג.',
     parity: 'צעדים בזוגות. כל עשר הוא חמישה זוגות שלמים — מכה עמוקה אחת. נשאר צעד בלי זוג? הוא יישמע לבד אחרי שקט.',
     prime: 'מנסים לחלק לתיבות שוות — לפחות שתי תיבות, ובכל תיבה לפחות שני צעדים. כאן — האם התחלק?',
     fives: 'כל עשר, מאה ואלף מתחלקים לחמישיות בלי שארית — מכה עמוקה אחת. מקבצים רק את האחדות. נשאר משהו?',
