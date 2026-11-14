@@ -156,3 +156,13 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
   assert.match(html, /src="src\/lib\/music\/shapeWalk\.js"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/shapeWalk\.js'/);
 });
+
+test('inclusion: a square walked has four right corners, so it is a rectangle; a rectangle walked has long and short sides, so it is not a square', () => {
+  const sq = ev('quadMotif', 'ד', 'האם כל ריבוע הוא מלבן? (כן/לא)', 'כן');
+  const re = ev('quadMotif', 'ד', 'האם כל מלבן הוא ריבוע? (כן/לא)', 'לא');
+  [sq, re].forEach((e) => assert.equal(stage(e, 'corner').length, 4));
+  const gaps = (e) => { const c = stage(e, 'corner').map((n) => n.at); return c.slice(1).map((x, i) => +(x - c[i]).toFixed(2)); };
+  assert.equal(new Set(gaps(sq)).size, 1, 'equal sides: equal silences');
+  assert.equal(new Set(gaps(re)).size, 2, 'long and short silences');
+  assert.equal(spec('quadMotif', 'ד', 'האם כל מלבן הוא ריבוע? (כן/לא)', 'כן'), null);
+});
