@@ -59,6 +59,14 @@
       const price = +m[1]; if (price % 10 === 0 && price <= 90) s = { kind: 'discount', price: price, tenth: price / 10, value: price - price / 10 };
     } else if ((m = /^מחיר של (\d+) ש״ח התייקר ב־(\d)0%\. מה המחיר החדש\?$/.exec(p))) {
       const price = +m[1], k = +m[2]; if (price % 10 === 0 && price <= 90 && k <= 3) s = { kind: 'markup', price: price, k: k, tenth: price / 10, value: price + k * price / 10 };
+    } else if ((m = /^המחיר עלה מ־(\d+) ל־(\d+) ש״ח\. בכמה אחוזים עלה\? \(מספר בלבד\)$/.exec(p))) {
+      // more than 100%: the rise counted in quarters of the OLD price (docs/research/topics/026)
+      const a = +m[1], b = +m[2], q = a / 4;
+      if (Number.isInteger(q) && b > a && (b - a) % q === 0 && (b - a) / q <= 8 && b <= 100) s = { kind: 'riseOver', a: a, b: b, q: q, k: (b - a) / q, value: (b - a) / q * 25 };
+    } else if ((m = /^קצב של (\d+) BPM עלה ב־25% ל־(\d+)\. בכמה אחוזים צריך לרדת כדי לחזור ל־\1\?$/.exec(p))) {
+      // back down is measured from the NEW base: a quarter up, but only tenths down (docs/research/topics/026)
+      const a = +m[1], b = +m[2], tenth = b / 10;
+      if (a % 4 === 0 && a + a / 4 === b && Number.isInteger(tenth) && (b - a) % tenth === 0) s = { kind: 'backDown', a: a, b: b, up: a / 4, tenth: tenth, k: (b - a) / tenth, value: (b - a) / tenth * 10 };
     } else if ((m = /^מחיר ירד מ־(\d+) ש״ח ל־(\d+) ש״ח\. בכמה אחוזים ירד\? \(מספר בלבד\)$/.exec(p))) {
       const a = +m[1], b = +m[2];
       if (a % 100 === 0 && a <= 300 && (a - b) * 4 === a) s = { kind: 'change', a: a, b: b, value: 25 };
@@ -162,6 +170,20 @@
         for (let i = 0; i < spec.k; i++) { skank('tenth', { i: i }); value(spec.tenth, 'add'); }
         value(spec.value, 'newPrice');
         break;
+      case 'riseOver':
+        value(spec.a, 'before');
+        value(spec.b, 'after');
+        drum('quarter'); value(spec.q, 'quarterValue');                        // a quarter of the OLD price
+        for (let i = 0; i < spec.k; i++) drum('rise', { i: i });               // the rise, in those quarters
+        break;
+      case 'backDown':
+        value(spec.a, 'start');
+        drum('up'); value(spec.up, 'upValue');                                  // a quarter of the old tempo, up
+        value(spec.b, 'top');
+        skank('tenth'); value(spec.tenth, 'tenthValue');                        // the way back is measured from the new tempo: tenths of it
+        for (let i = 0; i < spec.k; i++) skank('down', { i: i });
+        value(spec.a, 'back');
+        break;
       case 'change':
         value(spec.a, 'before');
         value(spec.b, 'after');
@@ -198,6 +220,8 @@
     whatPercent: 'השלם בטומבק, ואחריו ארבעה תופים שווים — הראשון עם הערך שלו. כמה תופים הוא החלק?',
     discount: 'המחיר. אחר כך סקאנק — עשירית: בק אחד מכל תום. ואז מה שמשלמים, ושקט במקום מה שירד.',
     markup: 'המחיר. אחר כך סקאנק לכל עשירית שנוספת, עם הערך שלה. ואז המחיר החדש.',
+    riseOver: 'המחיר לפני, המחיר אחרי. אחר כך תוף אחד — רבע מהמחיר שלפני — עם הערך שלו, ואז תוף לכל רבע כזה בעלייה. כל תוף הוא עשרים וחמישה אחוזים.',
+    backDown: 'הקצב, ועלייה של רבע ממנו: תוף עם הערך שלו. הקצב החדש. בדרך חזרה מודדים מהקצב החדש — סקאנק הוא עשירית ממנו, עם הערך שלה, ואז סקאנק לכל עשירית שיורדים. כל סקאנק הוא עשרה אחוזים.',
     change: 'המחיר לפני, המחיר אחרי, וההפרש. אחר כך המחיר שלפני בארבעה תופים שווים — הראשון עם הערך שלו. כמה תופים הוא ההפרש?',
   };
   function html(spec, opts) {
