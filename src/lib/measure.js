@@ -26,23 +26,42 @@
     let length = Math.round(Number(src.length));
     if (!Number.isFinite(length) || length < 1) length = 1;
     length = Math.min(20, length);
+    // A cm object may start past 0: the child counts the spaces from where it
+    // starts, not the number at its end (docs/research/topics/045-length.md).
+    const start = unit === 'cm' ? clampInt(src.start == null ? 0 : src.start, 0, 20 - length) : 0;
     // Imported items (banks.js keeps raw.ruler as-is) may carry a custom
     // label; keep it a plain non-empty string so the renderer can escape it.
     const custom = typeof src.label === 'string' || typeof src.label === 'number' ? String(src.label).trim() : '';
     const label = custom || (unit === 'cm' ? 'ס״מ' : 'יחידות');
-    return { unit: unit, length: length, label: label };
+    return { unit: unit, length: length, start: start, label: label };
   }
 
+  // The picture never prints the length: reading it is the exercise. A cm
+  // ruler shows its numbered marks under the object; the screen-reader label
+  // gives what a sighted child sees — where the object starts and ends.
   function renderRulerHtml(ruler) {
     const R = normalizeRuler(ruler);
     const label = escapeHtml(R.label);
     const cells = [];
+    for (let i = 0; i < R.start; i++) cells.push('<span class="ruler-gap" aria-hidden="true">&nbsp;</span>');
     for (let i = 0; i < R.length; i++) {
-      cells.push('<span class="ruler-cell" aria-hidden="true">' + (R.unit === 'cm' ? '▮' : '🟫') + '</span>');
+      cells.push(R.unit === 'cm'
+        ? '<span class="ruler-cell ruler-cm" aria-hidden="true"></span>'
+        : '<span class="ruler-cell" aria-hidden="true">🟫</span>');
     }
-    return '<div class="ruler" dir="ltr" role="img" aria-label="עצם שאורכו ' + R.length + ' ' + label + '">'
+    if (R.unit !== 'cm') {
+      return '<div class="ruler" dir="ltr" role="img" aria-label="שורה של ' + R.length + ' ' + label + ' לספירה">'
+        + '<div class="ruler-track">' + cells.join('') + '</div>'
+        + '<p class="ruler-read">סופרים את הקוביות, אחת אחת.</p>'
+        + '</div>';
+    }
+    const marks = [];
+    for (let m = 0; m <= R.start + R.length; m++) marks.push('<span class="ruler-mark" aria-hidden="true">' + m + '</span>');
+    return '<div class="ruler" dir="ltr" role="img" aria-label="סרגל ב' + label + ': העצם מתחיל בשנתה ' + R.start
+      + ' ונגמר בשנתה ' + (R.start + R.length) + '">'
       + '<div class="ruler-track">' + cells.join('') + '</div>'
-      + '<p class="ruler-read">' + R.length + ' ' + label + '</p>'
+      + '<div class="ruler-marks">' + marks.join('') + '</div>'
+      + '<p class="ruler-read">סופרים את הרווחים בין השנתות, מתחילת העצם עד סופו.</p>'
       + '</div>';
   }
 
@@ -71,13 +90,14 @@
       const a = (n % 12) * 30;
       return '<span class="clock-num" style="transform:rotate(' + a + 'deg) translateY(-42%) rotate(-' + a + 'deg)">' + n + '</span>';
     }).join('');
-    return '<div class="clock" role="img" aria-label="שעון מראה השעה ' + C.hour + ':00">'
+    // The face never prints the time: reading the hands is the exercise.
+    return '<div class="clock" role="img" aria-label="שעון: מחוג השעות הקצר מצביע על ' + C.hour + ', ומחוג הדקות הארוך על 12">'
       + '<div class="clock-face">' + numbers
       + '<div class="clock-hand clock-hour" style="transform:rotate(' + angle + 'deg)"></div>'
       + '<div class="clock-hand clock-min" style="transform:rotate(0deg)"></div>'
       + '<div class="clock-center"></div>'
       + '</div>'
-      + '<p class="clock-read">' + C.hour + ':00</p>'
+      + '<p class="clock-read">המחוג הקצר מראה את השעה.</p>'
       + '</div>';
   }
 
