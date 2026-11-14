@@ -70,14 +70,17 @@ test('bindGrade3 is a no-op without a document, a host, a spec or a known kind',
   });
 });
 
-test('the meter widget draws one box per bar, the accent carrying the multiple', () => {
+test('the meter widget draws one box per bar: the first beat accented, the closing beat carrying the multiple', () => {
   withDom((played, h) => {
     assert.equal(g3.bindGrade3(h, { kind: 'meter', table: 3, bars: 4, bpm: 96 }), true);
     assert.deepEqual(find(h, '.g3-bar').map((b) => b.children.length), [3, 3, 3, 3]);
-    // Only the last beat of each bar is accented, and it shows 3, 6, 9 — the
-    // last one, 12, is the beat total and waits for the answer (#457).
-    assert.deepEqual(find(h, '.on').map((i) => i.textContent), ['3', '6', '9', '']);
-    assert.equal(find(h, '.on')[3].getAttribute('data-reveal'), '12');
+    // Counted from 1, as musicians count: the first beat of each bar is the
+    // accent, and the beat that closes the bar shows 3, 6, 9 — the last one,
+    // 12, is the beat total and waits for the answer (#457).
+    assert.equal(find(h, '.on').length, 4);
+    assert.ok(find(h, '.g3-bar').every((b) => b.children[0].className === 'on'));
+    assert.deepEqual(find(h, '.end').map((i) => i.textContent), ['3', '6', '9', '']);
+    assert.equal(find(h, '.end')[3].getAttribute('data-reveal'), '12');
     const note = find(h, '.g3-note')[0];
     assert.equal(note.textContent, g3.meterCue(3));
     assert.equal(note.getAttribute('data-reveal'), g3.meterNarration(3, 4));
