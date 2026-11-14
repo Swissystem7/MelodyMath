@@ -8,9 +8,13 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, (engine) => {
   const MAX_INTERVALS = 100;
   const LIMIT = 1e6;
-  // The scale the line is heard on: ten steps make an octave, so +10 doubles
-  // the pitch and −10 halves it (plan §5, כיתה א׳).
-  const STEPS_PER_OCTAVE = 10;
+  // The scale the line is heard on is the chromatic scale, one semitone per
+  // unit like neighbouring piano keys: twelve steps make an octave (×2). A ten
+  // is NOT an octave — a scale is not place value (docs/research/topics/
+  // 039-number-line.md); tens are heard as a ten-beat jhaptal cycle,
+  // 2 + 3 + 2 + 3, closed by a gong (grade1Music.js).
+  const STEPS_PER_OCTAVE = 12;
+  const TEN_CYCLE = [2, 3, 2, 3];
   const SCALE_BASE_HZ = 220;
 
   function clampInt(n, min, max) {
@@ -226,17 +230,23 @@
     const numFreq = Number(baseFreq);
     const validBaseFreq = Number.isFinite(numFreq) && numFreq > 0 ? numFreq : SCALE_BASE_HZ;
     const freq = scaleStepFreq(validBaseFreq, jump);
+    const size = Math.abs(jump);
     return {
       from: from,
       to: to,
       jump: jump,
       frequency: freq,
-      isOctave: Math.abs(jump) === STEPS_PER_OCTAVE
+      isOctave: size === STEPS_PER_OCTAVE,
+      // A jump is counted in spaces, not ticks: whole tens are full cycles.
+      tens: Math.floor(size / 10),
+      ones: size % 10,
+      isTen: size > 0 && size % 10 === 0
     };
   }
 
   return {
     STEPS_PER_OCTAVE: STEPS_PER_OCTAVE,
+    TEN_CYCLE: TEN_CYCLE,
     SCALE_BASE_HZ: SCALE_BASE_HZ,
     normalizeLine: normalizeLine,
     ticksOf: ticksOf,
