@@ -373,7 +373,7 @@
   // Two tablets never share a clock reading to the millisecond by accident, so
   // the timestamp plus the text is enough to tell a re-import from a new note.
   function noteKey(note) {
-    return `${String(note && note.at != null ? note.at : '')} ${noteText(note)}`;
+    return `${String(note && note.at != null ? note.at : '')}\x00${noteText(note)}`;
   }
 
   // Notes come off another tablet's JSON file: keep the shape addNote writes,
@@ -862,6 +862,170 @@
     } catch (_e) { /* quota */ }
   }
 
+  // --- Anonymous classroom 8-min flow & AG11 end screen (MM-AUTO-754) ---
+  const CLASS_SESSION_MS = 8 * 60 * 1000;
+  const CLASS_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const CLASS_CODE_RE = /^[A-HJ-NP-Z2-9]{5}$/;
+  const AG11_TITLE = 'עבדת יפה היום.';
+  const AG11_SUBTITLE = 'אפשר לסיים, ואפשר עוד סבב.';
+  const AG11_DONE_LABEL = 'סיימתי להיום';
+  const AG11_AGAIN_LABEL = 'עוד סבב';
+  const AG11_FORBIDDEN = Object.freeze(['נכשלת', 'טעית', 'שגית', 'פספסת', 'ציון']);
+
+  const ANONYMOUS_SYSTEM_WORDS = new Set([
+    'ילד', 'ילדה', 'ילד/ה', 'תלמיד', 'תלמידה', 'תלמיד/ה',
+    'מורה', 'לדוגמה', 'דמו', 'demo',
+    'כוכב', 'נמר', 'שמש', 'ירח', 'דולפין', 'אייל', 'פרפר', 'צבי',
+  ]);
+
+  function cleanClassCode(input) {
+    if (input == null) return '';
+    return String(input)
+      .toUpperCase()
+      .replace(/[^A-HJ-NP-Z2-9]/g, '');
+  }
+
+  function formatClassCode(input) {
+    return cleanClassCode(input).slice(0, 5);
+  }
+
+  function isValidClassCode(code) {
+    if (code == null) return false;
+    const raw = String(code).trim();
+    if (raw.length !== 5) return false;
+    return CLASS_CODE_RE.test(cleanClassCode(raw)) || /^[\p{L}\p{N}]{5}$/u.test(raw);
+  }
+
+  function sanitizeNickname(input) {
+    if (input == null) return '';
+    return String(input)
+      .replace(/[<>&"'`]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function isAnonymousName(name) {
+    if (name == null) return false;
+    if (typeof name !== 'string' && typeof name !== 'number') return false;
+    const raw = sanitizeNickname(name);
+    if (!raw) return false;
+    if (raw.length < 2 && !/^#?\d+$/.test(raw)) return false;
+    if (raw.length > 24) return false;
+
+    // Block email, phone/id
+    if (raw.includes('@')) return false;
+    if (/\d{5,}/.test(raw)) return false;
+    if (/(?:^|[^\d])05\d[\s-]*\d/.test(raw)) return false;
+
+    // Student number 1-40 or #1-#40
+    const numMatch = /^#?(\d+)$/.exec(raw);
+    if (numMatch) {
+      const n = Number(numMatch[1]);
+      return n >= 1 && n <= 40;
+    }
+
+    const words = raw.split(' ').filter(Boolean);
+    if (words.length >= 2) {
+      // Must not be two personal name words (e.g. 'יוסי כהן')
+      const cleanWord = (w) => w.replace(/^[#«"']+|[»"',.!?:;]+$/g, '').toLowerCase();
+      const nonAllowed = words.filter((w) => !ANONYMOUS_SYSTEM_WORDS.has(cleanWord(w)) && !/^\d+$/.test(w));
+      if (nonAllowed.length >= 2) return false;
+    }
+
+    if (words.length === 1) {
+      const cleanWord = raw.replace(/^[#«"']+|[»"',.!?:;]+$/g, '').toLowerCase();
+      if (ANONYMOUS_SYSTEM_WORDS.has(cleanWord)) return true;
+      if (/^[\p{L}\p{M}/]+(?:-?#?\d+)?$/u.test(raw)) return true;
+      return false;
+    }
+
+    // Multi-word case: all must be system words or numbers
+    return words.every((w) => {
+      const cw = w.replace(/^[#«"']+|[»"',.!?:;]+$/g, '').toLowerCase();
+      return ANONYMOUS_SYSTEM_WORDS.has(cw) || /^#?\d+$/.test(w);
+    });
+  }
+
+  function validateAnonymousLogin(classCode, studentName) {
+    const codeOk = isValidClassCode(classCode);
+    const nameOk = isAnonymousName(studentName);
+    if (!codeOk && !nameOk) {
+      return { ok: false, reason: 'code_and_name_invalid', message: 'יש להזין קוד כיתה בן 5 תווים ומספר או כינוי תלמיד/ה ללא שמות אמיתיים.' };
+    }
+    if (!codeOk) {
+      return { ok: false, reason: 'code_invalid', message: 'קוד הכיתה צריך להכיל בדיוק 5 תווים.' };
+    }
+    if (!nameOk) {
+      return { ok: false, reason: 'name_invalid', message: 'יש להזין כינוי או מספר תלמיד/ה (למשל כוכב3 או #5), ללא שמות אמיתיים.' };
+    }
+    return {
+      ok: true,
+      classCode: formatClassCode(classCode) || String(classCode).trim(),
+      name: sanitizeNickname(studentName),
+    };
+  }
+
+  function startCalmSession(classCode, name, opts, storage) {
+    const session = startSession(classCode, name, 'class', storage);
+    if (!session) return null;
+    session.calm = true;
+    session.targetDuration = CLASS_SESSION_MS;
+    session.clockVisible = Boolean(opts?.clockVisible);
+    return session;
+  }
+
+  function checkCalmSession(session, now) {
+    const current = typeof now === 'number' ? now : Date.now();
+    const started = session?.started || current;
+    const duration = session?.targetDuration || CLASS_SESSION_MS;
+    const elapsed = Math.max(0, current - started);
+    const remaining = Math.max(0, duration - elapsed);
+    return {
+      complete: elapsed >= duration,
+      elapsedMs: elapsed,
+      remainingMs: remaining,
+      itemsCount: Array.isArray(session?.items) ? session.items.length : 0,
+      calm: true,
+    };
+  }
+
+  function buildAG11Summary(session, opts) {
+    const o = opts || {};
+    const topic = o.topicName ? `היום תרגלנו: ${String(o.topicName).trim()} ♫` : 'היום תרגלנו: שיעור כיתתי ♫';
+    const items = Array.isArray(session?.items) ? session.items : [];
+    return {
+      screen: 'AG11',
+      title: AG11_TITLE,
+      subtitle: AG11_SUBTITLE,
+      doneLabel: AG11_DONE_LABEL,
+      againLabel: AG11_AGAIN_LABEL,
+      topicText: topic,
+      itemsCount: items.length,
+      calm: true,
+    };
+  }
+
+  function renderAG11SessionEnd(opts) {
+    const o = opts || {};
+    const topic = o.topicName ? `היום תרגלנו: ${escapeHtml(o.topicName)} ♫` : 'היום תרגלנו: שיעור כיתתי ♫';
+    const html = '<section class="mm-view" data-testid="view-session-end" data-screen="AG11">'
+      + '<div class="mm-card" style="align-items:center;text-align:center">'
+      + `<h2 data-testid="session-end-title">${escapeHtml(AG11_TITLE)}</h2>`
+      + `<p class="mm-sub" data-testid="session-end-subtitle">${escapeHtml(AG11_SUBTITLE)}</p>`
+      + '</div>'
+      + `<div class="mm-card" data-testid="session-end-topic" style="text-align:center">${escapeHtml(topic)}</div>`
+      + '<div class="mm-row-actions" style="display:flex;gap:12px;justify-content:center;margin-top:16px">'
+      + `<button type="button" class="mm-btn secondary" id="classSessionDone" data-act="session-done" data-testid="session-done" style="min-height:48px;flex:1">${escapeHtml(AG11_DONE_LABEL)}</button>`
+      + `<button type="button" class="mm-btn mm-btn--mint primary" id="classAgain" data-act="session-again" data-testid="session-again" style="min-height:48px;flex:1">${escapeHtml(AG11_AGAIN_LABEL)}</button>`
+      + '</div>'
+      + '</section>';
+    for (const bad of AG11_FORBIDDEN) {
+      if (html.includes(bad)) throw new Error(`forbidden copy: ${bad}`);
+    }
+    if (/\d+\s*%/.test(html)) throw new Error('forbidden score copy in AG11');
+    return html;
+  }
+
   return {
     PREFIX, WHO_KEY,
     normalizeCode, studentLabel, gradeLabel, studentGrade, setStudentGrade, storageKey, emptyRoster,
@@ -872,5 +1036,12 @@
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
     loadWho, saveWho, makeChoices, exportRoster, importRoster, summarizeImport,
     loadJson, saveJson, jsonKey,
+    CLASS_SESSION_MS, CLASS_CODE_ALPHABET, CLASS_CODE_RE,
+    cleanClassCode, formatClassCode, isValidClassCode, isAnonymousClassCode: isValidClassCode,
+    sanitizeNickname, isAnonymousName, isValidAnonymousNickname: isAnonymousName,
+    validateAnonymousLogin, isAnonymousLogin: (c, n) => validateAnonymousLogin(c, n).ok,
+    startCalmSession, checkCalmSession,
+    buildAG11Summary, renderAG11SessionEnd,
+    AG11_TITLE, AG11_SUBTITLE, AG11_DONE_LABEL, AG11_AGAIN_LABEL, AG11_FORBIDDEN,
   };
 });
