@@ -758,6 +758,329 @@
     return r ? r.plan : [];
   }
 
+  // ---------- drum answer pad for multiplication & fractions (MM-AUTO-753) ----------
+  function configureDrumAnswer(opts) {
+    const o = opts || {};
+    const per = Math.max(1, Math.min(16, Math.round(Number(o.per) || 4)));
+    const mode = o.mode || (o.unit || o.hold ? 'fraction' : (o.groups ? 'mult' : 'beats'));
+    const groups = Math.max(0, Math.round(Number(o.groups) || 0));
+    const remainder = Math.max(0, Math.round(Number(o.remainder) || 0));
+    const barBeats = Math.max(1, Math.round(Number(o.barBeats) || (mode === 'fraction' ? (o.per || 4) : per)));
+    const target = o.target != null ? Number(o.target) : (o.answer != null ? Number(o.answer) : (o.beats != null ? Number(o.beats) : (mode === 'mult' && groups ? groups * per + remainder : null)));
+    return {
+      mode: mode,
+      per: per,
+      groups: groups,
+      remainder: remainder,
+      barBeats: barBeats,
+      unit: o.unit || (mode === 'fraction' ? 'quarter' : 'beat'),
+      hold: !!o.hold,
+      voice: o.voice || (mode === 'fraction' ? 'organ' : 'woodBar'),
+      target: target,
+      label: o.label || '',
+    };
+  }
+
+  function drumAnswerTapPlan(spec, state, opts) {
+    const o = opts || {};
+    const s = spec || {};
+    const notes = [];
+    if (s.mode === 'fraction' || o.hold) {
+      const dur = o.durationBeats ? o.durationBeats * 0.35 : 0.3;
+      notes.push({ note: '', hz: 261.63, at: 0, dur: dur, voice: s.voice || 'organ', role: 'held', chip: null, gain: 0.22 });
+      if (o.isBarStart || (state && state.beats % (s.barBeats || 4) === 1)) {
+        notes.push({ note: '', hz: 110, at: 0, dur: 0.12, voice: 'frameDrum', role: 'drum', chip: null, gain: 0.18 });
+      }
+    } else {
+      const isFirst = o.isBarStart || (state && (state.beats - 1) % s.per === 0);
+      const hz = isFirst ? 392 : 523.25;
+      const gain = isFirst ? 0.28 : 0.2;
+      notes.push({ note: '', hz: hz, at: 0, dur: 0.18, voice: s.voice || 'woodBar', role: 'tap', chip: null, gain: gain });
+      if (isFirst || o.wholeGroup) {
+        notes.push({ note: '', hz: 110, at: 0, dur: 0.14, voice: 'frameDrum', role: 'drum', chip: null, gain: 0.24 });
+      }
+      if (o.isCompleteGroup) {
+        notes.push({ note: '', hz: 659.25, at: 0.05, dur: 0.2, voice: 'bell', role: 'groupEnd', chip: null, gain: 0.16 });
+      }
+    }
+    return notes;
+  }
+
+  function createDrumAnswerPad(spec, initialState) {
+    const s = configureDrumAnswer(spec);
+    const st = {
+      beats: 0,
+      groups: 0,
+      heldMs: 0,
+      notes: [],
+      history: [],
+    };
+    if (initialState) {
+      if (typeof initialState === 'number') st.beats = Math.max(0, initialState);
+      else if (typeof initialState === 'object') {
+        if (initialState.beats != null) st.beats = Math.max(0, Number(initialState.beats) || 0);
+        if (initialState.groups != null) st.groups = Math.max(0, Number(initialState.groups) || 0);
+        if (initialState.notes) st.notes = initialState.notes.slice();
+      }
+    }
+    if (!st.groups && s.per > 0) st.groups = Math.floor(st.beats / s.per);
+
+    function updateGroups() {
+      if (s.per > 0) st.groups = Math.floor(st.beats / s.per);
+    }
+
+    const pad = {
+      spec: s,
+      state: st,
+      getState: function () {
+        return Object.assign({}, st, {
+          remainder: s.per > 0 ? (st.beats % s.per) : 0,
+          fractionText: s.mode === 'fraction' ? fractionText(makeFraction(Math.min(st.beats, s.barBeats), s.barBeats)) : '',
+        });
+      },
+      tap: function (d) {
+        const step = d == null ? 1 : Number(d) || 0;
+        st.beats = Math.max(0, Math.min(40, st.beats + step));
+        updateGroups();
+        const first = st.beats > 0 && ((st.beats - 1) % s.per === 0);
+        const isCompleteGroup = st.beats > 0 && (st.beats % s.per === 0);
+        const notes = drumAnswerTapPlan(s, st, { isBarStart: first, isCompleteGroup: isCompleteGroup });
+        st.history.push({ action: 'tap', delta: step, beats: st.beats, at: nowMs() });
+        return { beats: st.beats, groups: st.groups, isBarStart: first, isCompleteGroup: isCompleteGroup, notes: notes };
+      },
+      tapGroup: function () {
+        const step = s.per;
+        st.beats = Math.max(0, Math.min(40, st.beats + step));
+        updateGroups();
+        const notes = drumAnswerTapPlan(s, st, { isBarStart: true, isCompleteGroup: true, wholeGroup: true });
+        st.history.push({ action: 'tapGroup', delta: step, beats: st.beats, at: nowMs() });
+        return { beats: st.beats, groups: st.groups, isBarStart: true, isCompleteGroup: true, notes: notes };
+      },
+      untap: function (d) {
+        const step = d == null ? 1 : Number(d) || 0;
+        st.beats = Math.max(0, st.beats - step);
+        updateGroups();
+        st.history.push({ action: 'untap', delta: -step, beats: st.beats, at: nowMs() });
+        return { beats: st.beats, groups: st.groups };
+      },
+      holdDuration: function (durationBeats, durMs) {
+        const b = Math.max(0.25, Number(durationBeats) || 1);
+        st.beats = Math.max(0, Math.min(40, st.beats + b));
+        st.heldMs = (st.heldMs || 0) + (Number(durMs) || 0);
+        updateGroups();
+        const f = toFraction(b / s.barBeats) || makeFraction(Math.round(b * 2), s.barBeats * 2);
+        st.notes.push({ beats: b, fraction: f, durMs: durMs });
+        const notes = drumAnswerTapPlan(s, st, { hold: true, durationBeats: b });
+        st.history.push({ action: 'hold', beats: b, at: nowMs() });
+        return { beats: st.beats, groups: st.groups, fraction: f, notes: notes };
+      },
+      holdByMs: function (ms, msPerBeat) {
+        const beatLen = msPerBeat || 400;
+        const rawBeats = ms / beatLen;
+        let qBeats = 1;
+        if (rawBeats < 0.75) qBeats = 0.5;
+        else if (rawBeats < 1.5) qBeats = 1;
+        else if (rawBeats < 3) qBeats = 2;
+        else qBeats = 4;
+        return this.holdDuration(qBeats, ms);
+      },
+      reset: function () {
+        st.beats = 0;
+        st.groups = 0;
+        st.heldMs = 0;
+        st.notes = [];
+        st.history = [];
+      },
+      evaluate: function (targetAnswer) {
+        const tgt = targetAnswer != null ? targetAnswer : s.target;
+        return evaluateDrumAnswer(s, st.beats, tgt);
+      }
+    };
+    return pad;
+  }
+
+  function renderDrumAnswerPad(spec, state, opts) {
+    const s = configureDrumAnswer(spec);
+    const st = typeof state === 'number' ? { beats: state } : (state || { beats: 0 });
+    const n = Math.max(0, Number(st.beats) || 0);
+    const per = s.per || 4;
+    const o = opts || {};
+    const locked = !!o.locked;
+    const groups = Math.floor(n / per);
+    const rem = n % per;
+
+    let barsHtml = '';
+    const numBars = Math.max(1, Math.ceil(Math.max(n, 1) / per));
+    for (let b = 0; b < numBars; b++) {
+      let dots = '';
+      for (let j = 0; j < per; j++) {
+        const i = b * per + j;
+        const filled = i < n;
+        const isFirst = j === 0;
+        dots += '<span class="mm-tap__dot' + (filled ? ' is-filled' : ' is-empty') + (isFirst ? ' is-first' : '') + '" data-beat="' + (i + 1) + '"></span>';
+      }
+      const isFullGroup = (b + 1) * per <= n;
+      barsHtml += '<span class="mm-tap__bar' + (isFullGroup ? ' is-complete-group' : '') + '" data-bar="' + (b + 1) + '">' + dots + '</span>';
+    }
+
+    let fractionVisual = '';
+    if (s.mode === 'fraction') {
+      const barBeats = s.barBeats || 4;
+      const filledFraction = n / barBeats;
+      const pct = Math.min(100, Math.round(filledFraction * 100));
+      const frac = makeFraction(Math.min(n, barBeats), barBeats);
+      const fracStr = frac ? fractionText(frac) : (n + '/' + barBeats);
+      fractionVisual = '<div class="mm-fraction-ruler" aria-label="מילוי שבר בתיבה: ' + fracStr + '">'
+        + '<div class="mm-fraction-fill" style="width: ' + pct + '%" data-fraction="' + fracStr + '"></div>'
+        + '<span class="mm-fraction-label">' + fracStr + ' מהתיבה</span>'
+        + '</div>';
+    }
+
+    const liveText = s.mode === 'mult'
+      ? (groups + ' תיבות של ' + per + ' פעימות' + (rem ? ' ועוד ' + rem : '') + ' = ' + n + ' פעימות')
+      : s.mode === 'fraction'
+      ? ('משך בתיבה: ' + n + ' מתוך ' + s.barBeats + ' פעימות')
+      : (n + ' פעימות');
+
+    const subText = s.mode === 'mult'
+      ? 'הקישו קבוצות קצב לכפל (' + per + ' פעימות בכל תיבה). אפשר להקיש פעימה או תיבה שלמה.'
+      : s.mode === 'fraction'
+      ? 'החזיקו או הקישו משכי תווים כדי למלא את התיבה (' + s.barBeats + ' פעימות = שלם).'
+      : 'הקישו על התוף פעם אחת לכל פעימה. אפשר גם לכתוב את המספר במקלדת.';
+
+    const groupBtn = s.mode === 'mult'
+      ? '<button type="button" class="mm-btn mm-btn--secondary mm-tap__group" data-act="tap-group" data-testid="tap-group"' + (locked ? ' disabled' : '') + '>🥁 תיבה שלמה (' + per + ')</button>'
+      : '';
+
+    const holdBtn = s.mode === 'fraction' || s.hold
+      ? '<button type="button" class="mm-btn mm-btn--secondary mm-tap__hold" data-act="hold-drum" data-testid="hold-drum"' + (locked ? ' disabled' : '') + '>⏱️ החזקת תו</button>'
+      : '';
+
+    return '<div class="mm-card mm-tap mm-drum-answer" data-testid="tap-pad" data-mode="' + s.mode + '" data-count="' + n + '" data-groups="' + groups + '">'
+      + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">מנגנים את התשובה</span></div>'
+      + '<p class="mm-sub">' + subText + '</p>'
+      + '<div class="mm-tap__status" aria-live="polite" data-testid="tap-status">' + liveText + '</div>'
+      + (fractionVisual || '')
+      + '<div class="mm-tap__bars" dir="ltr" aria-hidden="true">' + barsHtml + '</div>'
+      + '<div class="mm-row-actions">'
+      + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (locked ? ' disabled' : '') + '>🥁 פעימה</button>'
+      + groupBtn
+      + holdBtn
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פעימה אחת"' + (locked || !n ? ' disabled' : '') + '>↶ פעימה אחורה</button>'
+      + '</div></div>';
+  }
+
+  function evaluateDrumAnswer(specOrQuestion, givenValue, expectedAnswer) {
+    const q = (specOrQuestion && (specOrQuestion.tap || specOrQuestion.topic || specOrQuestion.id)) ? specOrQuestion : null;
+    const s = configureDrumAnswer((q && q.tap) ? q.tap : specOrQuestion);
+    const target = expectedAnswer != null ? Number(expectedAnswer) : (q && q.answer != null ? Number(q.answer) : Number(s.target));
+    const val = typeof givenValue === 'object' && givenValue !== null ? Number(givenValue.beats || 0) : Number(givenValue);
+    const correct = val === target;
+
+    let feedback = '';
+    if (s.mode === 'mult') {
+      const groups = s.per > 0 ? Math.floor(val / s.per) : 0;
+      const expGroups = s.per > 0 ? Math.floor(target / s.per) : 0;
+      if (correct) {
+        feedback = 'נכון מאוד! ' + (groups ? groups + ' תיבות של ' + s.per + ' פעימות = ' : '') + target + '.';
+      } else if (val < target) {
+        feedback = 'עדיין חסרות פעימות: ניגנתם ' + val + ' מתוך ' + target + ' (' + groups + ' מתוך ' + expGroups + ' תיבות).';
+      } else {
+        feedback = 'ניגנתם יותר מדי פעימות: ' + val + ' במקום ' + target + '.';
+      }
+    } else if (s.mode === 'fraction') {
+      if (correct) {
+        feedback = 'מצוין! המשך בתיבה הוא בדיוק ' + target + ' פעימות.';
+      } else {
+        feedback = 'משך הפעימות בתיבה (' + val + ') אינו תואם לתשובה המבוקשת (' + target + ').';
+      }
+    } else {
+      feedback = correct ? ('נכון! ' + target + ' פעימות.') : ('ניגנתם ' + val + ' פעימות, התשובה היא ' + target + '.');
+    }
+
+    return {
+      correct: correct,
+      value: val,
+      target: target,
+      mode: s.mode,
+      per: s.per,
+      groups: s.per > 0 ? Math.floor(val / s.per) : 0,
+      feedback: feedback,
+    };
+  }
+
+  function mountDrumAnswerPad(container, specOrQuestion, options) {
+    if (!container || typeof document === 'undefined') return null;
+    const opts = options || {};
+    const q = (specOrQuestion && (specOrQuestion.tap || specOrQuestion.topic || specOrQuestion.id)) ? specOrQuestion : null;
+    const s = configureDrumAnswer((q && q.tap) ? q.tap : specOrQuestion);
+    if (q && q.answer != null && s.target == null) s.target = Number(q.answer);
+
+    const pad = createDrumAnswerPad(s, opts.initialBeats || 0);
+
+    function wireEvents() {
+      const tapBtn = container.querySelector('[data-act="tap"]');
+      if (tapBtn) tapBtn.onclick = function () { pad.tap(1); refresh(); };
+
+      const groupBtn = container.querySelector('[data-act="tap-group"]');
+      if (groupBtn) groupBtn.onclick = function () { pad.tapGroup(); refresh(); };
+
+      const untapBtn = container.querySelector('[data-act="untap"]');
+      if (untapBtn) untapBtn.onclick = function () { pad.untap(1); refresh(); };
+
+      const holdBtn = container.querySelector('[data-act="hold-drum"]');
+      if (holdBtn) {
+        let t0 = 0;
+        holdBtn.onpointerdown = function () { t0 = nowMs(); };
+        holdBtn.onpointerup = function () {
+          const dt = nowMs() - t0;
+          pad.holdByMs(Math.max(dt, 200));
+          refresh();
+        };
+      }
+    }
+
+    function setContent(el, html) {
+      if (!el) return;
+      el.textContent = '';
+      if (html) el.insertAdjacentHTML('beforeend', html);
+    }
+
+    function refresh() {
+      setContent(container, renderDrumAnswerPad(s, pad.state, { locked: !!opts.locked }));
+      wireEvents();
+      if (typeof opts.onChange === 'function') {
+        const evalRes = pad.evaluate();
+        opts.onChange({ state: pad.state, evaluation: evalRes });
+      }
+    }
+
+    refresh();
+    return {
+      pad: pad,
+      refresh: refresh,
+      getState: function () { return pad.state; },
+      evaluate: function () { return pad.evaluate(); },
+      destroy: function () { setContent(container, ''); }
+    };
+  }
+
+  function playDrumAnswerSound(type, opts) {
+    const o = opts || {};
+    if (audioState.muted) return null;
+    if (type === 'hold') {
+      return playTap(o.voice || 'organ', { step: 0, hz: o.hz || 261.63 });
+    }
+    if (type === 'accent' || type === 'downbeat') {
+      return playTap('drum', { step: 0 });
+    }
+    if (type === 'group') {
+      playTap('drum', { step: 0 });
+      return playTap('bell', { step: 4 });
+    }
+    return playTap(o.voice || 'woodBar', { step: o.step || 0 });
+  }
+
   const api = {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
@@ -773,6 +1096,8 @@
     tapFeedback, installTapFeedback, PAD_SETS, padFor, padHtml, mountFreePad,
     streakMelody, streakLayers, levelTune, playStreakMelody, playLevelTune,
     ALL_TAP_VOICES, loadTapProgress, recordCorrect,
+    configureDrumAnswer, createDrumAnswerPad, renderDrumAnswerPad,
+    evaluateDrumAnswer, drumAnswerTapPlan, mountDrumAnswerPad, playDrumAnswerSound,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.
