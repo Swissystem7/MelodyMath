@@ -72,18 +72,10 @@
   // if MMPilotMusic is missing, lacks a function, or a function throws, the
   // demo warns once in the console, plays no sound, and keeps working: the
   // pictures, captions and the rhythm bar fall back to the plain versions below.
-  function music() {
-    const NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
-    const live = G.MMPilotMusic;
-    let warned = false;
-    function warn(why) {
-      if (warned) return;
-      warned = true;
-      try { G.console.warn('[MelodyMath pilot] music is unavailable (' + why + '): the demo continues without sound.'); } catch (e) { /* no console */ }
-    }
+  function createMusicFallback() {
     const CHOICE_BEATS = { quarter: 1, half: 2, whole: 4 };
     let muted = false;
-    const fallback = {
+    return {
       CHOICES: [
         { id: 'quarter', symbol: '♩', fraction: '1/4', he: 'רבע תיבה' },
         { id: 'half', symbol: '𝅗𝅥', fraction: '1/2', he: 'חצי תיבה' },
@@ -105,8 +97,20 @@
       setMuted: function (v) { muted = !!v; },
       isMuted: function () { return muted; }
     };
+  }
+
+  function music() {
+    const NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
+    const live = G.MMPilotMusic;
+    let warned = false;
+    const warn = function (why) {
+      if (warned) return;
+      warned = true;
+      try { G.console.warn('[MelodyMath pilot] music is unavailable (' + why + '): the demo continues without sound.'); } catch (e) { /* no console */ }
+    };
+    const fallback = createMusicFallback();
     const missing = !live ? ['MMPilotMusic'] : NEEDED.filter(function (k) { return typeof live[k] !== 'function'; });
-    const ok = missing.length === 0 && Array.isArray(live.CHOICES) && Array.isArray(live.GIVEN);
+    const ok = missing.length === 0 && Array.isArray(live?.CHOICES) && Array.isArray(live?.GIVEN);
     if (!ok) warn(missing.length ? 'missing ' + missing.join(', ') : 'missing CHOICES/GIVEN');
     const safe = { CHOICES: ok ? live.CHOICES : fallback.CHOICES, GIVEN: ok ? live.GIVEN : fallback.GIVEN };
     NEEDED.forEach(function (k) {
