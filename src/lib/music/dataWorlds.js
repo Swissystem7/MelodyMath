@@ -387,5 +387,37 @@
       + '</div>';
   }
 
-  return { TAGS: TAGS, WORLDS: WORLDS, MAX_RUN: MAX_RUN, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html };
+  function printableWidget(itemOrSpec) {
+    if (!itemOrSpec) return '';
+    const spec = (itemOrSpec.kind && itemOrSpec.world) ? itemOrSpec : plan(itemOrSpec);
+    if (!spec) return '';
+    if (spec.kind === 'table' && Array.isArray(spec.pairs) && spec.pairs.length) {
+      const rows = spec.pairs.map((p) => '<tr><td>' + esc(p.label) + '</td><td>' + esc(p.n) + '</td></tr>').join('');
+      const scale = spec.unit > 1 ? '<div class="sheet-scale">כל הקשה = ' + esc(NUM_HE[spec.unit] || spec.unit) + '</div>' : '';
+      return '<div class="sheet-widget sheet-data-table" dir="rtl"><table class="sheet-table"><thead><tr><th>קטגוריה</th><th>כמות</th></tr></thead><tbody>' + rows + '</tbody></table>' + scale + '</div>';
+    }
+    if (spec.kind === 'tally' && Array.isArray(spec.cats) && spec.cats.length) {
+      const rows = spec.cats.map(([label, n]) => {
+        const marks = (Array(Math.floor(n / 5) + 1).join('卌 ') + Array((n % 5) + 1).join('|')).trim();
+        return '<div class="sheet-widget-row">' + esc(label) + ': ' + esc(marks) + ' (' + n + ')</div>';
+      }).join('');
+      return '<div class="sheet-widget sheet-data-tally" dir="rtl">' + rows + '</div>';
+    }
+    if (spec.kind === 'list' && Array.isArray(spec.list) && spec.list.length) {
+      return '<div class="sheet-widget sheet-data-list" dir="rtl">רשימה: ' + esc(spec.list.join(', ')) + '</div>';
+    }
+    if ((spec.kind === 'values' || spec.kind === 'modesCount') && Array.isArray(spec.values) && spec.values.length) {
+      return '<div class="sheet-widget sheet-data-values" dir="rtl">ערכים: ' + esc(spec.values.join(', ')) + '</div>';
+    }
+    if (spec.kind === 'pie') {
+      return '<div class="sheet-widget sheet-data-pie" dir="rtl">מעגל (' + spec.parts + ' חלקים): ' + esc(spec.yes) + ' בעד</div>';
+    }
+    return spec.world && spec.world.he ? '<div class="sheet-widget sheet-data-hint" dir="rtl">[' + esc(spec.world.he) + ']</div>' : '';
+  }
+
+  function isDataWorldItem(item) {
+    return !!plan(item);
+  }
+
+  return { TAGS: TAGS, WORLDS: WORLDS, MAX_RUN: MAX_RUN, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html, printableWidget: printableWidget, isDataWorldItem: isDataWorldItem };
 });

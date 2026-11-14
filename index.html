@@ -858,6 +858,7 @@ body.text-large, body.text-large button, body.text-large input, body.text-large 
     <label>חבילה
       <select id="sheetPack" aria-label="חבילת תרגילים">
         <option value="class">מצב כיתה (בנק א׳)</option>
+        <option value="gapTargeted">חבילה כיתתית ממוקדת פערים (נתונים וזמן)</option>
         <option value="diag">אבחון לפי הכיתה שנבחרה</option>
         <option value="practice">תרגול אישי לפי הכיתה</option>
         <option value="grade">כל הבנק של הכיתה</option>
@@ -1758,15 +1759,43 @@ function switchToKid(name){
 }
 function renderSheet(){
   const box=$('worksheetSheet'); if(!box) return;
-  const sheet=buildWorksheet({
-    pack:($('sheetPack')&&$('sheetPack').value)||'class',
+  const pack=($('sheetPack')&&$('sheetPack').value)||'class';
+  const isGap=pack==='gapTargeted'||pack==='gaps'||pack==='dataTimeGaps';
+  const classCode=who.classCode||($('classCode')&&$('classCode').value)||'';
+  let classErrors=[];
+  if(isGap){
+    if(typeof buildClassOverview==='function'){
+      try{
+        const overview=buildClassOverview(classCode);
+        overview.forEach(function(r){
+          if(Array.isArray(r.repeatingErrors)){
+            r.repeatingErrors.forEach(function(e){classErrors.push(e);});
+          }
+        });
+      }catch(_e){}
+    }
+    if(Array.isArray(classHist)){
+      classHist.forEach(function(h){
+        if(h&&!h.correct&&h.id)classErrors.push({id:h.id});
+      });
+    }
+  }
+  const isAnon=typeof isAnonymousName==='function'?isAnonymousName(who.name):false;
+  const nick=isAnon?(typeof sanitizeNickname==='function'?sanitizeNickname(who.name):who.name):(($('classGateNick')&&$('classGateNick').value)||'');
+  const count=$('sheetCount')?+$('sheetCount').value:8;
+  const opts={
+    pack:pack,
     grade:selectedGrade,
-    count:$('sheetCount')?+$('sheetCount').value:8,
-    seed:(Date.now()&0xffff)+(($('sheetCount')&&+$('sheetCount').value)||8),
+    count:count,
+    seed:(Date.now()&0xffff)+count,
     withAnswers:!!($('sheetKey')&&$('sheetKey').checked),
-    studentName:who.name||'',
-    classCode:who.classCode||''
-  });
+    studentName:isGap?'':(who.name||''),
+    nickname:nick,
+    classCode:classCode,
+    errors:classErrors,
+    noPii:isGap
+  };
+  const sheet=(isGap&&typeof buildGapTargetedWorksheet==='function')?buildGapTargetedWorksheet(opts):buildWorksheet(opts);
   lastSheet=sheet;
   box.innerHTML=renderWorksheetHtml(sheet);
   box.classList.remove('hidden');
