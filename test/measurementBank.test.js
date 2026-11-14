@@ -160,9 +160,14 @@ test('the diagnostic and personal practice reach measurement in every grade א׳
 test('the ruler and clock items of א׳–ב׳ keep their ids', () => {
   const ids = banks.allItems().map((it) => it.id);
   ['א-measurement-321', 'א-data-345'].forEach((id) => assert.ok(ids.includes(id), id));
-  const ruler = (it) => it.standard === ST.LENGTH || it.standard === ST.CLOCK;
-  const oldIds = banks.allItems().filter(ruler).map((it) => Number(it.id.split('-').pop()));
-  const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it))
-    .map((it) => Number(it.id.split('-').pop()));
+  // The rulers that start past 0 (14.11.2026) were appended at the very end,
+  // after everything else, so they never moved an older id either.
+  const offset = (it) => !!(it.ruler && it.ruler.start > 0);
+  const ruler = (it) => (it.standard === ST.LENGTH || it.standard === ST.CLOCK) && !offset(it);
+  const num = (it) => Number(it.id.split('-').pop());
+  const oldIds = banks.allItems().filter(ruler).map(num);
+  const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it) && !offset(it)).map(num);
   assert.ok(Math.min(...newIds) > Math.max(...oldIds), 'the later items sit after the older ones');
+  const lastIds = banks.allItems().filter(offset).map(num);
+  assert.ok(lastIds.length && Math.min(...lastIds) > Math.max(...banks.allItems().filter((it) => !offset(it)).map(num)), 'appended last');
 });

@@ -2,23 +2,40 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const measure = require('../src/lib/measure');
 
-test('a ruler names its unit and reports the measured length', () => {
+test('a cm ruler draws the object over numbered marks, and never prints the length', () => {
   const html = measure.renderRulerHtml({ unit: 'cm', length: 7 });
-  assert.match(html, /אורכו 7 ס״מ/);
   assert.equal((html.match(/ruler-cell/g) || []).length, 7);
+  assert.equal((html.match(/class="ruler-mark"/g) || []).length, 8, 'marks 0 to 7');
+  assert.match(html, /aria-label="סרגל בס״מ: העצם מתחיל בשנתה 0 ונגמר בשנתה 7"/);
+  const read = html.match(/<p class="ruler-read">([^<]*)<\/p>/)[1];
+  assert.doesNotMatch(read, /\d/, 'reading the length is the exercise: ' + read);
+  assert.match(read, /רווחים/, 'count the spaces, not the ticks');
   assert.doesNotMatch(html, /<script/);
 });
 
-test('a non-standard-unit ruler defaults to "יחידות"', () => {
+test('an object that does not start at 0: empty cells first, the screen reader hears where it starts and ends', () => {
+  const R = measure.normalizeRuler({ unit: 'cm', length: 5, start: 2 });
+  assert.deepEqual([R.start, R.length], [2, 5]);
+  const html = measure.renderRulerHtml({ unit: 'cm', length: 5, start: 2 });
+  assert.equal((html.match(/ruler-gap/g) || []).length, 2);
+  assert.equal((html.match(/ruler-cell/g) || []).length, 5);
+  assert.equal((html.match(/class="ruler-mark"/g) || []).length, 8, 'marks 0 to 7');
+  assert.match(html, /מתחיל בשנתה 2 ונגמר בשנתה 7/);
+  assert.equal(measure.normalizeRuler({ unit: 'cm', length: 18, start: 9 }).start, 2, 'the object stays on a 20 cm ruler');
+  assert.equal(measure.normalizeRuler({ length: 4, start: 3 }).start, 0, 'unit cubes always start at the first cube');
+});
+
+test('a non-standard-unit ruler defaults to "יחידות" and asks to count the cubes', () => {
   const html = measure.renderRulerHtml({ length: 4 });
-  assert.match(html, /4 יחידות/);
+  assert.match(html, /aria-label="שורה של 4 יחידות לספירה"/);
+  assert.match(html, /סופרים את הקוביות/);
+  assert.doesNotMatch(html, /ruler-mark/);
 });
 
 test('a custom ruler label is escaped and never breaks out of the markup', () => {
   const html = measure.renderRulerHtml({ length: 2, label: '"><script>alert(1)</script>' });
   assert.doesNotMatch(html, /<script/);
-  assert.match(html, /aria-label="עצם שאורכו 2 &quot;&gt;&lt;script&gt;/);
-  assert.match(html, /<p class="ruler-read">2 &quot;&gt;&lt;script&gt;/);
+  assert.match(html, /aria-label="שורה של 2 &quot;&gt;&lt;script&gt;/);
   assert.equal((html.match(/<\/div>/g) || []).length, 2);
 });
 
@@ -27,6 +44,20 @@ test('a blank or non-string ruler label falls back to the unit default', () => {
   assert.equal(measure.normalizeRuler({ label: { bad: true } }).label, 'יחידות');
   assert.equal(measure.normalizeRuler({ label: 'קוביות' }).label, 'קוביות');
   assert.match(measure.renderRulerHtml({ length: 3, label: 'קוביות' }), /3 קוביות/);
+});
+
+test('the bank: no ruler or clock item prints its answer, and some rulers start past 0', () => {
+  const banks = require('../src/lib/banks');
+  const items = banks.allItems().filter((it) => it.widget === 'ruler' || it.widget === 'clock');
+  items.forEach((it) => {
+    const html = it.widget === 'ruler' ? measure.renderRulerHtml(it.ruler) : measure.renderClockHtml(it.clock);
+    const visible = html.replace(/aria-label="[^"]*"/g, '').replace(/<span class="(ruler-mark|clock-num)"[^>]*>\d+<\/span>/g, '').replace(/<[^>]+>/g, ' ');
+    assert.ok(!(visible.match(/\d+/g) || []).includes(String(it.answer)), 'the picture prints the answer: ' + it.prompt);
+    assert.ok(!new RegExp('(^|\\D)' + it.answer + ':00').test(it.prompt), 'the prompt states the time: ' + it.prompt);
+  });
+  const offset = items.filter((it) => it.ruler && it.ruler.start > 0);
+  assert.ok(offset.length >= 4, 'rulers that do not start at 0: ' + offset.length);
+  offset.forEach((it) => assert.equal(Number(it.answer), it.ruler.length, it.prompt));
 });
 
 test('ruler length is clamped to a sane range', () => {
@@ -43,10 +74,10 @@ test('the clock hand angle is 30 degrees per whole hour, minute hand fixed at 12
   assert.equal(measure.clockHandAngle(9), 270);
 });
 
-test('the clock face announces the whole hour', () => {
+test('the clock face shows the hands, not the time: the screen reader hears where they point', () => {
   const html = measure.renderClockHtml({ hour: 4 });
-  assert.match(html, /מראה השעה 4:00/);
-  assert.match(html, /4:00/);
+  assert.match(html, /aria-label="שעון: מחוג השעות הקצר מצביע על 4, ומחוג הדקות הארוך על 12"/);
+  assert.doesNotMatch(html, /4:00/, 'reading the hands is the exercise');
   assert.doesNotMatch(html, /<script/);
 });
 
