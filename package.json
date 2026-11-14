@@ -5,6 +5,11 @@
   "scripts": {
     "test": "node --test",
     "coverage": "node tools/codecov.js",
-    "test:pilot": "npm --prefix pilot test"
+    "test:pilot": "npm --prefix pilot test",
+    "check:circular": "madge --circular --extensions js src pilot/js",
+    "check:assets": "node tools/check-assets.js"
+  },
+  "devDependencies": {
+    "madge": "8.0.0"
   }
 }
