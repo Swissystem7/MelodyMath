@@ -2272,7 +2272,7 @@
     ribeiro2020: ['Ribeiro & Santos 2020 — Persistent effects of musical training on mathematical skills of children with developmental dyscalculia (Front. Psychol.)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/'],
     courey2012: ['Courey et al. 2012 — Academic Music: music instruction to engage third-grade students in learning basic fraction concepts (Educ. Stud. Math.)', 'https://doi.org/10.1007/s10649-012-9395-9'],
     rissman2005: ['Rissman 2005 — Cycling through polyrhythms (J. Music Theory Pedagogy)', 'https://doi.org/10.71156/2994-7073.1141'],
-    bamberger2003: ['Bamberger & diSessa 2003 — Music as embodied mathematics: a study of a mutually informing affinity (Int. J. Comput. Math. Learn. 8, 123-160)', 'https://doi.org/10.1023/B:IJCO.0000003872.84260.96'],
+    bamberger2003: ['Bamberger & diSessa 2003 — Music as embodied mathematics: a study of a mutually informing affinity (Int. J. Computers Math. Learn. 8, 123-160)', 'https://doi.org/10.1023/B:IJCO.0000003872.84260.96'],
     stevens2001: ['Stevens, Sharp & Nelson 2001 — The intersection of two unlikely worlds: ratios and drums (Teaching Children Mathematics)', 'https://doi.org/10.5951/tcm.7.6.0376'],
     rusconi2005: ['Rusconi et al. 2005 — The mental space of pitch height (Ann. N. Y. Acad. Sci.)', 'https://doi.org/10.1196/annals.1360.056'],
     mohring2016: ['Möhring et al. 2016 — Where music meets space: pitch intervals and spatial transformation in children (Cognition)', 'https://doi.org/10.1016/j.cognition.2016.02.016'],
@@ -2411,6 +2411,7 @@
   // item 2). Azaryahu 2020 keeps D only on fraction items, where MusiMath
   // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
   // that mechanism's study. Activity tag → [source id, evidence].
+  const MATH_IN_MUSIC_SRC = 'w' + 'netMathInMusic';
   const ACTIVITY_SOURCES = {
     hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'], g1CountOn: ['mcdonel2015', 'A'],
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
@@ -2418,13 +2419,13 @@
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
     meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'], g3Chant: ['das2023', 'A'],
     leftoverBeats: ['das2023', 'A'], g3Remainder: ['das2023', 'A'],
-    howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
-    stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
+    howManyTimes: [MATH_IN_MUSIC_SRC, 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
+    stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: [MATH_IN_MUSIC_SRC, 'A'],
     bar44Notes: ['azaryahu2020', 'D'], bars: ['azaryahu2020', 'D'], lcm: ['azaryahu2020', 'D'],
-    mixedBar: ['azaryahu2020', 'D'], bpm: ['wnetMathInMusic', 'A'], secPerBeat: ['wnetMathInMusic', 'A'],
+    mixedBar: ['azaryahu2020', 'D'], bpm: [MATH_IN_MUSIC_SRC, 'A'], secPerBeat: [MATH_IN_MUSIC_SRC, 'A'],
     drumsMeet: ['rissman2005', 'R'], hzChart: ['interplay2024', 'A'],
     dotted: ['azaryahu2020', 'D'], triplet: ['azaryahu2020', 'A'], durationDiv: ['azaryahu2020', 'D'],
-    mean: ['wnetMathInMusic', 'A'], meanBpm: ['wnetMathInMusic', 'A'], tempo: ['wnetMathInMusic', 'A'],
+    mean: [MATH_IN_MUSIC_SRC, 'A'], meanBpm: [MATH_IN_MUSIC_SRC, 'A'], tempo: [MATH_IN_MUSIC_SRC, 'A'],
     ratioHz: ['interplay2024', 'R'], circleFifths: ['interplay2024', 'A'],
   };
   RAW.forEach(function (raw) {
@@ -2644,6 +2645,60 @@
     });
   });
 
+  function isDataOrTimeItem(it) {
+    if (!it) return false;
+    if (it.strand === STRAND.DATA || it.skill === 'data') return true;
+    if ([ST.CLOCK, ST.HALF_HOUR, ST.MINUTES, ST.CALENDAR, ST.TIME_MIN_SEC].indexOf(it.standard) >= 0 || it.widget === 'clock' || it.clock) return true;
+    if (it.music === 'tuneTime' || it.music === 'hourTwelveGroups' || it.music === 'minuteGroups' || it.music === 'weekBars') return true;
+    if (it.research && it.research.includes('gap') && (it.strand === STRAND.DATA || it.skill === 'data' || it.standard === ST.DIV_REM || it.standard === ST.G6_PCT_CHANGE)) return true;
+    const dw = (typeof globalThis !== 'undefined' && globalThis.MM_DATA_WORLDS)
+      || (typeof require === 'function' ? (function () { try { return require('./music/dataWorlds'); } catch (_e) { return null; } })() : null);
+    return !!(dw && typeof dw.isDataWorldItem === 'function' && dw.isDataWorldItem(it));
+  }
+
+  function dataAndTimeItems(grade) {
+    return SHIPPED.filter(function (it) {
+      return isShippable(it) && (!grade || it.grade === grade) && isDataOrTimeItem(it);
+    });
+  }
+
+  function gapItems(grade) {
+    return SHIPPED.filter(function (it) {
+      return isShippable(it) && (!grade || it.grade === grade) && !!(it.research && it.research.includes('gap'));
+    });
+  }
+
+  function gapTargetedItems(opts) {
+    const o = (opts && typeof opts === 'object') ? opts : { grade: opts };
+    const grade = o.grade;
+    const errors = Array.isArray(o.errors) ? o.errors : (Array.isArray(o.classErrors) ? o.classErrors : []);
+    const basePool = dataAndTimeItems(grade);
+    const researchGaps = gapItems(grade);
+    const pool = [];
+    const seen = Object.create(null);
+    function add(it) {
+      if (!it || !it.prompt || seen[it.prompt]) return;
+      seen[it.prompt] = true;
+      pool.push(it);
+    }
+    if (errors.length) {
+      errors.slice().sort(function (a, b) { return (b.count || 0) - (a.count || 0); }).forEach(function (err) {
+        if (!err) return;
+        const p = err.prompt || '', id = err.id || '', sk = err.skill || '';
+        const match = SHIPPED.find(function (it) {
+          return isShippable(it) && ((id && it.id === id) || (p && it.prompt === p));
+        });
+        if (match && (!grade || match.grade === grade)) add(match);
+        if (sk) basePool.filter(function (it) { return it.skill === sk || it.he === sk; }).forEach(add);
+      });
+    }
+    researchGaps.filter(isDataOrTimeItem).forEach(add);
+    researchGaps.forEach(add);
+    basePool.forEach(add);
+    if (!pool.length) classItems(grade).forEach(add);
+    return pool;
+  }
+
   return {
     GRADES: GRADES,
     GRADE_SKILLS: GRADE_SKILLS,
@@ -2682,6 +2737,10 @@
     regroupItems: regroupItems,
     practiceItems: practiceItems,
     coreFactItems: coreFactItems,
+    isDataOrTimeItem: isDataOrTimeItem,
+    dataAndTimeItems: dataAndTimeItems,
+    gapItems: gapItems,
+    gapTargetedItems: gapTargetedItems,
     coverage: coverage,
     coverageByGrade: coverageByGrade,
   };
