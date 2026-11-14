@@ -121,6 +121,12 @@
       const groups = [[+m[1], +m[2]], [+m[3], +m[4]]];
       s = { kind: 'families', groups: groups, value: groups.reduce((a, g) => a + g[0] * g[1], 0), world: WORLDS.andalus };
     // ---- values: the mode (pitch is the value)
+    } else if ((m = /: ((?:\d+, )+\d+)\. כמה שכיחים יש\?$/.exec(p))) {
+      // a set may have more than one mode: count the longest runs of one pitch
+      const vs = nums(m[1]).sort((a, b) => a - b), freq = {};
+      vs.forEach((v) => { freq[v] = (freq[v] || 0) + 1; });
+      const top = Math.max.apply(null, Object.values(freq));
+      if (vs.length <= MAX_RUN) s = { kind: 'modesCount', values: vs, value: Object.keys(freq).filter((k) => freq[k] === top).length, world: WORLDS.andalus };
     } else if ((m = /: ((?:\d+, )+\d+)\. (?:מהו השכיח|מה השכיחות של המספר (\d+))\?$/.exec(p))) {
       const vs = nums(m[1]).sort((a, b) => a - b);
       const freq = {};
@@ -241,7 +247,7 @@
           t += GAP;
         });
         break;
-      case 'values': {
+      case 'values': case 'modesCount': {
         // pitch is the value, in order; a short silence where the value changes
         const lo = spec.values[0];
         spec.values.forEach((v, i) => { if (i && v !== spec.values[i - 1]) t += 0.4; hit('woodBar', 392 * Math.pow(2, (v - lo) * 2 / 12), 0.14, 0.22, 'value', { v: v }); t += STEP; });
@@ -350,6 +356,7 @@
     table: 'כל קטגוריה בתורה, לפי הסדר בשאלה, ושקט ביניהן. אחרי כל קטגוריה — עצרו ואמרו כמה.',
     list: 'קודם הרשימה כמו שנאספה, אחד אחד. אחר כך אותה רשימה מסודרת: כל גוון בתורו. האם יצא אותו מספר בסך הכול?',
     tally: 'סימני ספירה: חמש הקשות שוות, שקט קצר — זו חבילה — ואז השאר. השקט הוא הגבול.',
+    modesCount: 'כאן גובה הצליל הוא הערך, מהנמוך לגבוה, ושקט קצר כשהערך משתנה. איזה גובה חוזר הכי הרבה פעמים ברצף? אולי יש יותר מאחד כזה.',
     values: 'כאן גובה הצליל הוא הערך, מהנמוך לגבוה, ושקט קצר כשהערך משתנה. השכיח הוא ערך — לא מספר ההקשות.',
     mean: 'כל רוקד: מכה עמוקה (כולם עומדים על הקטן ביותר) ואחריה מה שיש לו מעל. אחר כך מחלקים את העודף בסבבים — אחד לכל רוקד בכל סבב. לאף אחד לא היה הערך הזה בהתחלה — בנינו אותו.',
     meanNotValue: 'כל רוקד: מכה עמוקה ואחריה מה שיש לו מעל הקטן ביותר. אחר כך מחלקים את העודף בסבבים. האם למישהו היה בהתחלה בדיוק מה שיצא לכל אחד?',
