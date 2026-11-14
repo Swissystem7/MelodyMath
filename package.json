@@ -11,7 +11,10 @@
     "knip": "knip",
     "size": "size-limit",
     "check:html": "node tools/check-html.js",
-    "doctor": "node tools/doctor.js"
+    "doctor": "node tools/doctor.js",
+    "check:sw": "node tools/check-sw.js",
+    "check:a11y-static": "node tools/check-a11y-static.js",
+    "check:i18n": "node tools/check-i18n.js"
   },
   "devDependencies": {
     "@size-limit/file": "14.3.0",
