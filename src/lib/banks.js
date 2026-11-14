@@ -2224,6 +2224,17 @@
     LEN('ב', 'המפתח מתחיל בשנתה 1. כמה ס״מ אורכו?', 6, 'מתחילים לספור מהשנתה שבה המפתח מתחיל', { unit: 'cm', length: 6, start: 1 }, 2),
     LEN('ב', 'הסרט לא מונח מהאפס. כמה ס״מ אורכו?', 7, 'המספר בקצה הוא לא האורך: סופרים רווחים', { unit: 'cm', length: 7, start: 5 }, 3)
   );
+
+  // ---------- קריאות השופר: כפל וחוק הפילוג (כיתות ג׳–ד׳) ----------
+  // music/shofarCalls.js. Thirty calls: 3 × 4 + 3 × 3 + 3 × 3 = 3 × (4 + 3 + 3)
+  // (docs/research/instruments-catalog-2026-11-14.md, meta-integration-2026-11-14.md).
+  // Appended last so ids stay put.
+  RAW.push(
+    I('ג', 'multiplication', 'תשר״ת הם ארבעה קולות: תקיעה, שברים, תרועה, תקיעה. תוקעים אותם 3 פעמים. כמה קולות?', 12, 'שברים הם קול אחד, ותרועה היא קול אחד', { standard: ST.MUL_C, strand: STRAND.MUL, table: 3, level: 1, kind: 'shofar' }),
+    I('ג', 'multiplication', 'תש״ת הם שלושה קולות: תקיעה, שברים, תקיעה. תוקעים אותם 3 פעמים. כמה קולות?', 9, 'קול אחד לכל תקיעה ולכל שברים', { standard: ST.MUL_C, strand: STRAND.MUL, table: 3, level: 1, kind: 'shofar' }),
+    I('ד', 'multiplication', 'קולות השופר: 3 × 4 + 3 × 3 + 3 × 3 = ?', 30, 'כפל לפני חיבור, ואז מחברים', { standard: ST.ORDER_OPS, strand: STRAND.NUM, level: 2, kind: 'shofar' }),
+    I('ד', 'multiplication', '3 × 4 + 3 × 3 + 3 × 3 = 3 × ☐', 10, 'אותם קולות, בסדר של סבבים', { standard: ST.ORDER_OPS, strand: STRAND.NUM, level: 3, kind: 'shofar' })
+  );
   musicForLate();
 
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
