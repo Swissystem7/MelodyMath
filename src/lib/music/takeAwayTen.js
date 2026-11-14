@@ -27,6 +27,16 @@
     return { kind: 'takeAway', start: s, take: t, remaining: s - t, circles: circles };
   }
   function takeAwaySteps(start, take) { const c = takeAwayCircles(start, take); if (!c) return null; const steps = []; for (let n = c.start; n >= c.remaining; n--) steps.push(n); return steps; }
+  // Subtraction as a difference (docs/research/topics/005): from the smaller
+  // number, count UP to the larger — the start is where you stand, not a step.
+  function countUpCircles(start, target) {
+    const s = wholeIn(start, 0, 12), g = wholeIn(target, 0, 20);
+    if (s == null || g == null || g <= s || g - s > 12) return null;
+    const circles = [];
+    for (let i = 0; i < s; i++) circles.push({ index: circles.length, kind: 'beat', v: 1, gone: false });
+    for (let i = 0; i < g - s; i++) circles.push({ index: circles.length, kind: 'add', v: 1, gone: false });
+    return { kind: 'countUp', start: s, target: g, added: g - s, circles: circles };
+  }
   function tenExchange(bells) {
     const b = wholeIn(bells, 0, 999); if (b == null) return null;
     const hundreds = Math.floor(b / 100), drums = Math.floor((b % 100) / 10), left = b % 10, circles = [];
@@ -45,6 +55,10 @@
   function specForItem(item) {
     if (!item || typeof item !== 'object') return null;
     const nums = numbersOf(item.prompt);
+    if (item.music === 'takeAwayBeats' && /^כמה חסר מ־\d+ עד \d+\?$/.test(String(item.prompt).trim())) {
+      const u = countUpCircles(nums[0], nums[1]);
+      return u && String(u.added) === String(item.answer).trim() ? u : null;
+    }
     if (item.music === 'takeAwayBeats' && nums.length >= 2) return takeAwayCircles(nums[0], nums[1]);
     if ((item.music === 'tenExchange' || tenWidget(item)) && nums.length === 1) {
       const x = tenExchange(nums[0]);
@@ -53,19 +67,20 @@
     return null;
   }
 
-  const GLYPH = { beat: '🥁', bell: '🔔', drum: '🪘', hundred: '🛢️' };
-  const NAME = { beat: 'פעימה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
+  const GLYPH = { beat: '🥁', add: '✨', bell: '🔔', drum: '🪘', hundred: '🛢️' };
+  const NAME = { beat: 'פעימה', add: 'פעימה שנוספה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
 
   function circlesHtml(spec, opts) { const revealed = !!(opts && opts.revealed);
     if (!spec || !Array.isArray(spec.circles)) return '';
-    const shown = spec.circles; const parts = shown.map(function (c) {
+    // counting up: the steps added are the answer, so they appear only after it
+    const shown = spec.kind === 'countUp' && !revealed ? spec.circles.filter(function (c) { return c.kind !== 'add'; }) : spec.circles; const parts = shown.map(function (c) {
       const cls = 'snd-circle snd-' + c.kind + (revealed && c.gone ? ' snd-gone' : '');
       const label = NAME[c.kind] + (revealed && c.gone ? ' — שקט' : '');
       return '<span class="' + cls + '" role="img" aria-label="' + label + '" data-gone="' + (revealed && c.gone ? '1' : '0') + '"' + (!revealed && c.gone ? ' data-reveal-gone="1"' : '') + '>' + GLYPH[c.kind] + '</span>';
     });
     const ans = answerText(spec); return '<div class="snd-wrap"><button type="button" class="snd-play">▶ האזינו וספרו</button><div class="snd-circles' + (shown.length > 20 ? ' snd-many' : '') + '" dir="ltr">' + parts.join('') + '</div>' + (revealed ? '<span class="snd-answer">' + ans + '</span>' : '<span class="snd-answer" data-reveal="' + ans + '">?</span>') + '</div>';
   }
-  function answerText(spec) { if (!spec) return ''; if (spec.kind === 'takeAway') return 'נשארו ' + spec.remaining; return (spec.hundreds ? spec.hundreds + ' מאות, ' : '') + spec.drums + ' עשרות ו־' + spec.left + ' יחידות'; }
+  function answerText(spec) { if (!spec) return ''; if (spec.kind === 'takeAway') return 'נשארו ' + spec.remaining; if (spec.kind === 'countUp') return 'חסרים ' + spec.added; return (spec.hundreds ? spec.hundreds + ' מאות, ' : '') + spec.drums + ' עשרות ו־' + spec.left + ' יחידות'; }
   const STEP_HZ = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
   function pushCount(ev, total, t, step, oneKind, phase) { countGroups(total).forEach(function (g) { for (let k = 0; k < g.n; k++) { ev.push({ at: t, hz: g.v === 10 ? 130 : STEP_HZ[ev.length % 8], kind: g.v === 10 ? 'drum' : oneKind, v: g.v, phase: phase }); t += step; } }); return t; }
   function groupingEvents(spec) {
@@ -76,6 +91,7 @@
   }
   function soundEvents(spec, opts) { if (!spec || !Array.isArray(spec.circles)) return []; const ev = [];
     if (spec.kind === 'takeAway') { const t1 = pushCount(ev, spec.start, 0, 0.35, 'beat', 'start'); pushCount(ev, spec.remaining, t1 + 0.4, 0.35, 'beat', 'remain'); return ev; }
+    if (spec.kind === 'countUp') { const t1 = pushCount(ev, spec.start, 0, 0.3, 'beat', 'start'); let t = t1 + 0.6; for (let k = 0; k < spec.added; k++) { ev.push({ at: t, hz: STEP_HZ[(k + 3) % 8] * 1.5, kind: 'add', v: 1, phase: 'up' }); t += 0.38; } return ev; }
     if (!(opts && opts.revealed)) { spec.circles.forEach(function (c, i) { const v = c.kind === 'hundred' ? 100 : (c.kind === 'drum' ? 10 : 1); ev.push({ at: i * 0.22, hz: v === 1 ? STEP_HZ[i % 8] : 130, kind: c.kind, v: v, phase: 'start' }); }); return ev; }
     return groupingEvents(spec); }
   function myInst() { if (root && root.MM_MY_INSTRUMENT) return root.MM_MY_INSTRUMENT; try { return require('../myInstrument.js'); } catch (e) { return null; } }

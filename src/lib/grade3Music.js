@@ -25,8 +25,11 @@
 
   // ---------- לוח הכפל כמשקל ----------
   // Table 3 counts in 3/4 and table 6 in 6/8: the bar is exactly as long as
-  // the table step, so every multiple of the table lands on an accent and
-  // "3 × 4" is literally four accented beats.
+  // the table step. Musicians count from 1, so the accent is the first beat of
+  // every bar (1, 4, 7 …) and every multiple of the table is the beat that
+  // closes a bar (3, 6, 9 …): "3 × 4" is four bars, and the last beat of the
+  // fourth is 12. 6/8 is two groups of three, so beat 4 carries a lighter
+  // accent (docs/research/topics/000-meter-accents.md).
   const METERS = { 3: '3/4', 6: '6/8' };
 
   function meterForTable(table) {
@@ -35,20 +38,25 @@
     return { table: t, timeSig: METERS[t], beatsPerBar: t };
   }
 
-  // One entry per beat, in counting order. `accent` marks the multiples.
+  // One entry per beat, in counting order. `accent` is the first beat of a bar,
+  // `half` the lighter accent in the middle of a 6/8 bar, and `multiple` is set
+  // on the beat that closes a bar.
   function meterBeats(table, bars) {
     const m = meterForTable(table);
     const n = whole(bars, 1, 10);
     if (!m || n == null) return [];
     const out = [];
     for (let i = 1; i <= n * m.beatsPerBar; i++) {
-      const accent = i % m.beatsPerBar === 0;
-      out.push({ count: i, accent: accent, multiple: accent ? i : null, bar: Math.ceil(i / m.beatsPerBar) });
+      const pos = (i - 1) % m.beatsPerBar;
+      const closes = i % m.beatsPerBar === 0;
+      out.push({ count: i, accent: pos === 0, half: m.beatsPerBar === 6 && pos === 3,
+        closes: closes, multiple: closes ? i : null, bar: Math.ceil(i / m.beatsPerBar) });
     }
     return out;
   }
 
   const ACCENT_HZ = 660;
+  const HALF_HZ = 495;
   const BEAT_HZ = 330;
   const LEFTOVER_HZ = 494;
   const DEFAULT_BPM = 96;
@@ -62,8 +70,8 @@
     return meterBeats(table, bars).map(function (b, i) {
       return {
         at: i * step, dur: step * 0.7,
-        hz: b.accent ? ACCENT_HZ : BEAT_HZ,
-        gain: b.accent ? 0.26 : 0.14,
+        hz: b.accent ? ACCENT_HZ : (b.half ? HALF_HZ : BEAT_HZ),
+        gain: b.accent ? 0.26 : (b.half ? 0.2 : 0.14),
         type: b.accent ? 'triangle' : 'sine',
       };
     });
@@ -73,9 +81,11 @@
     const m = meterForTable(table);
     const beats = meterBeats(table, bars);
     if (!m || !beats.length) return '';
-    const hits = beats.filter(function (b) { return b.accent; }).map(function (b) { return b.count; });
-    return 'משקל ' + m.timeSig + '. ' + beats.length + ' פעמות ב־' + hits.length
-      + ' תיבות, והדגשה על ' + hits.join(', ') + '.';
+    const pick = function (key) { return beats.filter(function (b) { return b[key]; }).map(function (b) { return b.count; }); };
+    const ends = pick('closes');
+    return 'משקל ' + m.timeSig + '. ' + beats.length + ' פעמות ב־' + ends.length
+      + ' תיבות. ההדגשה בראש כל תיבה: ' + pick('accent').join(', ')
+      + ', וכל תיבה נסגרת על כפולה של ' + m.beatsPerBar + ': ' + ends.join(', ') + '.';
   }
 
   // The note on screen while the question is open. Every meter item asks for
@@ -387,8 +397,9 @@
     return group;
   }
 
-  // One bordered box per bar, one pad per beat, the accented beat carrying the
-  // multiple it lands on — the picture of meterNarration.
+  // One bordered box per bar, one pad per beat: the first beat is accented and
+  // the beat that closes the bar carries the multiple — the picture of
+  // meterNarration.
   function drawMeter(box, spec) {
     const beats = meterBeats(spec.table, spec.bars);
     if (!beats.length) return false;
@@ -398,10 +409,10 @@
     for (let bar = 1; bar * per <= beats.length; bar++) {
       const group = node('span', 'g3-bar');
       beats.filter(function (b) { return b.bar === bar; }).forEach(function (b) {
-        // The last accent is the beat total, so its label waits for the answer.
+        // The last multiple is the beat total, so its label waits for the answer.
         const last = b.count === beats.length;
-        const pad = node('i', b.accent ? 'on' : '', b.accent && !last ? String(b.count) : '');
-        if (b.accent && last) pad.setAttribute('data-reveal', String(b.count));
+        const pad = node('i', b.accent ? 'on' : (b.closes ? 'end' : ''), b.closes && !last ? String(b.count) : '');
+        if (b.closes && last) pad.setAttribute('data-reveal', String(b.count));
         group.appendChild(pad);
       });
       row.appendChild(group);

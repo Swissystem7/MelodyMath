@@ -43,7 +43,7 @@
     pan: { he: 'סטילפאן מטרינידד', why: 'הכלי שנולד בקרנבל של טרינידד. מחלקים באים בזוגות: כל מחלק שנמצא מצלצל, ועוצרים כשהזוגות מתחילים לחזור' },
     funk: { he: 'פאנק — ה־One', why: 'בפאנק של שנות השישים והשבעים ה־One הוא מקום בזמן ולא עוצמה. זוגות שלמים נוחתים על ה־One' },
   };
-  const KIND_WORLD = { twoThrees: 'samul', leftover: 'tala', measure: 'banjo', share: 'banjo', rect: 'tango', rectGiven: 'tango', factor: 'samul', by5: 'son', digitSum: 'son', walk: 'pan', evenPrime: 'pan', threeNotSix: 'funk' };
+  const KIND_WORLD = { twoThrees: 'samul', leftover: 'tala', position: 'tala', measure: 'banjo', share: 'banjo', rect: 'tango', rectGiven: 'tango', factor: 'samul', by5: 'son', digitSum: 'son', walk: 'pan', evenPrime: 'pan', threeNotSix: 'funk' };
   // samul nori: kkwaenggwari (small gong), janggu (hourglass drum), buk (barrel drum), jing (large gong)
   const SAMUL = { 2: ['metalBell', 1400], 3: ['drumHigh', 330], 5: ['drumLow', 98], 7: ['gong', 130] };
 
@@ -59,6 +59,11 @@
     if ((m = /^(\d+) פעימות בתיבות של (\d+) — כמה תיבות שלמות, וכמה פעימות נשארות\?/.exec(p))) {
       const n = +m[1], k = +m[2], q = Math.floor(n / k), r = n % k;
       if (k >= 2 && k <= 10 && q <= 10) s = { kind: 'leftover', n: n, k: k, q: q, r: r, value: q + ' שארית ' + r };
+    } else if (item.music === 'phraseShare' && (m = /^במשקל (\d)\/4, פעמה (\d+) היא איזו פעמה בתיבה שלה\?$/.exec(p))) {
+      // counted from 1, as musicians count: the place of beat n in a bar of k is
+      // ((n − 1) mod k) + 1 — a remainder of 0 is the bar's LAST beat, never "beat 0"
+      const k = +m[1], n = +m[2], q = Math.floor((n - 1) / k), pos = ((n - 1) % k) + 1;
+      if (k >= 2 && k <= 6 && q <= 10) s = { kind: 'position', n: n, k: k, q: q, pos: pos, value: pos };
     } else if (item.music === 'phraseShare' && (m = /^(\d+) ÷ (\d+) = \?$/.exec(p))) {
       // the bigger ones only: up to 40 notes stay with DivisionBeats
       const n = +m[1], k = +m[2];
@@ -148,6 +153,17 @@
         pause();
         strokes(spec.r, 'drumHigh', 520, 'left');
         if (spec.r) t += (spec.k - spec.r) * STEP;              // the bar's missing beats: real silence
+        break;
+      case 'position':
+        // one cycle in full; a sam for every bar already past; then the beat's
+        // own bar from its sam, beat by beat, stopping on the beat asked about
+        hit('drumLow', 110, 0.3, 0.2, 'demoSam'); t += STEP;
+        strokes(spec.k - 1, 'drumHigh', 520, 'demoStroke');
+        pause();
+        for (let i = 0; i < spec.q; i++) { hit('drumLow', 110, 0.3, 0.2, 'sam', { bar: i }); t += APART; }
+        pause();
+        hit('drumLow', 110, 0.3, 0.2, 'barSam', { beat: 1 }); t += STEP;
+        for (let b = 2; b <= spec.pos; b++) { hit('drumHigh', 520, 0.12, 0.18, 'beat', { beat: b }); t += STEP; }
         break;
       case 'measure':
       case 'share':
@@ -267,6 +283,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const HOW = {
     leftover: 'קודם מחזור אחד שלם: סאם ואחריו שאר הפעמות. אחר כך כל סאם הוא תיבה שלמה, ובסוף — הפעמות שנשארו, ושקט במקום הפעמות שחסרות לתיבה.',
+    position: 'קודם מחזור אחד שלם: סאם ואחריו שאר הפעמות. אחר כך כל סאם הוא תיבה שלמה שכבר עברה. בסוף התיבה של הפעמה, מהסאם שלה ופעמה אחרי פעמה — על איזו פעמה עוצרים?',
     measure: 'קודם רול אחד שלם בגודל הקבוצה. אחר כך כל פינץ׳ הוא רול שלם. כמה פינצ׳ים עד שמגיעים לכל הכמות?',
     share: 'סבב חלוקה אחד: צליל לכל ילד, וזה רול אחד. אחר כך כל פינץ׳ הוא סבב שלם. כמה סבבים — כך כמה קיבל כל ילד.',
     walk: 'בודקים מאחת והלאה: מספר המכות הוא המחלק שנבדק. מחלק שמתאים מצלצל — הוא ובן הזוג שלו; ריבוע מצלצל פעם אחת. עוצרים כשהזוגות חוזרים.',

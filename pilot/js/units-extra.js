@@ -15,11 +15,15 @@
 // Same contract as js/units.js: think / music + hear / right + wrong; the
 // `wrong` text never names the answer. Sources are the repo's own (MM-503 §2).
 (function (root, factory) {
-  const api = factory();
-  if (typeof module === 'object' && module.exports) module.exports = api;
+  const IN_NODE = typeof module === 'object' && !!module.exports;
+  const engine = IN_NODE ? require('../../src/lib/musicEngine.js') : (root.musicEngine || root);
+  const api = factory(engine);
+  if (IN_NODE) module.exports = api;
   else root.MMPilotUnitsExtra = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (engine) {
   'use strict';
+
+  const confTap = (opts) => (engine && typeof engine.configureDrumAnswer === 'function') ? engine.configureDrumAnswer(opts) : opts;
 
   const C = (id, label, sym) => ({ id: id, label: label, sym: sym || '' });
 
@@ -341,6 +345,7 @@
       questions: [
         {
           id: 'm5-1',
+          tap: confTap({ mode: 'mult', per: 5, groups: 2, answer: 10, voice: 'woodBar' }),
           topic: 'strat5',
           kind: 'num',
           q: 'כמה זה 2 × 5?',
@@ -359,6 +364,7 @@
         },
         {
           id: 'm5-2',
+          tap: confTap({ mode: 'mult', per: 5, groups: 4, answer: 20, voice: 'woodBar' }),
           topic: 'strat5',
           kind: 'num',
           q: 'כמה זה 4 × 5?',
@@ -377,6 +383,7 @@
         },
         {
           id: 'm5-3',
+          tap: confTap({ mode: 'mult', per: 5, groups: 6, answer: 30, voice: 'woodBar' }),
           topic: 'strat5',
           kind: 'num',
           q: 'כמה זה 6 × 5?',
@@ -395,6 +402,7 @@
         },
         {
           id: 'm5-4',
+          tap: confTap({ mode: 'mult', per: 5, groups: 8, answer: 40, voice: 'woodBar' }),
           topic: 'strat5',
           kind: 'num',
           q: 'כמה זה 8 × 5?',
@@ -721,13 +729,13 @@
           hear: 'שומעים ארבע נקישות של התיבה. צליל עוגב אחד נמשך לאורך שתי הנקישות הראשונות, ואחריו שקט עד סוף התיבה.',
           right: 'נכון! 1/2: התו ממלא 2 פעימות מתוך 4, כלומר חצי מהתיבה. לכן תו כזה נקרא ״חצי״.',
           wrong: 'ספרו את הנקישות: כמה יש בתיבה כולה, ועל כמה מהן הצליל נמשך? השוו את החלק המלא לחלק השקט.' },
-        { id: 'fr2', tap: { per: 2 }, topic: 'whole', kind: 'num', q: 'בתיבה שלמה של 4/4, כמה שמיניות נכנסות?', answer: 8,
+        { id: 'fr2', tap: confTap({ mode: 'fraction', per: 2, unit: 'eighth', barBeats: 4, total: 8, hold: true, answer: 8, voice: 'organ' }), topic: 'whole', kind: 'num', q: 'בתיבה שלמה של 4/4, כמה שמיניות נכנסות?', answer: 8,
           think: 'שמינית היא חצי פעימה: בכל פעימה נכנסות שתי שמיניות. כמה פעימות יש בתיבה?',
           music: { kind: 'durations', beats: 4, beat: 0.5, labels: ['תיבה 4/4, פעימה אחרי פעימה'], bars: [[{ len: 1, label: '♩', voice: 'keys' }, { len: 1, label: '♩', voice: 'keys' }, { len: 1, label: '♩', voice: 'keys' }, { len: 1, label: '♩', voice: 'keys' }]] },
           hear: 'שומעים את ארבע הפעימות של התיבה, תו רבע בכל פעימה. את השמיניות אתם מנגנים: שתיים בכל פעימה.',
           right: 'נכון! 8 שמיניות: 4 פעימות, שתי שמיניות בכל פעימה. לכן שמינית אחת היא 1/8 מהתיבה.',
           wrong: 'בכל פעימה נכנסות שתי שמיניות. הקישו שתי הקשות לכל רבע שמצויר, עד סוף התיבה.' },
-        { id: 'fr3', tap: { per: 2 }, topic: 'equiv', kind: 'num', q: 'שני רבעים של תיבה נמשכים כמו כמה שמיניות?', expr: '2/4 = ?/8', answer: 4,
+        { id: 'fr3', tap: confTap({ mode: 'fraction', per: 2, unit: 'eighth', barBeats: 4, total: 4, hold: true, answer: 4, voice: 'organ' }), topic: 'equiv', kind: 'num', q: 'שני רבעים של תיבה נמשכים כמו כמה שמיניות?', expr: '2/4 = ?/8', answer: 4,
           think: 'רבע אחד נמשך כמו שתי שמיניות. ומה קורה כשיש שני רבעים?',
           music: { kind: 'durations', beats: 8, beat: 0.28, labels: ['שני רבעים', 'אותו זמן, בשמיניות'],
             bars: [[{ len: 2, label: '♩', voice: 'keys' }, { len: 2, label: '♩', voice: 'keys' }], [{ len: 1, label: '♪', voice: 'woodBar', alt: true }, { len: 1, label: '♪', voice: 'woodBar', alt: true }, { len: 1, label: '♪', voice: 'woodBar', alt: true }, { len: 1, label: '♪', voice: 'woodBar', alt: true }]] },
@@ -741,13 +749,13 @@
           hear: 'שני צלילי כינור באותו גובה, כל אחד בתחילת תיבה משלו. הנקישות סופרות שמיניות: הקשיבו על כמה נקישות נמשך כל צליל.',
           right: 'נכון! הצליל הראשון ארוך יותר: 1/4 = 2/8, ו־3/8 גדול מ־2/8. משווים שברים כשהם באותו מכנה — כאן, בשמיניות.',
           wrong: 'אל תשוו רק את המספר שלמטה. הפכו את הרבע לשמיניות, ואז ספרו כמה שמיניות נמשך כל צליל.' },
-        { id: 'fr5', tap: { per: 2 }, topic: 'addfrac', kind: 'num', q: 'רבע ואחריו שמינית. כמה שמיניות הם תופסים יחד?', expr: '1/4 + 1/8 = ?/8', answer: 3,
+        { id: 'fr5', tap: confTap({ mode: 'fraction', per: 2, unit: 'eighth', barBeats: 4, total: 3, hold: true, answer: 3, voice: 'organ' }), topic: 'addfrac', kind: 'num', q: 'רבע ואחריו שמינית. כמה שמיניות הם תופסים יחד?', expr: '1/4 + 1/8 = ?/8', answer: 3,
           think: 'אי אפשר לחבר רבע ושמינית לפני שהם באותן יחידות. כמה שמיניות יש ברבע?',
           music: { kind: 'durations', beats: 8, beat: 0.28, labels: ['תיבה 4/4'], bars: [[{ len: 2, label: '1/4', voice: 'keys' }, { len: 1, label: '1/8', voice: 'woodBar', alt: true }]] },
           hear: 'שומעים צליל פסנתר של רבע, מיד אחריו צליל קסילופון קצר של שמינית, ואז שקט עד סוף התיבה. הנקישות סופרות שמיניות.',
           right: 'נכון! 3 שמיניות: 1/4 + 1/8 = 2/8 + 1/8 = 3/8. מחברים שברים רק אחרי שהם באותן יחידות: רבע הוא שתי שמיניות.',
           wrong: 'אל תחברו מונה עם מונה ומכנה עם מכנה. הפכו את הרבע לשמיניות, ואז ספרו שמיניות עם הנקישות.' },
-        { id: 'fr6', tap: { per: 2 }, topic: 'addfrac', kind: 'num', q: 'בתיבה כבר מנוגנים חצי ורבע. כמה שמיניות חסרות כדי למלא אותה?', expr: '1/2 + 1/4 + ?/8 = 1', answer: 2,
+        { id: 'fr6', tap: confTap({ mode: 'fraction', per: 2, unit: 'eighth', barBeats: 4, total: 2, hold: true, answer: 2, voice: 'organ' }), topic: 'addfrac', kind: 'num', q: 'בתיבה כבר מנוגנים חצי ורבע. כמה שמיניות חסרות כדי למלא אותה?', expr: '1/2 + 1/4 + ?/8 = 1', answer: 2,
           think: 'תיבה שלמה היא 8 שמיניות. כמה שמיניות תופסים החצי והרבע יחד, וכמה נשאר עד סוף התיבה?',
           music: { kind: 'durations', beats: 8, beat: 0.28, labels: ['תיבה 4/4'], bars: [[{ len: 4, label: '1/2', voice: 'organ' }, { len: 2, label: '1/4', voice: 'keys' }, { rest: true, len: 2, label: '?' }]] },
           hear: 'שומעים צליל עוגב ארוך של חצי תיבה, אחריו צליל פסנתר של רבע, ואז שקט עד סוף התיבה. הנקישות ממשיכות לספור שמיניות גם בשקט.',
@@ -797,6 +805,7 @@
       questions: [
         {
           id: 'm9-1',
+          tap: confTap({ mode: 'mult', per: 9, groups: 2, answer: 18, voice: 'woodBar' }),
           topic: 'strat9',
           kind: 'num',
           q: 'כמה זה 2 × 9?',
@@ -916,6 +925,7 @@
       questions: [
         {
           id: 'fbi-1',
+          tap: confTap({ mode: 'fraction', per: 4, unit: 'half', barBeats: 4, beats: 2, hold: true, answer: 2, voice: 'organ' }),
           topic: 'frac-bar',
           kind: 'num',
           q: 'כמה פעימות נמשך צליל חצי בתיבה של 4 פעימות?',
@@ -934,6 +944,7 @@
         },
         {
           id: 'fbi-2',
+          tap: confTap({ mode: 'fraction', per: 4, unit: 'quarter', barBeats: 4, beats: 2, hold: true, answer: 2, voice: 'keys' }),
           topic: 'frac-bar',
           kind: 'num',
           q: 'כמה תווי רבע נמשכים יחד כמו תו חצי אחד?',
@@ -955,6 +966,7 @@
         },
         {
           id: 'fbi-3',
+          tap: confTap({ mode: 'fraction', per: 4, unit: 'quarter', barBeats: 4, beats: 1, hold: true, answer: 1, voice: 'keys' }),
           topic: 'frac-bar',
           kind: 'num',
           q: 'בתיבה של 4 פעימות יש חצי ורבע. כמה תווי רבע חסרים כדי להשלים לשלם?',
@@ -973,6 +985,7 @@
         },
         {
           id: 'fbi-4',
+          tap: confTap({ mode: 'fraction', per: 4, unit: 'quarter', barBeats: 4, beats: 3, hold: true, answer: 3, voice: 'keys' }),
           topic: 'frac-bar',
           kind: 'num',
           q: 'תו רבע נמשך פעימה בודדת. כמה פעימות נותרו כדי להשלים תיבה של 4 פעימות?',

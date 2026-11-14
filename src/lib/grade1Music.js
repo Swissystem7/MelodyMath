@@ -1,7 +1,7 @@
 // MelodyMath — כיתה א׳ activities (plan §5, issue #102):
 //
 //   ספור את הפעמות: המטרונום מדגיש כל פעמה n, והילד חוזה את המספר המודגש הבא
-//   ישר המספרים כסולם: כל קפיצה היא צעד בסולם, וקפיצה של 10 היא אוקטבה
+//   ישר המספרים: כל צעד הוא מכה, וכל עשר מכות הן מחזור ג׳אפטאל שנסגר בגונג
 //   לוח 100 נוגע: העשרות נשמעות כצליל נמוך והיחידות כנקישות
 //   המשך את המנגינה: דגמי AB / AAB / ABC בצליל ובצורה
 //
@@ -133,9 +133,11 @@
       + track.accented.join(', ') + '.';
   }
 
-  // ---------- 2. ישר המספרים כסולם ----------
-  // numberLine.js owns the scale: ten steps are an octave, so a +10 jump
-  // doubles the frequency. Nothing here may re-export a name numberLine.js
+  // ---------- 2. ישר המספרים: צעדים וגִ׳אפְּטָאל ----------
+  // numberLine.js owns the scale: a semitone per unit, twelve to the octave.
+  // A ten is a cycle, not a pitch: every ten strokes close a jhaptal cycle
+  // (2 + 3 + 2 + 3) with a gong (docs/research/topics/039-number-line.md).
+  // Nothing here may re-export a name numberLine.js
   // exports — in the browser both Object.assign onto the same globalThis, so
   // a shared name overwrites the original and the delegation calls itself.
   // Use numberLine's `scaleStepFreq`; this module adds sound and narration.
@@ -143,18 +145,42 @@
     return nline.scaleJumpSound(Number(fromTick) || 0, Number(toTick) || 0, baseFreq || 220);
   }
 
-  // A jump is the step tone landed on; an octave jump sounds the tick it left
-  // from first, so "the same note, higher" is audible rather than asserted.
+  // The jhaptal cycle as strokes: dha on 1, claps on 3 and 8, the wave
+  // (khali, softer) on 6 — the starts of 2 + 3 + 2 + 3.
+  const CYCLE_GAIN = { 0: 0.24, 2: 0.18, 5: 0.1, 7: 0.18 };
+  const CYCLE_HZ = { 0: 196, 2: 294, 5: 440, 7: 294 };
+  const STROKE_HZ = 392;
+  const GONG_HZ = 110;
+  const MAX_STROKES = 40;
+
+  // A jump is heard as its steps: the tone it leaves, one stroke per unit
+  // (spaces, not ticks — the first stroke is already one step), a gong when
+  // ten strokes close a cycle, then the tone it lands on. Past MAX_STROKES a
+  // whole ten is heard as its gong alone.
   function scaleJumpEvents(fromTick, toTick, baseFreq, bpm) {
     const jump = numberLineScaleJump(fromTick, toTick, baseFreq);
     if (!jump || !Number.isFinite(jump.frequency)) return [];
     const beat = beatLength(bpm);
-    const base = Number(baseFreq) || 220;
-    if (!jump.isOctave) return [hit(0, beat * 0.8, jump.frequency, 0.22, 'sine')];
-    return [
-      hit(0, beat * 0.7, base, 0.22, 'sine'),
-      hit(beat * 0.8, beat * 1.1, jump.frequency, 0.22, 'sine'),
-    ];
+    const n = Math.abs(jump.jump);
+    if (n === 0) return [hit(0, beat * 0.8, jump.frequency, 0.22, 'sine')];
+    const step = Math.min(beat / 2, 0.3);
+    const startHz = nline.scaleStepFreq(baseFreq || 220, 0);
+    const out = [hit(0, beat * 0.6, startHz, 0.2, 'sine')];
+    let t = beat * 0.75;
+    if (n > MAX_STROKES) {
+      for (let c = 0; c < jump.tens; c++) { out.push(hit(t, 0.5, GONG_HZ, 0.24, 'sine')); t += 0.55; }
+      for (let k = 0; k < jump.ones; k++) { out.push(hit(t, step * 0.6, STROKE_HZ, 0.12, 'sine')); t += step; }
+    } else {
+      for (let k = 1; k <= n; k++) {
+        const p = (k - 1) % 10;
+        const strong = Object.prototype.hasOwnProperty.call(CYCLE_GAIN, p);
+        out.push(hit(t, step * 0.6, strong ? CYCLE_HZ[p] : STROKE_HZ, strong ? CYCLE_GAIN[p] : 0.12, p === 0 ? 'triangle' : 'sine'));
+        t += step;
+        if (k % 10 === 0) { out.push(hit(t, 0.5, GONG_HZ, 0.24, 'sine')); t += 0.3; }
+      }
+    }
+    out.push(hit(t + 0.15, beat * 0.9, jump.frequency, 0.22, 'sine'));
+    return out;
   }
 
   function scaleJumpNarration(fromTick, toTick, baseFreq) {
@@ -163,12 +189,11 @@
     const size = Math.abs(jump.jump);
     const dir = jump.jump < 0 ? 'אחורה' : 'קדימה';
     if (jump.jump === 0) return 'נשארתם על אותו מספר, ולכן הצליל לא זז.';
-    if (jump.isOctave) {
-      return 'קפיצה של ' + size + ' ' + dir + ' היא אוקטבה שלמה: אותו צליל, '
-        + (jump.jump < 0 ? 'נמוך פי 2' : 'גבוה פי 2') + '.';
-    }
-    return 'קפיצה של ' + size + ' ' + dir + ' היא ' + size + ' צעדים בסולם, '
-      + (jump.jump < 0 ? 'והצליל יורד' : 'והצליל עולה') + '.';
+    const move = jump.jump < 0 ? 'והצליל יורד' : 'והצליל עולה';
+    if (!jump.tens) return 'קפיצה של ' + size + ' ' + dir + ' היא ' + size + ' מכות, מכה לכל צעד, ' + move + '.';
+    const cycles = jump.tens === 1 ? 'מחזור ג׳אפטאל שלם אחד' : jump.tens + ' מחזורי ג׳אפטאל שלמים';
+    return 'קפיצה של ' + size + ' ' + dir + ' היא ' + cycles + ' (2 + 3 + 2 + 3), כל מחזור נסגר בגונג'
+      + (jump.ones ? ', ועוד ' + jump.ones + ' מכות' : '') + ', ' + move + '.';
   }
 
   function chart100Sound(number, baseTensFreq) {
@@ -372,7 +397,9 @@
     const jump = numberLineScaleJump(spec.from, spec.to, spec.baseFreq);
     if (!jump || !Number.isFinite(jump.frequency) || jump.jump === 0) return;
     const row = padRow(box);
-    row.appendChild(pads(Math.min(20, Math.abs(jump.jump)), jump.isOctave ? 'on' : 'left'));
+    // One box of ten per full cycle (at most three drawn), then the single strokes.
+    for (let c = 0; c < Math.min(3, jump.tens); c++) row.appendChild(pads(10, 'on'));
+    if (jump.ones) row.appendChild(pads(jump.ones, 'left'));
     addPlay(box, '▶ השמע שוב', function () {
       return scaleJumpEvents(spec.from, spec.to, spec.baseFreq, spec.bpm);
     });

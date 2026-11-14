@@ -19,22 +19,22 @@ test('countBeats generates skip counting beats with accented multiples', () => {
   assert.equal(g1.predictNextAccented(30, 10), 40);
 });
 
-test('scaleStepFreq and numberLineScaleJump implement scale steps where 10 steps is an octave', () => {
+test('the number line is heard on semitone steps (12 to the octave); a ten is a cycle, not an octave', () => {
   const base = 220;
   const line = require('../src/lib/numberLine');
-  assert.equal(line.scaleStepFreq(base, 10), 440);
-  assert.equal(line.scaleStepFreq(base, -10), 110);
+  assert.equal(line.scaleStepFreq(base, 12), 440);
+  assert.equal(line.scaleStepFreq(base, -12), 110);
   assert.equal(line.scaleStepFreq(base, 0), 220);
 
   const jump10 = g1.numberLineScaleJump(5, 15, base);
   assert.equal(jump10.jump, 10);
-  assert.equal(jump10.frequency, 440);
-  assert.equal(jump10.isOctave, true);
+  assert.equal(jump10.isOctave, false, 'a scale is not place value (docs/research/topics/039)');
+  assert.equal(jump10.isTen, true);
 
   const jump1 = g1.numberLineScaleJump(3, 4, base);
   assert.equal(jump1.jump, 1);
   assert.equal(jump1.isOctave, false);
-  assert.equal(jump1.frequency, Math.round(base * Math.pow(2, 1 / 10) * 100) / 100);
+  assert.equal(jump1.frequency, Math.round(base * Math.pow(2, 1 / 12) * 100) / 100);
 });
 
 test('chart100Sound encodes tens as low frequency tone and ones as clicks with Hebrew label', () => {
@@ -151,11 +151,20 @@ test('sound events stay inside the engine hearing-safe band and never precede th
     assert.ok(e.at >= 0 && e.dur > 0);
   });
 
-  // An octave jump sounds the tick it left from, then the tick it landed on.
-  const octave = g1.scaleJumpEvents(0, 10, 220, 96);
-  assert.equal(octave.length, 2);
-  assert.equal(octave[1].hz, 440);
-  assert.equal(g1.scaleJumpEvents(2, 3, 220, 96).length, 1);
+  // A jump of ten is a full jhaptal cycle: the tone it leaves, ten strokes
+  // with the accents of 2 + 3 + 2 + 3, a gong, and the tone it lands on.
+  const ten = g1.scaleJumpEvents(0, 10, 220, 96);
+  assert.equal(ten.length, 1 + 10 + 1 + 1);
+  assert.equal(ten.filter((e) => e.hz === 110 && e.dur === 0.5).length, 1, 'one gong per ten');
+  const strokes = ten.slice(1, 11);
+  assert.ok(strokes[0].gain > strokes[1].gain, 'dha on 1');
+  assert.ok(strokes[2].gain > strokes[1].gain && strokes[7].gain > strokes[6].gain, 'claps on 3 and 8');
+  assert.ok(strokes[5].gain < strokes[0].gain, 'the wave (khali) on 6 is soft');
+  assert.equal(g1.scaleJumpEvents(0, 25, 220, 96).filter((e) => e.hz === 110 && e.dur === 0.5).length, 2, 'two tens, two gongs');
+  assert.equal(g1.scaleJumpEvents(2, 3, 220, 96).length, 3, 'leave, one stroke (one space, not two ticks), land');
+  assert.ok(g1.scaleJumpEvents(10, 0, 220, 96).slice(-1)[0].hz < 220, 'backwards lands lower');
+  assert.match(g1.scaleJumpNarration(60, 85, 220), /2 מחזורי ג׳אפטאל שלמים .*ועוד 5 מכות/);
+  assert.doesNotMatch(g1.scaleJumpNarration(60, 85, 220), /85|אוקטבה/, 'never the answer, never an octave');
 
   // Playing the expected shape would give the answer away.
   const challenge = g1.createPatternChallenge('AB', 5);

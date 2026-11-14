@@ -101,6 +101,12 @@
       s = { kind: 'quad', corners: [60, 120, 60, 120], sides: [0.7, 0.7, 0.7, 0.7], value: 'מעוין', world: WORLDS.hora };
     } else if (/מרובע עם שני זוגות של צלעות מקבילות ובלי זווית ישרה/.test(p)) {
       s = { kind: 'quad', corners: [60, 120, 60, 120], sides: [0.9, 0.5, 0.9, 0.5], motifs: [0, 1, 0, 1], value: 'מקבילית', world: WORLDS.hora };
+    } else if (/^האם כל ריבוע הוא מלבן\? \(כן\/לא\)$/.test(p)) {
+      // inclusion (docs/research/topics/043): a square walked — every corner matches the right-angle model, so it is a rectangle too
+      s = { kind: 'quad', corners: [90, 90, 90, 90], sides: [0.7, 0.7, 0.7, 0.7], value: 'כן', world: WORLDS.hora };
+    } else if (/^האם כל מלבן הוא ריבוע\? \(כן\/לא\)$/.test(p)) {
+      // a rectangle walked — right corners, but long and short silences: not every rectangle is a square
+      s = { kind: 'quad', corners: [90, 90, 90, 90], sides: SIDES['מלבן'], value: 'לא', world: WORLDS.hora };
     } else if (/^כמה אלכסונים יש למרובע\?$/.test(p)) {
       s = { kind: 'diagonals', value: 2, world: WORLDS.hora };
     // ---- a turning hand

@@ -37,7 +37,18 @@
 .vert-op{color:#6946e8;margin-inline-end:.15em}
 .vert-line{border-top:3px solid #21183b;margin-top:4px}
 .ruler{margin:14px 0}
-.ruler-track{display:flex;flex-wrap:wrap;gap:2px;font-size:1.4rem;line-height:1}
+.ruler-track{display:flex;font-size:1.2rem;line-height:1}
+.ruler{overflow-x:auto;padding-inline-start:.9rem}
+/* A cm object is one continuous bar over the marks, not separate glyphs. */
+.ruler-cm{height:16px;align-self:flex-end;background:#f2b544;border-block:2px solid #9a6510}
+.ruler-cm:first-of-type,.ruler-gap+.ruler-cm{border-inline-start:2px solid #9a6510}
+.ruler-cm:last-child{border-inline-end:2px solid #9a6510}
+.ruler-mark{position:relative}
+.ruler-mark::before{content:"";position:absolute;top:-8px;left:50%;width:2px;height:6px;background:#21183b}
+.ruler-cell,.ruler-gap{flex:0 0 1.5rem;width:1.5rem;text-align:center}
+/* A numbered mark sits on the boundary between two cells: number m is the left edge of cell m. */
+.ruler-marks{display:flex;margin-inline-start:-.75rem;font-size:.8rem;font-weight:700;color:#534a6b;border-top:2px solid #21183b;padding-top:2px;width:max-content}
+.ruler-mark{flex:0 0 1.5rem;width:1.5rem;text-align:center}
 .ruler-read,.clock-read,.pictogram-key{margin:6px 0 0;font-size:.88rem;color:#534a6b}
 .ruler-read{direction:rtl;text-align:right}
 .clock{margin:14px 0}

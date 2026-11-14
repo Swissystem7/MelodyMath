@@ -401,3 +401,130 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
 .mm-tok--vertex { background: var(--mm-yellow); }
 .mm-tok--edge { background: var(--mm-violet); min-width: 22px; }
 .mm-tok--face { background: var(--mm-teal); color: var(--mm-white); min-width: 28px; height: 24px; border-radius: 8px; }
+
+/* MM-AUTO-752: Comparative bar chart & teacher comparison dashboard */
+.barchart--comparative {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.barchart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.barchart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.barchart-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--mm-ink);
+}
+.barchart-swatch--music {
+  background: var(--mm-ink);
+}
+.barchart-swatch--control {
+  background: var(--mm-muted);
+}
+.barchart-track--comparative {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 220px;
+  padding: 12px 8px 6px;
+  border-bottom: 2px solid var(--mm-ink);
+  background: var(--mm-cream-2);
+  border-radius: 12px;
+  gap: 14px;
+}
+.barchart-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  height: 100%;
+}
+.barchart-group-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: calc(100% - 24px);
+}
+.barchart-group-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mm-ink);
+}
+.barchart-col--music .barchart-bar {
+  background: var(--mm-ink);
+}
+.barchart-col--control .barchart-bar {
+  background: var(--mm-violet);
+  border-color: var(--mm-ink);
+}
+.barchart-bar {
+  width: 100%;
+  min-width: 18px;
+  max-width: 38px;
+  border-radius: 6px 6px 0 0;
+  border: 2px solid var(--mm-ink);
+  border-bottom: none;
+  transition: height 0.3s ease;
+}
+.barchart-val {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mm-ink);
+  margin-bottom: 4px;
+}
+.mm-comparison-card {
+  border-color: var(--mm-violet);
+  background: var(--mm-white);
+}
+.mm-comparison-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.mm-metric-box {
+  background: var(--mm-cream);
+  border: 2px solid var(--mm-ink);
+  border-radius: 14px;
+  padding: 8px 12px;
+  text-align: center;
+}
+.mm-metric-box--highlight {
+  background: var(--mm-mint-bg);
+  border-color: var(--mm-teal);
+}
+.mm-metric-box__num {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--mm-ink);
+  display: block;
+}
+.mm-metric-box__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mm-ink-soft);
+}
+.mm-table--comparison th, .mm-table--comparison td {
+  text-align: center;
+}
+.mm-table--comparison th:first-child {
+  text-align: start;
+}

@@ -105,3 +105,20 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
   assert.match(html, /src="src\/lib\/music\/tensPercent\.js"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/tensPercent\.js'/);
 });
+
+test('more than 100%: the rise from 40 to 100 is six quarters of the old price — 150%', () => {
+  const e = ev('shortenByPercent', 'המחיר עלה מ־40 ל־100 ש״ח. בכמה אחוזים עלה? (מספר בלבד)', 150);
+  assert.equal(stage(e, 'quarter').length, 1);
+  assert.equal(stage(e, 'quarterValue').reduce((s, n) => s + n.worth, 0), 10, 'a quarter of the old price');
+  assert.equal(stage(e, 'rise').length, 6);
+  assert.equal(spec('shortenByPercent', 'המחיר עלה מ־40 ל־100 ש״ח. בכמה אחוזים עלה? (מספר בלבד)', 60), null, 'the rise is not the percent');
+});
+
+test('the way back is measured from the new tempo: up a quarter of 80, down two tenths of 100 — 20%, not 25%', () => {
+  const P = 'קצב של 80 BPM עלה ב־25% ל־100. בכמה אחוזים צריך לרדת כדי לחזור ל־80?';
+  const e = ev('shortenByPercent', P, 20);
+  assert.equal(stage(e, 'upValue').reduce((s, n) => s + n.worth, 0), 20, 'a quarter of 80');
+  assert.equal(stage(e, 'tenthValue').reduce((s, n) => s + n.worth, 0), 10, 'a tenth of 100');
+  assert.equal(stage(e, 'down').length, 2);
+  assert.equal(spec('shortenByPercent', P, 25), null, 'the symmetric answer is never set to sound');
+});

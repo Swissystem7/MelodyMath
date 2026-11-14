@@ -71,6 +71,12 @@ test('bars: a waltz in 3/4 (strong, weak, weak) and a jig in 6/8 (two groups of 
   assert.equal(spec('meters', G3, 'במשקל 6/8, שמינית 36 — היא סוגרת תיבה? (כתבו כן או לא)', 'כן').value, 'כן');
 });
 
+test('an accented beat in 3/4, counted from 1 as musicians count: whole bars as bundles, then its own bar beat by beat', () => {
+  const e = ev('meters', G3, 'במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'לא');
+  assert.equal(stage(e, 'barBundle').length, 5, 'five whole bars: beats 1–15');
+  assert.deepEqual(stage(e, 'beat').map((n) => n.strong), [true, false, false], '16 strong, 17 and 18 weak');
+  assert.equal(spec('meters', G3, 'במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'כן'), null, 'counting from 0 is never set to sound');
+});
 test('only for the times-table standards, and only when the sounds give exactly the answer', () => {
   assert.equal(spec('repeatedBars', G3, '9 × 9 = ?', 80), null, 'a wrong key is never set to sound');
   assert.equal(spec('repeatedBars', 'כפל וחילוק במספר חד־ספרתי, גם במאונך; סימני התחלקות', '24 × 3 = ?', 72), null);

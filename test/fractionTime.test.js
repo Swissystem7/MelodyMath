@@ -118,3 +118,13 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
   assert.match(html, /src="src\/lib\/music\/fractionTime\.js"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/fractionTime\.js'/);
 });
+
+test('adding tops and bottoms: the claimed sum is shorter than the first part alone — a sum never is', () => {
+  const P = 'דני אומר ש־1/3 + 1/4 = 2/7. האם הוא צודק? (כן/לא)';
+  const e = ev('noteValues', P, 'לא');
+  assert.equal(stage(e, 'ruler').length, 12);
+  const first = stage(e, 'first').length, claim = stage(e, 'claim')[0];
+  assert.equal(first, 4, 'a third of the bar');
+  assert.ok(claim.dur < first * (stage(e, 'first')[1].at - stage(e, 'first')[0].at), 'the claim is held for less than the first part');
+  assert.equal(spec('noteValues', P, 'כן'), null);
+});

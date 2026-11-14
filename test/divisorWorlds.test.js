@@ -131,3 +131,15 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
   assert.match(html, /src="src\/lib\/music\/divisorWorlds\.js"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/divisorWorlds\.js'/);
 });
+
+test('which beat in its bar: counted from 1, a remainder of 0 is the LAST beat, never beat 0', () => {
+  const P = (n) => 'במשקל 4/4, פעמה ' + n + ' היא איזו פעמה בתיבה שלה?';
+  const e14 = ev('phraseShare', P(14), 2);
+  assert.equal(stage(e14, 'sam').length, 3, 'three bars already past');
+  assert.deepEqual([stage(e14, 'barSam').length, stage(e14, 'beat').length], [1, 1], 'then sam and one more beat: the second');
+  const e16 = ev('phraseShare', P(16), 4);
+  assert.equal(stage(e16, 'sam').length, 3);
+  assert.deepEqual(stage(e16, 'beat').map((n) => n.beat), [2, 3, 4], 'beat 16 is the fourth of the fourth bar');
+  assert.equal(spec('phraseShare', P(16), 0), null, 'a key that counts from 0 is never set to sound');
+  assert.equal(spec('phraseShare', P(14), 2).world.he, 'טאלה צפון־הודית');
+});

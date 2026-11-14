@@ -72,7 +72,11 @@
     const raw = String(item.answer).trim();
     let m, s = null;
     // ---- even / odd and divisibility (dabke)
-    if ((m = /^(?:האם )?(\d+)(?: פעימות הן מספר| הוא מספר)? זוגי או אי[־-]זוגי\?/.exec(p))) {
+    if ((m = /^(\d) \+ (\d) — זוגי או אי[־-]זוגי\?$/.exec(p))) {
+      // odd + odd: each leaves one step alone, and the two alone steps meet as a pair
+      const a = +m[1], b = +m[2];
+      s = { kind: 'sumParity', a: a, b: b, value: (a + b) % 2 === 0 ? 'זוגי' : 'אי-זוגי', world: WORLDS.dabke };
+    } else if ((m = /^(?:האם )?(\d+)(?: פעימות הן מספר| הוא מספר)? זוגי או אי[־-]זוגי\?/.exec(p))) {
       const n = +m[1];
       s = { kind: 'parity', n: n, value: n % 2 === 0 ? 'זוגי' : 'אי-זוגי', world: WORLDS.dabke };
     } else if ((m = /^האם (\d+) הוא מספר ראשוני\? \(כן\/לא\)$/.exec(p))) {
@@ -117,6 +121,12 @@
       const groups = [[+m[1], +m[2]], [+m[3], +m[4]]];
       s = { kind: 'families', groups: groups, value: groups.reduce((a, g) => a + g[0] * g[1], 0), world: WORLDS.andalus };
     // ---- values: the mode (pitch is the value)
+    } else if ((m = /: ((?:\d+, )+\d+)\. כמה שכיחים יש\?$/.exec(p))) {
+      // a set may have more than one mode: count the longest runs of one pitch
+      const vs = nums(m[1]).sort((a, b) => a - b), freq = {};
+      vs.forEach((v) => { freq[v] = (freq[v] || 0) + 1; });
+      const top = Math.max.apply(null, Object.values(freq));
+      if (vs.length <= MAX_RUN) s = { kind: 'modesCount', values: vs, value: Object.keys(freq).filter((k) => freq[k] === top).length, world: WORLDS.andalus };
     } else if ((m = /: ((?:\d+, )+\d+)\. (?:מהו השכיח|מה השכיחות של המספר (\d+))\?$/.exec(p))) {
       const vs = nums(m[1]).sort((a, b) => a - b);
       const freq = {};
@@ -237,7 +247,7 @@
           t += GAP;
         });
         break;
-      case 'values': {
+      case 'values': case 'modesCount': {
         // pitch is the value, in order; a short silence where the value changes
         const lo = spec.values[0];
         spec.values.forEach((v, i) => { if (i && v !== spec.values[i - 1]) t += 0.4; hit('woodBar', 392 * Math.pow(2, (v - lo) * 2 / 12), 0.14, 0.22, 'value', { v: v }); t += STEP; });
@@ -294,6 +304,19 @@
         if (k % 2) { t += GAP; step('alone'); }
         break;
       }
+      case 'sumParity': {
+        // each number in pairs; an odd one leaves one step alone after a silence;
+        // two alone steps then meet and step together as one more pair
+        const alone = [];
+        [spec.a, spec.b].forEach((k, w) => {
+          for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i, of: w }); step('pair', { i: i, of: w }, 120); t += 0.3; }
+          if (k % 2) { t += GAP; step('alone', { of: w }); alone.push(w); }
+          t += GAP;
+        });
+        if (alone.length === 2) { step('meet'); step('meet', {}, 120); }
+        else if (alone.length === 1) { t += GAP; step('alone', { last: true }); }
+        break;
+      }
       case 'prime': {
         const per = spec.n / spec.bars, tens = Math.floor(per / 10), ones = per % 10;
         for (let b = 0; b < spec.bars; b++) { for (let i = 0; i < tens; i++) { hit('drumLow', 98, 0.3, 0.24, 'barTen', { bar: b }); t += 0.42; } for (let i = 0; i < ones; i++) step('beat', { bar: b }); t += GAP; }
@@ -333,6 +356,7 @@
     table: 'כל קטגוריה בתורה, לפי הסדר בשאלה, ושקט ביניהן. אחרי כל קטגוריה — עצרו ואמרו כמה.',
     list: 'קודם הרשימה כמו שנאספה, אחד אחד. אחר כך אותה רשימה מסודרת: כל גוון בתורו. האם יצא אותו מספר בסך הכול?',
     tally: 'סימני ספירה: חמש הקשות שוות, שקט קצר — זו חבילה — ואז השאר. השקט הוא הגבול.',
+    modesCount: 'כאן גובה הצליל הוא הערך, מהנמוך לגבוה, ושקט קצר כשהערך משתנה. איזה גובה חוזר הכי הרבה פעמים ברצף? אולי יש יותר מאחד כזה.',
     values: 'כאן גובה הצליל הוא הערך, מהנמוך לגבוה, ושקט קצר כשהערך משתנה. השכיח הוא ערך — לא מספר ההקשות.',
     mean: 'כל רוקד: מכה עמוקה (כולם עומדים על הקטן ביותר) ואחריה מה שיש לו מעל. אחר כך מחלקים את העודף בסבבים — אחד לכל רוקד בכל סבב. לאף אחד לא היה הערך הזה בהתחלה — בנינו אותו.',
     meanNotValue: 'כל רוקד: מכה עמוקה ואחריה מה שיש לו מעל הקטן ביותר. אחר כך מחלקים את העודף בסבבים. האם למישהו היה בהתחלה בדיוק מה שיצא לכל אחד?',
@@ -343,6 +367,7 @@
     symbols: 'קודם סמל אחד נפתח ליחידות שלו. אחר כך כל סמל שווה את כולן. כמה סמלים?',
     sector: 'סיבוב שלם בנקישות שוות, כל נקישה שלושים מעלות. אחר כך רק הגזרה.',
     families: 'קבוצה לכל משפחה, גוון לכל סוג משפחה. כמה משפחות, כמה ילדים בכל אחת?',
+    sumParity: 'כל מספר בצעדים בזוגות. צעד בלי זוג נשמע לבד אחרי שקט. בסוף: אם שני צעדים נשארו לבד, הם נפגשים ורוקדים יחד כזוג.',
     parity: 'צעדים בזוגות. כל עשר הוא חמישה זוגות שלמים — מכה עמוקה אחת. נשאר צעד בלי זוג? הוא יישמע לבד אחרי שקט.',
     prime: 'מנסים לחלק לתיבות שוות — לפחות שתי תיבות, ובכל תיבה לפחות שני צעדים. כאן — האם התחלק?',
     fives: 'כל עשר, מאה ואלף מתחלקים לחמישיות בלי שארית — מכה עמוקה אחת. מקבצים רק את האחדות. נשאר משהו?',
