@@ -169,5 +169,5 @@ test('the ruler and clock items of א׳–ב׳ keep their ids', () => {
   const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it) && !offset(it)).map(num);
   assert.ok(Math.min(...newIds) > Math.max(...oldIds), 'the later items sit after the older ones');
   const lastIds = banks.allItems().filter(offset).map(num);
-  assert.ok(lastIds.length && Math.min(...lastIds) > Math.max(...banks.allItems().filter((it) => !offset(it)).map(num)), 'appended last');
+  assert.ok(lastIds.length && Math.min(...lastIds) > Math.max(...oldIds, ...newIds), 'appended after every older measurement item');
 });
