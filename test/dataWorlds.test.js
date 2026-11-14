@@ -154,3 +154,14 @@ test('index.html renders the widget after TakeAwayTen and reveals after the answ
   assert.ok(html.indexOf("MM_TAKEAWAY_TEN.specForItem(item)") < html.indexOf("MM_DATA_WORLDS.specForItem(item)"));
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/dataWorlds\.js'/);
 });
+
+test('odd + odd: each leaves one step alone, and the two alone steps meet as a pair', () => {
+  const e = ev('alternateDrums', '7 + 9 — זוגי או אי־זוגי?', 'זוגי');
+  assert.equal(stage(e, 'pair').length, 2 * (3 + 4));
+  assert.equal(stage(e, 'alone').length, 2);
+  assert.equal(stage(e, 'meet').length, 2, 'the two alone steps dance together');
+  assert.equal(spec('alternateDrums', '7 + 9 — זוגי או אי־זוגי?', 'אי-זוגי'), null);
+  const odd = ev('alternateDrums', '6 + 3 — זוגי או אי־זוגי?', 'אי-זוגי');
+  assert.equal(stage(odd, 'meet').length, 0);
+  assert.ok(stage(odd, 'alone').some((n) => n.last), 'one step stays alone at the end');
+});
