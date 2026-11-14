@@ -1345,8 +1345,8 @@
   // עדיין מתויג table=3/6, ולכן השער של mastery.js חל גם כאן.
   RAW.push(
     G3('multiplication', 'במשקל 3/4 שמעתם 2 תיבות מלאות. כמה פעמות שמעתם?', 6, '2 תיבות של 3 פעמות', { standard: ST.MUL_C, table: 3, level: 1, g3: { kind: 'meter', table: 3, bars: 2 } }),
-    G3('multiplication', 'במשקל 3/4 שמעתם 4 תיבות. כל כפולה של 3 מודגשת. כמה פעמות בסך הכול?', 12, '4 × 3 — ההדגשה האחרונה היא התשובה', { standard: ST.MUL_C, table: 3, level: 2, g3: { kind: 'meter', table: 3, bars: 4 } }),
-    G3('multiplication', 'במשקל 3/4 שמעתם 7 תיבות. על איזו פעמה נופלת ההדגשה האחרונה?', 21, '7 × 3', { standard: ST.MUL_C, table: 3, level: 3, g3: { kind: 'meter', table: 3, bars: 7 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 4 תיבות. כל תיבה נסגרת על כפולה של 3. כמה פעמות?', 12, '4 × 3 — הפעמה שסוגרת את התיבה האחרונה היא התשובה', { standard: ST.MUL_C, table: 3, level: 2, g3: { kind: 'meter', table: 3, bars: 4 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 7 תיבות. איזו פעמה סוגרת את התיבה האחרונה?', 21, '7 × 3. ההדגשה היא בראש כל תיבה: 1, 4 … 19', { standard: ST.MUL_C, table: 3, level: 3, g3: { kind: 'meter', table: 3, bars: 7 } }),
     G3('multiplication', 'במשקל 6/8 שמעתם 3 תיבות של 6 פעמות. כמה פעמות בסך הכול?', 18, '3 × 6', { standard: ST.MUL_C, table: 6, level: 2, g3: { kind: 'meter', table: 6, bars: 3 } }),
     G3('multiplication', 'במשקל 6/8, כמה תיבות שלמות נדרשות כדי להגיע ל־42 פעמות?', 7, '42 : 6', { standard: ST.MUL_C, table: 6, level: 3, g3: { kind: 'meter', table: 6, bars: 7 } })
   );

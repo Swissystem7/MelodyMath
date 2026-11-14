@@ -19,12 +19,18 @@ test('table 3 counts in 3/4 and table 6 in 6/8; other tables have no meter', () 
   assert.equal(g3.meterForTable('constructor'), null);
 });
 
-test('every multiple of the table falls on an accent, and nothing else does', () => {
+test('counted from 1, as musicians count: the first beat of a bar is accented and every multiple closes a bar', () => {
   const beats = g3.meterBeats(3, 4);
   assert.equal(beats.length, 12);
-  assert.deepEqual(beats.filter((b) => b.accent).map((b) => b.count), [3, 6, 9, 12]);
+  assert.deepEqual(beats.filter((b) => b.accent).map((b) => b.count), [1, 4, 7, 10]);
+  assert.deepEqual(beats.filter((b) => b.closes).map((b) => b.count), [3, 6, 9, 12]);
+  assert.deepEqual(beats.filter((b) => b.multiple).map((b) => b.multiple), [3, 6, 9, 12]);
+  assert.equal(g3.meterBeats(3, 7)[18 - 1].accent, false, 'beat 18 in 3/4 is the third of its bar (#1077)');
   assert.deepEqual(beats.filter((b) => b.bar === 2).map((b) => b.count), [4, 5, 6]);
-  assert.deepEqual(g3.meterBeats(6, 3).filter((b) => b.accent).map((b) => b.count), [6, 12, 18]);
+  const jig = g3.meterBeats(6, 3);
+  assert.deepEqual(jig.filter((b) => b.accent).map((b) => b.count), [1, 7, 13]);
+  assert.deepEqual(jig.filter((b) => b.half).map((b) => b.count), [4, 10, 16], '6/8 is two groups of three');
+  assert.deepEqual(jig.filter((b) => b.closes).map((b) => b.count), [6, 12, 18]);
   assert.deepEqual(g3.meterBeats(7, 3), []);
   assert.deepEqual(g3.meterBeats(3, 0), []);
   assert.deepEqual(g3.meterBeats(3, 99), []);
@@ -33,12 +39,15 @@ test('every multiple of the table falls on an accent, and nothing else does', ()
 test('the accented beat sounds louder, higher and in another timbre', () => {
   const ev = g3.meterEvents(3, 2, 96);
   assert.equal(ev.length, 6);
-  assert.ok(ev[2].hz > ev[0].hz);
-  assert.ok(ev[2].gain > ev[0].gain);
-  assert.notEqual(ev[2].type, ev[0].type);
+  assert.ok(ev[0].hz > ev[2].hz, 'the downbeat, not the last beat, is the strong one');
+  assert.ok(ev[0].gain > ev[2].gain);
+  assert.notEqual(ev[0].type, ev[2].type);
+  assert.ok(ev[3].gain > ev[4].gain, 'the second bar starts strong again');
   // 96 BPM is 0.625s a beat, so beat 2 starts there.
   assert.ok(Math.abs(ev[1].at - 0.625) < 1e-9);
-  assert.equal(g3.meterNarration(3, 4), 'משקל 3/4. 12 פעמות ב־4 תיבות, והדגשה על 3, 6, 9, 12.');
+  assert.equal(g3.meterNarration(3, 4), 'משקל 3/4. 12 פעמות ב־4 תיבות. ההדגשה בראש כל תיבה: 1, 4, 7, 10, וכל תיבה נסגרת על כפולה של 3: 3, 6, 9, 12.');
+  const jig = g3.meterEvents(6, 1, 96);
+  assert.ok(jig[0].gain > jig[3].gain && jig[3].gain > jig[1].gain, '6/8: strong, then a lighter accent on 4');
   assert.equal(g3.meterNarration(7, 4), '');
 });
 
@@ -302,9 +311,9 @@ test('the meter, remainder and pair widgets render without a real browser', () =
     const meter = dom.createElement('div');
     g3.bindGrade3(meter, { kind: 'meter', table: 3, bars: 4 });
     assert.equal(dom.all(meter, 'g3-bar').length, 4, 'one group per bar');
-    assert.equal(dom.all(meter, 'on').length, 4, 'one accent per multiple of 3');
-    assert.deepEqual(dom.all(meter, 'on').map((p) => p.textContent), ['3', '6', '9', '']);
-    assert.equal(dom.all(meter, 'on')[3].getAttribute('data-reveal'), '12');
+    assert.equal(dom.all(meter, 'on').length, 4, 'one accent per bar, on its first beat');
+    assert.deepEqual(dom.all(meter, 'end').map((p) => p.textContent), ['3', '6', '9', ''], 'the multiples close the bars');
+    assert.equal(dom.all(meter, 'end')[3].getAttribute('data-reveal'), '12');
     // The pads picture the sr-only line, so a reader does not hear it twice.
     assert.equal(dom.all(meter, 'g3-row')[0].getAttribute('aria-hidden'), 'true');
 
