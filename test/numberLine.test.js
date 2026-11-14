@@ -52,20 +52,27 @@ test('soundForTick calculates frequencies and identifies key fraction points', (
   assert.ok(s50.frequency > s0.frequency);
 });
 
-test('scaleJumpSound plays scale step frequencies where a jump of 10 is an octave', () => {
+test('scaleJumpSound plays semitone steps (12 to the octave); a ten is a full cycle, not an octave', () => {
   const base = 220;
-  const octaveJump = line.scaleJumpSound(0, 10, base);
-  assert.equal(octaveJump.jump, 10);
+  const ten = line.scaleJumpSound(0, 10, base);
+  assert.equal(ten.jump, 10);
+  assert.equal(ten.isOctave, false, 'a scale is not place value (docs/research/topics/039)');
+  assert.deepEqual([ten.isTen, ten.tens, ten.ones], [true, 1, 0]);
+  assert.deepEqual(line.TEN_CYCLE, [2, 3, 2, 3]);
+  assert.equal(line.TEN_CYCLE.reduce((s, x) => s + x, 0), 10);
+  const mixed = line.scaleJumpSound(60, 85, base);
+  assert.deepEqual([mixed.isTen, mixed.tens, mixed.ones], [false, 2, 5]);
+  const octaveJump = line.scaleJumpSound(0, 12, base);
   assert.equal(octaveJump.frequency, 440);
   assert.equal(octaveJump.isOctave, true);
 
   const stepJump = line.scaleJumpSound(2, 3, base);
   assert.equal(stepJump.jump, 1);
-  assert.equal(stepJump.frequency, Math.round(base * 2 ** (1 / 10) * 100) / 100);
+  assert.equal(stepJump.frequency, Math.round(base * 2 ** (1 / 12) * 100) / 100);
   assert.equal(stepJump.isOctave, false);
 
-  const downOctave = line.scaleJumpSound(15, 5, base);
-  assert.equal(downOctave.jump, -10);
+  const downOctave = line.scaleJumpSound(17, 5, base);
+  assert.equal(downOctave.jump, -12);
   assert.equal(downOctave.frequency, 110);
   assert.equal(downOctave.isOctave, true);
 });
@@ -91,12 +98,12 @@ test('scaleStepFreq falls back to SCALE_BASE_HZ for negative, zero, or NaN base 
   assert.equal(line.scaleStepFreq(0, 0), base);
   assert.equal(line.scaleStepFreq(NaN, 0), base);
   assert.equal(line.scaleStepFreq(Infinity, 0), base);
-  assert.equal(line.scaleStepFreq(-50, 10), 440);
-  assert.equal(line.scaleStepFreq(0, 10), 440);
-  assert.equal(line.scaleStepFreq(NaN, 10), 440);
+  assert.equal(line.scaleStepFreq(-50, 12), 440);
+  assert.equal(line.scaleStepFreq(0, 12), 440);
+  assert.equal(line.scaleStepFreq(NaN, 12), 440);
 
   // jumpSize is coerced to integer step
-  assert.equal(line.scaleStepFreq(base, 10.4), 440);
+  assert.equal(line.scaleStepFreq(base, 12.4), 440);
   assert.equal(line.scaleStepFreq(base, NaN), base);
 });
 
@@ -110,10 +117,10 @@ test('scaleJumpSound safely handles floats, non-finite ticks, and string numeric
   assert.equal(typeof floatJump.frequency, 'number');
 
   // String numeric inputs coerced to numbers
-  const strJump = line.scaleJumpSound('2', '12', '220');
+  const strJump = line.scaleJumpSound('2', '14', '220');
   assert.equal(strJump.from, 2);
-  assert.equal(strJump.to, 12);
-  assert.equal(strJump.jump, 10);
+  assert.equal(strJump.to, 14);
+  assert.equal(strJump.jump, 12);
   assert.equal(strJump.isOctave, true);
   assert.equal(strJump.frequency, 440);
 
