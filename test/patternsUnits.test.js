@@ -108,3 +108,14 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
   assert.match(html, /src="src\/lib\/music\/patternsUnits\.js"/);
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/patternsUnits\.js'/);
 });
+
+test('the repeating unit itself: the pattern plays evenly, nothing marks where the unit ends, and its length is the answer', () => {
+  const it = { music: 'fixedAccents', prompt: 'בדגם 🥁 🥁 🔔 🥁 🥁 🔔 — כמה צלילים יש ביחידה שחוזרת?', answer: 3 };
+  const s = U.specForItem(it);
+  assert.equal(s.kind, 'patternUnit');
+  const e = U.soundEvents(s).filter((n) => n.stage === 'body');
+  assert.deepEqual(e.map((n) => n.sound), [0, 0, 1, 0, 0, 1]);
+  const gaps = e.slice(1).map((n, i) => +(n.at - e[i].at).toFixed(3));
+  assert.equal(new Set(gaps).size, 1, 'evenly spaced: the unit is never marked');
+  assert.equal(U.specForItem(Object.assign({}, it, { answer: 6 })), null, 'the whole sequence is not the unit');
+});
