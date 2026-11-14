@@ -2235,6 +2235,29 @@
     I('ד', 'multiplication', 'קולות השופר: 3 × 4 + 3 × 3 + 3 × 3 = ?', 30, 'כפל לפני חיבור, ואז מחברים', { standard: ST.ORDER_OPS, strand: STRAND.NUM, level: 2, kind: 'shofar' }),
     I('ד', 'multiplication', '3 × 4 + 3 × 3 + 3 × 3 = 3 × ☐', 10, 'אותם קולות, בסדר של סבבים', { standard: ST.ORDER_OPS, strand: STRAND.NUM, level: 3, kind: 'shofar' })
   );
+
+  // ---------- פערים שהמחקר לכל נושא מצא (14.11.2026) ----------
+  // One item per misconception the per-topic research names and the bank did
+  // not yet test (docs/research/topics/README.md). Appended last so ids stay put.
+  RAW.push(
+    I('א', 'addition', '3 + 4 = ☐ + 5', 2, 'שני הצדדים שווים: כמה יש בצד שמאל?', { standard: ST.EQ_LEFT, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('א', 'addition', '6 + 2 = 5 + ☐', 3, 'גם בצד ימין יש תרגיל', { standard: ST.EQ_LEFT, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('א', 'subtraction', 'מה ההפרש בין 13 ל־7?', 6, 'כמה צריך להוסיף ל־7 כדי להגיע ל־13?', { standard: ST.SUB20, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('א', 'subtraction', 'כמה חסר מ־8 עד 13?', 5, 'סופרים קדימה מ־8', { standard: ST.SUB20, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('א', 'counting', 'בדגם 🥁 🥁 🔔 🥁 🥁 🔔 — כמה צלילים יש ביחידה שחוזרת?', 3, 'חפשו את החלק הקצר שחוזר שוב ושוב', { standard: ST.PATTERN, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ב', 'even_odd', 'האם 0 הוא מספר זוגי? (כן/לא)', 'כן', 'אפשר לחלק את 0 לשתי קבוצות שוות?', { standard: ST.EVEN_ODD, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ב', 'even_odd', '7 + 9 — זוגי או אי־זוגי?', 'זוגי', 'לכל מספר אי־זוגי נשאר אחד לבד', { standard: ST.EVEN_ODD, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ג', 'division', 'במשקל 4/4, פעמה 14 היא איזו פעמה בתיבה שלה?', 2, 'כמה תיבות שלמות עברו, ואיפה אתם בתיבה הבאה?', { standard: ST.DIV_REM, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ג', 'division', 'במשקל 4/4, פעמה 16 היא איזו פעמה בתיבה שלה?', 4, 'מה קורה כשהחלוקה ב־4 יוצאת בלי שארית?', { standard: ST.DIV_REM, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ד', 'geometry', 'האם כל ריבוע הוא מלבן? (כן/לא)', 'כן', 'כמה זוויות ישרות יש לריבוע?', { standard: ST.QUAD_SORT, strand: STRAND.GEO, level: 2, research: 'gap-2026-11-14' }),
+    I('ד', 'geometry', 'האם כל מלבן הוא ריבוע? (כן/לא)', 'לא', 'האם בכל מלבן כל הצלעות שוות?', { standard: ST.QUAD_SORT, strand: STRAND.GEO, level: 2, research: 'gap-2026-11-14' }),
+    I('ה', 'fractions', 'דני אומר ש־1/3 + 1/4 = 2/7. האם הוא צודק? (כן/לא)', 'לא', 'האם 2/7 גדול מ־1/3 לבדו?', { standard: ST.FRAC_ADD, strand: STRAND.FRAC, level: 2, research: 'gap-2026-11-14' }),
+    I('ה', 'decimals', 'מה גדול יותר, 0.125 או 0.5? כתבו את הגדול.', 0.5, 'השוו קודם את העשיריות', { standard: ST.DEC_PLACE, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ה', 'division', 'האם 97 הוא מספר ראשוני? (כן/לא)', 'כן', 'בדקו חלוקה ב־2, 3, 5 ו־7', { standard: ST.PRIME_FACTOR, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ה', 'data', 'הציונים בבוחן: 7, 8, 8, 9, 9, 10. כמה שכיחים יש?', 2, 'אולי יותר מערך אחד מופיע הכי הרבה פעמים', { standard: ST.FREQ, strand: STRAND.DATA, level: 3, research: 'gap-2026-11-14' }),
+    I('ו', 'percent', 'קצב של 80 BPM עלה ב־25% ל־100. בכמה אחוזים צריך לרדת כדי לחזור ל־80?', 20, 'האחוז נמדד מהקצב החדש', { standard: ST.G6_PCT_CHANGE, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ו', 'percent', 'המחיר עלה מ־40 ל־100 ש״ח. בכמה אחוזים עלה? (מספר בלבד)', 150, 'כמה פעמים 40 נכנס בעלייה?', { standard: ST.G6_PCT_CHANGE, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' })
+  );
   musicForLate();
 
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
