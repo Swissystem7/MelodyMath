@@ -805,13 +805,46 @@
       + '</form>';
   }
 
+  function isControlRow(r) {
+    if (!r) return false;
+    if (r.controlMode === true) return true;
+    if (r.group === 'control') return true;
+    if (r.post && r.post.group === 'control') return true;
+    if (r.pre && r.pre.group === 'control') return true;
+    return false;
+  }
+
+  function dataVizApi() {
+    if (typeof G !== 'undefined' && typeof G.renderComparativeBarChartHtml === 'function') return G;
+    if (typeof G !== 'undefined' && G.MMDataViz && typeof G.MMDataViz.renderComparativeBarChartHtml === 'function') return G.MMDataViz;
+    if (typeof globalThis !== 'undefined' && typeof globalThis.renderComparativeBarChartHtml === 'function') return globalThis;
+    if (typeof globalThis !== 'undefined' && globalThis.MMDataViz && typeof globalThis.MMDataViz.renderComparativeBarChartHtml === 'function') return globalThis.MMDataViz;
+    if (typeof window !== 'undefined' && typeof window.renderComparativeBarChartHtml === 'function') return window;
+    try { return require('../../src/lib/dataViz.js'); } catch (e) {
+      try { return require('../src/lib/dataViz.js'); } catch (e2) {
+        try { return require('./src/lib/dataViz.js'); } catch (e3) { return null; }
+      }
+    }
+  }
+
   // Every student × unit with a check before, for the class summary and the CSV.
   function checkRows() {
     const rows = [];
     students().forEach(function (s) {
       UNITS.forEach(function (unit) {
         const p = store.progress(s.id, unit.id);
-        if (p.pre) rows.push({ student: s.displayName, unit: unit.id, pre: p.pre, post: p.post || null, later: p.later || null });
+        if (p.pre) {
+          const ctrl = isControlRow(p);
+          rows.push({
+            student: s.displayName,
+            unit: unit.id,
+            pre: p.pre,
+            post: p.post || null,
+            later: p.later || null,
+            controlMode: ctrl,
+            group: ctrl ? 'control' : 'intervention'
+          });
+        }
       });
     });
     return rows;
@@ -873,12 +906,68 @@
             + '<td><span class="ltr">' + u.pre + '%</span></td><td><span class="ltr">' + u.post + '%</span></td><td><strong class="ltr">' + sign(u.gain) + '</strong></td></tr>';
         }).join('') + '</tbody></table></div>'
         + (a.ceiling ? '<p class="mm-sub">' + a.ceiling + ' מהזוגות התחילו עם הכול נכון כבר לפני, ולכן לא יכלו להראות שיפור.</p>' : '');
+      const comp = (S && typeof S.compareGroups === 'function') ? S.compareGroups(rows) : null;
+      if (comp && comp.hasBothGroups) {
+        const musicGain = comp.music.gainMean;
+        const controlGain = comp.control.gainMean;
+        const net = comp.netGain;
+        body += '<p data-testid="class-gain-compare" data-music-gain="' + musicGain + '" data-control-gain="' + controlGain + '" data-net="' + net + '">'
+          + 'שיפור ממוצע בקבוצת המוזיקה: ' + sign(musicGain) + ' נקודות; בקבוצת ההשוואה: ' + sign(controlGain) + ' נקודות; הפרש נטו: ' + sign(net) + ' נקודות.'
+          + '</p>';
+      }
     }
     return '<div class="mm-card" data-testid="class-gain"><h3>כמה הכיתה השתפרה? בדיקה בלי מוזיקה, לפני ואחרי</h3>' + body
       + '<p class="mm-sub" data-testid="class-gain-limits">מה זה לא מראה: אין כאן קבוצת השוואה, כל בדיקה היא 2–3 שאלות, והבדיקה אחרי נעשית מיד בסוף היחידה. '
       + 'שיפור כאן יכול לבוא גם מעצם התרגול. כדי לדעת כמה המוזיקה עצמה תורמת, משווים לכיתה דומה שמתרגלת את אותו חומר בלי מוזיקה, באותו זמן, עם אותן בדיקות.'
       + (sum.all.n && sum.all.children < 10 ? ' עם פחות מ־10 ילדים התוצאה עוד לא יציבה, גם כשיש הרבה יחידות.' : '') + '</p>'
       + (rows.length ? '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="export-checks" data-testid="export-checks">הורדת הנתונים לגיליון (CSV)</button></div>' : '')
+      + '</div>';
+  }
+
+  // MM-AUTO-752: Comparison dashboard: intervention (music) vs control group
+  function comparisonDashboardCard() {
+    const rows = checkRows();
+    const comp = (S && typeof S.compareGroups === 'function')
+      ? S.compareGroups(rows)
+      : null;
+    if (!comp) return '';
+
+    const dv = dataVizApi();
+    const chartHtml = (dv && typeof dv.renderComparativeBarChartHtml === 'function')
+      ? dv.renderComparativeBarChartHtml(comp.chartSpec)
+      : (dv && typeof dv.renderBarChartHtml === 'function' ? dv.renderBarChartHtml(comp.chartSpec) : '');
+
+    const sign = function (v) { return (v > 0 ? '+' : '') + v; };
+
+    let contentHtml = '';
+    const m = comp.music;
+    const c = comp.control;
+
+    if (!m.totalCount && !c.totalCount) {
+      contentHtml = '<p class="mm-sub" data-testid="comparison-empty">עדיין אין בדיקות במכשיר זה.</p>';
+    } else {
+      const netDisplay = comp.netGain != null ? sign(comp.netGain) + ' נקודות' : '—';
+      const dDisplay = comp.cohenD != null ? 'd = ' + comp.cohenD + (comp.effectClassification ? ' (' + comp.effectClassification + ')' : '') : '—';
+
+      contentHtml = '<div class="mm-comparison-metrics" data-testid="comparison-metrics">'
+        + '<div class="mm-metric-box mm-metric-box--highlight" data-testid="comparison-net-gain"><span class="mm-metric-box__num ltr">' + esc(netDisplay) + '</span><span class="mm-metric-box__label">הפרש שיפור נטו</span></div>'
+        + '<div class="mm-metric-box" data-testid="comparison-cohen-d"><span class="mm-metric-box__num ltr">' + esc(dDisplay) + '</span><span class="mm-metric-box__label">גודל אפקט Cohen d</span></div>'
+        + '<div class="mm-metric-box" data-testid="comparison-music-stats"><span class="mm-metric-box__num ltr">' + (m.gainMean != null ? sign(m.gainMean) + '%' : '—') + '</span><span class="mm-metric-box__label">שיפור קבוצת מוזיקה (' + m.n + ' תלמידים)</span></div>'
+        + '<div class="mm-metric-box" data-testid="comparison-control-stats"><span class="mm-metric-box__num ltr">' + (c.gainMean != null ? sign(c.gainMean) + '%' : '—') + '</span><span class="mm-metric-box__label">שיפור קבוצת ביקורת (' + c.n + ' תלמידים)</span></div>'
+        + '</div>'
+        + '<div class="mm-table-wrap"><table class="mm-table mm-table--comparison" data-testid="comparison-table"><thead><tr><th scope="col">שלב המדידה</th><th scope="col">קבוצת מוזיקה</th><th scope="col">קבוצת ביקורת</th><th scope="col">הפרש</th></tr></thead><tbody>'
+        + '<tr><th scope="row">ממוצע לפני</th><td><span class="ltr">' + (m.preMean != null ? m.preMean + '%' : '—') + '</span></td><td><span class="ltr">' + (c.preMean != null ? c.preMean + '%' : '—') + '</span></td><td><span class="ltr">' + (m.preMean != null && c.preMean != null ? sign(Math.round((m.preMean - c.preMean) * 10) / 10) : '—') + '</span></td></tr>'
+        + '<tr><th scope="row">ממוצע אחרי</th><td><span class="ltr">' + (m.postMean != null ? m.postMean + '%' : '—') + '</span></td><td><span class="ltr">' + (c.postMean != null ? c.postMean + '%' : '—') + '</span></td><td><span class="ltr">' + (m.postMean != null && c.postMean != null ? sign(Math.round((m.postMean - c.postMean) * 10) / 10) : '—') + '</span></td></tr>'
+        + '<tr><th scope="row">בדיקת מעקב (שבוע)</th><td><span class="ltr">' + (m.laterMean != null ? m.laterMean + '%' + (m.laterN ? ' (' + m.laterN + ' זוגות)' : '') : 'עוד לא') + '</span></td><td><span class="ltr">' + (c.laterMean != null ? c.laterMean + '%' + (c.laterN ? ' (' + c.laterN + ' זוגות)' : '') : 'עוד לא') + '</span></td><td><span class="ltr">' + (m.laterMean != null && c.laterMean != null ? sign(Math.round((m.laterMean - c.laterMean) * 10) / 10) : '—') + '</span></td></tr>'
+        + '<tr><th scope="row"><strong>שיפור ממוצע</strong></th><td><strong class="ltr">' + (m.gainMean != null ? sign(m.gainMean) + '%' : '—') + '</strong></td><td><strong class="ltr">' + (c.gainMean != null ? sign(c.gainMean) + '%' : '—') + '</strong></td><td><strong class="ltr">' + esc(netDisplay) + '</strong></td></tr>'
+        + '</tbody></table></div>'
+        + (chartHtml ? '<div class="mm-comparison-chart-wrap" data-testid="comparison-chart">' + chartHtml + '</div>' : '');
+    }
+
+    return '<div class="mm-card mm-comparison-card" data-testid="comparison-dashboard">'
+      + '<h3>לוח השוואת ניסוי מול ביקורת (קבוצת מוזיקה מול ביקורת)</h3>'
+      + '<p class="mm-sub">השוואה מדעית מבוקרת: תלמידים שתרגלו עם מוזיקה מול קבוצת ביקורת שתרגלה את אותם תרגילים ובדיקות בלי צלילים. כולל ממוצעי לפני, אחרי ומעקב שבוע, שיפור נטו ומדד Cohen d.</p>'
+      + contentHtml
       + '</div>';
   }
 
@@ -1064,7 +1153,7 @@
       + coverageCard()
       + '<section class="mm-view" aria-labelledby="report-title" data-testid="report"><h2 id="report-title" style="margin:6px 0 0">דוח לפי נושא ופערים</h2>'
       + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. «לפני/אחרי» = בדיקה קצרה בלי מוזיקה, לפני היחידה ואחריה (2–3 שאלות: סימן, לא ציון). הנתונים מהמכשיר הזה בלבד.</p>'
-      + classGainCard() + teacherReport() + '</section>'
+      + classGainCard() + comparisonDashboardCard() + teacherReport() + '</section>'
       + '<div class="mm-card"><h3>נתוני ההדגמה</h3><p class="mm-sub">מוחק את המשימות, ההתקדמות והכניסה מהדפדפן הזה בלבד.</p>'
       + '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="reset" data-testid="reset">'
       + (state.confirmReset ? 'לחצו שוב לאישור המחיקה' : 'איפוס נתוני ההדגמה') + '</button></div></div>'
@@ -1395,4 +1484,12 @@
       G.navigator.serviceWorker.register('../sw.js').catch(function () {});
     }
   } catch (e) { /* no offline copy; the demo itself is unaffected */ }
+
+  if (typeof globalThis !== 'undefined') {
+    globalThis.MMPilotApp = Object.assign(globalThis.MMPilotApp || {}, {
+      comparisonDashboardCard: comparisonDashboardCard,
+      checkRows: checkRows,
+      isControlRow: isControlRow
+    });
+  }
 })();

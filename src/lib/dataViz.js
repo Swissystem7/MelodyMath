@@ -59,6 +59,9 @@
   }
 
   function renderBarChartHtml(spec) {
+    if (spec && (spec.comparative || (Array.isArray(spec.series) && Array.isArray(spec.categories)))) {
+      return renderComparativeBarChartHtml(spec);
+    }
     const B = normalizeBars(spec);
     const bars = B.bars.map(function (b) {
       const pct = Math.round((b.value / B.max) * 100);
@@ -70,6 +73,62 @@
     }).join('');
     return '<div class="barchart" role="img" aria-label="דיאגרמת עמודות">'
       + '<div class="barchart-track">' + bars + '</div>'
+      + '</div>';
+  }
+
+  function normalizeComparativeBars(raw) {
+    const src = raw && typeof raw === 'object' ? raw : {};
+    const title = String(src.title || 'דיאגרמת עמודות השוואתית');
+    const categories = (Array.isArray(src.categories) ? src.categories : []).map(String);
+    const series = (Array.isArray(src.series) ? src.series : []).map(function (s, idx) {
+      const sObj = s && typeof s === 'object' ? s : {};
+      return {
+        key: String(sObj.key || ('series-' + idx)),
+        name: String(sObj.name || sObj.label || ('סדרה ' + (idx + 1))),
+        color: sObj.color ? String(sObj.color) : null,
+        values: (Array.isArray(sObj.values) ? sObj.values : []).map(function (v) {
+          const num = Number(v);
+          return Number.isFinite(num) ? Math.max(0, Math.round(num * 10) / 10) : 0;
+        })
+      };
+    });
+    let allVals = [];
+    series.forEach(function (s) { allVals = allVals.concat(s.values); });
+    const highest = allVals.length ? Math.max.apply(null, allVals) : 0;
+    const max = Math.max(highest, Math.round(Number(src.max)) || (highest > 100 ? Math.ceil(highest / 10) * 10 : 100));
+    return { title: title, categories: categories, series: series, max: max };
+  }
+
+  function renderComparativeBarChartHtml(spec) {
+    const C = normalizeComparativeBars(spec);
+    const legendItems = C.series.map(function (s) {
+      const colorStyle = s.color ? ' style="background-color:' + escapeHtml(s.color) + '"' : '';
+      return '<span class="barchart-legend-item"><span class="barchart-swatch barchart-swatch--' + escapeHtml(s.key) + '"' + colorStyle + ' aria-hidden="true"></span>'
+        + '<span class="barchart-legend-label">' + escapeHtml(s.name) + '</span></span>';
+    }).join('');
+    const legend = '<div class="barchart-legend" aria-label="מקרא סדרות">' + legendItems + '</div>';
+
+    const groups = C.categories.map(function (cat, catIdx) {
+      const barsHtml = C.series.map(function (s) {
+        const val = s.values[catIdx] != null ? s.values[catIdx] : 0;
+        const pct = C.max > 0 ? Math.min(100, Math.round((val / C.max) * 100)) : 0;
+        const colorStyle = s.color ? 'background-color:' + escapeHtml(s.color) + ';' : '';
+        return '<div class="barchart-col barchart-col--' + escapeHtml(s.key) + '" data-series="' + escapeHtml(s.key) + '">'
+          + '<span class="barchart-val">' + val + (C.max === 100 ? '%' : '') + '</span>'
+          + '<div class="barchart-bar barchart-bar--' + escapeHtml(s.key) + '" style="height:' + pct + '%;' + colorStyle + '" aria-hidden="true"></div>'
+          + '<span class="sr-only">' + escapeHtml(s.name) + ': ' + val + '</span>'
+          + '</div>';
+      }).join('');
+
+      return '<div class="barchart-group" data-category="' + escapeHtml(cat) + '">'
+        + '<div class="barchart-group-bars">' + barsHtml + '</div>'
+        + '<span class="barchart-group-label">' + escapeHtml(cat) + '</span>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="barchart barchart--comparative" role="img" aria-label="' + escapeHtml(C.title) + '">'
+      + legend
+      + '<div class="barchart-track barchart-track--comparative">' + groups + '</div>'
       + '</div>';
   }
 
@@ -138,6 +197,8 @@
     renderPictogramHtml: renderPictogramHtml,
     normalizeBars: normalizeBars,
     renderBarChartHtml: renderBarChartHtml,
+    normalizeComparativeBars: normalizeComparativeBars,
+    renderComparativeBarChartHtml: renderComparativeBarChartHtml,
     normalizePie: normalizePie,
     renderPieChartHtml: renderPieChartHtml,
     normalizeTable: normalizeTable,

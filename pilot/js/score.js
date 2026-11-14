@@ -608,5 +608,210 @@
     }).join('. ');
   }
 
-  return { KINDS: Object.keys(KINDS), PLACE: PLACE, plan: plan, describe: describe, deg: deg };
+  // ---------------------------------------------------------------- MM-AUTO-752 scientific evaluation & group comparison
+  function isControlRow(r) {
+    if (!r) return false;
+    return !!(r.controlMode === true || r.group === 'control' || (r.post && r.post.group === 'control') || (r.pre && r.pre.group === 'control'));
+  }
+
+  function pctScore(check) {
+    if (!check || typeof check !== 'object') return null;
+    const s = Number(check.score);
+    const t = Number(check.total);
+    if (!Number.isFinite(s) || !Number.isFinite(t) || t <= 0) return null;
+    return (s / t) * 100;
+  }
+
+  function computeGroupStats(rows, groupName) {
+    const validRows = (Array.isArray(rows) ? rows : []).filter(function (r) {
+      return r && (
+        (r.pre && pctScore(r.pre) !== null) ||
+        (r.post && pctScore(r.post) !== null) ||
+        (r.later && pctScore(r.later) !== null)
+      );
+    });
+
+    const preScores = validRows.filter(function (r) { return r.pre && pctScore(r.pre) !== null; }).map(function (r) { return pctScore(r.pre); });
+    const postScores = validRows.filter(function (r) { return r.post && pctScore(r.post) !== null; }).map(function (r) { return pctScore(r.post); });
+    const postPairs = validRows.filter(function (r) { return r.pre && pctScore(r.pre) !== null && r.post && pctScore(r.post) !== null; });
+    const gains = postPairs.map(function (r) { return pctScore(r.post) - pctScore(r.pre); });
+
+    const laterPairs = postPairs.filter(function (r) { return r.later && pctScore(r.later) !== null; });
+    const laterScores = laterPairs.map(function (r) { return pctScore(r.later); });
+
+    const mean = function (arr) {
+      if (!arr || !arr.length) return null;
+      const sum = arr.reduce(function (a, b) { return a + b; }, 0);
+      return Math.round((sum / arr.length) * 10) / 10;
+    };
+
+    const preMean = mean(preScores);
+    const postMean = mean(postScores);
+    const laterMean = mean(laterScores);
+    const gainMean = mean(gains);
+
+    const children = validRows.map(function (r) { return r.student; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).length;
+
+    let retentionRate = null;
+    if (postMean && postMean > 0 && laterMean !== null) {
+      retentionRate = Math.round((laterMean / postMean) * 100) / 100;
+    }
+
+    return {
+      name: groupName || '',
+      totalCount: validRows.length,
+      n: postPairs.length,
+      children: children,
+      laterN: laterPairs.length,
+      preMean: preMean,
+      postMean: postMean,
+      laterMean: laterMean,
+      gainMean: gainMean,
+      retentionRate: retentionRate,
+      preScores: preScores,
+      postScores: postScores,
+      laterScores: laterScores,
+      gains: gains
+    };
+  }
+
+  function calculatePooledStd(groupA, groupB) {
+    if (!Array.isArray(groupA) || !Array.isArray(groupB)) return null;
+    const cleanA = groupA.filter(function (x) { return typeof x === 'number' && Number.isFinite(x); });
+    const cleanB = groupB.filter(function (x) { return typeof x === 'number' && Number.isFinite(x); });
+    if (cleanA.length < 2 || cleanB.length < 2) return null;
+    const nA = cleanA.length;
+    const nB = cleanB.length;
+    const meanA = cleanA.reduce(function (s, x) { return s + x; }, 0) / nA;
+    const meanB = cleanB.reduce(function (s, x) { return s + x; }, 0) / nB;
+    const ssA = cleanA.reduce(function (s, x) { return s + Math.pow(x - meanA, 2); }, 0);
+    const ssB = cleanB.reduce(function (s, x) { return s + Math.pow(x - meanB, 2); }, 0);
+    const df = nA + nB - 2;
+    if (df <= 0) return null;
+    const pooledVar = (ssA + ssB) / df;
+    if (pooledVar <= 0) return 0;
+    return Math.sqrt(pooledVar);
+  }
+
+  function calculateCohenD(meanA, meanB, pooledStd) {
+    if (Array.isArray(meanA) && Array.isArray(meanB)) {
+      const pStd = (typeof pooledStd === 'number' && pooledStd > 0) ? pooledStd : calculatePooledStd(meanA, meanB);
+      if (!pStd || pStd <= 0) return null;
+      const mA = meanA.reduce(function (s, x) { return s + x; }, 0) / meanA.length;
+      const mB = meanB.reduce(function (s, x) { return s + x; }, 0) / meanB.length;
+      return Math.round(((mA - mB) / pStd) * 100) / 100;
+    }
+    if (typeof meanA !== 'number' || typeof meanB !== 'number' || typeof pooledStd !== 'number' || pooledStd <= 0 || !Number.isFinite(meanA) || !Number.isFinite(meanB) || !Number.isFinite(pooledStd)) {
+      return null;
+    }
+    const d = (meanA - meanB) / pooledStd;
+    return Math.round(d * 100) / 100;
+  }
+
+  function classifyEffectSize(d) {
+    if (typeof d !== 'number' || !Number.isFinite(d)) return null;
+    const absD = Math.abs(d);
+    if (absD < 0.2) return 'זניח';
+    if (absD < 0.5) return 'קטן';
+    if (absD < 0.8) return 'בינוני';
+    return 'גדול';
+  }
+
+  function computeNetImprovement(musicGain, controlGain) {
+    if (typeof musicGain !== 'number' || typeof controlGain !== 'number' || !Number.isFinite(musicGain) || !Number.isFinite(controlGain)) {
+      return null;
+    }
+    return Math.round((musicGain - controlGain) * 10) / 10;
+  }
+
+  function compareGroups(musicRowsOrAll, controlRows) {
+    let musicRows = [];
+    let ctrlRows = [];
+
+    if (Array.isArray(musicRowsOrAll) && Array.isArray(controlRows)) {
+      musicRows = musicRowsOrAll;
+      ctrlRows = controlRows;
+    } else if (Array.isArray(musicRowsOrAll)) {
+      musicRowsOrAll.forEach(function (r) {
+        if (isControlRow(r)) ctrlRows.push(r);
+        else musicRows.push(r);
+      });
+    }
+
+    const musicStats = computeGroupStats(musicRows, 'מוזיקה');
+    const controlStats = computeGroupStats(ctrlRows, 'ביקורת');
+
+    let netGain = null;
+    if (musicStats.gainMean !== null && controlStats.gainMean !== null) {
+      netGain = computeNetImprovement(musicStats.gainMean, controlStats.gainMean);
+    }
+
+    let cohenD = null;
+    if (musicStats.gains.length >= 2 && controlStats.gains.length >= 2) {
+      const pStd = calculatePooledStd(musicStats.gains, controlStats.gains);
+      if (pStd && pStd > 0) {
+        cohenD = calculateCohenD(musicStats.gainMean, controlStats.gainMean, pStd);
+      }
+    } else if (musicStats.postScores.length >= 2 && controlStats.postScores.length >= 2) {
+      const pStd = calculatePooledStd(musicStats.postScores, controlStats.postScores);
+      if (pStd && pStd > 0) {
+        cohenD = calculateCohenD(musicStats.postMean, controlStats.postMean, pStd);
+      }
+    }
+
+    const effectClassification = classifyEffectSize(cohenD);
+
+    const chartSpec = {
+      title: 'השוואת ממוצעי הישגים: קבוצת מוזיקה מול קבוצת ביקורת',
+      categories: ['לפני', 'אחרי', 'מעקב שבוע'],
+      series: [
+        {
+          key: 'music',
+          name: 'קבוצת מוזיקה',
+          color: '#1B1446',
+          values: [
+            musicStats.preMean != null ? musicStats.preMean : 0,
+            musicStats.postMean != null ? musicStats.postMean : 0,
+            musicStats.laterMean != null ? musicStats.laterMean : 0
+          ]
+        },
+        {
+          key: 'control',
+          name: 'קבוצת ביקורת',
+          color: '#6B6396',
+          values: [
+            controlStats.preMean != null ? controlStats.preMean : 0,
+            controlStats.postMean != null ? controlStats.postMean : 0,
+            controlStats.laterMean != null ? controlStats.laterMean : 0
+          ]
+        }
+      ],
+      max: 100
+    };
+
+    return {
+      music: musicStats,
+      control: controlStats,
+      netGain: netGain,
+      cohenD: cohenD,
+      effectClassification: effectClassification,
+      hasBothGroups: musicStats.n > 0 && controlStats.n > 0,
+      chartSpec: chartSpec
+    };
+  }
+
+  return {
+    KINDS: Object.keys(KINDS),
+    PLACE: PLACE,
+    plan: plan,
+    describe: describe,
+    deg: deg,
+    compareGroups: compareGroups,
+    computeGroupStats: computeGroupStats,
+    calculateCohenD: calculateCohenD,
+    calculatePooledStd: calculatePooledStd,
+    classifyEffectSize: classifyEffectSize,
+    computeNetImprovement: computeNetImprovement,
+    isControlRow: isControlRow
+  };
 });
