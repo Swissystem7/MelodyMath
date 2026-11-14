@@ -65,6 +65,10 @@
         const next = seq[seq.length % P];
         s = { kind: 'pattern', seq: seq, P: P, durations: seq.every((x) => /^(קצר|ארוך)$/.test(x)), value: legend[next] };
       }
+    } else if ((m = /^בדגם (.+?) — כמה צלילים יש ביחידה שחוזרת\?$/.exec(p)) && item.music === 'fixedAccents') {
+      // the repeating unit itself (docs/research/topics/006): heard twice and more, never marked
+      const seq = m[1].split(/\s+/).filter(Boolean), P = unitOf(seq);
+      if (P && seq.length >= 2 * P) s = { kind: 'patternUnit', seq: seq, P: P, durations: false, value: P };
     } else if ((m = /^(.+?) — איזה צליל משלים את התבנית\?$/.exec(p)) && item.music === 'fixedAccents') {
       const seq = m[1].split(/,\s*/).filter(Boolean), P = unitOf(seq);
       if (P && seq.length > P) s = { kind: 'pattern', seq: seq, P: P, durations: false, value: seq[seq.length % P] };
@@ -89,7 +93,7 @@
       if (len > inFirst) s = { kind: 'crossing', start: 25, len: len, inFirst: inFirst, value: len - inFirst };
     }
     if (!s || String(s.value) !== raw) return null;   // the sounds give exactly the answer
-    s.world = WORLDS[{ pattern: 'ghana', months: 'polska', crossing: 'polska', letters: 'klezmer' }[s.kind] || 'mariachi'];
+    s.world = WORLDS[{ pattern: 'ghana', patternUnit: 'ghana', months: 'polska', crossing: 'polska', letters: 'klezmer' }[s.kind] || 'mariachi'];
     s.answer = String(s.value);
     let ev;
     try { ev = soundEvents(s); } catch (e) { return null; }
@@ -116,7 +120,7 @@
     const trumpet = (stage, extra) => { hit('horn', 523, 0.4, 0.16, stage, extra); t += 0.55; };
     const demo = () => { maracas(10, 'demoMaraca'); t += 0.2; trumpet('demoTrumpet'); t += GAP; };   // ten bundles of a hundred = one trumpet
     switch (spec.kind) {
-      case 'pattern': {
+      case 'pattern': case 'patternUnit': {
         // first appearance decides the body sound; evenly spaced; the unit is never marked
         const order = [];
         spec.seq.forEach((tok) => { if (order.indexOf(tok) < 0) order.push(tok); });
@@ -207,6 +211,7 @@
   // ---------------------------------------------------------------- picture
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const HOW = {
+    patternUnit: 'הדגם מתנגן: הסמל הראשון — מחיאת כף, השני — טפיחה על הירך. כל צליל באותו מרחק מקודמו, ואין שום סימן איפה היחידה נגמרת. מהו החלק הקצר שחוזר שוב ושוב, וכמה צלילים יש בו?',
     pattern: 'הדגם מתנגן פעם אחת: הסמל הראשון — מחיאת כף, השני — טפיחה על הירך, השלישי — נקישת אצבעות. כל צליל באותו מרחק מקודמו, ובסוף שקט במקום הריק. איזו תנועה חסרה שם?',
     patternLong: 'הדגם מתנגן פעם אחת: קצר הוא מחיאה אחת, ארוך הוא מחיאה ואחריה פעמה של שקט. בסוף — שקט במקום הריק. מה חסר שם?',
     half: 'קודם עשרה מרקסים ואחריהם החצוצרה: אותה כמות בשם אחר. אחר כך החצוצרה נפתחת לשתי קבוצות שוות, עם שקט ביניהן.',

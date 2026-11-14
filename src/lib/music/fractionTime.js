@@ -61,6 +61,10 @@
     } else if ((m = /^(\d+)\/(\d+) ([+−]) (\d+)\/(\d+) = \?$/.exec(p)) || (m = /^\S+ צריכה (\d+)\/(\d+) מ\S+ \S+, (ו)\S+ צריכה (\d+)\/(\d+) ממנו\. איזה חלק מה\S+ הן צריכות יחד\?$/.exec(p))) {
       const a = +m[1], b = +m[2], c = +m[4], d = +m[5], L = lcm(b, d), x = a * L / b, y = c * L / d, minus = m[3] === '−';
       if (L <= 24 && (!minus || x > y) && (minus ? x : x + y) <= L) s = { kind: minus ? 'sub' : 'add', L: L, x: x, y: y, value: frac(minus ? x - y : x + y, L) };
+    } else if ((m = /^\S+ אומר ש־1\/(\d) \+ 1\/(\d) = 2\/(\d+)\. האם הוא צודק\? \(כן\/לא\)$/.exec(p))) {
+      // adding tops and bottoms (docs/research/topics/088): the claim is shorter than the first part alone — a sum never is
+      const b = +m[1], d = +m[2], L = lcm(b, d);
+      if (+m[3] === b + d && L <= 12 && 2 / (b + d) < 1 / b) s = { kind: 'claim', L: L, first: L / b, claim: 2 / (b + d) * L, value: 'לא' };
     } else if (/^בתיבה של 3\/4 יש רבע ושתי שמיניות\. כמה חסר עד תיבה מלאה\? \(כשבר\)$/.test(p)) {
       s = { kind: 'missing', L: 6, notes: [2, 1, 1], value: frac(2, 8) };
     } else if ((m = /^שיר אחד נמשך (\d) ו־(\d)\/(\d) דקות ושיר שני (\d) ו־(\d)\/(\d) דקות\. מה האורך הכולל\?/.exec(p)) || (m = /^כמה זה (\d) ו־(\d)\/(\d) ועוד (\d) ו־(\d)\/(\d)\?/.exec(p))) {
@@ -166,6 +170,11 @@
         ruler(spec.L);
         note(spec.x, 'first'); note(spec.y, 'second');
         silent(spec.L - spec.x - spec.y);                                   // what the bar still has: silence
+        break;
+      case 'claim':
+        ruler(spec.L);
+        note(spec.first, 'first'); rest();                                  // the first part alone
+        hit('reed', 330, spec.claim * STEP, 0.16, 'claim'); t += spec.claim * STEP; rest();   // the claimed sum, held: shorter
         break;
       case 'sub':
         ruler(spec.L);
@@ -288,6 +297,7 @@
   // ---------------------------------------------------------------- picture
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   const HOW = {
+    claim: 'קודם התיבה כולה, ואחריה החלק הראשון לבדו. ואז הצליל של דני, צליל אחד ארוך. הסכום של שני חלקים — איך הוא יכול להיות קצר מאחד מהם?',
     compare: 'קודם התיבה השלמה — הסרגל. אחר כך כל שבר על אותו סרגל: התוף מתחיל את התו, והגואצ׳ארקה סופרת כמה פעמות הוא מכסה. יותר חלוקות פירושן חתיכות קצרות יותר.',
     add: 'קודם התיבה השלמה. אחר כך שני התווים על אותו סרגל, זה אחרי זה. כמה פעמות מתוך התיבה?',
     sub: 'קודם התיבה השלמה, ואז התו הראשון. אחר כך אותו תו שוב — ומה שמורידים נשמע כשקט. כמה פעמות נשארו?',
