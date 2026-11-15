@@ -65,18 +65,25 @@
     return best;
   }
 
+  // One pitch for every blast. A real shofar does not change note between
+  // תקיעה, שברים and תרועה; only the length does. G4 sits in the range a
+  // small horn actually speaks.
+  const HORN_HZ = 392;
   // ---------------------------------------------------------------- sound
   function soundEvents(spec) {
     if (!spec) return [];
     const ev = [];
     let t = 0, calls = 0;
-    const blast = (hz, dur, gain, stage, extra) => { ev.push(Object.assign({ at: t, voice: 'horn', hz: hz, dur: dur, gain: gain, stage: stage }, extra || {})); };
+    const blast = (dur, gain, stage, extra) => { ev.push(Object.assign({ at: t, voice: 'horn', hz: HORN_HZ, dur: dur, gain: gain, stage: stage, hold: true }, extra || {})); };
     const call = (c, stage) => {
       calls += 1;
-      if (c === 'T') { blast(220, 0.9, 0.24, stage, { call: 'T', worth: 1 }); t += 1.0; }
-      else if (c === 'S') { for (let i = 0; i < 3; i++) { blast(247, 0.26, 0.22, stage, i ? { call: 'S' } : { call: 'S', worth: 1 }); t += 0.34; } t += 0.1; }
-      else { for (let i = 0; i < 9; i++) { blast(262, 0.07, 0.2, stage, i ? { call: 'R' } : { call: 'R', worth: 1 }); t += 0.1; } t += 0.2; }
-      t += 0.4;   // a breath between calls, so calls never run together
+      // תקיעה is one held blast, clearly longer than a whole תרועה.
+      // שברים: three medium blasts. תרועה: nine short ones. Halakha: the
+      // tekia lasts at least as long as the terua.
+      if (c === 'T') { blast(2.4, 0.24, stage, { call: 'T', worth: 1, glide: 1.06, attack: 0.28 }); t += 2.7; }
+      else if (c === 'S') { for (let i = 0; i < 3; i++) { blast(0.5, 0.22, stage, i ? { call: 'S' } : { call: 'S', worth: 1 }); t += 0.64; } t += 0.12; }
+      else { for (let i = 0; i < 9; i++) { blast(0.12, 0.2, stage, i ? { call: 'R' } : { call: 'R', worth: 1 }); t += 0.16; } t += 0.2; }
+      t += 0.45;   // a breath between calls, so calls never run together
     };
     const seq = (name, stage) => { SEQS[name].forEach((c) => call(c, stage)); t += 0.5; };
     const bell = (w, stage) => { ev.push({ at: t, voice: 'metalBell', hz: 660, dur: 0.6, gain: 0.2, stage: stage, worth: w }); t += 0.9; };
@@ -105,7 +112,7 @@
     if (typeof pv === 'function' && ac) {
       if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
       const start = ac.currentTime + 0.05;
-      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain }));
+      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain, hold: n.hold, glide: n.glide, attack: n.attack }));
       return { notes: events.length };
     }
     return { notes: events.length, silent: true };
@@ -132,5 +139,5 @@
       + '</div>';
   }
 
-  return { MAX_RUN: MAX_RUN, SEQS: SEQS, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html };
+  return { MAX_RUN: MAX_RUN, SEQS: SEQS, HORN_HZ: HORN_HZ, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html };
 });
