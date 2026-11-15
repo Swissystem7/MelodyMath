@@ -415,7 +415,7 @@
     if (typeof pv === 'function' && ac) {
       if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
       const start = ac.currentTime + 0.05;
-      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain }));
+      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain, hold: n.stage === 'run' }));
       return { notes: events.length };
     }
     return { notes: events.length, silent: true };
