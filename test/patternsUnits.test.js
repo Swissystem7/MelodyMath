@@ -7,7 +7,22 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
+const heard = require('./renderBody');
+Math.random = heard.mulberry32(4);
+const V = require('../src/lib/instrumentVoices');
 const U = require('../src/lib/music/patternsUnits');
+
+function loudnessGap(events) {
+  const byVoice = {};
+  events.forEach(function (n) {
+    if (byVoice[n.voice]) return;
+    const r = heard.renderVoice(V.playVoice, n.voice, n.hz, { dur: n.dur, gain: n.gain }, 0.25);
+    const db = 20 * Math.log10(Math.max(heard.rms(r.samples), 1e-12));
+    byVoice[n.voice] = db;
+  });
+  const vals = Object.values(byVoice);
+  return Math.max.apply(null, vals) - Math.min.apply(null, vals);
+}
 const banks = require('../src/lib/banks');
 
 const item = (music, prompt, answer) => ({ music: music, prompt: prompt, answer: answer });
@@ -24,8 +39,8 @@ test('patterns: the smallest unit decides what comes next; the unit is never mar
   assert.equal(e.length, 6, 'only the given sequence; the empty place is silence');
   const gaps = e.slice(1).map((n, i) => +(n.at - e[i].at).toFixed(3));
   assert.equal(new Set(gaps).size, 1, 'evenly spaced — no pause marks the unit');
-  assert.equal(new Set(e.map((n) => n.gain)).size, 1, 'equally loud');
   assert.deepEqual(e.map((n) => n.sound), [0, 0, 1, 1, 0, 0]);
+  assert.ok(loudnessGap(e) < 3, 'clap and thigh-pat come out equally loud, gap ' + loudnessGap(e).toFixed(1) + ' dB');
 });
 
 test('patterns: long is a clap and a beat of silence; "do mi do" asks for a name', () => {
@@ -117,5 +132,6 @@ test('the repeating unit itself: the pattern plays evenly, nothing marks where t
   assert.deepEqual(e.map((n) => n.sound), [0, 0, 1, 0, 0, 1]);
   const gaps = e.slice(1).map((n, i) => +(n.at - e[i].at).toFixed(3));
   assert.equal(new Set(gaps).size, 1, 'evenly spaced: the unit is never marked');
+  assert.ok(loudnessGap(e) < 3, 'the thigh pat is not louder than the clap, gap ' + loudnessGap(e).toFixed(1) + ' dB');
   assert.equal(U.specForItem(Object.assign({}, it, { answer: 6 })), null, 'the whole sequence is not the unit');
 });
