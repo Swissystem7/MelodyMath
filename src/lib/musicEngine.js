@@ -346,7 +346,7 @@
     // Feedback: a soft rising third for right, a soft falling step for wrong.
     // Neither is loud or harsh: a wrong answer is information, not a buzzer.
     correct: [{ at: 0, dur: 0.14, hz: 523.25, gain: 0.16, type: 'triangle' }, { at: 0.1, dur: 0.22, hz: 659.25, gain: 0.16, type: 'triangle' }],
-    wrong: [{ at: 0, dur: 0.16, hz: 329.63, gain: 0.1, type: 'sine' }, { at: 0.13, dur: 0.24, hz: 293.66, gain: 0.08, type: 'sine' }],
+    wrong: [{ at: 0, dur: 0.16, hz: 329.63, gain: 0.1, type: 'sine' }, { at: 0.13, dur: 0.24, hz: 293.66, gain: 0.08, type: 'sine' }]
   };
 
   // The parts a voice plays. `step` picks the pitch of a pitched voice (xylo,
@@ -1081,6 +1081,120 @@
     return playTap(o.voice || 'woodBar', { step: o.step || 0 });
   }
 
+  const ORFF_INSTRUMENTS = Object.freeze([
+    { place: 0, voice: 'tine', hz: 2093, he: 'גלוקנשפיל', placeName: 'אחדות' },
+    { place: 1, voice: 'woodBar', hz: 880, he: 'קסילופון סופרן', placeName: 'עשרות' },
+    { place: 2, voice: 'woodBar', hz: 523, he: 'קסילופון אלט', placeName: 'מאות' },
+    { place: 3, voice: 'metalBell', hz: 660, he: 'מטלופון', placeName: 'אלפים' },
+    { place: 4, voice: 'frameDrum', hz: 196, he: 'תוף יד', placeName: 'עשרות אלפים' },
+    { place: 5, voice: 'drumLow', hz: 98, he: 'תוף בס', placeName: 'מאות אלפים' },
+    { place: 6, voice: 'shaker', hz: 1200, he: 'שייקר', placeName: 'מיליונים' }
+  ]);
+
+  const SHOFAR_CALL_TYPES = Object.freeze({
+    T: { id: 'T', name: 'תקיעה', blasts: 1, dur: 0.9, hz: 220, voice: 'horn', worth: 1 },
+    S: { id: 'S', name: 'שברים', blasts: 3, dur: 0.26, hz: 247, voice: 'horn', worth: 1 },
+    R: { id: 'R', name: 'תרועה', blasts: 9, dur: 0.07, hz: 262, voice: 'horn', worth: 1 }
+  });
+
+  function playShofarCall(callType, opts) {
+    const o = opts || {};
+    if (audioState.muted) return null;
+    let key = 'T';
+    if (callType) {
+      const s = String(callType).trim().toUpperCase();
+      if (s === 'S' || s === 'SHEVARIM' || s.indexOf('שברים') >= 0) key = 'S';
+      else if (s === 'R' || s === 'TERUAH' || s.indexOf('תרועה') >= 0) key = 'R';
+    }
+    const spec = SHOFAR_CALL_TYPES[key];
+    const ac = o.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
+    const pv = o.playVoice || (typeof globalThis !== 'undefined' && globalThis.playVoice);
+    const isNode = !ac || !ac.createGain;
+
+    if (!isNode && typeof pv === 'function') {
+      if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
+      const t0 = (ac.currentTime || 0) + 0.05;
+      if (key === 'T') {
+        pv(ac, 'horn', spec.hz, t0, null, { dur: spec.dur, gain: 0.24 });
+      } else if (key === 'S') {
+        for (let i = 0; i < 3; i++) {
+          pv(ac, 'horn', spec.hz, t0 + i * 0.34, null, { dur: spec.dur, gain: 0.22 });
+        }
+      } else {
+        for (let i = 0; i < 9; i++) {
+          pv(ac, 'horn', spec.hz, t0 + i * 0.1, null, { dur: spec.dur, gain: 0.2 });
+        }
+      }
+      return { call: key, blasts: spec.blasts, voice: spec.voice, hz: spec.hz, duration: spec.dur, silent: false };
+    }
+    if (!isNode) {
+      playTap('horn', { hz: spec.hz });
+      return { call: key, blasts: spec.blasts, voice: spec.voice, hz: spec.hz, duration: spec.dur, silent: false };
+    }
+    return { call: key, blasts: spec.blasts, voice: spec.voice, hz: spec.hz, duration: spec.dur, silent: true };
+  }
+
+  function playShofarDistributive(spec, opts) {
+    const o = opts || {};
+    const kind = (spec && spec.kind) || 'bySeq';
+    let totalCalls = 30;
+    if (spec && typeof spec.value === 'number') totalCalls = spec.value;
+    const ac = o.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
+    const isNode = !ac || !ac.createGain;
+    if (!isNode && typeof globalThis !== 'undefined' && globalThis.MM_SHOFAR_CALLS && typeof globalThis.MM_SHOFAR_CALLS.play === 'function') {
+      try {
+        const dummySpec = { kind: kind === 'round' ? 'round' : 'bySeq', value: totalCalls, world: { he: 'קריאות השופר' } };
+        globalThis.MM_SHOFAR_CALLS.play(dummySpec, { audioContext: ac, playVoice: o.playVoice });
+      } catch (e) {}
+    } else if (!isNode) {
+      playShofarCall('T', o);
+    }
+    return { kind: kind, totalCalls: totalCalls, silent: isNode };
+  }
+
+  function playOrffEnsemble(placeOrInstrument, opts) {
+    const o = opts || {};
+    if (audioState.muted) return null;
+    let target = ORFF_INSTRUMENTS[0];
+    if (typeof placeOrInstrument === 'number') {
+      const idx = Math.max(0, Math.min(ORFF_INSTRUMENTS.length - 1, Math.round(placeOrInstrument)));
+      target = ORFF_INSTRUMENTS[idx];
+    } else if (typeof placeOrInstrument === 'string') {
+      const s = placeOrInstrument.trim();
+      const byName = ORFF_INSTRUMENTS.find(function (inst) {
+        return inst.voice === s || inst.he === s || inst.placeName === s;
+      });
+      if (byName) target = byName;
+      else if (/עשר/i.test(s)) target = ORFF_INSTRUMENTS[1];
+      else if (/מא/i.test(s)) target = ORFF_INSTRUMENTS[2];
+      else if (/אלף/i.test(s)) target = ORFF_INSTRUMENTS[3];
+      else if (/מילי/i.test(s)) target = ORFF_INSTRUMENTS[6];
+    }
+
+    const ac = o.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
+    const pv = o.playVoice || (typeof globalThis !== 'undefined' && globalThis.playVoice);
+    const isNode = !ac || !ac.createGain;
+
+    if (!isNode && typeof pv === 'function') {
+      if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
+      const t0 = (ac.currentTime || 0) + 0.05;
+      pv(ac, target.voice, target.hz, t0, null, { dur: 0.35, gain: 0.22 });
+      return { place: target.place, instrument: target.he, voice: target.voice, hz: target.hz, silent: false };
+    }
+    if (!isNode) {
+      playTap(target.voice, { hz: target.hz });
+      return { place: target.place, instrument: target.he, voice: target.voice, hz: target.hz, silent: false };
+    }
+    return { place: target.place, instrument: target.he, voice: target.voice, hz: target.hz, silent: true };
+  }
+
+  function playPartialProductSound(part, place, opts) {
+    const p = typeof place === 'number' ? place : (part && typeof part.place === 'number' ? part.place : 0);
+    const prod = typeof part === 'number' ? part : (part && part.product != null ? part.product : 0);
+    const res = playOrffEnsemble(p, opts);
+    return Object.assign({ product: prod }, res || {});
+  }
+
   const api = {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
@@ -1098,6 +1212,8 @@
     ALL_TAP_VOICES, loadTapProgress, recordCorrect,
     configureDrumAnswer, createDrumAnswerPad, renderDrumAnswerPad,
     evaluateDrumAnswer, drumAnswerTapPlan, mountDrumAnswerPad, playDrumAnswerSound,
+    ORFF_INSTRUMENTS, SHOFAR_CALL_TYPES, playShofarCall, playShofarDistributive,
+    playOrffEnsemble, playPartialProductSound,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.
