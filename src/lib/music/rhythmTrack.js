@@ -146,9 +146,9 @@
   // Every step up adds a voice or a non-whole (half-pulse) voice.
   const LEVELS = [
     { voices: 2, half: false, max: 8, he: 'שני קולות' },
-    { voices: 2, half: true, max: 6, he: 'שני קולות, אחד בחצאי פעמה' },
+    { voices: 2, half: true, max: 6, he: 'שני קולות, אחד בחצאי פַּעֲמָה' },
     { voices: 3, half: false, max: 6, he: 'שלושה קולות' },
-    { voices: 3, half: true, max: 6, he: 'שלושה קולות, אחד בחצאי פעמה' },
+    { voices: 3, half: true, max: 6, he: 'שלושה קולות, אחד בחצאי פַּעֲמָה' },
     { voices: 4, half: false, max: 6, he: 'ארבעה קולות' },
   ];
   const BAND = { low: 0.7, high: 0.85, target: 0.8 };

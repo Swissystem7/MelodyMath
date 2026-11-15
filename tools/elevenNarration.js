@@ -25,19 +25,19 @@ const HEBREW_VOICE_PROMPTS = [
   },
   {
     key: 'prompt_subtraction',
-    text: 'הקשיבו לפעימות הראשונות ולפעימות שנלקחו. כמה נשארו? הקישו את התשובה.',
+    text: 'הקשיבו לפְעָמוֹת הראשונות ולפְעָמוֹת שנלקחו. כמה נשארו? הקישו את התשובה.',
     filename: 'prompt_subtraction.wav',
     category: 'exercise'
   },
   {
     key: 'prompt_multiplication',
-    text: 'הקשיבו לקבוצות הפעימות. כמה פעימות יש בסך הכל? הקישו תשובה.',
+    text: 'הקשיבו לקבוצות הפְעָמוֹת. כמה פְעָמוֹת יש בסך הכל? הקישו תשובה.',
     filename: 'prompt_multiplication.wav',
     category: 'exercise'
   },
   {
     key: 'prompt_division',
-    text: 'הקשיבו לחלוקת הפעימות לקבוצות שוות. כמה פעימות בכל קבוצה?',
+    text: 'הקשיבו לחלוקת הפְעָמוֹת לקבוצות שוות. כמה פְעָמוֹת בכל קבוצה?',
     filename: 'prompt_division.wav',
     category: 'exercise'
   },

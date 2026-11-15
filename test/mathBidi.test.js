@@ -84,7 +84,7 @@ test('a division with remainder stays LTR, so "3 שארית 2" is never read as 
   // happens to use it stays RTL.
   assert.deepEqual(mathRuns('מה השארית של החלוקה?'), []);
   assert.deepEqual(mathRuns('נשארה שארית'), []);
-  const sentence = mathHtml('14 פעמות בתיבות של 4: התשובה היא 3 שארית 2.');
+  const sentence = mathHtml('14 פְעָמוֹת בתיבות של 4: התשובה היא 3 שארית 2.');
   assert.ok(sentence.includes(LTR + '3 שארית 2</span>'), sentence);
 });
 

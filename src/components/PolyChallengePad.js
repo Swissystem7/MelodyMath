@@ -56,7 +56,7 @@
         cells += '<span class="ttg-beat' + (b === lvl.meet ? ' acc' : '') + '" data-beat="' + b + '"' + (hit ? ' style="background:' + v.colour + ';color:#fff">' + b : '>·') + '</span>';
       }
       return '<div class="jam-row" style="justify-content:' + FLEX[v.side] + '"><b style="color:' + v.colour + '">' + e(v.name) + ' · כל ' + v.every + '</b></div>' +
-        '<div class="ttg-beats" role="img" aria-label="תוף ' + e(v.name) + ' מכה כל ' + v.every + ' פעמות">' + cells + '</div>';
+        '<div class="ttg-beats" role="img" aria-label="תוף ' + e(v.name) + ' מכה כל ' + v.every + ' פְעָמוֹת">' + cells + '</div>';
     }).join('');
   }
   function renderHtml(state) {
@@ -73,7 +73,7 @@
         '<input type="number" inputmode="numeric" id="pcAnswer" aria-label="תשובה" style="max-width:120px"><button type="button" class="primary" data-act="check">בדיקה</button></div>';
     }
     return '<div class="jam-head"><span class="tag">M4 · אתגר רשות · כיתות ה׳–ו׳</span>' + JAM.musicToggleHtml(state.showMusic) + '</div>' +
-      '<h3>🥁 אתגר: תופים שנפגשים</h3><p class="note">רשות. הדרך העיקרית לכפולות היא פעמות מודגשות (M2).</p>' +
+      '<h3>🥁 אתגר: תופים שנפגשים</h3><p class="note">רשות. הדרך העיקרית לכפולות היא פְעָמוֹת מודגשות (M2).</p>' +
       '<p>רמה ' + (state.index + 1) + ' מתוך ' + PC.levels().length + ': <bdi dir="ltr">' + e(lvl.id) + '</bdi></p>' + body +
       '<p class="jam-msg ' + (state.status === 'right' ? 'good' : state.status === 'retry' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
   }

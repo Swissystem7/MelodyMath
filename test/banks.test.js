@@ -192,7 +192,7 @@ test('grade-א diagnostic keeps the five-drum hear cue', () => {
   assert.equal(d[0].skill, 'counting');
   assert.equal(d[0].prompt.indexOf('🥁🥁🥁🥁🥁') !== -1, true);
   assert.deepEqual(d[0].hear, [5]);
-  const plus = banks.rowsOf('addition', 'א').find((x) => x.prompt.indexOf('3 פעימות') !== -1);
+  const plus = banks.rowsOf('addition', 'א').find((x) => x.prompt.indexOf('3 פְעָמוֹת') !== -1);
   assert.deepEqual(plus.hear, [3, 2]);
 });
 

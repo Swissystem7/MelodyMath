@@ -33,7 +33,7 @@
   // default and shown as a count only: a 1% sub-beat is too short to hear.
   function subbeatsHtml(state) {
     const a = PM.percentToSubbeats(PM.filled(state.fill));
-    return '<p class="jam-prompt" data-addon="subbeats100">' + a.subbeats + ' תת־פעמות מתוך ' + a.of + ' (תוספת ניסיונית)</p>';
+    return '<p class="jam-prompt" data-addon="subbeats100">' + a.subbeats + ' תת־פְעָמוֹת מתוך ' + a.of + ' (תוספת ניסיונית)</p>';
   }
 
   function tapTile(state, id) {
@@ -68,7 +68,7 @@
         '<button type="button" class="secondary" data-act="restart">מתחילים מחדש</button></div><p class="jam-msg" role="status" aria-live="polite">' + e(state.message) + '</p>';
     }
     const splits = PM.SPLITS.map(function (s) {
-      return '<button type="button" class="secondary" data-act="split" data-split="' + s + '" aria-pressed="' + (s === state.split) + '">' + s + ' פעמות</button>';
+      return '<button type="button" class="secondary" data-act="split" data-split="' + s + '" aria-pressed="' + (s === state.split) + '">' + s + ' פְעָמוֹת</button>';
     }).join('');
     const segs = state.fill.map(function (f, i) { return '<span class="fbp-seg" data-seg="' + i + '" style="width:' + PM.tile(f).n + '%">' + PM.tile(f).n + '%</span>'; }).join('');
     const noTen = melody && !state.ex.allowed.some(function (a) { return PM.tile(a).n === 10; });
@@ -85,7 +85,7 @@
       (on && state.subbeats ? subbeatsHtml(state) : '') +
       '<div class="jam-row" role="group" aria-label="אריחים">' + tiles + '</div><div class="jam-row">' +
       (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') +
-      (on ? '<button type="button" class="secondary" data-act="subbeats" aria-pressed="' + !!state.subbeats + '">100 תת־פעמות (תוספת)</button>' : '') + '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button>' +
+      (on ? '<button type="button" class="secondary" data-act="subbeats" aria-pressed="' + !!state.subbeats + '">100 תת־פְעָמוֹת (תוספת)</button>' : '') + '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button>' +
       '<button type="button" class="primary" data-act="check">בדיקה</button><button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
       '<p class="jam-msg ' + (state.status === 'exact' ? 'good' : state.sound === 'wrong' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
   }

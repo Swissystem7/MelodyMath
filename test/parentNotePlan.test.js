@@ -58,8 +58,8 @@ test('with a plan the letter names the one topic, the hook, the weekly pace and 
 
 test('the home tip follows the plan topic', () => {
   const tip = (topic) => store.buildParentNote(null, { plan: { ok: true, topic, hook: 'x', paceDone: 1, paceExpected: 3 } }).homeTip;
-  assert.equal(tip('ספירה עד 100'), 'ספרו יחד 10 פעימות בכפיים, ואז הלאה מ-10');
-  assert.equal(tip('מנייה עד 100'), 'ספרו יחד 10 פעימות בכפיים, ואז הלאה מ-10');
+  assert.equal(tip('ספירה עד 100'), 'ספרו יחד 10 פְעָמוֹת בכפיים, ואז הלאה מ-10');
+  assert.equal(tip('מנייה עד 100'), 'ספרו יחד 10 פְעָמוֹת בכפיים, ואז הלאה מ-10');
   assert.equal(tip('לוח כפל'), 'אמרו את הכפולות של 5 עם מחיאת כף');
   assert.equal(tip('חיסור עם פריטה'), 'פרטו שטר של 10 למטבעות');
   assert.equal(tip('כפל וחילוק שברים'), '5 דקות תרגול במכשיר, בלי לחץ');

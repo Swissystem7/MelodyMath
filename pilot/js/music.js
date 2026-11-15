@@ -173,7 +173,7 @@
     if (q.kind === 'rhythm') {
       return solved
         ? '1/4 + 1/4 + 1/2 = 1: שני רבעים ועוד חצי תיבה ממלאים תיבה שלמה, והמנגינה חוזרת הביתה.'
-        : 'בתיבה יש 4 פעמות = שלם אחד. 2 פעמות כבר מנוגנות. איזה קצב ממלא בדיוק את מה שחסר עד סוף התיבה?';
+        : 'בתיבה יש 4 פְעָמוֹת = שלם אחד. 2 פְעָמוֹת כבר מנוגנות. איזה קצב ממלא בדיוק את מה שחסר עד סוף התיבה?';
     }
     if (q.music === 'join') {
       return solved
@@ -204,7 +204,7 @@
       const f = barFill(choice).status;
       if (f === 'short') return 'הקשיבו: אחרי הקצב שבחרתם עוד יש שקט לפני סוף התיבה. צריך קצב ארוך יותר.';
       if (f === 'over') return 'הקשיבו: הקצב שבחרתם ממשיך אחרי סוף התיבה. צריך קצב קצר יותר.';
-      return 'הקשיבו לתיבה שוב וספרו 4 פעמות.';
+      return 'הקשיבו לתיבה שוב וספרו 4 פְעָמוֹת.';
     }
     if (q.music === 'join') return 'התחילו מ־' + q.a + ' וספרו קדימה עוד ' + q.b + ' צלילים. הקשיבו שוב — המנגינה עוד לא הגיעה הביתה.';
     if (q.music === 'remove') return 'התחילו מ־' + q.a + ' וספרו אחורה ' + q.b + ' צלילים, צליל אחד לכל ✕.';
@@ -214,7 +214,7 @@
 
   // A short line for screen readers and for "no sound": the same picture in words.
   function describe(q, stage) {
-    if (q.kind === 'rhythm') return 'תיבה של 4 פעמות. בפעמה 1 ובפעמה 2 יש תו רבע. פעמות 3 ו־4 עוד ריקות.';
+    if (q.kind === 'rhythm') return 'תיבה של 4 פְעָמוֹת. בפַּעֲמָה 1 ובפַּעֲמָה 2 יש תו רבע. פְעָמוֹת 3 ו־4 עוד ריקות.';
     const cs = chips(q, stage);
     const count = function (role) { return cs.filter(function (c) { return c.role === role; }).length; };
     if (q.music === 'join') return 'מנגינה: ' + count('a') + ' צלילים בפסנתר, ואחריהם ' + count('b') + ' צלילים בקסילופון.';

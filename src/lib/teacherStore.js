@@ -580,7 +580,7 @@
   // «כפל וחילוק שברים» is fractions, not the times table, so it gets the default.
   function homeTipFor(topic) {
     const t = String(topic || '');
-    if (/ספירה|מנייה/.test(t)) return 'ספרו יחד 10 פעימות בכפיים, ואז הלאה מ-10';
+    if (/ספירה|מנייה/.test(t)) return 'ספרו יחד 10 פְעָמוֹת בכפיים, ואז הלאה מ-10';
     if (/כפל/.test(t) && !/שבר/.test(t)) return 'אמרו את הכפולות של 5 עם מחיאת כף';
     if (/חיסור/.test(t)) return 'פרטו שטר של 10 למטבעות';
     return '5 דקות תרגול במכשיר, בלי לחץ';

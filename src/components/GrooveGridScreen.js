@@ -84,8 +84,8 @@
     }
 
     const ex = state.ex, target = answerOf(ex), gr = state.gr, gc = state.gc, gArea = gr * gc, hit = gArea === target;
-    const chipText = hit ? 'מעולה! ' + gr + ' × ' + gc + ' = ' + target + ' פעימות' : 'אתגר: בנו מלבן של ' + target + ' פעימות';
-    const playLabel = state.gp >= 0 ? 'פעימה ' + (state.gp + 1) + ' מתוך ' + gArea : '▶  נגנו את השטח';
+    const chipText = hit ? 'מעולה! ' + gr + ' × ' + gc + ' = ' + target + ' פְעָמוֹת' : 'אתגר: בנו מלבן של ' + target + ' פְעָמוֹת';
+    const playLabel = state.gp >= 0 ? 'פַּעֲמָה ' + (state.gp + 1) + ' מתוך ' + gArea : '▶  נגנו את השטח';
 
     return phoneOpen +
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 10px;flex:none">' +
@@ -103,7 +103,7 @@
       '<span style="font-size:34px;font-weight:800;padding-bottom:18px">×</span>' +
       '<div style="display:flex;flex-direction:column;align-items:center"><span style="font-size:42px;font-weight:900;line-height:1;color:#0F766E">' + gc + '</span><span style="font-size:13px;font-weight:600;color:#4A3F7A">עמודות</span></div>' +
       '<span style="font-size:34px;font-weight:800;padding-bottom:18px">=</span>' +
-      '<div style="display:flex;flex-direction:column;align-items:center"><span style="font-size:42px;font-weight:900;line-height:1;color:#5B3FD9">' + gArea + '</span><span style="font-size:13px;font-weight:600;color:#4A3F7A">פעימות</span></div>' +
+      '<div style="display:flex;flex-direction:column;align-items:center"><span style="font-size:42px;font-weight:900;line-height:1;color:#5B3FD9">' + gArea + '</span><span style="font-size:13px;font-weight:600;color:#4A3F7A">פְעָמוֹת</span></div>' +
       '</div>' +
       gridHtml(state, tr, on) +
       '<div style="font-size:13px;font-weight:500;color:#4A3F7A;text-align:center">הקישו על משבצת — המלבן נבנה מהפינה הימנית העליונה</div>' +

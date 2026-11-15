@@ -55,7 +55,7 @@ test('meter items agree with the factor logic', () => {
   const groups = rows.filter((it) => it.prompt.startsWith('לכמה גדלים'));
   assert.equal(groups.length, 2);
   groups.forEach((it) => {
-    const n = Number(/לחלק (\d+) פעימות/.exec(it.prompt)[1]);
+    const n = Number(/לחלק (\d+) פְעָמוֹת/.exec(it.prompt)[1]);
     assert.equal(Number(it.answer), poly.metersOf(n).length, it.prompt);
   });
   const eighteen = rows.find((it) => it.prompt.includes('18'));

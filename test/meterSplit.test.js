@@ -46,7 +46,7 @@ test('each try plays two rounds with a strong cycle start, so a broken group is 
 });
 
 test('the tempo is locked: every beat of every try lasts the same', () => {
-  const s = M.plan(item('לכמה גדלים שונים של קבוצות שוות אפשר לחלק 12 פעימות, בלי קבוצה של פעימה אחת ובלי כל ה־12 יחד?', 4));
+  const s = M.plan(item('לכמה גדלים שונים של קבוצות שוות אפשר לחלק 12 פְעָמוֹת, בלי קבוצה של פַּעֲמָה אחת ובלי כל ה־12 יחד?', 4));
   s.tries.forEach((tr, i) => {
     const at = M.soundEvents(s, i).map((e) => e.at).sort((a, b) => a - b);
     const gaps = new Set(at.slice(1).map((x, j) => Math.round((x - at[j]) * 1000)).filter((g) => g > 0));
@@ -57,7 +57,7 @@ test('the tempo is locked: every beat of every try lasts the same', () => {
 });
 
 test('LCM: rows meet after 12 beats, counted from 0, with a third stronger sound', () => {
-  const s = M.plan(item('תוף אחד מכה כל 4 פעימות ותוף שני כל 6 פעימות. אחרי כמה פעימות הם נפגשים?', 12, 'accentSkip'));
+  const s = M.plan(item('תוף אחד מכה כל 4 פְעָמוֹת ותוף שני כל 6 פְעָמוֹת. אחרי כמה פְעָמוֹת הם נפגשים?', 12, 'accentSkip'));
   assert.equal(s.kind, 'meet');
   const ev = M.soundEvents(s);
   const meet = ev.filter((e) => e.stage === 'meet');
@@ -65,11 +65,11 @@ test('LCM: rows meet after 12 beats, counted from 0, with a third stronger sound
   assert.equal(meet[0].beat, 12);
   assert.ok(meet[0].gain > Math.max(...ev.filter((e) => e.stage === 'row').map((e) => e.gain)), 'louder than the rows');
   assert.notEqual(meet[0].voice, ev.find((e) => e.stage === 'row').voice, 'a different sound: factor ≠ multiple');
-  assert.equal(M.plan(item('תוף אחד מכה כל 7 פעימות ותוף שני כל 5 פעימות. אחרי כמה פעימות הם נפגשים?', 35, 'accentSkip')), null, 'over 24 beats is not heard');
+  assert.equal(M.plan(item('תוף אחד מכה כל 7 פְעָמוֹת ותוף שני כל 5 פְעָמוֹת. אחרי כמה פְעָמוֹת הם נפגשים?', 35, 'accentSkip')), null, 'over 24 beats is not heard');
 });
 
 test('which cycle splits into 3s: only one does', () => {
-  const s = M.plan(item('תיבות של 5, 7, 9 ו־11 פעימות. איזו מהן אפשר לחלק לקבוצות שוות של 3?', 9));
+  const s = M.plan(item('תיבות של 5, 7, 9 ו־11 פְעָמוֹת. איזו מהן אפשר לחלק לקבוצות שוות של 3?', 9));
   assert.equal(s.kind, 'whichSplits');
   assert.deepEqual(s.tries.map((t) => t.closes), [false, false, true, false]);
 });

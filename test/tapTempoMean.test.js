@@ -59,13 +59,13 @@ test('averaging BPMs is wrong; averaging intervals gives the true tempo', () => 
   assert.equal(tapTempoMean.meanOf([7, 8, 8, 10]), 8.25);
 });
 
-test('child-facing prompts, hints and widget say פעימות בדקה, never BPM (Refs #665)', () => {
+test('child-facing prompts, hints and widget say פְעָמוֹת בדקה, never BPM (Refs #665)', () => {
   for (const item of tapTempoMean.getItems()) {
     for (const s of [item.prompt, item.hint, tapTempoMean.renderTapTempoWidgetHtml(item)]) {
       assert.doesNotMatch(s, /BPM/, item.id);
     }
   }
-  assert.ok(tapTempoMean.getItems()[0].hint.includes('75 פעימות בדקה'));
+  assert.ok(tapTempoMean.getItems()[0].hint.includes('75 פְעָמוֹת בדקה'));
 });
 
 test('widget shows taps, gaps and the tap cue; the check stage is plain', () => {

@@ -7,12 +7,12 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
 
   // Stage thresholds based on rhythm streak:
-  // Stage 1: פעימת מקצב יסוד (Just Drums)
+  // Stage 1: פְעָמַת מקצב יסוד (Just Drums)
   // Stage 2: בס מוזיקלי מצטרף (Bass Joins)
   // Stage 3: הרמוניה ואקורדים נפתחים (Chords Bloom)
   // Stage 4: תזמורת מלאה ומלודיה (Full Ensemble Melody)
   const STAGES = [
-    { level: 1, name: 'פעימת מקצב', desc: 'תופים ומקצב יסוד (רבעים ושמיניות)' },
+    { level: 1, name: 'פְעָמַת מקצב', desc: 'תופים ומקצב יסוד (רבעים ושמיניות)' },
     { level: 2, name: 'בס מוזיקלי', desc: 'צלילי בס מצטרפים לקצב' },
     { level: 3, name: 'הרמוניה ואקורדים', desc: 'אקורדים עשירים נפתחים ברצף' },
     { level: 4, name: 'מלודיה מלאה', desc: 'מנגינה מלאה והאצת טמפו!' }
@@ -66,7 +66,7 @@
     const tol = toleranceMs || 150;
     const diff = Math.abs(tapTimeMs - expectedTimeMs);
     if (diff < tol * 0.5) {
-      return { hit: true, rating: 'perfect', text: '🎯 בול בפעימה!', delta: Math.round(tapTimeMs - expectedTimeMs) };
+      return { hit: true, rating: 'perfect', text: '🎯 בול בפַּעֲמָה!', delta: Math.round(tapTimeMs - expectedTimeMs) };
     }
     if (isWithinTolerance(expectedTimeMs, tapTimeMs, tol)) {
       return { hit: true, rating: 'good', text: '🎵 קרוב מאוד!', delta: Math.round(tapTimeMs - expectedTimeMs) };

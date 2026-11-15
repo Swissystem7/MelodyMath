@@ -32,9 +32,9 @@ test('unit exists in coverage and has verified metadata', () => {
   assert.ok(unit.skill, 'skill field required');
   assert.deepEqual(unit.skill.sources, ['E4', 'E5']);
   assert.equal(unit.skill.level, 'ישיר');
-  assert.equal(unit.skill.music, 'לשמוע ולראות תיבה של 4 פעימות כשלם: 2 חצאים ממלאים שלם, ו־4 רבעים ממלאים שלם');
+  assert.equal(unit.skill.music, 'לשמוע ולראות תיבה של 4 פְעָמוֹת כשלם: 2 חצאים ממלאים שלם, ו־4 רבעים ממלאים שלם');
   assert.equal(unit.skill.math, 'חלקים ושלמים: חצי, רבע ושלם כחלקים משלם אחד (שברים יסודיים בתיבה)');
-  assert.equal(unit.skill.why, 'תיבה של 4 פעימות היא שלם; תו חצי נמשך 2 פעימות (חצי תיבה) ותו רבע נמשך פעימה אחת (רבע תיבה). השמיעה ומילוי התיבה ממחישים שחלקים מצטרפים לשלם (E4, E5).');
+  assert.equal(unit.skill.why, 'תיבה של 4 פְעָמוֹת היא שלם; תו חצי נמשך 2 פְעָמוֹת (חצי תיבה) ותו רבע נמשך פַּעֲמָה אחת (רבע תיבה). השמיעה ומילוי התיבה ממחישים שחלקים מצטרפים לשלם (E4, E5).');
   assert.equal(unit.skill.limits, 'ממחיש שברים יסודיים של 1/2 ו־1/4 מול שלם בתיבה של 4/4.');
 });
 

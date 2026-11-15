@@ -81,10 +81,10 @@
       voices: voices,
       meet: meet,
       reason: shuffleReason({
-        question: 'בחרו סיבה: למה התופים נפגשים בפעימה ' + meet + '?',
+        question: 'בחרו סיבה: למה התופים נפגשים בפַּעֲמָה ' + meet + '?',
         choices: [
           meet + ' היא הכפולה הקטנה ביותר של ' + list,
-          'כי ' + steps.reduce(function (a, b) { return a + b; }, 0) + ' פעימות עברו',
+          'כי ' + steps.reduce(function (a, b) { return a + b; }, 0) + ' פְעָמוֹת עברו',
           'כי התוף המהיר תמיד מחכה לאיטי',
         ],
         answer: 0,

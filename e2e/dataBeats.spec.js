@@ -55,7 +55,7 @@ test('pre-test, three practice steps, then the parallel post-test four weeks lat
     if (!id) break;
     await page.locator(card + ' [data-act="tile"][data-tile="' + id + '"]').click();
   }
-  await expect(page.locator(card + ' .jam-msg')).toContainText('מתוך 100 תת־פעמות');
+  await expect(page.locator(card + ' .jam-msg')).toContainText('מתוך 100 תת־פְעָמוֹת');
   await page.locator(card + ' [data-act="next"]').click();
   await expect(page.locator(card)).toContainText('סיימתם את שלושת השלבים');
 

@@ -122,7 +122,7 @@
       prompt = 'הקשיבו לתיבה. איזו תיבה כתובה כמו מה ששמעתם?';
       body = '<div class="jam-row" role="group" aria-label="תיבות לבחירה">' + it.options.map(function (bar, i) {
         return '<button type="button" class="msp-opt msp-bar' + optClass(i) + '" data-act="opt" data-opt="' + i + '"' + (done ? ' disabled' : '') + ' aria-label="תיבה ' + (i + 1) + ': ' + e(MS.barHe(bar)) + '"><span aria-hidden="true">' + noteSyms(bar) + '</span></button>';
-      }).join('') + '</div><p class="msp-legend" aria-hidden="true">𝅝 שלם = 4 פעמות · 𝅗𝅥 חצי = 2 · ♩ רבע = 1 · ♪ שמינית = חצי פעמה</p>';
+      }).join('') + '</div><p class="msp-legend" aria-hidden="true">𝅝 שלם = 4 פְעָמוֹת · 𝅗𝅥 חצי = 2 · ♩ רבע = 1 · ♪ שמינית = חצי פַּעֲמָה</p>';
     } else if (it.skill === 'pitch') {
       prompt = it.mode === 'interval'
         ? 'שמעתם שני צלילים. הראשון מסומן בקלידים. מצאו את השני ולחצו "בדיקה".'

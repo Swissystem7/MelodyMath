@@ -26,7 +26,7 @@ test('there are five Hebrew steps and no mastery promise', () => {
   assert.equal(steps[2].id, 'try');
   const blob = steps.map((s) => s.titleHe + s.bodyHe).join(' ');
   assert.match(blob, /נגישות/);
-  assert.match(blob, /על הפעימה/);
+  assert.match(blob, /על הפַּעֲמָה/);
   assert.match(blob, /לא ציון/);
   assert.match(blob, /שימו לב לצליל/);
   assert.match(blob, /אוזניות/);

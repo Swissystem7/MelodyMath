@@ -36,7 +36,7 @@
 		const quotient = divideBeatsEqually(dividend, divisor);
 		if (quotient === null)
 			return "אי אפשר לחלק כך: צריך מספרים שלמים שהחלוקה בהם שווה בשווה.";
-		return `מחלקים ${dividend} פעימות שווה בשווה ל-${divisor} נגנים: כל נגן מקבל ${quotient} פעימות, כי ${divisor} × ${quotient} = ${dividend}.`;
+		return `מחלקים ${dividend} פְעָמוֹת שווה בשווה ל-${divisor} נגנים: כל נגן מקבל ${quotient} פְעָמוֹת, כי ${divisor} × ${quotient} = ${dividend}.`;
 	}
 
 	return { divideBeatsEqually, divisionAsInverseMult, explainDivisionStep };

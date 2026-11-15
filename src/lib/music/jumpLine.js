@@ -108,8 +108,8 @@
     const G = (groups, size, then, extra, start) => (groups <= 9 && size <= MAX_RUN && extra <= MAX_RUN ? { kind: 'twoStep', groups: groups, size: size, then: then, extra: extra, start: start } : null);
     let s = null;
     if ((m = /(\d+) שורות של (\d+) נגנים, ועל הבמה עוד (\d+) זמרים/.exec(p))) s = G(+m[1], +m[2], 'more', +m[3]);
-    else if ((m = /תוף מנגן (\d+) פעימות בתיבה\. ניגנו (\d+) תיבות, ועוד (\d+) פעימות/.exec(p))) s = G(+m[2], +m[1], 'more', +m[3]);
-    else if ((m = /במשקל (\d)\/4 ניגנו (\d+) תיבות, ואחריהן עוד (\d+) פעמות/.exec(p))) s = G(+m[2], +m[1], 'more', +m[3]);
+    else if ((m = /תוף מנגן (\d+) פְעָמוֹת בתיבה\. ניגנו (\d+) תיבות, ועוד (\d+) פְעָמוֹת/.exec(p))) s = G(+m[2], +m[1], 'more', +m[3]);
+    else if ((m = /במשקל (\d)\/4 ניגנו (\d+) תיבות, ואחריהן עוד (\d+) פְעָמוֹת/.exec(p))) s = G(+m[2], +m[1], 'more', +m[3]);
     else if ((m = /(\d+) שורות של (\d+) זמרים\. (\d+) זמרים יצאו/.exec(p))) s = G(+m[1], +m[2], 'less', +m[3]);
     else if ((m = /היו (\d+) כרטיסים\. חילקו (\d+) קבוצות של (\d+) כרטיסים/.exec(p))) s = G(+m[2], +m[3], 'from', 0, +m[1]);
     else if ((m = /היו (\d+) ₪\. הוא קנה (\d+) מיתרים ב־(\d+) ₪/.exec(p))) s = G(+m[2], +m[3], 'from', 0, +m[1]);

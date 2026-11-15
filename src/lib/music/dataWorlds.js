@@ -76,7 +76,7 @@
       // odd + odd: each leaves one step alone, and the two alone steps meet as a pair
       const a = +m[1], b = +m[2];
       s = { kind: 'sumParity', a: a, b: b, value: (a + b) % 2 === 0 ? 'זוגי' : 'אי-זוגי', world: WORLDS.dabke };
-    } else if ((m = /^(?:האם )?(\d+)(?: פעימות הן מספר| הוא מספר)? זוגי או אי[־-]זוגי\?/.exec(p))) {
+    } else if ((m = /^(?:האם )?(\d+)(?: פְעָמוֹת הן מספר| הוא מספר)? זוגי או אי[־-]זוגי\?/.exec(p))) {
       const n = +m[1];
       s = { kind: 'parity', n: n, value: n % 2 === 0 ? 'זוגי' : 'אי-זוגי', world: WORLDS.dabke };
     } else if ((m = /^האם (\d+) הוא מספר ראשוני\? \(כן\/לא\)$/.exec(p))) {
@@ -154,8 +154,11 @@
       const pairs = pairsOf(p);
       if (pairs.length >= 2) s = tablePlan(p, pairs);
     }
-    if (!s || s.value == null || String(s.value) !== raw) return null;   // the sounds give exactly the answer
-    s.answer = String(s.value);
+    // 'אי-זוגי' and 'אי־זוגי' are the same answer. A maqaf in the bank must
+    // still match the value written with an ASCII hyphen, and the other way.
+    const foldHyphen = (v) => String(v).replace(/[\u05BE\u2010\u2011\u2012\u2013\u2014-]/g, '-');
+    if (!s || s.value == null || foldHyphen(s.value) !== foldHyphen(raw)) return null;
+    s.answer = raw;
     const ev = soundEvents(s);
     if (!ev.length || longestRun(ev) > MAX_RUN || ev.length > MAX_EVENTS) return null;
     return s;

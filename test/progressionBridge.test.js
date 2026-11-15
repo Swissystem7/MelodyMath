@@ -53,13 +53,14 @@ test('bridgeForLink returns null for invalid or non-existent links', () => {
 
 test('every bridge exercise prompt integrates the prerequisite musical mechanism and terms', () => {
   const musicalKeywords = [
-    'פעימ', 'צליל', 'מקצב', 'תוף', 'תיב', 'סולם',
+    'פעמ', 'צליל', 'מקצב', 'תוף', 'תיב', 'סולם',
     'קצב', 'טמפו', 'מנגנ', 'נגינ', 'שיר', 'אקורד',
     'הקש', 'נקיש', 'תווי', 'אוקטב'
   ];
+  const strip = (s) => String(s).replace(/[\u0591-\u05C7]/g, '');
 
   for (const bridge of Object.values(bridges.BRIDGES)) {
-    const hasMusic = musicalKeywords.some(keyword => bridge.prompt.includes(keyword));
+    const hasMusic = musicalKeywords.some(keyword => strip(bridge.prompt).includes(keyword));
     assert.ok(
       hasMusic,
       `Bridge ${bridge.from} -> ${bridge.to} prompt must include musical terminology: "${bridge.prompt}"`

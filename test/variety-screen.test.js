@@ -123,13 +123,13 @@ test('mm-cur-40 is not whole tens, grade-1 addition stays within 20, and a new e
   const b = variety.generateVariant('mm-cur-53', 0, { seed: 4 });
   assert.equal(a.exerciseType, 'percent');
   assert.notEqual(a.numberKey, b.numberKey);
-  const drums = 'תוף אחד מכה כל 2 פעימות ותוף שני כל 3 פעימות. אחרי כמה פעימות הם מכים שוב יחד?';
+  const drums = 'תוף אחד מכה כל 2 פְעָמוֹת ותוף שני כל 3 פְעָמוֹת. אחרי כמה פְעָמוֹת הם מכים שוב יחד?';
   const kept = vary('mm-cur-40', { skill: 'fractions', prompt: drums, answer: 6 }, 0);
   assert.equal(kept.prompt, drums);
   assert.equal(kept.answer, 6);
   assert.doesNotMatch(kept.prompt, /איזה שבר/);
-  const spoken = vary('mm-cur-3', { skill: 'addition', prompt: '3 פעימות תוף ועוד 2 — כמה ביחד?', answer: 5 }, 1);
-  assert.match(spoken.prompt, /פעימות תוף/);
+  const spoken = vary('mm-cur-3', { skill: 'addition', prompt: '3 פְעָמוֹת תוף ועוד 2 — כמה ביחד?', answer: 5 }, 1);
+  assert.match(spoken.prompt, /פְעָמוֹת תוף/);
   assert.match(spoken.prompt, /עוד/);
   assert.notEqual(spoken.answer, 5);
   assert.ok(spoken.answer <= 20);

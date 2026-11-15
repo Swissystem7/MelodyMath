@@ -45,7 +45,7 @@ test('the accented beat sounds louder, higher and in another timbre', () => {
   assert.ok(ev[3].gain > ev[4].gain, 'the second bar starts strong again');
   // 96 BPM is 0.625s a beat, so beat 2 starts there.
   assert.ok(Math.abs(ev[1].at - 0.625) < 1e-9);
-  assert.equal(g3.meterNarration(3, 4), 'משקל 3/4. 12 פעמות ב־4 תיבות. ההדגשה בראש כל תיבה: 1, 4, 7, 10, וכל תיבה נסגרת על כפולה של 3: 3, 6, 9, 12.');
+  assert.equal(g3.meterNarration(3, 4), 'משקל 3/4. 12 פְעָמוֹת ב־4 תיבות. ההדגשה בראש כל תיבה: 1, 4, 7, 10, וכל תיבה נסגרת על כפולה של 3: 3, 6, 9, 12.');
   const jig = g3.meterEvents(6, 1, 96);
   assert.ok(jig[0].gain > jig[3].gain && jig[3].gain > jig[1].gain, '6/8: strong, then a lighter accent on 4');
   assert.equal(g3.meterNarration(7, 4), '');
@@ -102,8 +102,8 @@ test('isRemainderAnswer accepts only the right pair, and a bare quotient only wh
 
 test('a remainder miss gets the message that names the mistake', () => {
   const spec = { beats: 14, perBar: 4 };
-  assert.match(g3.remainderMiss('3', spec), /פעמות עוד לא נכנסו/);
-  assert.match(g3.remainderMiss('14', spec), /מספר כל הפעמות/);
+  assert.match(g3.remainderMiss('3', spec), /פְעָמוֹת עוד לא נכנסו/);
+  assert.match(g3.remainderMiss('14', spec), /מספר כל הפְעָמוֹת/);
   assert.match(g3.remainderMiss('2 שארית 6', spec), /שארית תמיד קטנה מ־4/);
   assert.match(g3.remainderMiss('1 שארית 1', spec), /3 שארית 2/);
   assert.equal(g3.remainderMiss('3', { beats: 14, perBar: 0 }), '');
@@ -119,7 +119,7 @@ test('the leftover beats sound after the full bars and in another timbre', () =>
   assert.ok(left.every((e) => !bars.some((b) => b.type === e.type)), 'leftover reuses a bar timbre');
   assert.ok(left[0].at > bars[11].at);
   assert.deepEqual(g3.remainderEvents(14, 0, 96), []);
-  assert.match(g3.remainderNarration({ beats: 14, perBar: 4 }), /3 תיבות שלמות, ואחריהן 2 פעמות/);
+  assert.match(g3.remainderNarration({ beats: 14, perBar: 4 }), /3 תיבות שלמות, ואחריהן 2 פְעָמוֹת/);
 });
 
 test('"פי כמה" is the whole-number ratio of two tempi or two frequencies', () => {
@@ -159,7 +159,7 @@ test('a pair plays the two sides in the order the prompt names them', () => {
   assert.deepEqual(g3.pairEvents({ a: 0, b: 440 }), []);
   assert.deepEqual(g3.pairEvents(null), []);
   assert.equal(g3.pairNarration({ a: 220, b: 440, unit: 'hz' }), 'קודם 220 הרץ, ואחר כך 440 הרץ.');
-  assert.match(g3.pairNarration({ a: 60, b: 120, unit: 'bpm' }), /פעמות לדקה/);
+  assert.match(g3.pairNarration({ a: 60, b: 120, unit: 'bpm' }), /פְעָמוֹת לדקה/);
 });
 
 test('rows × steps of the sequencer grid is the area of the rectangle', () => {
@@ -321,7 +321,7 @@ test('the meter, remainder and pair widgets render without a real browser', () =
     g3.bindGrade3(rem, { kind: 'remainder', beats: 14, perBar: 4 });
     assert.equal(dom.all(rem, 'g3-bar').length, 4, '3 full bars plus the leftover group');
     assert.equal(dom.all(rem, 'left').length, 2, 'the 2 leftover beats look different');
-    assert.match(dom.all(rem, 'sr-only')[0].textContent, /2 פעמות שנשארו בצליל אחר/);
+    assert.match(dom.all(rem, 'sr-only')[0].textContent, /2 פְעָמוֹת שנשארו בצליל אחר/);
 
     const pair = dom.createElement('div');
     g3.bindGrade3(pair, { kind: 'pair', a: 220, b: 440, unit: 'hz' });

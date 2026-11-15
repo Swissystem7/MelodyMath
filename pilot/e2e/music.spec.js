@@ -34,7 +34,7 @@ test.describe('music in every exercise', () => {
     expect(play.notes.filter((n) => n.role === 'click')).toHaveLength(10);
     expect(play.notes.some((n) => n.role === 'home')).toBe(false);
     await expect(page.getByTestId('music-notes')).toHaveAttribute('data-count', '6');
-    await expect(page.getByTestId('music-caption')).toContainText('4 פעימות בפסנתר');
+    await expect(page.getByTestId('music-caption')).toContainText('4 פְעָמוֹת בפסנתר');
     await expect(page.getByTestId('music-caption')).not.toContainText('7');
     await expect(page.getByTestId('music-describe')).not.toContainText('7');
     await expect(page.getByTestId('q-curriculum')).toContainText('mm-cur-3');

@@ -52,7 +52,7 @@ test('no child string is longer than 15 words (strict child-eye constraint)', ()
 });
 
 test('abstract instructions replaced with concrete child action', () => {
-  const raw = 'ספרו את הפעימות ואז הקישו את המספר';
+  const raw = 'ספרו את הפְעָמוֹת ואז הקישו את המספר';
   const cleaned = VP.cleanChildPrompt(raw);
   assert.doesNotMatch(cleaned, /הקישו את המספר/);
   assert.match(cleaned, /הקישו 3 פעמים על התוף/);

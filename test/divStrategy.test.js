@@ -18,7 +18,7 @@ test("basic division facts without remainder up to 100 (divisor 1..10, quotient 
 			});
 			assert.equal(
 				strategy.explainDivisionStep(dividend, divisor),
-				`מחלקים ${dividend} פעימות שווה בשווה ל-${divisor} נגנים: כל נגן מקבל ${quotient} פעימות, כי ${divisor} × ${quotient} = ${dividend}.`,
+				`מחלקים ${dividend} פְעָמוֹת שווה בשווה ל-${divisor} נגנים: כל נגן מקבל ${quotient} פְעָמוֹת, כי ${divisor} × ${quotient} = ${dividend}.`,
 			);
 		}
 	}
@@ -68,7 +68,7 @@ test("remainder cases return null", () => {
 		assert.equal(typeof explanation, "string");
 		assert.notEqual(
 			explanation,
-			`מחלקים ${dividend} פעימות שווה בשווה ל-${divisor} נגנים: כל נגן מקבל ${dividend / divisor} פעימות, כי ${divisor} × ${dividend / divisor} = ${dividend}.`,
+			`מחלקים ${dividend} פְעָמוֹת שווה בשווה ל-${divisor} נגנים: כל נגן מקבל ${dividend / divisor} פְעָמוֹת, כי ${divisor} × ${dividend / divisor} = ${dividend}.`,
 		);
 	});
 });
@@ -105,7 +105,7 @@ test("invalid inputs (NaN, strings, negatives, fractions) return null", () => {
 test("exact Hebrew text for 12 ÷ 3", () => {
 	assert.equal(
 		strategy.explainDivisionStep(12, 3),
-		"מחלקים 12 פעימות שווה בשווה ל-3 נגנים: כל נגן מקבל 4 פעימות, כי 3 × 4 = 12.",
+		"מחלקים 12 פְעָמוֹת שווה בשווה ל-3 נגנים: כל נגן מקבל 4 פְעָמוֹת, כי 3 × 4 = 12.",
 	);
 });
 

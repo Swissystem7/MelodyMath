@@ -168,7 +168,7 @@
     const t = state.task;
     const level = RM.LEVELS[state.adapt.level];
     const move = state.move && state.move.move === 'up'
-      ? '<p class="rm-note" role="note">' + (state.move.added === 'voice' ? 'נוסף קול!' : 'נוסף קול בחצאי פעמה!') + '</p>'
+      ? '<p class="rm-note" role="note">' + (state.move.added === 'voice' ? 'נוסף קול!' : 'נוסף קול בחצאי פַּעֲמָה!') + '</p>'
       : (state.move && state.move.move === 'down' ? '<p class="rm-note" role="note">חוזרים רגע לשלב קל יותר.</p>' : '');
     let body = '<p class="jam-prompt">' + e(t.prompt) + '</p>' + voicesLine(t);
     if (state.showMusic) {
@@ -203,10 +203,10 @@
       out = '<p class="jam-msg good" role="status" aria-live="polite">יש לחידה פתרון: <bdi dir="ltr">' + e(r.answer) + '</bdi>.' +
         (r.answerMatches === true ? ' גם התשובה שלכם נכונה.' : r.answerMatches === false ? ' התשובה שכתבתם שונה, בדקו שוב.' : '') + '</p>';
     }
-    return '<h3>✏️ המציאו חידה</h3><p>בחרו 2 או 3 קולות (כל כמה פעימות כל קול מכה) ושאלה. המערכת בודקת שיש לחידה פתרון.</p>' +
+    return '<h3>✏️ המציאו חידה</h3><p>בחרו 2 או 3 קולות (כל כמה פְעָמוֹת כל קול מכה) ושאלה. המערכת בודקת שיש לחידה פתרון.</p>' +
       '<div class="rm-pose" role="group" aria-label="בניית חידה">' + sel('rmPoseV0', 0) + sel('rmPoseV1', 1) + sel('rmPoseV2', 2) +
       '<label for="rmPoseKind">שאלה</label><select id="rmPoseKind" data-pose="kind">' + kinds + '</select>' +
-      '<label for="rmPoseWithin">לפני פעימה (לא חובה, לשאלת מתי נפגשים)</label><input id="rmPoseWithin" data-pose="within" inputmode="numeric" value="' + e(d.within) + '">' +
+      '<label for="rmPoseWithin">לפני פַּעֲמָה (לא חובה, לשאלת מתי נפגשים)</label><input id="rmPoseWithin" data-pose="within" inputmode="numeric" value="' + e(d.within) + '">' +
       '<label for="rmPoseStrokes">כמה מכות של קול א׳ (לשאלת שבר)</label><input id="rmPoseStrokes" data-pose="strokes" inputmode="numeric" value="' + e(d.strokes) + '">' +
       '<label for="rmPoseAnswer">התשובה שלכם (לא חובה)</label><input id="rmPoseAnswer" data-pose="answer" dir="ltr" value="' + e(d.answer) + '"></div>' +
       '<div class="jam-row"><button type="button" class="primary" data-act="pose-check">בדיקת החידה</button><button type="button" class="secondary" data-act="pose-close">חזרה לתרגול</button></div>' + out;

@@ -1,6 +1,6 @@
 // MelodyMath — כיתה א׳ activities (plan §5, issue #102):
 //
-//   ספור את הפעמות: המטרונום מדגיש כל פעמה n, והילד חוזה את המספר המודגש הבא
+//   ספור את הפְעָמוֹת: המטרונום מדגיש כל פַּעֲמָה n, והילד חוזה את המספר המודגש הבא
 //   ישר המספרים: כל צעד הוא מכה, וכל עשר מכות הן מחזור ג׳אפטאל שנסגר בגונג
 //   לוח 100 נוגע: העשרות נשמעות כצליל נמוך והיחידות כנקישות
 //   המשך את המנגינה: דגמי AB / AAB / ABC בצליל ובצורה
@@ -85,7 +85,7 @@
     return c + s;
   }
 
-  // ---------- 1. ספור את הפעמות ----------
+  // ---------- 1. ספור את הפְעָמוֹת ----------
   // countBeats is the ladder of accents only. The metronome itself ticks on
   // every single beat and accents each n-th one — that contrast is the whole
   // activity, so the track has to hold the unaccented beats too.
@@ -128,7 +128,7 @@
   function metronomeNarration(from, step, accents) {
     const track = metronomeBeats(from, step, accents);
     if (!track) return '';
-    return 'המטרונום מתחיל ב־' + track.from + ' ומדגיש כל פעמה ' + track.step
+    return 'המטרונום מתחיל ב־' + track.from + ' ומדגיש כל פַּעֲמָה ' + track.step
       + '. שמעתם ' + track.accented.length + ' הדגשות: '
       + track.accented.join(', ') + '.';
   }
@@ -321,7 +321,7 @@
   function countOnNarration(from, steps) {
     const beats = countOnBeats(from, steps);
     if (!beats.length) return '';
-    return 'מתחילים ב־' + whole(from, 0, 1000) + ', ' + beats.length + ' פעימות קדימה.';
+    return 'מתחילים ב־' + whole(from, 0, 1000) + ', ' + beats.length + ' פְעָמוֹת קדימה.';
   }
 
   // ---------- widgets (slice 2 of #102 / #328) ----------

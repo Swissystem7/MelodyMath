@@ -43,7 +43,7 @@
     area: { he: 'שטח', mechanism: 'M2' },
     volume: { he: 'נפח', mechanism: 'M2' },
     // TempoRuler (#591): time and length measured in note lengths = M3.
-    measurement: { he: 'מדידה (זמן ואורך בפעמות)', mechanism: 'M3' },
+    measurement: { he: 'מדידה (זמן ואורך בפְעָמוֹת)', mechanism: 'M3' },
   };
 
   // e(id, he, en, origin, family, mechanism, mathTopics, voice, why, source, weakWays)

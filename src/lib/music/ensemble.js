@@ -226,7 +226,7 @@
       answer: cycleBeats,
       unisonBeats: unisonBeats,
       mathDisplay: steps.join(' × ') + ' → ' + cycleBeats,
-      questionHe: parts.map(function (p) { return p.he + ' כל ' + p.step; }).join(' + ') + ' — באיזו פעמה כולם נפגשים יחד?',
+      questionHe: parts.map(function (p) { return p.he + ' כל ' + p.step; }).join(' + ') + ' — באיזו פַּעֲמָה כולם נפגשים יחד?',
       parts: parts,
       timeline: timeline,
     };

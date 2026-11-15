@@ -205,13 +205,13 @@
       if (ctx && ctx.state === 'suspended') ctx.resume();
 
       if (action === 'bar44') {
-        if (status) status.textContent = 'משמיע: רבע (1/4) מול שמינית (1/8) — הקשב להבדל במשך הפעימה!';
+        if (status) status.textContent = 'משמיע: רבע (1/4) מול שמינית (1/8) — הקשב להבדל במשך הפַּעֲמָה!';
         playTone(440, 0.45, 0); // quarter
         playTone(440, 0.20, 0.6); // eighth
         playTone(440, 0.20, 0.9); // eighth
         setTimeout(function () { if (status) status.textContent = 'שמינית נשמעת ונמשכת בדיוק חצי מרבע.'; }, 1400);
       } else if (action === 'metroLoop') {
-        if (status) status.textContent = 'משמיע: לולאת מקצב קבועה לשינון כפולות — 4 פעימות טמפו מדויקות';
+        if (status) status.textContent = 'משמיע: לולאת מקצב קבועה לשינון כפולות — 4 פְעָמוֹת טמפו מדויקות';
         playTone(330, 0.12, 0, 'triangle');
         playTone(330, 0.12, 0.35, 'triangle');
         playTone(330, 0.12, 0.70, 'triangle');
@@ -229,7 +229,7 @@
         playSweep(220, 550, 0.7, 0.9); // up
         setTimeout(function () { if (status) status.textContent = 'הקודקוד נשמע בבירור כנקודת המפנה והסימטריה.'; }, 1800);
       } else if (action === 'accentGroup') {
-        if (status) status.textContent = 'משמיע: דאון־ביט מודגש (עשרת) + פעימות קלות (אחדות)';
+        if (status) status.textContent = 'משמיע: דאון־ביט מודגש (עשרת) + פְעָמוֹת קלות (אחדות)';
         playTone(260, 0.3, 0, 'triangle');
         playTone(520, 0.1, 0.4, 'sine');
         playTone(520, 0.1, 0.7, 'sine');
