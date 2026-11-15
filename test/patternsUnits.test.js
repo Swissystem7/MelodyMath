@@ -43,6 +43,23 @@ test('patterns: the smallest unit decides what comes next; the unit is never mar
   assert.ok(loudnessGap(e) < 3, 'clap and thigh-pat come out equally loud, gap ' + loudnessGap(e).toFixed(1) + ' dB');
 });
 
+test('clap, thigh-pat and finger-snap use the three equalized gains', () => {
+  const e = ev('fixedAccents', 'דגם ABC: 🥁 🔔 👏 🥁 🔔 👏 🥁 — מה הבא? (1=🥁, 2=🔔, 3=👏)', 2);
+  const gain = {};
+  e.forEach((n) => { gain[n.voice] = n.gain; });
+  assert.deepEqual(gain, { clap: 0.18, stomp: 0.04, woodClick: 0.06 });
+  assert.ok(loudnessGap(e) < 3, 'all three body sounds, gap ' + loudnessGap(e).toFixed(1) + ' dB');
+  const clap = e.find((n) => n.voice === 'clap');
+  const r = heard.renderVoice(V.playVoice, clap.voice, clap.hz, { dur: clap.dur, gain: clap.gain }, 0.3);
+  assert.ok(heard.timeWithin(r.samples, r.sampleRate, 12) > 0, 'the clap has a sounding length');
+  assert.equal(heard.timeWithin(new Float32Array(200), r.sampleRate, 12), 0);
+  assert.equal(heard.dominantHz(r.samples, r.sampleRate, 0, 8), 0);
+  assert.ok(heard.dominantHz(r.samples, r.sampleRate, 0, r.samples.length) > 0);
+  // a high-passed voice, so that filter branch of the renderer is not dead
+  const jing = heard.renderVoice(V.playVoice, 'jingle', 4000, { dur: 0.08, gain: 0.12 }, 0.2);
+  assert.ok(heard.rms(jing.samples) > 0);
+});
+
 test('patterns: long is a clap and a beat of silence; "do mi do" asks for a name', () => {
   const e = ev('fixedAccents', 'דגם צלילי AAB: קצר, קצר, ארוך, קצר, קצר — מה הבא? (1=קצר, 2=ארוך)', 2);
   const gaps = e.slice(1).map((n, i) => +(n.at - e[i].at).toFixed(3));
