@@ -161,6 +161,15 @@ test('sound events stay inside the engine hearing-safe band and never precede th
   assert.ok(strokes[2].gain > strokes[1].gain && strokes[7].gain > strokes[6].gain, 'claps on 3 and 8');
   assert.ok(strokes[5].gain < strokes[0].gain, 'the wave (khali) on 6 is soft');
   assert.equal(g1.scaleJumpEvents(0, 25, 220, 96).filter((e) => e.hz === 110 && e.dur === 0.5).length, 2, 'two tens, two gongs');
+  const gongOf = (a, b) => g1.scaleJumpEvents(a, b, 220, 96).filter((e) => e.hz === 110 && e.dur === 0.5);
+  assert.equal(gongOf(7, 13).length, 1, '7→13 crosses 10, so the gong sounds');
+  const five = g1.scaleJumpEvents(5, 15, 220, 96);
+  const fiveGong = five.filter((e) => e.hz === 110 && e.dur === 0.5);
+  assert.equal(fiveGong.length, 1, '5→15 crosses 10 once; 15 is not a ten');
+  assert.ok(fiveGong[0].at < five[five.length - 1].at - 0.3, 'the gong is the crossing, not the note you land on');
+  assert.equal(gongOf(23, 8).length, 2, 'counting back, the gong marks 20 and 10');
+  assert.equal(gongOf(3, 6).length, 0, 'a jump that stays inside a ten has no gong');
+  assert.match(g1.scaleJumpNarration(7, 13, 220), /הגונג מסמן את המעבר/);
   assert.equal(g1.scaleJumpEvents(2, 3, 220, 96).length, 3, 'leave, one stroke (one space, not two ticks), land');
   assert.ok(g1.scaleJumpEvents(10, 0, 220, 96).slice(-1)[0].hz < 220, 'backwards lands lower');
   assert.match(g1.scaleJumpNarration(60, 85, 220), /2 מחזורי ג׳אפטאל שלמים .*ועוד 5 מכות/);
