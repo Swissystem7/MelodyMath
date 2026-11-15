@@ -5,7 +5,8 @@ const measure = require('../src/lib/measure');
 test('a cm ruler draws the object over numbered marks, and never prints the length', () => {
   const html = measure.renderRulerHtml({ unit: 'cm', length: 7 });
   assert.equal((html.match(/ruler-cell/g) || []).length, 7);
-  assert.equal((html.match(/class="ruler-mark"/g) || []).length, 8, 'marks 0 to 7');
+  assert.equal((html.match(/class="ruler-mark"/g) || []).length, 10, 'marks 0 to 9: two ticks past the object');
+  assert.doesNotMatch(html, /ruler-scroll/, 'a short ruler fits, so it does not ask you to scroll');
   assert.match(html, /aria-label="סרגל בס״מ: העצם מתחיל בשנתה 0 ונגמר בשנתה 7"/);
   const read = html.match(/<p class="ruler-read">([^<]*)<\/p>/)[1];
   assert.doesNotMatch(read, /\d/, 'reading the length is the exercise: ' + read);
@@ -17,12 +18,26 @@ test('an object that does not start at 0: empty cells first, the screen reader h
   const R = measure.normalizeRuler({ unit: 'cm', length: 5, start: 2 });
   assert.deepEqual([R.start, R.length], [2, 5]);
   const html = measure.renderRulerHtml({ unit: 'cm', length: 5, start: 2 });
-  assert.equal((html.match(/ruler-gap/g) || []).length, 2);
+  assert.equal((html.match(/ruler-gap/g) || []).length, 4, 'the start gap plus two ticks past the object');
   assert.equal((html.match(/ruler-cell/g) || []).length, 5);
-  assert.equal((html.match(/class="ruler-mark"/g) || []).length, 8, 'marks 0 to 7');
+  assert.equal((html.match(/class="ruler-mark"/g) || []).length, 10, 'marks 0 to 9');
+  assert.doesNotMatch(html, /ruler-scroll/);
   assert.match(html, /מתחיל בשנתה 2 ונגמר בשנתה 7/);
   assert.equal(measure.normalizeRuler({ unit: 'cm', length: 18, start: 9 }).start, 2, 'the object stays on a 20 cm ruler');
   assert.equal(measure.normalizeRuler({ length: 4, start: 3 }).start, 0, 'unit cubes always start at the first cube');
+});
+
+test('a 20 cm ruler runs two ticks past the object and says to scroll on a small screen', () => {
+  const html = measure.renderRulerHtml({ unit: 'cm', length: 20 });
+  const marks = html.match(/class="ruler-mark"[^>]*>(\d+)</g).map((s) => +s.match(/>(\d+)</)[1]);
+  assert.equal(marks[marks.length - 1], 22, 'the last number is not the end of the object');
+  assert.equal(marks[20], 20);
+  assert.match(html, /נגמר בשנתה 20/);
+  assert.match(html, /class="ruler ruler-long"/);
+  assert.match(html, /גללו הצידה/);
+  const css = require('node:fs').readFileSync(require('node:path').join(__dirname, '../src/lib/print.css'), 'utf8');
+  assert.match(css, /\.ruler\{[^}]*overflow-x:auto/);
+  assert.match(css, /\.ruler-cell,\.ruler-gap\{flex:0 0 1\.5rem/);
 });
 
 test('a non-standard-unit ruler defaults to "יחידות" and asks to count the cubes', () => {
