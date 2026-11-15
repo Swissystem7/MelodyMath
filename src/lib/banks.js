@@ -1704,10 +1704,10 @@
     G4('subtraction', 'השלימו: ☐ − 4,000 = 2,357' + NO_COMMA, 6357, 'פעולה הפוכה: 2,357 ועוד 4,000', 3, ST.ADD_SUB_MILLION),
     G4('multiplication', '300 × 4 = ?' + NO_COMMA, 1200, '3 מאות כפול 4 הם 12 מאות', 1, ST.MUL_DIV_VERT),
     G4('multiplication', '24 × 3 = ?', 72, '20 × 3 ועוד 4 × 3', 1, ST.MUL_DIV_VERT),
-    G4('multiplication', 'חשבו במאונך: 237 × 4', 948, 'כופלים יחידות, עשרות ומאות ומעבירים', 2, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 237 × 4', 948, 'כופלים יחידות, עשרות ומאות ומעבירים', 2, ST.MUL_DIV_VERT, V(237, 4, '×')),
     G4('multiplication', '32 × 19 = ?', 608, 'חוק הפילוג: 32 × 20 פחות 32', 2, ST.MUL_DIV_VERT),
     G4('multiplication', '25 × 36 = ?', 900, '25 × 4 × 9 = 100 × 9', 3, ST.MUL_DIV_VERT),
-    G4('multiplication', 'חשבו במאונך: 586 × 7' + NO_COMMA, 4102, '6 × 7 = 42 — כותבים 2 ומעבירים 4', 3, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 586 × 7' + NO_COMMA, 4102, '6 × 7 = 42 — כותבים 2 ומעבירים 4', 3, ST.MUL_DIV_VERT, V(586, 7, '×')),
     G4('division', '84 : 4 = ?', 21, '80 : 4 ועוד 4 : 4', 1, ST.MUL_DIV_VERT),
     G4('division', '2,400 : 100 = ?', 24, 'הקטנה פי 100 — מורידים שני אפסים', 1, ST.MUL_DIV_VERT),
     G4('division', 'חשבו במאונך: 856 : 4', 214, 'מחלקים מאות, עשרות ויחידות', 2, ST.MUL_DIV_VERT),
@@ -1807,7 +1807,7 @@
     G5('multiplication', '0 × 1,234,567 = ?', 0, 'כפל ב־0 תמיד נותן 0', 1, ST.OPS_MILLION),
     G5('multiplication', '28 × 5 = ?', 140, 'כופלים 28 ב־10 ומחלקים ב־2', 2, ST.OPS_MILLION),
     G5('multiplication', 'נתון: 324 × 79 = 25,596. כמה זה 324 × 80?' + NO_COMMA, 25920, 'עוד פעם אחת 324', 2, ST.OPS_MILLION),
-    G5('multiplication', 'חשבו במאונך: 1,234 × 56' + NO_COMMA, 69104, '1,234 × 50 ועוד 1,234 × 6', 3, ST.OPS_MILLION),
+    G5('multiplication', 'חשבו במאונך: 1,234 × 56' + NO_COMMA, 69104, '1,234 × 50 ועוד 1,234 × 6', 3, ST.OPS_MILLION, V(1234, 56, '×')),
     G5('division', '48,000 : 8 = ?' + NO_COMMA, 6000, '48 : 8 הם 6, ונשארים שלושה אפסים', 1, ST.OPS_MILLION),
     G5('division', 'נתון: 324 × 79 = 25,596. כמה זה 25,596 : 79?', 324, 'חילוק הוא הפעולה ההפוכה לכפל', 2, ST.OPS_MILLION),
     G5('division', 'מסדרים 2,000 ביצים בתבניות של 30. כמה תבניות מלאות יתקבלו?', 66, '30 × 66 = 1,980, ונשארות 20 ביצים', 2, ST.OPS_MILLION),
@@ -2841,6 +2841,44 @@
     return pool;
   }
 
+  function explainDistributiveError(item, givenAnswer) {
+    if (!item) return 'ולמה: יש לבדוק את התרגיל.';
+    const g = String(givenAnswer == null ? '' : givenAnswer).trim();
+    if (item.why && item.why[g]) {
+      return 'ולמה: ' + item.why[g];
+    }
+    if (item.vert && item.vert.op === '×') {
+      const vertMod = (typeof globalThis !== 'undefined' && globalThis.normalizeVertical)
+        || (typeof require === 'function' ? (function () { try { return require('./vertical'); } catch (e) { return null; } })() : null);
+      const explainFn = (vertMod && typeof vertMod.explainError === 'function')
+        ? vertMod.explainError
+        : (vertMod && vertMod.normalizeVertical && typeof vertMod.normalizeVertical.explainError === 'function')
+          ? vertMod.normalizeVertical.explainError
+          : null;
+      if (explainFn) {
+        return explainFn(g, item.vert.a, item.vert.b);
+      }
+    }
+    if (item.kind === 'shofar' || item.kind === 'distributive_shofar') {
+      const numG = Number(g);
+      if (numG === 10) return 'ולמה: 10 הוא מספר הקולות בסבב אחד (4 + 3 + 3), אך תוקעים 3 סבבים: 3 × 10 = 30.';
+      if (numG === 30) return 'ולמה: 30 הוא סך כל הקולות. בסוגריים חסר חלק מסבב אחד (4 + 3 + 3 = 10).';
+      if (numG === 90) return 'ולמה: סופרים קריאות (קולות) ולא תקיעות בודדות: שברים ותרועה הם קול אחד כל אחד.';
+      return 'ולמה: בקריאות השופר חוק הפילוג מראה ש-3 פעמים (4 + 3 + 3) שווה ל-3×4 + 3×3 + 3×3 = 30.';
+    }
+    return item.hint ? ('ולמה: ' + item.hint) : 'ולמה: לפי חוק הפילוג כופלים כל חלק בנפרד ומחברים את המכפלות החלקיות.';
+  }
+
+  function distributiveItems(grade) {
+    return SHIPPED.filter(function (it) {
+      if (grade && it.grade !== grade) return false;
+      return it.kind === 'distributive' || it.kind === 'distributive_shofar' || it.kind === 'shofar'
+        || (it.vert && it.vert.op === '×')
+        || (it.hint && it.hint.includes('חוק הפילוג'))
+        || (it.prompt && it.prompt.includes('חוק הפילוג'));
+    });
+  }
+
   return {
     GRADES: GRADES,
     GRADE_SKILLS: GRADE_SKILLS,
@@ -2885,5 +2923,7 @@
     gapTargetedItems: gapTargetedItems,
     coverage: coverage,
     coverageByGrade: coverageByGrade,
+    distributiveItems: distributiveItems,
+    explainDistributiveError: explainDistributiveError,
   };
 });
