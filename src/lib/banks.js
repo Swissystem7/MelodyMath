@@ -186,46 +186,69 @@
     return Math.min(3, Math.max(1, v));
   }
 
+  function isValidHearTone(n) {
+    if (!Number.isFinite(n)) return false;
+    if (n < 1) return false;
+    return n <= 12;
+  }
+
   function hearOf(raw) {
-    if (!Array.isArray(raw) || !raw.length) return null;
+    if (!Array.isArray(raw)) return null;
+    if (!raw.length) return null;
     const hear = [];
     for (let i = 0; i < raw.length; i++) {
       const n = Math.round(Number(raw[i]));
-      if (!Number.isFinite(n) || n < 1 || n > 12) return null;
+      if (!isValidHearTone(n)) return null;
       hear.push(n);
     }
     return hear;
   }
 
+  function isNonEmptyString(v) {
+    if (typeof v !== 'string') return false;
+    return v.trim().length > 0;
+  }
+
   function hasRequiredTags(item) {
-    if (item == null || typeof item !== 'object') return false;
-    if (typeof item.grade !== 'string' || !item.grade.trim()) return false;
-    if (typeof item.strand !== 'string' || !item.strand.trim()) return false;
-    if (typeof item.standard !== 'string' || !item.standard.trim()) return false;
+    if (item == null) return false;
+    if (typeof item !== 'object') return false;
+    const requiredKeys = ['grade', 'strand', 'standard'];
+    for (let i = 0; i < requiredKeys.length; i++) {
+      if (!isNonEmptyString(item[requiredKeys[i]])) return false;
+    }
     return true;
+  }
+
+  function hasNonEmptyText(val) {
+    if (val == null) return false;
+    return String(val).trim().length > 0;
+  }
+
+  function hasShippableFields(it) {
+    if (!hasNonEmptyText(it.strand)) return false;
+    if (!hasNonEmptyText(it.standard)) return false;
+    if (!hasNonEmptyText(it.prompt)) return false;
+    return hasNonEmptyText(it.answer);
   }
 
   function isShippable(it) {
-    if (!it || typeof it !== 'object') return false;
-    if (!it.grade || GRADES.indexOf(it.grade) === -1) return false;
-    if (!it.strand || !String(it.strand).trim()) return false;
-    if (!it.standard || !String(it.standard).trim()) return false;
-    if (it.prompt == null || String(it.prompt).trim() === '') return false;
-    if (it.answer == null || String(it.answer).trim() === '') return false;
-    if (!it.skill || !SKILL_HE[it.skill]) return false;
-    return true;
+    if (it == null) return false;
+    if (typeof it !== 'object') return false;
+    if (GRADES.indexOf(it.grade) === -1) return false;
+    if (!SKILL_HE[it.skill]) return false;
+    return hasShippableFields(it);
   }
 
-  function I(grade, skill, prompt, answer, hint, extra) {
-    extra = extra || {};
+  function I(grade, skill, prompt, answer) {
+    const extra = arguments[5] || {};
     return {
-      grade: grade,
-      skill: skill,
+      grade,
+      skill,
       strand: extra.strand || STRAND.NUM,
       standard: extra.standard,
-      prompt: prompt,
-      answer: answer,
-      hint: hint,
+      prompt,
+      answer,
+      hint: arguments[4],
       hear: extra.hear || null,
       level: extra.level || 1,
       table: extra.table,
@@ -391,13 +414,8 @@
   );
 
   // ---------- כיתה א׳ · ישר מספרים ----------
-  function NL(prompt, answer, hint, line, level) {
-    return I('א', 'number_line', prompt, answer, hint, {
-      standard: ST.NLINE,
-      widget: 'numberLine',
-      line: line,
-      level: level || 1,
-    });
+  function NL(prompt, answer, hint, line) {
+    return I('א', 'number_line', prompt, answer, hint, { standard: ST.NLINE, widget: 'numberLine', line, level: arguments[4] || 1 });
   }
   RAW.push(
     NL('סמנו את 0 על הישר 0–10.', 0, '0 הוא ההתחלה', { min: 0, max: 10, mark: 0 }, 1),
@@ -447,8 +465,8 @@
   );
 
   // ---------- כיתה ב׳ · כפל 2/4/5/10 ----------
-  function M2(prompt, answer, hint, table, level) {
-    return I('ב', 'multiplication', prompt, answer, hint, { standard: ST.MUL_B, table: table, level: level || 1 });
+  function M2(prompt, answer, hint, table) {
+    return I('ב', 'multiplication', prompt, answer, hint, { standard: ST.MUL_B, table, level: arguments[4] || 1 });
   }
   RAW.push(
     M2('2 תיבות, בכל אחת 4 פעימות. כמה בסך הכול?', 8, '2 פעמים 4', 2, 1),
@@ -483,12 +501,10 @@
   );
 
   // ---------- כיתה ב׳ · חילוק (חלקים / הכלה) על 2/4/5/10 ----------
-  function D2(prompt, answer, hint, table, meaning, level) {
+  function D2(prompt, answer, hint, table) {
     return I('ב', 'division', prompt, answer, hint, {
-      standard: meaning === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
-      table: table,
-      meaning: meaning,
-      level: level || 1,
+      standard: arguments[4] === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
+      table, meaning: arguments[4], level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -515,8 +531,8 @@
   );
 
   // ---------- כיתה ג׳ · כפל 3/6/7/8/9 (חסום עד שליטת 2/4/5/10) ----------
-  function M3(prompt, answer, hint, table, level) {
-    return I('ג', 'multiplication', prompt, answer, hint, { standard: ST.MUL_C, table: table, level: level || 2 });
+  function M3(prompt, answer, hint, table) {
+    return I('ג', 'multiplication', prompt, answer, hint, { standard: ST.MUL_C, table, level: arguments[4] || 2 });
   }
   RAW.push(
     M3('3 × 3 = ?', 9, '3 קבוצות של 3', 3, 1),
@@ -542,12 +558,10 @@
     M3('9 × 6 = ?', 54, 'לוח ה-9', 9, 3)
   );
 
-  function D3(prompt, answer, hint, table, meaning, level) {
+  function D3(prompt, answer, hint, table) {
     return I('ג', 'division', prompt, answer, hint, {
-      standard: meaning === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
-      table: table,
-      meaning: meaning,
-      level: level || 2,
+      standard: arguments[4] === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
+      table, meaning: arguments[4], level: arguments[5] || 2,
     });
   }
   RAW.push(
@@ -566,13 +580,9 @@
   );
 
   // ---------- כיתה ד׳ · שברים מול תיבה 4/4 ----------
-  function F(prompt, answer, hint, bar, level) {
+  function F(prompt, answer, hint, bar) {
     return I('ד', 'basic_fractions', prompt, answer, hint, {
-      strand: STRAND.FRAC,
-      standard: ST.FRAC_BAR,
-      widget: 'bar44',
-      bar: bar || null,
-      level: level || 1,
+      strand: STRAND.FRAC, standard: ST.FRAC_BAR, widget: 'bar44', bar: bar || null, level: arguments[4] || 1,
     });
   }
   RAW.push(
@@ -597,11 +607,9 @@
   );
 
   // ---------- כיתה א׳ · שאלות מילוליות (איסוף / הפרדה / השוואה) ----------
-  function WP(grade, wordType, prompt, answer, hint, level) {
-    const standard = wordType === 'remove' ? ST.WORD_REMOVE
-      : wordType === 'compare' ? ST.WORD_COMPARE
-      : ST.WORD_COLLECT;
-    return I(grade, 'word_problems', prompt, answer, hint, { standard: standard, wordType: wordType, level: level || 1 });
+  function WP(grade, wordType, prompt, answer) {
+    const standard = wordType === 'remove' ? ST.WORD_REMOVE : wordType === 'compare' ? ST.WORD_COMPARE : ST.WORD_COLLECT;
+    return I(grade, 'word_problems', prompt, answer, arguments[4], { standard, wordType, level: arguments[5] || 1 });
   }
   RAW.push(
     WP('א', 'collect', 'לדנה 3 מדבקות. אמא נתנה לה עוד 2. כמה מדבקות יש לדנה?', 5, 'מצרפים את שתי הקבוצות', 1),
@@ -635,20 +643,20 @@
   );
 
   // ---------- כיתה ב׳ · חיבור/חיסור דו־ספרתי מלא, כולל מאונך ----------
-  function VA(prompt, answer, hint, a, b, level) {
-    return I('ב', 'addition', prompt, answer, hint, { standard: ST.ADD2D, level: level || 1 });
+  function VA(prompt, answer, hint) {
+    return I('ב', 'addition', prompt, answer, hint, { standard: ST.ADD2D, level: arguments[5] || 1 });
   }
-  function VS(prompt, answer, hint, a, b, level) {
-    return I('ב', 'subtraction', prompt, answer, hint, { standard: ST.SUB2D, level: level || 1 });
+  function VS(prompt, answer, hint) {
+    return I('ב', 'subtraction', prompt, answer, hint, { standard: ST.SUB2D, level: arguments[5] || 1 });
   }
-  function VAV(prompt, answer, hint, a, b, level) {
+  function VAV(prompt, answer, hint, a) {
     return I('ב', 'addition', prompt, answer, hint, {
-      standard: ST.VERT_ADD, widget: 'vertical', vert: { a: a, b: b, op: '+' }, level: level || 1,
+      standard: ST.VERT_ADD, widget: 'vertical', vert: { a, b: arguments[4], op: '+' }, level: arguments[5] || 1,
     });
   }
-  function VSV(prompt, answer, hint, a, b, level) {
+  function VSV(prompt, answer, hint, a) {
     return I('ב', 'subtraction', prompt, answer, hint, {
-      standard: ST.VERT_SUB, widget: 'vertical', vert: { a: a, b: b, op: '-' }, level: level || 1,
+      standard: ST.VERT_SUB, widget: 'vertical', vert: { a, b: arguments[4], op: '-' }, level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -690,8 +698,8 @@
   );
 
   // ---------- כיתה א׳ · גאומטריה — מיון מצולעים וזווית ישרה ----------
-  function GEOA(grade, prompt, answer, hint, level, standard) {
-    return I(grade, 'geometry', prompt, answer, hint, { strand: STRAND.GEO, standard: standard || ST.GEO_SORT, level: level || 1 });
+  function GEOA(grade, prompt, answer, hint) {
+    return I(grade, 'geometry', prompt, answer, hint, { strand: STRAND.GEO, standard: arguments[5] || ST.GEO_SORT, level: arguments[4] || 1 });
   }
   RAW.push(
     GEOA('א', 'למשולש יש כמה צלעות?', 3, 'שלוש צלעות ושלושה קודקודים', 1),
@@ -725,14 +733,14 @@
   );
 
   // ---------- כיתה א׳ · מדידה — אורך ביחידות מתווכות ואז ס״מ; שעון בשעות שלמות ----------
-  function LEN(grade, prompt, answer, hint, ruler, level) {
+  function LEN(grade, prompt, answer, hint) {
     return I(grade, 'measurement', prompt, answer, hint, {
-      strand: STRAND.MEASURE, standard: ST.LENGTH, widget: 'ruler', ruler: ruler, level: level || 1,
+      strand: STRAND.MEASURE, standard: ST.LENGTH, widget: 'ruler', ruler: arguments[4], level: arguments[5] || 1,
     });
   }
-  function CLK(grade, prompt, answer, hint, clock, level) {
+  function CLK(grade, prompt, answer, hint) {
     return I(grade, 'measurement', prompt, answer, hint, {
-      strand: STRAND.MEASURE, standard: ST.CLOCK, widget: 'clock', clock: clock, level: level || 1,
+      strand: STRAND.MEASURE, standard: ST.CLOCK, widget: 'clock', clock: arguments[4], level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -767,14 +775,14 @@
   );
 
   // ---------- כיתה א׳ · נתונים — פיקטוגרם ודיאגרמת עמודות ----------
-  function PICT(grade, prompt, answer, hint, chart, level) {
+  function PICT(grade, prompt, answer, hint) {
     return I(grade, 'data', prompt, answer, hint, {
-      strand: STRAND.DATA, standard: ST.PICTOGRAM, widget: 'pictogram', chart: chart, level: level || 1,
+      strand: STRAND.DATA, standard: ST.PICTOGRAM, widget: 'pictogram', chart: arguments[4], level: arguments[5] || 1,
     });
   }
-  function BARC(grade, prompt, answer, hint, chart, level) {
+  function BARC(grade, prompt, answer, hint) {
     return I(grade, 'data', prompt, answer, hint, {
-      strand: STRAND.DATA, standard: ST.BARCHART, widget: 'barchart', chart: chart, level: level || 1,
+      strand: STRAND.DATA, standard: ST.BARCHART, widget: 'barchart', chart: arguments[4], level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -851,8 +859,8 @@
   // ---------- מדידה ב׳–ד׳ — בלי ציור: הנתונים כתובים בשאלה ----------
   // Answers are whole numbers so a child types digits only; the unit is in
   // the prompt. test/measurementBank.test.js checks them against measure.js.
-  function MEAS(grade, prompt, answer, hint, level, standard) {
-    return I(grade, 'measurement', prompt, answer, hint, { strand: STRAND.MEASURE, standard: standard, level: level });
+  function MEAS(grade, prompt, answer, hint) {
+    return I(grade, 'measurement', prompt, answer, hint, { strand: STRAND.MEASURE, standard: arguments[5], level: arguments[4] });
   }
 
   // ---------- כיתה ב׳ · מדידה — חצאי שעות והיקף ----------
@@ -908,9 +916,9 @@
   // equivalent fraction, so 2/4 counts for 1/2. Decimal answers are numbers.
   // `music` names the music issue that reuses the item: lcm/bars/bpm for
   // #106 (grade ה׳), dotted/tempo/mean for #107 (grade ו׳).
-  function G56(grade, skill, prompt, answer, hint, level, standard, music) {
+  function G56(grade, skill, prompt, answer) {
     const strand = skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
-    return I(grade, skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
+    return I(grade, skill, prompt, answer, arguments[4], { strand, standard: arguments[6], level: arguments[5], music: arguments[7] });
   }
 
   // ---------- כיתה ה׳ · שברים ----------
@@ -978,8 +986,10 @@
   // Appended at the end: ids are RAW indexes, so earlier items keep theirs.
   // `music` names the activity; tables stay on 2/4/5/10 so the mastery gate
   // for 3/6/7/8/9 is untouched.
-  function MB(skill, music, prompt, answer, hint, level, extra) {
-    extra = extra || {};
+  function MB(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const extra = arguments[6] || {};
     extra.level = level;
     extra.music = music;
     return I('ב', skill, prompt, answer, hint, extra);
@@ -993,26 +1003,33 @@
       even ? 'מחלקים לזוגות — אף פעימה לא נשארת לבד' : 'בסוף נשארת פעימה אחת בלי זוג',
       level, { standard: ST.PLACE_VALUE, widget: 'g2', g2: { kind: 'evenOdd', beats: n } });
   }
-  function DUO(op, a, b, answer, hint, level) {
+  function DUO(op, a, b, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
     return MB(op === '+' ? 'addition' : 'subtraction', 'twoInstruments',
       'תוף מנגן את היחידות, בס מנגן את העשרות. חשבו במאונך: ' + a + ' ' + (op === '+' ? '+' : '−') + ' ' + b,
       answer, hint, level,
       { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'g2', g2: { kind: 'duo', a: a, b: b, op: op } });
   }
-  function BARS(prompt, answer, hint, table, level, bars, perBar) {
+  function BARS(prompt, answer, hint, table) {
+    const level = arguments[4];
+    const bars = arguments[5];
+    const perBar = arguments[6];
     const p = perBar == null ? table : perBar;
     return MB('multiplication', 'beatsBars', prompt, answer, hint, level, {
       standard: ST.MUL_B, table: table,
       widget: 'g2', g2: { kind: 'beatsBars', bars: bars, perBar: p, table: table },
     });
   }
-  function HALF(prompt, answer, hint, level, beatsPerBar) {
+  function HALF(prompt, answer, hint, level) {
+    const beatsPerBar = arguments[4];
     return MB('measurement', 'halfBar', prompt, answer, hint, level, {
       strand: STRAND.MEASURE, standard: ST.HALF_HOUR,
       widget: 'g2', g2: { kind: 'halfBar', beatsPerBar: beatsPerBar == null ? 4 : beatsPerBar },
     });
   }
-  function REG(prompt, answer, hint, level, reg) {
+  function REG(prompt, answer, hint, level) {
+    const reg = arguments[4];
     const r = Array.isArray(reg) ? { h: reg[0], t: reg[1] || 0, o: reg[2] || 0 } : reg;
     return MB('place_value', 'registers', prompt, answer, hint, level, {
       standard: ST.PLACE_VALUE,
@@ -1078,13 +1095,16 @@
   // Appended at the end like grade ב׳. Every item that leans on table
   // 3/6/7/8/9 carries `table`, so the mastery gate still holds it back.
   // Remainder answers ("3 שארית 2") are checked by parseRemainderAnswer.
-  function MC(skill, music, prompt, answer, hint, level, extra) {
-    extra = extra || {};
+  function MC(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const extra = arguments[6] || {};
     extra.level = level;
     extra.music = music;
     return I('ג', skill, prompt, answer, hint, extra);
   }
-  function METER(prompt, answer, hint, table, level) {
+  function METER(prompt, answer, hint, table) {
+    const level = arguments[4];
     return MC('multiplication', 'meters', prompt, answer, hint, level, { standard: ST.MUL_C, table: table });
   }
   function LEFT(total, bar, level, table) {
@@ -1096,10 +1116,14 @@
       q + ' תיבות של ' + bar + ' הן ' + (q * bar) + ' פעימות; ' + (r ? 'הנותרות מתנגנות בצליל אחר' : 'לא נשארת אף פעימה'),
       level, { standard: ST.DIV_REM, meaning: 'quotative', table: table });
   }
-  function TIMES(prompt, answer, hint, level, table) {
+  function TIMES(prompt, answer, hint, level) {
+    const table = arguments[4];
     return MC('word_problems', 'howManyTimes', prompt, answer, hint, level, { standard: ST.MUL_COMPARE, table: table });
   }
-  function GRID(rows, steps, prompt, answer, hint, level, table) {
+  function GRID(rows, steps, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const table = arguments[6];
     return MC('measurement', 'stepGrid', prompt, answer, hint, level,
       { strand: STRAND.MEASURE, standard: ST.AREA, grid: { rows: rows, steps: steps }, table: table });
   }
@@ -1167,7 +1191,10 @@
   // is fraction division, intervals are decimal ratios, tempo changes are
   // percents, the circle of fifths is a 12-gon with 30° steps (layout in
   // circleOfFifths.js) and the tapped tempo is a mean.
-  function MV(skill, music, prompt, answer, hint, level, standard) {
+  function MV(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const standard = arguments[6];
     const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO : STRAND.NUM;
     return I('ו', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
   }
@@ -1218,7 +1245,11 @@
   // Two drums meet every lcm beats, a bar of n beats splits into the factors
   // of n (polyrhythm.js), a mixed bar is added over the shortest note, a beat
   // lasts 60/BPM seconds, and do-re-mi in Hz is read off a bar chart.
-  function M5(skill, music, prompt, answer, hint, level, standard, chart) {
+  function M5(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const standard = arguments[6];
+    const chart = arguments[7];
     const strand = skill === 'data' ? STRAND.DATA
       : standard === ST.LCM || standard === ST.FACTORS ? STRAND.NUM
         : skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
@@ -1327,7 +1358,8 @@
   // ---------- כיתה ג׳ · מוזיקה (issue #104, תוכנית §5) ----------
   // כל פריט כאן מצמיד את המבנה המוזיקלי למבנה המתמטי: המשקל הוא לוח הכפל,
   // התיבה היא המחלק, הרשת היא המלבן והאוקטבה היא "פי 2".
-  function G3(skill, prompt, answer, hint, extra) {
+  function G3(skill, prompt, answer, hint) {
+    const extra = arguments[4];
     const e = extra || {};
     return I('ג', skill, prompt, answer, hint, {
       strand: e.strand || STRAND.NUM,
@@ -1633,7 +1665,10 @@
   // of a quantity, other names for a fraction, comparing, adding; surface
   // area of a box; the Hebrew calendar and decimetres; tables and diagrams
   // with fractions. Appended last so existing ids stay put.
-  function G4(skill, prompt, answer, hint, level, standard, extra) {
+  function G4(skill, prompt, answer, hint) {
+    const level = arguments[4];
+    const standard = arguments[5];
+    const extra = arguments[6];
     const e = extra || {};
     const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
       : skill === 'measurement' ? STRAND.MEASURE : skill === 'data' ? STRAND.DATA : STRAND.NUM;
@@ -1740,7 +1775,10 @@
 
   // Grade ה׳ rows of Newprogramgrade5.pdf (#559): plain exercises for every
   // heading of the topics column. Diagnosis keeps fractions, decimals and data.
-  function G5(skill, prompt, answer, hint, level, standard, extra) {
+  function G5(skill, prompt, answer, hint) {
+    const level = arguments[4];
+    const standard = arguments[5];
+    const extra = arguments[6];
     const e = extra || {};
     const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
       : skill === 'data' ? STRAND.DATA : STRAND.NUM;
@@ -2098,24 +2136,41 @@
 
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
+  function tagLateG1Music(raw, grade) {
+    if (raw.grade !== grade) return;
+    if (raw.music) return;
+    if (!raw.g1) return;
+    if (!raw.g1.kind) return;
+    raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
+  }
+
+  function attachLateMusicProperties(raw, m, ways) {
+    raw.music = m[0];
+    raw.musicNote = m[1];
+    raw.musicSrc = m[2];
+    raw.musicEv = m[3];
+    if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
+    const extra = extraFor(raw, ways, m);
+    if (extra.length) raw.musicExtra = extra;
+  }
+
+  function applyLateWays(raw, f, link) {
+    tagLateG1Music(raw, f.grade);
+    if (raw.grade !== f.grade) return;
+    if (raw.music || raw.noMusic) return;
+    const ways = link[raw.standard];
+    if (!ways) return;
+    const m = shownWay(raw, ways); // dosage: a primary way solves the item
+    if (m) attachLateMusicProperties(raw, m, ways);
+  }
+
   function musicForLate() {
     GRADE_FILES.forEach(function (f) {
       if (!f || !Array.isArray(f.items)) return;
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
-        // A late g1 widget item (#462) is a music activity, like the early ones.
-        if (raw.grade === f.grade && !raw.music && raw.g1 && raw.g1.kind) {
-          raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
-        }
-        const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
-        if (!ways) return;
-        const m = shownWay(raw, ways); // dosage: a primary way solves the item
-        if (!m) return;
-        raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
-        if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
-        const extra = extraFor(raw, ways, m);
-        if (extra.length) raw.musicExtra = extra;
+        applyLateWays(raw, f, link);
       });
     });
   }
@@ -2172,7 +2227,9 @@
   // music/bandShare.js. The whole is a band of one musical world, a different
   // world in each item (docs/research/percent-band-share-2026-11-13.md).
   // Appended last so ids stay put.
-  function BAND_SHARE(std, prompt, answer, hint, level, band) {
+  function BAND_SHARE(std, prompt, answer, hint) {
+    const level = arguments[4];
+    const band = arguments[5];
     return I('ו', 'percent', prompt, answer, hint, { standard: ST[std], strand: STRAND.NUM, level: level, band: band });
   }
   RAW.push(
@@ -2196,7 +2253,8 @@
   // ---------- FenceFloor: perimeter vs area of the same rectangle (grade ה׳) ----------
   // music/fenceFloor.js. One musical world per item
   // (docs/research/perimeter-area-fence-floor-2026-11-13.md). Appended last so ids stay put.
-  function FENCE(prompt, answer, hint, level, fence) {
+  function FENCE(prompt, answer, hint, level) {
+    const fence = arguments[4];
     return I('ה', 'geometry', prompt, answer, hint, { standard: ST.PERIMETER, strand: STRAND.GEO, level: level, fence: fence });
   }
   RAW.push(
@@ -2344,13 +2402,19 @@
   const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
   function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
   function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
+  function isDBoxVolumeItem(raw) {
+    if (raw.grade !== 'ד') return false;
+    if (raw.standard !== ST.MASS_VOL) return false;
+    return /תיבה|קובי/.test(raw.prompt || '');
+  }
+
   // The way an item is solved with. Primary ways only: an all-EXTRA topic does
   // not invent a main way. Grade ד׳ cube items show cubeLayerGroups (#751) so
   // a box is not explained as kilograms; kg and liters keep the one MAIN way.
   function shownWay(raw, ways) {
     const primary = primaryWays(ways);
     if (!primary.length) return null;
-    if (raw.grade === 'ד' && raw.standard === ST.MASS_VOL && /תיבה|קובי/.test(raw.prompt || '')) {
+    if (isDBoxVolumeItem(raw)) {
       const vol = (ways || []).find(function (w) { return w[0] === 'cubeLayerGroups'; });
       if (vol) return vol;
     }
@@ -2359,13 +2423,26 @@
   // A cube-volume item is solved by counting layers. It does not also carry
   // a kg explanation (gramGroups, half a kilo) as extra practice. The other
   // way: a kg or liter item does not carry the box-volume way (#751).
+  function isCubeFilteredWay(cube, mass, w) {
+    const note = (w && w[1]) ? w[1] : '';
+    if (cube && /ק״ג|גרם/.test(note)) return false;
+    if (mass && w[0] === 'cubeLayerGroups') return false;
+    return true;
+  }
+
+  function isDBoxMassItem(raw, cube) {
+    if (cube) return false;
+    if (raw.grade !== 'ד') return false;
+    return raw.standard === ST.MASS_VOL;
+  }
+
   function extraFor(raw, ways, shown) {
     const cube = /תיבה|קובי/.test(raw.prompt || '');
-    const mass = raw.grade === 'ד' && raw.standard === ST.MASS_VOL && !cube;
+    const mass = isDBoxMassItem(raw, cube);
     return (ways || []).filter(function (w) {
-      return isOptionalWay(w) && w[0] !== shown[0]
-        && !(cube && /ק״ג|גרם/.test(w[1] || ''))
-        && !(mass && w[0] === 'cubeLayerGroups');
+      if (!isOptionalWay(w)) return false;
+      if (w[0] === shown[0]) return false;
+      return isCubeFilteredWay(cube, mass, w);
     }).map(function (w) {
       return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
     });
@@ -2645,15 +2722,40 @@
     });
   });
 
+  const TIME_STANDARDS = [ST.CLOCK, ST.HALF_HOUR, ST.MINUTES, ST.CALENDAR, ST.TIME_MIN_SEC];
+  const TIME_MUSIC_TAGS = ['tuneTime', 'hourTwelveGroups', 'minuteGroups', 'weekBars'];
+
+  function isClockItem(it) {
+    if (TIME_STANDARDS.indexOf(it.standard) >= 0) return true;
+    if (it.widget === 'clock') return true;
+    return Boolean(it.clock);
+  }
+
+  function isTimeMusicItem(it) {
+    return TIME_MUSIC_TAGS.indexOf(it.music) >= 0;
+  }
+
+  function isGapResearchItem(it) {
+    if (!it.research) return false;
+    if (!it.research.includes('gap')) return false;
+    if (it.strand === STRAND.DATA) return true;
+    if (it.skill === 'data') return true;
+    return it.standard === ST.DIV_REM || it.standard === ST.G6_PCT_CHANGE;
+  }
+
+  function isDataWorldItem(it) {
+    const dw = (typeof globalThis !== 'undefined' && globalThis.MM_DATA_WORLDS)
+      || (typeof require === 'function' ? (function () { try { return require('./music/dataWorlds'); } catch (_e) { return null; } })() : null);
+    return Boolean(dw && typeof dw.isDataWorldItem === 'function' && dw.isDataWorldItem(it));
+  }
+
   function isDataOrTimeItem(it) {
     if (!it) return false;
     if (it.strand === STRAND.DATA || it.skill === 'data') return true;
-    if ([ST.CLOCK, ST.HALF_HOUR, ST.MINUTES, ST.CALENDAR, ST.TIME_MIN_SEC].indexOf(it.standard) >= 0 || it.widget === 'clock' || it.clock) return true;
-    if (it.music === 'tuneTime' || it.music === 'hourTwelveGroups' || it.music === 'minuteGroups' || it.music === 'weekBars') return true;
-    if (it.research && it.research.includes('gap') && (it.strand === STRAND.DATA || it.skill === 'data' || it.standard === ST.DIV_REM || it.standard === ST.G6_PCT_CHANGE)) return true;
-    const dw = (typeof globalThis !== 'undefined' && globalThis.MM_DATA_WORLDS)
-      || (typeof require === 'function' ? (function () { try { return require('./music/dataWorlds'); } catch (_e) { return null; } })() : null);
-    return !!(dw && typeof dw.isDataWorldItem === 'function' && dw.isDataWorldItem(it));
+    if (isClockItem(it)) return true;
+    if (isTimeMusicItem(it)) return true;
+    if (isGapResearchItem(it)) return true;
+    return isDataWorldItem(it);
   }
 
   function dataAndTimeItems(grade) {
@@ -2668,28 +2770,68 @@
     });
   }
 
+  function matchErrorItem(it, p, id) {
+    if (!isShippable(it)) return false;
+    if (id && it.id === id) return true;
+    return Boolean(p && it.prompt === p);
+  }
+
+  function isMatchingSkill(it, sk) {
+    if (it.skill === sk) return true;
+    return it.he === sk;
+  }
+
+  function addErrorMatch(match, grade, add) {
+    if (!match) return;
+    if (grade && match.grade !== grade) return;
+    add(match);
+  }
+
+  function handleSingleError(err, grade, basePool, add) {
+    if (!err) return;
+    const p = err.prompt ? err.prompt : '';
+    const id = err.id ? err.id : '';
+    const sk = err.skill ? err.skill : '';
+    const match = SHIPPED.find(function (it) {
+      return matchErrorItem(it, p, id);
+    });
+    addErrorMatch(match, grade, add);
+    if (sk) {
+      basePool.filter(function (it) {
+        return isMatchingSkill(it, sk);
+      }).forEach(add);
+    }
+  }
+
+  function normalizeGapOptions(opts) {
+    if (opts && typeof opts === 'object') return opts;
+    return { grade: opts };
+  }
+
+  function resolveErrorList(o) {
+    if (Array.isArray(o.errors)) return o.errors;
+    if (Array.isArray(o.classErrors)) return o.classErrors;
+    return [];
+  }
+
   function gapTargetedItems(opts) {
-    const o = (opts && typeof opts === 'object') ? opts : { grade: opts };
+    const o = normalizeGapOptions(opts);
     const grade = o.grade;
-    const errors = Array.isArray(o.errors) ? o.errors : (Array.isArray(o.classErrors) ? o.classErrors : []);
+    const errors = resolveErrorList(o);
     const basePool = dataAndTimeItems(grade);
     const researchGaps = gapItems(grade);
     const pool = [];
     const seen = Object.create(null);
     function add(it) {
-      if (!it || !it.prompt || seen[it.prompt]) return;
+      if (!it) return;
+      if (!it.prompt) return;
+      if (seen[it.prompt]) return;
       seen[it.prompt] = true;
       pool.push(it);
     }
     if (errors.length) {
       errors.slice().sort(function (a, b) { return (b.count || 0) - (a.count || 0); }).forEach(function (err) {
-        if (!err) return;
-        const p = err.prompt || '', id = err.id || '', sk = err.skill || '';
-        const match = SHIPPED.find(function (it) {
-          return isShippable(it) && ((id && it.id === id) || (p && it.prompt === p));
-        });
-        if (match && (!grade || match.grade === grade)) add(match);
-        if (sk) basePool.filter(function (it) { return it.skill === sk || it.he === sk; }).forEach(add);
+        handleSingleError(err, grade, basePool, add);
       });
     }
     researchGaps.filter(isDataOrTimeItem).forEach(add);
