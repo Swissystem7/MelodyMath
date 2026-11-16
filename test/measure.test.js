@@ -121,22 +121,22 @@ test('bindClock safely handles missing root and mounts markup to mock element', 
 });
 
 test('normalizeClock falls back to 12 or preserves and rounds valid hour values', () => {
-  assert.deepEqual(measure.normalizeClock(null), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock(undefined), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock({}), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock({ hour: 'non-numeric' }), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock({ hour: NaN }), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock({ hour: 0 }), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock({ hour: -3 }), { hour: 12 });
-  assert.deepEqual(measure.normalizeClock({ hour: 13 }), { hour: 12 });
+  assert.deepEqual(measure.normalizeClock(null), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock(undefined), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({}), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: 'non-numeric' }), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: NaN }), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: 0 }), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: -3 }), { hour: 12, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: 13 }), { hour: 12, minute: 0 });
 
   for (let h = 1; h <= 12; h++) {
-    assert.deepEqual(measure.normalizeClock({ hour: h }), { hour: h });
+    assert.deepEqual(measure.normalizeClock({ hour: h }), { hour: h, minute: 0 });
   }
 
-  assert.deepEqual(measure.normalizeClock({ hour: '5' }), { hour: 5 });
-  assert.deepEqual(measure.normalizeClock({ hour: 5.2 }), { hour: 5 });
-  assert.deepEqual(measure.normalizeClock({ hour: '5.8' }), { hour: 6 });
+  assert.deepEqual(measure.normalizeClock({ hour: '5' }), { hour: 5, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: 5.2 }), { hour: 5, minute: 0 });
+  assert.deepEqual(measure.normalizeClock({ hour: '5.8' }), { hour: 6, minute: 0 });
 });
 
 test('clampInt clamps to min/max range, rounds floats, and handles non-finite inputs', () => {

@@ -119,7 +119,9 @@
         const a = A[A.length - 1][1], b = B[B.length - 1][1], ok = m[2] === '<' ? a < b : m[2] === '>' ? a > b : a === b;
         s = { kind: 'twoSides', sides: [A, B], rel: m[2], value: ok ? 'נכון' : 'לא נכון', world: WORLDS.stages };
       }
-    } else if (item.music === 'balanceBars' && !balancePlays(item) && (m = /^מהו המספר השלם (הגדול|הקטן) ביותר שמתאים ל־☐: ☐ × (\d+) ([<>]) ([\d,]+)$/.exec(p))) {
+    } else if (item.music === 'balanceBars' && !balancePlays(item) && ((m = /^מהו המספר השלם (הגדול|הקטן) ביותר שמתאים ל־☐: ☐ × (\d+) ([<>]) ([\d,]+)$/.exec(p))
+      // counting from 1, the number of solutions of ☐ × k < lim is the largest one that fits
+      || (m = /^כמה מספרים שלמים, מ־1 ומעלה, (מתאימים) ל־☐: ☐ × (\d+) (<) ([\d,]+)$/.exec(p)))) {
       // try the multiplier near the bound and the next one: which product still fits?
       const k = +m[2], lim = +m[4].replace(/,/g, ''), less = m[3] === '<';
       const best = less ? Math.ceil(lim / k) - 1 : Math.floor(lim / k) + 1;

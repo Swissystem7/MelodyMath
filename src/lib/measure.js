@@ -84,26 +84,33 @@
     const src = raw && typeof raw === 'object' ? raw : {};
     let hour = Math.round(Number(src.hour));
     if (!Number.isFinite(hour) || hour < 1 || hour > 12) hour = 12;
-    return { hour: hour };
+    // minutes in steps of five; the hour hand then sits between two numbers
+    let minute = Math.round(Number(src.minute));
+    if (!Number.isFinite(minute) || minute < 0 || minute > 55 || minute % 5) minute = 0;
+    return { hour: hour, minute: minute };
   }
 
-  function clockHandAngle(hour) {
-    // Whole hours only: minute hand always at 12 (0°). Hour hand at 30° per hour.
-    return (hour % 12) * 30;
+  function clockHandAngle(hour, minute) {
+    // Hour hand: 30° per hour, and half a degree for every minute past it.
+    return (hour % 12) * 30 + (Number(minute) || 0) * 0.5;
   }
 
   function renderClockHtml(clock) {
     const C = normalizeClock(clock);
-    const angle = clockHandAngle(C.hour);
+    const angle = clockHandAngle(C.hour, C.minute);
+    const next = (C.hour % 12) + 1;
+    // Where the hands point, never the time itself: reading it is the exercise.
+    const hourAt = C.minute ? 'בין ' + C.hour + ' ל־' + next : 'על ' + C.hour;
+    const minAt = C.minute ? C.minute / 5 : 12;
     const numbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function (n) {
       const a = (n % 12) * 30;
       return '<span class="clock-num" style="transform:rotate(' + a + 'deg) translateY(-42%) rotate(-' + a + 'deg)">' + n + '</span>';
     }).join('');
     // The face never prints the time: reading the hands is the exercise.
-    return '<div class="clock" role="img" aria-label="שעון: מחוג השעות הקצר מצביע על ' + C.hour + ', ומחוג הדקות הארוך על 12">'
+    return '<div class="clock" role="img" aria-label="שעון: מחוג השעות הקצר מצביע ' + hourAt + ', ומחוג הדקות הארוך על ' + minAt + '">'
       + '<div class="clock-face">' + numbers
       + '<div class="clock-hand clock-hour" style="transform:rotate(' + angle + 'deg)"></div>'
-      + '<div class="clock-hand clock-min" style="transform:rotate(0deg)"></div>'
+      + '<div class="clock-hand clock-min" style="transform:rotate(' + (C.minute * 6) + 'deg)"></div>'
       + '<div class="clock-center"></div>'
       + '</div>'
       + '<p class="clock-read">המחוג הקצר מראה את השעה.</p>'

@@ -52,7 +52,9 @@
     // ---- perimeter (hora)
     if ((m = /^לריבוע צלע של (\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p))) s = walk([m[1], m[1], m[1], m[1]].map(n));
     else if ((m = /^למשולש צלעות של (\d+), (\d+) ו־(\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p))) s = walk([m[1], m[2], m[3]].map(n));
-    else if ((m = /^למלבן צלעות של (\d+) ס״מ ו־(\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p)) || (m = /^למקבילית צלעות של (\d+) ס״מ ו־(\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p))) s = walk([m[1], m[2], m[1], m[2]].map(n));
+    else if ((m = /^למלבן צלעות של (\d+) ס״מ ו־(\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p)) || (m = /^למקבילית צלעות של (\d+) ס״מ ו־(\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p))
+      // the line inside is not walked: only the four outer sides sound
+      || (m = /^מלבן של (\d+) ס״מ על (\d+) ס״מ מחולק בקו לשני ריבועים\. מה ההיקף בס״מ\?$/.exec(p))) s = walk([m[1], m[2], m[1], m[2]].map(n));
     else if ((m = /^למחומש 5 צלעות של (\d+) ס״מ כל אחת\. מה ההיקף בס״מ\?$/.exec(p))) s = walk(Array(5).fill(+m[1]));
     else if ((m = /^למשושה שכל צלעותיו שוות יש צלע של (\d+) ס״מ\. מה ההיקף בס״מ\?$/.exec(p))) s = walk(Array(6).fill(+m[1]));
     else if ((m = /^היקף ריבוע הוא (\d+) ס״מ\. כמה ס״מ אורך כל צלע\?$/.exec(p))) { const a = +m[1] / 4; if (Number.isInteger(a)) { s = walk([a, a, a, a]); s.value = a; } }
@@ -97,7 +99,9 @@
     } else if (/^למקבילית ולמשולש אותו בסיס ואותו גובה\. פי כמה גדול שטח המקבילית משטח המשולש\?$/.test(p)) {
       s = { kind: 'twoTriangles', half: 6, value: 2, world: WORLDS.call };
     // ---- parallelograms (darbuka)
-    } else if ((m = /^במקבילית, אורך צלע (\d+) ס״מ והגובה אליה (\d+) ס״מ\. מה שטח המקבילית/.exec(p))) {
+    } else if ((m = /^במקבילית, אורך צלע (\d+) ס״מ והגובה אליה (\d+) ס״מ\. מה שטח המקבילית/.exec(p))
+      // the slanted side is in the story and not in the sum
+      || (m = /^מקבילית: צלע (\d+) ס״מ, צלע משופעת \d+ ס״מ, גובה (\d+) ס״מ\. מה השטח\?$/.exec(p))) {
       s = { kind: 'parallelogram', base: +m[1], height: +m[2], value: +m[1] * +m[2], world: WORLDS.darbuka };
     } else if ((m = /^שטח מקבילית (\d+) סמ״ר והגובה (\d+) ס״מ\. מה אורך הצלע שאליה הגובה/.exec(p))) {
       const b = +m[1] / +m[2];
