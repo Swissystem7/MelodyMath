@@ -55,7 +55,10 @@
     // A max below the tallest bar would draw that bar past the top of the track.
     const tallest = Math.max.apply(null, bars.map(function (b) { return b.value; }).concat([1]));
     const max = Math.max(tallest, Math.round(Number(src.max)) || 1);
-    return { bars: bars, max: max };
+    // An axis that starts above zero (a misleading-graph item): never above the shortest bar.
+    const lowest = Math.min.apply(null, bars.map(function (b) { return b.value; }).concat([max]));
+    const min = Math.max(0, Math.min(Math.round(Number(src.min)) || 0, lowest, max - 1));
+    return { bars: bars, max: max, min: min };
   }
 
   function renderBarChartHtml(spec) {
@@ -64,15 +67,17 @@
     }
     const B = normalizeBars(spec);
     const bars = B.bars.map(function (b) {
-      const pct = Math.round((b.value / B.max) * 100);
+      const pct = Math.round(((b.value - B.min) / (B.max - B.min)) * 100);
       return '<div class="barchart-col">'
         + '<div class="barchart-bar" style="height:' + pct + '%" aria-hidden="true"></div>'
         + '<span class="barchart-val">' + b.value + '</span>'
         + '<span class="barchart-label">' + escapeHtml(b.label) + '</span>'
         + '</div>';
     }).join('');
-    return '<div class="barchart" role="img" aria-label="דיאגרמת עמודות">'
+    const axis = B.min ? 'הציר מתחיל ב־' + B.min : '';
+    return '<div class="barchart" role="img" aria-label="דיאגרמת עמודות' + (axis ? ', ' + axis : '') + '">'
       + '<div class="barchart-track">' + bars + '</div>'
+      + (axis ? '<span class="barchart-axis-min">' + axis + '</span>' : '')
       + '</div>';
   }
 

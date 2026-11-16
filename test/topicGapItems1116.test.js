@@ -19,11 +19,11 @@ const mods = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => {
 }).filter(([, m]) => m && typeof m.specForItem === 'function');
 const player = (it) => { for (const [f, m] of mods) { try { if (m.specForItem(it)) return f; } catch (e) { /* not this one */ } } return null; };
 
-test('thirty-two items, appended after everything that was already in the bank', () => {
-  assert.equal(mine.length, 32);
+test('thirty-five items (32 on 16.11, 3 on 17.11), appended after everything that was already in the bank', () => {
+  assert.equal(mine.length, 35);
   const older = banks.allItems().filter((it) => it.research !== TAG).map(num);
   assert.ok(Math.min(...mine.map(num)) > Math.max(...older));
-  assert.equal(new Set(mine.map((it) => it.prompt)).size, 32);
+  assert.equal(new Set(mine.map((it) => it.prompt)).size, 35);
   mine.forEach((it) => assert.ok(it.hint && it.standard && (it.music || it.noMusic), it.prompt));
 });
 
@@ -99,4 +99,28 @@ test('XI and IX: the same signs in another order are another number, and both so
   assert.equal(xi.answer, 10 + 1);
   assert.equal(ix.answer, 10 - 1);
   assert.ok(pn.specForItem(xi) && pn.specForItem(ix));
+});
+
+test('17.11: the same amount in another order, the same volume with another weight, an axis above zero', () => {
+  const swap = by(/^3 \+ 2 = 2 \+ ☐$/);
+  assert.equal(swap.answer, 3 + 2 - 2, '3 + 2 and 2 + 3 are the same amount');
+  assert.ok(player(swap), 'the swapped order sounds');
+  const oil = by(/ליטר שמן/);
+  assert.equal(oil.answer, 10 - 9, 'the same 10 litres weigh differently');
+  assert.ok(player(oil), 'the two weights sound');
+  const wrong = Object.assign({}, oil, { answer: 2 });
+  assert.equal(player(wrong), null, 'a wrong answer never sounds');
+  const chart = by(/^בגרף, עמודה א׳/);
+  assert.equal(chart.answer, 70 - 60, 'the gap, not the picture');
+  const html = require('../src/lib/dataViz').renderBarChartHtml(chart.chart);
+  const heights = (html.match(/height:(\d+)%/g) || []).map((h) => +h.replace(/\D/g, ''));
+  assert.deepEqual(heights, [50, 100], 'from 50, ב׳ looks twice as tall');
+  assert.match(html, /הציר מתחיל ב־50/);
+  assert.doesNotMatch(require('../src/lib/dataViz').renderBarChartHtml({ bars: [{ label: 'x', value: 4 }] }), /הציר מתחיל/, 'a chart from zero says nothing');
+});
+
+test('the print sheet keeps the minutes of a clock', () => {
+  const ws = require('../src/lib/worksheets');
+  assert.match(ws.printableWidget({ widget: 'clock', clock: { hour: 2, minute: 50 } }), /2:50/);
+  assert.match(ws.printableWidget({ widget: 'clock', clock: { hour: 4 } }), /4:00/);
 });

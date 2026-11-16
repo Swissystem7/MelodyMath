@@ -145,9 +145,12 @@
     }
     if (it && (it.widget === 'clock' || it.clock)) {
       const h = Math.round(Number(it.clock && it.clock.hour)) || 12;
-      return '<div class="sheet-widget sheet-clock" role="img" aria-label="שעון: שעה ' + h + '">'
+      // the clock face can show minutes too (2:50), so the print must not round it to 2:00
+      const mi = Math.round(Number(it.clock && it.clock.minute)) || 0;
+      const t = h + ':' + (mi < 10 ? '0' : '') + mi;
+      return '<div class="sheet-widget sheet-clock" role="img" aria-label="שעון: שעה ' + t + '">'
         + '<div class="sheet-clock-box" style="display:inline-flex;align-items:center;gap:6px;border:1px solid #777;border-radius:8px;padding:4px 8px;font-size:0.9rem">'
-        + '<span>🕒 שעה במחוגים: <b>' + h + ':00</b></span>'
+        + '<span>🕒 שעה במחוגים: <b>' + t + '</b></span>'
         + '</div>'
         + '</div>';
     }
