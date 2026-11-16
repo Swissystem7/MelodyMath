@@ -2375,7 +2375,11 @@
     I('ו', 'fractions', '2/3 × 2/3 = ?', '4/9', 'כופלים גם את המכנים', Object.assign({ standard: ST.FRAC_MUL, strand: STRAND.FRAC, level: 2 }, GAP2)),
     // XI and IX: the same signs, and the order changes the number (topic 109)
     I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא XI?', 11, 'I אחרי X מוסיף אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 2 }, GAP2)),
-    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא IX?', 9, 'אותם סימנים כמו XI, אבל I לפני X מוריד אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 3 }, GAP2))
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא IX?', 9, 'אותם סימנים כמו XI, אבל I לפני X מוריד אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 3 }, GAP2)),
+    // 17.11.2026: the last three gaps from docs/research/topics 029, 062 and 028
+    I('א', 'addition', '3 + 2 = 2 + ☐', 3, 'אותה כמות בסידור אחר: 3 ואז 2, או 2 ואז 3', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ד', 'measurement', '10 ליטר שמן: 9 ק״ג. 10 ליטר מים: 10 ק״ג. בכמה ק״ג המים כבדים יותר?', 1, 'אותו נפח, משקל אחר', Object.assign({ standard: ST.MASS_VOL, strand: STRAND.MEASURE, level: 2 }, GAP2)),
+    I('ד', 'data', 'בגרף, עמודה א׳ היא 60 ועמודה ב׳ 70. בכמה ב׳ גבוהה יותר?', 10, 'הציר מתחיל ב־50: ב׳ נראית פי 2, אבל ההפרש רק 10', Object.assign({ standard: ST.BARCHART, strand: STRAND.DATA, level: 3, widget: 'barchart', chart: { min: 50, bars: [{ label: 'א׳', value: 60 }, { label: 'ב׳', value: 70 }] } }, GAP2))
   );
   musicForLate();
 

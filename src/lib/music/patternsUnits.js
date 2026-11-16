@@ -81,6 +81,8 @@
     else if ((m = /^בבקבוק 1 ליטר ועוד (\d)00 מ״ל\. כמה מ״ל בסך הכול\?$/.exec(p))) s = { kind: 'plus', hundreds: +m[1], value: 1000 + +m[1] * 100 };
     else if ((m = /^בקבוק מחזיק (\d) ליטר\. כמה כוסות של חצי ליטר ממלאות אותו\?$/.exec(p)) || (m = /^מזגנו (\d) ליטר מים לכוסות של חצי ליטר\. כמה כוסות מילאנו\?$/.exec(p))) { const L = +m[1]; if (L <= 2) s = { kind: 'cups', L: L, value: 2 * L }; }
     else if ((m = /^שק אחד שוקל (\d+) ק״ג ושק שני (\d+) ק״ג\. בכמה ק״ג השני כבד יותר\?$/.exec(p))) { const a = +m[1], b = +m[2]; if (b > a && b <= 10) s = { kind: 'diff', a: a, b: b, value: b - a }; }
+    // same volume, another weight: only the two weights sound
+    else if ((m = /^(\d+) ליטר שמן: (\d+) ק״ג\. \1 ליטר מים: (\d+) ק״ג\. בכמה ק״ג המים כבדים יותר\?$/.exec(p))) { const a = +m[2], b = +m[3]; if (b > a && b <= 10) s = { kind: 'diff', a: a, b: b, value: b - a }; }
     else if (/^כמה סמ״ק הם מ״ל אחד\?$/.test(p)) s = { kind: 'same', value: 1 };
     else if ((m = /^תיבה של (\d+) ס״מ על (\d+) ס״מ על (\d+) ס״מ מלאה מים\. כמה ליטרים בתוכה\?$/.exec(p))) {
       const a = +m[1], b = +m[2], c = +m[3], base = a * b;
