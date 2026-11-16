@@ -55,12 +55,21 @@
         + '<p class="ruler-read">סופרים את הקוביות, אחת אחת.</p>'
         + '</div>';
     }
+    // Two marks past the object, so the last number on the ruler is not
+    // always the end of the thing being measured. A ruler of about 14 cm or
+    // more does not fit a phone at a readable tick size: it scrolls, and
+    // says so.
+    const TAIL = 2;
+    for (let i = 0; i < TAIL; i++) cells.push('<span class="ruler-gap ruler-tail" aria-hidden="true">&nbsp;</span>');
+    const span = R.start + R.length + TAIL;
     const marks = [];
-    for (let m = 0; m <= R.start + R.length; m++) marks.push('<span class="ruler-mark" aria-hidden="true">' + m + '</span>');
-    return '<div class="ruler" dir="ltr" role="img" aria-label="סרגל ב' + label + ': העצם מתחיל בשנתה ' + R.start
+    for (let m = 0; m <= span; m++) marks.push('<span class="ruler-mark" aria-hidden="true">' + m + '</span>');
+    const long = span >= 16;
+    return '<div class="ruler' + (long ? ' ruler-long' : '') + '" dir="ltr" role="img" aria-label="סרגל ב' + label + ': העצם מתחיל בשנתה ' + R.start
       + ' ונגמר בשנתה ' + (R.start + R.length) + '">'
       + '<div class="ruler-track">' + cells.join('') + '</div>'
       + '<div class="ruler-marks">' + marks.join('') + '</div>'
+      + (long ? '<p class="ruler-scroll">אם הסרגל לא נגמר על המסך — גללו הצידה.</p>' : '')
       + '<p class="ruler-read">סופרים את הרווחים בין השנתות, מתחילת העצם עד סופו.</p>'
       + '</div>';
   }

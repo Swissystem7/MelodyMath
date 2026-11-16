@@ -32,8 +32,9 @@
   function countUpCircles(start, target) {
     const s = wholeIn(start, 0, 12), g = wholeIn(target, 0, 20);
     if (s == null || g == null || g <= s || g - s > 12) return null;
-    const circles = [];
-    for (let i = 0; i < s; i++) circles.push({ index: circles.length, kind: 'beat', v: 1, gone: false });
+    // One marker for where you stand. Eight separate beats invite counting
+    // them plus the steps (13) instead of the steps alone.
+    const circles = [{ index: 0, kind: 'stand', v: s, gone: false }];
     for (let i = 0; i < g - s; i++) circles.push({ index: circles.length, kind: 'add', v: 1, gone: false });
     return { kind: 'countUp', start: s, target: g, added: g - s, circles: circles };
   }
@@ -55,9 +56,18 @@
   function specForItem(item) {
     if (!item || typeof item !== 'object') return null;
     const nums = numbersOf(item.prompt);
-    if (item.music === 'takeAwayBeats' && /^כמה חסר מ־\d+ עד \d+\?$/.test(String(item.prompt).trim())) {
-      const u = countUpCircles(nums[0], nums[1]);
-      return u && String(u.added) === String(item.answer).trim() ? u : null;
+    const prompt = String(item.prompt == null ? '' : item.prompt).trim();
+    if (item.music === 'takeAwayBeats') {
+      const diff = /^מה ההפרש בין (\d+) ל־(\d+)\?$/.exec(prompt);
+      if (diff) {
+        const lo = Math.min(+diff[1], +diff[2]), hi = Math.max(+diff[1], +diff[2]);
+        const u = countUpCircles(lo, hi);
+        return u && String(u.added) === String(item.answer).trim() ? u : null;
+      }
+      if (/^כמה חסר מ־\d+ עד \d+\?$/.test(prompt)) {
+        const u = countUpCircles(nums[0], nums[1]);
+        return u && String(u.added) === String(item.answer).trim() ? u : null;
+      }
     }
     if (item.music === 'takeAwayBeats' && nums.length >= 2) return takeAwayCircles(nums[0], nums[1]);
     if ((item.music === 'tenExchange' || tenWidget(item)) && nums.length === 1) {
@@ -67,8 +77,8 @@
     return null;
   }
 
-  const GLYPH = { beat: '🥁', add: '✨', bell: '🔔', drum: '🪘', hundred: '🛢️' };
-  const NAME = { beat: 'פעימה', add: 'פעימה שנוספה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
+  const GLYPH = { beat: '🥁', stand: '🚩', add: '✨', bell: '🔔', drum: '🪘', hundred: '🛢️' };
+  const NAME = { beat: 'פעימה', stand: 'המקום שבו עומדים', add: 'פעימה שנוספה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
 
   function circlesHtml(spec, opts) { const revealed = !!(opts && opts.revealed);
     if (!spec || !Array.isArray(spec.circles)) return '';
@@ -91,7 +101,19 @@
   }
   function soundEvents(spec, opts) { if (!spec || !Array.isArray(spec.circles)) return []; const ev = [];
     if (spec.kind === 'takeAway') { const t1 = pushCount(ev, spec.start, 0, 0.35, 'beat', 'start'); pushCount(ev, spec.remaining, t1 + 0.4, 0.35, 'beat', 'remain'); return ev; }
-    if (spec.kind === 'countUp') { const t1 = pushCount(ev, spec.start, 0, 0.3, 'beat', 'start'); let t = t1 + 0.6; for (let k = 0; k < spec.added; k++) { ev.push({ at: t, hz: STEP_HZ[(k + 3) % 8] * 1.5, kind: 'add', v: 1, phase: 'up' }); t += 0.38; } return ev; }
+    if (spec.kind === 'countUp') {
+      // One chord: "I am standing on the start." The steps then rise from
+      // above that chord, a semitone at a time, so the seam never dips.
+      const standHz = 392, chordHz = 523.25;
+      ev.push({ at: 0, hz: standHz, kind: 'stand', v: spec.start, phase: 'stand' });
+      ev.push({ at: 0, hz: chordHz, kind: 'stand', v: spec.start, phase: 'stand' });
+      let t = 0.9;
+      for (let k = 0; k < spec.added; k++) {
+        ev.push({ at: t, hz: 587.33 * Math.pow(2, k / 12), kind: 'add', v: 1, phase: 'up' });
+        t += 0.38;
+      }
+      return ev;
+    }
     if (!(opts && opts.revealed)) { spec.circles.forEach(function (c, i) { const v = c.kind === 'hundred' ? 100 : (c.kind === 'drum' ? 10 : 1); ev.push({ at: i * 0.22, hz: v === 1 ? STEP_HZ[i % 8] : 130, kind: c.kind, v: v, phase: 'start' }); }); return ev; }
     return groupingEvents(spec); }
   function myInst() { if (root && root.MM_MY_INSTRUMENT) return root.MM_MY_INSTRUMENT; try { return require('../myInstrument.js'); } catch (e) { return null; } }
