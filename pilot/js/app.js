@@ -571,10 +571,41 @@
       + '</form></section>';
   }
 
+  // MM-AUTO-764: exact resume (question + think/hear/why stage + class session),
+  // kept in its own key so pilot progress/check history is never rewritten.
+  const RESUME_KEY = 'mmPilot.v1.resume';
+  const resumeMem = {};
+  function resumeStorage() { try { return safeStorage(); } catch (e) { return null; } }
+  function readResumes() { const s = resumeStorage(); try { if (s) return JSON.parse(s.getItem(RESUME_KEY) || '{}') || {}; } catch (e) {} return resumeMem; }
+  function stageOf() { return (state.qState === 'right' || state.qState === 'revealed' || state.qState === 'wrong' || state.qState === 'retry') ? 'why' : (state.audio ? 'hear' : 'think'); }
+  function saveResumePosition() {
+    if (state.preview || !state.account) return null;
+    const p = currentProgress(); const q = UNIT.questions[Math.min(p.index, UNIT.questions.length - 1)];
+    const row = { unitId: UNIT.id, questionIndex: Math.min(p.index, Math.max(0, UNIT.questions.length - 1)), questionId: q ? q.id : '', stage: stageOf(), view: state.view, sessionKind: classSize() ? 'class' : 'practice', classSession: !!classSize(), updatedAt: Date.now() };
+    const all = readResumes(); all[state.account.id] = all[state.account.id] || {}; all[state.account.id][UNIT.id] = row;
+    const s = resumeStorage(); try { if (s) s.setItem(RESUME_KEY, JSON.stringify(all)); else resumeMem[state.account.id] = all[state.account.id]; } catch (e) { resumeMem[state.account.id] = all[state.account.id]; }
+    if (typeof G !== 'undefined' && typeof G.saveUnitResume === 'function') {
+      try { G.saveUnitResume(state.account.classCode || 'pilot', state.account.name || state.account.id, row, s); } catch (e) {}
+    }
+    return row;
+  }
+  function loadResumePosition(unitId) {
+    if (typeof G !== 'undefined' && typeof G.loadUnitResume === 'function' && state.account) {
+      try {
+        const fromTs = G.loadUnitResume(state.account.classCode || 'pilot', state.account.name || state.account.id, unitId, resumeStorage());
+        if (fromTs) return fromTs;
+      } catch (e) {}
+    }
+    const all = readResumes();
+    return (state.account && all[state.account.id] && all[state.account.id][unitId]) || null;
+  }
+  function progressByUnit() { const out = {}; if (!state.account) return out; UNITS.forEach(function (u) { out[u.id] = store.progress(state.account.id, u.id); }); return out; }
+  function extraNavHtml(unit, p) { const X = G.MMPilotUnitsExtra; if (!X) return ''; return (typeof X.progressBarHtml === 'function' ? X.progressBarHtml(unit, p) : '') + (typeof X.skipButtonHtml === 'function' ? X.skipButtonHtml(unit.id, UNITS, progressByUnit()) : ''); }
   function currentProgress() { return state.preview ? state.preview.p : store.progress(state.account.id, UNIT.id); }
   function saveP(p) {
     if (state.preview) { state.preview.p = p; return; }
     store.saveProgress(state.account.id, UNIT.id, p);
+    saveResumePosition();
   }
 
   function currentQuestion() {
@@ -711,7 +742,7 @@
     return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-unit="' + esc(UNIT.id) + '" data-qid="' + q.id + '" data-kind="' + (ctx.rhythm ? 'rhythm' : ctx.picks ? 'choice' : 'keypad') + '"' + (state.preview ? ' data-preview="1"' : '') + '>'
       + topbar('תרגול', UNIT.title, '<span class="mm-badge" data-testid="star-count" aria-label="כוכבים">★ ' + firstTryCount(p) + '</span>')
       + (state.preview ? '<div class="mm-preview-bar" data-testid="preview-bar"><span>תצוגה מקדימה למורה — לא נשמר בדוח</span><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="preview-exit" data-testid="preview-exit">חזרה ללוח</button></div>' : '')
-      + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (ctx.qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>'
+      + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (ctx.qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>' + extraNavHtml(UNIT, p)
       + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(ctx.topic.name) + '</span>' + curriculumBadge(q) + '</div>'
       + '<h2 class="mm-question' + (legacy ? '' : ' mm-question--text') + '" data-testid="q-text">' + qHead + '</h2>'
       + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="narrate" data-q="' + esc(q.id) + '" data-testid="narration" hidden>🔊 הקראה</button></div>'
@@ -1186,6 +1217,8 @@
     state.preview = null;
     if (typeof store.setLastUnit === 'function') store.setLastUnit(UNIT.id);
     const p = currentProgress();
+    const resume = loadResumePosition(UNIT.id);
+    if (resume && !p.completedAt && resume.questionIndex > p.index) { p.index = Math.min(resume.questionIndex, UNIT.questions.length - 1); saveP(p); }
     state.lessonStatus = '';
     if (hasChecks() && !p.pre) go('check-pre');
     else if (p.completedAt && hasChecks() && !p.post) go('check-post');
@@ -1326,6 +1359,7 @@
     const act = btn.getAttribute('data-act');
     if (act === 'signout') { signOutClean(); store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); return; }
     if (act === 'open-unit') { openUnit(btn.getAttribute('data-unit') || UNITS[0].id); return; }
+    if (act === 'skip-unit') { const tid = btn.getAttribute('data-unit'); const X = G.MMPilotUnitsExtra; if (tid && X && X.canSkipTo(UNIT.id, tid, UNITS, progressByUnit())) { saveResumePosition(); openUnit(tid); } return; }
     if (act === 'preview') { e.preventDefault(); openPreview(btn.getAttribute('data-unit'), btn.getAttribute('data-q')); return; }
     if (act === 'preview-exit') { exitPreview(); return; }
     if (act === 'narrate') {
