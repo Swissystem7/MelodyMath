@@ -37,7 +37,9 @@
     klezmer: { he: 'בהשראת הכליזמר', why: 'מוזיקה יהודית כלית לשמחות ולחתונות. אותיות כמספרים משמשות בחיי היומיום — בתאריכים ועל מטבעות' },
   };
   // the three body sounds, by order of first appearance: clap, thigh pat, finger snap
-  const BODY = [['clap', 1000, 'מחיאת כף'], ['stomp', 120, 'טפיחה על הירך'], ['woodClick', 1800, 'נקישת אצבעות']];
+  // Gains are what make the rendered hits equally loud. A stomp at the clap's
+  // gain is about 11 dB louder, so loudness would mark the end of the unit.
+  const BODY = [['clap', 1000, 'מחיאת כף', 0.18], ['stomp', 120, 'טפיחה על הירך', 0.04], ['woodClick', 1800, 'נקישת אצבעות', 0.06]];
   const HEB = { 'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9, 'י': 10, 'כ': 20, 'ל': 30, 'מ': 40, 'נ': 50 };
 
   // the smallest unit that rebuilds the whole sequence (or the one the item names, when it fits)
@@ -126,7 +128,7 @@
         spec.seq.forEach((tok) => { if (order.indexOf(tok) < 0) order.push(tok); });
         spec.seq.forEach((tok, i) => {
           if (spec.durations) { hit('clap', 1000, 0.1, 0.18, 'body', { tok: tok, i: i }); t += tok === 'ארוך' ? 2 * BEAT : BEAT; }
-          else { const b = BODY[order.indexOf(tok)]; hit(b[0], b[1], 0.12, 0.18, 'body', { tok: tok, i: i, sound: order.indexOf(tok) }); t += BEAT; }
+          else { const b = BODY[order.indexOf(tok)]; hit(b[0], b[1], 0.12, b[3], 'body', { tok: tok, i: i, sound: order.indexOf(tok) }); t += BEAT; }
         });
         t += BEAT;                                             // the empty place: real silence
         break;
