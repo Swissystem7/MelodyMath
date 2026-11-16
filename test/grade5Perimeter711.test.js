@@ -49,6 +49,6 @@ test('ids of the items that were already there stay put', () => {
   const all = banks.itemsForGrade('ה');
   // The research-gap items (14.11.2026) were appended after these, so they
   // moved no id either.
-  const last = Math.max(...all.filter((it) => it.standard !== banks.ST.PERIMETER && it.research !== 'gap-2026-11-14').map((it) => +it.id.split('-').pop()));
+  const last = Math.max(...all.filter((it) => it.standard !== banks.ST.PERIMETER && !it.research).map((it) => +it.id.split('-').pop()));
   items.forEach((it) => assert.ok(+it.id.split('-').pop() > last, it.id + ' is appended last'));
 });

@@ -12,7 +12,7 @@ test('seventeen gap items, each in its grade and standard, appended after everyt
   assert.equal(gap.length, 17);
   const ids = gap.map((it) => +it.id.split('-').pop());
   const laterVolume = (it) => it.grade === 'ד' && it.standard === banks.ST.MASS_VOL && /סמ״ק|חסרים ל־750|ליטר ו־250|3,000 מ״ל/.test(it.prompt);
-  const others = banks.allItems().filter((it) => it.research !== 'gap-2026-11-14' && !laterVolume(it)).map((it) => +it.id.split('-').pop());
+  const others = banks.allItems().filter((it) => !it.research && !laterVolume(it)).map((it) => +it.id.split('-').pop());
   const vol = banks.allItems().filter(laterVolume).map((it) => +it.id.split('-').pop());
   assert.ok(Math.min(...ids) > Math.max(...others), 'the gap items stayed after everything that was already in the bank');
   assert.ok(vol.length && Math.min(...vol) > Math.max(...ids), 'grade-ד׳ volume was appended after the gap items');

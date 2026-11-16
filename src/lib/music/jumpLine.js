@@ -114,6 +114,8 @@
     else if ((m = /היו (\d+) כרטיסים\. חילקו (\d+) קבוצות של (\d+) כרטיסים/.exec(p))) s = G(+m[2], +m[3], 'from', 0, +m[1]);
     else if ((m = /היו (\d+) ₪\. הוא קנה (\d+) מיתרים ב־(\d+) ₪/.exec(p))) s = G(+m[2], +m[3], 'from', 0, +m[1]);
     else if ((m = /קנינו (\d+) חוברות תווים ב־(\d+) ₪ כל אחת, ושילמנו בשטר של (\d+) ₪/.exec(p))) s = G(+m[1], +m[2], 'from', 0, +m[3]);
+    // the story gives the data in the opposite order to the sum
+    else if ((m = /^קנה (\d+) מיתרים ב־(\d+) ₪ כל אחד\. קודם היו לו (\d+) ₪\. כמה נשאר\?$/.exec(p))) s = G(+m[1], +m[2], 'from', 0, +m[3]);
     if (!s) return null;
     const mid = s.groups * s.size;
     s.mid = mid;
