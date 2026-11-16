@@ -2318,6 +2318,24 @@
   );
   musicForLate();
 
+  // Grade ד׳ volume that is actually grade ד׳: the box as length × width ×
+  // height, and litres that are not a copy of the grade-ב׳ cube counts.
+  // Appended after every earlier push so existing ids stay put (#1096).
+  // The older MASS_VOL prompts stay; #751 locks them in place.
+  RAW.push(
+    MEAS('ד', 'תיבה שאורכה 5 ס״מ, רוחבה 3 ס״מ וגובהה 2 ס״מ. מה נפחה בסמ״ק?', 30, 'אורך כפול רוחב כפול גובה: 5 × 3 × 2', 2, ST.MASS_VOL),
+    MEAS('ד', 'תיבה שאורכה 4 ס״מ, רוחבה 4 ס״מ וגובהה 3 ס״מ. מה נפחה בסמ״ק?', 48, '4 × 4 × 3', 2, ST.MASS_VOL),
+    MEAS('ד', 'נפח תיבה הוא 36 סמ״ק. אורכה 6 ס״מ ורוחבה 3 ס״מ. מה גובהה בס״מ?', 2, '36 לחלק ל־18', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה של 8 ס״מ על 5 ס״מ על 2 ס״מ. כמה סמ״ק היא מכילה?', 80, '8 × 5 × 2', 2, ST.MASS_VOL),
+    MEAS('ד', 'קובייה שצלעה 3 ס״מ. מה נפחה בסמ״ק?', 27, '3 × 3 × 3', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה 5×4×2 ס״מ. כמה מ״ל מים היא מכילה? (1 סמ״ק = 1 מ״ל)', 40, '5 × 4 × 2', 3, ST.MASS_VOL),
+    MEAS('ד', 'שתי תיבות: 6×2×2 ו־5×3×2 ס״מ. בכמה סמ״ק השנייה גדולה יותר?', 6, '30 פחות 24', 3, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל חסרים ל־750 מ״ל כדי להגיע לליטר אחד?', 250, 'ליטר הוא 1,000 מ״ל', 2, ST.MASS_VOL),
+    MEAS('ד', 'בבקבוק 2 ליטר ו־250 מ״ל. כמה מ״ל בסך הכול?', 2250, '2 × 1,000 ועוד 250', 2, ST.MASS_VOL),
+    MEAS('ד', '3,000 מ״ל הם כמה ליטר?', 3, 'כל 1,000 מ״ל הם ליטר', 2, ST.MASS_VOL)
+  );
+  musicForLate();
+
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
   // way and music activity uses one of 14 mechanisms; the peer-reviewed
   // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:

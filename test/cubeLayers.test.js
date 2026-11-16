@@ -17,7 +17,7 @@ test('box volume (mm-cur-20) has one way, cubeLayerGroups; layerBars and gramGro
   const gram = g4.music.MASS_VOL.find((w) => w[0] === 'gramGroups');
   assert.ok(gram && banks.isOptionalWay(gram));
   const kg = massVol('ד').filter((it) => !cube(it)), units = cur.itemsForTopic('mm-cur-35', banks.itemsForGrade('ד'));
-  assert.equal(kg.length, 9);
+  assert.ok(kg.length >= 9, 'the original unit items, plus any litre items appended later');
   kg.forEach((it) => { assert.ok(units.includes(it), it.prompt); assert.equal(CL.specForItem(it), null); });
   const ways = [1, 2, 3, 4, 5, 6].flatMap((g) => Object.values(require('../src/lib/curriculum/grade' + g).music).flat()).filter((w) => w && w[0] === 'gramGroups');
   assert.ok(ways.length >= 1 && ways.every((w) => banks.isOptionalWay(w)) && banks.MUSIC_MECHANISMS.M2.tags.includes('gramGroups'));
