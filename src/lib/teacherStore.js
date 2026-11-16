@@ -680,6 +680,7 @@
       // Otherwise a row lands under a name getStudent can never look up.
       const name = studentLabel(rawName);
       if (!name) { skipped += 1; return; }
+      const unitResume = cleanUnitResumes(incoming.unitResume);
       const sessions = cleanSessions(incoming.sessions);
       const incomingNotes = cleanNotes(incoming.notes);
       const incomingAssignments = cleanAssignments(incoming.assignments);
@@ -691,6 +692,7 @@
           sessions: sessions,
           assignments: incomingAssignments,
           notes: incomingNotes,
+          unitResume: unitResume,
         };
         added += 1;
         notes += incomingNotes.length;
@@ -849,6 +851,140 @@
     } catch (_e) {
       return false;
     }
+  }
+
+  // --- Unit resume (MM-AUTO-764): exact in-unit position, kept apart from
+  // sessions/items so check/test history is never rewritten by navigation. ---
+  const RESUME_STAGES = Object.freeze(['think', 'hear', 'why']);
+  const RESUME_VIEWS = Object.freeze(['lesson', 'exercise', 'check-pre', 'check-post', 'check-later', 'summary', 'student-home']);
+
+  let resumeSeq = 0;
+  function resumeTimestamp(explicit) {
+    const num = Number(explicit);
+    if (Number.isFinite(num) && num > 0) return num;
+    const now = Date.now();
+    resumeSeq = Math.max(now, resumeSeq + 1);
+    return resumeSeq;
+  }
+
+  function normalizeResumeStage(stage) {
+    return RESUME_STAGES.indexOf(stage) >= 0 ? stage : 'think';
+  }
+
+  function normalizeUnitResume(raw, fallbackUnitId) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    const unitId = String(raw.unitId || fallbackUnitId || '').trim().slice(0, 80);
+    if (!unitId) return null;
+    const qi = Math.floor(Number(raw.questionIndex != null ? raw.questionIndex : raw.index));
+    const view = RESUME_VIEWS.indexOf(raw.view) >= 0 ? raw.view : 'exercise';
+    return {
+      unitId: unitId,
+      questionIndex: Number.isFinite(qi) && qi > 0 ? qi : 0,
+      questionId: raw.questionId ? String(raw.questionId).slice(0, 80) : '',
+      stage: normalizeResumeStage(raw.stage),
+      view: view,
+      sessionKind: String(raw.sessionKind || raw.classSession || 'practice').slice(0, 40) || 'practice',
+      classSession: raw.classSession === true || raw.sessionKind === 'class',
+      updatedAt: resumeTimestamp(raw.updatedAt),
+    };
+  }
+
+  function cleanUnitResumes(map) {
+    const out = {};
+    if (!map || typeof map !== 'object' || Array.isArray(map)) return out;
+    Object.keys(map).forEach((key) => {
+      const row = normalizeUnitResume(map[key], key);
+      if (row) out[row.unitId] = row;
+    });
+    return out;
+  }
+
+  function saveUnitResume(classCode, name, resume, storage) {
+    const row = normalizeUnitResume(resume);
+    if (!row || !studentLabel(name)) return null;
+    const student = upsertStudent(classCode, name, storage);
+    if (!student) return null;
+    const roster = loadRoster(classCode, storage);
+    const target = ownStudent(roster, student.name) || student;
+    if (!ownStudent(roster, student.name)) roster.students[student.name] = target;
+    target.unitResume = cleanUnitResumes(target.unitResume);
+    row.updatedAt = resumeTimestamp(resume && resume.updatedAt);
+    target.unitResume[row.unitId] = row;
+    saveRoster(classCode, roster, storage);
+    return row;
+  }
+
+  function loadUnitResume(classCode, name, unitId, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (!student) return null;
+    const map = cleanUnitResumes(student.unitResume);
+    return map[String(unitId || '').trim()] || null;
+  }
+
+  function listUnitResumes(classCode, name, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (!student) return [];
+    return Object.values(cleanUnitResumes(student.unitResume)).sort((a, b) => {
+      const diff = b.updatedAt - a.updatedAt;
+      if (diff !== 0) return diff;
+      return String(b.unitId || '').localeCompare(String(a.unitId || ''));
+    });
+  }
+
+  function clearUnitResume(classCode, name, unitId, storage) {
+    const label = studentLabel(name);
+    if (!label) return false;
+    const roster = loadRoster(classCode, storage);
+    const student = ownStudent(roster, label);
+    if (!student || !student.unitResume) return false;
+    const key = String(unitId || '').trim();
+    if (!Object.prototype.hasOwnProperty.call(student.unitResume, key)) return false;
+    delete student.unitResume[key];
+    saveRoster(classCode, roster, storage);
+    return true;
+  }
+
+  function unitProgressPercent(done, total) {
+    const t = Math.floor(Number(total));
+    const d = Math.floor(Number(done));
+    if (!Number.isFinite(t) || t <= 0) return 0;
+    if (!Number.isFinite(d) || d <= 0) return 0;
+    return Math.min(100, Math.round((Math.min(d, t) / t) * 100));
+  }
+
+  function resumeProgressPercent(resume, total) {
+    if (!resume) return 0;
+    return unitProgressPercent(resume.questionIndex, total);
+  }
+
+  // Controlled skip: only the first unfinished unit (or a unit already
+  // started/finished, i.e. revisiting) may be jumped to; later units stay locked.
+  function recommendedUnitId(units, progressByUnit) {
+    const list = Array.isArray(units) ? units : [];
+    const prog = progressByUnit || {};
+    for (const u of list) {
+      if (!u || !u.id) continue;
+      const p = prog[u.id] || {};
+      const total = Array.isArray(u.questions) ? u.questions.length : Number(u.total) || 0;
+      const done = p.completedAt ? total : Object.keys(p.results || {}).filter((k) => p.results[k] && (p.results[k].correct || p.results[k].revealed)).length;
+      if (!p.completedAt && (!total || done < total)) return u.id;
+    }
+    return list.length && list[0] ? list[0].id : null;
+  }
+
+  function canSkipToUnit(units, progressByUnit, targetId) {
+    if (!targetId) return false;
+    const prog = progressByUnit || {};
+    if (prog[targetId] && (prog[targetId].completedAt || prog[targetId].index > 0 || Object.keys(prog[targetId].results || {}).length)) return true;
+    return recommendedUnitId(units, prog) === targetId;
+  }
+
+  function renderResumeProgressHtml(resume, total) {
+    const pct = resumeProgressPercent(resume, total);
+    const idx = resume ? resume.questionIndex : 0;
+    return '<div class="unit-resume-progress" data-testid="unit-resume-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="התקדמות ביחידה">'
+      + '<span class="unit-resume-progress__bar" style="width:' + pct + '%"></span>'
+      + '<span class="unit-resume-progress__text">תרגיל ' + (idx + 1) + ' · ' + pct + '%</span></div>';
   }
 
   function saveWho(who, storage) {
@@ -1042,6 +1178,9 @@
     validateAnonymousLogin, isAnonymousLogin: (c, n) => validateAnonymousLogin(c, n).ok,
     startCalmSession, checkCalmSession,
     buildAG11Summary, renderAG11SessionEnd,
+    RESUME_STAGES, RESUME_VIEWS, normalizeResumeStage, normalizeUnitResume, cleanUnitResumes,
+    saveUnitResume, loadUnitResume, listUnitResumes, clearUnitResume,
+    unitProgressPercent, resumeProgressPercent, recommendedUnitId, canSkipToUnit, renderResumeProgressHtml,
     AG11_TITLE, AG11_SUBTITLE, AG11_DONE_LABEL, AG11_AGAIN_LABEL, AG11_FORBIDDEN,
   };
 });
