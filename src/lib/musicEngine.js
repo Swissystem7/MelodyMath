@@ -320,9 +320,16 @@
       if (!positive(dur) || typeof at !== 'number' || !Number.isFinite(at) || at < 0) return;
       const hz = e.rest ? null : clampHz(e.hz);
       if (hz != null) {
-        out.push({
-          time: t0 + at, dur: Math.max(dur, ATTACK + RELEASE), hz: hz,
-          gain: clampGain(e.gain == null ? 0.2 : e.gain), type: e.type || 'sine',
+        // partials: [ratio, gain scale]. Absent means the one sine the event names.
+        const ratios = Array.isArray(e.partials) && e.partials.length ? e.partials : [[1, 1]];
+        const baseGain = e.gain == null ? 0.2 : e.gain;
+        ratios.forEach(function (ratio) {
+          const ph = clampHz(hz * ratio[0]);
+          if (ph == null) return;
+          out.push({
+            time: t0 + at, dur: Math.max(dur, ATTACK + RELEASE), hz: ph,
+            gain: clampGain(baseGain * (ratio[1] == null ? 1 : ratio[1])), type: e.type || 'sine',
+          });
         });
       }
     });

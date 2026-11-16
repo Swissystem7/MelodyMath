@@ -38,7 +38,11 @@
 .vert-line{border-top:3px solid #21183b;margin-top:4px}
 .ruler{margin:14px 0}
 .ruler-track{display:flex;font-size:1.2rem;line-height:1}
-.ruler{overflow-x:auto;padding-inline-start:.9rem}
+.ruler{overflow-x:auto;padding-inline-start:.9rem;-webkit-overflow-scrolling:touch}
+/* A long ruler stays at a readable tick size and scrolls. The shadow on the
+   end is the hint that more ticks are off the screen. */
+.ruler-long{box-shadow:inset -16px 0 12px -8px rgba(105,70,232,.45)}
+.ruler-scroll{margin:6px 0 0;font-size:.88rem;font-weight:800;color:#6946e8}
 /* A cm object is one continuous bar over the marks, not separate glyphs. */
 .ruler-cm{height:16px;align-self:flex-end;background:#f2b544;border-block:2px solid #9a6510}
 .ruler-cm:first-of-type,.ruler-gap+.ruler-cm{border-inline-start:2px solid #9a6510}

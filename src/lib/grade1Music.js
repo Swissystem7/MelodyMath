@@ -52,8 +52,26 @@
     return engine.bpmToSeconds(whole(bpm, 40, 180) || DEFAULT_BPM);
   }
 
-  function hit(at, dur, hz, gain, type) {
-    return { at: at, dur: dur, hz: hz, gain: gain, type: type };
+  function hit(at, dur, hz, gain, type, partials) {
+    const e = { at: at, dur: dur, hz: hz, gain: gain, type: type };
+    if (partials) e.partials = partials;
+    return e;
+  }
+
+  function gongHit(at) {
+    return hit(at, 0.5, GONG_HZ, 0.24, 'sine', GONG_PARTIALS);
+  }
+
+  // Multiples of ten the jump lands on, counting from the line (not from the
+  // first step). 7→13 crosses 10; 5→15 crosses 10 and lands on 15.
+  function tensLanded(from, to) {
+    const a = Math.round(Number(from)) || 0;
+    const b = Math.round(Number(to)) || 0;
+    if (a === b) return 0;
+    const step = b > a ? 1 : -1;
+    let n = 0;
+    for (let p = a + step; step > 0 ? p <= b : p >= b; p += step) if (p % 10 === 0) n++;
+    return n;
   }
 
   // Hands a plain event list to the shared engine. In Node there is no
@@ -151,6 +169,9 @@
   const CYCLE_HZ = { 0: 196, 2: 294, 5: 440, 7: 294 };
   const STROKE_HZ = 392;
   const GONG_HZ = 110;
+  // The body stays at 110 Hz. The upper partials are what a phone speaker,
+  // which barely moves below 300 Hz, can actually put in the air.
+  const GONG_PARTIALS = [[1, 0.28], [2.2, 0.9], [3.15, 0.72], [4.4, 0.4]];
   const MAX_STROKES = 40;
 
   // A jump is heard as its steps: the tone it leaves, one stroke per unit
@@ -167,16 +188,22 @@
     const startHz = nline.scaleStepFreq(baseFreq || 220, 0);
     const out = [hit(0, beat * 0.6, startHz, 0.2, 'sine')];
     let t = beat * 0.75;
+    const from = Number(fromTick) || 0;
+    const dir = jump.jump < 0 ? -1 : 1;
     if (n > MAX_STROKES) {
-      for (let c = 0; c < jump.tens; c++) { out.push(hit(t, 0.5, GONG_HZ, 0.24, 'sine')); t += 0.55; }
+      const crossed = tensLanded(from, from + jump.jump);
+      for (let c = 0; c < crossed; c++) { out.push(gongHit(t)); t += 0.55; }
       for (let k = 0; k < jump.ones; k++) { out.push(hit(t, step * 0.6, STROKE_HZ, 0.12, 'sine')); t += step; }
     } else {
       for (let k = 1; k <= n; k++) {
-        const p = (k - 1) % 10;
+        const pos = from + k * dir;
+        const m = ((pos % 10) + 10) % 10;
+        // Beat 1 of a ten (…1) is dha, 3 and 8 are claps, 6 is the wave.
+        const p = m === 0 ? 9 : m - 1;
         const strong = Object.prototype.hasOwnProperty.call(CYCLE_GAIN, p);
         out.push(hit(t, step * 0.6, strong ? CYCLE_HZ[p] : STROKE_HZ, strong ? CYCLE_GAIN[p] : 0.12, p === 0 ? 'triangle' : 'sine'));
         t += step;
-        if (k % 10 === 0) { out.push(hit(t, 0.5, GONG_HZ, 0.24, 'sine')); t += 0.3; }
+        if (m === 0) { out.push(gongHit(t)); t += 0.3; }
       }
     }
     out.push(hit(t + 0.15, beat * 0.9, jump.frequency, 0.22, 'sine'));
@@ -190,6 +217,8 @@
     const dir = jump.jump < 0 ? 'אחורה' : 'קדימה';
     if (jump.jump === 0) return 'נשארתם על אותו מספר, ולכן הצליל לא זז.';
     const move = jump.jump < 0 ? 'והצליל יורד' : 'והצליל עולה';
+    const crossed = tensLanded(fromTick, toTick);
+    if (!jump.tens && crossed) return 'קפיצה של ' + size + ' ' + dir + ' היא ' + size + ' מכות, והגונג מסמן את המעבר לעשרת, ' + move + '.';
     if (!jump.tens) return 'קפיצה של ' + size + ' ' + dir + ' היא ' + size + ' מכות, מכה לכל צעד, ' + move + '.';
     const cycles = jump.tens === 1 ? 'מחזור ג׳אפטאל שלם אחד' : jump.tens + ' מחזורי ג׳אפטאל שלמים';
     return 'קפיצה של ' + size + ' ' + dir + ' היא ' + cycles + ' (2 + 3 + 2 + 3), כל מחזור נסגר בגונג'
