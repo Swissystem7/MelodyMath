@@ -168,7 +168,7 @@ test('the ruler and clock items of א׳–ב׳ keep their ids', () => {
   const laterVolume = (it) => it.grade === 'ד' && it.standard === ST.MASS_VOL && /סמ״ק|חסרים ל־750|ליטר ו־250|3,000 מ״ל/.test(it.prompt);
   const num = (it) => Number(it.id.split('-').pop());
   const oldIds = banks.allItems().filter(ruler).map(num);
-  const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it) && !offset(it) && !laterVolume(it)).map(num);
+  const newIds = banks.allItems().filter((it) => it.skill === 'measurement' && !ruler(it) && !offset(it) && !laterVolume(it) && !it.research).map(num);
   assert.ok(Math.min(...newIds) > Math.max(...oldIds), 'the later items sit after the older ones');
   const lastIds = banks.allItems().filter(offset).map(num);
   assert.ok(lastIds.length && Math.min(...lastIds) > Math.max(...oldIds, ...newIds), 'appended after every older measurement item');

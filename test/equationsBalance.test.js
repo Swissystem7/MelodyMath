@@ -51,7 +51,7 @@ const calc = (s) => Function('return (' + s.replace(/,/g, '').replace(/×/g, '*'
       const ok = (pair) => (op === '<' ? pair[0] < pair[1] : pair[0] > pair[1]);
       assert.ok(ok([l, r]), it.id);
       // The extreme whole number: one step further breaks the inequality.
-      const next = /הגדול/.test(it.prompt) ? it.answer + 1 : it.answer - 1;
+      const next = /הגדול|מ־1 ומעלה/.test(it.prompt) ? it.answer + 1 : it.answer - 1;
       assert.ok(!ok(at(next)), it.id);
     });
   });
