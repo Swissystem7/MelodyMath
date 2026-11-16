@@ -2372,7 +2372,10 @@
     I('ד', 'fractions', 'כמה רבעים יש ב־2 ו־3/4? כתבו כשבר.', '11/4', 'כל שלם הוא 4 רבעים, ועוד 3', Object.assign({ standard: ST.FRAC_MIXED_D, strand: STRAND.FRAC, level: 2 }, GAP2)),
     I('ה', 'fractions', 'מה גדול יותר, 1/2 או 2/3? ב־2/3 הוסיפו 1 למונה ולמכנה.', '2/3', 'הרחבה היא כפל, לא חיבור: כאן השבר השתנה', Object.assign({ standard: ST.FRAC_EQUIV, strand: STRAND.FRAC, level: 2 }, GAP2)),
     I('ה', 'geometry', 'מקבילית: צלע 6 ס״מ, צלע משופעת 5 ס״מ, גובה 4 ס״מ. מה השטח?', 24, 'הגובה מאונך לבסיס, הצלע המשופעת לא', Object.assign({ standard: ST.PARA_AREA, strand: STRAND.GEO, level: 3 }, GAP2)),
-    I('ו', 'fractions', '2/3 × 2/3 = ?', '4/9', 'כופלים גם את המכנים', Object.assign({ standard: ST.FRAC_MUL, strand: STRAND.FRAC, level: 2 }, GAP2))
+    I('ו', 'fractions', '2/3 × 2/3 = ?', '4/9', 'כופלים גם את המכנים', Object.assign({ standard: ST.FRAC_MUL, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    // XI and IX: the same signs, and the order changes the number (topic 109)
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא XI?', 11, 'I אחרי X מוסיף אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא IX?', 9, 'אותם סימנים כמו XI, אבל I לפני X מוריד אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 3 }, GAP2))
   );
   musicForLate();
 
