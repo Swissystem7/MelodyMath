@@ -19,11 +19,11 @@ const mods = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => {
 }).filter(([, m]) => m && typeof m.specForItem === 'function');
 const player = (it) => { for (const [f, m] of mods) { try { if (m.specForItem(it)) return f; } catch (e) { /* not this one */ } } return null; };
 
-test('thirty items, appended after everything that was already in the bank', () => {
-  assert.equal(mine.length, 30);
+test('thirty-two items, appended after everything that was already in the bank', () => {
+  assert.equal(mine.length, 32);
   const older = banks.allItems().filter((it) => it.research !== TAG).map(num);
   assert.ok(Math.min(...mine.map(num)) > Math.max(...older));
-  assert.equal(new Set(mine.map((it) => it.prompt)).size, 30);
+  assert.equal(new Set(mine.map((it) => it.prompt)).size, 32);
   mine.forEach((it) => assert.ok(it.hint && it.standard && (it.music || it.noMusic), it.prompt));
 });
 
@@ -60,7 +60,7 @@ test('every answer is worked out here, not copied', () => {
   assert.equal(by(/^2\/3 × 2\/3/).answer, (2 * 2) + '/' + (3 * 3));
 });
 
-test('twenty-four of them sound in a music world, and the sounds give the answer', () => {
+test('twenty-six of them sound in a music world, and the sounds give the answer', () => {
   const silent = mine.filter((it) => !it.widget && !player(it)).map((it) => it.prompt.slice(0, 11)).sort();
   assert.deepEqual(silent, ['לשני שירים ', 'לשתי זוויות', 'מסובבים משו', 'שני ישרים ב'].sort(), 'only the four yes/no ideas stay silent');
   assert.equal(mine.filter((it) => it.widget === 'clock').length, 1);
@@ -91,4 +91,12 @@ test('the clock at 2:50: the short hand is not yet on 3, and the face does not p
   // whole hours look as they did
   assert.match(measure.renderClockHtml({ hour: 3 }), /מצביע על 3, ומחוג הדקות הארוך על 12/);
   assert.deepEqual(measure.normalizeClock({ hour: 2, minute: 52 }), { hour: 2, minute: 0 }, 'only steps of five');
+});
+
+test('XI and IX: the same signs in another order are another number, and both sound', () => {
+  const pn = require('../src/lib/music/partsNumerals');
+  const xi = by(/הוא XI\?$/), ix = by(/הוא IX\?$/);
+  assert.equal(xi.answer, 10 + 1);
+  assert.equal(ix.answer, 10 - 1);
+  assert.ok(pn.specForItem(xi) && pn.specForItem(ix));
 });
