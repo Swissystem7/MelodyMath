@@ -229,7 +229,9 @@
     let t = 0;
     const hit = (voice, hz, dur, gain, stage, extra) => { ev.push(Object.assign({ at: t, voice: voice, hz: hz, dur: dur, gain: gain, stage: stage }, extra || {})); };
     const strokes = (k, n, stage, extra) => { const v = VOICES[k % VOICES.length]; for (let i = 0; i < n; i++) { hit(v[0], v[1], 0.14, 0.22, stage, Object.assign({ cat: k }, extra)); t += STEP; } t += GAP; };
-    const step = (stage, extra, hz) => { hit('stomp', hz || 90, 0.14, 0.24, stage, extra); t += STEP; };
+    // 349 and 440 Hz sit above a phone speaker's ~300 Hz cutoff. 90/120 Hz
+    // stomps were measured about 19 dB down through that high-pass.
+    const step = (stage, extra, hz) => { hit('stomp', hz || 349, 0.14, 0.24, stage, extra); t += STEP; };
 
     switch (spec.kind) {
       case 'table':
@@ -300,7 +302,7 @@
         const ten = spec.n >= 10;
         if (ten) { for (let i = 0; i < tens; i++) { hit('drumLow', 98, 0.3, 0.24, 'ten'); t += 0.42; } t += GAP; }
         const k = ten ? ones : spec.n;
-        for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i }); step('pair', { i: i }, 120); t += 0.3; }
+        for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i }); step('pair', { i: i }, 440); t += 0.3; }
         if (k % 2) { t += GAP; step('alone'); }
         break;
       }
@@ -309,11 +311,11 @@
         // two alone steps then meet and step together as one more pair
         const alone = [];
         [spec.a, spec.b].forEach((k, w) => {
-          for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i, of: w }); step('pair', { i: i, of: w }, 120); t += 0.3; }
+          for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i, of: w }); step('pair', { i: i, of: w }, 440); t += 0.3; }
           if (k % 2) { t += GAP; step('alone', { of: w }); alone.push(w); }
           t += GAP;
         });
-        if (alone.length === 2) { step('meet'); step('meet', {}, 120); }
+        if (alone.length === 2) { step('meet'); step('meet', {}, 440); }
         else if (alone.length === 1) { t += GAP; step('alone', { last: true }); }
         break;
       }

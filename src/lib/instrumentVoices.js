@@ -20,7 +20,10 @@
   // lowFilter: replaces filter below LOW_HZ, so a held 220 Hz ten is not
   // cut away by a high bandpass (#831).
   const VOICES = {
-    drumLow: { wave: 'sine', partials: [[1, 1]], sweep: 0.55, noise: 0.15, filter: ['lowpass', 900], attack: 0.002, decay: 0.35, hz: 90 },
+    // Upper partials (about 4× and 6.5×) so a 65–110 Hz drum still has energy
+    // above ~300 Hz. A phone speaker high-passes that band away and the
+    // fundamental alone disappears.
+    drumLow: { wave: 'sine', partials: [[1, 0.55], [4, 0.42], [6.5, 0.32]], sweep: 0.55, noise: 0.22, filter: ['lowpass', 900], attack: 0.002, decay: 0.35, hz: 90 },
     drumHigh: { wave: 'triangle', partials: [[1, 0.6], [1.6, 0.3]], sweep: 0.8, noise: 0.45, filter: ['bandpass', 2500], lowFilter: ['lowpass', 1500], attack: 0.001, decay: 0.12, hz: 330 },
     frameDrum: { wave: 'sine', partials: [[1, 0.8], [2.3, 0.2]], sweep: 0.7, noise: 0.3, filter: ['lowpass', 2000], attack: 0.002, decay: 0.25, hz: 140 },
     jingle: { wave: 'square', partials: [[1, 0.05]], sweep: 1, noise: 0.7, filter: ['highpass', 6000], attack: 0.001, decay: 0.18, hz: 5000 },
