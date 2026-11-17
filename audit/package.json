@@ -1,0 +1,14 @@
+{
+  "name": "melodymath-audit",
+  "private": true,
+  "description": "MM-701 regression suite for MelodyMath (Playwright). Self-contained: not part of the repo's npm test or CI.",
+  "scripts": {
+    "test": "playwright test",
+    "test:desktop": "playwright test --project=desktop",
+    "test:phone": "playwright test --project=phone360",
+    "install-browser": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1"
+  }
+}
