@@ -1006,5 +1006,62 @@
     }
   ];
 
-  return { UNITS: UNITS };
+  // --- MM-AUTO-764: in-unit progress bar + controlled skip to recommended unit ---
+  function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function unitProgress(unit, progress) {
+    const total = unit && Array.isArray(unit.questions) ? unit.questions.length : 0;
+    const p = progress || {};
+    const done = p.completedAt ? total : Object.keys(p.results || {}).filter(function (k) { return p.results[k] && (p.results[k].correct || p.results[k].revealed); }).length;
+    const idx = Math.max(0, Math.min(total ? total - 1 : 0, Math.floor(Number(p.index) || 0)));
+    return { total: total, done: done, currentIndex: idx, percent: total ? Math.min(100, Math.round((done / total) * 100)) : 0, completed: !!p.completedAt };
+  }
+  function progressBarHtml(unit, progress) {
+    const info = unitProgress(unit, progress);
+    return '<div class="mm-unit-progress" data-testid="unit-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + info.percent + '" aria-label="התקדמות ביחידה ' + escHtml(unit && unit.title) + '">'
+      + '<span class="mm-unit-progress__fill" style="width:' + info.percent + '%"></span>'
+      + '<span class="mm-unit-progress__text" data-testid="unit-progress-text">' + info.done + ' מתוך ' + info.total + ' · ' + info.percent + '%</span></div>';
+  }
+  function recommendedUnit(units, progressById) {
+    const list = Array.isArray(units) ? units : [];
+    const prog = progressById || {};
+    for (let i = 0; i < list.length; i++) { if (!unitProgress(list[i], prog[list[i].id]).completed && unitProgress(list[i], prog[list[i].id]).done < unitProgress(list[i], prog[list[i].id]).total) return list[i]; }
+    return list[0] || null;
+  }
+  function canSkipTo(currentId, targetId, units, progressById) {
+    if (!targetId || targetId === currentId) return false;
+    const prog = progressById || {};
+    const target = (units || []).filter(function (u) { return u.id === targetId; })[0];
+    if (!target) return false;
+    if (unitProgress(target, prog[targetId]).done > 0 || (prog[targetId] && prog[targetId].completedAt)) return true;
+    const rec = recommendedUnit(units, prog);
+    return !!rec && rec.id === targetId;
+  }
+  function skipButtonHtml(currentId, units, progressById) {
+    const rec = recommendedUnit(units, progressById);
+    if (!rec || rec.id === currentId) return '';
+    const ok = canSkipTo(currentId, rec.id, units, progressById);
+    return '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="skip-unit" data-unit="' + escHtml(rec.id) + '" data-testid="skip-to-recommended" data-target="' + escHtml(rec.id) + '"' + (ok ? '' : ' disabled aria-disabled="true"') + '>דילוג ליחידה המומלצת: ' + escHtml(rec.title) + '</button>';
+  }
+
+  function resumeStageName(stage) {
+    if (stage === 'hear') return 'שומעים';
+    if (stage === 'why') return 'למה';
+    return 'חושבים';
+  }
+  function quickSwitchHtml(currentId, units, progressById) {
+    const list = Array.isArray(units) ? units : [];
+    const prog = progressById || {};
+    const items = list.filter(function (u) {
+      return u.id === currentId || canSkipTo(currentId, u.id, list, prog);
+    }).map(function (u) {
+      const p = unitProgress(u, prog[u.id]);
+      const isCur = u.id === currentId;
+      return '<button type="button" class="mm-btn mm-btn--small' + (isCur ? ' mm-btn--active' : ' mm-btn--white') + '" data-act="' + (isCur ? 'open-unit' : 'skip-unit') + '" data-unit="' + escHtml(u.id) + '" data-testid="quick-unit-btn-' + escHtml(u.id) + '"' + (isCur ? ' aria-current="true"' : '') + '>'
+        + escHtml(u.title) + ' (' + p.percent + '%)</button>';
+    });
+    if (!items.length) return '';
+    return '<div class="mm-quick-switch" data-testid="unit-quick-switch" role="navigation" aria-label="מעבר מהיר בין יחידות">' + items.join('') + '</div>';
+  }
+
+  return { UNITS: UNITS, unitProgress: unitProgress, progressBarHtml: progressBarHtml, recommendedUnit: recommendedUnit, canSkipTo: canSkipTo, skipButtonHtml: skipButtonHtml, quickSwitchHtml: quickSwitchHtml, resumeStageName: resumeStageName };
 });

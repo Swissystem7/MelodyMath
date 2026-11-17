@@ -57,7 +57,7 @@ test('grade ג add/sub has word problems in context', () => {
 
 test('grade ג data covers collecting, organizing and diagrams at levels 1–3', () => {
   const data = banks.rowsOf('data', 'ג');
-  const org = data.filter((it) => it.standard === banks.ST.DATA_ORGANIZE);
+  const org = data.filter((it) => it.standard === banks.ST.DATA_ORGANIZE && !it.research);
   assert.deepEqual(org.map((it) => it.level).sort(), [1, 2, 3]);
   assert.ok(org.some((it) => /\|{5}/.test(it.prompt)), 'tally marks');
   [banks.ST.PICTOGRAM, banks.ST.BARCHART, banks.ST.TABLE].forEach((st) => {

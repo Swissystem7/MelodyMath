@@ -546,6 +546,25 @@
     return ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
   }
 
+  function getMastery() {
+    if (typeof MM_MASTERY !== 'undefined') return MM_MASTERY;
+    try { return typeof require === 'function' ? require('./mastery') : null; } catch (e) { return null; }
+  }
+
+  function dataStrandTopics(grade) {
+    const rows = grade ? rowsForGrade(grade) : MATRIX;
+    return rows.filter(function (r) { return r.strand === 'data'; }).map(function (r) { return r.topic; });
+  }
+
+  function topicReviewPath(topicId, history, catalog) {
+    const row = topicById(topicId);
+    const mast = getMastery();
+    if (row && mast && typeof mast.buildReviewPath === 'function') {
+      return mast.buildReviewPath(history, catalog, { topic: row.topic, grade: row.grade, strand: row.strand });
+    }
+    return null;
+  }
+
   return {
     COVERED: COVERED,
     PARTIAL: PARTIAL,
@@ -572,5 +591,7 @@
     programGrades: programGrades,
     programForGrade: programForGrade,
     itemsForTopic: itemsForTopic,
+    dataStrandTopics: dataStrandTopics,
+    topicReviewPath: topicReviewPath,
   };
 });

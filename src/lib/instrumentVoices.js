@@ -20,7 +20,10 @@
   // lowFilter: replaces filter below LOW_HZ, so a held 220 Hz ten is not
   // cut away by a high bandpass (#831).
   const VOICES = {
-    drumLow: { wave: 'sine', partials: [[1, 1]], sweep: 0.55, noise: 0.15, filter: ['lowpass', 900], attack: 0.002, decay: 0.35, hz: 90 },
+    // Upper partials (about 4× and 6.5×) so a 65–110 Hz drum still has energy
+    // above ~300 Hz. A phone speaker high-passes that band away and the
+    // fundamental alone disappears.
+    drumLow: { wave: 'sine', partials: [[1, 0.55], [4, 0.42], [6.5, 0.32]], sweep: 0.55, noise: 0.22, filter: ['lowpass', 900], attack: 0.002, decay: 0.35, hz: 90 },
     drumHigh: { wave: 'triangle', partials: [[1, 0.6], [1.6, 0.3]], sweep: 0.8, noise: 0.45, filter: ['bandpass', 2500], lowFilter: ['lowpass', 1500], attack: 0.001, decay: 0.12, hz: 330 },
     frameDrum: { wave: 'sine', partials: [[1, 0.8], [2.3, 0.2]], sweep: 0.7, noise: 0.3, filter: ['lowpass', 2000], attack: 0.002, decay: 0.25, hz: 140 },
     jingle: { wave: 'square', partials: [[1, 0.05]], sweep: 1, noise: 0.7, filter: ['highpass', 6000], attack: 0.001, decay: 0.18, hz: 5000 },
@@ -34,7 +37,9 @@
     bowed: { wave: 'sawtooth', partials: [[1, 0.45]], sweep: 1, noise: 0, filter: ['lowpass', 3000], attack: 0.08, decay: 0.9, hz: 440, vibrato: [5.5, 4] },
     breathy: { wave: 'sine', partials: [[1, 0.7], [2, 0.1]], sweep: 1, noise: 0.12, filter: ['bandpass', 1800], attack: 0.05, decay: 0.7, hz: 587, vibrato: [5, 3] },
     reed: { wave: 'square', partials: [[1, 0.3]], sweep: 1, noise: 0.03, filter: ['lowpass', 2500], attack: 0.03, decay: 0.8, hz: 349 },
-    horn: { wave: 'sawtooth', partials: [[1, 0.5], [1.5, 0.1]], sweep: 1, noise: 0.05, filter: ['lowpass', 1400], attack: 0.06, decay: 0.9, hz: 233 },
+    // 2× and 3×, not 1.5×: a half-harmonic makes the pitch fall an octave below
+    // the note a horn is actually playing.
+    horn: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.22], [3, 0.12]], sweep: 1, noise: 0.05, filter: ['lowpass', 1800], attack: 0.06, decay: 0.9, hz: 233 },
     drone: { wave: 'sawtooth', partials: [[1, 0.5], [2, 0.2]], sweep: 1, noise: 0.08, filter: ['lowpass', 700], attack: 0.1, decay: 1.2, hz: 73, vibrato: [6, 2] },
     keys: { wave: 'triangle', partials: [[1, 0.6], [2, 0.2], [3, 0.08]], sweep: 1, noise: 0.01, filter: ['lowpass', 4000], attack: 0.004, decay: 0.8, hz: 262 },
     organ: { wave: 'sine', partials: [[1, 0.5], [2, 0.3], [4, 0.15]], sweep: 1, noise: 0, filter: null, attack: 0.03, decay: 1, hz: 262 },
@@ -82,7 +87,12 @@
 
   // Renders one note. Returns the stop time, or null without an AudioContext.
   // opts.dur (seconds) holds that one note longer; opts.gain above 0.16
-  // raises the envelope, still capped at 1. Omitted opts keep the voice plan.
+  // raises the envelope, still capped at 1. opts.hold (or opts.sustain) keeps
+  // the peak until the last 80 ms, instead of fading from the attack straight
+  // to silence — a shofar blast and a held fraction tone have to stay loud
+  // for the whole duration the child is comparing. opts.glide > 1 bends the
+  // pitch up over the last part of a held note. opts.attack lengthens the
+  // rise. Omitted opts keep the voice plan.
   function playVoice(ac, voice, hz, when, dest, opts) {
     const plan = planVoice(voice, hz);
     if (!ac || !plan) return null;
@@ -90,10 +100,21 @@
     const held = opts && Number(opts.dur) > 0 ? Number(opts.dur) : 0;
     const end = t + (held || plan.attack + plan.decay);
     const peak = held && Number(opts.gain) > 0 ? Math.min(1, Number(opts.gain) / 0.16) : 1;
+    const sustain = !!(opts && (opts.hold || opts.sustain) && held);
+    let attack = opts && Number(opts.attack) > 0 ? Number(opts.attack) : plan.attack;
+    if (held) attack = Math.min(attack, held * 0.45);
+    attack = Math.max(0.004, attack);
+    const release = held ? Math.min(0.08, held * 0.3) : 0;
     const out = ac.createGain();
     out.gain.setValueAtTime(0.0001, t);
-    out.gain.linearRampToValueAtTime(peak, t + (held ? Math.min(plan.attack, held) : plan.attack));
-    out.gain.exponentialRampToValueAtTime(0.0001, end);
+    if (sustain && held > attack + release + 0.02) {
+      out.gain.linearRampToValueAtTime(peak, t + attack);
+      out.gain.setValueAtTime(peak, end - release);
+      out.gain.exponentialRampToValueAtTime(0.0001, end);
+    } else {
+      out.gain.linearRampToValueAtTime(peak, t + (held ? Math.min(attack, held) : plan.attack));
+      out.gain.exponentialRampToValueAtTime(0.0001, end);
+    }
     let bus = out;
     if (plan.filter) {
       const bq = ac.createBiquadFilter();
@@ -108,7 +129,16 @@
       const g = ac.createGain();
       osc.type = o.type;
       osc.frequency.setValueAtTime(o.hz, t);
-      if (o.endHz !== o.hz) osc.frequency.exponentialRampToValueAtTime(o.endHz, end);
+      const glide = opts && Number(opts.glide) > 1 ? Number(opts.glide) : 1;
+      if (glide > 1 && held > 0.4) {
+        const bendAt = Math.max(t + attack, end - Math.min(0.45, held * 0.25));
+        if (bendAt < end) {
+          osc.frequency.setValueAtTime(o.hz, bendAt);
+          osc.frequency.exponentialRampToValueAtTime(o.hz * glide, end);
+        }
+      } else if (o.endHz !== o.hz) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.endHz), end);
+      }
       if (plan.vibrato) {
         const lfo = ac.createOscillator();
         const depth = ac.createGain();

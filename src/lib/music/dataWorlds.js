@@ -30,6 +30,7 @@
   'use strict';
 
   const TAGS = Object.freeze(['tableRowGroups', 'cellGroups', 'rowCellGroups', 'listToGroups', 'tallyFives', 'levelNotes', 'showAsBar', 'alternateDrums', 'stickingParity', 'tenExchange']);
+  const EXTRA_TAGS = ['columnsAsNotes', 'columnHeldNote', 'probabilityChance'];
   const MAX_RUN = 12;
   const MAX_EVENTS = 40;
   const STEP = 0.26, GAP = 0.7;
@@ -65,7 +66,7 @@
   }
 
   function plan(item) {
-    if (!item || item.noMusic || TAGS.indexOf(item.music) < 0) return null;
+    if (!item || item.noMusic || (TAGS.indexOf(item.music) < 0 && EXTRA_TAGS.indexOf(item.music) < 0)) return null;
     const tt = takeAwayTen();
     if (tt && tt.specForItem && tt.specForItem(item)) return null;
     const p = String(item.prompt || '').trim();
@@ -92,8 +93,17 @@
       s = meanPlan(vs);
     } else if ((m = /^הממוצע של ([\d, ו־]+) הוא (\d+)\. מוסיפים לקבוצה את (\d+)\. מה הממוצע החדש\?$/.exec(p))) {
       s = meanPlan(nums(m[1]).concat([+m[3]]));
+    } else if (/^ב(?:\S+ )?עמודות יש ([\d, ו־]+) הקשות\. מה הממוצע\?$/.test(p)) {
+      m = /^ב(?:\S+ )?עמודות יש ([\d, ו־]+) הקשות\. מה הממוצע\?$/.exec(p);
+      s = meanPlan(nums(m[1]));
     } else if ((m = /^ב\S+ \S+ יש ([\d, ו־]+) \S+\. מה מספר ה\S+ הממוצע ל\S+\?$/.exec(p))) {
       s = meanPlan(nums(m[1]));
+    } else if (/^מה הממוצע של ([\d, ו־]+)\?$/.test(p)) {
+      m = /^מה הממוצע של ([\d, ו־]+)\?$/.exec(p);
+      s = meanPlan(nums(m[1]));
+    } else if (/ממוצע/.test(p) && item.chart && Array.isArray(item.chart.bars) && item.chart.bars.length >= 2) {
+      const vs = item.chart.bars.map((b) => b.value);
+      s = meanPlan(vs);
     } else if ((m = /^בקבוצת מספרים הקטן הוא (\d+) והממוצע הוא (\d+)\. האם הגדול יכול להיות (\d+)\? \(כן\/לא\)$/.exec(p))) {
       // the best case: two numbers, the smallest and the largest — even then the level stays below the mean asked for
       const lo = +m[1], mean = +m[2], hi = +m[3];
@@ -120,6 +130,58 @@
     } else if ((m = /^בטבלת שכיחויות: (\d+) משפחות עם (\d+) ילדים ו־(\d+) משפחות עם (\d+) ילדים\. כמה ילדים יש בכל המשפחות האלה\?$/.exec(p))) {
       const groups = [[+m[1], +m[2]], [+m[3], +m[4]]];
       s = { kind: 'families', groups: groups, value: groups.reduce((a, g) => a + g[0] * g[1], 0), world: WORLDS.andalus };
+    // ---- column / bar comparison
+    } else if (/^בגרף, עמודה ([^ ]+) היא (\d+) ועמודה ([^ ]+) (\d+)\. בכמה \S+ גבוהה יותר\?$/.test(p)) {
+      m = /^בגרף, עמודה ([^ ]+) היא (\d+) ועמודה ([^ ]+) (\d+)\. בכמה \S+ גבוהה יותר\?$/.exec(p);
+      const l1 = m[1], v1 = +m[2], l2 = m[3], v2 = +m[4];
+      const diff = Math.abs(v1 - v2);
+      const unit = scaleFor([v1, v2, diff]);
+      if (unit && (v1 / unit) <= MAX_RUN && (v2 / unit) <= MAX_RUN && (diff / unit) <= MAX_RUN) {
+        s = { kind: 'columnCompare', col1: { label: l1, value: v1 }, col2: { label: l2, value: v2 }, diff: diff, value: diff, unit: unit, world: WORLDS.andalus };
+      }
+    } else if (/(?:^|.*?\.\s*)בכמה (?:משתתפים|ילדים|תלמידים|ספרים)? היו יותר ב(?:סיור של )?(\S+) מב(?:סיור של )?(\S+)\?$/.test(p) && item.chart && Array.isArray(item.chart.bars)) {
+      m = /(?:^|.*?\.\s*)בכמה (?:משתתפים|ילדים|תלמידים|ספרים)? היו יותר ב(?:סיור של )?(\S+) מב(?:סיור של )?(\S+)\?$/.exec(p);
+      const b1 = item.chart.bars.find((b) => b.label === m[1] || b.label.indexOf(m[1]) >= 0);
+      const b2 = item.chart.bars.find((b) => b.label === m[2] || b.label.indexOf(m[2]) >= 0);
+      if (b1 && b2) {
+        const diff = Math.abs(b1.value - b2.value);
+        const unit = scaleFor([b1.value, b2.value, diff]);
+        if (unit && (b1.value / unit) <= MAX_RUN && (b2.value / unit) <= MAX_RUN && (diff / unit) <= MAX_RUN) {
+          s = { kind: 'columnCompare', col1: { label: b1.label, value: b1.value }, col2: { label: b2.label, value: b2.value }, diff: diff, value: diff, unit: unit, world: WORLDS.andalus };
+        }
+      }
+    } else if (/^בדיאגרמת עמודות: עמודה ([^ ]+) בגובה (\d+) ועמודה ([^ ]+) בגובה (\d+)\. מה ההפרש ביניהן\?$/.test(p)) {
+      m = /^בדיאגרמת עמודות: עמודה ([^ ]+) בגובה (\d+) ועמודה ([^ ]+) בגובה (\d+)\. מה ההפרש ביניהן\?$/.exec(p);
+      const l1 = m[1], v1 = +m[2], l2 = m[3], v2 = +m[4];
+      const diff = Math.abs(v1 - v2);
+      const unit = scaleFor([v1, v2, diff]);
+      if (unit && (v1 / unit) <= MAX_RUN && (v2 / unit) <= MAX_RUN && (diff / unit) <= MAX_RUN) {
+        s = { kind: 'columnCompare', col1: { label: l1, value: v1 }, col2: { label: l2, value: v2 }, diff: diff, value: diff, unit: unit, world: WORLDS.andalus };
+      }
+    // ---- probability / chance
+    } else if (/^בכד (\d+) כדורים \S+ ו־(\d+) כדורים \S+\. מה (?:ההסתברות|הסיכוי) להוציא כדור (\S+)\? \(כשבר\)$/.test(p)) {
+      m = /^בכד (\d+) כדורים \S+ ו־(\d+) כדורים \S+\. מה (?:ההסתברות|הסיכוי) להוציא כדור (\S+)\? \(כשבר\)$/.exec(p);
+      const a = +m[1], b = +m[2], total = a + b;
+      const fav = p.indexOf(m[3]) === p.lastIndexOf(m[3]) ? a : (p.indexOf(m[3]) < p.indexOf('ו־') ? a : b);
+      const d = gcd(fav, total);
+      const frac = (fav / d) + '/' + (total / d);
+      if (total <= MAX_RUN) {
+        s = { kind: 'probability', fav: fav, total: total, ratio: frac, value: frac, world: WORLDS.hora };
+      }
+    } else if (/^מטילים קובייה(?: הוגנת)?\. מה הסיכוי לקבל מספר (זוגי|אי־זוגי)\? \(כשבר\)$/.test(p)) {
+      s = { kind: 'probability', fav: 3, total: 6, ratio: '1/2', value: '1/2', world: WORLDS.hora };
+    } else if (/^בסביבון (\d+) צבעים שווים\. מה הסיכוי שייפול על \S+\? \(כשבר\)$/.test(p)) {
+      m = /^בסביבון (\d+) צבעים שווים\. מה הסיכוי שייפול על \S+\? \(כשבר\)$/.exec(p);
+      const total = +m[1];
+      if (total <= MAX_RUN) {
+        s = { kind: 'probability', fav: 1, total: total, ratio: '1/' + total, value: '1/' + total, world: WORLDS.hora };
+      }
+    } else if (/^מה (?:ההסתברות|הסיכוי) ש\S+ מתוך (\d+) שווים\? \(כשבר\)$/.test(p)) {
+      m = /^מה (?:ההסתברות|הסיכוי) ש\S+ מתוך (\d+) שווים\? \(כשבר\)$/.exec(p);
+      const total = +m[1];
+      if (total <= MAX_RUN) {
+        s = { kind: 'probability', fav: 1, total: total, ratio: '1/' + total, value: '1/' + total, world: WORLDS.hora };
+      }
     // ---- values: the mode (pitch is the value)
     } else if ((m = /: ((?:\d+, )+\d+)\. כמה שכיחים יש\?$/.exec(p))) {
       // a set may have more than one mode: count the longest runs of one pitch
@@ -135,6 +197,16 @@
       const modes = Object.keys(freq).filter((k) => freq[k] === top);
       const value = m[2] != null ? freq[+m[2]] : modes.length === 1 ? +modes[0] : null;
       if (value != null && vs.length <= MAX_RUN) s = { kind: 'values', values: vs, asked: m[2] != null ? +m[2] : null, value: value, world: WORLDS.andalus };
+    } else if (/^(?:הציונים|המספרים|בקבוצה):? ([\d, ו־]+)\. מהו השכיח\?$/.test(p) || /^מהו השכיח ב(?:קבוצת המספרים|סדרה):? ([\d, ו־]+)\?$/.test(p)) {
+      m = /^(?:הציונים|המספרים|בקבוצה):? ([\d, ו־]+)\. מהו השכיח\?$/.exec(p) || /^מהו השכיח ב(?:קבוצת המספרים|סדרה):? ([\d, ו־]+)\?$/.exec(p);
+      const vs = nums(m[1]).sort((a, b) => a - b);
+      const freq = {};
+      vs.forEach((v) => { freq[v] = (freq[v] || 0) + 1; });
+      const top = Math.max.apply(null, Object.values(freq));
+      const modes = Object.keys(freq).filter((k) => freq[k] === top);
+      if (modes.length === 1 && vs.length <= MAX_RUN) {
+        s = { kind: 'values', values: vs, asked: null, value: +modes[0], world: WORLDS.andalus };
+      }
     // ---- lists to a table, and tallies
     } else if ((m = /: ((?:[א-ת]+, )+[א-ת]+)\. (?:בטבלה מסודרת — כמה בחרו ([א-ת]+)|ארגנו בטבלה: בכמה ילדים יותר בחרו ([א-ת]+) מאשר ([א-ת]+))\?$/.exec(p))) {
       const list = m[1].split(', ');
@@ -228,11 +300,14 @@
   // ---------------------------------------------------------------- sound
   function soundEvents(spec) {
     if (!spec) return [];
+    if (spec.kind === 'feedback') return tierAuditoryFeedback(spec.tier, spec.isCorrect);
     const ev = [];
     let t = 0;
     const hit = (voice, hz, dur, gain, stage, extra) => { ev.push(Object.assign({ at: t, voice: voice, hz: hz, dur: dur, gain: gain, stage: stage }, extra || {})); };
     const strokes = (k, n, stage, extra) => { const v = VOICES[k % VOICES.length]; for (let i = 0; i < n; i++) { hit(v[0], v[1], 0.14, 0.22, stage, Object.assign({ cat: k }, extra)); t += STEP; } t += GAP; };
-    const step = (stage, extra, hz) => { hit('stomp', hz || 90, 0.14, 0.24, stage, extra); t += STEP; };
+    // 349 and 440 Hz sit above a phone speaker's ~300 Hz cutoff. 90/120 Hz
+    // stomps were measured about 19 dB down through that high-pass.
+    const step = (stage, extra, hz) => { hit('stomp', hz || 349, 0.14, 0.24, stage, extra); t += STEP; };
 
     switch (spec.kind) {
       case 'table':
@@ -303,7 +378,7 @@
         const ten = spec.n >= 10;
         if (ten) { for (let i = 0; i < tens; i++) { hit('drumLow', 98, 0.3, 0.24, 'ten'); t += 0.42; } t += GAP; }
         const k = ten ? ones : spec.n;
-        for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i }); step('pair', { i: i }, 120); t += 0.3; }
+        for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i }); step('pair', { i: i }, 440); t += 0.3; }
         if (k % 2) { t += GAP; step('alone'); }
         break;
       }
@@ -312,11 +387,11 @@
         // two alone steps then meet and step together as one more pair
         const alone = [];
         [spec.a, spec.b].forEach((k, w) => {
-          for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i, of: w }); step('pair', { i: i, of: w }, 120); t += 0.3; }
+          for (let i = 0; i < Math.floor(k / 2); i++) { step('pair', { i: i, of: w }); step('pair', { i: i, of: w }, 440); t += 0.3; }
           if (k % 2) { t += GAP; step('alone', { of: w }); alone.push(w); }
           t += GAP;
         });
-        if (alone.length === 2) { step('meet'); step('meet', {}, 120); }
+        if (alone.length === 2) { step('meet'); step('meet', {}, 440); }
         else if (alone.length === 1) { t += GAP; step('alone', { last: true }); }
         break;
       }
@@ -330,6 +405,26 @@
         const ones = spec.n % 10;
         hit('drumLow', 98, 0.4, 0.24, 'rest'); t += 0.4 + GAP;
         for (let i = 0; i < ones; i++) { step('one'); if (i === 4 && ones > 5) t += 0.35; }
+        break;
+      }
+      case 'columnCompare': {
+        const n1 = spec.col1.value / spec.unit;
+        const n2 = spec.col2.value / spec.unit;
+        const diff = spec.diff / spec.unit;
+        for (let i = 0; i < n1; i++) { hit('pluck', 196, 0.14, 0.22, 'col1', { col: 1 }); t += STEP; }
+        t += GAP;
+        for (let i = 0; i < n2; i++) { hit('bowed', 330, 0.14, 0.22, 'col2', { col: 2 }); t += STEP; }
+        t += GAP;
+        for (let i = 0; i < diff; i++) { hit('metalBell', 784, 0.16, 0.22, 'diff'); t += STEP; }
+        break;
+      }
+      case 'probability': {
+        for (let i = 0; i < spec.fav; i++) { hit('pluck', 196, 0.16, 0.22, 'fav', { i: i }); t += STEP; }
+        t += GAP;
+        const remaining = spec.total - spec.fav;
+        for (let i = 0; i < remaining; i++) { hit('bowed', 330, 0.16, 0.22, 'other', { i: i }); t += STEP; }
+        t += 0.3;
+        hit('metalBell', 1047, 0.35, 0.16, 'totalChime');
         break;
       }
       default:
@@ -347,7 +442,9 @@
     if (typeof pv === 'function' && ac) {
       if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
       const start = ac.currentTime + 0.05;
-      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain }));
+      events.forEach((n) => {
+        pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain });
+      });
       return { notes: events.length };
     }
     return { notes: events.length, silent: true };
@@ -374,11 +471,13 @@
     parity: 'צעדים בזוגות. כל עשר הוא חמישה זוגות שלמים — מכה עמוקה אחת. נשאר צעד בלי זוג? הוא יישמע לבד אחרי שקט.',
     prime: 'מנסים לחלק לתיבות שוות — לפחות שתי תיבות, ובכל תיבה לפחות שני צעדים. כאן — האם התחלק?',
     fives: 'כל עשר, מאה ואלף מתחלקים לחמישיות בלי שארית — מכה עמוקה אחת. מקבצים רק את האחדות. נשאר משהו?',
+    columnCompare: 'השוואת עמודות: שומעים כל עמודה בגובהה או במספר הקשות, ואז את ההפרש ביניהן.',
+    probability: 'הסתברות: שומעים את האפשרויות הרצויות מול כלל האפשרויות בשלם — החלק מתוך הכל.',
   };
   function html(spec, opts) {
     if (!spec) return '';
     const revealed = !!(opts && opts.revealed);
-    const scale = (spec.kind === 'table' || spec.kind === 'meanSum') && spec.unit > 1 ? ' כל הקשה שווה ' + (NUM_HE[spec.unit] || '') + '.' : '';
+    const scale = (spec.kind === 'table' || spec.kind === 'meanSum' || spec.kind === 'columnCompare') && spec.unit > 1 ? ' כל הקשה שווה ' + (NUM_HE[spec.unit] || '') + '.' : '';
     return '<div class="data-worlds">'
       + '<p class="band-note">' + esc(spec.world.he + ': ' + spec.world.why + '.') + '</p>'
       + '<p class="band-note">' + esc(HOW[spec.kind] + scale) + '</p>'
@@ -398,6 +497,13 @@
       const rows = spec.pairs.map((p) => '<tr><td>' + esc(p.label) + '</td><td>' + esc(p.n) + '</td></tr>').join('');
       const scale = spec.unit > 1 ? '<div class="sheet-scale">כל הקשה = ' + esc(NUM_HE[spec.unit] || spec.unit) + '</div>' : '';
       return '<div class="sheet-widget sheet-data-table" dir="rtl"><table class="sheet-table"><thead><tr><th>קטגוריה</th><th>כמות</th></tr></thead><tbody>' + rows + '</tbody></table>' + scale + '</div>';
+    }
+    if (spec.kind === 'columnCompare' && spec.col1 && spec.col2) {
+      const scale = spec.unit > 1 ? '<div class="sheet-scale">כל הקשה = ' + esc(NUM_HE[spec.unit] || spec.unit) + '</div>' : '';
+      return '<div class="sheet-widget sheet-data-columns" dir="rtl"><div class="sheet-columns-row">' + esc(spec.col1.label) + ': ' + esc(spec.col1.value) + ' מול ' + esc(spec.col2.label) + ': ' + esc(spec.col2.value) + ' (הפרש: ' + esc(spec.diff) + ')</div>' + scale + '</div>';
+    }
+    if (spec.kind === 'probability') {
+      return '<div class="sheet-widget sheet-data-probability" dir="rtl">הסתברות: ' + esc(spec.fav) + ' מתוך ' + esc(spec.total) + ' (' + esc(spec.value) + ')</div>';
     }
     if (spec.kind === 'tally' && Array.isArray(spec.cats) && spec.cats.length) {
       const rows = spec.cats.map(([label, n]) => {
@@ -422,5 +528,34 @@
     return !!plan(item);
   }
 
-  return { TAGS: TAGS, WORLDS: WORLDS, MAX_RUN: MAX_RUN, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html, printableWidget: printableWidget, isDataWorldItem: isDataWorldItem };
+  function tierAuditoryFeedback(tier, isCorrect) {
+    const t = Number(tier) || 1;
+    const ev = [];
+    if (isCorrect) {
+      if (t === 1) {
+        ev.push({ at: 0, voice: 'pluck', hz: 261.63, dur: 0.2, gain: 0.2, stage: 'feedback' });
+        ev.push({ at: 0.22, voice: 'pluck', hz: 329.63, dur: 0.2, gain: 0.2, stage: 'feedback' });
+        ev.push({ at: 0.44, voice: 'metalBell', hz: 523.25, dur: 0.4, gain: 0.22, stage: 'feedback' });
+      } else if (t === 2) {
+        ev.push({ at: 0, voice: 'woodBar', hz: 392, dur: 0.15, gain: 0.2, stage: 'feedback' });
+        ev.push({ at: 0.18, voice: 'metalBell', hz: 587.33, dur: 0.35, gain: 0.22, stage: 'feedback' });
+      } else {
+        ev.push({ at: 0, voice: 'tine', hz: 784, dur: 0.1, gain: 0.18, stage: 'feedback' });
+        ev.push({ at: 0.14, voice: 'metalBell', hz: 1046.5, dur: 0.4, gain: 0.24, stage: 'feedback' });
+      }
+    } else {
+      if (t === 1) {
+        ev.push({ at: 0, voice: 'drumLow', hz: 98, dur: 0.3, gain: 0.2, stage: 'retry' });
+        ev.push({ at: 0.35, voice: 'reed', hz: 220, dur: 0.25, gain: 0.18, stage: 'retry' });
+      } else if (t === 2) {
+        ev.push({ at: 0, voice: 'drumLow', hz: 110, dur: 0.25, gain: 0.2, stage: 'retry' });
+        ev.push({ at: 0.3, voice: 'woodClick', hz: 1200, dur: 0.08, gain: 0.18, stage: 'retry' });
+      } else {
+        ev.push({ at: 0, voice: 'woodClick', hz: 1000, dur: 0.06, gain: 0.18, stage: 'retry' });
+      }
+    }
+    return ev;
+  }
+
+  return { TAGS: TAGS, WORLDS: WORLDS, MAX_RUN: MAX_RUN, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html, printableWidget: printableWidget, isDataWorldItem: isDataWorldItem, tierAuditoryFeedback: tierAuditoryFeedback };
 });

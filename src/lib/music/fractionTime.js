@@ -171,11 +171,26 @@
         note(spec.x, 'first'); note(spec.y, 'second');
         silent(spec.L - spec.x - spec.y);                                   // what the bar still has: silence
         break;
-      case 'claim':
+      case 'claim': {
+        // Both tones are held with the same envelope, on a slow beat, so the
+        // child hears the length and does not have to trust a fade. 1/3 is
+        // four of those beats; 2/7 is the same beat times 2/7 of the bar,
+        // which is shorter by about half a second — a sum cannot be shorter
+        // than one of its parts. The ticks under the first tone are there to
+        // count; Danny's claim stays one tone, as the text says.
         ruler(spec.L);
-        note(spec.first, 'first'); rest();                                  // the first part alone
-        hit('reed', 330, spec.claim * STEP, 0.16, 'claim'); t += spec.claim * STEP; rest();   // the claimed sum, held: shorter
+        rest();
+        const SLOW = 0.8;
+        const firstDur = spec.first * SLOW;
+        const claimDur = spec.claim * SLOW;
+        hit('reed', 330, firstDur, 0.16, 'firstHold', { hold: true });
+        for (let i = 0; i < spec.first; i++) { hit('shaker', 2400, 0.05, 0.14, 'first'); t += SLOW; }
+        rest();
+        hit('reed', 330, claimDur, 0.16, 'claim', { hold: true });
+        t += claimDur;
+        rest();
         break;
+      }
       case 'sub':
         ruler(spec.L);
         note(spec.x, 'first'); rest();
@@ -288,7 +303,7 @@
     if (typeof pv === 'function' && ac) {
       if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) { /* autoplay */ } }
       const start = ac.currentTime + 0.05;
-      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain }));
+      events.forEach((n) => pv(ac, n.voice, n.hz, start + n.at, null, { dur: n.dur, gain: n.gain, hold: n.hold }));
       return { notes: events.length };
     }
     return { notes: events.length, silent: true };

@@ -2318,6 +2318,71 @@
   );
   musicForLate();
 
+  // Grade ד׳ volume that is actually grade ד׳: the box as length × width ×
+  // height, and litres that are not a copy of the grade-ב׳ cube counts.
+  // Appended after every earlier push so existing ids stay put (#1096).
+  // The older MASS_VOL prompts stay; #751 locks them in place.
+  RAW.push(
+    MEAS('ד', 'תיבה שאורכה 5 ס״מ, רוחבה 3 ס״מ וגובהה 2 ס״מ. מה נפחה בסמ״ק?', 30, 'אורך כפול רוחב כפול גובה: 5 × 3 × 2', 2, ST.MASS_VOL),
+    MEAS('ד', 'תיבה שאורכה 4 ס״מ, רוחבה 4 ס״מ וגובהה 3 ס״מ. מה נפחה בסמ״ק?', 48, '4 × 4 × 3', 2, ST.MASS_VOL),
+    MEAS('ד', 'נפח תיבה הוא 36 סמ״ק. אורכה 6 ס״מ ורוחבה 3 ס״מ. מה גובהה בס״מ?', 2, '36 לחלק ל־18', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה של 8 ס״מ על 5 ס״מ על 2 ס״מ. כמה סמ״ק היא מכילה?', 80, '8 × 5 × 2', 2, ST.MASS_VOL),
+    MEAS('ד', 'קובייה שצלעה 3 ס״מ. מה נפחה בסמ״ק?', 27, '3 × 3 × 3', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה 5×4×2 ס״מ. כמה מ״ל מים היא מכילה? (1 סמ״ק = 1 מ״ל)', 40, '5 × 4 × 2', 3, ST.MASS_VOL),
+    MEAS('ד', 'שתי תיבות: 6×2×2 ו־5×3×2 ס״מ. בכמה סמ״ק השנייה גדולה יותר?', 6, '30 פחות 24', 3, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל חסרים ל־750 מ״ל כדי להגיע לליטר אחד?', 250, 'ליטר הוא 1,000 מ״ל', 2, ST.MASS_VOL),
+    MEAS('ד', 'בבקבוק 2 ליטר ו־250 מ״ל. כמה מ״ל בסך הכול?', 2250, '2 × 1,000 ועוד 250', 2, ST.MASS_VOL),
+    MEAS('ד', '3,000 מ״ל הם כמה ליטר?', 3, 'כל 1,000 מ״ל הם ליטר', 2, ST.MASS_VOL)
+  );
+  musicForLate();
+
+  // ---------- פערים שנשארו מהמחקר לכל נושא (16.11.2026) ----------
+  // The "מה חסר בבנק" lines of docs/research/topics/*.md that #1084 did not
+  // cover: one item per misconception. Appended last so ids stay put.
+  // The tag has no "gap" in it on purpose: gapItems() feeds the data-and-time
+  // print pack, and most of these are neither.
+  const GAP2 = { research: 'topics-2026-11-16' };
+  RAW.push(
+    I('א', 'counting', '3 קפיצות של 2 מ־50. לאן הגעתם?', 56, 'כל קפיצה מוסיפה 2', Object.assign({ standard: ST.SKIP2, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'addition', '10 = 7 + ☐', 3, 'כמה חסר ל־7 כדי להגיע ל־10?', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'addition', '6 + 4 = 7 + ☐', 3, 'שני הצדדים שווים ל־10', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'addition', '2 + 9 = ?', 11, 'מתחילים מ־9 וסופרים עוד 2', Object.assign({ standard: ST.ADD20, strand: STRAND.NUM, level: 1 }, GAP2)),
+    I('א', 'counting', 'איזה מספר בא לפני 15?', 14, 'צעד אחד אחורה', Object.assign({ standard: ST.NEXTPREV, strand: STRAND.NUM, level: 1 }, GAP2)),
+    I('א', 'counting', 'איזה מספר בא לפני 20?', 19, 'צעד אחד אחורה, אל העשרת הקודמת', Object.assign({ standard: ST.NEXTPREV, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'counting', '52, 51, 50, ?', 49, 'ממשיכים אחורה, גם מתחת ל־50', Object.assign({ standard: ST.COUNT_BACK, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'counting', 'דילוגי 5 אחורה: 100, 95, 90, ?', 85, 'כל צעד יורד 5', Object.assign({ standard: ST.SKIP5, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'counting', 'במספר 24, כמה מראה הספרה 2?', 20, 'הספרה 2 במקום העשרות', Object.assign({ standard: ST.GROUP10, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'addition', '3 + ☐ = 8', 5, 'כמה מוסיפים ל־3 כדי להגיע ל־8?', Object.assign({ standard: ST.ADD10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'addition', '7 + 5 + 3 = ?', 15, 'חפשו שני מספרים שמשלימים ל־10', Object.assign({ standard: ST.MULTIADD, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'word_problems', 'לנועה 5 יותר מלתום. לנועה 12. כמה לתום?', 7, 'למי יש פחות?', Object.assign({ standard: ST.WORD_COMPARE, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'word_problems', 'היו כמה ילדים בחצר. באו עוד 3, ועכשיו 8. כמה היו?', 5, 'מה היה לפני שבאו?', Object.assign({ standard: ST.WORD_COLLECT, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ב', 'place_value', '3 עשרות ו־14 יחידות. איזה מספר זה?', 44, '10 יחידות הן עוד עשרת', Object.assign({ standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ב', 'place_value', '2 מאות, 13 עשרות ו־5 יחידות. איזה מספר זה?', 335, '10 עשרות הן עוד מאה', Object.assign({ standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ב', 'measurement', 'מלבן של 6 ס״מ על 3 ס״מ מחולק בקו לשני ריבועים. מה ההיקף בס״מ?', 18, 'הקו באמצע לא שייך להיקף', Object.assign({ standard: ST.PERIMETER, strand: STRAND.MEASURE, level: 3 }, GAP2)),
+    I('א', 'geometry', 'מסובבים משולש. האם הוא עדיין אותו משולש? (כן/לא)', 'כן', 'סיבוב לא משנה צלעות וזוויות', Object.assign({ standard: ST.POLY_CUT_A, strand: STRAND.GEO, level: 2 }, GAP2)),
+    I('ג', 'measurement', 'מה השעה בשעון?', '2:50', 'המחוג הקצר עוד לא הגיע ל־3', Object.assign({ standard: ST.MINUTES, strand: STRAND.MEASURE, level: 3, widget: 'clock', clock: { hour: 2, minute: 50 } }, GAP2)),
+    I('ג', 'measurement', 'האוטובוס יוצא ב־3:10. עכשיו 2:50. בעוד כמה דקות הוא יוצא?', 20, 'מ־2:50 עד 3:00, ועוד 10 דקות', Object.assign({ standard: ST.MINUTES, strand: STRAND.MEASURE, level: 2 }, GAP2)),
+    I('ג', 'word_problems', 'במקהלה 3 שורות של 8 זמרים. 5 זמרים יצאו. כמה זמרים נשארו?', 19, '24 הוא רק שלב באמצע', Object.assign({ standard: ST.WORD_TWO_STEP, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ג', 'word_problems', 'קנה 3 מיתרים ב־5 ₪ כל אחד. קודם היו לו 40 ₪. כמה נשאר?', 25, 'הנתון הראשון בסיפור הוא לא הראשון בחשבון', Object.assign({ standard: ST.WORD_TWO_STEP, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ג', 'data', 'לשני שירים אותה טבלת צלילים. האם הם בהכרח אותו שיר? (כן/לא)', 'לא', 'הטבלה סופרת, אבל לא שומרת את הסדר', Object.assign({ standard: ST.DATA_ORGANIZE, strand: STRAND.DATA, level: 2 }, GAP2)),
+    I('ג', 'geometry', 'לשתי זוויות של 30° זרועות באורך שונה. האם הארוכה גדולה יותר? (כן/לא)', 'לא', 'הזווית היא הפתיחה, לא אורך הזרועות', Object.assign({ standard: ST.ANGLE_KINDS, strand: STRAND.GEO, level: 2 }, GAP2)),
+    I('ג', 'division', '35 × 100 = ? (כתבו בלי פסיק)', 3500, 'קודם × 10, ואז עוד × 10', Object.assign({ standard: ST.MUL_DIV_10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ד', 'multiplication', 'כמה מספרים שלמים, מ־1 ומעלה, מתאימים ל־☐: ☐ × 7 < 30', 4, 'נסו 1, 2, 3... עד שזה מפסיק להתאים', Object.assign({ standard: ST.EQ_INEQ, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ד', 'geometry', 'שני ישרים באלכסון לא נפגשים, גם כשמאריכים אותם. האם הם מקבילים? (כן/לא)', 'כן', 'מקבילים לא חייבים לעמוד או לשכב', Object.assign({ standard: ST.PARALLEL, strand: STRAND.GEO, level: 2 }, GAP2)),
+    I('ד', 'fractions', 'כמה רבעים יש ב־2 ו־3/4? כתבו כשבר.', '11/4', 'כל שלם הוא 4 רבעים, ועוד 3', Object.assign({ standard: ST.FRAC_MIXED_D, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    I('ה', 'fractions', 'מה גדול יותר, 1/2 או 2/3? ב־2/3 הוסיפו 1 למונה ולמכנה.', '2/3', 'הרחבה היא כפל, לא חיבור: כאן השבר השתנה', Object.assign({ standard: ST.FRAC_EQUIV, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    I('ה', 'geometry', 'מקבילית: צלע 6 ס״מ, צלע משופעת 5 ס״מ, גובה 4 ס״מ. מה השטח?', 24, 'הגובה מאונך לבסיס, הצלע המשופעת לא', Object.assign({ standard: ST.PARA_AREA, strand: STRAND.GEO, level: 3 }, GAP2)),
+    I('ו', 'fractions', '2/3 × 2/3 = ?', '4/9', 'כופלים גם את המכנים', Object.assign({ standard: ST.FRAC_MUL, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    // XI and IX: the same signs, and the order changes the number (topic 109)
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא XI?', 11, 'I אחרי X מוסיף אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא IX?', 9, 'אותם סימנים כמו XI, אבל I לפני X מוריד אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 3 }, GAP2)),
+    // 17.11.2026: the last three gaps from docs/research/topics 029, 062 and 028
+    I('א', 'addition', '3 + 2 = 2 + ☐', 3, 'אותה כמות בסידור אחר: 3 ואז 2, או 2 ואז 3', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ד', 'measurement', '10 ליטר שמן: 9 ק״ג. 10 ליטר מים: 10 ק״ג. בכמה ק״ג המים כבדים יותר?', 1, 'אותו נפח, משקל אחר', Object.assign({ standard: ST.MASS_VOL, strand: STRAND.MEASURE, level: 2 }, GAP2)),
+    I('ד', 'data', 'בגרף, עמודה א׳ היא 60 ועמודה ב׳ 70. בכמה ב׳ גבוהה יותר?', 10, 'הציר מתחיל ב־50: ב׳ נראית פי 2, אבל ההפרש רק 10', Object.assign({ standard: ST.BARCHART, strand: STRAND.DATA, level: 3, widget: 'barchart', chart: { min: 50, bars: [{ label: 'א׳', value: 60 }, { label: 'ב׳', value: 70 }] } }, GAP2))
+  );
+  musicForLate();
+
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
   // way and music activity uses one of 14 mechanisms; the peer-reviewed
   // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:

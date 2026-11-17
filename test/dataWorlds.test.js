@@ -478,7 +478,7 @@ test('prime: composite numbers decompose into equal bars with barTen and beats; 
   assert.equal(beats.length, 6);
   assert.equal(beats.filter((n) => n.bar === 0).length, 3);
   assert.equal(beats.filter((n) => n.bar === 1).length, 3);
-  assert.ok(beats.every((n) => n.voice === 'stomp' && n.hz === 90));
+  assert.ok(beats.every((n) => n.voice === 'stomp' && n.hz === 349));
 });
 
 test('meanBound: hi >= mean yields כן; out of bounds returns null', () => {
@@ -765,20 +765,20 @@ test('tally and list sound events: raw vs sorted, and tally tick grouping', () =
   assert.ok(drumHits.every((n) => n.label === 'תוף'));
 });
 
-test('sumParity sound events: pairs with stomp 90 and 120 Hz, meet and alone', () => {
+test('sumParity sound events: pairs with two audible stomps, meet and alone', () => {
   const eMeet = ev('alternateDrums', '3 + 5 — זוגי או אי־זוגי?', 'זוגי');
   const meet = stage(eMeet, 'meet');
   assert.equal(meet.length, 2);
   assert.equal(meet[0].voice, 'stomp');
-  assert.equal(meet[0].hz, 90);
+  assert.equal(meet[0].hz, 349);
   assert.equal(meet[1].voice, 'stomp');
-  assert.equal(meet[1].hz, 120);
+  assert.equal(meet[1].hz, 440);
 
   const eAlone = ev('alternateDrums', '2 + 3 — זוגי או אי־זוגי?', 'אי-זוגי');
   const alone = stage(eAlone, 'alone');
   assert.equal(alone.length, 2);
   assert.ok(alone.some((n) => n.last));
-  assert.ok(alone.every((n) => n.voice === 'stomp' && n.hz === 90));
+  assert.ok(alone.every((n) => n.voice === 'stomp' && n.hz === 349));
 });
 
 test('prime sound events: barTen with drumLow and beat with stomp', () => {
@@ -790,7 +790,7 @@ test('prime sound events: barTen with drumLow and beat with stomp', () => {
   assert.ok(barTens.every((n) => n.voice === 'drumLow' && n.hz === 98 && n.dur === 0.3 && n.gain === 0.24));
   const beats = stage(e, 'beat');
   assert.equal(beats.length, 14);
-  assert.ok(beats.every((n) => n.voice === 'stomp' && n.hz === 90));
+  assert.ok(beats.every((n) => n.voice === 'stomp' && n.hz === 349));
 });
 
 test('tablePlan fraction and single category queries', () => {

@@ -54,13 +54,20 @@
     if (ans == null) return null;
     let m, s = null;
     if ((m = /^(\d+), ואז המספר הבא\?/.exec(p))) s = { kind: 'step', from: +m[1], dir: 1, value: +m[1] + 1, world: WORLDS.rhyme };
-    else if ((m = /^המספר שלפני (\d+)\?/.exec(p))) s = { kind: 'step', from: +m[1], dir: -1, value: +m[1] - 1, world: WORLDS.rhyme };
-    else if ((m = /ספירה אחורה: (\d+), (\d+), (\d+), \?/.exec(p)) && +m[1] - +m[2] === 1 && +m[2] - +m[3] === 1) {
+    else if ((m = /^(?:המספר שלפני|איזה מספר בא לפני) (\d+)\?/.exec(p))) s = { kind: 'step', from: +m[1], dir: -1, value: +m[1] - 1, world: WORLDS.rhyme };
+    else if ((m = /(?:ספירה אחורה: |^)(\d+), (\d+), (\d+), \?/.exec(p)) && +m[1] - +m[2] === 1 && +m[2] - +m[3] === 1) {
       s = { kind: 'back', from: +m[1], steps: 3, value: +m[3] - 1, world: WORLDS.tof };
     } else if (/דילוג|מקצב דילוגי|ספירה אחורה במקצב|בדילוגי|בעשרות|מקצב עשרות/.test(p) && (m = /(\d+), (\d+), (\d+)(?:, (\d+))?, \?/.exec(p))) {
       const seq = [m[1], m[2], m[3], m[4]].filter(Boolean).map(Number), d = seq[1] - seq[0];
-      if (!seq.every((x, i) => i === 0 || x - seq[i - 1] === d) || ![2, -2, 5, 10].includes(d)) return null;
+      if (!seq.every((x, i) => i === 0 || x - seq[i - 1] === d) || ![2, -2, 5, -5, 10].includes(d)) return null;
       s = { kind: 'skip', seq: seq, d: d, value: seq[seq.length - 1] + d, world: d === 10 ? WORLDS.tombak : Math.abs(d) === 2 ? WORLDS.pairs : WORLDS.hands };
+    } else if ((m = /^(\d) קפיצות של (2|5) מ־(\d+)\. לאן הגעתם\?$/.exec(p))) {
+      // the number of jumps is not the size of a jump: one group per jump
+      const d = +m[2], seq = Array.from({ length: +m[1] }, (_, i) => +m[3] + i * d);
+      s = { kind: 'skip', seq: seq, d: d, value: seq[seq.length - 1] + d, world: d === 2 ? WORLDS.pairs : WORLDS.hands };
+    } else if ((m = /^במספר (\d)(\d), כמה מראה הספרה \1\?$/.exec(p)) && m[1] !== m[2]) {
+      // the digit is worth its toms: each tom is ten
+      s = { kind: 'tens', tens: +m[1], ones: +m[2], value: +m[1] * 10, ask: 'tensValue', world: WORLDS.tombak };
     } else if ((m = /^(\d+) קבוצות של 10(?: ועוד (\d+))? — כמה זה\?/.exec(p))) {
       s = { kind: 'tens', tens: +m[1], ones: +(m[2] || 0), value: +m[1] * 10 + +(m[2] || 0), world: WORLDS.tombak };
     } else if ((m = /כמה קבוצות של 10 יש ב־(\d+)\?/.exec(p))) {
@@ -79,6 +86,13 @@
       const parts = nums(m[1]);
       if (parts.length < 3 || parts.length > 4) return null;
       s = { kind: 'parts', parts: parts, value: parts.reduce((a, b) => a + b, 0), world: WORLDS.darbuka };
+    } else if ((m = /^(\d+) = (\d+) \+ ☐$/.exec(p)) || (m = /^(\d+) \+ ☐ = (\d+)$/.exec(p)) && (m = [null, m[2], m[1]])
+      || (m = /^(\d+) \+ (\d+) = (\d+) \+ ☐$/.exec(p)) && (m = [null, +m[1] + +m[2], m[3]])
+      || (m = /^ל\S+ (\d+) יותר מ\S+\. ל\S+ (\d+)\. כמה ל\S+\?$/.exec(p)) && (m = [null, m[2], m[1]])
+      || (m = /^היו כמה \S+ \S+\. באו עוד (\d+), ועכשיו (\d+)\. כמה היו\?$/.exec(p)) && (m = [null, m[2], m[1]])) {
+      // the missing part: the whole against the part that is known, beat against beat
+      if (+m[2] > +m[1]) return null;
+      s = { kind: 'compare', a: +m[1], b: +m[2], value: +m[1] - +m[2], world: WORLDS.body };
     } else if (/בכמה .*יותר|כמה .* צריך .* כדי שיהיו לו כמו/.test(p)) {
       const ns = nums(p);
       if (ns.length !== 2) return null;
