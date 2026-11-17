@@ -1043,5 +1043,25 @@
     return '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="skip-unit" data-unit="' + escHtml(rec.id) + '" data-testid="skip-to-recommended" data-target="' + escHtml(rec.id) + '"' + (ok ? '' : ' disabled aria-disabled="true"') + '>דילוג ליחידה המומלצת: ' + escHtml(rec.title) + '</button>';
   }
 
-  return { UNITS: UNITS, unitProgress: unitProgress, progressBarHtml: progressBarHtml, recommendedUnit: recommendedUnit, canSkipTo: canSkipTo, skipButtonHtml: skipButtonHtml };
+  function resumeStageName(stage) {
+    if (stage === 'hear') return 'שומעים';
+    if (stage === 'why') return 'למה';
+    return 'חושבים';
+  }
+  function quickSwitchHtml(currentId, units, progressById) {
+    const list = Array.isArray(units) ? units : [];
+    const prog = progressById || {};
+    const items = list.filter(function (u) {
+      return u.id === currentId || canSkipTo(currentId, u.id, list, prog);
+    }).map(function (u) {
+      const p = unitProgress(u, prog[u.id]);
+      const isCur = u.id === currentId;
+      return '<button type="button" class="mm-btn mm-btn--small' + (isCur ? ' mm-btn--active' : ' mm-btn--white') + '" data-act="' + (isCur ? 'open-unit' : 'skip-unit') + '" data-unit="' + escHtml(u.id) + '" data-testid="quick-unit-btn-' + escHtml(u.id) + '"' + (isCur ? ' aria-current="true"' : '') + '>'
+        + escHtml(u.title) + ' (' + p.percent + '%)</button>';
+    });
+    if (!items.length) return '';
+    return '<div class="mm-quick-switch" data-testid="unit-quick-switch" role="navigation" aria-label="מעבר מהיר בין יחידות">' + items.join('') + '</div>';
+  }
+
+  return { UNITS: UNITS, unitProgress: unitProgress, progressBarHtml: progressBarHtml, recommendedUnit: recommendedUnit, canSkipTo: canSkipTo, skipButtonHtml: skipButtonHtml, quickSwitchHtml: quickSwitchHtml, resumeStageName: resumeStageName };
 });

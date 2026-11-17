@@ -600,7 +600,17 @@
     return (state.account && all[state.account.id] && all[state.account.id][unitId]) || null;
   }
   function progressByUnit() { const out = {}; if (!state.account) return out; UNITS.forEach(function (u) { out[u.id] = store.progress(state.account.id, u.id); }); return out; }
-  function extraNavHtml(unit, p) { const X = G.MMPilotUnitsExtra; if (!X) return ''; return (typeof X.progressBarHtml === 'function' ? X.progressBarHtml(unit, p) : '') + (typeof X.skipButtonHtml === 'function' ? X.skipButtonHtml(unit.id, UNITS, progressByUnit()) : ''); }
+  function extraNavHtml(unit, p) {
+    const X = G.MMPilotUnitsExtra;
+    if (!X) return '';
+    const prog = progressByUnit();
+    const stageName = typeof X.resumeStageName === 'function' ? X.resumeStageName(stageOf()) : '';
+    const stageBadge = stageName ? '<span class="mm-stage-chip" data-testid="stage-indicator" style="margin-inline-start:6px;font-size:0.8rem">שלב: ' + esc(stageName) + '</span>' : '';
+    return (typeof X.progressBarHtml === 'function' ? X.progressBarHtml(unit, p) : '')
+      + stageBadge
+      + (typeof X.skipButtonHtml === 'function' ? X.skipButtonHtml(unit.id, UNITS, prog) : '')
+      + (typeof X.quickSwitchHtml === 'function' ? X.quickSwitchHtml(unit.id, UNITS, prog) : '');
+  }
   function currentProgress() { return state.preview ? state.preview.p : store.progress(state.account.id, UNIT.id); }
   function saveP(p) {
     if (state.preview) { state.preview.p = p; return; }
@@ -1218,7 +1228,15 @@
     if (typeof store.setLastUnit === 'function') store.setLastUnit(UNIT.id);
     const p = currentProgress();
     const resume = loadResumePosition(UNIT.id);
-    if (resume && !p.completedAt && resume.questionIndex > p.index) { p.index = Math.min(resume.questionIndex, UNIT.questions.length - 1); saveP(p); }
+    if (resume && !p.completedAt) {
+      if (resume.questionIndex > p.index) {
+        p.index = Math.min(resume.questionIndex, UNIT.questions.length - 1);
+        saveP(p);
+      }
+      if (resume.stage === 'why') {
+        state.whyOpen = true;
+      }
+    }
     state.lessonStatus = '';
     if (hasChecks() && !p.pre) go('check-pre');
     else if (p.completedAt && hasChecks() && !p.post) go('check-post');

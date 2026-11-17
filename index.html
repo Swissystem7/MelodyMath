@@ -731,7 +731,7 @@ body.text-large, body.text-large button, body.text-large input, body.text-large 
 <div id="rmPlan" class="card hidden"><div class="topline"><span id="rmPlanSkill" class="tag"></span><span id="rmPlanCounter"></span></div><p id="rmPlanTag" class="item-tag" hidden></p><h2 id="rmPlanPrompt" class="prompt"></h2><div id="rmPlanNumberPlay" class="number-play-slot"></div><p id="rmPlanWay" class="music-way hidden"></p><div id="rmPlanPredict" class="predict hidden"></div><div id="rmPlanWidget" class="hidden"></div><div class="answer-row"><label class="sr-only" for="rmPlanAnswer">תשובה</label><input id="rmPlanAnswer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה" aria-label="תשובה"><button type="button" id="rmPlanCheck" data-tap="xylo">בדיקה</button></div><div id="rmPlanFeedback" class="feedback hidden" role="status" aria-live="polite"></div><div id="rmReward" class="result rhythm hidden" role="status" aria-live="polite"></div><button type="button" id="rmPlanNext" class="primary hidden">הבא</button><div id="rmPlanDoneActions" class="hidden" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="rmPlanRestart" class="primary">אבחון חדש</button><button type="button" id="rmPlanReport" class="secondary">חזרה לדוח הפערים</button><button type="button" class="secondary msp-offer" data-msp-offer>🎶 מסלול מוזיקליות קצר · 2–3 דקות · רשות</button></div><div id="masteryCheckHost" class="hidden" style="margin-top:16px"></div></div><div id="familyJamCard" class="card" data-family-jam></div></section>
 <section id="lessons" class="panel" role="tabpanel" aria-labelledby="tab-lessons" hidden><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><div><span class="tag">הוראה מפורשת · מוקדי כשל</span><h2 style="margin:6px 0;">🎓 שיעורים מודרכים — הבנת המושג לפני תרגול</h2></div><div id="lessonsGradeFilter" class="grade-filter-pills" role="group" aria-label="סינון שיעורים לפי כיתה" style="display:flex;gap:6px;flex-wrap:wrap;"></div></div><p class="note" style="margin:0 0 16px;">יחידות לימוד מונחות: הסבר מושגי ⬅️ הדגמה מוזיקלית ⬅️ התנסות אינטראקטיבית ⬅️ בדיקת הבנה.</p><div class="lessons-grid" id="lessonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px;"></div><div class="active-lesson-card hidden" id="activeLessonCard" style="background:#fdfaff;border:2px solid var(--purple);border-radius:20px;padding:22px;margin-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px;"><div><span class="tag" id="activeLessonBadge">כיתה ד׳ · שברים</span><h3 id="activeLessonTitle" style="margin:6px 0;font-size:1.35rem;color:var(--ink);">מהו שבר?</h3></div><button type="button" id="lessonCloseBtn" class="secondary" style="width:auto;min-height:44px;padding:6px 14px;">✕ חזרה לרשימת השיעורים</button></div><div class="lesson-stepper" id="lessonStepper" role="navigation" aria-label="שלבי השיעור" style="display:flex;gap:8px;margin-bottom:18px;"></div><div id="lessonStepContent" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;"><h4 id="stepTitle" style="margin:0;font-size:1.15rem;color:var(--purple);"></h4><button type="button" id="stepSpeakBtn" class="secondary" style="width:auto;min-height:44px;padding:4px 12px;font-size:0.85rem;" aria-label="הקראת השלב בקול">🔊 הקשב</button></div><p id="stepBody" style="font-size:1.05rem;line-height:1.6;"></p><div id="stepInteractiveBox" style="margin:16px 0;padding:16px;background:#f8f6fc;border-radius:14px;text-align:center;"></div><div id="stepQuizBox" class="hidden" style="margin:16px 0;"><div class="choices" id="stepQuizChoices" role="group" aria-label="אפשרויות תשובה" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div><div id="stepQuizFeedback" class="feedback hidden" role="status" aria-live="polite" style="margin-top:14px;"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><button type="button" id="stepPrevBtn" class="secondary" style="width:auto;min-height:44px;">← שלב קודם</button><span id="stepCounterDisplay" style="font-weight:bold;color:var(--muted);">שלב 1 מתוך 4</span><button type="button" id="stepNextBtn" class="primary" style="width:auto;min-height:44px;padding:10px 24px;">שלב הבא ←</button><button type="button" id="stepPracticeBtn" class="primary hidden" style="width:auto;min-height:44px;background:var(--good);padding:10px 24px;">🎯 מעבר לתרגול בבנק!</button></div></div></div></section>
 <section id="practice" class="panel" role="tabpanel" aria-labelledby="tab-practice" hidden><div id="start" class="card"><span class="tag">מעבר לתוכנית · צלילים וטמפו</span><h2>תרגול מוזיקלי נפרד</h2><p>35 תרגילים על שברים מוזיקליים, יחסים בין צלילים וטמפו. זה לא בנק משרד החינוך. בחרו רמה. אחרי שתי נכונות ברצף עולים; אחרי שתי טעויות יורדים.</p><div class="levels" role="group" aria-label="רמת קושי לתרגול"><button type="button" class="level selected" data-level="1" aria-pressed="true"><strong>בסיס</strong>קצב ושברים</button><button type="button" class="level" data-level="2" aria-pressed="false"><strong>מתקדמים</strong>יחסים וחזקות</button><button type="button" class="level" data-level="3" aria-pressed="false"><strong>אתגר</strong>פונקציות וצלילים</button><button type="button" class="level" data-level="4" aria-pressed="false"><strong>אתגר ו׳</strong>מעבר לתוכנית</button></div><button type="button" id="begin" class="primary">מתחילים לנגן</button></div>
-<div id="quiz" class="card hidden"><div class="topline"><span id="counter" role="status" aria-live="polite"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><div id="unitResumeBar" data-testid="unit-resume-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="התקדמות ביחידה"><span id="unitResumeFill" style="display:block;height:8px;width:0%"></span><span id="unitResumeText">0 מתוך 10 · 0%</span></div><button type="button" id="unitSkipBtn" class="secondary" data-testid="skip-to-recommended">דילוג מבוקר לתרגיל המומלץ הבא</button><span id="meta" class="tag"></span><h2 id="prompt" class="prompt"></h2><div id="practiceNumberPlay" class="number-play-slot"></div><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check" data-tap="xylo">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button><button type="button" id="quizCancel" class="secondary no-print">ביטול וחזרה</button></div>
+<div id="quiz" class="card hidden"><div class="topline"><span id="counter" role="status" aria-live="polite"></span><span id="score"></span></div><div class="progress"><span id="bar"></span></div><div id="unitResumeBar" data-testid="unit-resume-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="התקדמות ביחידה"><span id="unitResumeFill" style="display:block;height:8px;width:0%"></span><span id="unitResumeText">0 מתוך 10 · 0%</span><span id="unitResumeStageText" class="tag" style="margin-right:6px">שלב 1 · חושבים</span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;"><button type="button" id="unitSkipBtn" class="secondary" data-testid="skip-to-recommended">דילוג מבוקר לתרגיל המומלץ הבא</button><nav id="unitQuickNavPills" class="unit-quick-nav-pills" aria-label="מעבר מהיר בין יחידות" style="display:flex;gap:6px;"></nav></div><span id="meta" class="tag"></span><h2 id="prompt" class="prompt">תרגיל</h2><div id="practiceNumberPlay" class="number-play-slot"></div><div class="answer-row"><label class="sr-only" for="answer">תשובה</label><input id="answer" dir="ltr" autocomplete="off" placeholder="הקלידו תשובה (למשל 3 או 3:2)" aria-label="תשובה"><button type="button" id="check" data-tap="xylo">בדיקה</button></div><div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div><button type="button" id="next" class="primary hidden">לתרגיל הבא</button><button type="button" id="finish" class="secondary hidden">סיום וסיכום</button><button type="button" id="quizCancel" class="secondary no-print">ביטול וחזרה</button></div>
 <div id="summary" class="card hidden"><span class="tag">הדרן</span><h2>סיכום האימון</h2><div id="stats" class="session"></div><p id="summaryText"></p><button type="button" id="again" class="primary">אימון חדש</button></div></section>
 <section id="classMode" class="panel" role="tabpanel" aria-labelledby="tab-classMode" hidden><div class="card" id="classGate">
   <span class="tag">מפגש תרגול · 8 דקות · הכיתה שנבחרה</span>
@@ -1113,37 +1113,66 @@ function syncPracticeResumeUI(){
   const total=10;const done=history.length;
   const bar=$('unitResumeBar');
   const pct=typeof resumeProgressPercent==='function'?resumeProgressPercent({questionIndex:done},total):(typeof unitProgressPercent==='function'?unitProgressPercent(done,total):Math.min(100,Math.round((done/total)*100)));
+  const stg=answered?'why':'think';
+  const stgLabel=typeof resumeStageLabel==='function'?resumeStageLabel(stg):(answered?'שלב 3 · למה':'שלב 1 · חושבים');
   if(bar){
     bar.setAttribute('aria-valuenow',String(pct));
     if($('unitResumeFill'))$('unitResumeFill').style.width=pct+'%';
     if($('unitResumeText'))$('unitResumeText').textContent=(Math.min(done+1,total))+' מתוך '+total+' · '+pct+'%';
+    if($('unitResumeStageText'))$('unitResumeStageText').textContent=stgLabel;
+  }
+  const levels=[{id:'practice-level-1',questions:new Array(10)},{id:'practice-level-2',questions:new Array(10)},{id:'practice-level-3',questions:new Array(10)},{id:'practice-level-4',questions:new Array(10)}];
+  const prog={};
+  const whoObj=typeof who!=='undefined'?who:null;
+  if(whoObj&&whoObj.name&&typeof listUnitResumes==='function'){
+    try{listUnitResumes(whoObj.classCode,whoObj.name).forEach(r=>{prog[r.unitId]={index:r.questionIndex,results:{}};});}catch(e){}
   }
   const skipBtn=$('unitSkipBtn');
   if(skipBtn){
-    const levels=[{id:'practice-level-1',questions:new Array(10)},{id:'practice-level-2',questions:new Array(10)},{id:'practice-level-3',questions:new Array(10)},{id:'practice-level-4',questions:new Array(10)}];
-    const prog={};
-    const whoObj=typeof who!=='undefined'?who:null;
-    if(whoObj&&whoObj.name&&typeof listUnitResumes==='function'){
-      try{listUnitResumes(whoObj.classCode,whoObj.name).forEach(r=>{prog[r.unitId]={index:r.questionIndex,results:{}};});}catch(e){}
-    }
     const recId=typeof recommendedUnitId==='function'?recommendedUnitId(levels,prog):null;
     const ok=typeof canSkipToUnit==='function'?canSkipToUnit(levels,prog,recId):true;
     if(recId)skipBtn.setAttribute('data-target',recId);
     if(!ok&&history.length>=9)skipBtn.setAttribute('disabled','true');else skipBtn.removeAttribute('disabled');
   }
-  const whoObj=typeof who!=='undefined'?who:null;
-  if(whoObj&&whoObj.name&&typeof saveUnitResume==='function'){
-    try{
-      saveUnitResume(whoObj.classCode,whoObj.name,{
-        unitId:'practice-level-'+chosenLevel,
-        questionIndex:done,
-        questionId:current?current.id:'',
-        stage:answered?'why':'think',
-        view:'exercise',
-        sessionKind:'practice',
-        classSession:false
-      });
-    }catch(e){}
+  const qNav=$('unitQuickNavPills');
+  if(qNav){
+    qNav.innerHTML=[1,2,3,4].map(lvl=>{
+      const isCur=lvl===chosenLevel;
+      return '<button type="button" class="secondary" style="font-size:0.75rem;padding:2px 6px;'+(isCur?'font-weight:bold;border-color:var(--purple);':'')+'" data-lvl="'+lvl+'">רמה '+lvl+(isCur?' ★':'')+'</button>';
+    }).join('');
+    qNav.querySelectorAll('button').forEach(btn=>{
+      btn.onclick=()=>{
+        const targetLvl=Number(btn.getAttribute('data-lvl'));
+        if(targetLvl&&targetLvl!==chosenLevel){
+          if(whoObj&&whoObj.name&&typeof saveUnitResume==='function'){
+            try{saveUnitResume(whoObj.classCode,whoObj.name,{unitId:'practice-level-'+chosenLevel,questionIndex:done,stage:stg,view:'exercise',sessionKind:'practice',classSession:false});}catch(e){}
+          }
+          chosenLevel=targetLvl;
+          document.querySelectorAll('.levels .level').forEach(x=>{x.classList.toggle('selected',+x.dataset.level===chosenLevel);x.setAttribute('aria-pressed',+x.dataset.level===chosenLevel?'true':'false')});
+          history=[];
+          if(whoObj&&whoObj.name&&typeof loadUnitResume==='function'){
+            try{const res=loadUnitResume(whoObj.classCode,whoObj.name,'practice-level-'+chosenLevel);if(res&&res.questionIndex>0&&res.questionIndex<10){for(let i=0;i<res.questionIndex;i++)history.push({id:0,correct:true,resumed:true});}}catch(e){}
+          }
+          renderExercise();
+        }
+      };
+    });
+  }
+  if(whoObj&&whoObj.name){
+    if(typeof quickResumeUnit==='function'){try{quickResumeUnit(whoObj.classCode,whoObj.name,levels);}catch(e){}}
+    if(typeof saveUnitResume==='function'){
+      try{
+        saveUnitResume(whoObj.classCode,whoObj.name,{
+          unitId:'practice-level-'+chosenLevel,
+          questionIndex:done,
+          questionId:current?current.id:'',
+          stage:stg,
+          view:'exercise',
+          sessionKind:'practice',
+          classSession:false
+        });
+      }catch(e){}
+    }
   }
 }
 function renderExercise(){current=nextExercise();answered=false;$('counter').textContent=`תרגיל ${history.length+1} מתוך 10`;$('score').textContent=`${history.filter(x=>x.correct).length} נכונות`;$('bar').style.width=`${history.length*10}%`;const tag=beyondLabel(current);$('meta').textContent=`רמה ${current.level} · ${current.musicConcept} × ${current.mathTopic}${tag?' · '+tag:''}`;setMath($('prompt'),childPrompt(current));const music=extraMusic(current);if(music&&music.clicks&&typeof playCountClicks==='function'){playCountClicks(music.clicks,music.bpm);if(typeof setNumberPlay==='function')setNumberPlay('practiceNumberPlay',{noMusic:true})}else if(music&&music.notes){playExtraNotes(music.notes);if(typeof setNumberPlay==='function')setNumberPlay('practiceNumberPlay',{noMusic:true})}else if(typeof setNumberPlay==='function')setNumberPlay('practiceNumberPlay',current);$('answer').value='';$('answer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('check',current);$('check').disabled=false;show('feedback',false);show('next',false);show('finish',history.length>0);const cue=openCue();if(!music||!(music.clicks||music.notes))maybeHear(current);else if(cue)cue.seen(current);setActiveHear(null);speakTerm(current);if(typeof syncPracticeResumeUI==='function')syncPracticeResumeUI();setTimeout(()=>$('answer').focus(),0)}
