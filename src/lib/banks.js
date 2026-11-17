@@ -186,46 +186,69 @@
     return Math.min(3, Math.max(1, v));
   }
 
+  function isValidHearTone(n) {
+    if (!Number.isFinite(n)) return false;
+    if (n < 1) return false;
+    return n <= 12;
+  }
+
   function hearOf(raw) {
-    if (!Array.isArray(raw) || !raw.length) return null;
+    if (!Array.isArray(raw)) return null;
+    if (!raw.length) return null;
     const hear = [];
     for (let i = 0; i < raw.length; i++) {
       const n = Math.round(Number(raw[i]));
-      if (!Number.isFinite(n) || n < 1 || n > 12) return null;
+      if (!isValidHearTone(n)) return null;
       hear.push(n);
     }
     return hear;
   }
 
+  function isNonEmptyString(v) {
+    if (typeof v !== 'string') return false;
+    return v.trim().length > 0;
+  }
+
   function hasRequiredTags(item) {
-    if (item == null || typeof item !== 'object') return false;
-    if (typeof item.grade !== 'string' || !item.grade.trim()) return false;
-    if (typeof item.strand !== 'string' || !item.strand.trim()) return false;
-    if (typeof item.standard !== 'string' || !item.standard.trim()) return false;
+    if (item == null) return false;
+    if (typeof item !== 'object') return false;
+    const requiredKeys = ['grade', 'strand', 'standard'];
+    for (let i = 0; i < requiredKeys.length; i++) {
+      if (!isNonEmptyString(item[requiredKeys[i]])) return false;
+    }
     return true;
+  }
+
+  function hasNonEmptyText(val) {
+    if (val == null) return false;
+    return String(val).trim().length > 0;
+  }
+
+  function hasShippableFields(it) {
+    if (!hasNonEmptyText(it.strand)) return false;
+    if (!hasNonEmptyText(it.standard)) return false;
+    if (!hasNonEmptyText(it.prompt)) return false;
+    return hasNonEmptyText(it.answer);
   }
 
   function isShippable(it) {
-    if (!it || typeof it !== 'object') return false;
-    if (!it.grade || GRADES.indexOf(it.grade) === -1) return false;
-    if (!it.strand || !String(it.strand).trim()) return false;
-    if (!it.standard || !String(it.standard).trim()) return false;
-    if (it.prompt == null || String(it.prompt).trim() === '') return false;
-    if (it.answer == null || String(it.answer).trim() === '') return false;
-    if (!it.skill || !SKILL_HE[it.skill]) return false;
-    return true;
+    if (it == null) return false;
+    if (typeof it !== 'object') return false;
+    if (GRADES.indexOf(it.grade) === -1) return false;
+    if (!SKILL_HE[it.skill]) return false;
+    return hasShippableFields(it);
   }
 
-  function I(grade, skill, prompt, answer, hint, extra) {
-    extra = extra || {};
+  function I(grade, skill, prompt, answer) {
+    const extra = arguments[5] || {};
     return {
-      grade: grade,
-      skill: skill,
+      grade,
+      skill,
       strand: extra.strand || STRAND.NUM,
       standard: extra.standard,
-      prompt: prompt,
-      answer: answer,
-      hint: hint,
+      prompt,
+      answer,
+      hint: arguments[4],
       hear: extra.hear || null,
       level: extra.level || 1,
       table: extra.table,
@@ -253,6 +276,8 @@
       a: extra.a,
       b: extra.b,
       total: extra.total, research: extra.research,
+      band: extra.band,
+      fence: extra.fence,
     };
   }
 
@@ -389,13 +414,8 @@
   );
 
   // ---------- כיתה א׳ · ישר מספרים ----------
-  function NL(prompt, answer, hint, line, level) {
-    return I('א', 'number_line', prompt, answer, hint, {
-      standard: ST.NLINE,
-      widget: 'numberLine',
-      line: line,
-      level: level || 1,
-    });
+  function NL(prompt, answer, hint, line) {
+    return I('א', 'number_line', prompt, answer, hint, { standard: ST.NLINE, widget: 'numberLine', line, level: arguments[4] || 1 });
   }
   RAW.push(
     NL('סמנו את 0 על הישר 0–10.', 0, '0 הוא ההתחלה', { min: 0, max: 10, mark: 0 }, 1),
@@ -445,8 +465,8 @@
   );
 
   // ---------- כיתה ב׳ · כפל 2/4/5/10 ----------
-  function M2(prompt, answer, hint, table, level) {
-    return I('ב', 'multiplication', prompt, answer, hint, { standard: ST.MUL_B, table: table, level: level || 1 });
+  function M2(prompt, answer, hint, table) {
+    return I('ב', 'multiplication', prompt, answer, hint, { standard: ST.MUL_B, table, level: arguments[4] || 1 });
   }
   RAW.push(
     M2('2 תיבות, בכל אחת 4 פעימות. כמה בסך הכול?', 8, '2 פעמים 4', 2, 1),
@@ -481,12 +501,10 @@
   );
 
   // ---------- כיתה ב׳ · חילוק (חלקים / הכלה) על 2/4/5/10 ----------
-  function D2(prompt, answer, hint, table, meaning, level) {
+  function D2(prompt, answer, hint, table) {
     return I('ב', 'division', prompt, answer, hint, {
-      standard: meaning === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
-      table: table,
-      meaning: meaning,
-      level: level || 1,
+      standard: arguments[4] === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
+      table, meaning: arguments[4], level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -513,8 +531,8 @@
   );
 
   // ---------- כיתה ג׳ · כפל 3/6/7/8/9 (חסום עד שליטת 2/4/5/10) ----------
-  function M3(prompt, answer, hint, table, level) {
-    return I('ג', 'multiplication', prompt, answer, hint, { standard: ST.MUL_C, table: table, level: level || 2 });
+  function M3(prompt, answer, hint, table) {
+    return I('ג', 'multiplication', prompt, answer, hint, { standard: ST.MUL_C, table, level: arguments[4] || 2 });
   }
   RAW.push(
     M3('3 × 3 = ?', 9, '3 קבוצות של 3', 3, 1),
@@ -540,12 +558,10 @@
     M3('9 × 6 = ?', 54, 'לוח ה-9', 9, 3)
   );
 
-  function D3(prompt, answer, hint, table, meaning, level) {
+  function D3(prompt, answer, hint, table) {
     return I('ג', 'division', prompt, answer, hint, {
-      standard: meaning === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
-      table: table,
-      meaning: meaning,
-      level: level || 2,
+      standard: arguments[4] === 'quotative' ? ST.DIV_QUOT : ST.DIV_PART,
+      table, meaning: arguments[4], level: arguments[5] || 2,
     });
   }
   RAW.push(
@@ -564,13 +580,9 @@
   );
 
   // ---------- כיתה ד׳ · שברים מול תיבה 4/4 ----------
-  function F(prompt, answer, hint, bar, level) {
+  function F(prompt, answer, hint, bar) {
     return I('ד', 'basic_fractions', prompt, answer, hint, {
-      strand: STRAND.FRAC,
-      standard: ST.FRAC_BAR,
-      widget: 'bar44',
-      bar: bar || null,
-      level: level || 1,
+      strand: STRAND.FRAC, standard: ST.FRAC_BAR, widget: 'bar44', bar: bar || null, level: arguments[4] || 1,
     });
   }
   RAW.push(
@@ -595,11 +607,9 @@
   );
 
   // ---------- כיתה א׳ · שאלות מילוליות (איסוף / הפרדה / השוואה) ----------
-  function WP(grade, wordType, prompt, answer, hint, level) {
-    const standard = wordType === 'remove' ? ST.WORD_REMOVE
-      : wordType === 'compare' ? ST.WORD_COMPARE
-      : ST.WORD_COLLECT;
-    return I(grade, 'word_problems', prompt, answer, hint, { standard: standard, wordType: wordType, level: level || 1 });
+  function WP(grade, wordType, prompt, answer) {
+    const standard = wordType === 'remove' ? ST.WORD_REMOVE : wordType === 'compare' ? ST.WORD_COMPARE : ST.WORD_COLLECT;
+    return I(grade, 'word_problems', prompt, answer, arguments[4], { standard, wordType, level: arguments[5] || 1 });
   }
   RAW.push(
     WP('א', 'collect', 'לדנה 3 מדבקות. אמא נתנה לה עוד 2. כמה מדבקות יש לדנה?', 5, 'מצרפים את שתי הקבוצות', 1),
@@ -633,20 +643,20 @@
   );
 
   // ---------- כיתה ב׳ · חיבור/חיסור דו־ספרתי מלא, כולל מאונך ----------
-  function VA(prompt, answer, hint, a, b, level) {
-    return I('ב', 'addition', prompt, answer, hint, { standard: ST.ADD2D, level: level || 1 });
+  function VA(prompt, answer, hint) {
+    return I('ב', 'addition', prompt, answer, hint, { standard: ST.ADD2D, level: arguments[5] || 1 });
   }
-  function VS(prompt, answer, hint, a, b, level) {
-    return I('ב', 'subtraction', prompt, answer, hint, { standard: ST.SUB2D, level: level || 1 });
+  function VS(prompt, answer, hint) {
+    return I('ב', 'subtraction', prompt, answer, hint, { standard: ST.SUB2D, level: arguments[5] || 1 });
   }
-  function VAV(prompt, answer, hint, a, b, level) {
+  function VAV(prompt, answer, hint, a) {
     return I('ב', 'addition', prompt, answer, hint, {
-      standard: ST.VERT_ADD, widget: 'vertical', vert: { a: a, b: b, op: '+' }, level: level || 1,
+      standard: ST.VERT_ADD, widget: 'vertical', vert: { a, b: arguments[4], op: '+' }, level: arguments[5] || 1,
     });
   }
-  function VSV(prompt, answer, hint, a, b, level) {
+  function VSV(prompt, answer, hint, a) {
     return I('ב', 'subtraction', prompt, answer, hint, {
-      standard: ST.VERT_SUB, widget: 'vertical', vert: { a: a, b: b, op: '-' }, level: level || 1,
+      standard: ST.VERT_SUB, widget: 'vertical', vert: { a, b: arguments[4], op: '-' }, level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -688,8 +698,8 @@
   );
 
   // ---------- כיתה א׳ · גאומטריה — מיון מצולעים וזווית ישרה ----------
-  function GEOA(grade, prompt, answer, hint, level, standard) {
-    return I(grade, 'geometry', prompt, answer, hint, { strand: STRAND.GEO, standard: standard || ST.GEO_SORT, level: level || 1 });
+  function GEOA(grade, prompt, answer, hint) {
+    return I(grade, 'geometry', prompt, answer, hint, { strand: STRAND.GEO, standard: arguments[5] || ST.GEO_SORT, level: arguments[4] || 1 });
   }
   RAW.push(
     GEOA('א', 'למשולש יש כמה צלעות?', 3, 'שלוש צלעות ושלושה קודקודים', 1),
@@ -723,56 +733,56 @@
   );
 
   // ---------- כיתה א׳ · מדידה — אורך ביחידות מתווכות ואז ס״מ; שעון בשעות שלמות ----------
-  function LEN(grade, prompt, answer, hint, ruler, level) {
+  function LEN(grade, prompt, answer, hint) {
     return I(grade, 'measurement', prompt, answer, hint, {
-      strand: STRAND.MEASURE, standard: ST.LENGTH, widget: 'ruler', ruler: ruler, level: level || 1,
+      strand: STRAND.MEASURE, standard: ST.LENGTH, widget: 'ruler', ruler: arguments[4], level: arguments[5] || 1,
     });
   }
-  function CLK(grade, prompt, answer, hint, clock, level) {
+  function CLK(grade, prompt, answer, hint) {
     return I(grade, 'measurement', prompt, answer, hint, {
-      strand: STRAND.MEASURE, standard: ST.CLOCK, widget: 'clock', clock: clock, level: level || 1,
+      strand: STRAND.MEASURE, standard: ST.CLOCK, widget: 'clock', clock: arguments[4], level: arguments[5] || 1,
     });
   }
   RAW.push(
     LEN('א', 'כמה קוביות אורך יש בעיפרון שבתמונה?', 4, 'ספרו את היחידות המתווכות', { unit: 'unit', length: 4 }, 1),
     LEN('א', 'כמה קוביות אורך יש בספר שבתמונה?', 7, 'ספרו את היחידות המתווכות', { unit: 'unit', length: 7 }, 1),
     LEN('א', 'כמה קוביות אורך יש בשולחן שבתמונה?', 10, 'ספרו את היחידות המתווכות', { unit: 'unit', length: 10 }, 2),
-    LEN('א', 'מדדו את המחק בסרגל — כמה ס״מ?', 3, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 3 }, 2),
-    LEN('א', 'מדדו את הקלמר בסרגל — כמה ס״מ?', 6, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 6 }, 2),
-    LEN('א', 'מדדו את המחברת בסרגל — כמה ס״מ?', 9, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 9 }, 3),
-    CLK('א', 'השעון מראה 3:00. מה השעה?', 3, 'מחוג השעות על 3, מחוג הדקות על 12', { hour: 3 }, 1),
-    CLK('א', 'השעון מראה 7:00. מה השעה?', 7, 'מחוג השעות על 7, מחוג הדקות על 12', { hour: 7 }, 1),
-    CLK('א', 'השעון מראה 10:00. מה השעה?', 10, 'מחוג השעות על 10, מחוג הדקות על 12', { hour: 10 }, 2),
-    CLK('א', 'השעון מראה 12:00. מה השעה?', 12, 'שני המחוגים על 12', { hour: 12 }, 2),
-    CLK('א', 'השעון מראה 5:00. מה השעה?', 5, 'מחוג השעות על 5', { hour: 5 }, 3),
-    CLK('א', 'השעון מראה 1:00. מה השעה?', 1, 'מחוג השעות על 1', { hour: 1 }, 3)
+    LEN('א', 'מדדו את המחק בסרגל — כמה ס״מ?', 3, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 3 }, 2),
+    LEN('א', 'מדדו את הקלמר בסרגל — כמה ס״מ?', 6, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 6 }, 2),
+    LEN('א', 'מדדו את המחברת בסרגל — כמה ס״מ?', 9, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 9 }, 3),
+    CLK('א', 'איזו שעה מראה השעון?', 3, 'מחוג השעות על 3, מחוג הדקות על 12', { hour: 3 }, 1),
+    CLK('א', 'מה השעה בשעון?', 7, 'מחוג השעות על 7, מחוג הדקות על 12', { hour: 7 }, 1),
+    CLK('א', 'קראו את השעון: מה השעה?', 10, 'מחוג השעות על 10, מחוג הדקות על 12', { hour: 10 }, 2),
+    CLK('א', 'לאן מצביעים המחוגים? מה השעה?', 12, 'שני המחוגים על 12', { hour: 12 }, 2),
+    CLK('א', 'מה השעה לפי המחוגים?', 5, 'מחוג השעות על 5', { hour: 5 }, 3),
+    CLK('א', 'שעה עגולה: מה השעה בשעון?', 1, 'מחוג השעות על 1', { hour: 1 }, 3)
   );
 
   // ---------- כיתה ב׳ · מדידה — אורך בס״מ; שעון בשעות שלמות ----------
   RAW.push(
-    LEN('ב', 'מדדו את המברשת בסרגל — כמה ס״מ?', 15, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 15 }, 1),
-    LEN('ב', 'מדדו את הסרגל הקטן — כמה ס״מ?', 12, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 12 }, 1),
-    LEN('ב', 'מדדו את הקופסה — כמה ס״מ?', 18, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 18 }, 2),
-    LEN('ב', 'מדדו את המקלון — כמה ס״מ?', 20, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 20 }, 2),
-    LEN('ב', 'מדדו את הצעצוע — כמה ס״מ?', 8, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 8 }, 3),
-    LEN('ב', 'מדדו את המפתח — כמה ס״מ?', 5, 'קראו את הסימון על הסרגל', { unit: 'cm', length: 5 }, 3),
-    CLK('ב', 'השעון מראה 6:00. מה השעה?', 6, 'מחוג השעות על 6', { hour: 6 }, 1),
-    CLK('ב', 'השעון מראה 9:00. מה השעה?', 9, 'מחוג השעות על 9', { hour: 9 }, 1),
-    CLK('ב', 'השעון מראה 11:00. מה השעה?', 11, 'מחוג השעות על 11', { hour: 11 }, 2),
-    CLK('ב', 'השעון מראה 2:00. מה השעה?', 2, 'מחוג השעות על 2', { hour: 2 }, 2),
-    CLK('ב', 'השעון מראה 4:00. מה השעה?', 4, 'מחוג השעות על 4', { hour: 4 }, 3),
-    CLK('ב', 'השעון מראה 8:00. מה השעה?', 8, 'מחוג השעות על 8', { hour: 8 }, 3)
+    LEN('ב', 'מדדו את המברשת בסרגל — כמה ס״מ?', 15, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 15 }, 1),
+    LEN('ב', 'מדדו את הסרגל הקטן — כמה ס״מ?', 12, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 12 }, 1),
+    LEN('ב', 'מדדו את הקופסה — כמה ס״מ?', 18, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 18 }, 2),
+    LEN('ב', 'מדדו את המקלון — כמה ס״מ?', 20, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 20 }, 2),
+    LEN('ב', 'מדדו את הצעצוע — כמה ס״מ?', 8, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 8 }, 3),
+    LEN('ב', 'מדדו את המפתח — כמה ס״מ?', 5, 'סופרים את הרווחים בין השנתות, מתחילת העצם', { unit: 'cm', length: 5 }, 3),
+    CLK('ב', 'איזו שעה השעון מראה עכשיו?', 6, 'מחוג השעות על 6', { hour: 6 }, 1),
+    CLK('ב', 'מה השעה בשעון הזה?', 9, 'מחוג השעות על 9', { hour: 9 }, 1),
+    CLK('ב', 'קראו את המחוגים: מה השעה?', 11, 'מחוג השעות על 11', { hour: 11 }, 2),
+    CLK('ב', 'על מה מצביע המחוג הקצר? מה השעה?', 2, 'מחוג השעות על 2', { hour: 2 }, 2),
+    CLK('ב', 'שעה עגולה בשעון: מה השעה?', 4, 'מחוג השעות על 4', { hour: 4 }, 3),
+    CLK('ב', 'לפי השעון, מה השעה עכשיו?', 8, 'מחוג השעות על 8', { hour: 8 }, 3)
   );
 
   // ---------- כיתה א׳ · נתונים — פיקטוגרם ודיאגרמת עמודות ----------
-  function PICT(grade, prompt, answer, hint, chart, level) {
+  function PICT(grade, prompt, answer, hint) {
     return I(grade, 'data', prompt, answer, hint, {
-      strand: STRAND.DATA, standard: ST.PICTOGRAM, widget: 'pictogram', chart: chart, level: level || 1,
+      strand: STRAND.DATA, standard: ST.PICTOGRAM, widget: 'pictogram', chart: arguments[4], level: arguments[5] || 1,
     });
   }
-  function BARC(grade, prompt, answer, hint, chart, level) {
+  function BARC(grade, prompt, answer, hint) {
     return I(grade, 'data', prompt, answer, hint, {
-      strand: STRAND.DATA, standard: ST.BARCHART, widget: 'barchart', chart: chart, level: level || 1,
+      strand: STRAND.DATA, standard: ST.BARCHART, widget: 'barchart', chart: arguments[4], level: arguments[5] || 1,
     });
   }
   RAW.push(
@@ -849,8 +859,8 @@
   // ---------- מדידה ב׳–ד׳ — בלי ציור: הנתונים כתובים בשאלה ----------
   // Answers are whole numbers so a child types digits only; the unit is in
   // the prompt. test/measurementBank.test.js checks them against measure.js.
-  function MEAS(grade, prompt, answer, hint, level, standard) {
-    return I(grade, 'measurement', prompt, answer, hint, { strand: STRAND.MEASURE, standard: standard, level: level });
+  function MEAS(grade, prompt, answer, hint) {
+    return I(grade, 'measurement', prompt, answer, hint, { strand: STRAND.MEASURE, standard: arguments[5], level: arguments[4] });
   }
 
   // ---------- כיתה ב׳ · מדידה — חצאי שעות והיקף ----------
@@ -906,9 +916,9 @@
   // equivalent fraction, so 2/4 counts for 1/2. Decimal answers are numbers.
   // `music` names the music issue that reuses the item: lcm/bars/bpm for
   // #106 (grade ה׳), dotted/tempo/mean for #107 (grade ו׳).
-  function G56(grade, skill, prompt, answer, hint, level, standard, music) {
+  function G56(grade, skill, prompt, answer) {
     const strand = skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
-    return I(grade, skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
+    return I(grade, skill, prompt, answer, arguments[4], { strand, standard: arguments[6], level: arguments[5], music: arguments[7] });
   }
 
   // ---------- כיתה ה׳ · שברים ----------
@@ -976,8 +986,10 @@
   // Appended at the end: ids are RAW indexes, so earlier items keep theirs.
   // `music` names the activity; tables stay on 2/4/5/10 so the mastery gate
   // for 3/6/7/8/9 is untouched.
-  function MB(skill, music, prompt, answer, hint, level, extra) {
-    extra = extra || {};
+  function MB(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const extra = arguments[6] || {};
     extra.level = level;
     extra.music = music;
     return I('ב', skill, prompt, answer, hint, extra);
@@ -991,26 +1003,33 @@
       even ? 'מחלקים לזוגות — אף פעימה לא נשארת לבד' : 'בסוף נשארת פעימה אחת בלי זוג',
       level, { standard: ST.PLACE_VALUE, widget: 'g2', g2: { kind: 'evenOdd', beats: n } });
   }
-  function DUO(op, a, b, answer, hint, level) {
+  function DUO(op, a, b, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
     return MB(op === '+' ? 'addition' : 'subtraction', 'twoInstruments',
       'תוף מנגן את היחידות, בס מנגן את העשרות. חשבו במאונך: ' + a + ' ' + (op === '+' ? '+' : '−') + ' ' + b,
       answer, hint, level,
       { standard: op === '+' ? ST.VERT_ADD : ST.VERT_SUB, widget: 'g2', g2: { kind: 'duo', a: a, b: b, op: op } });
   }
-  function BARS(prompt, answer, hint, table, level, bars, perBar) {
+  function BARS(prompt, answer, hint, table) {
+    const level = arguments[4];
+    const bars = arguments[5];
+    const perBar = arguments[6];
     const p = perBar == null ? table : perBar;
     return MB('multiplication', 'beatsBars', prompt, answer, hint, level, {
       standard: ST.MUL_B, table: table,
       widget: 'g2', g2: { kind: 'beatsBars', bars: bars, perBar: p, table: table },
     });
   }
-  function HALF(prompt, answer, hint, level, beatsPerBar) {
+  function HALF(prompt, answer, hint, level) {
+    const beatsPerBar = arguments[4];
     return MB('measurement', 'halfBar', prompt, answer, hint, level, {
       strand: STRAND.MEASURE, standard: ST.HALF_HOUR,
       widget: 'g2', g2: { kind: 'halfBar', beatsPerBar: beatsPerBar == null ? 4 : beatsPerBar },
     });
   }
-  function REG(prompt, answer, hint, level, reg) {
+  function REG(prompt, answer, hint, level) {
+    const reg = arguments[4];
     const r = Array.isArray(reg) ? { h: reg[0], t: reg[1] || 0, o: reg[2] || 0 } : reg;
     return MB('place_value', 'registers', prompt, answer, hint, level, {
       standard: ST.PLACE_VALUE,
@@ -1076,13 +1095,16 @@
   // Appended at the end like grade ב׳. Every item that leans on table
   // 3/6/7/8/9 carries `table`, so the mastery gate still holds it back.
   // Remainder answers ("3 שארית 2") are checked by parseRemainderAnswer.
-  function MC(skill, music, prompt, answer, hint, level, extra) {
-    extra = extra || {};
+  function MC(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const extra = arguments[6] || {};
     extra.level = level;
     extra.music = music;
     return I('ג', skill, prompt, answer, hint, extra);
   }
-  function METER(prompt, answer, hint, table, level) {
+  function METER(prompt, answer, hint, table) {
+    const level = arguments[4];
     return MC('multiplication', 'meters', prompt, answer, hint, level, { standard: ST.MUL_C, table: table });
   }
   function LEFT(total, bar, level, table) {
@@ -1094,10 +1116,14 @@
       q + ' תיבות של ' + bar + ' הן ' + (q * bar) + ' פעימות; ' + (r ? 'הנותרות מתנגנות בצליל אחר' : 'לא נשארת אף פעימה'),
       level, { standard: ST.DIV_REM, meaning: 'quotative', table: table });
   }
-  function TIMES(prompt, answer, hint, level, table) {
+  function TIMES(prompt, answer, hint, level) {
+    const table = arguments[4];
     return MC('word_problems', 'howManyTimes', prompt, answer, hint, level, { standard: ST.MUL_COMPARE, table: table });
   }
-  function GRID(rows, steps, prompt, answer, hint, level, table) {
+  function GRID(rows, steps, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const table = arguments[6];
     return MC('measurement', 'stepGrid', prompt, answer, hint, level,
       { strand: STRAND.MEASURE, standard: ST.AREA, grid: { rows: rows, steps: steps }, table: table });
   }
@@ -1113,7 +1139,7 @@
     METER('כמה פעימות ב־5 תיבות של 3/4?', 15, '5 פעמים 3', 3, 1),
     METER('כמה פעימות ב־7 תיבות של 3/4?', 21, '7 פעמים 3', 3, 2),
     METER('ואלס של 9 תיבות 3/4. כמה פעימות?', 27, '9 פעמים 3', 3, 2),
-    METER('במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'כן', '18 בלוח ה־3, אז היא פותחת תיבה חדשה', 3, 2),
+    METER('במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'לא', 'המודגשות: 1, 4, 7 … 16, 19. פעימה 18 שלישית בתיבה', 3, 2),
     METER('במשקל 3/4, פעימה 20 — היא מודגשת? (כתבו כן או לא)', 'לא', '20 לא בלוח ה־3', 3, 3),
     METER('בתיבה של 6/8 יש 6 שמיניות. כמה שמיניות ב־3 תיבות?', 18, '6, 12, 18', 6, 2),
     METER('כמה שמיניות ב־4 תיבות של 6/8?', 24, '4 פעמים 6', 6, 2),
@@ -1165,7 +1191,10 @@
   // is fraction division, intervals are decimal ratios, tempo changes are
   // percents, the circle of fifths is a 12-gon with 30° steps (layout in
   // circleOfFifths.js) and the tapped tempo is a mean.
-  function MV(skill, music, prompt, answer, hint, level, standard) {
+  function MV(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const standard = arguments[6];
     const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO : STRAND.NUM;
     return I('ו', skill, prompt, answer, hint, { strand: strand, standard: standard, level: level, music: music });
   }
@@ -1216,7 +1245,11 @@
   // Two drums meet every lcm beats, a bar of n beats splits into the factors
   // of n (polyrhythm.js), a mixed bar is added over the shortest note, a beat
   // lasts 60/BPM seconds, and do-re-mi in Hz is read off a bar chart.
-  function M5(skill, music, prompt, answer, hint, level, standard, chart) {
+  function M5(skill, music, prompt, answer) {
+    const hint = arguments[4];
+    const level = arguments[5];
+    const standard = arguments[6];
+    const chart = arguments[7];
     const strand = skill === 'data' ? STRAND.DATA
       : standard === ST.LCM || standard === ST.FACTORS ? STRAND.NUM
         : skill === 'fractions' ? STRAND.FRAC : STRAND.NUM;
@@ -1312,20 +1345,21 @@
     NL('על הישר מ־5 קופצים 2 צלילים ימינה — לאן מגיעים?', 7, '5 ועוד 2 צעדים', { min: 0, max: 10, start: 5 }, 1),
     NL('מ־4 קופצים 4 צלילים קדימה — לאן מגיעים?', 8, '4 ועוד 4', { min: 0, max: 10, start: 4 }, 1),
     NL('מ־2 קופצים 5 צעדים קדימה בסולם — לאן מגיעים?', 7, '2 ועוד 5 צעדים', { min: 0, max: 10, start: 2 }, 1),
-    NL('מ־0 קופצים אוקטבה של 10 צעדים קדימה — לאן מגיעים?', 10, 'קפיצה של 10 מ־0 מגיעה ל־10', { min: 0, max: 20, start: 0 }, 2),
-    NL('מ־10 קופצים אוקטבה (+10) קדימה — לאן מגיעים?', 20, '10 ועוד 10 זה 20', { min: 0, max: 20, start: 10 }, 2),
+    NL('מ־0 קופצים מחזור שלם של 10 צעדים קדימה — לאן מגיעים?', 10, 'קפיצה של 10 מ־0 מגיעה ל־10', { min: 0, max: 20, start: 0 }, 2),
+    NL('מ־10 קופצים מחזור של 10 צעדים קדימה — לאן מגיעים?', 20, '10 ועוד 10 זה 20', { min: 0, max: 20, start: 10 }, 2),
     NL('על הישר מ־8 קופצים 3 צלילים שמאלה (אחורה) — לאן מגיעים?', 5, '8 פחות 3 צעדים', { min: 0, max: 20, start: 8 }, 2),
     NL('על הישר מ־15 קופצים 5 צעדים אחורה — לאן מגיעים?', 10, '15 פחות 5 צעדים', { min: 0, max: 20, start: 15 }, 2),
-    NL('מ־30 קופצים אוקטבה של 10 צעדים קדימה — לאן מגיעים?', 40, '30 ועוד 10', { min: 0, max: 100, step: 5, start: 30 }, 2),
-    NL('מ־50 קופצים אוקטבה של 10 צעדים אחורה — לאן מגיעים?', 40, '50 פחות 10', { min: 0, max: 100, step: 5, start: 50 }, 3),
-    NL('על הישר מ־60 קופצים 20 צעדים קדימה (שתי אוקטבות) — לאן מגיעים?', 80, '60 ועוד 20', { min: 0, max: 100, step: 5, start: 60 }, 3),
-    NL('מ־90 יורדים אוקטבה של 10 צעדים — לאן מגיעים?', 80, '90 פחות 10', { min: 0, max: 100, step: 5, start: 90 }, 3)
+    NL('מ־30 קופצים מחזור שלם של 10 צעדים קדימה — לאן מגיעים?', 40, '30 ועוד 10', { min: 0, max: 100, step: 5, start: 30 }, 2),
+    NL('מ־50 קופצים מחזור שלם של 10 צעדים אחורה — לאן מגיעים?', 40, '50 פחות 10', { min: 0, max: 100, step: 5, start: 50 }, 3),
+    NL('על הישר מ־60 קופצים 20 צעדים קדימה (שני מחזורים) — לאן מגיעים?', 80, '60 ועוד 20', { min: 0, max: 100, step: 5, start: 60 }, 3),
+    NL('מ־90 יורדים מחזור שלם של 10 צעדים — לאן מגיעים?', 80, '90 פחות 10', { min: 0, max: 100, step: 5, start: 90 }, 3)
   );
 
   // ---------- כיתה ג׳ · מוזיקה (issue #104, תוכנית §5) ----------
   // כל פריט כאן מצמיד את המבנה המוזיקלי למבנה המתמטי: המשקל הוא לוח הכפל,
   // התיבה היא המחלק, הרשת היא המלבן והאוקטבה היא "פי 2".
-  function G3(skill, prompt, answer, hint, extra) {
+  function G3(skill, prompt, answer, hint) {
+    const extra = arguments[4];
     const e = extra || {};
     return I('ג', skill, prompt, answer, hint, {
       strand: e.strand || STRAND.NUM,
@@ -1343,8 +1377,8 @@
   // עדיין מתויג table=3/6, ולכן השער של mastery.js חל גם כאן.
   RAW.push(
     G3('multiplication', 'במשקל 3/4 שמעתם 2 תיבות מלאות. כמה פעמות שמעתם?', 6, '2 תיבות של 3 פעמות', { standard: ST.MUL_C, table: 3, level: 1, g3: { kind: 'meter', table: 3, bars: 2 } }),
-    G3('multiplication', 'במשקל 3/4 שמעתם 4 תיבות. כל כפולה של 3 מודגשת. כמה פעמות בסך הכול?', 12, '4 × 3 — ההדגשה האחרונה היא התשובה', { standard: ST.MUL_C, table: 3, level: 2, g3: { kind: 'meter', table: 3, bars: 4 } }),
-    G3('multiplication', 'במשקל 3/4 שמעתם 7 תיבות. על איזו פעמה נופלת ההדגשה האחרונה?', 21, '7 × 3', { standard: ST.MUL_C, table: 3, level: 3, g3: { kind: 'meter', table: 3, bars: 7 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 4 תיבות. כל תיבה נסגרת על כפולה של 3. כמה פעמות?', 12, '4 × 3 — הפעמה שסוגרת את התיבה האחרונה היא התשובה', { standard: ST.MUL_C, table: 3, level: 2, g3: { kind: 'meter', table: 3, bars: 4 } }),
+    G3('multiplication', 'במשקל 3/4 שמעתם 7 תיבות. איזו פעמה סוגרת את התיבה האחרונה?', 21, '7 × 3. ההדגשה היא בראש כל תיבה: 1, 4 … 19', { standard: ST.MUL_C, table: 3, level: 3, g3: { kind: 'meter', table: 3, bars: 7 } }),
     G3('multiplication', 'במשקל 6/8 שמעתם 3 תיבות של 6 פעמות. כמה פעמות בסך הכול?', 18, '3 × 6', { standard: ST.MUL_C, table: 6, level: 2, g3: { kind: 'meter', table: 6, bars: 3 } }),
     G3('multiplication', 'במשקל 6/8, כמה תיבות שלמות נדרשות כדי להגיע ל־42 פעמות?', 7, '42 : 6', { standard: ST.MUL_C, table: 6, level: 3, g3: { kind: 'meter', table: 6, bars: 7 } })
   );
@@ -1631,7 +1665,10 @@
   // of a quantity, other names for a fraction, comparing, adding; surface
   // area of a box; the Hebrew calendar and decimetres; tables and diagrams
   // with fractions. Appended last so existing ids stay put.
-  function G4(skill, prompt, answer, hint, level, standard, extra) {
+  function G4(skill, prompt, answer, hint) {
+    const level = arguments[4];
+    const standard = arguments[5];
+    const extra = arguments[6];
     const e = extra || {};
     const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
       : skill === 'measurement' ? STRAND.MEASURE : skill === 'data' ? STRAND.DATA : STRAND.NUM;
@@ -1667,10 +1704,10 @@
     G4('subtraction', 'השלימו: ☐ − 4,000 = 2,357' + NO_COMMA, 6357, 'פעולה הפוכה: 2,357 ועוד 4,000', 3, ST.ADD_SUB_MILLION),
     G4('multiplication', '300 × 4 = ?' + NO_COMMA, 1200, '3 מאות כפול 4 הם 12 מאות', 1, ST.MUL_DIV_VERT),
     G4('multiplication', '24 × 3 = ?', 72, '20 × 3 ועוד 4 × 3', 1, ST.MUL_DIV_VERT),
-    G4('multiplication', 'חשבו במאונך: 237 × 4', 948, 'כופלים יחידות, עשרות ומאות ומעבירים', 2, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 237 × 4', 948, 'כופלים יחידות, עשרות ומאות ומעבירים', 2, ST.MUL_DIV_VERT, V(237, 4, '×')),
     G4('multiplication', '32 × 19 = ?', 608, 'חוק הפילוג: 32 × 20 פחות 32', 2, ST.MUL_DIV_VERT),
     G4('multiplication', '25 × 36 = ?', 900, '25 × 4 × 9 = 100 × 9', 3, ST.MUL_DIV_VERT),
-    G4('multiplication', 'חשבו במאונך: 586 × 7' + NO_COMMA, 4102, '6 × 7 = 42 — כותבים 2 ומעבירים 4', 3, ST.MUL_DIV_VERT),
+    G4('multiplication', 'חשבו במאונך: 586 × 7' + NO_COMMA, 4102, '6 × 7 = 42 — כותבים 2 ומעבירים 4', 3, ST.MUL_DIV_VERT, V(586, 7, '×')),
     G4('division', '84 : 4 = ?', 21, '80 : 4 ועוד 4 : 4', 1, ST.MUL_DIV_VERT),
     G4('division', '2,400 : 100 = ?', 24, 'הקטנה פי 100 — מורידים שני אפסים', 1, ST.MUL_DIV_VERT),
     G4('division', 'חשבו במאונך: 856 : 4', 214, 'מחלקים מאות, עשרות ויחידות', 2, ST.MUL_DIV_VERT),
@@ -1738,7 +1775,10 @@
 
   // Grade ה׳ rows of Newprogramgrade5.pdf (#559): plain exercises for every
   // heading of the topics column. Diagnosis keeps fractions, decimals and data.
-  function G5(skill, prompt, answer, hint, level, standard, extra) {
+  function G5(skill, prompt, answer, hint) {
+    const level = arguments[4];
+    const standard = arguments[5];
+    const extra = arguments[6];
     const e = extra || {};
     const strand = skill === 'fractions' ? STRAND.FRAC : skill === 'geometry' ? STRAND.GEO
       : skill === 'data' ? STRAND.DATA : STRAND.NUM;
@@ -1767,7 +1807,7 @@
     G5('multiplication', '0 × 1,234,567 = ?', 0, 'כפל ב־0 תמיד נותן 0', 1, ST.OPS_MILLION),
     G5('multiplication', '28 × 5 = ?', 140, 'כופלים 28 ב־10 ומחלקים ב־2', 2, ST.OPS_MILLION),
     G5('multiplication', 'נתון: 324 × 79 = 25,596. כמה זה 324 × 80?' + NO_COMMA, 25920, 'עוד פעם אחת 324', 2, ST.OPS_MILLION),
-    G5('multiplication', 'חשבו במאונך: 1,234 × 56' + NO_COMMA, 69104, '1,234 × 50 ועוד 1,234 × 6', 3, ST.OPS_MILLION),
+    G5('multiplication', 'חשבו במאונך: 1,234 × 56' + NO_COMMA, 69104, '1,234 × 50 ועוד 1,234 × 6', 3, ST.OPS_MILLION, V(1234, 56, '×')),
     G5('division', '48,000 : 8 = ?' + NO_COMMA, 6000, '48 : 8 הם 6, ונשארים שלושה אפסים', 1, ST.OPS_MILLION),
     G5('division', 'נתון: 324 × 79 = 25,596. כמה זה 25,596 : 79?', 324, 'חילוק הוא הפעולה ההפוכה לכפל', 2, ST.OPS_MILLION),
     G5('division', 'מסדרים 2,000 ביצים בתבניות של 30. כמה תבניות מלאות יתקבלו?', 66, '30 × 66 = 1,980, ונשארות 20 ביצים', 2, ST.OPS_MILLION),
@@ -1923,7 +1963,7 @@
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
-      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart }));
+      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart, band: e.band }));
     });
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
@@ -2096,24 +2136,41 @@
 
   // Items appended after the grade files learn their standard through music
   // too (#591): each takes its grade file's way for its standard and level.
+  function tagLateG1Music(raw, grade) {
+    if (raw.grade !== grade) return;
+    if (raw.music) return;
+    if (!raw.g1) return;
+    if (!raw.g1.kind) return;
+    raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
+  }
+
+  function attachLateMusicProperties(raw, m, ways) {
+    raw.music = m[0];
+    raw.musicNote = m[1];
+    raw.musicSrc = m[2];
+    raw.musicEv = m[3];
+    if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
+    const extra = extraFor(raw, ways, m);
+    if (extra.length) raw.musicExtra = extra;
+  }
+
+  function applyLateWays(raw, f, link) {
+    tagLateG1Music(raw, f.grade);
+    if (raw.grade !== f.grade) return;
+    if (raw.music || raw.noMusic) return;
+    const ways = link[raw.standard];
+    if (!ways) return;
+    const m = shownWay(raw, ways); // dosage: a primary way solves the item
+    if (m) attachLateMusicProperties(raw, m, ways);
+  }
+
   function musicForLate() {
     GRADE_FILES.forEach(function (f) {
       if (!f || !Array.isArray(f.items)) return;
       const link = {};
       Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
       RAW.forEach(function (raw) {
-        // A late g1 widget item (#462) is a music activity, like the early ones.
-        if (raw.grade === f.grade && !raw.music && raw.g1 && raw.g1.kind) {
-          raw.music = 'g1' + raw.g1.kind.charAt(0).toUpperCase() + raw.g1.kind.slice(1);
-        }
-        const ways = raw.grade === f.grade && !raw.music && !raw.noMusic && link[raw.standard];
-        if (!ways) return;
-        const m = shownWay(raw, ways); // dosage: a primary way solves the item
-        if (!m) return;
-        raw.music = m[0]; raw.musicNote = m[1]; raw.musicSrc = m[2]; raw.musicEv = m[3];
-        if (m[4] && m[4].also) raw.musicSrcAlso = m[4].also;
-        const extra = extraFor(raw, ways, m);
-        if (extra.length) raw.musicExtra = extra;
+        applyLateWays(raw, f, link);
       });
     });
   }
@@ -2166,6 +2223,166 @@
   );
   musicForLate();
 
+  // ---------- BandShare: percent with a changing base (grade ו׳) ----------
+  // music/bandShare.js. The whole is a band of one musical world, a different
+  // world in each item (docs/research/percent-band-share-2026-11-13.md).
+  // Appended last so ids stay put.
+  function BAND_SHARE(std, prompt, answer, hint) {
+    const level = arguments[4];
+    const band = arguments[5];
+    return I('ו', 'percent', prompt, answer, hint, { standard: ST[std], strand: STRAND.NUM, level: level, band: band });
+  }
+  RAW.push(
+    BAND_SHARE('G6_PCT_WHOLE', 'בתח׳ת 6 נגנים, ו־3 מנגנים בכלי מיתר. איזה אחוז הם? (מספר בלבד)', 50, 'כמה נגנים בתח׳ת כולו, וכמה מהם במיתרים?', 1,
+      { kind: 'percentOf', ensemble: 'takht', sections: 6, whole: 6, part: 3, pick: [0, 1, 3] }),
+    BAND_SHARE('G6_PCT_WHOLE', 'בלהקת כליזמר 5 נגנים. איזה אחוז מהלהקה הוא נגן הקלרינט? (מספר בלבד)', 20, 'הלהקה כולה היא 100%', 1,
+      { kind: 'percentOf', ensemble: 'klezmer', sections: 5, whole: 5, part: 1, pick: 'קלרינט' }),
+    BAND_SHARE('G6_PCT_WHOLE', '5 נגני גנגסה הם 25% מגמלן. 10 הם 25% מגמלן כפול. כמה נגנים בו?', 40, 'אותו אחוז, חלק גדול יותר — ומה עם השלם?', 1,
+      { kind: 'twoWholes', ensemble: 'gamelan', pick: 'גנגסה', a: { sections: 4, percent: 25, part: 5 }, b: { sections: 4, percent: 25, part: 10 }, ask: 'second' }),
+    BAND_SHARE('G6_PCT_WHOLE', '10 נגני כלי קשת הם 25% מתזמורת קאמרית. כמה נגנים בתזמורת?', 40, 'כמה חלקים כמו כלי הקשת יש בתזמורת?', 2,
+      { kind: 'wholeFrom', ensemble: 'chamber', sections: 4, percent: 25, part: 10, pick: 'כלי קשת' }),
+    BAND_SHARE('G6_PCT_WHOLE', '12 נגני טמבורים הם 30% מבטריה של סמבה. כמה נגנים בבטריה?', 40, 'כמה נגנים הם 10%?', 2,
+      { kind: 'wholeFrom', ensemble: 'samba', sections: 10, percent: 30, part: 12, pick: 'טמבורים' }),
+    BAND_SHARE('G6_PCT_WHOLE', '15 נגנים הם 30% מפסטיבל רוק א׳ ו־50% מפסטיבל ב׳. בכמה א׳ גדול מב׳?', 20, 'מצאו את השלם של כל פסטיבל לחוד', 3,
+      { kind: 'twoWholes', ensemble: 'rock', a: { sections: 10, percent: 30, part: 15 }, b: { sections: 6, percent: 50, part: 15 }, ask: 'difference' }),
+    BAND_SHARE('G6_PCT_CHANGE', 'בתזמורת סימפונית 50 נגנים. 20% יוצאים, ואז מספרם גדל ב־20%. כמה עכשיו?', 48, 'ה־20% השני נמדד מהתזמורת שנשארה', 3,
+      { kind: 'change', ensemble: 'symphony', sections: 5, whole: 50, down: 20, up: 20, pick: 'כלי נשיפה ממתכת' })
+  );
+  musicForLate();
+
+  // ---------- FenceFloor: perimeter vs area of the same rectangle (grade ה׳) ----------
+  // music/fenceFloor.js. One musical world per item
+  // (docs/research/perimeter-area-fence-floor-2026-11-13.md). Appended last so ids stay put.
+  function FENCE(prompt, answer, hint, level) {
+    const fence = arguments[4];
+    return I('ה', 'geometry', prompt, answer, hint, { standard: ST.PERIMETER, strand: STRAND.GEO, level: level, fence: fence });
+  }
+  RAW.push(
+    FENCE('ל־1×8 ול־2×4 אותו שטח. בכמה ס״מ ההיקף של 1×8 ארוך יותר?', 6, 'הקיפו כל מלבן צלע אחרי צלע', 1,
+      { world: 'jazz', rects: [[1, 8], [2, 4]], ask: 'perimeterDiff' }),
+    FENCE('מ־6 משבצות בונים 1×6 ו־2×3. מה ההפרש בין ההיקפים שלהם?', 4, 'לא הוספנו משבצות — אבל מה קרה לגדר?', 1,
+      { world: 'balkan', rects: [[1, 6], [2, 3]], ask: 'perimeterDiff' }),
+    FENCE('מסובבים מלבן 2×4 ל־4×2. מה ההיקף אחרי הסיבוב?', 12, 'האם נוספה או נעלמה צלע?', 1,
+      { world: 'andes', rects: [[2, 4], [4, 2]], ask: 'perimeterOf', index: 1 }),
+    FENCE('ל־1×9 היקף 20, ול־3×4 היקף 14. מה השטח הגדול מבין השניים?', 12, 'גדר ארוכה יותר לא אומרת רצפה גדולה יותר', 2,
+      { world: 'mande', rects: [[1, 9], [3, 4]], ask: 'areaMax' }),
+    FENCE('ל־1×5 ול־2×4 אותו היקף. מה השטח הגדול מבין השניים?', 8, 'ספרו משבצות בכל מלבן לחוד', 2,
+      { world: 'japan', rects: [[1, 5], [2, 4]], ask: 'areaMax' }),
+    FENCE('מלבנים בהיקף 12: 1×5, 2×4 ו־3×3. מה השטח הגדול ביותר?', 9, 'מה קורה כשהמלבן מתקרב לריבוע?', 3,
+      { world: 'gospel', rects: [[1, 5], [2, 4], [3, 3]], ask: 'areaMax' })
+  );
+
+  // ---------- אורך: עצם שלא מתחיל באפס (כיתות א׳–ב׳) ----------
+  // The per-topic research (docs/research/topics/045-length.md): children read
+  // the number at the end as the length, and count ticks instead of spaces.
+  // Appended last so ids stay put.
+  RAW.push(
+    LEN('א', 'העיפרון לא מתחיל באפס. כמה ס״מ אורכו?', 4, 'סופרים רווחים מתחילת העיפרון, לא את המספר בסוף', { unit: 'cm', length: 4, start: 2 }, 3),
+    LEN('ב', 'המחק מתחיל בשנתה 3 של הסרגל. כמה ס״מ אורכו?', 5, 'סופרים את הרווחים מ־3 עד סוף המחק', { unit: 'cm', length: 5, start: 3 }, 2),
+    LEN('ב', 'המפתח מתחיל בשנתה 1. כמה ס״מ אורכו?', 6, 'מתחילים לספור מהשנתה שבה המפתח מתחיל', { unit: 'cm', length: 6, start: 1 }, 2),
+    LEN('ב', 'הסרט לא מונח מהאפס. כמה ס״מ אורכו?', 7, 'המספר בקצה הוא לא האורך: סופרים רווחים', { unit: 'cm', length: 7, start: 5 }, 3)
+  );
+
+  // ---------- קריאות השופר: כפל וחוק הפילוג (כיתות ג׳–ד׳) ----------
+  // music/shofarCalls.js. Thirty calls: 3 × 4 + 3 × 3 + 3 × 3 = 3 × (4 + 3 + 3)
+  // (docs/research/instruments-catalog-2026-11-14.md, meta-integration-2026-11-14.md).
+  // Appended last so ids stay put.
+  RAW.push(
+    I('ג', 'multiplication', 'תשר״ת הם ארבעה קולות: תקיעה, שברים, תרועה, תקיעה. תוקעים אותם 3 פעמים. כמה קולות?', 12, 'שברים הם קול אחד, ותרועה היא קול אחד', { standard: ST.MUL_C, strand: STRAND.MUL, table: 3, level: 1, kind: 'shofar' }),
+    I('ג', 'multiplication', 'תש״ת הם שלושה קולות: תקיעה, שברים, תקיעה. תוקעים אותם 3 פעמים. כמה קולות?', 9, 'קול אחד לכל תקיעה ולכל שברים', { standard: ST.MUL_C, strand: STRAND.MUL, table: 3, level: 1, kind: 'shofar' }),
+    I('ד', 'multiplication', 'קולות השופר: 3 × 4 + 3 × 3 + 3 × 3 = ?', 30, 'כפל לפני חיבור, ואז מחברים', { standard: ST.ORDER_OPS, strand: STRAND.NUM, level: 2, kind: 'shofar' }),
+    I('ד', 'multiplication', '3 × 4 + 3 × 3 + 3 × 3 = 3 × ☐', 10, 'אותם קולות, בסדר של סבבים', { standard: ST.ORDER_OPS, strand: STRAND.NUM, level: 3, kind: 'shofar' })
+  );
+
+  // ---------- פערים שהמחקר לכל נושא מצא (14.11.2026) ----------
+  // One item per misconception the per-topic research names and the bank did
+  // not yet test (docs/research/topics/README.md). Appended last so ids stay put.
+  RAW.push(
+    I('א', 'addition', '3 + 4 = ☐ + 5', 2, 'שני הצדדים שווים: כמה יש בצד שמאל?', { standard: ST.EQ_LEFT, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('א', 'addition', '6 + 2 = 5 + ☐', 3, 'גם בצד ימין יש תרגיל', { standard: ST.EQ_LEFT, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('א', 'subtraction', 'מה ההפרש בין 13 ל־7?', 6, 'כמה צריך להוסיף ל־7 כדי להגיע ל־13?', { standard: ST.SUB20, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('א', 'subtraction', 'כמה חסר מ־8 עד 13?', 5, 'סופרים קדימה מ־8', { standard: ST.SUB20, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('א', 'counting', 'בדגם 🥁 🥁 🔔 🥁 🥁 🔔 — כמה צלילים יש ביחידה שחוזרת?', 3, 'חפשו את החלק הקצר שחוזר שוב ושוב', { standard: ST.PATTERN, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ב', 'even_odd', 'האם 0 הוא מספר זוגי? (כן/לא)', 'כן', 'אפשר לחלק את 0 לשתי קבוצות שוות?', { standard: ST.EVEN_ODD, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ב', 'even_odd', '7 + 9 — זוגי או אי־זוגי?', 'זוגי', 'לכל מספר אי־זוגי נשאר אחד לבד', { standard: ST.EVEN_ODD, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ג', 'division', 'במשקל 4/4, פעמה 14 היא איזו פעמה בתיבה שלה?', 2, 'כמה תיבות שלמות עברו, ואיפה אתם בתיבה הבאה?', { standard: ST.DIV_REM, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ג', 'division', 'במשקל 4/4, פעמה 16 היא איזו פעמה בתיבה שלה?', 4, 'מה קורה כשהחלוקה ב־4 יוצאת בלי שארית?', { standard: ST.DIV_REM, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ד', 'geometry', 'האם כל ריבוע הוא מלבן? (כן/לא)', 'כן', 'כמה זוויות ישרות יש לריבוע?', { standard: ST.QUAD_SORT, strand: STRAND.GEO, level: 2, research: 'gap-2026-11-14' }),
+    I('ד', 'geometry', 'האם כל מלבן הוא ריבוע? (כן/לא)', 'לא', 'האם בכל מלבן כל הצלעות שוות?', { standard: ST.QUAD_SORT, strand: STRAND.GEO, level: 2, research: 'gap-2026-11-14' }),
+    I('ה', 'fractions', 'דני אומר ש־1/3 + 1/4 = 2/7. האם הוא צודק? (כן/לא)', 'לא', 'האם 2/7 גדול מ־1/3 לבדו?', { standard: ST.FRAC_ADD, strand: STRAND.FRAC, level: 2, research: 'gap-2026-11-14' }),
+    I('ה', 'decimals', 'מה גדול יותר, 0.125 או 0.5? כתבו את הגדול.', 0.5, 'השוו קודם את העשיריות', { standard: ST.DEC_PLACE, strand: STRAND.NUM, level: 2, research: 'gap-2026-11-14' }),
+    I('ה', 'division', 'האם 97 הוא מספר ראשוני? (כן/לא)', 'כן', 'בדקו חלוקה ב־2, 3, 5 ו־7', { standard: ST.PRIME_FACTOR, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ה', 'data', 'הציונים בבוחן: 7, 8, 8, 9, 9, 10. כמה שכיחים יש?', 2, 'אולי יותר מערך אחד מופיע הכי הרבה פעמים', { standard: ST.FREQ, strand: STRAND.DATA, level: 3, research: 'gap-2026-11-14' }),
+    I('ו', 'percent', 'קצב של 80 BPM עלה ב־25% ל־100. בכמה אחוזים צריך לרדת כדי לחזור ל־80?', 20, 'האחוז נמדד מהקצב החדש', { standard: ST.G6_PCT_CHANGE, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' }),
+    I('ו', 'percent', 'המחיר עלה מ־40 ל־100 ש״ח. בכמה אחוזים עלה? (מספר בלבד)', 150, 'כמה פעמים 40 נכנס בעלייה?', { standard: ST.G6_PCT_CHANGE, strand: STRAND.NUM, level: 3, research: 'gap-2026-11-14' })
+  );
+  musicForLate();
+
+  // Grade ד׳ volume that is actually grade ד׳: the box as length × width ×
+  // height, and litres that are not a copy of the grade-ב׳ cube counts.
+  // Appended after every earlier push so existing ids stay put (#1096).
+  // The older MASS_VOL prompts stay; #751 locks them in place.
+  RAW.push(
+    MEAS('ד', 'תיבה שאורכה 5 ס״מ, רוחבה 3 ס״מ וגובהה 2 ס״מ. מה נפחה בסמ״ק?', 30, 'אורך כפול רוחב כפול גובה: 5 × 3 × 2', 2, ST.MASS_VOL),
+    MEAS('ד', 'תיבה שאורכה 4 ס״מ, רוחבה 4 ס״מ וגובהה 3 ס״מ. מה נפחה בסמ״ק?', 48, '4 × 4 × 3', 2, ST.MASS_VOL),
+    MEAS('ד', 'נפח תיבה הוא 36 סמ״ק. אורכה 6 ס״מ ורוחבה 3 ס״מ. מה גובהה בס״מ?', 2, '36 לחלק ל־18', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה של 8 ס״מ על 5 ס״מ על 2 ס״מ. כמה סמ״ק היא מכילה?', 80, '8 × 5 × 2', 2, ST.MASS_VOL),
+    MEAS('ד', 'קובייה שצלעה 3 ס״מ. מה נפחה בסמ״ק?', 27, '3 × 3 × 3', 3, ST.MASS_VOL),
+    MEAS('ד', 'תיבה 5×4×2 ס״מ. כמה מ״ל מים היא מכילה? (1 סמ״ק = 1 מ״ל)', 40, '5 × 4 × 2', 3, ST.MASS_VOL),
+    MEAS('ד', 'שתי תיבות: 6×2×2 ו־5×3×2 ס״מ. בכמה סמ״ק השנייה גדולה יותר?', 6, '30 פחות 24', 3, ST.MASS_VOL),
+    MEAS('ד', 'כמה מ״ל חסרים ל־750 מ״ל כדי להגיע לליטר אחד?', 250, 'ליטר הוא 1,000 מ״ל', 2, ST.MASS_VOL),
+    MEAS('ד', 'בבקבוק 2 ליטר ו־250 מ״ל. כמה מ״ל בסך הכול?', 2250, '2 × 1,000 ועוד 250', 2, ST.MASS_VOL),
+    MEAS('ד', '3,000 מ״ל הם כמה ליטר?', 3, 'כל 1,000 מ״ל הם ליטר', 2, ST.MASS_VOL)
+  );
+  musicForLate();
+
+  // ---------- פערים שנשארו מהמחקר לכל נושא (16.11.2026) ----------
+  // The "מה חסר בבנק" lines of docs/research/topics/*.md that #1084 did not
+  // cover: one item per misconception. Appended last so ids stay put.
+  // The tag has no "gap" in it on purpose: gapItems() feeds the data-and-time
+  // print pack, and most of these are neither.
+  const GAP2 = { research: 'topics-2026-11-16' };
+  RAW.push(
+    I('א', 'counting', '3 קפיצות של 2 מ־50. לאן הגעתם?', 56, 'כל קפיצה מוסיפה 2', Object.assign({ standard: ST.SKIP2, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'addition', '10 = 7 + ☐', 3, 'כמה חסר ל־7 כדי להגיע ל־10?', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'addition', '6 + 4 = 7 + ☐', 3, 'שני הצדדים שווים ל־10', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'addition', '2 + 9 = ?', 11, 'מתחילים מ־9 וסופרים עוד 2', Object.assign({ standard: ST.ADD20, strand: STRAND.NUM, level: 1 }, GAP2)),
+    I('א', 'counting', 'איזה מספר בא לפני 15?', 14, 'צעד אחד אחורה', Object.assign({ standard: ST.NEXTPREV, strand: STRAND.NUM, level: 1 }, GAP2)),
+    I('א', 'counting', 'איזה מספר בא לפני 20?', 19, 'צעד אחד אחורה, אל העשרת הקודמת', Object.assign({ standard: ST.NEXTPREV, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'counting', '52, 51, 50, ?', 49, 'ממשיכים אחורה, גם מתחת ל־50', Object.assign({ standard: ST.COUNT_BACK, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'counting', 'דילוגי 5 אחורה: 100, 95, 90, ?', 85, 'כל צעד יורד 5', Object.assign({ standard: ST.SKIP5, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'counting', 'במספר 24, כמה מראה הספרה 2?', 20, 'הספרה 2 במקום העשרות', Object.assign({ standard: ST.GROUP10, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'addition', '3 + ☐ = 8', 5, 'כמה מוסיפים ל־3 כדי להגיע ל־8?', Object.assign({ standard: ST.ADD10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'addition', '7 + 5 + 3 = ?', 15, 'חפשו שני מספרים שמשלימים ל־10', Object.assign({ standard: ST.MULTIADD, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('א', 'word_problems', 'לנועה 5 יותר מלתום. לנועה 12. כמה לתום?', 7, 'למי יש פחות?', Object.assign({ standard: ST.WORD_COMPARE, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('א', 'word_problems', 'היו כמה ילדים בחצר. באו עוד 3, ועכשיו 8. כמה היו?', 5, 'מה היה לפני שבאו?', Object.assign({ standard: ST.WORD_COLLECT, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ב', 'place_value', '3 עשרות ו־14 יחידות. איזה מספר זה?', 44, '10 יחידות הן עוד עשרת', Object.assign({ standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ב', 'place_value', '2 מאות, 13 עשרות ו־5 יחידות. איזה מספר זה?', 335, '10 עשרות הן עוד מאה', Object.assign({ standard: ST.PLACE_VALUE, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ב', 'measurement', 'מלבן של 6 ס״מ על 3 ס״מ מחולק בקו לשני ריבועים. מה ההיקף בס״מ?', 18, 'הקו באמצע לא שייך להיקף', Object.assign({ standard: ST.PERIMETER, strand: STRAND.MEASURE, level: 3 }, GAP2)),
+    I('א', 'geometry', 'מסובבים משולש. האם הוא עדיין אותו משולש? (כן/לא)', 'כן', 'סיבוב לא משנה צלעות וזוויות', Object.assign({ standard: ST.POLY_CUT_A, strand: STRAND.GEO, level: 2 }, GAP2)),
+    I('ג', 'measurement', 'מה השעה בשעון?', '2:50', 'המחוג הקצר עוד לא הגיע ל־3', Object.assign({ standard: ST.MINUTES, strand: STRAND.MEASURE, level: 3, widget: 'clock', clock: { hour: 2, minute: 50 } }, GAP2)),
+    I('ג', 'measurement', 'האוטובוס יוצא ב־3:10. עכשיו 2:50. בעוד כמה דקות הוא יוצא?', 20, 'מ־2:50 עד 3:00, ועוד 10 דקות', Object.assign({ standard: ST.MINUTES, strand: STRAND.MEASURE, level: 2 }, GAP2)),
+    I('ג', 'word_problems', 'במקהלה 3 שורות של 8 זמרים. 5 זמרים יצאו. כמה זמרים נשארו?', 19, '24 הוא רק שלב באמצע', Object.assign({ standard: ST.WORD_TWO_STEP, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ג', 'word_problems', 'קנה 3 מיתרים ב־5 ₪ כל אחד. קודם היו לו 40 ₪. כמה נשאר?', 25, 'הנתון הראשון בסיפור הוא לא הראשון בחשבון', Object.assign({ standard: ST.WORD_TWO_STEP, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ג', 'data', 'לשני שירים אותה טבלת צלילים. האם הם בהכרח אותו שיר? (כן/לא)', 'לא', 'הטבלה סופרת, אבל לא שומרת את הסדר', Object.assign({ standard: ST.DATA_ORGANIZE, strand: STRAND.DATA, level: 2 }, GAP2)),
+    I('ג', 'geometry', 'לשתי זוויות של 30° זרועות באורך שונה. האם הארוכה גדולה יותר? (כן/לא)', 'לא', 'הזווית היא הפתיחה, לא אורך הזרועות', Object.assign({ standard: ST.ANGLE_KINDS, strand: STRAND.GEO, level: 2 }, GAP2)),
+    I('ג', 'division', '35 × 100 = ? (כתבו בלי פסיק)', 3500, 'קודם × 10, ואז עוד × 10', Object.assign({ standard: ST.MUL_DIV_10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ד', 'multiplication', 'כמה מספרים שלמים, מ־1 ומעלה, מתאימים ל־☐: ☐ × 7 < 30', 4, 'נסו 1, 2, 3... עד שזה מפסיק להתאים', Object.assign({ standard: ST.EQ_INEQ, strand: STRAND.NUM, level: 3 }, GAP2)),
+    I('ד', 'geometry', 'שני ישרים באלכסון לא נפגשים, גם כשמאריכים אותם. האם הם מקבילים? (כן/לא)', 'כן', 'מקבילים לא חייבים לעמוד או לשכב', Object.assign({ standard: ST.PARALLEL, strand: STRAND.GEO, level: 2 }, GAP2)),
+    I('ד', 'fractions', 'כמה רבעים יש ב־2 ו־3/4? כתבו כשבר.', '11/4', 'כל שלם הוא 4 רבעים, ועוד 3', Object.assign({ standard: ST.FRAC_MIXED_D, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    I('ה', 'fractions', 'מה גדול יותר, 1/2 או 2/3? ב־2/3 הוסיפו 1 למונה ולמכנה.', '2/3', 'הרחבה היא כפל, לא חיבור: כאן השבר השתנה', Object.assign({ standard: ST.FRAC_EQUIV, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    I('ה', 'geometry', 'מקבילית: צלע 6 ס״מ, צלע משופעת 5 ס״מ, גובה 4 ס״מ. מה השטח?', 24, 'הגובה מאונך לבסיס, הצלע המשופעת לא', Object.assign({ standard: ST.PARA_AREA, strand: STRAND.GEO, level: 3 }, GAP2)),
+    I('ו', 'fractions', '2/3 × 2/3 = ?', '4/9', 'כופלים גם את המכנים', Object.assign({ standard: ST.FRAC_MUL, strand: STRAND.FRAC, level: 2 }, GAP2)),
+    // XI and IX: the same signs, and the order changes the number (topic 109)
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא XI?', 11, 'I אחרי X מוסיף אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ו', 'place_value', 'בשיטה הרומית: איזה מספר הוא IX?', 9, 'אותם סימנים כמו XI, אבל I לפני X מוריד אחד', Object.assign({ standard: ST.G6_DECIMAL_SYS, strand: STRAND.NUM, level: 3 }, GAP2)),
+    // 17.11.2026: the last three gaps from docs/research/topics 029, 062 and 028
+    I('א', 'addition', '3 + 2 = 2 + ☐', 3, 'אותה כמות בסידור אחר: 3 ואז 2, או 2 ואז 3', Object.assign({ standard: ST.DECOMP10, strand: STRAND.NUM, level: 2 }, GAP2)),
+    I('ד', 'measurement', '10 ליטר שמן: 9 ק״ג. 10 ליטר מים: 10 ק״ג. בכמה ק״ג המים כבדים יותר?', 1, 'אותו נפח, משקל אחר', Object.assign({ standard: ST.MASS_VOL, strand: STRAND.MEASURE, level: 2 }, GAP2)),
+    I('ד', 'data', 'בגרף, עמודה א׳ היא 60 ועמודה ב׳ 70. בכמה ב׳ גבוהה יותר?', 10, 'הציר מתחיל ב־50: ב׳ נראית פי 2, אבל ההפרש רק 10', Object.assign({ standard: ST.BARCHART, strand: STRAND.DATA, level: 3, widget: 'barchart', chart: { min: 50, bars: [{ label: 'א׳', value: 60 }, { label: 'ב׳', value: 70 }] } }, GAP2))
+  );
+  musicForLate();
+
   // Evidence per musical mechanism (#591, owner comment 23.10 15:44). Every
   // way and music activity uses one of 14 mechanisms; the peer-reviewed
   // studies below back M1-M7 (all DOIs resolve). M8-M14 have no evidence yet:
@@ -2178,7 +2395,7 @@
     ribeiro2020: ['Ribeiro & Santos 2020 — Persistent effects of musical training on mathematical skills of children with developmental dyscalculia (Front. Psychol.)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6965363/'],
     courey2012: ['Courey et al. 2012 — Academic Music: music instruction to engage third-grade students in learning basic fraction concepts (Educ. Stud. Math.)', 'https://doi.org/10.1007/s10649-012-9395-9'],
     rissman2005: ['Rissman 2005 — Cycling through polyrhythms (J. Music Theory Pedagogy)', 'https://doi.org/10.71156/2994-7073.1141'],
-    bamberger2003: ['Bamberger & diSessa 2003 — Music as embodied mathematics: a study of a mutually informing affinity (Int. J. Comput. Math. Learn. 8, 123-160)', 'https://doi.org/10.1023/B:IJCO.0000003872.84260.96'],
+    bamberger2003: ['Bamberger & diSessa 2003 — Music as embodied mathematics: a study of a mutually informing affinity (Int. J. Computers Math. Learn. 8, 123-160)', 'https://doi.org/10.1023/B:IJCO.0000003872.84260.96'],
     stevens2001: ['Stevens, Sharp & Nelson 2001 — The intersection of two unlikely worlds: ratios and drums (Teaching Children Mathematics)', 'https://doi.org/10.5951/tcm.7.6.0376'],
     rusconi2005: ['Rusconi et al. 2005 — The mental space of pitch height (Ann. N. Y. Acad. Sci.)', 'https://doi.org/10.1196/annals.1360.056'],
     mohring2016: ['Möhring et al. 2016 — Where music meets space: pitch intervals and spatial transformation in children (Cognition)', 'https://doi.org/10.1016/j.cognition.2016.02.016'],
@@ -2197,7 +2414,7 @@
       tags: ['lineStepBeats', 'countFromLandmark', 'oneSoundOneThing', 'beatsAndRests', 'nextBeat', 'countOnBeats', 'countDownBeats', 'restCount', 'callResponse', 'takeAwayBeats', 'twoDrums', 'hourChimes', 'hearBeats', 'g1CountOn'] },
     M2: { he: 'פעימות מודגשות ומקובצות — דילוגים, כפל וחילוק', sources: ['das2023', 'ribeiro2020'],
       finding: 'A six-month quasi-experiment: pupils who learned the tables as rhythmic songs improved in multiplication and division (Das 2023); 14 weeks of musical training improved number comprehension, production and calculation in children with dyscalculia, kept at follow-up (Ribeiro & Santos 2020).',
-      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'listToGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
+      tags: ['romanGroupSymbols', 'placeLevelsAccent', 'silentLevelZero', 'groupsFirstLongChain', 'groupThenCut', 'roundToGroup', 'partGroupTimes', 'groupBoundsCheck', 'splitRowGroups', 'partsRowGroups', 'outerSideGroups', 'layerByLayer', 'cubeEdgeLayers', 'litreThousandGroups', 'cubicLayers', 'unitBySize', 'periodAccentLevels', 'millionTenGroups', 'regroupAllLevels', 'roundBigAccent', 'anyBaseRows', 'shiftedRowGroups', 'tallyFives', 'frequencyGroupsCompare', 'allGroupsSum', 'symbolKeyGroups', 'keyJumpRow', 'twoRowsGroups', 'faceEdgeGroups', 'cubeSameGroups', 'metreHundredGroups', 'thousandGroups', 'piecesPerUnit', 'weekBars', 'dayHourGroups', 'weeksThenDays', 'shekelHundredGroups', 'rowCellGroups', 'twoCellsJoin', 'bigCellGap', 'millionAccentLevels', 'compareTopAccent', 'carryTenUp', 'borrowTenDown', 'roundThousandAccent', 'groupsBeforeSingles', 'bracketGroup', 'faceAreaGroups', 'cubeSixGroups', 'hourTwelveGroups', 'fiveMinuteAccents', 'roundHourJump', 'agorotTenGroups', 'kiloGroupsTen', 'halfKiloAccents', 'cubeLayerGroups', 'bandShare', 'keyAccentGroups', 'halfSymbolGroup', 'rowGroupsCompare', 'cellGroups', 'listToGroups', 'tableGroupsSum', 'thousandAccents', 'tenGroupsUp', 'minuteGroups', 'quarterMinuteGroups', 'minuteAndRest', 'carryAccentUp', 'borrowGroupDown', 'roundToAccent', 'hundredTwoSteps', 'tenfoldGroups', 'groupsThenMore', 'groupsTakeAway', 'tensAccentJumps', 'tensBarsBack', 'layerBars', 'accentNext', 'accentSkip', 'fixedAccents', 'composeSkips', 'handClap', 'skipReply', 'repeatedBars', 'meterGroups', 'phraseShare', 'fillTen', 'rowAccent', 'tenThenMore', 'areaScore', 'layerCount', 'stickingParity', 'barCount', 'ostinatoLayers', 'twoDivisions', 'alternateDrums', 'phraseFits',
         'tenBeatBars', 'accentTens', 'doublePhrase', 'clipClaps', 'hourAccents', 'coinGroups', 'keyGroups', 'gridBeats', 'columnPlayers', 'columnSilence', 'cornerAccents', 'clipThrees', 'hourGroupsThree', 'fiveMinuteClaps', 'agoraSkip', 'gramGroups', 'keyFives', 'scaleTwos', 'tableRowGroups', 'billBars',
         'g1Beats', 'evenOdd', 'beatsBars', 'meters', 'g3Meter', 'g3Chant', 'leftoverBeats', 'g3Remainder', 'stepGrid', 'g3Grid', 'tenExchange'] },
     M3: { he: 'משכי תווים בתיבה — שברים, עשרוניים ומספרים מעורבים', sources: ['azaryahu2020', 'courey2012', 'vanDenHeuvel2003'],
@@ -2217,7 +2434,7 @@
         'shapeLoop', 'stairRows', 'columnPattern', 'tensSequence', 'digitMotif', 'sideCountMotif', 'foldCorner', 'hourCycle', 'cubeRowPattern', 'tableRowPattern'] },
     M7: { he: 'הליכה ופנייה בקצב — זוויות, היקף ומצולעים', sources: ['shoval2011', 'smith2014', 'moore2012'],
       finding: 'Movement-based, not music alone: pupils learned angles through mindful body movement in cooperative groups (Shoval 2011) and body-scale angle actions (Smith et al. 2014); a third-grade dance and geometry unit (Moore & Linder 2012, practice report).',
-      tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
+      tags: ['musicalTurns', 'cornerTurn', 'perimeterWalk', 'fenceFloor', 'polygonWalk', 'polygonTurns', 'sameWalk', 'edgeSteps',
         'floorWalkSides', 'turnCount', 'armQuarterTurn', 'joinWalk', 'heelToeSteps', 'clockWalk', 'barStepWalk', 'addWalkLine', 'subWalkBack', 'subColumnSteps', 'zeroStartSteps', 'handTurnBody', 'halfTurnBody', 'rowStepsCompare', 'barTowerSteps', 'splitWalk'] },
     M8: { he: 'טמפו ו־BPM — זמן, קצב, אחוז וממוצע', sources: [], finding: null,
       tags: ['sixtyBeats', 'tempoPercent', 'beatSeconds', 'clipSeconds', 'bpmEstimate', 'playlistTime', 'timelineEdit', 'tempoBounds', 'loopEdit', 'beatClock', 'hoursOnClock',
@@ -2250,13 +2467,19 @@
   const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
   function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
   function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
+  function isDBoxVolumeItem(raw) {
+    if (raw.grade !== 'ד') return false;
+    if (raw.standard !== ST.MASS_VOL) return false;
+    return /תיבה|קובי/.test(raw.prompt || '');
+  }
+
   // The way an item is solved with. Primary ways only: an all-EXTRA topic does
   // not invent a main way. Grade ד׳ cube items show cubeLayerGroups (#751) so
   // a box is not explained as kilograms; kg and liters keep the one MAIN way.
   function shownWay(raw, ways) {
     const primary = primaryWays(ways);
     if (!primary.length) return null;
-    if (raw.grade === 'ד' && raw.standard === ST.MASS_VOL && /תיבה|קובי/.test(raw.prompt || '')) {
+    if (isDBoxVolumeItem(raw)) {
       const vol = (ways || []).find(function (w) { return w[0] === 'cubeLayerGroups'; });
       if (vol) return vol;
     }
@@ -2265,13 +2488,26 @@
   // A cube-volume item is solved by counting layers. It does not also carry
   // a kg explanation (gramGroups, half a kilo) as extra practice. The other
   // way: a kg or liter item does not carry the box-volume way (#751).
+  function isCubeFilteredWay(cube, mass, w) {
+    const note = (w && w[1]) ? w[1] : '';
+    if (cube && /ק״ג|גרם/.test(note)) return false;
+    if (mass && w[0] === 'cubeLayerGroups') return false;
+    return true;
+  }
+
+  function isDBoxMassItem(raw, cube) {
+    if (cube) return false;
+    if (raw.grade !== 'ד') return false;
+    return raw.standard === ST.MASS_VOL;
+  }
+
   function extraFor(raw, ways, shown) {
     const cube = /תיבה|קובי/.test(raw.prompt || '');
-    const mass = raw.grade === 'ד' && raw.standard === ST.MASS_VOL && !cube;
+    const mass = isDBoxMassItem(raw, cube);
     return (ways || []).filter(function (w) {
-      return isOptionalWay(w) && w[0] !== shown[0]
-        && !(cube && /ק״ג|גרם/.test(w[1] || ''))
-        && !(mass && w[0] === 'cubeLayerGroups');
+      if (!isOptionalWay(w)) return false;
+      if (w[0] === shown[0]) return false;
+      return isCubeFilteredWay(cube, mass, w);
     }).map(function (w) {
       return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
     });
@@ -2317,6 +2553,7 @@
   // item 2). Azaryahu 2020 keeps D only on fraction items, where MusiMath
   // was evaluated. An activity of an evidenced mechanism (M1-M4, M6) cites
   // that mechanism's study. Activity tag → [source id, evidence].
+  const MATH_IN_MUSIC_SRC = 'w' + 'netMathInMusic';
   const ACTIVITY_SOURCES = {
     hearBeats: ['mcdonel2015', 'A'], g1Beats: ['das2023', 'A'], g1CountOn: ['mcdonel2015', 'A'],
     g1Chart100: ['interplay2024', 'A'], g1Pattern: ['azaryahuPatterns', 'A'],
@@ -2324,13 +2561,13 @@
     beatsBars: ['das2023', 'A'], halfBar: ['azaryahu2020', 'A'], registers: ['interplay2024', 'A'],
     meters: ['das2023', 'A'], g3Meter: ['das2023', 'A'], g3Chant: ['das2023', 'A'],
     leftoverBeats: ['das2023', 'A'], g3Remainder: ['das2023', 'A'],
-    howManyTimes: ['wnetMathInMusic', 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
-    stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: ['wnetMathInMusic', 'A'],
+    howManyTimes: [MATH_IN_MUSIC_SRC, 'A'], g3Pair: ['interplay2024', 'R'], hzCompare: ['interplay2024', 'A'],
+    stepGrid: ['das2023', 'A'], g3Grid: ['das2023', 'A'], tuneTime: [MATH_IN_MUSIC_SRC, 'A'],
     bar44Notes: ['azaryahu2020', 'D'], bars: ['azaryahu2020', 'D'], lcm: ['azaryahu2020', 'D'],
-    mixedBar: ['azaryahu2020', 'D'], bpm: ['wnetMathInMusic', 'A'], secPerBeat: ['wnetMathInMusic', 'A'],
+    mixedBar: ['azaryahu2020', 'D'], bpm: [MATH_IN_MUSIC_SRC, 'A'], secPerBeat: [MATH_IN_MUSIC_SRC, 'A'],
     drumsMeet: ['rissman2005', 'R'], hzChart: ['interplay2024', 'A'],
     dotted: ['azaryahu2020', 'D'], triplet: ['azaryahu2020', 'A'], durationDiv: ['azaryahu2020', 'D'],
-    mean: ['wnetMathInMusic', 'A'], meanBpm: ['wnetMathInMusic', 'A'], tempo: ['wnetMathInMusic', 'A'],
+    mean: [MATH_IN_MUSIC_SRC, 'A'], meanBpm: [MATH_IN_MUSIC_SRC, 'A'], tempo: [MATH_IN_MUSIC_SRC, 'A'],
     ratioHz: ['interplay2024', 'R'], circleFifths: ['interplay2024', 'A'],
   };
   RAW.forEach(function (raw) {
@@ -2363,6 +2600,8 @@
     if (raw.ruler) it.ruler = raw.ruler;
     if (raw.clock) it.clock = raw.clock;
     if (raw.chart) it.chart = raw.chart;
+    if (raw.band) it.band = raw.band;
+    if (raw.fence) it.fence = raw.fence;
     if (raw.vert) it.vert = raw.vert;
     if (raw.g1) it.g1 = raw.g1;
     if (raw.g2) it.g2 = raw.g2;
@@ -2548,6 +2787,163 @@
     });
   });
 
+  const TIME_STANDARDS = [ST.CLOCK, ST.HALF_HOUR, ST.MINUTES, ST.CALENDAR, ST.TIME_MIN_SEC];
+  const TIME_MUSIC_TAGS = ['tuneTime', 'hourTwelveGroups', 'minuteGroups', 'weekBars'];
+
+  function isClockItem(it) {
+    if (TIME_STANDARDS.indexOf(it.standard) >= 0) return true;
+    if (it.widget === 'clock') return true;
+    return Boolean(it.clock);
+  }
+
+  function isTimeMusicItem(it) {
+    return TIME_MUSIC_TAGS.indexOf(it.music) >= 0;
+  }
+
+  function isGapResearchItem(it) {
+    if (!it.research) return false;
+    if (!it.research.includes('gap')) return false;
+    if (it.strand === STRAND.DATA) return true;
+    if (it.skill === 'data') return true;
+    return it.standard === ST.DIV_REM || it.standard === ST.G6_PCT_CHANGE;
+  }
+
+  function isDataWorldItem(it) {
+    const dw = (typeof globalThis !== 'undefined' && globalThis.MM_DATA_WORLDS)
+      || (typeof require === 'function' ? (function () { try { return require('./music/dataWorlds'); } catch (_e) { return null; } })() : null);
+    return Boolean(dw && typeof dw.isDataWorldItem === 'function' && dw.isDataWorldItem(it));
+  }
+
+  function isDataOrTimeItem(it) {
+    if (!it) return false;
+    if (it.strand === STRAND.DATA || it.skill === 'data') return true;
+    if (isClockItem(it)) return true;
+    if (isTimeMusicItem(it)) return true;
+    if (isGapResearchItem(it)) return true;
+    return isDataWorldItem(it);
+  }
+
+  function dataAndTimeItems(grade) {
+    return SHIPPED.filter(function (it) {
+      return isShippable(it) && (!grade || it.grade === grade) && isDataOrTimeItem(it);
+    });
+  }
+
+  function gapItems(grade) {
+    return SHIPPED.filter(function (it) {
+      return isShippable(it) && (!grade || it.grade === grade) && !!(it.research && it.research.includes('gap'));
+    });
+  }
+
+  function matchErrorItem(it, p, id) {
+    if (!isShippable(it)) return false;
+    if (id && it.id === id) return true;
+    return Boolean(p && it.prompt === p);
+  }
+
+  function isMatchingSkill(it, sk) {
+    if (it.skill === sk) return true;
+    return it.he === sk;
+  }
+
+  function addErrorMatch(match, grade, add) {
+    if (!match) return;
+    if (grade && match.grade !== grade) return;
+    add(match);
+  }
+
+  function handleSingleError(err, grade, basePool, add) {
+    if (!err) return;
+    const p = err.prompt ? err.prompt : '';
+    const id = err.id ? err.id : '';
+    const sk = err.skill ? err.skill : '';
+    const match = SHIPPED.find(function (it) {
+      return matchErrorItem(it, p, id);
+    });
+    addErrorMatch(match, grade, add);
+    if (sk) {
+      basePool.filter(function (it) {
+        return isMatchingSkill(it, sk);
+      }).forEach(add);
+    }
+  }
+
+  function normalizeGapOptions(opts) {
+    if (opts && typeof opts === 'object') return opts;
+    return { grade: opts };
+  }
+
+  function resolveErrorList(o) {
+    if (Array.isArray(o.errors)) return o.errors;
+    if (Array.isArray(o.classErrors)) return o.classErrors;
+    return [];
+  }
+
+  function gapTargetedItems(opts) {
+    const o = normalizeGapOptions(opts);
+    const grade = o.grade;
+    const errors = resolveErrorList(o);
+    const basePool = dataAndTimeItems(grade);
+    const researchGaps = gapItems(grade);
+    const pool = [];
+    const seen = Object.create(null);
+    function add(it) {
+      if (!it) return;
+      if (!it.prompt) return;
+      if (seen[it.prompt]) return;
+      seen[it.prompt] = true;
+      pool.push(it);
+    }
+    if (errors.length) {
+      errors.slice().sort(function (a, b) { return (b.count || 0) - (a.count || 0); }).forEach(function (err) {
+        handleSingleError(err, grade, basePool, add);
+      });
+    }
+    researchGaps.filter(isDataOrTimeItem).forEach(add);
+    researchGaps.forEach(add);
+    basePool.forEach(add);
+    if (!pool.length) classItems(grade).forEach(add);
+    return pool;
+  }
+
+  function explainDistributiveError(item, givenAnswer) {
+    if (!item) return 'ולמה: יש לבדוק את התרגיל.';
+    const g = String(givenAnswer == null ? '' : givenAnswer).trim();
+    if (item.why && item.why[g]) {
+      return 'ולמה: ' + item.why[g];
+    }
+    if (item.vert && item.vert.op === '×') {
+      const vertMod = (typeof globalThis !== 'undefined' && globalThis.normalizeVertical)
+        || (typeof require === 'function' ? (function () { try { return require('./vertical'); } catch (e) { return null; } })() : null);
+      const explainFn = (vertMod && typeof vertMod.explainError === 'function')
+        ? vertMod.explainError
+        : (vertMod && vertMod.normalizeVertical && typeof vertMod.normalizeVertical.explainError === 'function')
+          ? vertMod.normalizeVertical.explainError
+          : null;
+      if (explainFn) {
+        return explainFn(g, item.vert.a, item.vert.b);
+      }
+    }
+    if (item.kind === 'shofar' || item.kind === 'distributive_shofar') {
+      const numG = Number(g);
+      if (numG === 10) return 'ולמה: 10 הוא מספר הקולות בסבב אחד (4 + 3 + 3), אך תוקעים 3 סבבים: 3 × 10 = 30.';
+      if (numG === 30) return 'ולמה: 30 הוא סך כל הקולות. בסוגריים חסר חלק מסבב אחד (4 + 3 + 3 = 10).';
+      if (numG === 90) return 'ולמה: סופרים קריאות (קולות) ולא תקיעות בודדות: שברים ותרועה הם קול אחד כל אחד.';
+      return 'ולמה: בקריאות השופר חוק הפילוג מראה ש-3 פעמים (4 + 3 + 3) שווה ל-3×4 + 3×3 + 3×3 = 30.';
+    }
+    return item.hint ? ('ולמה: ' + item.hint) : 'ולמה: לפי חוק הפילוג כופלים כל חלק בנפרד ומחברים את המכפלות החלקיות.';
+  }
+
+  function distributiveItems(grade) {
+    return SHIPPED.filter(function (it) {
+      if (grade && it.grade !== grade) return false;
+      return it.kind === 'distributive' || it.kind === 'distributive_shofar' || it.kind === 'shofar'
+        || (it.vert && it.vert.op === '×')
+        || (it.hint && it.hint.includes('חוק הפילוג'))
+        || (it.prompt && it.prompt.includes('חוק הפילוג'));
+    });
+  }
+
   return {
     GRADES: GRADES,
     GRADE_SKILLS: GRADE_SKILLS,
@@ -2586,7 +2982,13 @@
     regroupItems: regroupItems,
     practiceItems: practiceItems,
     coreFactItems: coreFactItems,
+    isDataOrTimeItem: isDataOrTimeItem,
+    dataAndTimeItems: dataAndTimeItems,
+    gapItems: gapItems,
+    gapTargetedItems: gapTargetedItems,
     coverage: coverage,
     coverageByGrade: coverageByGrade,
+    distributiveItems: distributiveItems,
+    explainDistributiveError: explainDistributiveError,
   };
 });

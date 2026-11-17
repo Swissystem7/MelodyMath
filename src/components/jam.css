@@ -19,6 +19,7 @@
 .jam-msg{min-height:1.5em;font-weight:800;margin:10px 0;padding:8px 14px;border-radius:16px;font-size:1.05rem}
 .jam-msg.good{color:#1B1446;background:#2ED3A8;border:3px solid #1B1446;box-shadow:0 3px 0 #1B1446}
 .jam-msg.soft{color:#7A2E0A;background:#FFF1E6;border:3px solid #C2410C}
+/* biome-ignore lint/complexity/noImportantStyles: active beat highlight requires override */
 .jam-lit{background:#2ED3A8!important;border-color:#1B1446!important}
 .fbp-bar{display:flex;height:68px;border:3px solid #1B1446;border-radius:18px;overflow:hidden;background:#FFFFFF;box-shadow:0 4px 0 #1B1446}
 .fbp-bar.done{border-color:#0F766E;background:#D5F6EC;box-shadow:0 0 0 4px #0F766E}
@@ -44,6 +45,7 @@
 .ttg-beat.acc{min-width:42px;height:40px;background:#FFC93C;color:#1B1446;font-weight:900;font-size:1.05rem;border:3px solid #1B1446;box-shadow:0 2px 0 #1B1446}
 .ttg-beat.ask{border:3px dashed #C2410C;background:#FFF1E6;color:#C2410C;font-size:1.2rem}
 .ttg-plain{font-size:1.35rem;font-weight:900;margin:10px 0;color:#1B1446}
+/* biome-ignore lint/complexity/noImportantStyles: pressed button states override defaults */
 .mm-game [aria-pressed="true"]:not(.mm-music-toggle){background:#5B3FD9!important;color:#FFFFFF!important;border-color:#1B1446!important;box-shadow:0 3px 0 #1B1446!important}
 .tr-stick{display:flex;flex-direction:column;align-items:center;gap:8px}
 .tr-rod{display:block;height:14px;max-width:100%;border-radius:7px;border:2px solid #1B1446;background:#FFC93C}
@@ -112,7 +114,9 @@
 .msp-key{min-width:48px;min-height:76px;flex:1 1 48px;border-radius:0 0 16px 16px;border:3px solid #1B1446;background:#FFFFFF;color:#1B1446;font-weight:900;box-shadow:0 4px 0 #1B1446}
 .msp-key.msp-ref{box-shadow:inset 0 -8px 0 #5B3FD9, 0 4px 0 #1B1446}
 .msp-key.msp-picked{background:#FFC93C}
+/* biome-ignore lint/complexity/noImportantStyles: quiz feedback classes override element defaults */
 .msp-right{border-color:#1B1446!important;background:#2ED3A8!important}
+/* biome-ignore lint/complexity/noImportantStyles: quiz feedback classes override element defaults */
 .msp-wrong{border-style:dashed!important;border-color:#C2410C!important;background:#FFF1E6!important}
 .msp-legend{color:#4A3F7A;font-size:.95rem;font-weight:700;margin:6px 0}
 .msp-progress,.msp-round{margin:8px 0;padding-inline-start:20px;font-weight:800}
@@ -122,3 +126,29 @@
 .rm-note{color:#4A3F7A;font-size:.95rem;font-weight:700}
 .rm-pose{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin:10px 0}
 .rm-pose select,.rm-pose input{min-height:48px;border:3px solid #1B1446;border-radius:14px;box-shadow:0 3px 0 #1B1446;font-weight:700}
+
+/* MM-UI-705: Visual beat indicator & accessible pulse styling */
+@keyframes beatPulseRing {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12); opacity: 0.75; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.beat-active {
+  background: #2ED3A8;
+  border-color: #1B1446;
+  color: #1B1446;
+  box-shadow: 0 0 0 3px #1B1446, 0 0 16px rgba(46, 211, 168, 0.85);
+}
+
+.beat-pulse-ring {
+  animation: beatPulseRing 0.5s ease-out;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beat-pulse-ring {
+    animation: none;
+  }
+}
+

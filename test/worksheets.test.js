@@ -71,3 +71,11 @@ test('Unicode characters are escaped in HTML', () => {
 test('clampCount returns 4 for non-numeric input like "abc"', () => {
   assert.equal(sheets.clampCount('abc'), 4);
 });
+
+test('printed worksheets include RTL nickname and class-code fill-in fields', () => {
+  const html = sheets.renderWorksheetHtml(sheets.buildWorksheet({ pack: 'class', count: 4, seed: 1 }));
+  assert.match(html, /dir="rtl"/);
+  assert.match(html, /הכינוי שלי: ___________/);
+  assert.match(html, /קוד כיתה: ___________/);
+  assert.match(html, /כתבו כינוי, לא שם אמיתי/);
+});

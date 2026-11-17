@@ -10,7 +10,7 @@
    one missing URL must not stop the service worker from installing.
    A navigation that cannot reach the network uses the cached page, then
    ./index.html. Scope is this file's directory (/MelodyMath/ on GitHub Pages). */
-const CACHE = 'melodymath-offline-v53';
+const CACHE = 'melodymath-offline-v102';
 const ASSETS = [
   './',
   './index.html',
@@ -110,6 +110,32 @@ const ASSETS = [
   './src/components/FractionBarPad.js',
   './src/lib/music/tempoRuler.js',
   './src/components/TempoRuler.js',
+  './src/lib/music/bandShare.js',
+  './src/lib/music/fenceFloor.js',
+  './src/lib/music/noteBar.js',
+  './src/lib/music/meterSplit.js',
+  './src/lib/music/divisionBeats.js',
+  './src/lib/music/timeCycles.js',
+  './src/lib/music/earlyBeats.js',
+  './src/lib/music/moneyMarket.js',
+  './src/lib/music/multiplyWorlds.js',
+  './src/lib/music/jumpLine.js',
+  './src/lib/music/shapeWalk.js',
+  './src/lib/music/measureWorlds.js',
+  './src/lib/music/dataWorlds.js',
+  './src/lib/music/areaWorlds.js',
+  './src/lib/music/partsNumerals.js',
+  './src/lib/music/cutCompose.js',
+  './src/lib/music/senseSix.js',
+  './src/lib/music/decimalWorlds.js',
+  './src/lib/music/lawsSix.js',
+  './src/lib/music/timesTable.js',
+  './src/lib/music/bigNumbers.js',
+  './src/lib/music/divisorWorlds.js',
+  './src/lib/music/patternsUnits.js',
+  './src/lib/music/tensPercent.js',
+  './src/lib/music/fractionTime.js',
+  './src/lib/music/shofarCalls.js',
   './src/lib/music/takeAwayTen.js',
   './src/lib/music/dragPlace.js',
   './src/lib/music/beatCounter.js',
@@ -174,6 +200,8 @@ const ASSETS = [
   './pilot/js/music.js?v=20261119',
   './pilot/js/research.js?v=20261119',
   './pilot/js/store.js?v=20261119',
+  './pilot/js/exportValidator.js?v=20261119',
+  './pilot/js/sessionEnd.js?v=20261119',
   './pilot/js/app.js?v=20261119',
 ];
 

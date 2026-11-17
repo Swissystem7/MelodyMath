@@ -38,8 +38,9 @@ const WAYS = {
     G6_NAT_EST: ['roundToGroup', 'partGroupTimes', 'groupBoundsCheck'],
     G6_DEC_EST: ['nearlyWholeNote', 'pitchBound', 'shortNoteBound'],
     G6_DEC_LAWS: ['bracketBeatsFirst', 'tempoSwap', 'equalNotesDistribute'],
-    G6_PCT_WHOLE: ['wholeFromTenth', 'splitToHundred', 'quarterToWhole'],
-    G6_PCT_CHANGE: ['shortenByPercent', 'lengthenByPercent', 'changeOverOriginal'],
+    // bandShare: an EXTRA (experimental) way for percent with a changing base.
+    G6_PCT_WHOLE: ['wholeFromTenth', 'splitToHundred', 'quarterToWhole', 'bandShare'],
+    G6_PCT_CHANGE: ['shortenByPercent', 'lengthenByPercent', 'changeOverOriginal', 'bandShare'],
     G6_CIRCLE_TERMS: ['sectorAsNote', 'diameterTwoRadii', 'chordShorterNote'],
     G6_CIRCLE_CALC: ['piBarsAround', 'halfCircleBar', 'doubleRadiusBars'],
     G6_COMP_TRI: ['partsRowGroups', 'outerSideGroups', 'areaScore'],

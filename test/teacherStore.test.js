@@ -63,7 +63,7 @@ test('makeChoices always includes the key and four distinct non-negative options
   assert.equal(opts.length, 4);
   assert.ok(opts.includes(5));
   assert.equal(new Set(opts).size, 4);
-  opts.forEach((n) => assert.ok(n >= 0));
+  opts.forEach((n) => { assert.ok(n >= 0); });
 });
 
 test('export then import merges sessions and rejects garbage', () => {
@@ -90,6 +90,75 @@ test('loadJson/saveJson namespace keys and survive garbage', () => {
   assert.equal(store.loadJson('bad', 7, ls), 7);
 });
 
+test('loadJson returns fallback for empty, whitespace, null, and undefined keys without querying storage', () => {
+  let called = false;
+  const ls = {
+    getItem: () => { called = true; return '{"a":1}'; },
+    setItem: () => {},
+    removeItem: () => {},
+  };
+  const fallback = { fallback: true };
+  assert.equal(store.loadJson('', fallback, ls), fallback);
+  assert.equal(store.loadJson('   ', fallback, ls), fallback);
+  assert.equal(store.loadJson(null, fallback, ls), fallback);
+  assert.equal(store.loadJson(undefined, fallback, ls), fallback);
+  assert.equal(called, false);
+});
+
+test('saveJson returns false and writes nothing for empty, whitespace, null, and undefined keys', () => {
+  let written = 0;
+  const m = Object.create(null);
+  const ls = {
+    getItem: (k) => m[k] || null,
+    setItem: (k, v) => { written += 1; m[k] = v; },
+    removeItem: (k) => { delete m[k]; },
+  };
+  assert.equal(store.saveJson('', { ok: 1 }, ls), false);
+  assert.equal(store.saveJson('   ', { ok: 1 }, ls), false);
+  assert.equal(store.saveJson(null, { ok: 1 }, ls), false);
+  assert.equal(store.saveJson(undefined, { ok: 1 }, ls), false);
+  assert.equal(written, 0);
+  assert.equal(Object.keys(m).length, 0);
+});
+
+test('jsonKey safely handles empty, whitespace, null, and undefined keys without unexpected prefixes', () => {
+  assert.equal(store.jsonKey(''), '');
+  assert.equal(store.jsonKey('   '), '');
+  assert.equal(store.jsonKey(null), '');
+  assert.equal(store.jsonKey(undefined), '');
+  assert.equal(store.jsonKey('sf-807'), 'mm:v1:sf-807');
+  assert.equal(store.jsonKey('  spaced  '), 'mm:v1:spaced');
+});
+
+test('loadJson returns fallback when storage contains malformed JSON strings', () => {
+  const ls = memory();
+  const fallback = { safe: true };
+  const malformed = ['{"key":', '[1,2,', '{invalid}', '{"unclosed string', 'undefined', '{', '}{'];
+  malformed.forEach((bad, idx) => {
+    const key = `bad-data-${idx}`;
+    ls.setItem(store.jsonKey(key), bad);
+    assert.deepEqual(store.loadJson(key, fallback, ls), fallback);
+  });
+});
+
+test('loadRoster returns fallback empty roster when storage contains malformed JSON', () => {
+  const ls = memory();
+  const malformed = ['{"key":', '[1,2,', '{invalid}', '{"students":', 'null', '{"students": null}'];
+  malformed.forEach((bad) => {
+    ls.setItem(store.storageKey('כיתה א'), bad);
+    const roster = store.loadRoster('כיתה א', ls);
+    assert.deepEqual(roster, store.emptyRoster('כיתה א'));
+  });
+});
+
+test('loadWho returns fallback empty who when storage contains malformed JSON', () => {
+  const ls = memory();
+  ls.setItem(store.WHO_KEY, '{"classCode":');
+  assert.deepEqual(store.loadWho(ls), { classCode: '', name: '' });
+  ls.setItem(store.WHO_KEY, '{invalid}');
+  assert.deepEqual(store.loadWho(ls), { classCode: '', name: '' });
+});
+
 test('a tablet that cannot persist still runs the session instead of throwing', () => {
   // Safari private mode / full quota: getItem works, setItem throws.
   const m = Object.create(null);
@@ -101,7 +170,7 @@ test('a tablet that cannot persist still runs the session instead of throwing', 
   assert.equal(store.saveRoster('שילוב', store.emptyRoster('שילוב'), readOnly), false);
   let sess;
   assert.doesNotThrow(() => { sess = store.startSession('שילוב', 'נועה', 'class', readOnly); });
-  assert.ok(sess && sess.id);
+  assert.ok(sess?.id);
   assert.equal(sess.kind, 'class');
   // Nothing was written, and the follow-up calls degrade to null, not a crash.
   assert.deepEqual(store.listStudents('שילוב', readOnly), []);

@@ -108,7 +108,7 @@ test('without a principal address the letter is not silently addressed to the pr
 test('the project gets a copy only when the teacher ticks the box', () => {
   const project = require('../src/lib/contact').projectEmail();
   assert.ok(project, 'CONTACT.email is empty; this test needs the configured address');
-  const enc = encodeURIComponent(project).replace(/[.]/g, '\\.');
+  const enc = encodeURIComponent(project).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const off = offer.buildPrincipalEmail(sample);
   assert.doesNotMatch(off.mailto, new RegExp(enc));
   const on = offer.buildPrincipalEmail(Object.assign({}, sample, { copyProject: true, replyEmail: 'teacher@example.school.il' }));

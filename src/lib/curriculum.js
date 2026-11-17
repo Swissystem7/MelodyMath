@@ -30,7 +30,7 @@
   const MATRIX = [
     { grade: 'א', strand: 'numbers', topic: 'ספירה עד 100 קדימה ואחורה ממספר כלשהו', status: COVERED, note: 'כולל אחורה ודילוגי 2 מ־50 ודילוגי 5; «ספור את הפעמות» — המטרונום מדגיש כל פעמה n בדילוגי 2/5/10 (grade1Music)' },
     { grade: 'א', strand: 'numbers', topic: 'מנייה עד 100, קיבוץ ל־10', status: COVERED, note: 'קיבוץ לעשרות; אין אומדן פתוח' },
-    { grade: 'א', strand: 'numbers', topic: 'ישר המספרים — מיקום מדויק ומקורב עד 100', status: COVERED, note: 'ישר אינטראקטיבי 0–20 ו־0–100; כל קפיצה היא צעד בסולם וקפיצה של 10 היא אוקטבה (numberLine)' },
+    { grade: 'א', strand: 'numbers', topic: 'ישר המספרים — מיקום מדויק ומקורב עד 100', status: COVERED, note: 'ישר אינטראקטיבי 0–20 ו־0–100; כל צעד הוא מכה וכל 10 הם מחזור ג׳אפטאל שנסגר בגונג (numberLine)' },
     { grade: 'א', strand: 'numbers', topic: 'חיבור וחיסור בתחום 10 ואז 20; פירוקי 10; = משמאל; יותר משני מחוברים', status: COVERED, note: 'תרגול סגור, לא אסטרטגיה נלמדת' },
     { topicId: 'mm-cur-5', grade: 'א', strand: 'numbers', topic: 'קריאה וכתיבה של מספרים, לוח מאה, שם־מספר', status: COVERED, note: 'לוח מאה עם צלילי עשרות ויחידות (grade1Music)' },
     { topicId: 'mm-cur-4', grade: 'א', strand: 'numbers', topic: 'חיבור וחיסור בעשרות שלמות עד 100', status: COVERED, note: '20+60 ודומיהם' },
@@ -546,6 +546,25 @@
     return ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
   }
 
+  function getMastery() {
+    if (typeof MM_MASTERY !== 'undefined') return MM_MASTERY;
+    try { return typeof require === 'function' ? require('./mastery') : null; } catch (e) { return null; }
+  }
+
+  function dataStrandTopics(grade) {
+    const rows = grade ? rowsForGrade(grade) : MATRIX;
+    return rows.filter(function (r) { return r.strand === 'data'; }).map(function (r) { return r.topic; });
+  }
+
+  function topicReviewPath(topicId, history, catalog) {
+    const row = topicById(topicId);
+    const mast = getMastery();
+    if (row && mast && typeof mast.buildReviewPath === 'function') {
+      return mast.buildReviewPath(history, catalog, { topic: row.topic, grade: row.grade, strand: row.strand });
+    }
+    return null;
+  }
+
   return {
     COVERED: COVERED,
     PARTIAL: PARTIAL,
@@ -572,5 +591,7 @@
     programGrades: programGrades,
     programForGrade: programForGrade,
     itemsForTopic: itemsForTopic,
+    dataStrandTopics: dataStrandTopics,
+    topicReviewPath: topicReviewPath,
   };
 });

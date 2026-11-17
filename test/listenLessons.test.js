@@ -41,3 +41,33 @@ test('compareHearing names which sample has a root without calling it a proof', 
   assert.match(cmp.cueHe, /רק לב׳ יש שורש/);
   assert.match(cmp.cueHe, /לא הוכחה|לא «קול הפונקציה»/);
 });
+
+test('lesson step integrity, unique identifiers, Hebrew titles, and robustness against missing or empty inputs', () => {
+  const ids = lessons.LISTEN_LESSONS.map((L) => L.id);
+  const uniqueIds = new Set(ids);
+  assert.equal(uniqueIds.size, ids.length, 'Lesson IDs must be unique');
+
+  lessons.LISTEN_LESSONS.forEach((L) => {
+    assert.ok(L.id, 'Lesson must have an id');
+    assert.ok(L.kind, 'Lesson must have a kind');
+    assert.ok(typeof L.titleHe === 'string' && L.titleHe.trim().length > 0, 'Lesson must have a Hebrew title');
+    assert.ok(typeof L.promptHe === 'string' && L.promptHe.trim().length > 0, 'Lesson must have a Hebrew prompt');
+    assert.ok(typeof L.teachHe === 'string' && L.teachHe.trim().length > 0, 'Lesson must have a Hebrew teach explanation');
+    assert.ok(Array.isArray(L.choices) && L.choices.length > 0, 'Lesson must have choices');
+    assert.ok(L.answer != null, 'Lesson must have an answer');
+  });
+
+  assert.equal(lessons.lessonById(null), null);
+  assert.equal(lessons.lessonById(undefined), null);
+  assert.equal(lessons.lessonById(''), null);
+  assert.equal(lessons.lessonById('non-existent-id'), null);
+
+  assert.equal(lessons.lessonIndex(null), -1);
+  assert.equal(lessons.lessonIndex(undefined), -1);
+  assert.equal(lessons.lessonIndex(''), -1);
+
+  assert.deepEqual(lessons.classifyHearing(null), { trend: 'flat', hasRoot: false, rootCount: 0, hasAsymptote: false, hasUndefined: false });
+  assert.deepEqual(lessons.classifyHearing(undefined), { trend: 'flat', hasRoot: false, rootCount: 0, hasAsymptote: false, hasUndefined: false });
+
+  assert.equal(lessons.checkListenAnswer(null, 'root'), false);
+});

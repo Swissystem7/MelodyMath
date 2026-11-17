@@ -22,10 +22,12 @@
   const MAX_LEVEL = 3;
 
   function nextLevel(currentLevel, lastTwo) {
-    if (!Array.isArray(lastTwo) || lastTwo.length !== 2) return currentLevel;
-    if (lastTwo.every((x) => x.correct)) return Math.min(MAX_LEVEL, currentLevel + 1);
-    if (lastTwo.every((x) => !x.correct)) return Math.max(MIN_LEVEL, currentLevel - 1);
-    return currentLevel;
+    const lvl = Number.isFinite(currentLevel) ? currentLevel : MIN_LEVEL;
+    const clampedCurrent = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, lvl));
+    if (!Array.isArray(lastTwo) || lastTwo.length !== 2) return Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, clampedCurrent));
+    if (lastTwo.every((x) => x && x.correct)) return Math.min(MAX_LEVEL, clampedCurrent + 1);
+    if (lastTwo.every((x) => x && !x.correct)) return Math.max(MIN_LEVEL, clampedCurrent - 1);
+    return clampedCurrent;
   }
 
   function normalizeAnswer(value) {
@@ -156,11 +158,12 @@
 
   function eligibleExercises(items, history, lastId, chosenLevel) {
     const list = Array.isArray(items) ? items : [];
-    const log = Array.isArray(history) ? history : [];
-    const mastered = new Set(log.filter((h) => h.correct).map((h) => h.id));
-    const missed = log.filter((h) => !h.correct && !mastered.has(h.id)).map((h) => h.id);
+    const log = Array.isArray(history) ? history.filter((h) => h && typeof h === 'object') : [];
+    const mastered = new Set(log.filter((h) => h && h.correct).map((h) => h.id));
+    const missed = log.filter((h) => h && !h.correct && !mastered.has(h.id)).map((h) => h.id);
     const last = list.find((x) => x.id === lastId);
-    const level = nextLevel(last ? last.level : chosenLevel, log.slice(-2));
+    const baseLevel = Number.isFinite(chosenLevel) ? Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, chosenLevel)) : MIN_LEVEL;
+    const level = nextLevel(last && Number.isFinite(last.level) ? last.level : baseLevel, log.slice(-2));
     const atLevel = (pred) => list.filter((x) => x.level === level && pred(x));
     // Prefer a miss that is not the item just shown — one intervening question,
     // then the error returns. Immediate repeat only if nothing else is left.

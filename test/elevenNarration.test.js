@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { generatePreRecordedNarration, HEBREW_VOICE_PROMPTS, ELEVEN_CONFIG } = require('../tools/elevenNarration');
+const { generatePreRecordedNarration, HEBREW_VOICE_PROMPTS, ELEVEN_CONFIG, pcmToWav } = require('../tools/elevenNarration');
 const NarrationPlayer = require('../src/lib/narrationPlayer');
 
 test('elevenNarration exports valid config and Hebrew voice prompts', () => {
@@ -29,11 +29,15 @@ test('generatePreRecordedNarration handles dry-run mode without network calls', 
 test('generatePreRecordedNarration writes audio buffer on successful response', async () => {
   const origFetch = globalThis.fetch;
   try {
-    globalThis.fetch = async () => ({
-      ok: true,
-      status: 200,
-      arrayBuffer: async () => Buffer.from('fake-mp3-bytes')
-    });
+    let requested = '';
+    globalThis.fetch = async (url) => {
+      requested = String(url);
+      return {
+        ok: true,
+        status: 200,
+        arrayBuffer: async () => Buffer.from([1, 0, 2, 0, 3, 0, 4, 0])
+      };
+    };
     const fakeDir = path.join(__dirname, '..', 'tmp-test-voice');
     const origDir = ELEVEN_CONFIG.outputDir;
     ELEVEN_CONFIG.outputDir = fakeDir;
@@ -41,6 +45,12 @@ test('generatePreRecordedNarration writes audio buffer on successful response', 
     assert.equal(res.skipped, false);
     assert.equal(res.generatedCount, 1);
     assert.equal(res.results[0].status, 'generated');
+    assert.match(requested, /\?output_format=pcm_22050$/);
+    const written = fs.readFileSync(path.join(fakeDir, 'prompt_addition.wav'));
+    assert.equal(written.toString('ascii', 0, 4), 'RIFF');
+    assert.equal(written.toString('ascii', 8, 12), 'WAVE');
+    assert.equal(written.readUInt32LE(24), 22050);
+    assert.equal(written.length, 44 + 8);
     fs.rmSync(fakeDir, { recursive: true, force: true });
     ELEVEN_CONFIG.outputDir = origDir;
   } finally {
@@ -77,8 +87,8 @@ test('tools/elevenNarration runs as standalone CLI and reports missing key', () 
 });
 
 test('NarrationPlayer returns asset paths and handles unknown keys', () => {
-  assert.equal(NarrationPlayer.getAudioPath('addition'), 'sounds/voice/he/prompt_addition.mp3');
-  assert.equal(NarrationPlayer.getAudioPath('feedback_good'), 'sounds/voice/he/feedback_good.mp3');
+  assert.equal(NarrationPlayer.getAudioPath('addition'), 'sounds/voice/he/prompt_addition.wav');
+  assert.equal(NarrationPlayer.getAudioPath('feedback_good'), 'sounds/voice/he/feedback_correct.wav');
   assert.equal(NarrationPlayer.getAudioPath('non_existent'), null);
 });
 
@@ -158,4 +168,23 @@ test('NarrationPlayer supports non-CommonJS window root global', () => {
   assert.ok(globalThis.NarrationPlayer);
   assert.equal(typeof globalThis.NarrationPlayer.playNarration, 'function');
   delete globalThis.NarrationPlayer;
+});
+
+test('elevenNarration writes exactly the .wav files NarrationPlayer plays', () => {
+  const generated = HEBREW_VOICE_PROMPTS.map((p) => 'sounds/voice/he/' + p.filename).sort();
+  const played = Object.values(NarrationPlayer.NARRATION_ASSETS).sort();
+  assert.deepEqual(generated, played);
+  for (const p of HEBREW_VOICE_PROMPTS) assert.match(p.filename, /\.wav$/);
+});
+
+test('pcmToWav builds a 16-bit mono PCM header and leaves WAV bytes alone', () => {
+  const wav = pcmToWav(Buffer.alloc(100), 8000);
+  assert.equal(wav.length, 144);
+  assert.equal(wav.readUInt32LE(4), 136);
+  assert.equal(wav.readUInt16LE(20), 1);
+  assert.equal(wav.readUInt16LE(22), 1);
+  assert.equal(wav.readUInt32LE(28), 16000);
+  assert.equal(wav.readUInt16LE(34), 16);
+  assert.equal(wav.readUInt32LE(40), 100);
+  assert.equal(pcmToWav(wav, 8000), wav);
 });

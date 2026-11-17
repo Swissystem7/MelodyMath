@@ -65,7 +65,7 @@ function sizeVerdict(live, ref) {
   return live < ref ? 'האתר מאחור (' + (ref - live) + ' בתים)' : 'האתר שונה (+' + (live - ref) + ' בתים)';
 }
 
-function row(cells) { return '| ' + cells.map((c) => String(c).replace(/\|/g, '\\|')).join(' | ') + ' |'; }
+function row(cells) { return '| ' + cells.map((c) => String(c).replace(/\\/g, '\\\\').replace(/\|/g, '\\|')).join(' | ') + ' |'; }
 
 async function get(url) {
   try {
@@ -173,4 +173,5 @@ module.exports = {
   youtubeEmbeds,
   sizeVerdict,
   demoVideoLinkedFromOnboard,
+  row,
 };
