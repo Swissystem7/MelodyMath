@@ -72,18 +72,10 @@
   // if MMPilotMusic is missing, lacks a function, or a function throws, the
   // demo warns once in the console, plays no sound, and keeps working: the
   // pictures, captions and the rhythm bar fall back to the plain versions below.
-  function music() {
-    const NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
-    const live = G.MMPilotMusic;
-    let warned = false;
-    function warn(why) {
-      if (warned) return;
-      warned = true;
-      try { G.console.warn('[MelodyMath pilot] music is unavailable (' + why + '): the demo continues without sound.'); } catch (e) { /* no console */ }
-    }
+  function createMusicFallback() {
     const CHOICE_BEATS = { quarter: 1, half: 2, whole: 4 };
     let muted = false;
-    const fallback = {
+    return {
       CHOICES: [
         { id: 'quarter', symbol: '♩', fraction: '1/4', he: 'רבע תיבה' },
         { id: 'half', symbol: '𝅗𝅥', fraction: '1/2', he: 'חצי תיבה' },
@@ -105,8 +97,20 @@
       setMuted: function (v) { muted = !!v; },
       isMuted: function () { return muted; }
     };
+  }
+
+  function music() {
+    const NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
+    const live = G.MMPilotMusic;
+    let warned = false;
+    const warn = function (why) {
+      if (warned) return;
+      warned = true;
+      try { G.console.warn('[MelodyMath pilot] music is unavailable (' + why + '): the demo continues without sound.'); } catch (e) { /* no console */ }
+    };
+    const fallback = createMusicFallback();
     const missing = !live ? ['MMPilotMusic'] : NEEDED.filter(function (k) { return typeof live[k] !== 'function'; });
-    const ok = missing.length === 0 && Array.isArray(live.CHOICES) && Array.isArray(live.GIVEN);
+    const ok = missing.length === 0 && Array.isArray(live?.CHOICES) && Array.isArray(live?.GIVEN);
     if (!ok) warn(missing.length ? 'missing ' + missing.join(', ') : 'missing CHOICES/GIVEN');
     const safe = { CHOICES: ok ? live.CHOICES : fallback.CHOICES, GIVEN: ok ? live.GIVEN : fallback.GIVEN };
     NEEDED.forEach(function (k) {
@@ -567,10 +571,51 @@
       + '</form></section>';
   }
 
+  // MM-AUTO-764: exact resume (question + think/hear/why stage + class session),
+  // kept in its own key so pilot progress/check history is never rewritten.
+  const RESUME_KEY = 'mmPilot.v1.resume';
+  const resumeMem = {};
+  function resumeStorage() { try { return safeStorage(); } catch (e) { return null; } }
+  function readResumes() { const s = resumeStorage(); try { if (s) return JSON.parse(s.getItem(RESUME_KEY) || '{}') || {}; } catch (e) {} return resumeMem; }
+  function stageOf() { return (state.qState === 'right' || state.qState === 'revealed' || state.qState === 'wrong' || state.qState === 'retry') ? 'why' : (state.audio ? 'hear' : 'think'); }
+  function saveResumePosition() {
+    if (state.preview || !state.account) return null;
+    const p = currentProgress(); const q = UNIT.questions[Math.min(p.index, UNIT.questions.length - 1)];
+    const row = { unitId: UNIT.id, questionIndex: Math.min(p.index, Math.max(0, UNIT.questions.length - 1)), questionId: q ? q.id : '', stage: stageOf(), view: state.view, sessionKind: classSize() ? 'class' : 'practice', classSession: !!classSize(), updatedAt: Date.now() };
+    const all = readResumes(); all[state.account.id] = all[state.account.id] || {}; all[state.account.id][UNIT.id] = row;
+    const s = resumeStorage(); try { if (s) s.setItem(RESUME_KEY, JSON.stringify(all)); else resumeMem[state.account.id] = all[state.account.id]; } catch (e) { resumeMem[state.account.id] = all[state.account.id]; }
+    if (typeof G !== 'undefined' && typeof G.saveUnitResume === 'function') {
+      try { G.saveUnitResume(state.account.classCode || 'pilot', state.account.name || state.account.id, row, s); } catch (e) {}
+    }
+    return row;
+  }
+  function loadResumePosition(unitId) {
+    if (typeof G !== 'undefined' && typeof G.loadUnitResume === 'function' && state.account) {
+      try {
+        const fromTs = G.loadUnitResume(state.account.classCode || 'pilot', state.account.name || state.account.id, unitId, resumeStorage());
+        if (fromTs) return fromTs;
+      } catch (e) {}
+    }
+    const all = readResumes();
+    return (state.account && all[state.account.id] && all[state.account.id][unitId]) || null;
+  }
+  function progressByUnit() { const out = {}; if (!state.account) return out; UNITS.forEach(function (u) { out[u.id] = store.progress(state.account.id, u.id); }); return out; }
+  function extraNavHtml(unit, p) {
+    const X = G.MMPilotUnitsExtra;
+    if (!X) return '';
+    const prog = progressByUnit();
+    const stageName = typeof X.resumeStageName === 'function' ? X.resumeStageName(stageOf()) : '';
+    const stageBadge = stageName ? '<span class="mm-stage-chip" data-testid="stage-indicator" style="margin-inline-start:6px;font-size:0.8rem">שלב: ' + esc(stageName) + '</span>' : '';
+    return (typeof X.progressBarHtml === 'function' ? X.progressBarHtml(unit, p) : '')
+      + stageBadge
+      + (typeof X.skipButtonHtml === 'function' ? X.skipButtonHtml(unit.id, UNITS, prog) : '')
+      + (typeof X.quickSwitchHtml === 'function' ? X.quickSwitchHtml(unit.id, UNITS, prog) : '');
+  }
   function currentProgress() { return state.preview ? state.preview.p : store.progress(state.account.id, UNIT.id); }
   function saveP(p) {
     if (state.preview) { state.preview.p = p; return; }
     store.saveProgress(state.account.id, UNIT.id, p);
+    saveResumePosition();
   }
 
   function currentQuestion() {
@@ -707,7 +752,7 @@
     return '<section class="mm-view mm-view--exercise" data-testid="view-exercise" data-unit="' + esc(UNIT.id) + '" data-qid="' + q.id + '" data-kind="' + (ctx.rhythm ? 'rhythm' : ctx.picks ? 'choice' : 'keypad') + '"' + (state.preview ? ' data-preview="1"' : '') + '>'
       + topbar('תרגול', UNIT.title, '<span class="mm-badge" data-testid="star-count" aria-label="כוכבים">★ ' + firstTryCount(p) + '</span>')
       + (state.preview ? '<div class="mm-preview-bar" data-testid="preview-bar"><span>תצוגה מקדימה למורה — לא נשמר בדוח</span><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="preview-exit" data-testid="preview-exit">חזרה ללוח</button></div>' : '')
-      + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (ctx.qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>'
+      + '<div class="mm-progress"><span class="mm-sub" data-testid="q-progress">תרגיל ' + (ctx.qi + 1) + ' מתוך ' + UNIT.questions.length + '</span><div class="mm-dots" aria-hidden="true">' + dots + '</div></div>' + extraNavHtml(UNIT, p)
       + '<div class="mm-card"><div class="mm-task__row"><span class="mm-chip" data-testid="q-topic">' + esc(ctx.topic.name) + '</span>' + curriculumBadge(q) + '</div>'
       + '<h2 class="mm-question' + (legacy ? '' : ' mm-question--text') + '" data-testid="q-text">' + qHead + '</h2>'
       + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="narrate" data-q="' + esc(q.id) + '" data-testid="narration" hidden>🔊 הקראה</button></div>'
@@ -801,13 +846,46 @@
       + '</form>';
   }
 
+  function isControlRow(r) {
+    if (!r) return false;
+    if (r.controlMode === true) return true;
+    if (r.group === 'control') return true;
+    if (r.post && r.post.group === 'control') return true;
+    if (r.pre && r.pre.group === 'control') return true;
+    return false;
+  }
+
+  function dataVizApi() {
+    if (typeof G !== 'undefined' && typeof G.renderComparativeBarChartHtml === 'function') return G;
+    if (typeof G !== 'undefined' && G.MMDataViz && typeof G.MMDataViz.renderComparativeBarChartHtml === 'function') return G.MMDataViz;
+    if (typeof globalThis !== 'undefined' && typeof globalThis.renderComparativeBarChartHtml === 'function') return globalThis;
+    if (typeof globalThis !== 'undefined' && globalThis.MMDataViz && typeof globalThis.MMDataViz.renderComparativeBarChartHtml === 'function') return globalThis.MMDataViz;
+    if (typeof window !== 'undefined' && typeof window.renderComparativeBarChartHtml === 'function') return window;
+    try { return require('../../src/lib/dataViz.js'); } catch (e) {
+      try { return require('../src/lib/dataViz.js'); } catch (e2) {
+        try { return require('./src/lib/dataViz.js'); } catch (e3) { return null; }
+      }
+    }
+  }
+
   // Every student × unit with a check before, for the class summary and the CSV.
   function checkRows() {
     const rows = [];
     students().forEach(function (s) {
       UNITS.forEach(function (unit) {
         const p = store.progress(s.id, unit.id);
-        if (p.pre) rows.push({ student: s.displayName, unit: unit.id, pre: p.pre, post: p.post || null, later: p.later || null });
+        if (p.pre) {
+          const ctrl = isControlRow(p);
+          rows.push({
+            student: s.displayName,
+            unit: unit.id,
+            pre: p.pre,
+            post: p.post || null,
+            later: p.later || null,
+            controlMode: ctrl,
+            group: ctrl ? 'control' : 'intervention'
+          });
+        }
       });
     });
     return rows;
@@ -869,12 +947,68 @@
             + '<td><span class="ltr">' + u.pre + '%</span></td><td><span class="ltr">' + u.post + '%</span></td><td><strong class="ltr">' + sign(u.gain) + '</strong></td></tr>';
         }).join('') + '</tbody></table></div>'
         + (a.ceiling ? '<p class="mm-sub">' + a.ceiling + ' מהזוגות התחילו עם הכול נכון כבר לפני, ולכן לא יכלו להראות שיפור.</p>' : '');
+      const comp = (S && typeof S.compareGroups === 'function') ? S.compareGroups(rows) : null;
+      if (comp && comp.hasBothGroups) {
+        const musicGain = comp.music.gainMean;
+        const controlGain = comp.control.gainMean;
+        const net = comp.netGain;
+        body += '<p data-testid="class-gain-compare" data-music-gain="' + musicGain + '" data-control-gain="' + controlGain + '" data-net="' + net + '">'
+          + 'שיפור ממוצע בקבוצת המוזיקה: ' + sign(musicGain) + ' נקודות; בקבוצת ההשוואה: ' + sign(controlGain) + ' נקודות; הפרש נטו: ' + sign(net) + ' נקודות.'
+          + '</p>';
+      }
     }
     return '<div class="mm-card" data-testid="class-gain"><h3>כמה הכיתה השתפרה? בדיקה בלי מוזיקה, לפני ואחרי</h3>' + body
       + '<p class="mm-sub" data-testid="class-gain-limits">מה זה לא מראה: אין כאן קבוצת השוואה, כל בדיקה היא 2–3 שאלות, והבדיקה אחרי נעשית מיד בסוף היחידה. '
       + 'שיפור כאן יכול לבוא גם מעצם התרגול. כדי לדעת כמה המוזיקה עצמה תורמת, משווים לכיתה דומה שמתרגלת את אותו חומר בלי מוזיקה, באותו זמן, עם אותן בדיקות.'
       + (sum.all.n && sum.all.children < 10 ? ' עם פחות מ־10 ילדים התוצאה עוד לא יציבה, גם כשיש הרבה יחידות.' : '') + '</p>'
       + (rows.length ? '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="export-checks" data-testid="export-checks">הורדת הנתונים לגיליון (CSV)</button></div>' : '')
+      + '</div>';
+  }
+
+  // MM-AUTO-752: Comparison dashboard: intervention (music) vs control group
+  function comparisonDashboardCard() {
+    const rows = checkRows();
+    const comp = (S && typeof S.compareGroups === 'function')
+      ? S.compareGroups(rows)
+      : null;
+    if (!comp) return '';
+
+    const dv = dataVizApi();
+    const chartHtml = (dv && typeof dv.renderComparativeBarChartHtml === 'function')
+      ? dv.renderComparativeBarChartHtml(comp.chartSpec)
+      : (dv && typeof dv.renderBarChartHtml === 'function' ? dv.renderBarChartHtml(comp.chartSpec) : '');
+
+    const sign = function (v) { return (v > 0 ? '+' : '') + v; };
+
+    let contentHtml = '';
+    const m = comp.music;
+    const c = comp.control;
+
+    if (!m.totalCount && !c.totalCount) {
+      contentHtml = '<p class="mm-sub" data-testid="comparison-empty">עדיין אין בדיקות במכשיר זה.</p>';
+    } else {
+      const netDisplay = comp.netGain != null ? sign(comp.netGain) + ' נקודות' : '—';
+      const dDisplay = comp.cohenD != null ? 'd = ' + comp.cohenD + (comp.effectClassification ? ' (' + comp.effectClassification + ')' : '') : '—';
+
+      contentHtml = '<div class="mm-comparison-metrics" data-testid="comparison-metrics">'
+        + '<div class="mm-metric-box mm-metric-box--highlight" data-testid="comparison-net-gain"><span class="mm-metric-box__num ltr">' + esc(netDisplay) + '</span><span class="mm-metric-box__label">הפרש שיפור נטו</span></div>'
+        + '<div class="mm-metric-box" data-testid="comparison-cohen-d"><span class="mm-metric-box__num ltr">' + esc(dDisplay) + '</span><span class="mm-metric-box__label">גודל אפקט Cohen d</span></div>'
+        + '<div class="mm-metric-box" data-testid="comparison-music-stats"><span class="mm-metric-box__num ltr">' + (m.gainMean != null ? sign(m.gainMean) + '%' : '—') + '</span><span class="mm-metric-box__label">שיפור קבוצת מוזיקה (' + m.n + ' תלמידים)</span></div>'
+        + '<div class="mm-metric-box" data-testid="comparison-control-stats"><span class="mm-metric-box__num ltr">' + (c.gainMean != null ? sign(c.gainMean) + '%' : '—') + '</span><span class="mm-metric-box__label">שיפור קבוצת ביקורת (' + c.n + ' תלמידים)</span></div>'
+        + '</div>'
+        + '<div class="mm-table-wrap"><table class="mm-table mm-table--comparison" data-testid="comparison-table"><thead><tr><th scope="col">שלב המדידה</th><th scope="col">קבוצת מוזיקה</th><th scope="col">קבוצת ביקורת</th><th scope="col">הפרש</th></tr></thead><tbody>'
+        + '<tr><th scope="row">ממוצע לפני</th><td><span class="ltr">' + (m.preMean != null ? m.preMean + '%' : '—') + '</span></td><td><span class="ltr">' + (c.preMean != null ? c.preMean + '%' : '—') + '</span></td><td><span class="ltr">' + (m.preMean != null && c.preMean != null ? sign(Math.round((m.preMean - c.preMean) * 10) / 10) : '—') + '</span></td></tr>'
+        + '<tr><th scope="row">ממוצע אחרי</th><td><span class="ltr">' + (m.postMean != null ? m.postMean + '%' : '—') + '</span></td><td><span class="ltr">' + (c.postMean != null ? c.postMean + '%' : '—') + '</span></td><td><span class="ltr">' + (m.postMean != null && c.postMean != null ? sign(Math.round((m.postMean - c.postMean) * 10) / 10) : '—') + '</span></td></tr>'
+        + '<tr><th scope="row">בדיקת מעקב (שבוע)</th><td><span class="ltr">' + (m.laterMean != null ? m.laterMean + '%' + (m.laterN ? ' (' + m.laterN + ' זוגות)' : '') : 'עוד לא') + '</span></td><td><span class="ltr">' + (c.laterMean != null ? c.laterMean + '%' + (c.laterN ? ' (' + c.laterN + ' זוגות)' : '') : 'עוד לא') + '</span></td><td><span class="ltr">' + (m.laterMean != null && c.laterMean != null ? sign(Math.round((m.laterMean - c.laterMean) * 10) / 10) : '—') + '</span></td></tr>'
+        + '<tr><th scope="row"><strong>שיפור ממוצע</strong></th><td><strong class="ltr">' + (m.gainMean != null ? sign(m.gainMean) + '%' : '—') + '</strong></td><td><strong class="ltr">' + (c.gainMean != null ? sign(c.gainMean) + '%' : '—') + '</strong></td><td><strong class="ltr">' + esc(netDisplay) + '</strong></td></tr>'
+        + '</tbody></table></div>'
+        + (chartHtml ? '<div class="mm-comparison-chart-wrap" data-testid="comparison-chart">' + chartHtml + '</div>' : '');
+    }
+
+    return '<div class="mm-card mm-comparison-card" data-testid="comparison-dashboard">'
+      + '<h3>לוח השוואת ניסוי מול ביקורת (קבוצת מוזיקה מול ביקורת)</h3>'
+      + '<p class="mm-sub">השוואה מדעית מבוקרת: תלמידים שתרגלו עם מוזיקה מול קבוצת ביקורת שתרגלה את אותם תרגילים ובדיקות בלי צלילים. כולל ממוצעי לפני, אחרי ומעקב שבוע, שיפור נטו ומדד Cohen d.</p>'
+      + contentHtml
       + '</div>';
   }
 
@@ -1060,7 +1194,7 @@
       + coverageCard()
       + '<section class="mm-view" aria-labelledby="report-title" data-testid="report"><h2 id="report-title" style="margin:6px 0 0">דוח לפי נושא ופערים</h2>'
       + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. «לפני/אחרי» = בדיקה קצרה בלי מוזיקה, לפני היחידה ואחריה (2–3 שאלות: סימן, לא ציון). הנתונים מהמכשיר הזה בלבד.</p>'
-      + classGainCard() + teacherReport() + '</section>'
+      + classGainCard() + comparisonDashboardCard() + teacherReport() + '</section>'
       + '<div class="mm-card"><h3>נתוני ההדגמה</h3><p class="mm-sub">מוחק את המשימות, ההתקדמות והכניסה מהדפדפן הזה בלבד.</p>'
       + '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="reset" data-testid="reset">'
       + (state.confirmReset ? 'לחצו שוב לאישור המחיקה' : 'איפוס נתוני ההדגמה') + '</button></div></div>'
@@ -1093,6 +1227,16 @@
     state.preview = null;
     if (typeof store.setLastUnit === 'function') store.setLastUnit(UNIT.id);
     const p = currentProgress();
+    const resume = loadResumePosition(UNIT.id);
+    if (resume && !p.completedAt) {
+      if (resume.questionIndex > p.index) {
+        p.index = Math.min(resume.questionIndex, UNIT.questions.length - 1);
+        saveP(p);
+      }
+      if (resume.stage === 'why') {
+        state.whyOpen = true;
+      }
+    }
     state.lessonStatus = '';
     if (hasChecks() && !p.pre) go('check-pre');
     else if (p.completedAt && hasChecks() && !p.post) go('check-post');
@@ -1233,6 +1377,7 @@
     const act = btn.getAttribute('data-act');
     if (act === 'signout') { signOutClean(); store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); return; }
     if (act === 'open-unit') { openUnit(btn.getAttribute('data-unit') || UNITS[0].id); return; }
+    if (act === 'skip-unit') { const tid = btn.getAttribute('data-unit'); const X = G.MMPilotUnitsExtra; if (tid && X && X.canSkipTo(UNIT.id, tid, UNITS, progressByUnit())) { saveResumePosition(); openUnit(tid); } return; }
     if (act === 'preview') { e.preventDefault(); openPreview(btn.getAttribute('data-unit'), btn.getAttribute('data-q')); return; }
     if (act === 'preview-exit') { exitPreview(); return; }
     if (act === 'narrate') {
@@ -1391,4 +1536,12 @@
       G.navigator.serviceWorker.register('../sw.js').catch(function () {});
     }
   } catch (e) { /* no offline copy; the demo itself is unaffected */ }
+
+  if (typeof globalThis !== 'undefined') {
+    globalThis.MMPilotApp = Object.assign(globalThis.MMPilotApp || {}, {
+      comparisonDashboardCard: comparisonDashboardCard,
+      checkRows: checkRows,
+      isControlRow: isControlRow
+    });
+  }
 })();

@@ -77,3 +77,53 @@ test('geometry prompts get the glyphs of the shapes they name, in reading order'
   assert.match(html, /aria-hidden="true"/);
   assert.match(html, /▲/);
 });
+
+test('banks refactored validation and tag helpers handle valid and edge cases', () => {
+  const banks = require('../src/lib/banks.js');
+  // hasRequiredTags
+  assert.equal(banks.hasRequiredTags(null), false);
+  assert.equal(banks.hasRequiredTags('not-an-object'), false);
+  assert.equal(banks.hasRequiredTags({}), false);
+  assert.equal(banks.hasRequiredTags({ grade: '', strand: 'מספרים', standard: 'st' }), false);
+  assert.equal(banks.hasRequiredTags({ grade: 'א', strand: '   ', standard: 'st' }), false);
+  assert.equal(banks.hasRequiredTags({ grade: 'א', strand: 'מספרים', standard: '' }), false);
+  assert.equal(banks.hasRequiredTags({ grade: 'א', strand: 'מספרים ופעולות', standard: 'ספירה' }), true);
+
+  // isShippable
+  assert.equal(banks.isShippable(null), false);
+  assert.equal(banks.isShippable({ grade: 'Z' }), false);
+  assert.equal(banks.isShippable({ grade: 'א', skill: 'nonexistent' }), false);
+  assert.equal(banks.isShippable({ grade: 'א', skill: 'addition', strand: 's', standard: 'std', prompt: '', answer: 1 }), false);
+  assert.equal(banks.isShippable({ grade: 'א', skill: 'addition', strand: 's', standard: 'std', prompt: 'p', answer: '' }), false);
+  assert.equal(banks.isShippable({ grade: 'א', skill: 'addition', strand: 'מספרים ופעולות', standard: 'חיבור', prompt: '1+1', answer: 2 }), true);
+
+  // hearOf
+  assert.equal(banks.hearOf(null), null);
+  assert.equal(banks.hearOf([]), null);
+  assert.equal(banks.hearOf([0]), null);
+  assert.equal(banks.hearOf([13]), null);
+  assert.equal(banks.hearOf(['abc']), null);
+  assert.deepEqual(banks.hearOf([1, '5', 12]), [1, 5, 12]);
+
+  // isDataOrTimeItem & gapTargetedItems
+  assert.equal(banks.isDataOrTimeItem(null), false);
+  const dataItem = { strand: banks.STRAND.DATA, skill: 'data' };
+  assert.equal(banks.isDataOrTimeItem(dataItem), true);
+  const targeted = banks.gapTargetedItems({ grade: 'א', errors: [{ prompt: 'test' }] });
+  assert.ok(Array.isArray(targeted));
+
+  // non-object opts (covers normalizeGapOptions fallback)
+  const targetedByGrade = banks.gapTargetedItems('ב');
+  assert.ok(Array.isArray(targetedByGrade));
+
+  // errors with matching skill and matching he (covers isMatchingSkill and handleSingleError skill loop)
+  const targetedWithSkill = banks.gapTargetedItems({
+    grade: 'ב',
+    errors: [
+      { skill: 'measurement' },
+      { skill: 'נתונים' },
+    ],
+  });
+  assert.ok(Array.isArray(targetedWithSkill));
+});
+

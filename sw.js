@@ -4,7 +4,7 @@
    background (stale-while-revalidate), so a fix shipped to the site reaches
    a tablet on its second visit without anyone bumping CACHE. Bumping CACHE
    is still the way to drop a bad cache at once (see pwa.test.js). */
-const CACHE = 'melodymath-offline-v54';
+const CACHE = 'melodymath-offline-v101';
 const ASSETS = [
   './',
   './index.html',
@@ -106,6 +106,30 @@ const ASSETS = [
   './src/components/TempoRuler.js',
   './src/lib/music/bandShare.js',
   './src/lib/music/fenceFloor.js',
+  './src/lib/music/noteBar.js',
+  './src/lib/music/meterSplit.js',
+  './src/lib/music/divisionBeats.js',
+  './src/lib/music/timeCycles.js',
+  './src/lib/music/earlyBeats.js',
+  './src/lib/music/moneyMarket.js',
+  './src/lib/music/multiplyWorlds.js',
+  './src/lib/music/jumpLine.js',
+  './src/lib/music/shapeWalk.js',
+  './src/lib/music/measureWorlds.js',
+  './src/lib/music/dataWorlds.js',
+  './src/lib/music/areaWorlds.js',
+  './src/lib/music/partsNumerals.js',
+  './src/lib/music/cutCompose.js',
+  './src/lib/music/senseSix.js',
+  './src/lib/music/decimalWorlds.js',
+  './src/lib/music/lawsSix.js',
+  './src/lib/music/timesTable.js',
+  './src/lib/music/bigNumbers.js',
+  './src/lib/music/divisorWorlds.js',
+  './src/lib/music/patternsUnits.js',
+  './src/lib/music/tensPercent.js',
+  './src/lib/music/fractionTime.js',
+  './src/lib/music/shofarCalls.js',
   './src/lib/music/takeAwayTen.js',
   './src/lib/music/dragPlace.js',
   './src/lib/music/beatCounter.js',

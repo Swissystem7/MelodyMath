@@ -373,7 +373,7 @@
   // Two tablets never share a clock reading to the millisecond by accident, so
   // the timestamp plus the text is enough to tell a re-import from a new note.
   function noteKey(note) {
-    return `${String(note && note.at != null ? note.at : '')} ${noteText(note)}`;
+    return `${String(note && note.at != null ? note.at : '')}\x00${noteText(note)}`;
   }
 
   // Notes come off another tablet's JSON file: keep the shape addNote writes,
@@ -680,6 +680,7 @@
       // Otherwise a row lands under a name getStudent can never look up.
       const name = studentLabel(rawName);
       if (!name) { skipped += 1; return; }
+      const unitResume = cleanUnitResumes(incoming.unitResume);
       const sessions = cleanSessions(incoming.sessions);
       const incomingNotes = cleanNotes(incoming.notes);
       const incomingAssignments = cleanAssignments(incoming.assignments);
@@ -691,6 +692,7 @@
           sessions: sessions,
           assignments: incomingAssignments,
           notes: incomingNotes,
+          unitResume: unitResume,
         };
         added += 1;
         notes += incomingNotes.length;
@@ -851,6 +853,164 @@
     }
   }
 
+  // --- Unit resume (MM-AUTO-764): exact in-unit position, kept apart from
+  // sessions/items so check/test history is never rewritten by navigation. ---
+  const RESUME_STAGES = Object.freeze(['think', 'hear', 'why']);
+  const RESUME_VIEWS = Object.freeze(['lesson', 'exercise', 'check-pre', 'check-post', 'check-later', 'summary', 'student-home']);
+
+  let resumeSeq = 0;
+  function resumeTimestamp(explicit) {
+    const num = Number(explicit);
+    if (Number.isFinite(num) && num > 0) return num;
+    const now = Date.now();
+    resumeSeq = Math.max(now, resumeSeq + 1);
+    return resumeSeq;
+  }
+
+  function normalizeResumeStage(stage) {
+    return RESUME_STAGES.indexOf(stage) >= 0 ? stage : 'think';
+  }
+
+  function normalizeUnitResume(raw, fallbackUnitId) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    const unitId = String(raw.unitId || fallbackUnitId || '').trim().slice(0, 80);
+    if (!unitId) return null;
+    const qi = Math.floor(Number(raw.questionIndex != null ? raw.questionIndex : raw.index));
+    const view = RESUME_VIEWS.indexOf(raw.view) >= 0 ? raw.view : 'exercise';
+    return {
+      unitId: unitId,
+      questionIndex: Number.isFinite(qi) && qi > 0 ? qi : 0,
+      questionId: raw.questionId ? String(raw.questionId).slice(0, 80) : '',
+      stage: normalizeResumeStage(raw.stage),
+      view: view,
+      sessionKind: String(raw.sessionKind || raw.classSession || 'practice').slice(0, 40) || 'practice',
+      classSession: raw.classSession === true || raw.sessionKind === 'class',
+      updatedAt: resumeTimestamp(raw.updatedAt),
+    };
+  }
+
+  function cleanUnitResumes(map) {
+    const out = {};
+    if (!map || typeof map !== 'object' || Array.isArray(map)) return out;
+    Object.keys(map).forEach((key) => {
+      const row = normalizeUnitResume(map[key], key);
+      if (row) out[row.unitId] = row;
+    });
+    return out;
+  }
+
+  function saveUnitResume(classCode, name, resume, storage) {
+    const row = normalizeUnitResume(resume);
+    if (!row || !studentLabel(name)) return null;
+    const student = upsertStudent(classCode, name, storage);
+    if (!student) return null;
+    const roster = loadRoster(classCode, storage);
+    const target = ownStudent(roster, student.name) || student;
+    if (!ownStudent(roster, student.name)) roster.students[student.name] = target;
+    target.unitResume = cleanUnitResumes(target.unitResume);
+    row.updatedAt = resumeTimestamp(resume && resume.updatedAt);
+    target.unitResume[row.unitId] = row;
+    saveRoster(classCode, roster, storage);
+    return row;
+  }
+
+  function loadUnitResume(classCode, name, unitId, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (!student) return null;
+    const map = cleanUnitResumes(student.unitResume);
+    return map[String(unitId || '').trim()] || null;
+  }
+
+  function listUnitResumes(classCode, name, storage) {
+    const student = getStudent(classCode, name, storage);
+    if (!student) return [];
+    return Object.values(cleanUnitResumes(student.unitResume)).sort((a, b) => {
+      const diff = b.updatedAt - a.updatedAt;
+      if (diff !== 0) return diff;
+      return String(b.unitId || '').localeCompare(String(a.unitId || ''));
+    });
+  }
+
+  function clearUnitResume(classCode, name, unitId, storage) {
+    const label = studentLabel(name);
+    if (!label) return false;
+    const roster = loadRoster(classCode, storage);
+    const student = ownStudent(roster, label);
+    if (!student || !student.unitResume) return false;
+    const key = String(unitId || '').trim();
+    if (!Object.prototype.hasOwnProperty.call(student.unitResume, key)) return false;
+    delete student.unitResume[key];
+    saveRoster(classCode, roster, storage);
+    return true;
+  }
+
+  function unitProgressPercent(done, total) {
+    const t = Math.floor(Number(total));
+    const d = Math.floor(Number(done));
+    if (!Number.isFinite(t) || t <= 0) return 0;
+    if (!Number.isFinite(d) || d <= 0) return 0;
+    return Math.min(100, Math.round((Math.min(d, t) / t) * 100));
+  }
+
+  function resumeProgressPercent(resume, total) {
+    if (!resume) return 0;
+    return unitProgressPercent(resume.questionIndex, total);
+  }
+
+  // Controlled skip: only the first unfinished unit (or a unit already
+  // started/finished, i.e. revisiting) may be jumped to; later units stay locked.
+  function recommendedUnitId(units, progressByUnit) {
+    const list = Array.isArray(units) ? units : [];
+    const prog = progressByUnit || {};
+    for (const u of list) {
+      if (!u || !u.id) continue;
+      const p = prog[u.id] || {};
+      const total = Array.isArray(u.questions) ? u.questions.length : Number(u.total) || 0;
+      const done = p.completedAt ? total : Object.keys(p.results || {}).filter((k) => p.results[k] && (p.results[k].correct || p.results[k].revealed)).length;
+      if (!p.completedAt && (!total || done < total)) return u.id;
+    }
+    return list.length && list[0] ? list[0].id : null;
+  }
+
+  function canSkipToUnit(units, progressByUnit, targetId) {
+    if (!targetId) return false;
+    const prog = progressByUnit || {};
+    if (prog[targetId] && (prog[targetId].completedAt || prog[targetId].index > 0 || Object.keys(prog[targetId].results || {}).length)) return true;
+    return recommendedUnitId(units, prog) === targetId;
+  }
+
+  function resumeStageLabel(stage) {
+    const s = normalizeResumeStage(stage);
+    if (s === 'hear') return 'שלב 2 · שומעים';
+    if (s === 'why') return 'שלב 3 · למה';
+    return 'שלב 1 · חושבים';
+  }
+
+  function quickResumeUnit(classCode, name, units, storage) {
+    const resumes = listUnitResumes(classCode, name, storage);
+    const list = Array.isArray(units) ? units : [];
+    for (const r of resumes) {
+      const match = list.find((u) => u && u.id === r.unitId);
+      if (match) {
+        const total = Array.isArray(match.questions) ? match.questions.length : (Number(match.total) || 10);
+        if (r.questionIndex < total) return r;
+      }
+    }
+    const recId = recommendedUnitId(list, {});
+    return recId ? { unitId: recId, questionIndex: 0, stage: 'think', view: 'exercise' } : null;
+  }
+
+  function renderResumeProgressHtml(resume, total) {
+    const pct = resumeProgressPercent(resume, total);
+    const idx = resume ? resume.questionIndex : 0;
+    const stage = resume ? normalizeResumeStage(resume.stage) : 'think';
+    const stageLabel = resumeStageLabel(stage);
+    return '<div class="unit-resume-progress" data-testid="unit-resume-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="התקדמות ביחידה">'
+      + '<span class="unit-resume-progress__bar" style="width:' + pct + '%"></span>'
+      + '<span class="unit-resume-progress__text">תרגיל ' + (idx + 1) + ' · ' + pct + '%</span>'
+      + '<span class="unit-resume-progress__stage" data-testid="unit-resume-stage">' + escapeHtml(stageLabel) + '</span></div>';
+  }
+
   function saveWho(who, storage) {
     const ls = storage || defaultStorage();
     if (!ls) return;
@@ -860,6 +1020,170 @@
         name: studentLabel(who?.name),
       }));
     } catch (_e) { /* quota */ }
+  }
+
+  // --- Anonymous classroom 8-min flow & AG11 end screen (MM-AUTO-754) ---
+  const CLASS_SESSION_MS = 8 * 60 * 1000;
+  const CLASS_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const CLASS_CODE_RE = /^[A-HJ-NP-Z2-9]{5}$/;
+  const AG11_TITLE = 'עבדת יפה היום.';
+  const AG11_SUBTITLE = 'אפשר לסיים, ואפשר עוד סבב.';
+  const AG11_DONE_LABEL = 'סיימתי להיום';
+  const AG11_AGAIN_LABEL = 'עוד סבב';
+  const AG11_FORBIDDEN = Object.freeze(['נכשלת', 'טעית', 'שגית', 'פספסת', 'ציון']);
+
+  const ANONYMOUS_SYSTEM_WORDS = new Set([
+    'ילד', 'ילדה', 'ילד/ה', 'תלמיד', 'תלמידה', 'תלמיד/ה',
+    'מורה', 'לדוגמה', 'דמו', 'demo',
+    'כוכב', 'נמר', 'שמש', 'ירח', 'דולפין', 'אייל', 'פרפר', 'צבי',
+  ]);
+
+  function cleanClassCode(input) {
+    if (input == null) return '';
+    return String(input)
+      .toUpperCase()
+      .replace(/[^A-HJ-NP-Z2-9]/g, '');
+  }
+
+  function formatClassCode(input) {
+    return cleanClassCode(input).slice(0, 5);
+  }
+
+  function isValidClassCode(code) {
+    if (code == null) return false;
+    const raw = String(code).trim();
+    if (raw.length !== 5) return false;
+    return CLASS_CODE_RE.test(cleanClassCode(raw)) || /^[\p{L}\p{N}]{5}$/u.test(raw);
+  }
+
+  function sanitizeNickname(input) {
+    if (input == null) return '';
+    return String(input)
+      .replace(/[<>&"'`]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function isAnonymousName(name) {
+    if (name == null) return false;
+    if (typeof name !== 'string' && typeof name !== 'number') return false;
+    const raw = sanitizeNickname(name);
+    if (!raw) return false;
+    if (raw.length < 2 && !/^#?\d+$/.test(raw)) return false;
+    if (raw.length > 24) return false;
+
+    // Block email, phone/id
+    if (raw.includes('@')) return false;
+    if (/\d{5,}/.test(raw)) return false;
+    if (/(?:^|[^\d])05\d[\s-]*\d/.test(raw)) return false;
+
+    // Student number 1-40 or #1-#40
+    const numMatch = /^#?(\d+)$/.exec(raw);
+    if (numMatch) {
+      const n = Number(numMatch[1]);
+      return n >= 1 && n <= 40;
+    }
+
+    const words = raw.split(' ').filter(Boolean);
+    if (words.length >= 2) {
+      // Must not be two personal name words (e.g. 'יוסי כהן')
+      const cleanWord = (w) => w.replace(/^[#«"']+|[»"',.!?:;]+$/g, '').toLowerCase();
+      const nonAllowed = words.filter((w) => !ANONYMOUS_SYSTEM_WORDS.has(cleanWord(w)) && !/^\d+$/.test(w));
+      if (nonAllowed.length >= 2) return false;
+    }
+
+    if (words.length === 1) {
+      const cleanWord = raw.replace(/^[#«"']+|[»"',.!?:;]+$/g, '').toLowerCase();
+      if (ANONYMOUS_SYSTEM_WORDS.has(cleanWord)) return true;
+      if (/^[\p{L}\p{M}/]+(?:-?#?\d+)?$/u.test(raw)) return true;
+      return false;
+    }
+
+    // Multi-word case: all must be system words or numbers
+    return words.every((w) => {
+      const cw = w.replace(/^[#«"']+|[»"',.!?:;]+$/g, '').toLowerCase();
+      return ANONYMOUS_SYSTEM_WORDS.has(cw) || /^#?\d+$/.test(w);
+    });
+  }
+
+  function validateAnonymousLogin(classCode, studentName) {
+    const codeOk = isValidClassCode(classCode);
+    const nameOk = isAnonymousName(studentName);
+    if (!codeOk && !nameOk) {
+      return { ok: false, reason: 'code_and_name_invalid', message: 'יש להזין קוד כיתה בן 5 תווים ומספר או כינוי תלמיד/ה ללא שמות אמיתיים.' };
+    }
+    if (!codeOk) {
+      return { ok: false, reason: 'code_invalid', message: 'קוד הכיתה צריך להכיל בדיוק 5 תווים.' };
+    }
+    if (!nameOk) {
+      return { ok: false, reason: 'name_invalid', message: 'יש להזין כינוי או מספר תלמיד/ה (למשל כוכב3 או #5), ללא שמות אמיתיים.' };
+    }
+    return {
+      ok: true,
+      classCode: formatClassCode(classCode) || String(classCode).trim(),
+      name: sanitizeNickname(studentName),
+    };
+  }
+
+  function startCalmSession(classCode, name, opts, storage) {
+    const session = startSession(classCode, name, 'class', storage);
+    if (!session) return null;
+    session.calm = true;
+    session.targetDuration = CLASS_SESSION_MS;
+    session.clockVisible = Boolean(opts?.clockVisible);
+    return session;
+  }
+
+  function checkCalmSession(session, now) {
+    const current = typeof now === 'number' ? now : Date.now();
+    const started = session?.started || current;
+    const duration = session?.targetDuration || CLASS_SESSION_MS;
+    const elapsed = Math.max(0, current - started);
+    const remaining = Math.max(0, duration - elapsed);
+    return {
+      complete: elapsed >= duration,
+      elapsedMs: elapsed,
+      remainingMs: remaining,
+      itemsCount: Array.isArray(session?.items) ? session.items.length : 0,
+      calm: true,
+    };
+  }
+
+  function buildAG11Summary(session, opts) {
+    const o = opts || {};
+    const topic = o.topicName ? `היום תרגלנו: ${String(o.topicName).trim()} ♫` : 'היום תרגלנו: שיעור כיתתי ♫';
+    const items = Array.isArray(session?.items) ? session.items : [];
+    return {
+      screen: 'AG11',
+      title: AG11_TITLE,
+      subtitle: AG11_SUBTITLE,
+      doneLabel: AG11_DONE_LABEL,
+      againLabel: AG11_AGAIN_LABEL,
+      topicText: topic,
+      itemsCount: items.length,
+      calm: true,
+    };
+  }
+
+  function renderAG11SessionEnd(opts) {
+    const o = opts || {};
+    const topic = o.topicName ? `היום תרגלנו: ${escapeHtml(o.topicName)} ♫` : 'היום תרגלנו: שיעור כיתתי ♫';
+    const html = '<section class="mm-view" data-testid="view-session-end" data-screen="AG11">'
+      + '<div class="mm-card" style="align-items:center;text-align:center">'
+      + `<h2 data-testid="session-end-title">${escapeHtml(AG11_TITLE)}</h2>`
+      + `<p class="mm-sub" data-testid="session-end-subtitle">${escapeHtml(AG11_SUBTITLE)}</p>`
+      + '</div>'
+      + `<div class="mm-card" data-testid="session-end-topic" style="text-align:center">${escapeHtml(topic)}</div>`
+      + '<div class="mm-row-actions" style="display:flex;gap:12px;justify-content:center;margin-top:16px">'
+      + `<button type="button" class="mm-btn secondary" id="classSessionDone" data-act="session-done" data-testid="session-done" style="min-height:48px;flex:1">${escapeHtml(AG11_DONE_LABEL)}</button>`
+      + `<button type="button" class="mm-btn mm-btn--mint primary" id="classAgain" data-act="session-again" data-testid="session-again" style="min-height:48px;flex:1">${escapeHtml(AG11_AGAIN_LABEL)}</button>`
+      + '</div>'
+      + '</section>';
+    for (const bad of AG11_FORBIDDEN) {
+      if (html.includes(bad)) throw new Error(`forbidden copy: ${bad}`);
+    }
+    if (/\d+\s*%/.test(html)) throw new Error('forbidden score copy in AG11');
+    return html;
   }
 
   return {
@@ -872,5 +1196,16 @@
     buildParentNote, renderParentNoteHtml, buildCertificate, renderCertificateHtml, escapeHtml,
     loadWho, saveWho, makeChoices, exportRoster, importRoster, summarizeImport,
     loadJson, saveJson, jsonKey,
+    CLASS_SESSION_MS, CLASS_CODE_ALPHABET, CLASS_CODE_RE,
+    cleanClassCode, formatClassCode, isValidClassCode, isAnonymousClassCode: isValidClassCode,
+    sanitizeNickname, isAnonymousName, isValidAnonymousNickname: isAnonymousName,
+    validateAnonymousLogin, isAnonymousLogin: (c, n) => validateAnonymousLogin(c, n).ok,
+    startCalmSession, checkCalmSession,
+    buildAG11Summary, renderAG11SessionEnd,
+    RESUME_STAGES, RESUME_VIEWS, normalizeResumeStage, normalizeUnitResume, cleanUnitResumes,
+    saveUnitResume, loadUnitResume, listUnitResumes, clearUnitResume,
+    unitProgressPercent, resumeProgressPercent, recommendedUnitId, canSkipToUnit, renderResumeProgressHtml,
+    resumeStageLabel, quickResumeUnit,
+    AG11_TITLE, AG11_SUBTITLE, AG11_DONE_LABEL, AG11_AGAIN_LABEL, AG11_FORBIDDEN,
   };
 });
