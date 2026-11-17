@@ -6,6 +6,12 @@
   <title>MelodyMath · תרגיל לדוגמה: שומעים חיבור</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#6946e8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MelodyMath">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="src/sefirot.css">
   <link rel="stylesheet" href="src/theme.css">
   <link rel="stylesheet" href="src/components/jam.css">
@@ -24,5 +30,14 @@
     if (typeof installTapFeedback === 'function') installTapFeedback(document);
   </script>
   <script src="src/components/SoundAdd.js"></script>
+  <script>
+    if (navigator.serviceWorker) {
+      var scopeUrl = new URL('./', location.href);
+      navigator.serviceWorker.register(new URL('sw.js', scopeUrl), {
+        scope: scopeUrl.href,
+        updateViaCache: 'none'
+      }).catch(function () {});
+    }
+  </script>
 </body>
 </html>

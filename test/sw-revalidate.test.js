@@ -42,9 +42,14 @@ function loadSw(opts) {
   const puts = [];
   const deleted = [];
   const fetchCalls = [];
+  const failAdd = o.failAdd || new Set();
   const cache = {
     addAll: async function (list) {
       list.forEach(function (rel) { store.set(urlOf(rel), response('precached ' + rel)); });
+    },
+    add: async function (rel) {
+      if (failAdd.has(rel)) throw new TypeError('missing ' + rel);
+      store.set(urlOf(rel), response('precached ' + rel));
     },
     put: async function (req, res) {
       puts.push(urlOf(req));
@@ -168,4 +173,12 @@ test('install precaches the asset list and activate drops the previous cache', a
   await dispatchLifecycle(sw, 'activate');
   assert.deepEqual(sw.deleted.sort(), ['melodymath-offline-v6', 'melodymath-offline-v7']);
   assert.equal(sw.sandbox.claimed, true);
+});
+
+test('install still activates when one non-shell precache URL is missing', async () => {
+  const sw = loadSw({ failAdd: new Set(['./src/lib/teacherStore.js']) });
+  await dispatchLifecycle(sw, 'install');
+  assert.ok(sw.store.has(urlOf('./index.html')), 'the shell is cached');
+  assert.equal(sw.store.has(urlOf('./src/lib/teacherStore.js')), false);
+  assert.equal(sw.sandbox.skipped, true, 'a single miss does not reject install');
 });

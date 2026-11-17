@@ -46,6 +46,14 @@
     document.head.appendChild(link);
   }
 
+  function ensureMeta(name, content) {
+    if (document.querySelector('meta[name="' + name + '"]')) return;
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.appendChild(meta);
+  }
+
   function installPwaHooks() {
     if (typeof document === 'undefined') return;
     const rootHref = siteRoot();
@@ -56,14 +64,19 @@
       ic.href = rootHref + 'icons/icon-192.png';
       document.head.appendChild(ic);
     }
-    if (!document.querySelector('meta[name="theme-color"]')) {
-      const t = document.createElement('meta');
-      t.name = 'theme-color';
-      t.content = '#6946e8';
-      document.head.appendChild(t);
-    }
+    ensureMeta('theme-color', '#6946e8');
+    ensureMeta('mobile-web-app-capable', 'yes');
+    ensureMeta('apple-mobile-web-app-capable', 'yes');
+    ensureMeta('apple-mobile-web-app-title', 'MelodyMath');
+    ensureMeta('apple-mobile-web-app-status-bar-style', 'default');
     if (typeof navigator === 'undefined' || !navigator.serviceWorker) return;
-    navigator.serviceWorker.register(rootHref + 'sw.js').then(function () {
+    // scope is the directory of sw.js. On GitHub Pages that is /MelodyMath/;
+    // a local server at the repo root gets /. updateViaCache 'none' so the
+    // worker script is not stuck behind GitHub Pages' cache-control.
+    navigator.serviceWorker.register(rootHref + 'sw.js', {
+      scope: rootHref || './',
+      updateViaCache: 'none'
+    }).then(function () {
       const el = document.getElementById('pwaStatus');
       if (el) el.textContent = 'נשמר בטאבלט · עובד גם בלי רשת אחרי הביקור הראשון';
     }).catch(function () {

@@ -1,0 +1,42 @@
+{
+  "packageId": "com.swissystem.melodymath",
+  "host": "swissystem7.github.io",
+  "name": "MelodyMath",
+  "launcherName": "MelodyMath",
+  "display": "standalone",
+  "themeColor": "#6946E8",
+  "themeColorDark": "#6946E8",
+  "navigationColor": "#6946E8",
+  "navigationColorDark": "#6946E8",
+  "navigationDividerColor": "#6946E8",
+  "navigationDividerColorDark": "#6946E8",
+  "backgroundColor": "#F7F4FF",
+  "enableNotifications": false,
+  "startUrl": "/MelodyMath/index.html",
+  "iconUrl": "https://swissystem7.github.io/MelodyMath/icons/icon-512.png",
+  "maskableIconUrl": "https://swissystem7.github.io/MelodyMath/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "melodymath"
+  },
+  "appVersionCode": 1,
+  "appVersion": "1",
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://swissystem7.github.io/MelodyMath/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://swissystem7.github.io/MelodyMath/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}
