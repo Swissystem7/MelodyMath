@@ -275,7 +275,7 @@
       html += '<button type="button" data-acc="' + pair[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + pair[1] + '</button>';
     });
     html += '<button type="button" id="mm-speak-now" hidden disabled>השמע תרגיל</button>';
-    html += '<button type="button" id="mm-hear" hidden disabled>השמע פעימות</button>';
+    html += '<button type="button" id="mm-hear" hidden disabled>השמע פְעָמוֹת</button>';
     bar.innerHTML = html;
     const nav = document.getElementById('mm-site-nav');
     if (nav && nav.parentNode) nav.parentNode.insertBefore(bar, nav.nextSibling);

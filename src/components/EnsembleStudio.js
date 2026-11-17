@@ -61,7 +61,7 @@ export const ENSEMBLE_PRESETS = [
   },
   {
     id: 'cajon-beat',
-    titleHe: 'מכה לכל פעימה',
+    titleHe: 'מכה לכל פַּעֲמָה',
     topicId: 'counting',
     bpm: 100,
     ratioLabel: '1/1',
@@ -91,7 +91,7 @@ function nameOf(id) {
 }
 
 function tempo(preset) {
-  return bdi(preset.ratioLabel) + ' בקצב ' + bdi(preset.bpm) + ' פעימות לדקה';
+  return bdi(preset.ratioLabel) + ' בקצב ' + bdi(preset.bpm) + ' פְעָמוֹת לדקה';
 }
 
 function factHe(preset) {
@@ -99,12 +99,12 @@ function factHe(preset) {
     return 'הדרבוקה ממלאה את התיבה במכה ארוכה ובמכה קצרה. הגיטרה בסריג ה־12 היא חצי מיתר, והחלילית מנגנת חצי. אותו יחס ' + tempo(preset) + '.';
   }
   if (preset.id === 'djembe-12') {
-    return 'הג׳מבה חוזרת על מחזור של 12 פעימות: 4 קבוצות של 3. העוד והפסנתר מנגנים בתרגיל הזה את אותו יחס ' + tempo(preset) + '.';
+    return 'הג׳מבה חוזרת על מחזור של 12 פְעָמוֹת: 4 קבוצות של 3. העוד והפסנתר מנגנים בתרגיל הזה את אותו יחס ' + tempo(preset) + '.';
   }
   if (preset.id === 'tabla-quarter') {
-    return 'בטאבלה לכל מחזור 16 מטרות ב־4 קבוצות, וקבוצה אחת היא ' + bdi(preset.ratioLabel) + '. החלילית מנגנת רבע, ' + bdi('1/4') + ', אותו יחס אחרי צמצום. המרימבה מצטרפת אליהן בתרגיל, בקצב ' + bdi(preset.bpm) + ' פעימות לדקה.';
+    return 'בטאבלה לכל מחזור 16 מטרות ב־4 קבוצות, וקבוצה אחת היא ' + bdi(preset.ratioLabel) + '. החלילית מנגנת רבע, ' + bdi('1/4') + ', אותו יחס אחרי צמצום. המרימבה מצטרפת אליהן בתרגיל, בקצב ' + bdi(preset.bpm) + ' פְעָמוֹת לדקה.';
   }
-  return 'הקחון מלווה את הגיטרה: מכה אחת לכל פעימה, יחס ' + bdi(preset.ratioLabel) + '. הטאיקו סופר מכה אחת לכל פעימה, באותו קצב ' + bdi(preset.bpm) + '.';
+  return 'הקחון מלווה את הגיטרה: מכה אחת לכל פַּעֲמָה, יחס ' + bdi(preset.ratioLabel) + '. הטאיקו סופר מכה אחת לכל פַּעֲמָה, באותו קצב ' + bdi(preset.bpm) + '.';
 }
 
 function choices(preset) {
@@ -180,13 +180,13 @@ export function formatCrossInstrumentCard(preset, status, mine, locked, offerLcm
   return '<article dir="rtl" lang="he" data-preset="' + escapeHtml(p.id) + '">'
     + '<h2>' + escapeHtml(p.titleHe) + '</h2>'
     + (offerFraction === false
-      ? '<p>' + 'מכה אחת לכל פעימה. כל הכלים מנגנים באותו קצב: ' + bdi(p.bpm) + ' פעימות לדקה.</p>'
+      ? '<p>' + 'מכה אחת לכל פַּעֲמָה. כל הכלים מנגנים באותו קצב: ' + bdi(p.bpm) + ' פְעָמוֹת לדקה.</p>'
       : '<p>' + factHe(p) + ' השבר המשותף הוא ' + bdi(frac) + '.</p>')
     + '<p>הקשה: ' + escapeHtml(perc.map(nameOf).join(', ')) + '. יחד עם: ' + escapeHtml(rest.map(nameOf).join(', ')) + '.</p>'
     + '<div class="jam-row">' + taps + '</div>'
     + '<p>מקישים כדי לשמוע. את הכלי שלכם בוחרים ב־🎻 הכלי שלי.</p>'
     + (offerLcm === false ? '' : '<h3>שילוב כלים: כפולה משותפת</h3>'
-      + '<p>כלי אחד חוזר כל ' + bdi(p.cycleA) + ' פעימות וכלי שני כל ' + bdi(p.cycleB) + ' פעימות. אחרי כמה פעימות הכלים נפגשים שוב?</p>'
+      + '<p>כלי אחד חוזר כל ' + bdi(p.cycleA) + ' פְעָמוֹת וכלי שני כל ' + bdi(p.cycleB) + ' פְעָמוֹת. אחרי כמה פְעָמוֹת הכלים נפגשים שוב?</p>'
       + '<div class="jam-row">' + answers + '</div>'
       + '<p data-ensemble-result role="status">' + (status ? escapeHtml(status) : '') + '</p>')
     + '</article>';

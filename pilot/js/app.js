@@ -587,8 +587,8 @@
 
   // ---------------------------------------------------------------- MM-610: new units' music on screen
   const KIND_HE = {
-    beats: 'תיבות ופעמות', steps: 'צעדים בסולם', place: 'כלי לכל מקום במספר', pattern: 'דגם שחוזר',
-    pitch: 'עמודות שמתנגנות', durations: 'משכי תווים בתיבה', turn: 'סיבוב שלם = תיבה', shape: 'צורה = לולאה של פעמות', tempo: 'שני קצבים באותו זמן',
+    beats: 'תיבות ופְעָמוֹת', steps: 'צעדים בסולם', place: 'כלי לכל מקום במספר', pattern: 'דגם שחוזר',
+    pitch: 'עמודות שמתנגנות', durations: 'משכי תווים בתיבה', turn: 'סיבוב שלם = תיבה', shape: 'צורה = לולאה של פְעָמוֹת', tempo: 'שני קצבים באותו זמן',
     contrast: 'גבוה או נמוך, ארוך או קצר', canon: 'אותם משפטים, סדר אחר', body: 'מחיאות ורקיעות', solid: 'קודקוד, מקצוע, פאה'
   };
 
@@ -984,11 +984,11 @@
     const bars = renderTapBars(n, per);
     return '<div class="mm-card mm-tap" data-testid="tap-pad" data-count="' + n + '">'
       + '<div class="mm-music__head"><span class="mm-chip mm-chip--yellow">מנגנים את התשובה</span></div>'
-      + '<p class="mm-sub">הקישו על התוף פעם אחת לכל פעימה. אפשר גם לכתוב את המספר במקלדת.</p>'
+      + '<p class="mm-sub">הקישו על התוף פעם אחת לכל פַּעֲמָה. אפשר גם לכתוב את המספר במקלדת.</p>'
       + '<div class="mm-tap__bars" dir="ltr" aria-hidden="true">' + bars + '</div>'
       + '<div class="mm-row-actions">'
-      + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (ctx.locked ? ' disabled' : '') + '>🥁 פעימה</button>'
-      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פעימה אחת"' + (ctx.locked || !n ? ' disabled' : '') + '>↶ פעימה אחורה</button>'
+      + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (ctx.locked ? ' disabled' : '') + '>🥁 פַּעֲמָה</button>'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פַּעֲמָה אחת"' + (ctx.locked || !n ? ' disabled' : '') + '>↶ פַּעֲמָה אחורה</button>'
       + '</div></div>';
   }
 

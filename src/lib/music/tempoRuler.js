@@ -31,8 +31,8 @@
 
   // Units in beats. 'second' depends on the tempo and is handled apart.
   const UNITS = {
-    half: { beats: 0.5, he: 'חצי פעמה', hePlural: 'חצאי פעמה' },
-    beat: { beats: 1, he: 'פעמה', hePlural: 'פעמות' },
+    half: { beats: 0.5, he: 'חצי פַּעֲמָה', hePlural: 'חצאי פַּעֲמָה' },
+    beat: { beats: 1, he: 'פַּעֲמָה', hePlural: 'פְעָמוֹת' },
     bar: { beats: BEATS_PER_BAR, he: 'תיבה', hePlural: 'תיבות' },
   };
   const SECOND_HE = { he: 'שנייה', hePlural: 'שניות' };
@@ -130,7 +130,7 @@
   const STEPS = [
     { id: 'measure', he: 'שלב 1: בוחרים מקל ומודדים' },
     { id: 'compare', he: 'שלב 2: משווים בין יחידות' },
-    { id: 'convert', he: 'שלב 3: ממירים שניות ופעמות לפי הטמפו' },
+    { id: 'convert', he: 'שלב 3: ממירים שניות ופְעָמוֹת לפי הטמפו' },
   ];
   const PRACTICE = {
     measure: [
@@ -185,13 +185,13 @@
 
   function itemFor(shape, p) {
     switch (shape) {
-      case 'compare-half': return { prompt: 'מה ארוך יותר: ' + p[0] + ' חצאי פעמה או ' + label(p[1], 'beat') + '?', answer: p[0] * 0.5 > p[1] ? 'חצאי הפעמה' : p[0] * 0.5 < p[1] ? 'הפעמות' : 'שווים', choices: ['חצאי הפעמה', 'הפעמות', 'שווים'] };
-      case 'bars-to-beats': return num('כמה פעמות יש ב־' + p[0] + ' תיבות של 4/4?', p[0] * 4);
-      case 'beats-to-halves': return num('כמה חצאי פעמה יש ב־' + p[0] + ' פעמות?', p[0] * 2);
-      case 'beats-to-seconds-60': return num('בטמפו 60 BPM, כמה שניות נמשכות ' + p[0] + ' פעמות?', bpmToSeconds(p[0], 60));
-      case 'seconds-to-beats-120': return num('בטמפו 120 BPM, כמה פעמות יש ב־' + p[0] + ' שניות?', secondsToBeats(p[0], 120));
-      case 'sticks-bars': return num('מקל של תיבה אחת אורכו 4 פעמות. כמה מקלות של פעמה אחת ממלאים ' + p[0] + ' תיבות?', p[0] * 4);
-      case 'beats-to-bars': return num(p[0] + ' פעמות הן כמה תיבות של 4/4?', p[0] / 4);
+      case 'compare-half': return { prompt: 'מה ארוך יותר: ' + p[0] + ' חצאי פַּעֲמָה או ' + label(p[1], 'beat') + '?', answer: p[0] * 0.5 > p[1] ? 'חצאי הפַּעֲמָה' : p[0] * 0.5 < p[1] ? 'הפְעָמוֹת' : 'שווים', choices: ['חצאי הפַּעֲמָה', 'הפְעָמוֹת', 'שווים'] };
+      case 'bars-to-beats': return num('כמה פְעָמוֹת יש ב־' + p[0] + ' תיבות של 4/4?', p[0] * 4);
+      case 'beats-to-halves': return num('כמה חצאי פַּעֲמָה יש ב־' + p[0] + ' פְעָמוֹת?', p[0] * 2);
+      case 'beats-to-seconds-60': return num('בטמפו 60 BPM, כמה שניות נמשכות ' + p[0] + ' פְעָמוֹת?', bpmToSeconds(p[0], 60));
+      case 'seconds-to-beats-120': return num('בטמפו 120 BPM, כמה פְעָמוֹת יש ב־' + p[0] + ' שניות?', secondsToBeats(p[0], 120));
+      case 'sticks-bars': return num('מקל של תיבה אחת אורכו 4 פְעָמוֹת. כמה מקלות של פַּעֲמָה אחת ממלאים ' + p[0] + ' תיבות?', p[0] * 4);
+      case 'beats-to-bars': return num(p[0] + ' פְעָמוֹת הן כמה תיבות של 4/4?', p[0] / 4);
       case 'minutes-to-seconds': return num('כמה שניות יש ב־' + p[0] + ' דקות?', p[0] * 60);
       case 'metres-to-cm': return num('חבל אורכו ' + p[0] + ' מטרים. כמה סנטימטרים זה?', p[0] * 100);
       case 'smaller-unit': return num('שולחן אורכו ' + p[0] + ' עפרונות. מחק אורכו חצי עפרון. כמה מחקים אורכו של השולחן?', p[0] * 2);

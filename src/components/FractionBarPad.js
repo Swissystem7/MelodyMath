@@ -107,9 +107,9 @@
 
   function beatsHe(d) {
     const beats = (d.n / d.d) * BEATS_PER_BAR;
-    if (beats === 1) return 'פעמה';
-    if (beats > 1) return beats + ' פעמות';
-    return beats === 0.5 ? 'חצי פעמה' : 'רבע פעמה';
+    if (beats === 1) return 'פַּעֲמָה';
+    if (beats > 1) return beats + ' פְעָמוֹת';
+    return beats === 0.5 ? 'חצי פַּעֲמָה' : 'רבע פַּעֲמָה';
   }
 
   function renderHtml(state, voice) {
@@ -144,7 +144,7 @@
       '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button><button type="button" class="primary" data-act="check">בדיקה</button>' +
       '<button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
       '<p class="jam-msg ' + (state.status === 'exact' ? 'good' : state.sound === 'wrong' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>' +
-      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M3 (משכי תווים בתיבה) · כיתות ג׳–ו׳ · 90 פעימות לדקה · מקור: Azaryahu et al. 2020</div></details>' : '');
+      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M3 (משכי תווים בתיבה) · כיתות ג׳–ו׳ · 90 פְעָמוֹת לדקה · מקור: Azaryahu et al. 2020</div></details>' : '');
   }
 
   function mount(el, props) {

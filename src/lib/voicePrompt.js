@@ -22,17 +22,17 @@
     },
     subtraction: {
       key: 'subtraction',
-      voicePrompt: 'הקשיבו לפעימות הראשונות ולפעימות שנלקחו. כמה נשארו? הקישו את התשובה.',
+      voicePrompt: 'הקשיבו לפְעָמוֹת הראשונות ולפְעָמוֹת שנלקחו. כמה נשארו? הקישו את התשובה.',
       fallbackAsset: 'prompt_subtraction.wav'
     },
     multiplication: {
       key: 'multiplication',
-      voicePrompt: 'הקשיבו לקבוצות הפעימות. כמה פעימות יש בסך הכל? הקישו תשובה.',
+      voicePrompt: 'הקשיבו לקבוצות הפְעָמוֹת. כמה פְעָמוֹת יש בסך הכל? הקישו תשובה.',
       fallbackAsset: 'prompt_multiplication.wav'
     },
     division: {
       key: 'division',
-      voicePrompt: 'הקשיבו לחלוקת הפעימות לקבוצות שוות. כמה פעימות בכל קבוצה?',
+      voicePrompt: 'הקשיבו לחלוקת הפְעָמוֹת לקבוצות שוות. כמה פְעָמוֹת בכל קבוצה?',
       fallbackAsset: 'prompt_division.wav'
     },
     fractions: {
@@ -42,7 +42,7 @@
     },
     counting: {
       key: 'counting',
-      voicePrompt: 'הקשיבו לפעימות התוף. הקישו 3 פעמים על התוף.',
+      voicePrompt: 'הקשיבו לפְעָמוֹת התוף. הקישו 3 פעמים על התוף.',
       fallbackAsset: 'prompt_counting.wav'
     },
     number_line: {
@@ -52,12 +52,12 @@
     },
     even_odd: {
       key: 'even_odd',
-      voicePrompt: 'הקשיבו לפעימות התופים בזוגות. האם המספר זוגי או אי-זוגי?',
+      voicePrompt: 'הקשיבו לפְעָמוֹת התופים בזוגות. האם המספר זוגי או אי-זוגי?',
       fallbackAsset: 'prompt_even_odd.wav'
     },
     groups_mult: {
       key: 'groups_mult',
-      voicePrompt: 'הקשיבו לקבוצות הפעימות שחוזרות. כמה פעימות יש בסך הכל?',
+      voicePrompt: 'הקשיבו לקבוצות הפְעָמוֹת שחוזרות. כמה פְעָמוֹת יש בסך הכל?',
       fallbackAsset: 'prompt_groups_mult.wav'
     },
     geometry: {
@@ -67,7 +67,7 @@
     },
     measurement: {
       key: 'measurement',
-      voicePrompt: 'הקשיבו לפעימות המקצב. כמה יחידות זמן או אורך נמדדו?',
+      voicePrompt: 'הקשיבו לפְעָמוֹת המקצב. כמה יחידות זמן או אורך נמדדו?',
       fallbackAsset: 'prompt_measurement.wav'
     },
     data: {

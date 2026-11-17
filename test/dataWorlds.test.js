@@ -436,7 +436,7 @@ test('parity: tens drumLow strokes sound before ones step in pairs, handling ten
   assert.equal(stage(e20, 'pair').length, 0);
   assert.equal(stage(e20, 'alone').length, 0);
 
-  const s12 = spec('alternateDrums', '12 פעימות הן מספר זוגי או אי-זוגי?', 'זוגי');
+  const s12 = spec('alternateDrums', '12 פְעָמוֹת הן מספר זוגי או אי-זוגי?', 'זוגי');
   assert.equal(s12.n, 12);
   assert.equal(stage(D.soundEvents(s12), 'ten').length, 1);
   assert.equal(stage(D.soundEvents(s12), 'pair').length, 2);

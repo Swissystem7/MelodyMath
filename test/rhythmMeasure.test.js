@@ -26,7 +26,7 @@ test('three parallel 12-item forms: same slots, different numbers, 6 practised +
   });
   A.filter((i) => !i.practised).forEach((it) => {
     assert.notEqual(it.context, 'drums', 'unpractised items use a context practice never shows');
-    assert.doesNotMatch(it.prompt, /תוף|פעימ/);
+    assert.doesNotMatch(it.prompt.replace(/[\u0591-\u05C7]/g, ''), /תוף|פעמ/);
   });
 });
 

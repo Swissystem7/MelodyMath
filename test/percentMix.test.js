@@ -60,8 +60,8 @@ test('One 25% tile: quarter and beat are the same tile and it keeps both sounds'
 });
 
 test('The beat label follows the chosen split (4/10/20)', () => {
-  [['quarter', 4, '25% = פעמה מתוך 4'], ['quarter', 10, '25% = 2.5 פעמות מתוך 10'], ['quarter', 20, '25% = 5 פעמות מתוך 20'],
-    ['ten', 10, '10% = פעמה מתוך 10'], ['half', 4, '50% = 2 פעמות מתוך 4']].forEach(([id, s, he]) => assert.equal(PM.tileLabel(id, s), he));
+  [['quarter', 4, '25% = פַּעֲמָה מתוך 4'], ['quarter', 10, '25% = 2.5 פְעָמוֹת מתוך 10'], ['quarter', 20, '25% = 5 פְעָמוֹת מתוך 20'],
+    ['ten', 10, '10% = פַּעֲמָה מתוך 10'], ['half', 4, '50% = 2 פְעָמוֹת מתוך 4']].forEach(([id, s, he]) => assert.equal(PM.tileLabel(id, s), he));
 });
 
 test('DataBeats adds an accent every 5 taps and cites real sources', () => {
@@ -86,7 +86,7 @@ test('PercentMixPad screen: mounted card, split buttons, tiles, no-music check a
   assert.match(fs.readFileSync(require.resolve('../index.html'), 'utf8'), /id="pmCard"[\s\S]*src\/components\/PercentMixPad\.js/);
   assert.match(fs.readFileSync(require.resolve('../sw.js'), 'utf8'), /PercentMixPad\.js/);
   let s = P.createState(0, true, 4);
-  assert.match(P.renderHtml(s, 'drumLow'), /data-split="20"[\s\S]*25% = פעמה מתוך 4/);
+  assert.match(P.renderHtml(s, 'drumLow'), /data-split="20"[\s\S]*25% = פַּעֲמָה מתוך 4/);
   assert.equal(P.tapTile(s, 'quarter').status, 'exact');
   assert.equal(P.check(P.tapTile(P.createState(1, true), 'ten')).message, 'חסרים 40%. הוסיפו אריח.');
   s = P.createState(PM.TARGETS.length, true);
@@ -176,6 +176,6 @@ test('#682: the pad offers 100 sub-beats as an off-by-default add-on, shown as a
   assert.doesNotMatch(P.renderHtml(s, 'drumLow'), /data-addon="subbeats100"/);
   assert.match(P.renderHtml(s, 'drumLow'), /data-act="subbeats" aria-pressed="false"/);
   s = Object.assign(P.tapTile(s, 'quarter'), { subbeats: true });
-  assert.match(P.renderHtml(s, 'drumLow'), /data-addon="subbeats100">25 תת־פעמות מתוך 100 \(תוספת ניסיונית\)/);
+  assert.match(P.renderHtml(s, 'drumLow'), /data-addon="subbeats100">25 תת־פְעָמוֹת מתוך 100 \(תוספת ניסיונית\)/);
   assert.doesNotMatch(P.renderHtml(Object.assign({}, s, { showMusic: false }), 'drumLow'), /subbeats/);
 });

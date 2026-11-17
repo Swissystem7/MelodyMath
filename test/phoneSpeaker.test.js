@@ -93,7 +93,7 @@ test('low drums and the 7+9 steps keep energy above 300 Hz', () => {
 });
 
 test('the sam, the percent toms and the 7+9 steps are the cues that were inaudible', () => {
-  const pos = D.specForItem({ music: 'phraseShare', prompt: 'במשקל 4/4, פעמה 16 היא איזו פעמה בתיבה שלה?', answer: 4 });
+  const pos = D.specForItem({ music: 'phraseShare', prompt: 'במשקל 4/4, פַּעֲמָה 16 היא איזו פַּעֲמָה בתיבה שלה?', answer: 4 });
   assert.ok(D.soundEvents(pos).some((e) => e.stage === 'sam' && e.voice === 'drumLow'));
   const pct = TP.specForItem({ music: 'shortenByPercent', prompt: 'המחיר עלה מ־40 ל־100 ש״ח. בכמה אחוזים עלה? (מספר בלבד)', answer: 150 });
   const lows = TP.soundEvents(pct).filter((e) => e.voice === 'drumLow');

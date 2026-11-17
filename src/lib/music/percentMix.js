@@ -95,14 +95,14 @@
     { id: 'half', n: 50, subbeats: 50, percent: 50, he: '50% (חצי תיבה)' },
     { id: 'quarter', alias: 'beat', n: 25, subbeats: 25, percent: 25, he: '25% (רבע תיבה)', voices: ['drumLow', 'woodClick'] },
     { id: 'ten', n: 10, subbeats: 10, percent: 10, he: '10% (עשירית תיבה)' },
-    { id: 'five', n: 5, subbeats: 5, percent: 5, he: '5 תת־פעמות', hidden: true },
-    { id: 'one', n: 1, subbeats: 1, percent: 1, he: 'תת־פעמה (1%)', hidden: true },
+    { id: 'five', n: 5, subbeats: 5, percent: 5, he: '5 תת־פְעָמוֹת', hidden: true },
+    { id: 'one', n: 1, subbeats: 1, percent: 1, he: 'תת־פַּעֲמָה (1%)', hidden: true },
   ];
   const VISIBLE_TILES = TILES.filter(function (t) { return !t.hidden; });
   function tile(id) {
     return TILES.filter(function (t) { return t.id === id || t.alias === id; })[0] || null;
   }
-  function beatsHe(b) { return b === 1 ? 'פעמה' : b === 0.5 ? 'חצי פעמה' : b + ' פעמות'; }
+  function beatsHe(b) { return b === 1 ? 'פַּעֲמָה' : b === 0.5 ? 'חצי פַּעֲמָה' : b + ' פְעָמוֹת'; }
   function tileLabel(id, split) {
     const t = tile(id), s = splitOf(split);
     return t ? t.percent + '% = ' + beatsHe((t.n * s) / 100) + ' מתוך ' + s : '';

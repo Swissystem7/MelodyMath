@@ -13,7 +13,7 @@ const item = (music, prompt, answer, standard) => ({ music: music, prompt: promp
 const spec = (...a) => D.specForItem(item(...a));
 const ev = (...a) => D.soundEvents(spec(...a));
 const stage = (list, st) => list.filter((n) => n.stage === st);
-const LEFT = (n, k) => n + ' פעימות בתיבות של ' + k + ' — כמה תיבות שלמות, וכמה פעימות נשארות? (כתבו כמו 3 שארית 2)';
+const LEFT = (n, k) => n + ' פְעָמוֹת בתיבות של ' + k + ' — כמה תיבות שלמות, וכמה פְעָמוֹת נשארות? (כתבו כמו 3 שארית 2)';
 
 test('remainders (tala): one cycle in full, a sam for every whole bar, then the leftover strokes and real silence', () => {
   const e = ev('leftoverBeats', LEFT(22, 5), '4 שארית 2');
@@ -93,7 +93,7 @@ test('the largest prime below 30 walks 29 to the middle — only one and itself 
   assert.equal(stage(t, 'nine').length, 9);
 });
 test('only for its tags and phrasings', () => {
-  assert.equal(spec('meters', 'במשקל 3/4, פעימה 20 — היא מודגשת? (כתבו כן או לא)', 'לא'), null);
+  assert.equal(spec('meters', 'במשקל 3/4, פַּעֲמָה 20 — היא מודגשת? (כתבו כן או לא)', 'לא'), null);
   assert.equal(spec('remainders', '56 ÷ 7 = ?', 8), null);
   assert.equal(D.specForItem(null), null);
 });
@@ -133,7 +133,7 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
 });
 
 test('which beat in its bar: counted from 1, a remainder of 0 is the LAST beat, never beat 0', () => {
-  const P = (n) => 'במשקל 4/4, פעמה ' + n + ' היא איזו פעמה בתיבה שלה?';
+  const P = (n) => 'במשקל 4/4, פַּעֲמָה ' + n + ' היא איזו פַּעֲמָה בתיבה שלה?';
   const e14 = ev('phraseShare', P(14), 2);
   assert.equal(stage(e14, 'sam').length, 3, 'three bars already past');
   assert.deepEqual([stage(e14, 'barSam').length, stage(e14, 'beat').length], [1, 1], 'then sam and one more beat: the second');

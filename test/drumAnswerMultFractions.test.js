@@ -128,7 +128,7 @@ test('renderDrumAnswerPad produces real-time visual feedback with bar groups and
   assert.match(multHtml, /data-groups="2"/);
   assert.match(multHtml, /data-act="tap-group"/);
   assert.match(multHtml, /class="mm-tap__bar is-complete-group"/);
-  assert.match(multHtml, /2 תיבות של 4 פעימות/);
+  assert.match(multHtml, /2 תיבות של 4 פְעָמוֹת/);
 
   // Fraction rendering
   const fracHtml = M.renderDrumAnswerPad({ mode: 'fraction', per: 4, barBeats: 4, answer: 2, hold: true }, { beats: 2 });
@@ -136,7 +136,7 @@ test('renderDrumAnswerPad produces real-time visual feedback with bar groups and
   assert.match(fracHtml, /class="mm-fraction-ruler"/);
   assert.match(fracHtml, /data-fraction="1\/2"/);
   assert.match(fracHtml, /data-act="hold-drum"/);
-  assert.match(fracHtml, /משך בתיבה: 2 מתוך 4 פעימות/);
+  assert.match(fracHtml, /משך בתיבה: 2 מתוך 4 פְעָמוֹת/);
 });
 
 test('evaluateDrumAnswer validates multiplication rhythm answers with rich Hebrew feedback', () => {
@@ -148,18 +148,18 @@ test('evaluateDrumAnswer validates multiplication rhythm answers with rich Hebre
   assert.equal(right.value, 12);
   assert.equal(right.target, 12);
   assert.match(right.feedback, /נכון מאוד/);
-  assert.match(right.feedback, /3 תיבות של 4 פעימות/);
+  assert.match(right.feedback, /3 תיבות של 4 פְעָמוֹת/);
 
   // Too few beats
   const under = M.evaluateDrumAnswer(spec, 8);
   assert.equal(under.correct, false);
-  assert.match(under.feedback, /עדיין חסרות פעימות/);
+  assert.match(under.feedback, /עדיין חסרות פְעָמוֹת/);
   assert.match(under.feedback, /2 מתוך 3/);
 
   // Too many beats
   const over = M.evaluateDrumAnswer(spec, 14);
   assert.equal(over.correct, false);
-  assert.match(over.feedback, /יותר מדי פעימות/);
+  assert.match(over.feedback, /יותר מדי פְעָמוֹת/);
 });
 
 test('evaluateDrumAnswer validates fraction durations against bar parts with informative feedback', () => {
@@ -168,7 +168,7 @@ test('evaluateDrumAnswer validates fraction durations against bar parts with inf
   const right = M.evaluateDrumAnswer(spec, 2);
   assert.equal(right.correct, true);
   assert.match(right.feedback, /מצוין/);
-  assert.match(right.feedback, /2 פעימות/);
+  assert.match(right.feedback, /2 פְעָמוֹת/);
 
   const wrong = M.evaluateDrumAnswer(spec, 1);
   assert.equal(wrong.correct, false);
@@ -345,11 +345,11 @@ test('createDrumAnswerPad handles numeric and object initial states and resets p
 test('evaluateDrumAnswer handles default beats mode correctly and with error feedback', () => {
   const ok = M.evaluateDrumAnswer({ mode: 'beats' }, 4, 4);
   assert.equal(ok.correct, true);
-  assert.match(ok.feedback, /נכון! 4 פעימות\./);
+  assert.match(ok.feedback, /נכון! 4 פְעָמוֹת\./);
 
   const wrong = M.evaluateDrumAnswer({ mode: 'beats' }, 3, 4);
   assert.equal(wrong.correct, false);
-  assert.match(wrong.feedback, /ניגנתם 3 פעימות, התשובה היא 4\./);
+  assert.match(wrong.feedback, /ניגנתם 3 פְעָמוֹת, התשובה היא 4\./);
 });
 
 test('playDrumAnswerSound routes audio for hold, accent, downbeat, group, and tap, respecting muted state', () => {

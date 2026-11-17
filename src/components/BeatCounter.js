@@ -77,7 +77,7 @@
     const bell = JAM.instrument('handbells', 'metalBell');
     const kal = JAM.instrument('kalimba', 'tine');
     const slots = state.first.slots.map(function (full, i) {
-      return '<button type="button" class="bc-slot' + (full ? ' full' : '') + '" data-act="slot" data-slot="' + i + '"' + (on ? ' data-tap="' + e(bell.voice) + '" data-hz="' + C_MAJOR[i % 8] + '"' : '') + ' aria-label="פעמה ' + (i + 1) + (full ? ', יש חפץ' : ', ריק') + '">' + (full ? '🍎' : '') + '</button>';
+      return '<button type="button" class="bc-slot' + (full ? ' full' : '') + '" data-act="slot" data-slot="' + i + '"' + (on ? ' data-tap="' + e(bell.voice) + '" data-hz="' + C_MAJOR[i % 8] + '"' : '') + ' aria-label="פַּעֲמָה ' + (i + 1) + (full ? ', יש חפץ' : ', ריק') + '">' + (full ? '🍎' : '') + '</button>';
     }).join('');
     let ask = '';
     if (state.phase === 'total') {
@@ -102,15 +102,15 @@
     const free = on ? '<div class="jam-free" role="group" aria-label="נגינה חופשית"><span>נגנו חופשי וספרו לחבר:</span>' +
       '<button type="button" class="jam-pad" data-tap="' + e(bell.voice) + '" data-hz="523.25">🔔 ' + e(bell.he) + '</button>' +
       '<button type="button" class="jam-pad" data-tap="' + e(kal.voice) + '" data-hz="392">' + e(kal.he) + '</button></div>' : '';
-    return '<div class="jam-head"><span class="tag">ספירה לפי פעמה · כיתות א׳–ב׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
+    return '<div class="jam-head"><span class="tag">ספירה לפי פַּעֲמָה · כיתות א׳–ב׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🔔 חפץ אחד על כל צליל' : 'סופרים חפצים') + '</h3>' +
-      '<p class="jam-prompt">' + (on ? 'הקשיבו לפעמונים ושימו חפץ אחד על כל פעמה.' : 'שימו חפץ אחד בכל משבצת.') + '</p>' +
-      (on ? '<div class="jam-row"><button type="button" class="secondary" data-act="play">▶ נגנו את הפעמה</button></div>' : '') +
-      '<div class="bc-slots" role="group" aria-label="פעמות">' + slots + '</div>' +
+      '<p class="jam-prompt">' + (on ? 'הקשיבו לפעמונים ושימו חפץ אחד על כל פַּעֲמָה.' : 'שימו חפץ אחד בכל משבצת.') + '</p>' +
+      (on ? '<div class="jam-row"><button type="button" class="secondary" data-act="play">▶ נגנו את הפַּעֲמָה</button></div>' : '') +
+      '<div class="bc-slots" role="group" aria-label="פְעָמוֹת">' + slots + '</div>' +
       '<p class="fbp-sum">שמתם <bdi dir="ltr">' + BC.placedCount(state.first) + '</bdi> חפצים</p>' + ask + free + extra +
       '<div class="jam-row"><button type="button" class="secondary" data-act="next">תרגיל הבא ←</button></div>' +
       '<p class="jam-msg ' + e(state.tone) + '" role="status" aria-live="polite">' + e(state.message) + '</p>' +
-      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M1 (פעימה קבועה ומנייה) · כיתות א׳–ב׳ · McDonel 2015 · הרחבה: M5 (ראיות חלשות)</div></details>' : '');
+      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M1 (פַּעֲמָה קבועה ומנייה) · כיתות א׳–ב׳ · McDonel 2015 · הרחבה: M5 (ראיות חלשות)</div></details>' : '');
   }
 
   function mount(el) {

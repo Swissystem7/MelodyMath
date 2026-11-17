@@ -62,7 +62,7 @@ test('the card is Hebrew RTL and isolates the ratio, fraction and LCM', async ()
     assert.ok(html.includes('<bdi dir="ltr">' + p.ratioLabel + '</bdi>'), p.id);
     assert.ok(html.includes('<bdi dir="ltr">' + frac + '</bdi>'), p.id);
     assert.ok(html.includes('<bdi dir="ltr">' + p.cycleA + '</bdi>') && html.includes('<bdi dir="ltr">' + p.cycleB + '</bdi>'), p.id);
-    assert.match(html, /אחרי כמה פעימות הכלים נפגשים שוב\?/);
+    assert.match(html, /אחרי כמה פְעָמוֹת הכלים נפגשים שוב\?/);
     assert.ok(html.includes('data-ensemble-answer="' + p.targetLcm + '"'), p.id);
     assert.match(html, /שילוב כלים: כפולה משותפת/);
     assert.match(html, /data-ensemble-answer="/);

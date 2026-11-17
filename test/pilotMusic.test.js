@@ -84,7 +84,7 @@ test('describe and hint have a line for every exercise and every rhythm choice',
     if (q.kind !== 'rhythm') assert.ok(M.chips(q, 'right').some((c) => c.role === 'home'), q.id);
   });
   const q7 = U.QUESTIONS.find((q) => q.kind === 'rhythm');
-  assert.match(M.hint(q7, 'half'), /4 פעמות/);
+  assert.match(M.hint(q7, 'half'), /4 פְעָמוֹת/);
   assert.equal(M.plan(q7, 'hint', 'whole').filter((n) => n.role === 'click-over').length, 2);
   assert.deepEqual(U.hintGroups(q7), []);
   assert.equal(U.questionText(q7), '1/4 + 1/4 + ? = 1');
