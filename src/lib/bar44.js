@@ -103,7 +103,7 @@
         + (interactive === true ? '' : ' disabled')
         + ' data-i="' + i + '"'
         + ' aria-pressed="' + (on ? 'true' : 'false') + '"'
-        + ' aria-label="שמינית ' + (i + 1) + ' · פעימה ' + beat + '">'
+        + ' aria-label="שמינית ' + (i + 1) + ' · פַּעֲמָה ' + beat + '">'
         + (i % 2 === 0 ? `<span class="bar44-beat">${beat}</span>` : '')
         + '</button>'
       );
@@ -114,7 +114,7 @@
       + '<div class="bar44-track" role="group" aria-label="תיבה מוזיקלית 4/4">'
       + cells.join('') + '</div>'
       + (quiet === true
-        ? '<p class="bar44-read">ספרו את התאים המלאים: כל תא הוא שמינית, כל פעימה היא רבע.</p>'
+        ? '<p class="bar44-read">ספרו את התאים המלאים: כל תא הוא שמינית, כל פַּעֲמָה היא רבע.</p>'
         : `<p class="bar44-read" aria-live="polite">מלא: ${frac} מהתיבה</p>`)
       + '</div>';
   }

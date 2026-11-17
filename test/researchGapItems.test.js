@@ -29,8 +29,8 @@ test('every answer is right, worked out here and not copied', () => {
   assert.equal(by(/האם 0 הוא מספר זוגי/).answer, 0 % 2 === 0 ? 'כן' : 'לא');
   assert.equal(by(/^7 \+ 9/).answer, (7 + 9) % 2 === 0 ? 'זוגי' : 'אי-זוגי');
   const beat = (n, m) => ((n - 1) % m) + 1;   // counted from 1, as musicians count
-  assert.equal(by(/פעמה 14/).answer, beat(14, 4));
-  assert.equal(by(/פעמה 16/).answer, beat(16, 4), 'remainder 0 is the last beat of the bar, not beat 0');
+  assert.equal(by(/פַּעֲמָה 14/).answer, beat(14, 4));
+  assert.equal(by(/פַּעֲמָה 16/).answer, beat(16, 4), 'remainder 0 is the last beat of the bar, not beat 0');
   assert.equal(by(/כל ריבוע הוא מלבן/).answer, 'כן', 'inclusion: a square has four right angles');
   assert.equal(by(/כל מלבן הוא ריבוע/).answer, 'לא');
   assert.ok(1 / 3 + 1 / 4 !== 2 / 7 && by(/1\/3 \+ 1\/4 = 2\/7/).answer === 'לא');

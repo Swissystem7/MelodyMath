@@ -207,7 +207,7 @@ test('report: gain on unpractised items, target 0.3 SD, kept after 30 days', () 
 test('records load and save through an injectable storage', () => {
   const st = memStorage();
   assert.deepEqual(TR.loadRecord(st), TR.emptyRecord());
-  const r = TR.recordTest(TR.emptyRecord(), 'pre', { t1: 'הפעמות' }, 5);
+  const r = TR.recordTest(TR.emptyRecord(), 'pre', { t1: 'הפְעָמוֹת' }, 5);
   assert.equal(TR.saveRecord(st, r), true);
   assert.deepEqual(TR.loadRecord(st), JSON.parse(JSON.stringify(r)));
   st.setItem(TR.STORAGE_KEY, '{broken');

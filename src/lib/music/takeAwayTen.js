@@ -78,7 +78,7 @@
   }
 
   const GLYPH = { beat: '🥁', stand: '🚩', add: '✨', bell: '🔔', drum: '🪘', hundred: '🛢️' };
-  const NAME = { beat: 'פעימה', stand: 'המקום שבו עומדים', add: 'פעימה שנוספה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
+  const NAME = { beat: 'פַּעֲמָה', stand: 'המקום שבו עומדים', add: 'פַּעֲמָה שנוספה', bell: 'פעמון', drum: 'תוף של עשרה פעמונים', hundred: 'תוף של מאה פעמונים' };
 
   function circlesHtml(spec, opts) { const revealed = !!(opts && opts.revealed);
     if (!spec || !Array.isArray(spec.circles)) return '';

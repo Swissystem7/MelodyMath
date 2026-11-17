@@ -34,7 +34,7 @@
   const STEPS = [
     { id: 'mean', he: 'שלב 1 מתוך 3 · ממוצע', tag: 'M1 · גרף שומעים לפי זמן' },
     { id: 'trendRange', he: 'שלב 2 מתוך 3 · מגמה וטווח', tag: 'M1 · גרף שומעים לפי זמן' },
-    { id: 'percent', he: 'שלב 3 מתוך 3 · אחוזים בתיבה', tag: 'M3 · 100 תת־פעמות בתיבה' },
+    { id: 'percent', he: 'שלב 3 מתוך 3 · אחוזים בתיבה', tag: 'M3 · 100 תת־פְעָמוֹת בתיבה' },
   ];
 
   function trendSeries() { return DB.SERIES.filter(function (s) { return !s.zigzag; }); }
@@ -109,11 +109,11 @@
     const target = questionsFor(2, state.round).target;
     if (target.allowed.indexOf(id) === -1) return Object.assign({}, state, { sound: null });
     const r = PM.addTile(state.fill, id, target.percent);
-    if (!r.accepted) return Object.assign({}, state, { over: r.over, status: 'try', message: 'עברת ב־' + r.over + ' תת־פעמות. נסו אריח קצר יותר.', sound: 'wrong' });
+    if (!r.accepted) return Object.assign({}, state, { over: r.over, status: 'try', message: 'עברת ב־' + r.over + ' תת־פְעָמוֹת. נסו אריח קצר יותר.', sound: 'wrong' });
     if (r.status === 'exact') {
       const p = PM.percentToSubbeats(target.percent);
       return Object.assign({}, state, { fill: r.fill, over: 0, status: 'right', sound: 'cadence',
-        message: target.percent + '% = ' + p.subbeats + ' מתוך 100 תת־פעמות = ' + p.fraction + ' מהתיבה.' });
+        message: target.percent + '% = ' + p.subbeats + ' מתוך 100 תת־פְעָמוֹת = ' + p.fraction + ' מהתיבה.' });
     }
     return Object.assign({}, state, { fill: r.fill, over: 0, status: '', message: '', sound: null });
   }
@@ -126,7 +126,7 @@
     const target = questionsFor(2, state.round).target;
     const c = PM.checkFill(state.fill, target.percent);
     if (c.status === 'exact') return state;
-    return Object.assign({}, state, { status: 'try', message: 'חסרות ' + c.missing + ' תת־פעמות.', sound: 'wrong' });
+    return Object.assign({}, state, { status: 'try', message: 'חסרות ' + c.missing + ' תת־פְעָמוֹת.', sound: 'wrong' });
   }
 
   // After a right answer: the next question of the step, the next step, or
@@ -233,14 +233,14 @@
     } else {
       const target = set.target;
       const sum = PM.filled(state.fill);
-      out += '<p class="jam-prompt">' + e(target.he) + '. בתיבה 100 תת־פעמות, 25 בכל פעמה.</p>' +
-        '<div class="db-bar' + (state.status === 'right' ? ' done' : '') + '" role="img" aria-label="מולאו ' + sum + ' מתוך 100 תת־פעמות">' +
+      out += '<p class="jam-prompt">' + e(target.he) + '. בתיבה 100 תת־פְעָמוֹת, 25 בכל פַּעֲמָה.</p>' +
+        '<div class="db-bar' + (state.status === 'right' ? ' done' : '') + '" role="img" aria-label="מולאו ' + sum + ' מתוך 100 תת־פְעָמוֹת">' +
         state.fill.map(function (id, i) { const t = PM.tile(id); return '<span class="db-seg" data-seg="' + i + '" style="width:' + t.n + '%">' + t.n + '</span>'; }).join('') + '</div>' +
         '<p>מילאתם <bdi dir="ltr">' + sum + '/100 = ' + sum + '%</bdi></p>' +
         '<div class="jam-row" role="group" aria-label="אריחים">' + target.allowed.map(function (id) {
           const t = PM.tile(id);
           const tap = on ? ' data-tap="' + e((voices && voices.percent) || 'drumLow') + '"' : '';
-          return '<button type="button" class="fbp-tile" data-act="tile" data-tile="' + id + '"' + tap + ' aria-label="אריח ' + t.he + ', ' + t.n + ' תת־פעמות"><b><bdi dir="ltr">' + t.n + '</bdi></b><span>' + t.he + '</span></button>';
+          return '<button type="button" class="fbp-tile" data-act="tile" data-tile="' + id + '"' + tap + ' aria-label="אריח ' + t.he + ', ' + t.n + ' תת־פְעָמוֹת"><b><bdi dir="ltr">' + t.n + '</bdi></b><span>' + t.he + '</span></button>';
         }).join('') + '</div><div class="jam-row">' + (on ? '<button type="button" class="secondary" data-act="play">▶ נגן תיבה</button>' : '') +
         '<button type="button" class="secondary" data-act="undo">↩ הסרת אריח</button><button type="button" class="primary" data-act="check">בדיקה</button></div>';
     }
@@ -250,7 +250,7 @@
 
   function renderHtml(state, voices) {
     const head = '<div class="jam-head"><span class="tag">נתונים ואחוזים · כיתות ד׳–ו׳</span>' + (state.view === 'step' ? JAM.musicToggleHtml(state.showMusic) : '') + '</div>' +
-      '<h3>📊 DataBeats + PercentMix: נתונים ואחוזים בפעמות</h3>';
+      '<h3>📊 DataBeats + PercentMix: נתונים ואחוזים בפְעָמוֹת</h3>';
     let body;
     if (state.view === 'test') body = testHtml(state);
     else if (state.view === 'result') body = resultHtml(state);

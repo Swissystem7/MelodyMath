@@ -122,7 +122,7 @@ test("each primary way cites peer-reviewed studies already used by the app", () 
 });
 
 const MUSIC_WORDS =
-	/תוף|תופ|מכה|מכות|מיתר|פריט|פורט|נושפ|נשיפ|צליל|קליד|לחיצ|לוחצ|תיבה|קשת|מפוח|נגנ|פעימ|קצב|מוזיק|שיר|תווים|כלי/;
+	/תוף|תופ|מכה|מכות|מיתר|פריט|פורט|נושפ|נשיפ|צליל|קליד|לחיצ|לוחצ|תיבה|קשת|מפוח|נגנ|פעמ|קצב|מוזיק|שיר|תווים|כלי/;
 const plain = (s) => s.replace(/[֑-ׇ]/g, "");
 
 test("noMusicCheck asks the bare fact with no music words and the right answer", () => {
@@ -141,7 +141,7 @@ test("noMusicCheck asks the bare fact with no music words and the right answer",
 		assert.equal(c.answer, want, t);
 		assert.match(c.ask, /[א-ת]/, t);
 		assert.ok(!/[{}]/.test(c.ask), t);
-		assert.ok(!MUSIC_WORDS.test(c.ask), `${t} has a music word: ${c.ask}`);
+		assert.ok(!MUSIC_WORDS.test(plain(c.ask)), `${t} has a music word: ${c.ask}`);
 		names.forEach((n) => {
 			assert.ok(!c.ask.includes(n), `${t} names ${n}`);
 		});
@@ -153,7 +153,7 @@ test("noMusicCheck asks the bare fact with no music words and the right answer",
 	// the word list really catches the musical lines
 	L.FAMILIES.forEach((f) => {
 		Object.keys(L.LINES).forEach((t) => {
-			assert.ok(MUSIC_WORDS.test(L.LINES[t][f].ask), `${t}/${f}`);
+			assert.ok(MUSIC_WORDS.test(plain(L.LINES[t][f].ask)), `${t}/${f}`);
 		});
 	});
 });

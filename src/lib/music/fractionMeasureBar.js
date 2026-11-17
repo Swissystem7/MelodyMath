@@ -115,7 +115,7 @@
       : getPartition(opts.denominator, opts.activeCount !== undefined ? opts.activeCount : opts.activeIndices, opts);
 
     const info = PARTITIONS[partition.denominator] || PARTITIONS[4];
-    const defaultLabel = `סרגל שברים תיבת 4/4: ${partition.activeParts} מתוך ${partition.totalParts} חלקים פעילים (${partition.activeBeats}/4 פעימות)`;
+    const defaultLabel = `סרגל שברים תיבת 4/4: ${partition.activeParts} מתוך ${partition.totalParts} חלקים פעילים (${partition.activeBeats}/4 פְעָמוֹת)`;
     const containerLabel = opts.ariaLabel ? escapeHtml(opts.ariaLabel) : escapeHtml(defaultLabel);
 
     const blocksHtml = partition.parts.map((part) => {

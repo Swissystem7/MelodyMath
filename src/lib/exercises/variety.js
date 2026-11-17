@@ -146,7 +146,7 @@
     if (type === 'word_problems') { const sum = Math.max(2, Math.min(hi, Math.max(lo, 2) + (s % Math.max(1, hi - Math.max(lo, 2) + 1)))), a = 1 + ((s * 3) % Math.max(1, sum - 1)), answer = sum - a; return { a: a, b: answer, answer: answer, key: 'miss:' + a + ':' + sum, prompt: 'כמה חסר ל־' + a + ' כדי להגיע ל־' + sum + '?', hint: a + ' ועוד ' + answer + ' הם ' + sum }; }
     if (type === 'measurement' || type === 'data') { const n = spanPick(range, step, type === 'data' ? 19 : 23); return { answer: n, key: type + ':' + n, prompt: type === 'data' ? ('בעמודה יש ' + n + '. כמה יש בעמודה?') : ('הסרגל מראה ' + n + ' ס״מ. כמה ס״מ זה?'), hint: String(n), hearN: n }; }
     if (type === 'percent') { const p = [10, 20, 25, 50][s % 4], cap = Math.min(hi, 100), floor = Math.max(lo, 1), answer = floor + (s % Math.max(1, cap - floor + 1)), whole = answer * (100 / p); return { a: p, b: whole, answer: answer, key: p + '%of' + whole, prompt: 'כמה זה ' + p + '% מ־' + whole + '?', hint: p + '% הם ' + answer }; }
-    if (type === 'factors') { const pairs = [[2, 3], [2, 5], [3, 4], [3, 5], [4, 5], [5, 6], [5, 7], [6, 7], [7, 8], [7, 9], [8, 9], [9, 10], [4, 7], [3, 7], [3, 8], [4, 9], [6, 11], [7, 11], [8, 11], [9, 11]], pair = pairs[s % pairs.length], answer = pair[0] / gcd(pair[0], pair[1]) * pair[1]; return { a: pair[0], b: pair[1], answer: answer, key: 'lcm:' + pair[0] + ':' + pair[1], prompt: 'תוף אחד כל ' + pair[0] + ' פעימות ותוף שני כל ' + pair[1] + '. אחרי כמה פעימות הם נפגשים?', hint: 'הכפולה המשותפת היא ' + answer }; }
+    if (type === 'factors') { const pairs = [[2, 3], [2, 5], [3, 4], [3, 5], [4, 5], [5, 6], [5, 7], [6, 7], [7, 8], [7, 9], [8, 9], [9, 10], [4, 7], [3, 7], [3, 8], [4, 9], [6, 11], [7, 11], [8, 11], [9, 11]], pair = pairs[s % pairs.length], answer = pair[0] / gcd(pair[0], pair[1]) * pair[1]; return { a: pair[0], b: pair[1], answer: answer, key: 'lcm:' + pair[0] + ':' + pair[1], prompt: 'תוף אחד כל ' + pair[0] + ' פְעָמוֹת ותוף שני כל ' + pair[1] + '. אחרי כמה פְעָמוֹת הם נפגשים?', hint: 'הכפולה המשותפת היא ' + answer }; }
     if (type === 'operations') { const floor = Math.max(1, lo), cap = hi; let a = 2 + (s % 8), b = 2 + ((s * 3 + 1) % 8); if (a * b < floor) b = Math.max(b, Math.ceil(floor / a)); if (a * b > cap) { a = 1; b = Math.min(cap, Math.max(floor, 1)); } let answer = a * b; if (answer < floor || answer > cap) { a = 1; b = floor; answer = floor; } return { a: a, b: b, answer: answer, key: 'op:' + a + '*' + b, prompt: a + ' × ' + b + ' = ?', hint: a + ' כפול ' + b + ' הם ' + answer }; }
     if (type === 'decimals') { const t = 1 + (Math.floor(s / 3) % 9), answer = (10 + t) / 10; return { answer: answer, key: 'dec:' + t, prompt: 'כתבו כשבר עשרוני: ' + (10 + t) + '/10', hint: String(answer) }; }
     return null;
@@ -232,14 +232,14 @@
       } else if (type === 'fractions') {
         const pairs = isGrade1 ? [[1, 2], [2, 2], [1, 3], [2, 3], [1, 4], [2, 4], [3, 4], [4, 4]] : FRACTION_PAIRS;
         const pair = pairs[step % pairs.length], num = pair[0], denom = pair[1], key = `${num}/${denom}`;
-        if (!seen.has(key) || tryIdx === 99) { candidate = { a: num, b: denom, answer: `${num}/${denom}`, key, prompt: `איזה שבר מייצג ${num} מתוך ${denom} פעימות בתיבה?`, hint: `${num} חלקים מתוך ${denom}` }; break; }
+        if (!seen.has(key) || tryIdx === 99) { candidate = { a: num, b: denom, answer: `${num}/${denom}`, key, prompt: `איזה שבר מייצג ${num} מתוך ${denom} פְעָמוֹת בתיבה?`, hint: `${num} חלקים מתוך ${denom}` }; break; }
       } else {
         const made = otherSet(type, step, range);
         if (made && made.answer >= (range.min || 0) && (typeof made.answer !== 'number' || made.answer <= (range.max != null ? range.max : made.answer)) && (!seen.has(made.key) || tryIdx === 99)) { candidate = made; break; }
         if (!made && !OWN_TYPES[type]) {
           let n = isGrade1 ? Math.min(maxVal, ((step * 5 + 2) % Math.min(18, Math.max(1, maxVal - 2))) + 3) : ((step * 7 + 2) % 20) + 3;
           const key = `count:${n}`;
-          if (!seen.has(key) || tryIdx === 99) { candidate = { n, answer: n, key, prompt: 'כמה פעימות נשמעו?', hint: `ספרו את הפעימות: יש ${n}` }; break; }
+          if (!seen.has(key) || tryIdx === 99) { candidate = { n, answer: n, key, prompt: 'כמה פְעָמוֹת נשמעו?', hint: `ספרו את הפְעָמוֹת: יש ${n}` }; break; }
         }
       }
     }

@@ -944,16 +944,16 @@
     }
 
     const liveText = s.mode === 'mult'
-      ? (groups + ' תיבות של ' + per + ' פעימות' + (rem ? ' ועוד ' + rem : '') + ' = ' + n + ' פעימות')
+      ? (groups + ' תיבות של ' + per + ' פְעָמוֹת' + (rem ? ' ועוד ' + rem : '') + ' = ' + n + ' פְעָמוֹת')
       : s.mode === 'fraction'
-      ? ('משך בתיבה: ' + n + ' מתוך ' + s.barBeats + ' פעימות')
-      : (n + ' פעימות');
+      ? ('משך בתיבה: ' + n + ' מתוך ' + s.barBeats + ' פְעָמוֹת')
+      : (n + ' פְעָמוֹת');
 
     const subText = s.mode === 'mult'
-      ? 'הקישו קבוצות קצב לכפל (' + per + ' פעימות בכל תיבה). אפשר להקיש פעימה או תיבה שלמה.'
+      ? 'הקישו קבוצות קצב לכפל (' + per + ' פְעָמוֹת בכל תיבה). אפשר להקיש פַּעֲמָה או תיבה שלמה.'
       : s.mode === 'fraction'
-      ? 'החזיקו או הקישו משכי תווים כדי למלא את התיבה (' + s.barBeats + ' פעימות = שלם).'
-      : 'הקישו על התוף פעם אחת לכל פעימה. אפשר גם לכתוב את המספר במקלדת.';
+      ? 'החזיקו או הקישו משכי תווים כדי למלא את התיבה (' + s.barBeats + ' פְעָמוֹת = שלם).'
+      : 'הקישו על התוף פעם אחת לכל פַּעֲמָה. אפשר גם לכתוב את המספר במקלדת.';
 
     const groupBtn = s.mode === 'mult'
       ? '<button type="button" class="mm-btn mm-btn--secondary mm-tap__group" data-act="tap-group" data-testid="tap-group"' + (locked ? ' disabled' : '') + '>🥁 תיבה שלמה (' + per + ')</button>'
@@ -970,10 +970,10 @@
       + (fractionVisual || '')
       + '<div class="mm-tap__bars" dir="ltr" aria-hidden="true">' + barsHtml + '</div>'
       + '<div class="mm-row-actions">'
-      + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (locked ? ' disabled' : '') + '>🥁 פעימה</button>'
+      + '<button type="button" class="mm-btn mm-tap__drum" data-act="tap" data-testid="tap"' + (locked ? ' disabled' : '') + '>🥁 פַּעֲמָה</button>'
       + groupBtn
       + holdBtn
-      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פעימה אחת"' + (locked || !n ? ' disabled' : '') + '>↶ פעימה אחורה</button>'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="untap" data-testid="untap" aria-label="להוריד פַּעֲמָה אחת"' + (locked || !n ? ' disabled' : '') + '>↶ פַּעֲמָה אחורה</button>'
       + '</div></div>';
   }
 
@@ -989,20 +989,20 @@
       const groups = s.per > 0 ? Math.floor(val / s.per) : 0;
       const expGroups = s.per > 0 ? Math.floor(target / s.per) : 0;
       if (correct) {
-        feedback = 'נכון מאוד! ' + (groups ? groups + ' תיבות של ' + s.per + ' פעימות = ' : '') + target + '.';
+        feedback = 'נכון מאוד! ' + (groups ? groups + ' תיבות של ' + s.per + ' פְעָמוֹת = ' : '') + target + '.';
       } else if (val < target) {
-        feedback = 'עדיין חסרות פעימות: ניגנתם ' + val + ' מתוך ' + target + ' (' + groups + ' מתוך ' + expGroups + ' תיבות).';
+        feedback = 'עדיין חסרות פְעָמוֹת: ניגנתם ' + val + ' מתוך ' + target + ' (' + groups + ' מתוך ' + expGroups + ' תיבות).';
       } else {
-        feedback = 'ניגנתם יותר מדי פעימות: ' + val + ' במקום ' + target + '.';
+        feedback = 'ניגנתם יותר מדי פְעָמוֹת: ' + val + ' במקום ' + target + '.';
       }
     } else if (s.mode === 'fraction') {
       if (correct) {
-        feedback = 'מצוין! המשך בתיבה הוא בדיוק ' + target + ' פעימות.';
+        feedback = 'מצוין! המשך בתיבה הוא בדיוק ' + target + ' פְעָמוֹת.';
       } else {
-        feedback = 'משך הפעימות בתיבה (' + val + ') אינו תואם לתשובה המבוקשת (' + target + ').';
+        feedback = 'משך הפְעָמוֹת בתיבה (' + val + ') אינו תואם לתשובה המבוקשת (' + target + ').';
       }
     } else {
-      feedback = correct ? ('נכון! ' + target + ' פעימות.') : ('ניגנתם ' + val + ' פעימות, התשובה היא ' + target + '.');
+      feedback = correct ? ('נכון! ' + target + ' פְעָמוֹת.') : ('ניגנתם ' + val + ' פְעָמוֹת, התשובה היא ' + target + '.');
     }
 
     return {

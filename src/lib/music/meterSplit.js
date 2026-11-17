@@ -95,11 +95,11 @@
       const meet = P.lcmOf.apply(null, every);
       if (!meet || meet > MAX_BEATS) return null;
       spec = { kind: 'meet', every: every, beats: meet, answer: meet };
-    } else if ((m = /(\d+)\s*פעימות מחולקת לקבוצות של (\d+)/.exec(p))) {
+    } else if ((m = /(\d+)\s*פְעָמוֹת מחולקת לקבוצות של (\d+)/.exec(p))) {
       const n = int(m[1], 2, MAX_BEATS), k = int(m[2], 1, MAX_BEATS);
       if (!n || !k || n % k) return null;
       spec = { kind: 'groups', n: n, tries: [tryGroups(n, k)], answer: n / k };
-    } else if ((m = /(\d+) פעימות אפשר לספור בקבוצות שוות[^.]*\.\s*כמה פעימות בקבוצה אם יש (\d+) קבוצות/.exec(p))) {
+    } else if ((m = /(\d+) פְעָמוֹת אפשר לספור בקבוצות שוות[^.]*\.\s*כמה פְעָמוֹת בקבוצה אם יש (\d+) קבוצות/.exec(p))) {
       const n = int(m[1], 2, MAX_BEATS), g = int(m[2], 1, MAX_BEATS);
       if (!n || !g || n % g) return null;
       spec = { kind: 'groups', n: n, tries: [tryGroups(n, n / g)], answer: n / g };
@@ -121,7 +121,7 @@
       const tries = [];
       for (let k = 2; k < n; k++) tries.push(tryGroups(n, k));
       spec = { kind: 'prime', n: n, tries: tries, answer: P.isPrimeBeats(n) ? 'כן' : 'לא' };
-    } else if (/איזו מהן אפשר לחלק לקבוצות שוות של (\d+)/.test(p) && (m = /תיבות של ([\d,\sו־-]+) פעימות/.exec(p))) {
+    } else if (/איזו מהן אפשר לחלק לקבוצות שוות של (\d+)/.test(p) && (m = /תיבות של ([\d,\sו־-]+) פְעָמוֹת/.exec(p))) {
       const k = Number(/קבוצות שוות של (\d+)/.exec(p)[1]);
       const cycles = numbers(m[1]).filter((n) => n >= 2 && n <= MAX_BEATS);
       const closing = cycles.filter((n) => n % k === 0);
@@ -203,7 +203,7 @@
       return '<span class="nb-cell ' + (broken ? 'ms-broken' : g % 2 ? 'nb-n2' : 'nb-n0') + (b % tr.k === 0 && b > 0 ? ' nb-barline' : '') + '"></span>';
     }).join('');
     const tag = revealed ? (tr.closes ? ' ✓ נסגר' : ' ✗ נשבר') : '';
-    return '<div class="ms-try"><button type="button" class="snd-play ms-play" data-try="' + i + '">▶ ' + tr.n + ' פעמות, קבוצות של ' + tr.k + '</button>'
+    return '<div class="ms-try"><button type="button" class="snd-play ms-play" data-try="' + i + '">▶ ' + tr.n + ' פְעָמוֹת, קבוצות של ' + tr.k + '</button>'
       + '<span class="ms-label">' + esc(tag) + '</span>'
       + '<div class="nb-bar" dir="ltr" style="grid-template-columns:repeat(' + tr.n + ',1fr)">' + cells + '</div></div>';
   }
@@ -220,7 +220,7 @@
     const meet = spec.kind === 'meet';
     const body = meet ? (revealed ? meetRows(spec) : '') + '<button type="button" class="snd-play ms-play" data-try="0">▶ שמעו את השורות</button>'
       : spec.tries.map((tr, i) => tryRow(tr, i, revealed)).join('');
-    const how = meet ? 'כל שורה בקצב שלה; צליל חזק ושונה כשכולן נפגשות. סופרים מ־0: הן נפגשות אחרי כמה פעימות.'
+    const how = meet ? 'כל שורה בקצב שלה; צליל חזק ושונה כשכולן נפגשות. סופרים מ־0: הן נפגשות אחרי כמה פְעָמוֹת.'
       : 'אותו קצב בכל ניסיון, שני סיבובים. צליל מיוחד פותח כל סיבוב: שומעים אם הקבוצה האחרונה נסגרת עליו או נשברת.';
     return '<div class="meter-split">'
       + '<p class="band-note">' + esc(spec.world.he + ': ' + spec.world.why + '. ' + how) + '</p>'

@@ -48,7 +48,7 @@ test('the two meanings use different worlds; siku only as the 2-player guest', (
   assert.match(share.world.he, /באיאקה/);
   assert.match(share.world.why, /מסורת חיה/);
   assert.match(D.plan(item('10 עוגיות ל־2 ילדים, בשווה. כמה לכל אחד?', 5, SHARE)).world.he, /סיקו/);
-  assert.match(D.plan(item('20 פעימות ל־4 ילדים. כמה לכל אחד?', 5, SHARE)).world.he, /באיאקה/);
+  assert.match(D.plan(item('20 פְעָמוֹת ל־4 ילדים. כמה לכל אחד?', 5, SHARE)).world.he, /באיאקה/);
 });
 
 test('0 : 5 is honest silence with empty trays; 8 : 1 is one player playing everything', () => {

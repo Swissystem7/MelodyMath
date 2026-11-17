@@ -37,7 +37,7 @@ test('number line, Euclidean wheel, and parity explorers expose accessible attri
   assert.match(indexHtml, /id="eucStepsBtns"\s+role="group"\s+aria-label="סה״כ צעדים במעגל"/);
   assert.match(indexHtml, /id="eucPulsesBtns"\s+role="group"\s+aria-label="צלילים פעילים"/);
   assert.match(indexHtml, /data-p="\$\{p\}"\s+aria-pressed="\$\{p === euclideanPulses\}"/);
-  assert.match(indexHtml, /<svg[^>]*role="img"[^>]*aria-label="גלגל מקצב אוקלידי: \$\{euclideanPulses\} קודקודים מתוך \$\{euclideanSteps\} פעימות"/);
+  assert.match(indexHtml, /<svg[^>]*role="img"[^>]*aria-label="גלגל מקצב אוקלידי: \$\{euclideanPulses\} קודקודים מתוך \$\{euclideanSteps\} פְעָמוֹת"/);
   assert.match(indexHtml, /id="eoNumBtns"\s+role="group"\s+aria-label="בחירת מספר לבדיקת זוגיות"/);
   assert.match(indexHtml, /data-n="\$\{n\}"\s+aria-pressed="\$\{n === evenOddCount\}"/);
 });

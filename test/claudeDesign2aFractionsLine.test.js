@@ -22,7 +22,7 @@ test('Screen 2a fractions line renders faithful Claude Design phone frame', () =
   assert.match(html, /יוקללה/);
   assert.match(html, /כלי ראשי · מנגינה/);
   assert.match(html, /תוף/);
-  assert.match(html, /כלי נוסף · פעימה/);
+  assert.match(html, /כלי נוסף · פַּעֲמָה/);
 
   // Target banner
   assert.match(html, /בנו קו באורך של/);

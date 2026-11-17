@@ -64,7 +64,7 @@ test('the distributive split: every group heard as a bundle of five and a few si
 });
 
 test('bars: a waltz in 3/4 (strong, weak, weak) and a jig in 6/8 (two groups of three)', () => {
-  const w = ev('meters', G3, 'כמה פעימות ב־7 תיבות של 3/4?', 21);
+  const w = ev('meters', G3, 'כמה פְעָמוֹת ב־7 תיבות של 3/4?', 21);
   assert.equal(stage(w, 'beat').filter((n) => n.strong).length, 7);
   const j = ev('meters', G3, 'כמה שמיניות ב־4 תיבות של 6/8?', 24);
   assert.equal(stage(j, 'beat').filter((n) => n.strong).length, 8);
@@ -72,10 +72,10 @@ test('bars: a waltz in 3/4 (strong, weak, weak) and a jig in 6/8 (two groups of 
 });
 
 test('an accented beat in 3/4, counted from 1 as musicians count: whole bars as bundles, then its own bar beat by beat', () => {
-  const e = ev('meters', G3, 'במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'לא');
+  const e = ev('meters', G3, 'במשקל 3/4 סופרים את כל הפְעָמוֹת מההתחלה. פַּעֲמָה 18 — היא מודגשת? (כתבו כן או לא)', 'לא');
   assert.equal(stage(e, 'barBundle').length, 5, 'five whole bars: beats 1–15');
   assert.deepEqual(stage(e, 'beat').map((n) => n.strong), [true, false, false], '16 strong, 17 and 18 weak');
-  assert.equal(spec('meters', G3, 'במשקל 3/4 סופרים את כל הפעימות מההתחלה. פעימה 18 — היא מודגשת? (כתבו כן או לא)', 'כן'), null, 'counting from 0 is never set to sound');
+  assert.equal(spec('meters', G3, 'במשקל 3/4 סופרים את כל הפְעָמוֹת מההתחלה. פַּעֲמָה 18 — היא מודגשת? (כתבו כן או לא)', 'כן'), null, 'counting from 0 is never set to sound');
 });
 test('only for the times-table standards, and only when the sounds give exactly the answer', () => {
   assert.equal(spec('repeatedBars', G3, '9 × 9 = ?', 80), null, 'a wrong key is never set to sound');

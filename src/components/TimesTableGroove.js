@@ -83,7 +83,7 @@
     const right = Number(value) === q.answer;
     const r = STREAK.recordAnswer(state.streak, right);
     if (!right) {
-      const hint = q.division ? 'ספרו את הפעמות המודגשות: כל אחת סוגרת קבוצה של ' + q.factor + '.' : 'ספרו בדילוגים של ' + q.factor + ' עד הפעמה המודגשת ה־' + q.k + '.';
+      const hint = q.division ? 'ספרו את הפְעָמוֹת המודגשות: כל אחת סוגרת קבוצה של ' + q.factor + '.' : 'ספרו בדילוגים של ' + q.factor + ' עד הפַּעֲמָה המודגשת ה־' + q.k + '.';
       return Object.assign({}, state, { streak: r.state, status: 'retry', message: 'עוד לא. ' + hint, sound: null });
     }
     let message = (q.division ? q.answer + ' קבוצות. ' : q.factor + ' × ' + q.k + ' = ' + q.answer + '. ') + 'נכון!';
@@ -130,7 +130,7 @@
     const cells = q.played.map(function (b) {
       return '<span class="ttg-beat' + (b.accent ? ' acc' : '') + '" data-beat="' + b.index + '">' + (b.accent ? b.product : '·') + '</span>';
     }).join('') + '<span class="ttg-beat acc ask" data-beat="' + q.factor * q.k + '">' + (state.status === 'right' ? q.factor * q.k : '?') + '</span>';
-    const row = on ? '<div class="ttg-beats" role="img" aria-label="' + q.played.length + ' פעמות, כל ' + q.factor + ' מודגשת">' + cells + '</div>'
+    const row = on ? '<div class="ttg-beats" role="img" aria-label="' + q.played.length + ' פְעָמוֹת, כל ' + q.factor + ' מודגשת">' + cells + '</div>'
       : '<p class="ttg-plain"><bdi dir="ltr">' + q.played.filter(function (b) { return b.accent; }).map(function (b) { return b.product; }).concat(['?']).join(', ') + '</bdi></p>';
     const opts = choices(q).map(function (c) {
       return '<button type="button" class="jam-pad" data-act="answer" data-value="' + c + '"' + (on ? ' data-tap="' + e(inst.voice) + '"' : '') + '>' + c + '</button>';
@@ -139,7 +139,7 @@
     const lockNote = on && state.lockedPick ? '<p class="jam-free" role="note">🎵 ' + e(JAM.instrument(state.lockedPick).he) +
       ' לא מנגן בלוח הכפל. בינתיים מנגנת ' + e(inst.he) + '.</p>' : '';
     const layers = state.streak.layers.map(function (l) { return LAYER_HE[l]; }).join(' · ');
-    return '<div class="jam-head"><span class="tag">פעמות מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
+    return '<div class="jam-head"><span class="tag">פְעָמוֹת מודגשות · כיתות ב׳–ד׳</span>' + JAM.musicToggleHtml(on) + '</div>' +
       '<h3>' + (on ? '🪘 לוח הכפל כשיר קצבי' : 'ספירה בדילוגים') + '</h3>' +
       '<div class="jam-row" role="group" aria-label="עמודה בלוח הכפל">' + factors + '</div>' +
       row + '<p class="jam-prompt"><bdi dir="ltr">' + e(q.he) + '</bdi></p>' +
@@ -149,7 +149,7 @@
       lockNote + (on && layers ? '<p class="jam-free">שכבות בשיר: ' + e(layers) + '</p>' : '') +
       '<div class="jam-row"><button type="button" class="secondary" data-act="next">שאלה הבאה ←</button></div>' +
       '<p class="jam-msg ' + (state.status === 'right' ? 'good' : state.status === 'retry' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>' +
-      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M2 (פעימות מודגשות ומקובצות) · כיתות ב׳–ד׳ · 100 פעימות לדקה · מקור: Das 2023</div></details>' : '');
+      (on ? '<details class="teacher-info teacher-only hidden" style="display:none!important;margin-top:8px" role="region" aria-label="מידע למורה"><summary style="cursor:pointer;color:var(--muted);font-size:0.85rem">למורה ▸</summary><div class="teacher-body" style="font-size:0.85rem;color:var(--muted);padding:4px 0">שיטה: M2 (פְעָמוֹת מודגשות ומקובצות) · כיתות ב׳–ד׳ · 100 פְעָמוֹת לדקה · מקור: Das 2023</div></details>' : '');
   }
 
   function mount(el) {

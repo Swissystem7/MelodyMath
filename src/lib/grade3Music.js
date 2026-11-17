@@ -3,7 +3,7 @@
 // Everything above the "widgets" line is pure and runs in Node:
 //
 //   לוח 3 במשקל 3/4, לוח 6 במשקל 6/8, הדגשה על כל כפולה
-//   14 פעמות בתיבות של 4 = 3 תיבות ו־2 פעמות שנשארו, "3 שארית 2"
+//   14 פְעָמוֹת בתיבות של 4 = 3 תיבות ו־2 פְעָמוֹת שנשארו, "3 שארית 2"
 //   השוואה כפלית: שני טמפו או שני צלילים במרחק אוקטבה = "פי כמה"
 //   שטח מלבן = שורות × תאים ברשת מקצב
 //   זמן: דקות ↔ שניות של מנגינה קצרה, ומספרים עד 10,000 כהשוואת Hz
@@ -83,7 +83,7 @@
     if (!m || !beats.length) return '';
     const pick = function (key) { return beats.filter(function (b) { return b[key]; }).map(function (b) { return b.count; }); };
     const ends = pick('closes');
-    return 'משקל ' + m.timeSig + '. ' + beats.length + ' פעמות ב־' + ends.length
+    return 'משקל ' + m.timeSig + '. ' + beats.length + ' פְעָמוֹת ב־' + ends.length
       + ' תיבות. ההדגשה בראש כל תיבה: ' + pick('accent').join(', ')
       + ', וכל תיבה נסגרת על כפולה של ' + m.beatsPerBar + ': ' + ends.join(', ') + '.';
   }
@@ -94,7 +94,7 @@
   function meterCue(table) {
     const m = meterForTable(table);
     if (!m) return '';
-    return 'משקל ' + m.timeSig + ': ' + m.beatsPerBar + ' פעמות בכל תיבה, וההדגשה על הפעמה הראשונה בכל תיבה.';
+    return 'משקל ' + m.timeSig + ': ' + m.beatsPerBar + ' פְעָמוֹת בכל תיבה, וההדגשה על הפַּעֲמָה הראשונה בכל תיבה.';
   }
 
   // ---------- חילוק עם שארית ----------
@@ -146,16 +146,16 @@
       ? Number(String(given).trim()) : null;
     const got = parseRemainder(given);
     if (bare === s.bars && s.remainder) {
-      return 'התיבות נכונות, אבל ' + s.remainder + ' פעמות עוד לא נכנסו לתיבה. כתבו ' + remainderText(s) + '.';
+      return 'התיבות נכונות, אבל ' + s.remainder + ' פְעָמוֹת עוד לא נכנסו לתיבה. כתבו ' + remainderText(s) + '.';
     }
     if (bare === s.beats) {
-      return 'זה מספר כל הפעמות. השאלה היא כמה תיבות שלמות יוצאות וכמה פעמות נשארות.';
+      return 'זה מספר כל הפְעָמוֹת. השאלה היא כמה תיבות שלמות יוצאות וכמה פְעָמוֹת נשארות.';
     }
     if (got && got.remainder >= s.perBar) {
       return 'שארית תמיד קטנה מ־' + s.perBar + ', אחרת אפשר למלא עוד תיבה שלמה.';
     }
     return s.bars + ' × ' + s.perBar + ' = ' + (s.bars * s.perBar) + ', ומ־' + s.beats
-      + ' נשארות ' + s.remainder + ' פעמות: ' + remainderText(s) + '.';
+      + ' נשארות ' + s.remainder + ' פְעָמוֹת: ' + remainderText(s) + '.';
   }
 
   // Full bars keep the meter voice; the leftover beats sound in a different
@@ -184,8 +184,8 @@
   function remainderNarration(spec) {
     const s = barsAndRemainder(spec && spec.beats, spec && spec.perBar);
     if (!s) return '';
-    return s.beats + ' פעמות בתיבות של ' + s.perBar + ': ' + s.bars
-      + ' תיבות שלמות, ואחריהן ' + s.remainder + ' פעמות שנשארו בצליל אחר.';
+    return s.beats + ' פְעָמוֹת בתיבות של ' + s.perBar + ': ' + s.bars
+      + ' תיבות שלמות, ואחריהן ' + s.remainder + ' פְעָמוֹת שנשארו בצליל אחר.';
   }
 
   // ---------- השוואה כפלית ("פי") ----------
@@ -227,7 +227,7 @@
 
   function pairNarration(spec) {
     const s = spec || {};
-    const unit = s.unit === 'bpm' ? 'פעמות לדקה' : 'הרץ';
+    const unit = s.unit === 'bpm' ? 'פְעָמוֹת לדקה' : 'הרץ';
     if (!Number.isFinite(Number(s.a)) || !Number.isFinite(Number(s.b))) return '';
     return 'קודם ' + s.a + ' ' + unit + ', ואחר כך ' + s.b + ' ' + unit + '.';
   }
@@ -350,7 +350,7 @@
   function chantNarration(table, pauseAt) {
     const t = whole(table, 1, 10);
     if (t == null || CHANT_TABLES.indexOf(t) === -1) return '';
-    return 'אומרים את הכפולות של ' + t + ' עם הפעימה. כשהצליל עוצר — אומרים את הבאה.';
+    return 'אומרים את הכפולות של ' + t + ' עם הפַּעֲמָה. כשהצליל עוצר — אומרים את הבאה.';
   }
 
   // ---------- the widgets ----------

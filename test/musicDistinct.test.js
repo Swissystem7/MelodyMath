@@ -69,9 +69,9 @@ function nearCopy(a, b) {
 }
 
 test('near-copy detection flags a reused sentence and lets a different method pass', () => {
-  const kept = 'נגנו תיבה שלמה וספרו את הפעימות שנשמעו עד הסוף.';
-  const copied = 'נגנו תיבה שלמה וספרו את הפעימות שנשארו עד הסוף.';
-  const other = 'כל חצי תו נמשך שתי פעימות, וסופרים את החצאים קדימה.';
+  const kept = 'נגנו תיבה שלמה וספרו את הפְעָמוֹת שנשמעו עד הסוף.';
+  const copied = 'נגנו תיבה שלמה וספרו את הפְעָמוֹת שנשארו עד הסוף.';
+  const other = 'כל חצי תו נמשך שתי פְעָמוֹת, וסופרים את החצאים קדימה.';
   assert.equal(nearCopy(kept, kept), true);
   assert.equal(nearCopy(kept, copied), true);
   assert.equal(nearCopy(kept, other), false);

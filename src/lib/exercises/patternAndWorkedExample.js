@@ -58,7 +58,7 @@
   function stagePrompt(a, b, stage) {
     const total = a + b;
     return stage === 'demo' ? ('ראו: ' + a + ' תופים ועוד ' + b + ' פעמונים הם ' + total + ' צלילים.')
-      : stage === 'completion' ? ('השלימו: יש כבר ' + (total - 1) + ' פעימות. הקישו פעם אחת להשלמת ' + total + '.')
+      : stage === 'completion' ? ('השלימו: יש כבר ' + (total - 1) + ' פְעָמוֹת. הקישו פעם אחת להשלמת ' + total + '.')
       : stage === 'check' ? ('כמה הם ' + a + ' ועוד ' + b + '?')
       : ('עכשיו לבד: כמה צלילים הם ' + a + ' ועוד ' + b + '?');
   }
@@ -67,7 +67,7 @@
     const a = o.a != null ? o.a : 3, b = o.b != null ? o.b : 2, total = a + b;
     const stage = o.stage || 'demo';
     const prompt = stagePrompt(a, b, stage);
-    const hint = a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פעימות.';
+    const hint = a + ' ועוד ' + b + ' שווים בדיוק ' + total + ' פְעָמוֹת.';
     const ex = {
       id: o.id || 'worked-example-' + a + '+' + b + '-' + stage,
       grade: o.grade || 'א', skill: 'addition', kind: EXERCISE_KINDS.WORKED_EXAMPLE,
@@ -222,7 +222,7 @@
         wrap.appendChild(btn(d, 'primary demo-proceed-btn', 'הבנתי', function () { stage = 'completion'; paint(); }));
       } else if (stage === 'completion') {
         const line = d.createElement('p');
-        line.textContent = 'השלימו את הפעימה החסרה';
+        line.textContent = 'השלימו את הפַּעֲמָה החסרה';
         wrap.appendChild(line);
         wrap.appendChild(btn(d, 'primary completion-tap-btn', '🥁 הקישו להשלמה', function () {
           container._heard = playDemo({ a: 1, b: 0, total: 0, pattern: null }, Object.assign({}, opts, { later: function (fn) { fn(); } }));

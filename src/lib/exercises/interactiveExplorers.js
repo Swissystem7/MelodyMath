@@ -1,8 +1,8 @@
 // MelodyMath — Interactive Explorer Exercises (Issue #688, Refs #665).
 // Transforms passive exploratory tools into active curriculum exercises:
 // 1. Singing Number Line (ישר מספרים מנגן עם פעמוני שבר / אחוז)
-// 2. Groups × Size (קבוצות כפל עם פעימות צליל)
-// 3. Even/Odd Rhythm (זוגי/אי-זוגי עם פעימות בזוגות)
+// 2. Groups × Size (קבוצות כפל עם פְעָמוֹת צליל)
+// 3. Even/Odd Rhythm (זוגי/אי-זוגי עם פְעָמוֹת בזוגות)
 // Criteria: <= 15 words per prompt, audio replay + second try on error, animation on success.
 (function (root, factory) {
   const api = factory(root);
@@ -69,7 +69,7 @@
       if (ns) { groups = ns.a; size = ns.b; }
     }
     groups = groups || 4; size = size || 3; const total = groups * size;
-    const prompt = 'יש ' + groups + ' קבוצות של ' + size + ' פעימות. כמה בסך הכל?';
+    const prompt = 'יש ' + groups + ' קבוצות של ' + size + ' פְעָמוֹת. כמה בסך הכל?';
     return {
       id: o.id || 'groups-mult-' + groups + 'x' + size, grade: o.grade || 'ב', skill: 'multiplication',
       kind: EXERCISE_KINDS.GROUPS_MULT, standard: o.standard || 'כפולות 2, 4, 5 ו־10 עד סוף כיתה ב׳',
@@ -86,7 +86,7 @@
       if (ns) { dividend = ns.a; divisor = ns.b; quotient = ns.answer; }
     }
     divisor = divisor || 3; quotient = quotient || 4; dividend = dividend || (divisor * quotient);
-    const prompt = dividend + ' פעימות מתחלקות ל־' + divisor + ' קבוצות שוות. כמה בכל קבוצה?';
+    const prompt = dividend + ' פְעָמוֹת מתחלקות ל־' + divisor + ' קבוצות שוות. כמה בכל קבוצה?';
     return {
       id: o.id || 'groups-div-' + dividend + 'div' + divisor, grade: o.grade || 'ג', skill: 'division',
       kind: EXERCISE_KINDS.GROUPS_DIV, standard: o.standard || 'חילוק כחלוקה לחלקים שווים',
@@ -101,7 +101,7 @@
     const count = o.count != null ? o.count : 6;
     const isEven = count % 2 === 0;
     const answer = isEven ? 'זוגי' : 'אי-זוגי';
-    const prompt = 'האם ' + count + ' פעימות הן מספר זוגי או אי-זוגי?';
+    const prompt = 'האם ' + count + ' פְעָמוֹת הן מספר זוגי או אי-זוגי?';
     return {
       id: o.id || 'even-odd-' + count,
       grade: o.grade || 'ב',
@@ -112,7 +112,7 @@
       isEven: isEven,
       prompt: prompt,
       answer: answer,
-      hint: isEven ? count + ' מתחלק לזוגות שלמים' : 'נשארת פעימה אחת ללא זוג',
+      hint: isEven ? count + ' מתחלק לזוגות שלמים' : 'נשארת פַּעֲמָה אחת ללא זוג',
       wordCount: countWords(prompt),
       hasMusic: true,
       visualKind: 'pairs_pulse'
@@ -149,7 +149,7 @@
       let dots = '';
       for (let i = 0; i < g; i++) {
         dots += '<div class="explorer-group" style="display:inline-flex;gap:4px;padding:6px;border:2px dashed var(--purple);border-radius:10px;margin:4px;">';
-        for (let j = 0; j < s; j++) dots += '<button type="button" class="explorer-dot-btn" data-tap="drumLow" aria-label="פעימה" style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--pink);border:0;cursor:pointer;padding:0;"></button>';
+        for (let j = 0; j < s; j++) dots += '<button type="button" class="explorer-dot-btn" data-tap="drumLow" aria-label="פַּעֲמָה" style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--pink);border:0;cursor:pointer;padding:0;"></button>';
         dots += '</div>';
       }
       wrapper.innerHTML = `<div class="groups-container" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0;">${dots}</div>`;

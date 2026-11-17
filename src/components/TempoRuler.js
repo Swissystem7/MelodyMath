@@ -134,16 +134,16 @@
       const s = TR.UNITS[state.stick];
       return ex.beats + ' ÷ ' + s.beats + ' = ' + currentAnswer(state) + ' מקלות של ' + s.he + '.';
     }
-    if (id === 'compare') return TR.label(ex.a.value, ex.a.unit) + ' = ' + TR.convertUnits(ex.a.value, ex.a.unit, 'beat') + ' פעמות, ' + TR.label(ex.b.value, ex.b.unit) + ' = ' + TR.convertUnits(ex.b.value, ex.b.unit, 'beat') + ' פעמות.';
+    if (id === 'compare') return TR.label(ex.a.value, ex.a.unit) + ' = ' + TR.convertUnits(ex.a.value, ex.a.unit, 'beat') + ' פְעָמוֹת, ' + TR.label(ex.b.value, ex.b.unit) + ' = ' + TR.convertUnits(ex.b.value, ex.b.unit, 'beat') + ' פְעָמוֹת.';
     const perBeat = TR.bpmToSeconds(1, ex.bpm);
-    return 'בטמפו ' + ex.bpm + ' BPM פעמה נמשכת ' + perBeat + ' שניות.';
+    return 'בטמפו ' + ex.bpm + ' BPM פַּעֲמָה נמשכת ' + perBeat + ' שניות.';
   }
 
   function hint(state) {
     const id = stepId(state);
     if (id === 'measure') return 'כמה מקלות כאלה נכנסים לאורך הקו? אפשר לנגן אותם ולספור.';
-    if (id === 'compare') return 'המירו את שני האורכים לפעמות ואז השוו.';
-    return 'בדקו כמה שניות נמשכת פעמה אחת בטמפו הזה.';
+    if (id === 'compare') return 'המירו את שני האורכים לפְעָמוֹת ואז השוו.';
+    return 'בדקו כמה שניות נמשכת פַּעֲמָה אחת בטמפו הזה.';
   }
 
   // Next exercise, next step, then the end of practice.
@@ -183,7 +183,7 @@
     else if (ph.phase === 'retention') what = 'עברו 30 יום ממבחן הסיום. בדיקה קצרה: מה נשאר?';
     else if (ph.phase === 'done') what = 'כל המבחנים הושלמו. אפשר לראות את התוצאות.';
     else what = 'ממשיכים לתרגל. ' + (ph.postDueAt ? 'מבחן הסיום ייפתח בעוד ' + days(ph.postDueAt - state.now) + ' ימים.' : 'הבדיקה אחרי 30 יום תיפתח בעוד ' + days(ph.retentionDueAt - state.now) + ' ימים.');
-    return '<p class="jam-prompt">מודדים זמן ואורך בפעמות: חצי פעמה, פעמה ותיבה.</p>' + (state.showMusic ? inst : '') +
+    return '<p class="jam-prompt">מודדים זמן ואורך בפְעָמוֹת: חצי פַּעֲמָה, פַּעֲמָה ותיבה.</p>' + (state.showMusic ? inst : '') +
       '<p>' + e(what) + '</p><div class="jam-row"><button type="button" class="primary" data-act="start">מתחילים</button></div>';
   }
 
@@ -208,13 +208,13 @@
       const sticks = '<div class="jam-row" role="radiogroup" aria-label="בחירת מקל מדידה">' + TR.STICKS.map(function (s) {
         const sel = s.id === state.stick;
         const tap = on ? ' data-tap="' + e(voice) + '"' : '';
-        return '<button type="button" class="secondary tr-stick" role="radio" data-act="stick" data-stick="' + s.id + '"' + tap + ' aria-checked="' + sel + '" aria-label="מקל של ' + s.he + ', ' + s.beats + ' פעמות">' +
+        return '<button type="button" class="secondary tr-stick" role="radio" data-act="stick" data-stick="' + s.id + '"' + tap + ' aria-checked="' + sel + '" aria-label="מקל של ' + s.he + ', ' + s.beats + ' פְעָמוֹת">' +
           '<span class="tr-rod" style="width:' + (s.beats * 18) + 'px"></span>' + e(s.he) + '</button>';
       }).join('') + '</div>';
       const row = stickRow(state).map(function (r) {
         return '<span class="tr-seg" data-seg="' + r.i + '" style="width:' + r.width + '%"></span>';
       }).join('');
-      body = sticks + '<div class="tr-line" role="img" aria-label="קו באורך ' + ex.beats + ' פעמות' + (state.stick ? ', מכוסה במקלות של ' + TR.UNITS[state.stick].he : '') + '">' + row + '</div>' +
+      body = sticks + '<div class="tr-line" role="img" aria-label="קו באורך ' + ex.beats + ' פְעָמוֹת' + (state.stick ? ', מכוסה במקלות של ' + TR.UNITS[state.stick].he : '') + '">' + row + '</div>' +
         (on && state.stick ? '<div class="jam-row"><button type="button" class="secondary" data-act="play">▶ נגן מקלות</button></div>' : '');
     }
     const prompt = id === 'measure'

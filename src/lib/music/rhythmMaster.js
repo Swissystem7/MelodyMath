@@ -70,7 +70,7 @@
   // Word contexts. 'drums' is the practised one; the others carry the same
   // maths with no music, for the unpractised (transfer) items of the tests.
   const CONTEXTS = {
-    drums: { who: 'תוף', unit: 'פעימות', verb: 'מכה', strokes: 'מכות', meet: 'יכו יחד שוב' },
+    drums: { who: 'תוף', unit: 'פְעָמוֹת', verb: 'מכה', strokes: 'מכות', meet: 'יכו יחד שוב' },
     bus: { who: 'קו אוטובוס', unit: 'דקות', verb: 'יוצא', strokes: 'יציאות', meet: 'ייצאו יחד שוב' },
     lights: { who: 'פנס', unit: 'שניות', verb: 'מהבהב', strokes: 'הבהובים', meet: 'יהבהבו יחד שוב' },
     gears: { who: 'גלגל', unit: 'שניות', verb: 'משלים סיבוב', strokes: 'סיבובים', meet: 'יחזרו יחד לנקודת ההתחלה' },

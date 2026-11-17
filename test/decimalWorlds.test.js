@@ -51,11 +51,11 @@ test('1/4: one pop beat sounds and three are silent; then the same moment in ten
 });
 
 test('beat length: a metronome inside a reference second cut into tenths', () => {
-  const e = ev('tenthNotes', 'פעימה ב־120 BPM נמשכת 60/120 שנייה. כמה שניות זה כשבר עשרוני?', '0.5');
+  const e = ev('tenthNotes', 'פַּעֲמָה ב־120 BPM נמשכת 60/120 שנייה. כמה שניות זה כשבר עשרוני?', '0.5');
   const beats = stage(e, 'metronome'), tenths = e.filter((n) => n.stage === 'tenth' || n.stage === 'second');
   const gap = beats[1].at - beats[0].at, tick = tenths[1].at - tenths[0].at;
   assert.equal(Math.round(gap / tick), 5);
-  assert.equal(spec('tenthNotes', 'פעימה נמשכת 0.5 שנייה. כמה פעימות בדקה (BPM)?', 120).value, '120');
+  assert.equal(spec('tenthNotes', 'פַּעֲמָה נמשכת 0.5 שנייה. כמה פְעָמוֹת בדקה (BPM)?', 120).value, '120');
 });
 
 test('× and : by powers of ten: the same number of sounds, every sound a place bigger or smaller', () => {

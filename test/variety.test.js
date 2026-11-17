@@ -162,7 +162,7 @@ test('number line hides its answer, percentages leave the ukulele, and a kept se
   for (let r = 0; r < 6; r++) assert.ok(['darbuka', 'erhu'].includes(variety.generateVariant('mm-cur-53', r, { seed: r }).instrument));
   assert.ok(variety.TOPIC_RANGES['mm-cur-45'] && variety.TOPIC_RANGES['mm-cur-46']);
   [
-    ['mm-cur-3', 'addition', '3 פעימות תוף ועוד 2 — כמה ביחד?', 5, /פעימות תוף ועוד/],
+    ['mm-cur-3', 'addition', '3 פְעָמוֹת תוף ועוד 2 — כמה ביחד?', 5, /פְעָמוֹת תוף ועוד/],
     ['mm-cur-7', 'word_problems', 'לדנה 3 מדבקות. אמא נתנה לה עוד 2. כמה מדבקות יש לדנה?', 5, /לדנה/],
     ['mm-cur-15', 'multiplication', '3 × 9 = ?', 27, /×/],
     ['mm-cur-16', 'division', '10 עוגיות ל־2 ילדים, בשווה. כמה לכל אחד?', 5, /עוגיות/],
@@ -182,6 +182,6 @@ test('number line hides its answer, percentages leave the ukulele, and a kept se
   });
   curriculum.MATRIX.forEach((row) => {
     const ex = variety.generateVariant(row.topicId, 0, { seed: 3 });
-    assert.equal(String(ex.prompt).includes('כמה פעימות נשמעו?'), false, row.topicId);
+    assert.equal(String(ex.prompt).includes('כמה פְעָמוֹת נשמעו?'), false, row.topicId);
   });
 });

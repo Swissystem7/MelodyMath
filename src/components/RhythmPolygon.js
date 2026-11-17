@@ -40,11 +40,11 @@
   ];
 
   const HINT = {
-    sides: 'כל פעמה היא פינה. ספרו את הפינות.',
-    angle: 'סיבוב שלם הוא 360°. חלקו אותו במספר הפעמות.',
+    sides: 'כל פַּעֲמָה היא פינה. ספרו את הפינות.',
+    angle: 'סיבוב שלם הוא 360°. חלקו אותו במספר הפְעָמוֹת.',
     axes: 'במצולע משוכלל יש צירי סימטריה כמספר הצלעות.',
-    shift: 'כל פעמה בשעון היא 360° חלקי מספר הפעמות.',
-    same: 'סובבו את הקצב הראשון פעמה אחרי פעמה ובדקו אם הוא נהיה השני. היפוך במראה הוא לא סיבוב.',
+    shift: 'כל פַּעֲמָה בשעון היא 360° חלקי מספר הפְעָמוֹת.',
+    same: 'סובבו את הקצב הראשון פַּעֲמָה אחרי פַּעֲמָה ובדקו אם הוא נהיה השני. היפוך במראה הוא לא סיבוב.',
   };
 
   function base(rec, now, showMusic) {
@@ -135,7 +135,7 @@
       const corner = on.indexOf(i) >= 0;
       dots += '<circle data-beat="' + i + '" cx="' + (Math.sin(r)).toFixed(3) + '" cy="' + (-Math.cos(r)).toFixed(3) + '" r="' + (corner ? 0.09 : 0.05) + '" class="' + (corner ? 'rp-corner' : 'rp-beat') + '"/>';
     }
-    const label = 'שעון קצב של ' + c.cycle + ' פעמות, ' + a.nameHe + (b ? ', ולידו הקצב השני' : '');
+    const label = 'שעון קצב של ' + c.cycle + ' פְעָמוֹת, ' + a.nameHe + (b ? ', ולידו הקצב השני' : '');
     return '<svg class="rp-clock" viewBox="-1.25 -1.25 2.5 2.5" role="img" aria-label="' + JAM.esc(label) + '">' +
       '<circle cx="0" cy="0" r="1" class="rp-ring"/>' +
       (b && b.isPolygon ? '<polygon class="rp-poly2" points="' + pts(b) + '"/>' : '') +
@@ -159,7 +159,7 @@
     const e = JAM.esc;
     const head = '<div class="jam-head"><span class="tag">M6 · שעון קצב · גאומטריה</span>' + (state.phase === 'steps' ? JAM.musicToggleHtml(state.showMusic) : '') + '</div>';
     if (state.phase === 'choose') {
-      return head + '<h3>🕒 שעון הקצב</h3><p class="jam-prompt">פעמות על מעגל יוצרות מצולע. באיזה כלי לנגן? הכלי משנה רק את הצליל.</p>' +
+      return head + '<h3>🕒 שעון הקצב</h3><p class="jam-prompt">פְעָמוֹת על מעגל יוצרות מצולע. באיזה כלי לנגן? הכלי משנה רק את הצליל.</p>' +
         '<div class="jam-row" role="group" aria-label="בחירת כלי">' + INSTRUMENTS.map(function (id) {
           return '<button type="button" class="secondary" data-act="choose" data-inst="' + id + '">' + e(JAM.instrument(id, 'woodBar').he) + '</button>';
         }).join('') + '</div><p class="hint">קודם בדיקת פתיחה קצרה, בלי צלילים ובלי ציון.</p>';
@@ -174,15 +174,15 @@
       const it = currentItem(state);
       const on = state.showMusic;
       const sound = on ? '<div class="jam-row"><button type="button" class="secondary" data-act="play">▶ נגן</button>' +
-        (it.clock && !it.clock.turned ? '<button type="button" class="secondary" data-act="turn">↻ הזיזו את הקצב בפעמה</button>' : '') +
+        (it.clock && !it.clock.turned ? '<button type="button" class="secondary" data-act="turn">↻ הזיזו את הקצב בפַּעֲמָה</button>' : '') +
         '<button type="button" class="secondary" data-act="pitch" aria-pressed="' + state.pitch + '">' + e(RP.PITCH_ADDON.he) + '</button></div>' +
         // Free play before answering (touch goal A.3): sounds on pointerdown via data-tap, multi-touch.
         '<div class="jam-free" role="group" aria-label="נגינה חופשית"><span>🎵 נגנו חופשי:</span>' +
         '<button type="button" class="jam-pad" data-tap="' + e(JAM.instrument(state.instrument, 'woodBar').voice) + '">פינה</button>' +
-        '<button type="button" class="jam-pad" data-tap="woodClick">פעמה</button></div>' : '';
+        '<button type="button" class="jam-pad" data-tap="woodClick">פַּעֲמָה</button></div>' : '';
       return head + '<h3>' + st.he + ' <bdi dir="ltr">(' + (state.item + 1) + '/' + st.items.length + ')</bdi></h3>' +
         '<p class="jam-prompt">' + e(it.prompt) + '</p>' + clockSvg(it.clock, state.turn) +
-        (state.turn ? '<p class="hint">הקצב זז ב־' + state.turn + ' פעמות, המצולע הסתובב ב־<bdi dir="ltr">' + (state.turn * 360 / it.clock.cycle) + '°</bdi>. הוא נשאר אותו מצולע.</p>' : '') +
+        (state.turn ? '<p class="hint">הקצב זז ב־' + state.turn + ' פְעָמוֹת, המצולע הסתובב ב־<bdi dir="ltr">' + (state.turn * 360 / it.clock.cycle) + '°</bdi>. הוא נשאר אותו מצולע.</p>' : '') +
         sound + optionsHtml(it, 'step') +
         '<div class="jam-row"><button type="button" class="primary" data-act="next"' + (state.solved ? '' : ' disabled') + '>הבא ←</button></div>' +
         '<p class="jam-msg ' + (state.solved ? 'good' : state.sound === 'wrong' ? 'soft' : '') + '" role="status" aria-live="polite">' + e(state.message) + '</p>';
