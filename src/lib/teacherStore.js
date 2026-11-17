@@ -979,12 +979,36 @@
     return recommendedUnitId(units, prog) === targetId;
   }
 
+  function resumeStageLabel(stage) {
+    const s = normalizeResumeStage(stage);
+    if (s === 'hear') return 'שלב 2 · שומעים';
+    if (s === 'why') return 'שלב 3 · למה';
+    return 'שלב 1 · חושבים';
+  }
+
+  function quickResumeUnit(classCode, name, units, storage) {
+    const resumes = listUnitResumes(classCode, name, storage);
+    const list = Array.isArray(units) ? units : [];
+    for (const r of resumes) {
+      const match = list.find((u) => u && u.id === r.unitId);
+      if (match) {
+        const total = Array.isArray(match.questions) ? match.questions.length : (Number(match.total) || 10);
+        if (r.questionIndex < total) return r;
+      }
+    }
+    const recId = recommendedUnitId(list, {});
+    return recId ? { unitId: recId, questionIndex: 0, stage: 'think', view: 'exercise' } : null;
+  }
+
   function renderResumeProgressHtml(resume, total) {
     const pct = resumeProgressPercent(resume, total);
     const idx = resume ? resume.questionIndex : 0;
+    const stage = resume ? normalizeResumeStage(resume.stage) : 'think';
+    const stageLabel = resumeStageLabel(stage);
     return '<div class="unit-resume-progress" data-testid="unit-resume-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" aria-label="התקדמות ביחידה">'
       + '<span class="unit-resume-progress__bar" style="width:' + pct + '%"></span>'
-      + '<span class="unit-resume-progress__text">תרגיל ' + (idx + 1) + ' · ' + pct + '%</span></div>';
+      + '<span class="unit-resume-progress__text">תרגיל ' + (idx + 1) + ' · ' + pct + '%</span>'
+      + '<span class="unit-resume-progress__stage" data-testid="unit-resume-stage">' + escapeHtml(stageLabel) + '</span></div>';
   }
 
   function saveWho(who, storage) {
@@ -1181,6 +1205,7 @@
     RESUME_STAGES, RESUME_VIEWS, normalizeResumeStage, normalizeUnitResume, cleanUnitResumes,
     saveUnitResume, loadUnitResume, listUnitResumes, clearUnitResume,
     unitProgressPercent, resumeProgressPercent, recommendedUnitId, canSkipToUnit, renderResumeProgressHtml,
+    resumeStageLabel, quickResumeUnit,
     AG11_TITLE, AG11_SUBTITLE, AG11_DONE_LABEL, AG11_AGAIN_LABEL, AG11_FORBIDDEN,
   };
 });
