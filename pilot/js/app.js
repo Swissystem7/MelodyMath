@@ -138,6 +138,11 @@
     return safe;
   }
 
+  function getMusicWhy(status) {
+    if (status.missing.length) return 'missing ' + status.missing.join(', ');
+    return 'missing CHOICES/GIVEN';
+  }
+
   function music() {
     const live = G.MMPilotMusic;
     let warned = false;
@@ -149,8 +154,7 @@
     const fallback = createMusicFallback();
     const status = inspectLiveMusic(live);
     if (!status.ok) {
-      const why = status.missing.length ? 'missing ' + status.missing.join(', ') : 'missing CHOICES/GIVEN';
-      warn(why);
+      warn(getMusicWhy(status));
       return fallback;
     }
     return createMusicSafeWrapper(live, fallback, warn);
@@ -207,12 +211,15 @@
   function childOf(base, n) {
     return { id: base.id + '#' + n, baseId: base.id, child: n, role: 'student', username: base.username, grade: base.grade, displayName: 'ילד/ה ' + n };
   }
-  function accountById(id) {
+  function parseAccountId(id) {
     const m = /^(.*)#(\d+)$/.exec(String(id || ''));
-    const base = SEED.accounts.filter(function (a) { return a.id === (m ? m[1] : id); })[0] || null;
-    if (!m || !base) return base;
-    const n = Number(m[2]);
-    return base.role === 'student' && n >= 1 && n <= classSize() ? childOf(base, n) : null;
+    return { baseId: m ? m[1] : id, childNum: m ? Number(m[2]) : null };
+  }
+  function accountById(id) {
+    const parsed = parseAccountId(id);
+    const base = SEED.accounts.filter(function (a) { return a.id === parsed.baseId; })[0] || null;
+    if (!parsed.childNum || !base) return base;
+    return base.role === 'student' && parsed.childNum >= 1 && parsed.childNum <= classSize() ? childOf(base, parsed.childNum) : null;
   }
   function students() {
     const seed = SEED.accounts.filter(function (a) { return a.role === 'student'; });
@@ -251,10 +258,16 @@
     return !!p.pre;
   }
 
-  function unitStatus(p, unit) {
-    const u = unit || UNIT;
+  function getCheckStatus(p, u) {
     if (isPostCheckDue(p, u)) return { key: 'post', text: 'נשארה בדיקה קצרה אחרי' };
     if (isLaterCheckDue(p)) return { key: 'later', text: 'מחכה בדיקת המשך' };
+    return null;
+  }
+
+  function unitStatus(p, unit) {
+    const u = unit || UNIT;
+    const checkStatus = getCheckStatus(p, u);
+    if (checkStatus) return checkStatus;
     if (p.completedAt) return { key: 'done', text: 'הושלמה' };
     const answered = countAnsweredQuestions(p.results);
     if (isUnitInProgress(p, answered)) return { key: 'progress', text: 'בתהליך · ' + answered + ' מתוך ' + u.questions.length };
@@ -1773,98 +1786,126 @@
   }
 
   root.addEventListener('click', function (e) {
-    const btn = e.target.closest('[data-act]');
-    if (!btn || btn.disabled) return;
-    const act = btn.getAttribute('data-act');
-    if (act === 'signout') { signOutClean(); store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); return; }
-    if (act === 'open-unit') { openUnit(btn.getAttribute('data-unit') || UNITS[0].id); return; }
-    if (act === 'skip-unit') { const tid = btn.getAttribute('data-unit'); const X = G.MMPilotUnitsExtra; if (tid && X && X.canSkipTo(UNIT.id, tid, UNITS, progressByUnit())) { saveResumePosition(); openUnit(tid); } return; }
-    if (act === 'preview') { e.preventDefault(); openPreview(btn.getAttribute('data-unit'), btn.getAttribute('data-q')); return; }
-    if (act === 'preview-exit') { exitPreview(); return; }
-    if (act === 'narrate') {
-      try { const a = new G.Audio(narrationUrl(currentQuestion())); a.play().catch(function () {}); } catch (err) { /* no audio element */ }
-      return;
+  function handleActionSignOut() { signOutClean(); store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); }
+  function handleActionOpenUnit(btn) { openUnit(btn.getAttribute('data-unit') || UNITS[0].id); }
+  function handleActionSkipUnit(btn) {
+    const tid = btn.getAttribute('data-unit');
+    const X = G.MMPilotUnitsExtra;
+    if (tid && X && X.canSkipTo(UNIT.id, tid, UNITS, progressByUnit())) {
+      saveResumePosition();
+      openUnit(tid);
     }
-    if (act === 'lesson-play' && !UNIT.legacy) {
+  }
+  function handleActionPreview(e, btn) {
+    e.preventDefault();
+    openPreview(btn.getAttribute('data-unit'), btn.getAttribute('data-q'));
+  }
+  function handleActionNarrate() {
+    try {
+      const a = new G.Audio(narrationUrl(currentQuestion()));
+      a.play().catch(function () {});
+    } catch (err) {}
+  }
+  function handleActionLessonPlay() {
+    if (!UNIT.legacy) {
       state.audio = M.play('lesson:' + UNIT.id, S.plan(UNIT.lesson.demo, 'question').notes, highlight);
       state.lessonStatus = (state.audio === 'played' ? '🔊 ' : '🔈 (בלי צליל במכשיר הזה) ') + UNIT.lesson.caption;
-      const st = root.querySelector('[data-testid="lesson-status"]');
-      if (st) { st.textContent = state.lessonStatus; st.setAttribute('data-audio', state.audio); }
-      return;
-    }
-    if (act === 'lesson-play') {
+    } else {
       const d = UNIT.lesson.demo;
       const demo = { id: 'lesson', music: 'join', a: d.a, op: '+', b: d.b };
       state.audio = M.play('lesson', M.plan(demo, 'right'), highlight);
       state.lessonStatus = (state.audio === 'played' ? '🔊 ' : '🔈 (בלי צליל במכשיר הזה) ') + 'שומעים 3 צלילים בפסנתר ועוד 2 בקסילופון = 5 צלילים, והמנגינה חוזרת הביתה.';
-      const status = root.querySelector('[data-testid="lesson-status"]');
-      if (status) { status.textContent = state.lessonStatus; status.setAttribute('data-audio', state.audio); }
-      return;
     }
-    if (act === 'lesson-done') {
-      stopSound();
-      const p = currentProgress();
-      p.lessonDone = true;
-      if (!p.startedAt) p.startedAt = Date.now();
-      saveP(p);
-      enterExercise();
-      return;
+    const st = root.querySelector('[data-testid="lesson-status"]');
+    if (st) {
+      st.textContent = state.lessonStatus;
+      st.setAttribute('data-audio', state.audio);
     }
-    if (act === 'replay') {
-      const q = currentQuestion();
-      const stage = state.qState === 'right' ? 'right' : state.qState === 'revealed' ? 'reveal' : 'question';
-      playStage(q, stage);
-      return;
-    }
-    if (act === 'sound') {
-      M.setMuted(!M.isMuted());
+  }
+  function handleActionLessonDone() {
+    stopSound();
+    const p = currentProgress();
+    p.lessonDone = true;
+    if (!p.startedAt) p.startedAt = Date.now();
+    saveP(p);
+    enterExercise();
+  }
+  function handleActionReplay() {
+    const q = currentQuestion();
+    const stage = state.qState === 'right' ? 'right' : state.qState === 'revealed' ? 'reveal' : 'question';
+    playStage(q, stage);
+  }
+  function handleActionSound() {
+    M.setMuted(!M.isMuted());
+    render();
+    const t = root.querySelector('[data-testid="sound-toggle"]');
+    if (t) t.focus();
+  }
+  function handleActionWhy() {
+    state.whyOpen = !state.whyOpen;
+    render();
+    const t = root.querySelector('[data-testid="why-open"]');
+    if (t) t.focus();
+  }
+  function handleActionChild(btn) {
+    const base = state.account && accountById(state.account.baseId || state.account.id);
+    const n = Number(btn.getAttribute('data-child'));
+    if (!base || base.role !== 'student' || !(n >= 1 && n <= classSize())) return;
+    state.account = childOf(base, n);
+    store.signIn(state.account.id);
+    UNIT = UNITS[0];
+    go('student-home');
+  }
+  function handleActionSessionAgain() {
+    const p2 = currentProgress();
+    p2.completedAt = null;
+    p2.index = 0;
+    p2.results = {};
+    saveP(p2);
+    enterExercise();
+  }
+  function handleActionReset() {
+    if (!state.confirmReset) {
+      state.confirmReset = true;
       render();
-      const t = root.querySelector('[data-testid="sound-toggle"]');
-      if (t) t.focus();
       return;
     }
-    if (act === 'why') {
-      state.whyOpen = !state.whyOpen;
-      render();
-      const t = root.querySelector('[data-testid="why-open"]');
-      if (t) t.focus();
-      return;
-    }
-    if (act === 'key') { onKey(btn.getAttribute('data-key')); return; }
-    if (act === 'child') {
-      const base = state.account && accountById(state.account.baseId || state.account.id);
-      const n = Number(btn.getAttribute('data-child'));
-      if (!base || base.role !== 'student' || !(n >= 1 && n <= classSize())) return;
-      state.account = childOf(base, n);
-      store.signIn(state.account.id);
-      UNIT = UNITS[0];
-      go('student-home');
-      return;
-    }
-    if (act === 'tap') { onTap(1); return; }
-    if (act === 'untap') { onTap(-1); return; }
-    if (act === 'choose') { onChoose(btn.getAttribute('data-choice')); return; }
-    if (act === 'check') { onCheck(); return; }
-    if (act === 'next') { onNext(); return; }
-    if (act === 'home') { if (state.account && state.account.role === 'teacher') exitPreview(); else go('student-home'); return; }
-    if (act === 'session-done') { go('student-home'); return; }
-    if (act === 'session-again') {
-      const p2 = currentProgress();
-      p2.completedAt = null;
-      p2.index = 0;
-      p2.results = {};
-      saveP(p2);
-      enterExercise();
-      return;
-    }
-    if (act === 'export-checks') { exportChecks(); return; }
-    if (act === 'reset') {
-      if (!state.confirmReset) { state.confirmReset = true; render(); return; }
-      state.confirmReset = false;
-      store.resetAll();
-      state.account = null; state.flash = '';
-      go('login');
-    }
+    state.confirmReset = false;
+    store.resetAll();
+    state.account = null;
+    state.flash = '';
+    go('login');
+  }
+
+  function rootClickHandler(e) {
+    const btn = e.target.closest('[data-act]');
+    if (!btn || btn.disabled) return;
+    const act = btn.getAttribute('data-act');
+    if (act === 'signout') return handleActionSignOut();
+    if (act === 'open-unit') return handleActionOpenUnit(btn);
+    if (act === 'skip-unit') return handleActionSkipUnit(btn);
+    if (act === 'preview') return handleActionPreview(e, btn);
+    if (act === 'preview-exit') return exitPreview();
+    if (act === 'narrate') return handleActionNarrate();
+    if (act === 'lesson-play') return handleActionLessonPlay();
+    if (act === 'lesson-done') return handleActionLessonDone();
+    if (act === 'replay') return handleActionReplay();
+    if (act === 'sound') return handleActionSound();
+    if (act === 'why') return handleActionWhy();
+    if (act === 'key') return onKey(btn.getAttribute('data-key'));
+    if (act === 'child') return handleActionChild(btn);
+    if (act === 'tap') return onTap(1);
+    if (act === 'untap') return onTap(-1);
+    if (act === 'choose') return onChoose(btn.getAttribute('data-choice'));
+    if (act === 'check') return onCheck();
+    if (act === 'next') return onNext();
+    if (act === 'home') return (state.account && state.account.role === 'teacher') ? exitPreview() : go('student-home');
+    if (act === 'session-done') return go('student-home');
+    if (act === 'session-again') return handleActionSessionAgain();
+    if (act === 'export-checks') return exportChecks();
+    if (act === 'reset') return handleActionReset();
+  }
+  root.addEventListener('click', rootClickHandler);
   });
 
   root.addEventListener('submit', function (e) {
