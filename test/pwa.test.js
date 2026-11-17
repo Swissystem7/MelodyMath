@@ -2,8 +2,15 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const core = require('../src/lib/core');
 
 const root = path.join(__dirname, '..');
+
+function linkHref(html, rel) {
+  const tags = html.match(/<link\b[^>]*>/gi);
+  const tag = tags.find((item) => item.includes('rel="' + rel + '"'));
+  return tag.match(/\bhref="([^"]*)"/)[1];
+}
 
 test('the manifest is Hebrew RTL standalone and points at real icons', () => {
   const m = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
@@ -162,8 +169,10 @@ test('every entry page links the manifest, icon and iOS install tags without dro
   for (const [page, prefix] of Object.entries(pages)) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');
     assert.match(html, /<html\s+lang="he"\s+dir="rtl"/i, page);
-    assert.match(html, new RegExp('rel="manifest"\\s+href="' + prefix.replace(/[.]/g, '\\.') + 'manifest\\.webmanifest"'), page);
-    assert.match(html, new RegExp('rel="apple-touch-icon"\\s+href="' + prefix.replace(/[.]/g, '\\.') + 'icons/icon-192\\.png"'), page);
+    // Read the href out of the tag. Putting the prefix into a RegExp after
+    // escaping only "." leaves a backslash able to change the pattern.
+    assert.equal(linkHref(html, 'manifest'), prefix + 'manifest.webmanifest', page);
+    assert.equal(linkHref(html, 'apple-touch-icon'), prefix + 'icons/icon-192.png', page);
     assert.match(html, /name="theme-color"\s+content="#6946e8"/, page);
     assert.match(html, /name="apple-mobile-web-app-capable"\s+content="yes"/, page);
     assert.match(html, /name="apple-mobile-web-app-title"\s+content="MelodyMath"/, page);
@@ -191,4 +200,152 @@ test('installation survives one missing precache file, and offline navigations f
   assert.match(sw, /addBestEffort\(cache, ASSETS\)/);
   assert.match(sw, /event\.request\.mode === 'navigate'/);
   assert.match(sw, /caches\.match\('\.\/index\.html'\)/);
+});
+
+function installDom() {
+  const nodes = [];
+  function make(tag) {
+    const node = {
+      tagName: String(tag).toLowerCase(),
+      rel: '',
+      href: '',
+      name: '',
+      content: '',
+      id: '',
+      className: '',
+      textContent: '',
+      attributes: {},
+      children: [],
+      parentNode: null,
+      setAttribute(key, value) { this.attributes[key] = String(value); },
+      appendChild(child) {
+        child.parentNode = this;
+        this.children.push(child);
+        return child;
+      },
+      insertBefore(child, ref) {
+        child.parentNode = this;
+        const at = this.children.indexOf(ref);
+        if (at === -1) this.children.push(child);
+        else this.children.splice(at, 0, child);
+        return child;
+      },
+    };
+    nodes.push(node);
+    return node;
+  }
+  const doc = {
+    currentScript: { src: 'https://swissystem7.github.io/MelodyMath/src/lib/core.js' },
+    head: make('head'),
+    body: make('body'),
+    readyState: 'complete',
+    createElement: make,
+    querySelector(selector) {
+      return nodes.find((node) => {
+        if (selector === 'link[data-mm-print]') return node.attributes['data-mm-print'] != null;
+        if (selector === '.mm-skip') return node.className === 'mm-skip';
+        const rel = /^link\[rel="([^"]+)"\]$/.exec(selector);
+        if (rel) return node.tagName === 'link' && node.rel === rel[1];
+        const meta = /^meta\[name="([^"]+)"\]$/.exec(selector);
+        return node.tagName === 'meta' && node.name === meta[1];
+      }) || null;
+    },
+    getElementById(id) {
+      return nodes.find((node) => node.id === id) || null;
+    },
+  };
+  doc.body.firstChild = null;
+  return doc;
+}
+
+function metasNamed(doc, name) {
+  return doc.head.children.filter((node) => node.tagName === 'meta' && node.name === name);
+}
+
+function withInstallGlobals(doc, navigatorValue, run) {
+  const prevNav = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  const prevDoc = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  const prevLoc = Object.getOwnPropertyDescriptor(globalThis, 'location');
+  function put(key, value) {
+    Object.defineProperty(globalThis, key, { value: value, configurable: true, writable: true, enumerable: true });
+  }
+  function restore(key, desc) {
+    if (desc) Object.defineProperty(globalThis, key, desc);
+    else delete globalThis[key];
+  }
+  put('navigator', navigatorValue);
+  put('document', doc);
+  put('location', { pathname: '/MelodyMath/index.html' });
+  return Promise.resolve()
+    .then(run)
+    .finally(() => {
+      restore('navigator', prevNav);
+      restore('document', prevDoc);
+      restore('location', prevLoc);
+    });
+}
+
+test('installSharedChrome fills missing install tags and registers the worker at the site root', async () => {
+  const doc = installDom();
+  const existing = doc.createElement('meta');
+  existing.name = 'theme-color';
+  existing.content = '#112233';
+  doc.head.appendChild(existing);
+  const status = doc.createElement('p');
+  status.id = 'pwaStatus';
+  doc.body.appendChild(status);
+  const calls = [];
+  const navigatorValue = {
+    serviceWorker: {
+      register(url, options) {
+        const done = Promise.resolve();
+        calls.push({ url: url, options: options, done: done });
+        return done;
+      },
+    },
+  };
+  await withInstallGlobals(doc, navigatorValue, async () => {
+    core.installSharedChrome();
+    doc.currentScript = { src: '' };
+    core.installSharedChrome();
+    await calls[0].done;
+    await calls[1].done;
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].url, 'https://swissystem7.github.io/MelodyMath/sw.js');
+  assert.deepEqual(calls[0].options, {
+    scope: 'https://swissystem7.github.io/MelodyMath/',
+    updateViaCache: 'none',
+  });
+  assert.equal(calls[1].url, 'sw.js');
+  assert.deepEqual(calls[1].options, { scope: './', updateViaCache: 'none' });
+  assert.equal(metasNamed(doc, 'theme-color').length, 1);
+  assert.equal(metasNamed(doc, 'theme-color')[0].content, '#112233');
+  assert.equal(metasNamed(doc, 'mobile-web-app-capable')[0].content, 'yes');
+  assert.equal(metasNamed(doc, 'apple-mobile-web-app-capable')[0].content, 'yes');
+  assert.equal(metasNamed(doc, 'apple-mobile-web-app-title')[0].content, 'MelodyMath');
+  assert.equal(metasNamed(doc, 'apple-mobile-web-app-status-bar-style')[0].content, 'default');
+  assert.equal(status.textContent, 'נשמר בטאבלט · עובד גם בלי רשת אחרי הביקור הראשון');
+  const manifest = doc.head.children.find((node) => node.rel === 'manifest');
+  assert.equal(manifest.href, 'https://swissystem7.github.io/MelodyMath/manifest.webmanifest');
+});
+
+test('installSharedChrome leaves the page usable when the worker registration fails', async () => {
+  const doc = installDom();
+  const status = doc.createElement('p');
+  status.id = 'pwaStatus';
+  doc.body.appendChild(status);
+  const navigatorValue = {
+    serviceWorker: {
+      register() {
+        return Promise.reject(new Error('offline'));
+      },
+    },
+  };
+  await withInstallGlobals(doc, navigatorValue, async () => {
+    core.installSharedChrome();
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+  assert.equal(status.textContent, 'שמירה ללא-רשת דורשת פתיחה מ־https (לא מקובץ מקומי)');
 });
