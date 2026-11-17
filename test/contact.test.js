@@ -48,7 +48,7 @@ test('the pilot issue form is Hebrew, warns it is public, and asks the one end-o
   assert.doesNotMatch(form, /id: (phone|email|school_name|child)/);
   const wf = path.join(root, '.github', 'workflows');
   if (fs.existsSync(wf)) {
-    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
+    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml', 'plan-gate.yml', 'plan-router.yml'], 'only the CI pipeline and the factory plan workflows are allowed');
   }
 });
 

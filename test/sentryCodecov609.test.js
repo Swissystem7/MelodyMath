@@ -52,7 +52,7 @@ test('home keeps the placeholder, loads the local loader, and stores no secret',
   assert.doesNotMatch(blob, /CODECOV_TOKEN\s*[:=]\s*['"][A-Za-z0-9]{8,}/);
   const wf = path.join(root, '.github', 'workflows');
   if (fs.existsSync(wf)) {
-    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml'], 'only .github/workflows/ci.yml is allowed');
+    assert.deepEqual(fs.readdirSync(wf).sort(), ['ci.yml', 'plan-gate.yml', 'plan-router.yml'], 'only the CI pipeline and the factory plan workflows are allowed');
   }
 });
 
