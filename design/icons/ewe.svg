@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="גנקוגוי — Ewe Gankogui Double Bell">
+  <title>גנקוגוי (Gankogui)</title>
+  <desc>פעמון גנקוגוי כפול של האֶוֶוה (גאנה וטוגו): מחזור 12 פעמות וקמ״מ של 3 מול 4</desc>
+  <rect width="64" height="64" rx="14" fill="#334155"/>
+  <!-- Iron handle stem -->
+  <rect x="30" y="8" width="4" height="12" rx="1" fill="#94a3b8"/>
+  <!-- Smaller top high-pitched bell -->
+  <path d="M26 20 L38 20 L41 32 L23 32 Z" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.2"/>
+  <ellipse cx="32" cy="32" rx="9" ry="2.5" fill="#64748b"/>
+  <!-- Connecting bridge stem -->
+  <rect x="30.5" y="32" width="3" height="4" fill="#94a3b8"/>
+  <!-- Larger bottom low-pitched bell -->
+  <path d="M22 36 L42 36 L47 54 L17 54 Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+  <ellipse cx="32" cy="54" rx="15" ry="3.5" fill="#475569"/>
+  <!-- Wooden striker stick tilted beside -->
+  <line x1="48" y1="20" x2="38" y2="46" stroke="#ffd85d" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sound impact sparkle -->
+  <circle cx="39" cy="44" r="2.5" fill="#ffd85d"/>
+</svg>

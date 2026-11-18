@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="מריאצ׳י — Mexican Mariachi Trumpet">
+  <title>מריאצ׳י (Mariachi)</title>
+  <desc>מריאצ׳י מחליסקו: חצוצרה ומרקסים כחבילות בגודל קבוע ומאה לעומת עשרה</desc>
+  <rect width="64" height="64" rx="14" fill="#e11d48"/>
+  <!-- Trumpet positioned horizontally / slightly angled -->
+  <!-- Flared Bell -->
+  <path d="M12 24 L22 30 L22 36 L12 42 Z" fill="#eab308" stroke="#ffffff" stroke-width="1.2"/>
+  <ellipse cx="12" cy="33" rx="2.5" ry="9" fill="#fef08a" stroke="#ffffff" stroke-width="1.2"/>
+  <!-- Main lead tubing -->
+  <rect x="22" y="31" width="30" height="3.5" fill="#fde047" stroke="#78350f" stroke-width="0.8"/>
+  <!-- Valve Casings (3 valves) -->
+  <rect x="30" y="24" width="3.5" height="15" rx="1" fill="#ffffff" stroke="#78350f" stroke-width="0.8"/>
+  <rect x="35" y="24" width="3.5" height="15" rx="1" fill="#ffffff" stroke="#78350f" stroke-width="0.8"/>
+  <rect x="40" y="24" width="3.5" height="15" rx="1" fill="#ffffff" stroke="#78350f" stroke-width="0.8"/>
+  <!-- Valve Buttons on top -->
+  <circle cx="31.75" cy="22" r="1.5" fill="#ffd85d"/>
+  <circle cx="36.75" cy="22" r="1.5" fill="#ffd85d"/>
+  <circle cx="41.75" cy="22" r="1.5" fill="#ffd85d"/>
+  <!-- Tuning slide loop below -->
+  <path d="M26 35 L26 42 L34 42 L34 35" fill="none" stroke="#fde047" stroke-width="2"/>
+  <!-- Mouthpiece on right -->
+  <path d="M52 31.5 L56 30 L56 35 L52 33.5 Z" fill="#ffffff"/>
+  <!-- Festive sound bursts -->
+  <path d="M10 20 L6 16" stroke="#ffd85d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M7 33 L2 33" stroke="#ffd85d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M10 46 L6 50" stroke="#ffd85d" stroke-width="2" stroke-linecap="round"/>
+</svg>

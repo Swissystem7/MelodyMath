@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="צעדי דבקה — Dabke Line Dance">
+  <title>צעדי דבקה (Dabke)</title>
+  <desc>ריקוד שורה ים-תיכוני: צעדים מתואמים וקפיצות מקצביות בשורה ישרה המייצגים ישר מספרים ומדידה</desc>
+  <rect width="64" height="64" rx="14" fill="#d97757"/>
+  <!-- Baseline floor -->
+  <line x1="8" y1="48" x2="56" y2="48" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Rhythm step markers on the floor -->
+  <circle cx="16" cy="52" r="2.5" fill="#ffd85d"/>
+  <circle cx="28" cy="52" r="2.5" fill="#ffd85d"/>
+  <circle cx="40" cy="52" r="2.5" fill="#ffd85d"/>
+  <circle cx="50" cy="52" r="3.5" fill="#ffffff"/>
+  <!-- Dancers in line holding shoulders/hands -->
+  <!-- Dancer 1 -->
+  <circle cx="16" cy="22" r="3.5" fill="#ffffff"/>
+  <path d="M14 27 L18 27 L19 40 L17 40 L17 46 L14 46 L14 40 L12 40 Z" fill="#ffffff"/>
+  <!-- Dancer 2 -->
+  <circle cx="28" cy="22" r="3.5" fill="#ffffff"/>
+  <path d="M26 27 L30 27 L31 40 L29 40 L29 46 L26 46 L26 40 L24 40 Z" fill="#ffffff"/>
+  <!-- Dancer 3 -->
+  <circle cx="40" cy="22" r="3.5" fill="#ffffff"/>
+  <path d="M38 27 L42 27 L43 40 L41 40 L41 46 L38 46 L38 40 L36 40 Z" fill="#ffffff"/>
+  <!-- Lead Dancer (Raas) kicking foot up -->
+  <circle cx="50" cy="18" r="3.8" fill="#ffd85d"/>
+  <path d="M48 23 L52 23 L53 36 L56 42 L53 43 L50 38 L49 46 L47 46 L47 36 L46 33 Z" fill="#ffffff"/>
+  <!-- Handkerchief / kerchief in leader's hand -->
+  <path d="M54 22 C57 18, 60 19, 58 24 Z" fill="#ffd85d"/>
+  <!-- Connecting arm line across shoulders -->
+  <line x1="16" y1="28" x2="48" y2="25" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+</svg>

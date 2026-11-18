@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="רול בנג׳ו בבלוגראס — Bluegrass Banjo Roll">
+  <title>רול בנג׳ו (Banjo Roll)</title>
+  <desc>מסורת נגני הבנג׳ו מהרי האפלצ׳ים: רול של צלילים ופינץ׳ של שני מיתרים לחילוק להכלה</desc>
+  <rect width="64" height="64" rx="14" fill="#0891b2"/>
+  <!-- Circular Banjo Head Pot -->
+  <circle cx="27" cy="37" r="17" fill="#ffffff" stroke="#ffd85d" stroke-width="2.5"/>
+  <circle cx="27" cy="37" r="14" fill="#f8fafc"/>
+  <!-- Wooden bridge on head -->
+  <rect x="23" y="36" width="8" height="2" fill="#78350f"/>
+  <!-- Long wooden neck extending to top-right -->
+  <path d="M37 27 L49 15 L53 19 L41 31 Z" fill="#78350f" stroke="#164e63" stroke-width="1.2"/>
+  <!-- Peghead with tuning pegs -->
+  <polygon points="49,15 57,7 61,11 53,19" fill="#164e63"/>
+  <circle cx="53" cy="9" r="1.2" fill="#ffd85d"/>
+  <circle cx="57" cy="13" r="1.2" fill="#ffd85d"/>
+  <circle cx="51" cy="11" r="1.2" fill="#ffd85d"/>
+  <circle cx="55" cy="15" r="1.2" fill="#ffd85d"/>
+  <!-- Characteristic 5th String Tuner peg halfway up neck -->
+  <circle cx="43" cy="21" r="1.5" fill="#ffd85d"/>
+  <!-- Strings -->
+  <line x1="24" y1="37" x2="52" y2="13" stroke="#94a3b8" stroke-width="0.8"/>
+  <line x1="26" y1="37" x2="54" y2="15" stroke="#94a3b8" stroke-width="0.8"/>
+  <line x1="28" y1="37" x2="56" y2="17" stroke="#94a3b8" stroke-width="0.8"/>
+  <!-- Pinch arc (two strings plucked simultaneously) -->
+  <path d="M16 28 C20 25, 26 27, 28 32" fill="none" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="28" cy="32" r="2.2" fill="#fde047"/>
+</svg>

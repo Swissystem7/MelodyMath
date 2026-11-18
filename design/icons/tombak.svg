@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="טומבק פרסי — Persian Tombak Drum">
+  <title>טומבק (Tombak)</title>
+  <desc>תוף גביע פרסי מעץ: מכות תום (נמוך ועשר) ובק (גבוה ואחד) לערך מקום ואחוזים</desc>
+  <rect width="64" height="64" rx="14" fill="#9a3412"/>
+  <!-- Top skin head -->
+  <ellipse cx="32" cy="18" rx="17" ry="5.5" fill="#fed7aa" stroke="#ffd85d" stroke-width="1.8"/>
+  <!-- Center circle indicating low "Tom" bass (worth 10) -->
+  <ellipse cx="32" cy="18" rx="7" ry="2.5" fill="#c2410c"/>
+  <circle cx="32" cy="18" r="2" fill="#ffd85d"/>
+  <!-- Rim snap indicating high "Bak" treble (worth 1) -->
+  <circle cx="43" cy="18" r="1.6" fill="#ffffff"/>
+  <!-- Solid carved wooden bowl narrowing into flared throat -->
+  <path d="M15 18 C16 32, 24 38, 27 44 L27 52 L22 56 L42 56 L37 52 L37 44 C40 38, 48 32, 49 18 Z" fill="#78350f" stroke="#fed7aa" stroke-width="1.5"/>
+  <!-- Characteristic horizontal decorative ring ridges carved on the body -->
+  <path d="M22 28 Q32 32 42 28" fill="none" stroke="#ffd85d" stroke-width="1.8"/>
+  <path d="M25 35 Q32 39 39 35" fill="none" stroke="#ffd85d" stroke-width="1.8"/>
+  <line x1="27" y1="48" x2="37" y2="48" stroke="#ffd85d" stroke-width="1.8"/>
+</svg>

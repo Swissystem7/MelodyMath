@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="סון קובני וקלאווה — Cuban Son &amp; Claves">
+  <title>סון קובני (Cuban Son)</title>
+  <desc>סון קובני ומקלות קלאווה: מקצב 3-2 וסכום ספרות לבדיקת סימני התחלקות</desc>
+  <rect width="64" height="64" rx="14" fill="#ea580c"/>
+  <!-- Clave 1 (Held horizontally in cupped hand as resonator) -->
+  <rect x="12" y="36" width="34" height="8" rx="4" fill="#fef3c7" stroke="#7c2d12" stroke-width="1.8"/>
+  <circle cx="16" cy="40" r="1.5" fill="#d97706"/>
+  <circle cx="42" cy="40" r="1.5" fill="#d97706"/>
+  <!-- Clave 2 (Striking stick held at an angle) -->
+  <g transform="rotate(-35 34 22)">
+    <rect x="18" y="18" width="34" height="7" rx="3.5" fill="#fed7aa" stroke="#7c2d12" stroke-width="1.8"/>
+  </g>
+  <!-- Sound impact spark at point of contact (34, 34) -->
+  <circle cx="34" cy="34" r="3.5" fill="#ffd85d"/>
+  <path d="M34 26 L34 29" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M42 34 L39 34" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M34 42 L34 39" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M26 34 L29 34" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <!-- 3-2 syncopation pulse dots -->
+  <circle cx="16" cy="14" r="2.2" fill="#ffffff"/>
+  <circle cx="23" cy="14" r="2.2" fill="#ffffff"/>
+  <circle cx="30" cy="14" r="2.2" fill="#ffffff"/>
+  <circle cx="42" cy="14" r="2.2" fill="#ffd85d"/>
+  <circle cx="49" cy="14" r="2.2" fill="#ffd85d"/>
+</svg>

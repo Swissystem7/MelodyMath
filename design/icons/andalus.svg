@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="הרכב אנדלוסי — Andalusian Ensemble &amp; Oud">
+  <title>הרכב אנדלוסי (Andalus)</title>
+  <desc>עוּד קלאסי ומסורת אנדלוסית: גווני קול שונים המייצגים קטגוריות וטבלאות נתונים</desc>
+  <rect width="64" height="64" rx="14" fill="#92400e"/>
+  <!-- Decorative background arch inspired by Moorish architecture -->
+  <path d="M14 54 L14 30 C14 18, 50 18, 50 30 L50 54 Z" fill="#78350f" opacity="0.6"/>
+  <!-- Oud Body (pear shape) -->
+  <path d="M22 52 C14 46, 15 32, 24 26 C28 23, 36 23, 40 26 C49 32, 50 46, 42 52 C37 56, 27 56, 22 52 Z" fill="#d97706" stroke="#ffd85d" stroke-width="1.5"/>
+  <!-- Central Soundhole Rosette -->
+  <circle cx="32" cy="38" r="5" fill="#451a03"/>
+  <circle cx="32" cy="38" r="3.2" fill="none" stroke="#ffd85d" stroke-width="1" stroke-dasharray="2 1.5"/>
+  <circle cx="32" cy="38" r="1.2" fill="#ffd85d"/>
+  <!-- Oud Neck -->
+  <rect x="29" y="16" width="6" height="11" fill="#78350f" rx="1"/>
+  <!-- Angled Pegbox -->
+  <path d="M29 16 L25 8 L33 6 L35 16 Z" fill="#451a03"/>
+  <!-- Tuning Pegs -->
+  <circle cx="27" cy="10" r="1.2" fill="#ffd85d"/>
+  <circle cx="28" cy="13" r="1.2" fill="#ffd85d"/>
+  <circle cx="31" cy="9" r="1.2" fill="#ffd85d"/>
+  <circle cx="32" cy="12" r="1.2" fill="#ffd85d"/>
+  <!-- Strings -->
+  <line x1="30" y1="18" x2="30" y2="48" stroke="#ffffff" stroke-width="0.75" opacity="0.8"/>
+  <line x1="31.3" y1="18" x2="31.3" y2="48" stroke="#ffffff" stroke-width="0.75" opacity="0.8"/>
+  <line x1="32.7" y1="18" x2="32.7" y2="48" stroke="#ffffff" stroke-width="0.75" opacity="0.8"/>
+  <line x1="34" y1="18" x2="34" y2="48" stroke="#ffffff" stroke-width="0.75" opacity="0.8"/>
+  <!-- Bridge -->
+  <rect x="27" y="47" width="10" height="2.5" rx="1" fill="#451a03"/>
+</svg>

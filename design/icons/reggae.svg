@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="רגאיי — Jamaican Reggae Skank &amp; Nyabinghi">
+  <title>רגאיי (Reggae)</title>
+  <desc>רגאיי ג'מייקני: סקאנק גיטרה ותוף ניאבינגי המייצגים חלקי אחוזים ורבעים</desc>
+  <rect width="64" height="64" rx="14" fill="#15803d"/>
+  <!-- Reggae flag tricolor bars in background subtle glow -->
+  <path d="M12 14 L52 14" stroke="#b91c1c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 19 L52 19" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 24 L52 24" stroke="#15803d" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Electric guitar body for Skank rhythm -->
+  <path d="M22 36 C18 32, 16 38, 18 45 C20 52, 28 54, 34 50 C40 46, 42 38, 36 34 C33 32, 33 26, 38 22 L34 18 C28 22, 26 30, 22 36 Z" fill="#b91c1c" stroke="#ffffff" stroke-width="1.5"/>
+  <ellipse cx="28" cy="42" rx="4" ry="4" fill="#1f1e1d"/>
+  <!-- Guitar Neck pointing up right -->
+  <line x1="36" y1="20" x2="48" y2="8" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="48" cy="8" r="3" fill="#ffffff"/>
+
+  <!-- Off-beat 16th note rhythm skank bursts (beats 2 & 4) -->
+  <path d="M42 36 L47 31 L45 39 Z" fill="#fde047"/>
+  <path d="M48 44 L53 39 L51 47 Z" fill="#fde047"/>
+</svg>
