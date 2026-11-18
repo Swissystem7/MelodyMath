@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="בא־אקה וסיקו — BaAka Polyphony &amp; Siku Pan Flute">
+  <title>בא־אקה וסיקו (BaAka &amp; Siku)</title>
+  <desc>פוליפוניה קולית של הבא־אקה וחלילי סיקו מהאנדים: נגינה לסירוגין (הוקט) המייצגת זוגי/אי-זוגי וחילוק</desc>
+  <rect width="64" height="64" rx="14" fill="#0f766e"/>
+  <!-- Stepped bamboo pipes of Siku pan flute -->
+  <!-- Pipe 1 (longest) -->
+  <rect x="14" y="16" width="5.5" height="38" rx="2" fill="#fde047" stroke="#134e4a" stroke-width="1.2"/>
+  <ellipse cx="16.75" cy="16" rx="2.75" ry="1.2" fill="#854d0e"/>
+  <!-- Pipe 2 -->
+  <rect x="21" y="21" width="5.5" height="33" rx="2" fill="#fef08a" stroke="#134e4a" stroke-width="1.2"/>
+  <ellipse cx="23.75" cy="21" rx="2.75" ry="1.2" fill="#854d0e"/>
+  <!-- Pipe 3 -->
+  <rect x="28" y="26" width="5.5" height="28" rx="2" fill="#fde047" stroke="#134e4a" stroke-width="1.2"/>
+  <ellipse cx="30.75" cy="26" rx="2.75" ry="1.2" fill="#854d0e"/>
+  <!-- Pipe 4 -->
+  <rect x="35" y="31" width="5.5" height="23" rx="2" fill="#fef08a" stroke="#134e4a" stroke-width="1.2"/>
+  <ellipse cx="37.75" cy="31" rx="2.75" ry="1.2" fill="#854d0e"/>
+  <!-- Pipe 5 (shortest) -->
+  <rect x="42" y="36" width="5.5" height="18" rx="2" fill="#fde047" stroke="#134e4a" stroke-width="1.2"/>
+  <ellipse cx="44.75" cy="36" rx="2.75" ry="1.2" fill="#854d0e"/>
+  <!-- Cane binding strips tying pipes together -->
+  <rect x="12" y="32" width="38" height="3.5" rx="1" fill="#b45309" stroke="#ffffff" stroke-width="0.8"/>
+  <rect x="12" y="44" width="38" height="3.5" rx="1" fill="#b45309" stroke="#ffffff" stroke-width="0.8"/>
+  <!-- Breath / vocal resonance waves on top -->
+  <path d="M16 12 C18 9, 22 13, 24 10 C26 7, 30 11, 32 8" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
