@@ -2934,6 +2934,12 @@
     return item.hint ? ('ולמה: ' + item.hint) : 'ולמה: לפי חוק הפילוג כופלים כל חלק בנפרד ומחברים את המכפלות החלקיות.';
   }
 
+  function explainOrderOfOperationsError(item, givenAnswer) {
+    if (!item) return 'ולמה: יש לבדוק את סדר פעולות החשבון.';
+    const g = Number(String(givenAnswer == null ? '' : givenAnswer).replace(/,/g, '').trim());
+    return 'ולמה: התוצאה' + (!isNaN(g) && g !== 0 ? ' (' + g + ')' : '') + ' התקבלה מביצוע משמאל לימין תוך התעלמות מסוגריים ומקדימות כפל וחילוק. בסדר פעולות יש לחשב תחילה את הביטוי שבתוך הסוגריים, אחר כך כפל וחילוק, ורק אז חיבור וחיסור משמאל לימין.';
+  }
+
   function distributiveItems(grade) {
     return SHIPPED.filter(function (it) {
       if (grade && it.grade !== grade) return false;
@@ -2990,5 +2996,6 @@
     coverageByGrade: coverageByGrade,
     distributiveItems: distributiveItems,
     explainDistributiveError: explainDistributiveError,
+    explainOrderOfOperationsError: explainOrderOfOperationsError,
   };
 });
