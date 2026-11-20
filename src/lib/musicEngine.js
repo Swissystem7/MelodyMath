@@ -1202,6 +1202,186 @@
     return Object.assign({ product: prod }, res || {});
   }
 
+  function orderOfOperationsSpec(exprOrItem) {
+    if (!exprOrItem) return null;
+    const rawStr = typeof exprOrItem === 'string' ? exprOrItem : (exprOrItem.prompt || '');
+    const cleanStr = rawStr.replace(/=\s*\?.*$/, '').replace(/\?.*$/, '').trim();
+    if (!cleanStr) return null;
+
+    const hasBracket = /\(|\)/.test(cleanStr);
+
+    function tokenize(s) {
+      const normalized = s
+        .replace(/\u2212/g, '-')
+        .replace(/\u00d7/g, '*')
+        .replace(/[:÷]/g, '/');
+      const tokens = [];
+      let i = 0;
+      while (i < normalized.length) {
+        const ch = normalized[i];
+        if (/\s/.test(ch)) {
+          i++;
+          continue;
+        }
+        if (ch === '(' || ch === ')' || ch === '+' || ch === '-' || ch === '*' || ch === '/') {
+          tokens.push(ch);
+          i++;
+          continue;
+        }
+        if (/[\d.]/.test(ch)) {
+          let numStr = '';
+          while (i < normalized.length && /[\d.]/.test(normalized[i])) {
+            numStr += normalized[i];
+            i++;
+          }
+          tokens.push(Number(numStr));
+          continue;
+        }
+        i++;
+      }
+      return tokens;
+    }
+
+    function evaluateOp(a, op, b) {
+      if (op === '+') return a + b;
+      if (op === '-') return a - b;
+      if (op === '*') return a * b;
+      return b !== 0 ? a / b : 0;
+    }
+
+    function opGlyph(op) {
+      if (op === '*') return '×';
+      if (op === '/') return ':';
+      if (op === '-') return '−';
+      return op;
+    }
+
+    const steps = [];
+
+    function reduceSimpleList(toks, inBracket) {
+      // First pass: * and / (left to right)
+      let i = 0;
+      while (i < toks.length) {
+        if (toks[i] === '*' || toks[i] === '/') {
+          const a = toks[i - 1];
+          const op = toks[i];
+          const b = toks[i + 1];
+          const res = evaluateOp(a, op, b);
+          steps.push({
+            op: op,
+            a: a,
+            b: b,
+            val: res,
+            emphasized: !!inBracket,
+            inBracket: !!inBracket,
+            expr: a + ' ' + opGlyph(op) + ' ' + b + ' = ' + res,
+          });
+          toks.splice(i - 1, 3, res);
+          i = 0;
+          continue;
+        }
+        i++;
+      }
+      // Second pass: + and - (left to right)
+      i = 0;
+      while (i < toks.length) {
+        if (toks[i] === '+' || toks[i] === '-') {
+          const a = toks[i - 1];
+          const op = toks[i];
+          const b = toks[i + 1];
+          const res = evaluateOp(a, op, b);
+          steps.push({
+            op: op,
+            a: a,
+            b: b,
+            val: res,
+            emphasized: !!inBracket,
+            inBracket: !!inBracket,
+            expr: a + ' ' + opGlyph(op) + ' ' + b + ' = ' + res,
+          });
+          toks.splice(i - 1, 3, res);
+          i = 0;
+          continue;
+        }
+        i++;
+      }
+      return toks[0];
+    }
+
+    const workingTokens = tokenize(cleanStr);
+
+    while (workingTokens.includes('(')) {
+      const openIdx = workingTokens.lastIndexOf('(');
+      const closeIdx = workingTokens.indexOf(')', openIdx);
+      if (closeIdx === -1) break;
+      const subToks = workingTokens.slice(openIdx + 1, closeIdx);
+      const subRes = reduceSimpleList(subToks, true);
+      workingTokens.splice(openIdx, closeIdx - openIdx + 1, subRes);
+    }
+
+    reduceSimpleList(workingTokens, false);
+    const finalAnswer = workingTokens[0];
+
+    const thinking = hasBracket
+      ? 'חושבים: מזהים תחילה את הביטוי שבתוך הסוגריים ומחשבים אותו כחבילה מודגשת ראשונה, ולאחר מכן ממשיכים בכפל וחילוק וחיבור וחיסור.'
+      : 'חושבים: בודקים את סדר הפעולות – כפל וחילוק קודמים לחיבור וחיסור, ופעולות שוות קדימות מחושבות משמאל לימין.';
+
+    const hearAndSee = hasBracket
+      ? 'שומעים ורואים: שומעים קודם את חבילת הסוגריים המודגשת, ורק לאחר מכן את הפעולות החיצוניות לפי סדר הקדימות.'
+      : 'שומעים ורואים: שומעים את צלילי שלבי החישוב לפי סדר הפעולות, משמאל לימין.';
+
+    const why = 'ולמה: בסדר פעולות חשבון מבצעים תחילה את הביטוי שבתוך הסוגריים, לאחר מכן כפל וחילוק, ופעולות שוות קדימות מחושבות משמאל לימין.';
+
+    return {
+      raw: rawStr,
+      clean: cleanStr,
+      hasBracket: hasBracket,
+      answer: finalAnswer,
+      steps: steps,
+      thinking: thinking,
+      hearAndSee: hearAndSee,
+      why: why,
+    };
+  }
+
+  function playOrderOfOperations(spec, opts) {
+    if (!spec || !Array.isArray(spec.steps)) return null;
+    const o = opts || {};
+    const ac = o.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
+    const pv = o.playVoice || (typeof globalThis !== 'undefined' && globalThis.playVoice);
+    const isNode = !ac || !ac.createGain;
+    const steps = spec.steps;
+    const noteCount = steps.length;
+
+    if (!isNode && !audioState.muted) {
+      if (ac.state === 'suspended' && ac.resume) {
+        try { ac.resume(); } catch (e) {}
+      }
+      const t0 = (ac.currentTime || 0) + 0.05;
+      const baseHz = [261.63, 329.63, 392.00, 523.25, 659.25];
+      steps.forEach(function (st, idx) {
+        const at = t0 + idx * 0.45;
+        const hz = baseHz[idx % baseHz.length] * (st.emphasized ? 1.25 : 1.0);
+        const voice = st.emphasized ? 'bell' : 'xylo';
+        const gain = st.emphasized ? 0.32 : 0.22;
+        const dur = st.emphasized ? 0.4 : 0.25;
+        if (typeof pv === 'function') {
+          pv(ac, voice, hz, at, null, { dur: dur, gain: gain });
+        } else {
+          playTap(voice, { hz: hz });
+        }
+      });
+    }
+
+    return {
+      notes: noteCount,
+      silent: isNode,
+      steps: steps,
+      hasBracket: !!spec.hasBracket,
+      answer: spec.answer,
+    };
+  }
+
   const api = {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
@@ -1221,6 +1401,7 @@
     evaluateDrumAnswer, drumAnswerTapPlan, mountDrumAnswerPad, playDrumAnswerSound,
     ORFF_INSTRUMENTS, SHOFAR_CALL_TYPES, playShofarCall, playShofarDistributive,
     playOrffEnsemble, playPartialProductSound,
+    orderOfOperationsSpec, playOrderOfOperations,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.

@@ -1601,6 +1601,35 @@ function renderWidget(hostId, item, inputId){
         playShofarDistributive(dSpec);
       }
     };
+  } else if(item.widget==='orderOfOperations' || (item.standard === 'G6_NAT_OPS' && /[()×:*]/.test(item.prompt || ''))){
+    host.classList.remove('hidden');
+    const spec = (typeof musicEngine !== 'undefined' && musicEngine.orderOfOperationsSpec)
+      ? musicEngine.orderOfOperationsSpec(item)
+      : (typeof orderOfOperationsSpec === 'function' ? orderOfOperationsSpec(item) : null);
+    host._ooSpec = spec;
+    if (spec) {
+      let stepsHtml = '';
+      (spec.steps || []).forEach(function(s, idx) {
+        stepsHtml += '<span class="oo-step' + (s.emphasized ? ' oo-bracket-pkg' : '') + '" style="margin:0 4px;padding:2px 6px;border-radius:4px;background:' + (s.emphasized ? 'color-mix(in srgb, var(--purple) 25%, var(--card))' : 'var(--surface-2)') + ';font-weight:' + (s.emphasized ? 'bold' : 'normal') + ';">שלב ' + (idx + 1) + ': ' + (s.expr || s.val) + '</span>';
+      });
+      host.innerHTML = '<div class="oo-widget" role="region" aria-label="סדר פעולות חשבון ומקצב">'
+        + '<div class="oo-flow" style="display:flex;flex-direction:column;gap:8px;margin:8px 0;">'
+        + '<div class="oo-thinking note" style="font-size:0.9rem;">' + spec.thinking + '</div>'
+        + '<div class="oo-hear-see note" style="font-size:0.9rem;">' + spec.hearAndSee + '</div>'
+        + '<div class="oo-steps-row" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">' + stepsHtml + '</div>'
+        + '<button type="button" class="snd-play oo-play" data-act="oo-play" style="align-self:flex-start;margin-top:4px;">🎵 השמעת שלבי החישוב במקצב</button>'
+        + '</div>'
+        + '</div>';
+      host.onclick = function(ev) {
+        if (ev.target && ev.target.closest && ev.target.closest('.oo-play')) {
+          if (typeof musicEngine !== 'undefined' && typeof musicEngine.playOrderOfOperations === 'function') {
+            musicEngine.playOrderOfOperations(spec);
+          } else if (typeof playOrderOfOperations === 'function') {
+            playOrderOfOperations(spec);
+          }
+        }
+      };
+    }
   } else if(typeof MM_PERCENT_MIX!=='undefined' && MM_PERCENT_MIX.specForItem(item)){ host.classList.remove('hidden'); const ps=MM_PERCENT_MIX.specForItem(item); host.innerHTML=MM_PERCENT_MIX.circlesHtml(ps); host.onclick=function(ev){if(ev.target&&ev.target.closest&&ev.target.closest('.snd-play'))MM_PERCENT_MIX.play(ps);}; MM_PERCENT_MIX.play(ps);
   } else if(item.standard==='G6_MEAN' && item.music==='tapTempo' && !item.noMusic && Array.isArray(item.intervals) && typeof MM_TAP_TEMPO_MEAN!=='undefined'){
     // #750: the tap widget, in the instrument the child picks here (kept on this device by
@@ -1682,7 +1711,7 @@ function setNumberPlay(id,it){const el=$(id);if(!el||typeof MM_NUMBER_PLAY==='un
 function setMusicWay(id,it){const el=$(id);if(!el)return;if(it&&it.noMusic){el.innerHTML='';show(id,false);return}const html=musicWayHtml(it);el.innerHTML=html;show(id,!!html);if(typeof mountFreePad==='function')mountFreePad(el,{mechanism:it&&typeof mechanismOf==='function'?mechanismOf(it.music):null,quiet:typeof prefsNow==='function'&&!!prefsNow().quiet})}
 function musicEvHe(ev){return ev==='D'?'חלק מהתערבות שנבדקה במחקר':ev==='R'?'מקור הוראה מוכר':'התאמה שעדיין לא נבדקה בנפרד'}
 function musicSourceHtml(it){const s=it&&it.musicSrc&&typeof MUSIC_SOURCES!=='undefined'?MUSIC_SOURCES[it.musicSrc]:null;if(!s)return'';const link=s=>{const a=document.createElement('a');a.href=s[1];a.target='_blank';a.rel='noopener';a.textContent=s[0];return a.outerHTML};const also=(it.musicSrcAlso||[]).map(k=>MUSIC_SOURCES[k]).filter(Boolean).map(link);return`<div class="music-src teacher-only hidden" style="display:none!important">מקור הדרך המוזיקלית: ${[link(s)].concat(also).join('; ')} · ${musicEvHe(it.musicEv)}</div>`}
-function answerHint(it,given,correct){const s=remSpec(it);if(correct)return it?it.hint:'';if(typeof explainDistributiveError==='function'&&it&&(it.kind==='distributive'||it.kind==='distributive_shofar'||it.kind==='shofar'||(it.vert&&it.vert.op==='×')))return explainDistributiveError(it,given);if(!s||typeof remainderMiss!=='function')return it?it.hint:'';return remainderMiss(given,s)}
+function answerHint(it,given,correct){const s=remSpec(it);if(correct)return it?it.hint:'';if(typeof explainDistributiveError==='function'&&it&&(it.kind==='distributive'||it.kind==='distributive_shofar'||it.kind==='shofar'||(it.vert&&it.vert.op==='×')))return explainDistributiveError(it,given);if(typeof explainOrderOfOperationsError==='function'&&it&&(it.widget==='orderOfOperations'||(it.standard==='G6_NAT_OPS'&&/[()×:*]/.test(it.prompt||''))))return explainOrderOfOperationsError(it,given);if(!s||typeof remainderMiss!=='function')return it?it.hint:'';return remainderMiss(given,s)}
 function rmRender(){const q=RM_DIAG[rmIdx];rmAnswered=false;const rd=Math.floor(rmIdx/DIAG_BLOCK),ri=rmIdx%DIAG_BLOCK,rn=Math.min(DIAG_BLOCK,RM_DIAG.length-rd*DIAG_BLOCK);$('rmCounter').innerHTML=`סבב ${rd+1} · שאלה <bdi dir="ltr" style="white-space:nowrap">${ri+1}/${rn}</bdi>`;$('rmSkill').textContent=rmHe(q.skill);$('rmBar').style.width=`${ri/rn*100}%`;if($('rmItemTag'))setItemTag($('rmItemTag'),q);setMath($('rmPrompt'),q.prompt);if(typeof setNumberPlay==='function')setNumberPlay('rmNumberPlay',q);setMusicWay('rmWay',q);renderWidget('rmWidget',q,'rmAnswer');$('rmAnswer').value='';$('rmAnswer').disabled=false;if(typeof tapVoiceFor==='function')tapVoiceFor('rmCheck',q);$('rmCheck').disabled=false;show('rmFeedback',false);show('rmNext',false);maybeHear(q);maybeSpeak(ri?q.prompt:`${rd?'עוד סבב קצר.':'משחקים! סבב קצר של שאלות, ושומעים מיד איך הלך.'} ${q.prompt}`);setTimeout(()=>$('rmAnswer').focus(),0)}
 function rmCheck(){if(rmAnswered)return;if(!normalizeAnswer($('rmAnswer').value))return askForAnswer('rmAnswer','rmFeedback');rmAnswered=true;const q=RM_DIAG[rmIdx];const correct=answerOk(q,$('rmAnswer').value);rmAns.push({skill:q.skill,correct});noteMetro(correct,q.skill,q);logTeacherItem({kind:'diag',skill:rmHe(q.skill),prompt:q.prompt,answer:q.answer,given:$('rmAnswer').value,correct});$('rmFeedback').className=`feedback ${correct?'good':'bad'}`;$('rmFeedback').innerHTML=`<strong>${correct?'נכון! 🎵':'לא נורא.'}</strong><div class="hint">${mathHtml(answerHint(q,$('rmAnswer').value,correct))}. התשובה: <b>${mathHtml(q.answer)}</b></div>${musicSourceHtml(q)}`;show('rmFeedback',true);revealWidget('rmWidget');$('rmAnswer').disabled=true;$('rmCheck').disabled=true;show('rmNext',true);$('rmNext').textContent=rmIdx<RM_DIAG.length-1?((rmIdx+1)%DIAG_BLOCK?'הבא':'לסבב הבא'):'לדוח הפערים';if($('rmNext')&&typeof $('rmNext').focus==='function')$('rmNext').focus();}
 function rmAdvance(){if(rmIdx<RM_DIAG.length-1){rmIdx++;rmRender()}else rmReport()}
