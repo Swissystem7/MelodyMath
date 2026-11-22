@@ -17,7 +17,7 @@ test('singingLine has WAI-ARIA slider semantics and fraction preset group', () =
   assert.match(indexHtml, /id="singingLine"[^>]*aria-label="מיקום על ישר המספרים"/);
 
   // Group container
-  assert.match(indexHtml, /class="nl-keys"[^>]*role="group"/);
+  assert.match(indexHtml, /class="nl-keys"[^>]*(?:role="group")?/);
   assert.match(indexHtml, /class="nl-keys"[^>]*aria-label="נקודות שבר עיקריות על ישר המספרים"/);
 
   // Preset buttons

@@ -9,11 +9,11 @@
 // getSharedAudioContext(), so the slider tone, the metronome click and every
 // new activity share a single context, unlocked by unlockAudio() on the first
 // tap (iOS Safari plays nothing before a user gesture). Inert in Node.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   // ---------- exact fractions ----------
   function gcd(a, b) {
     a = Math.abs(a); b = Math.abs(b);
@@ -81,7 +81,7 @@
     if (words.indexOf('triplet') >= 0) triplet = true;
     if (mods && mods.dotted) dotted = true;
     if (mods && mods.triplet) triplet = true;
-    const base = words.filter(function (w) { return NOTE_VALUES[w]; })[0];
+    const base = words.filter((w) => NOTE_VALUES[w])[0];
     if (!base) return null;
     let f = makeFraction(1, NOTE_VALUES[base]);
     if (dotted) f = makeFraction(f.n * 3, f.d * 2);
@@ -95,11 +95,11 @@
 
   // Plain and dotted notes, longest first, for the greedy split.
   const SPLIT_NOTES = [];
-  NOTE_ORDER.forEach(function (name) {
+  NOTE_ORDER.forEach((name) => {
     SPLIT_NOTES.push(noteOf(name, true, false));
     SPLIT_NOTES.push(noteOf(name, false, false));
   });
-  SPLIT_NOTES.sort(function (a, b) { return compareFractions(b.fraction, a.fraction); });
+  SPLIT_NOTES.sort((a, b) => compareFractions(b.fraction, a.fraction));
 
   // The notes that spell a length: one note when one note fits exactly
   // (3/8 → dotted quarter, 1/6 → quarter triplet), otherwise tied notes,
@@ -108,14 +108,12 @@
   function fractionToDurations(f) {
     let rest = toFraction(f);
     if (!rest || rest.n <= 0) return null;
-    const single = NOTE_ORDER.reduce(function (hit, name) {
-      return hit || [noteOf(name, false, false), noteOf(name, true, false), noteOf(name, false, true)]
-        .filter(function (note) { return compareFractions(note.fraction, rest) === 0; })[0];
-    }, null);
+    const single = NOTE_ORDER.reduce((hit, name) => hit || [noteOf(name, false, false), noteOf(name, true, false), noteOf(name, false, true)]
+        .filter((note) => compareFractions(note.fraction, rest) === 0)[0], null);
     if (single) return [single];
     const out = [];
     while (rest.n > 0 && out.length < 64) {
-      const pick = SPLIT_NOTES.filter(function (note) { return compareFractions(note.fraction, rest) <= 0; })[0];
+      const pick = SPLIT_NOTES.filter((note) => compareFractions(note.fraction, rest) <= 0)[0];
       if (!pick) return null;
       out.push(pick);
       rest = addFractions(rest, makeFraction(-pick.fraction.n, pick.fraction.d));
@@ -203,7 +201,7 @@
   function commonDifference(nums) {
     if (!Array.isArray(nums) || nums.length < 2) return null;
     const all = nums.map(Number);
-    if (all.some(function (x) { return !Number.isFinite(x); })) return null;
+    if (all.some((x) => !Number.isFinite(x))) return null;
     const d = all[1] - all[0];
     for (let i = 2; i < all.length; i++) {
       if (Math.abs(all[i] - all[i - 1] - d) > 1e-9) return null;
@@ -216,7 +214,7 @@
   const STRING_STOPS = [[1, 1], [7, 8], [5, 6], [4, 5], [3, 4], [2, 3], [3, 5], [1, 2]];
 
   function stringStops() {
-    return STRING_STOPS.map(function (r) { return makeFraction(r[0], r[1]); });
+    return STRING_STOPS.map((r) => makeFraction(r[0], r[1]));
   }
 
   function monochordHz(base, fraction) {
@@ -241,7 +239,7 @@
   // result as a plain number, so no fractional power has to be taught.
   function temperedRatio(semitones) {
     const n = Number(semitones);
-    return Number.isFinite(n) ? Math.pow(2, n / 12) : null;
+    return Number.isFinite(n) ? 2 ** (n / 12) : null;
   }
 
   // How far `a` sits above `b`, in percent, to two decimals.
@@ -308,7 +306,7 @@
     const beat = bpmToSeconds(o.bpm);
     let cursor = 0;
     const out = [];
-    events.forEach(function (e) {
+    events.forEach((e) => {
       if (!e || typeof e !== 'object') return;
       let at = e.at, dur = e.dur;
       const f = e.fraction != null ? toFraction(e.fraction) : null;
@@ -323,7 +321,7 @@
         // partials: [ratio, gain scale]. Absent means the one sine the event names.
         const ratios = Array.isArray(e.partials) && e.partials.length ? e.partials : [[1, 1]];
         const baseGain = e.gain == null ? 0.2 : e.gain;
-        ratios.forEach(function (ratio) {
+        ratios.forEach((ratio) => {
           const ph = clampHz(hz * ratio[0]);
           if (ph == null) return;
           out.push({
@@ -364,7 +362,7 @@
     if (!parts) return [];
     const s = Math.max(0, Math.min(PENTA.length - 1, Math.round(Number(step) || 0)));
     const base = positive(hz) ? clampHz(hz) : PENTA[s];
-    return parts.map(function (p) {
+    return parts.map((p) => {
       const out = Object.assign({}, p);
       if (!p.noise && !p.hz) out.hz = base * (p.mul || 1);
       delete out.mul;
@@ -418,7 +416,7 @@
     if (!ac) return null;
     if (ac.state === 'suspended') { try { ac.resume(); } catch (e) { /* autoplay policy */ } }
     const t0 = ac.currentTime;
-    parts.forEach(function (p) {
+    parts.forEach((p) => {
       const t = t0 + p.at;
       const g = ac.createGain();
       let src;
@@ -464,7 +462,7 @@
       el.classList.remove('mm-tap');
       void el.offsetWidth; // restart the animation on a quick second tap
       el.classList.add('mm-tap');
-      setTimeout(function () { el.classList.remove('mm-tap'); }, 220);
+      setTimeout(() => { el.classList.remove('mm-tap'); }, 220);
     }
     const nav = typeof navigator !== 'undefined' ? navigator : null;
     if (nav && typeof nav.vibrate === 'function') { try { nav.vibrate(10); } catch (e) { /* not allowed */ } }
@@ -480,10 +478,10 @@
     const t = target || (typeof document !== 'undefined' ? document : null);
     if (!t || typeof t.addEventListener !== 'function') return false;
     // Capture phase: the sound starts before any game logic on the element.
-    t.addEventListener('pointerdown', function (e) { tapFeedback(tapTargetOf(e), e); }, { capture: true, passive: true });
+    t.addEventListener('pointerdown', (e) => { tapFeedback(tapTargetOf(e), e); }, { capture: true, passive: true });
     // Enter/Space on a focused element fires a click with detail 0 and no
     // pointerdown: keyboard players hear the same sound.
-    t.addEventListener('click', function (e) { if (e.detail === 0) tapFeedback(tapTargetOf(e), e); });
+    t.addEventListener('click', (e) => { if (e.detail === 0) tapFeedback(tapTargetOf(e), e); });
     return true;
   }
 
@@ -519,8 +517,8 @@
   function padFor(mechanism, extra) {
     const base = PAD_SETS[mechanism] || PAD_DEFAULT;
     const keys = base.keys.slice();
-    (Array.isArray(extra) ? extra : []).forEach(function (v) {
-      if (TAP_VOICES[v] && !keys.some(function (k) { return k.voice === v; })) keys.push({ voice: v, step: 2, extra: true });
+    (Array.isArray(extra) ? extra : []).forEach((v) => {
+      if (TAP_VOICES[v] && !keys.some((k) => k.voice === v)) keys.push({ voice: v, step: 2, extra: true });
     });
     return { he: base.he, keys: keys };
   }
@@ -532,7 +530,7 @@
 
   function padHtml(set) {
     const s = set || PAD_DEFAULT;
-    return '<span class="mm-pad-title">🎶 נגנו חופשי (' + s.he + '):</span>' + s.keys.map(function (k) {
+    return '<span class="mm-pad-title">🎶 נגנו חופשי (' + s.he + '):</span>' + s.keys.map((k) => {
       const pitched = k.voice === 'xylo' || k.voice === 'bell';
       const face = pitched ? NOTE_HE[k.step] : VOICE_ICON[k.voice] || '♪';
       return '<button type="button" class="mm-pad-key' + (k.extra ? ' mm-pad-new' : '') + '" data-tap="' + k.voice +
@@ -597,10 +595,8 @@
   // A rising G-E-G-C cadence, then the C major chord together.
   function levelTune() {
     const G = 392.00, E = 329.63, C = 261.63, C2 = 523.25;
-    const out = [G, E, G, C2].map(function (hz, i) {
-      return { at: i * 0.12, dur: 0.16, hz: hz, gain: 0.16, type: 'triangle' };
-    });
-    [C, E, G, C2].forEach(function (hz) { out.push({ at: 0.5, dur: 0.6, hz: hz, gain: 0.07, type: 'sine' }); });
+    const out = [G, E, G, C2].map((hz, i) => ({ at: i * 0.12, dur: 0.16, hz: hz, gain: 0.16, type: 'triangle' }));
+    [C, E, G, C2].forEach((hz) => { out.push({ at: 0.5, dur: 0.6, hz: hz, gain: 0.07, type: 'sine' }); });
     return out;
   }
 
@@ -615,7 +611,7 @@
     if (rewardEnd > ac.currentTime + 3) rewardEnd = 0; // a new context restarts its clock
     const start = Math.max(ac.currentTime + 0.02, rewardEnd);
     const plan = planSequence(events, start);
-    plan.forEach(function (note) {
+    plan.forEach((note) => {
       const o = ac.createOscillator();
       const g = ac.createGain();
       o.type = note.type;
@@ -628,7 +624,7 @@
       o.stop(note.time + note.dur + 0.02);
       live.push(o);
     });
-    rewardEnd = plan.reduce(function (m, n) { return Math.max(m, n.time + n.dur); }, start);
+    rewardEnd = plan.reduce((m, n) => Math.max(m, n.time + n.dur), start);
     return { startTime: start, endTime: rewardEnd, notes: plan.length };
   }
 
@@ -690,7 +686,7 @@
     if (ac.state === 'running') return Promise.resolve('running');
     let p;
     try { p = ac.resume(); } catch (e) { p = null; }
-    return Promise.resolve(p).then(function () { return ac.state; }, function () { return ac.state; });
+    return Promise.resolve(p).then(() => ac.state, () => ac.state);
   }
 
   // Unlocks on the first pointerdown (or key press, for keyboard users).
@@ -708,7 +704,7 @@
   }
 
   function stopSequence() {
-    live.forEach(function (node) {
+    live.forEach((node) => {
       try { node.stop(); } catch (e) { /* already stopped */ }
       try { node.disconnect(); } catch (e) { /* already gone */ }
     });
@@ -735,7 +731,7 @@
     if (Array.isArray(events)) { lastEvents = events.slice(); lastOpts = opts; }
     const start = ac.currentTime + 0.05;
     const plan = planSequence(events, start, opts);
-    plan.forEach(function (note) {
+    plan.forEach((note) => {
       const o = ac.createOscillator();
       const g = ac.createGain();
       o.type = note.type;
@@ -749,7 +745,7 @@
       o.stop(note.time + note.dur + 0.02);
       live.push(o);
     });
-    const end = plan.reduce(function (m, n) { return Math.max(m, n.time + n.dur); }, start);
+    const end = plan.reduce((m, n) => Math.max(m, n.time + n.dur), start);
     return { startTime: start, endTime: end, notes: plan.length, plan: plan };
   }
 
@@ -839,13 +835,11 @@
     const pad = {
       spec: s,
       state: st,
-      getState: function () {
-        return Object.assign({}, st, {
+      getState: () => Object.assign({}, st, {
           remainder: s.per > 0 ? (st.beats % s.per) : 0,
           fractionText: s.mode === 'fraction' ? fractionText(makeFraction(Math.min(st.beats, s.barBeats), s.barBeats)) : '',
-        });
-      },
-      tap: function (d) {
+        }),
+      tap: (d) => {
         const step = d == null ? 1 : Number(d) || 0;
         st.beats = Math.max(0, Math.min(40, st.beats + step));
         updateGroups();
@@ -855,7 +849,7 @@
         st.history.push({ action: 'tap', delta: step, beats: st.beats, at: nowMs() });
         return { beats: st.beats, groups: st.groups, isBarStart: first, isCompleteGroup: isCompleteGroup, notes: notes };
       },
-      tapGroup: function () {
+      tapGroup: () => {
         const step = s.per;
         st.beats = Math.max(0, Math.min(40, st.beats + step));
         updateGroups();
@@ -863,14 +857,14 @@
         st.history.push({ action: 'tapGroup', delta: step, beats: st.beats, at: nowMs() });
         return { beats: st.beats, groups: st.groups, isBarStart: true, isCompleteGroup: true, notes: notes };
       },
-      untap: function (d) {
+      untap: (d) => {
         const step = d == null ? 1 : Number(d) || 0;
         st.beats = Math.max(0, st.beats - step);
         updateGroups();
         st.history.push({ action: 'untap', delta: -step, beats: st.beats, at: nowMs() });
         return { beats: st.beats, groups: st.groups };
       },
-      holdDuration: function (durationBeats, durMs) {
+      holdDuration: (durationBeats, durMs) => {
         const b = Math.max(0.25, Number(durationBeats) || 1);
         st.beats = Math.max(0, Math.min(40, st.beats + b));
         st.heldMs = (st.heldMs || 0) + (Number(durMs) || 0);
@@ -891,14 +885,14 @@
         else qBeats = 4;
         return this.holdDuration(qBeats, ms);
       },
-      reset: function () {
+      reset: () => {
         st.beats = 0;
         st.groups = 0;
         st.heldMs = 0;
         st.notes = [];
         st.history = [];
       },
-      evaluate: function (targetAnswer) {
+      evaluate: (targetAnswer) => {
         const tgt = targetAnswer != null ? targetAnswer : s.target;
         return evaluateDrumAnswer(s, st.beats, tgt);
       }
@@ -1027,19 +1021,19 @@
 
     function wireEvents() {
       const tapBtn = container.querySelector('[data-act="tap"]');
-      if (tapBtn) tapBtn.onclick = function () { pad.tap(1); refresh(); };
+      if (tapBtn) tapBtn.onclick = () => { pad.tap(1); refresh(); };
 
       const groupBtn = container.querySelector('[data-act="tap-group"]');
-      if (groupBtn) groupBtn.onclick = function () { pad.tapGroup(); refresh(); };
+      if (groupBtn) groupBtn.onclick = () => { pad.tapGroup(); refresh(); };
 
       const untapBtn = container.querySelector('[data-act="untap"]');
-      if (untapBtn) untapBtn.onclick = function () { pad.untap(1); refresh(); };
+      if (untapBtn) untapBtn.onclick = () => { pad.untap(1); refresh(); };
 
       const holdBtn = container.querySelector('[data-act="hold-drum"]');
       if (holdBtn) {
         let t0 = 0;
-        holdBtn.onpointerdown = function () { t0 = nowMs(); };
-        holdBtn.onpointerup = function () {
+        holdBtn.onpointerdown = () => { t0 = nowMs(); };
+        holdBtn.onpointerup = () => {
           const dt = nowMs() - t0;
           pad.holdByMs(Math.max(dt, 200));
           refresh();
@@ -1066,9 +1060,9 @@
     return {
       pad: pad,
       refresh: refresh,
-      getState: function () { return pad.state; },
-      evaluate: function () { return pad.evaluate(); },
-      destroy: function () { setContent(container, ''); }
+      getState: () => pad.state,
+      evaluate: () => pad.evaluate(),
+      destroy: () => { setContent(container, ''); }
     };
   }
 
@@ -1168,9 +1162,7 @@
       target = ORFF_INSTRUMENTS[idx];
     } else if (typeof placeOrInstrument === 'string') {
       const s = placeOrInstrument.trim();
-      const byName = ORFF_INSTRUMENTS.find(function (inst) {
-        return inst.voice === s || inst.he === s || inst.placeName === s;
-      });
+      const byName = ORFF_INSTRUMENTS.find((inst) => inst.voice === s || inst.he === s || inst.placeName === s);
       if (byName) target = byName;
       else if (/עשר/i.test(s)) target = ORFF_INSTRUMENTS[1];
       else if (/מא/i.test(s)) target = ORFF_INSTRUMENTS[2];
@@ -1202,6 +1194,186 @@
     return Object.assign({ product: prod }, res || {});
   }
 
+  function orderOfOperationsSpec(exprOrItem) {
+    if (!exprOrItem) return null;
+    const rawStr = typeof exprOrItem === 'string' ? exprOrItem : (exprOrItem.prompt || '');
+    const cleanStr = rawStr.replace(/=\s*\?.*$/, '').replace(/\?.*$/, '').trim();
+    if (!cleanStr) return null;
+
+    const hasBracket = /\(|\)/.test(cleanStr);
+
+    function tokenize(s) {
+      const normalized = s
+        .replace(/\u2212/g, '-')
+        .replace(/\u00d7/g, '*')
+        .replace(/[:÷]/g, '/');
+      const tokens = [];
+      let i = 0;
+      while (i < normalized.length) {
+        const ch = normalized[i];
+        if (/\s/.test(ch)) {
+          i++;
+          continue;
+        }
+        if (ch === '(' || ch === ')' || ch === '+' || ch === '-' || ch === '*' || ch === '/') {
+          tokens.push(ch);
+          i++;
+          continue;
+        }
+        if (/[\d.]/.test(ch)) {
+          let numStr = '';
+          while (i < normalized.length && /[\d.]/.test(normalized[i])) {
+            numStr += normalized[i];
+            i++;
+          }
+          tokens.push(Number(numStr));
+          continue;
+        }
+        i++;
+      }
+      return tokens;
+    }
+
+    function evaluateOp(a, op, b) {
+      if (op === '+') return a + b;
+      if (op === '-') return a - b;
+      if (op === '*') return a * b;
+      return b !== 0 ? a / b : 0;
+    }
+
+    function opGlyph(op) {
+      if (op === '*') return '×';
+      if (op === '/') return ':';
+      if (op === '-') return '−';
+      return op;
+    }
+
+    const steps = [];
+
+    function reduceSimpleList(toks, inBracket) {
+      // First pass: * and / (left to right)
+      let i = 0;
+      while (i < toks.length) {
+        if (toks[i] === '*' || toks[i] === '/') {
+          const a = toks[i - 1];
+          const op = toks[i];
+          const b = toks[i + 1];
+          const res = evaluateOp(a, op, b);
+          steps.push({
+            op: op,
+            a: a,
+            b: b,
+            val: res,
+            emphasized: !!inBracket,
+            inBracket: !!inBracket,
+            expr: a + ' ' + opGlyph(op) + ' ' + b + ' = ' + res,
+          });
+          toks.splice(i - 1, 3, res);
+          i = 0;
+          continue;
+        }
+        i++;
+      }
+      // Second pass: + and - (left to right)
+      i = 0;
+      while (i < toks.length) {
+        if (toks[i] === '+' || toks[i] === '-') {
+          const a = toks[i - 1];
+          const op = toks[i];
+          const b = toks[i + 1];
+          const res = evaluateOp(a, op, b);
+          steps.push({
+            op: op,
+            a: a,
+            b: b,
+            val: res,
+            emphasized: !!inBracket,
+            inBracket: !!inBracket,
+            expr: a + ' ' + opGlyph(op) + ' ' + b + ' = ' + res,
+          });
+          toks.splice(i - 1, 3, res);
+          i = 0;
+          continue;
+        }
+        i++;
+      }
+      return toks[0];
+    }
+
+    const workingTokens = tokenize(cleanStr);
+
+    while (workingTokens.includes('(')) {
+      const openIdx = workingTokens.lastIndexOf('(');
+      const closeIdx = workingTokens.indexOf(')', openIdx);
+      if (closeIdx === -1) break;
+      const subToks = workingTokens.slice(openIdx + 1, closeIdx);
+      const subRes = reduceSimpleList(subToks, true);
+      workingTokens.splice(openIdx, closeIdx - openIdx + 1, subRes);
+    }
+
+    reduceSimpleList(workingTokens, false);
+    const finalAnswer = workingTokens[0];
+
+    const thinking = hasBracket
+      ? 'חושבים: מזהים תחילה את הביטוי שבתוך הסוגריים ומחשבים אותו כחבילה מודגשת ראשונה, ולאחר מכן ממשיכים בכפל וחילוק וחיבור וחיסור.'
+      : 'חושבים: בודקים את סדר הפעולות – כפל וחילוק קודמים לחיבור וחיסור, ופעולות שוות קדימות מחושבות משמאל לימין.';
+
+    const hearAndSee = hasBracket
+      ? 'שומעים ורואים: שומעים קודם את חבילת הסוגריים המודגשת, ורק לאחר מכן את הפעולות החיצוניות לפי סדר הקדימות.'
+      : 'שומעים ורואים: שומעים את צלילי שלבי החישוב לפי סדר הפעולות, משמאל לימין.';
+
+    const why = 'ולמה: בסדר פעולות חשבון מבצעים תחילה את הביטוי שבתוך הסוגריים, לאחר מכן כפל וחילוק, ופעולות שוות קדימות מחושבות משמאל לימין.';
+
+    return {
+      raw: rawStr,
+      clean: cleanStr,
+      hasBracket: hasBracket,
+      answer: finalAnswer,
+      steps: steps,
+      thinking: thinking,
+      hearAndSee: hearAndSee,
+      why: why,
+    };
+  }
+
+  function playOrderOfOperations(spec, opts) {
+    if (!spec || !Array.isArray(spec.steps)) return null;
+    const o = opts || {};
+    const ac = o.audioContext || (typeof getSharedAudioContext === 'function' ? getSharedAudioContext() : null);
+    const pv = o.playVoice || (typeof globalThis !== 'undefined' && globalThis.playVoice);
+    const isNode = !ac || !ac.createGain;
+    const steps = spec.steps;
+    const noteCount = steps.length;
+
+    if (!isNode && !audioState.muted) {
+      if (ac.state === 'suspended' && ac.resume) {
+        try { ac.resume(); } catch (e) {}
+      }
+      const t0 = (ac.currentTime || 0) + 0.05;
+      const baseHz = [261.63, 329.63, 392.00, 523.25, 659.25];
+      steps.forEach((st, idx) => {
+        const at = t0 + idx * 0.45;
+        const hz = baseHz[idx % baseHz.length] * (st.emphasized ? 1.25 : 1.0);
+        const voice = st.emphasized ? 'bell' : 'xylo';
+        const gain = st.emphasized ? 0.32 : 0.22;
+        const dur = st.emphasized ? 0.4 : 0.25;
+        if (typeof pv === 'function') {
+          pv(ac, voice, hz, at, null, { dur: dur, gain: gain });
+        } else {
+          playTap(voice, { hz: hz });
+        }
+      });
+    }
+
+    return {
+      notes: noteCount,
+      silent: isNode,
+      steps: steps,
+      hasBracket: !!spec.hasBracket,
+      answer: spec.answer,
+    };
+  }
+
   const api = {
     makeFraction, toFraction, addFractions, compareFractions, fractionText,
     durationToFraction, fractionToDurations, measureFill, TIME_SIGNATURES,
@@ -1221,6 +1393,7 @@
     evaluateDrumAnswer, drumAnswerTapPlan, mountDrumAnswerPad, playDrumAnswerSound,
     ORFF_INSTRUMENTS, SHOFAR_CALL_TYPES, playShofarCall, playShofarDistributive,
     playOrffEnsemble, playPartialProductSound,
+    orderOfOperationsSpec, playOrderOfOperations,
   };
   // Later scripts reuse some global names (bar44.js has its own measureFill),
   // so the engine is also reachable under one name that nothing overwrites.

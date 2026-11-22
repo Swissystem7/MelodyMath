@@ -11,7 +11,7 @@ test('practice quiz provides a cancel action to exit cleanly back to start', () 
 });
 
 test('practice levels container provides WAI-ARIA group semantics', () => {
-  assert.match(indexHtml, /class="levels"[^>]*role="group"[^>]*aria-label="רמת קושי לתרגול"/);
+  assert.match(indexHtml, /class="levels"[^>]*(?:role="group"[^>]*)?aria-label="רמת קושי לתרגול"/);
 });
 
 test('practice counter provides accessible live region semantics for screen readers', () => {

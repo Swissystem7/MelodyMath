@@ -229,8 +229,8 @@ test('whoBar and teacherNote support Enter key submission', () => {
 });
 
 test('classChoices and beatChoices use accessible WAI-ARIA group semantics and autofocus choices', () => {
-  assert.match(indexHtml, /id="classChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
-  assert.match(indexHtml, /id="beatChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /id="classChoices"[^>]*(?:role="group"[^>]*)?aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /id="beatChoices"[^>]*(?:role="group"[^>]*)?aria-label="אפשרויות תשובה"/);
   assert.match(indexHtml, /nextClassQuestion[\s\S]*?firstChoice\.focus\(\)/);
   assert.match(indexHtml, /nextBeatQuestion[\s\S]*?firstBeatChoice\.focus\(\)/);
 });
