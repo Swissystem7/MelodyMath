@@ -27,10 +27,10 @@
 
   const TAGS = Object.freeze(['thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp', 'periodAccentLevels', 'regroupAllLevels', 'repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols']);
   // the modules that already own repeatedBars / takeAwayBeats items keep them
-  const EXTRA_TAGS = ['repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols'];   // only the vertical-multiplication and counting-up rules use these
-  const OWNERS = ['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats'];
+  const EXTRA_TAGS = Object.freeze(['repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols']);   // only the vertical-multiplication and counting-up rules use these
+  const OWNERS = Object.freeze(['multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats']);
   const nodeOwners = [];
-  if (typeof module === 'object' && module.exports && typeof require === 'function') OWNERS.forEach((f) => { try { nodeOwners.push(require('./' + f + '.js')); } catch (e) { /* absent */ } });
+  if (typeof module === 'object' && module.exports && typeof require === 'function') OWNERS.forEach((f) => { try { nodeOwners.push(require('./' + f)); } catch (e) { /* absent */ } });
   const otherPlays = (item) => {
     const mods = nodeOwners.length ? nodeOwners : [root && root.MM_MULTIPLY_WORLDS, root && root.MM_TIMES_TABLE, root && root.MM_TAKEAWAY_TEN, root && root.MM_DRAG_PLACE, root && root.MM_DATA_WORLDS, root && root.MM_EARLY_BEATS];
     return mods.some((mod) => { try { return !!(mod && mod.specForItem && mod.specForItem(item)); } catch (e) { return false; } });
@@ -48,8 +48,8 @@
   const digits = (n) => String(n).split('').reverse().map(Number);
 
   function plan(item) {
-    if (!item || item.noMusic || TAGS.indexOf(item.music) < 0) return null;
-    const p = String(item.prompt || '').trim();
+    if (!item || item.noMusic || typeof item.prompt !== 'string' || TAGS.indexOf(item.music) < 0) return null;
+    const p = item.prompt.trim();
     const raw = String(item.answer).trim();
     let m, s = null;
     const PL = { 'האחדות': 0, 'העשרות': 1, 'המאות': 2, 'האלפים': 3, 'עשרות האלפים': 4, 'מאות האלפים': 5, 'המיליונים': 6 };
@@ -382,5 +382,5 @@
       + '</div>';
   }
 
-  return { TAGS: TAGS, MAX_RUN: MAX_RUN, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html, ORFF: ORFF };
+  return { TAGS: TAGS, EXTRA_TAGS: EXTRA_TAGS, OWNERS: OWNERS, MAX_RUN: MAX_RUN, plan: plan, specForItem: specForItem, soundEvents: soundEvents, longestRun: longestRun, play: play, html: html, ORFF: ORFF };
 });

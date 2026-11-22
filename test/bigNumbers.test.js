@@ -20,6 +20,7 @@ test('a number is played from the ones upward, a marker before every place; a ze
   const e = ev('thousandAccents', '6,000 + 80 + 9 = ? (כתבו בלי פסיק)', 6089);
   const turns = stage(e, 'turn');
   assert.deepEqual(turns.map((n) => n.place), [0, 1, 2, 3]);
+  assert.ok(turns.every((n) => n.voice === 'woodClick' && n.hz === 400 && n.dur === 0.04 && n.gain === 0.08));
   assert.deepEqual([0, 1, 2, 3].map((p) => strokesAt(e, p).length), [9, 8, 0, 6]);
   // the hundreds slot is silent but keeps its time
   assert.ok(turns[3].at - turns[2].at > 0.5);
@@ -45,9 +46,11 @@ test('the next number after 999,999: the first packing in full, then packing aft
   const e = ev('millionAccentLevels', 'מה המספר שבא אחרי 999,999? (כתבו בלי פסיק)', 1000000);
   assert.equal(stage(e, 'pack').length, 6);
   assert.equal(stage(e, 'nine').length, 9);
+  assert.equal(stage(e, 'carried').length, 5);
   assert.equal(stage(e, 'newPlace').length, 1);
   const two = ev('periodAccentLevels', 'מה המספר שבא אחרי 1,999,999? (כתבו בלי פסיק)', 2000000);
   assert.equal(stage(two, 'pack').length, 6);
+  assert.equal(stage(two, 'carried').length, 5);
   assert.equal(stage(two, 'newPlace').length, 2, 'the million that was there and the one carried in');
 });
 
@@ -69,6 +72,8 @@ test('comparing starts at the largest place and stops where the numbers first di
   const e = ev('thousandAccents', 'איזה גבוה יותר: 7040 הרץ או 7400 הרץ? (כתבו בלי פסיק)', 7400);
   assert.equal(stage(e, 'decided')[0].place, 2);
   assert.deepEqual(stage(e, 'turn').map((n) => n.place), [3, 2]);
+  assert.ok(stage(e, 'a').length > 0);
+  assert.ok(stage(e, 'b').length > 0);
   assert.equal(spec('thousandAccents', 'איזה מספר קטן יותר: 7050 או 7500? כתבו את המספר.', 7050).value, 7050);
 });
 
@@ -89,6 +94,7 @@ test('subtraction and missing addends by counting up: to a round number, then th
 test('×10 and ×100 move the same pattern up the instruments; ×1 is one framed group; ×0 is framed silence', () => {
   const e = ev('millionAccentLevels', '3,450 × 100 = ? (כתבו בלי פסיק)', 345000);
   assert.equal(stage(e, 'timesTen').length, 2);
+  assert.deepEqual([1, 2, 3].map((p) => strokesAt(stage(e, 'start'), p).length), [5, 4, 3]);
   assert.deepEqual([3, 4, 5].map((p) => strokesAt(stage(e, 'shifted'), p).length), [5, 4, 3]);
   const z = ev('regroupAllLevels', '0 × 1,234,567 = ?', 0);
   assert.equal(z.length, 2);
@@ -152,6 +158,7 @@ test('differences in tables by counting up; a sum of two shows in columns', () =
 
 test('how many hundreds in a jump: counting up in two jumps, thousands then hundreds', () => {
   const s = spec('romanGroupSymbols', 'כדי להפוך את 210,000 ל־217,800 מוסיפים 7 אלפים ועוד כמה מאות?', 8);
+  assert.equal(s.ask, 'hundreds');
   assert.deepEqual(s.jumps, [[3, 7], [2, 8]]);
 });
 test('the modules that already own an item keep it', () => {
@@ -167,7 +174,7 @@ test('index.html renders the widget and reveals after the answer; sw.js caches i
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/src\/lib\/music\/bigNumbers\.js'/);
 });
 
-test('TAGS, MAX_RUN, and ORFF instrument definitions are exact and complete', () => {
+test('TAGS, EXTRA_TAGS, OWNERS, MAX_RUN, and ORFF instrument definitions are exact and complete', () => {
   assert.equal(B.MAX_RUN, 12);
   assert.deepEqual(B.TAGS, [
     'thousandAccents', 'carryAccentUp', 'millionAccentLevels', 'carryTenUp',
@@ -175,6 +182,14 @@ test('TAGS, MAX_RUN, and ORFF instrument definitions are exact and complete', ()
     'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols'
   ]);
   assert.ok(Object.isFrozen(B.TAGS));
+  assert.deepEqual(B.EXTRA_TAGS, [
+    'repeatedBars', 'takeAwayBeats', 'tableRowGroups', 'rowCellGroups', 'columnsAsNotes', 'callResponse', 'romanGroupSymbols'
+  ]);
+  assert.ok(Object.isFrozen(B.EXTRA_TAGS));
+  assert.deepEqual(B.OWNERS, [
+    'multiplyWorlds', 'timesTable', 'takeAwayTen', 'dragPlace', 'dataWorlds', 'earlyBeats'
+  ]);
+  assert.ok(Object.isFrozen(B.OWNERS));
   assert.deepEqual(B.ORFF, [
     ['tine', 2093, 'גלוקנשפיל'],
     ['woodBar', 880, 'קסילופון סופרן'],
@@ -745,6 +760,9 @@ test('cascade, shift, add, up, and levels soundEvents verify exact properties an
   assert.equal(upArrived[0].hz, 1568);
   assert.equal(upArrived[0].dur, 0.4);
   assert.equal(upArrived[0].gain, 0.16);
+  const upJumps = stage(eUp, 'jump');
+  assert.equal(upJumps.length, 11);
+  assert.ok(upJumps.every((n) => n.stage === 'jump'));
 
   // levels event details
   const sLevels = spec('periodAccentLevels', 'כמה אלפים יש במיליון? (כתבו בלי פסיק)', 1000);
@@ -781,5 +799,110 @@ test('plan returns null when answer does not match, when events exceed MAX_EVENT
   assert.deepEqual(B.soundEvents(undefined), []);
   assert.deepEqual(B.soundEvents({ kind: 'unknown' }), []);
 });
+
+test('columnsAsNotes item runs through extraPlan and returns counting up spec', () => {
+  const s = spec('columnsAsNotes', 'בטבלת נקודות: קבוצה א׳ — 25, קבוצה ב׳ — 18. בכמה נקודות מובילה קבוצה א׳?', 7);
+  assert.ok(s);
+  assert.equal(s.kind, 'up');
+  assert.equal(s.value, 7);
+});
+
+test('spec contains world info with he and why exact descriptions', () => {
+  const s = spec('thousandAccents', 'מה הספרה במקום האחדות במספר 4,321?', 1);
+  assert.ok(s);
+  assert.equal(s.world.he, 'הרכב אורף');
+  assert.equal(s.world.why, 'כלי הנגינה של שיעור המוזיקה, בשיטה שפיתח קרל אורף: לכל מקום במספר כלי משלו, כולם באותה עוצמה, ומנגנים בתורות — מהאחדות כלפי מעלה');
+});
+
+test('browser environment assigns root.MM_BIG_NUMBERS and otherPlays delegates to root modules', () => {
+  const vm = require('node:vm');
+  const code = fs.readFileSync(path.join(__dirname, '../src/lib/music/bigNumbers.js'), 'utf8');
+
+  // Test globalThis root and otherPlays delegation in browser
+  const ctxWithGlobalThis = {
+    globalThis: {},
+    MM_MULTIPLY_WORLDS: { specForItem: (it) => it.prompt === 'from-mw' ? {} : null },
+    MM_TIMES_TABLE: { specForItem: (it) => it.prompt === 'from-tt' ? {} : null },
+    MM_TAKEAWAY_TEN: { specForItem: (it) => it.prompt === 'from-ta' ? {} : null },
+    MM_DRAG_PLACE: { specForItem: (it) => it.prompt === 'from-dp' ? {} : null },
+    MM_DATA_WORLDS: { specForItem: (it) => it.prompt === 'from-dw' ? {} : null },
+    MM_EARLY_BEATS: { specForItem: (it) => it.prompt === 'from-eb' ? {} : null }
+  };
+  ctxWithGlobalThis.globalThis = ctxWithGlobalThis;
+  vm.runInNewContext(code, ctxWithGlobalThis);
+  assert.ok(ctxWithGlobalThis.MM_BIG_NUMBERS);
+  assert.equal(ctxWithGlobalThis.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'from-mw', answer: 1 }), null);
+  assert.equal(ctxWithGlobalThis.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'from-tt', answer: 1 }), null);
+  assert.equal(ctxWithGlobalThis.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'from-ta', answer: 1 }), null);
+  assert.equal(ctxWithGlobalThis.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'from-dp', answer: 1 }), null);
+  assert.equal(ctxWithGlobalThis.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'from-dw', answer: 1 }), null);
+  assert.equal(ctxWithGlobalThis.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'from-eb', answer: 1 }), null);
+
+  // Module that throws in specForItem is handled gracefully
+  const ctxThrow = {
+    globalThis: {},
+    MM_MULTIPLY_WORLDS: { specForItem: () => { throw new Error('fail'); } }
+  };
+  ctxThrow.globalThis = ctxThrow;
+  vm.runInNewContext(code, ctxThrow);
+  assert.ok(ctxThrow.MM_BIG_NUMBERS.specForItem({ music: 'thousandAccents', prompt: 'מה הספרה במקום האחדות במספר 4,321?', answer: 1 }));
+
+  // Test fallback when globalThis is undefined (uses this)
+  const ctxWithoutGlobalThis = { globalThis: undefined };
+  vm.runInNewContext(code, ctxWithoutGlobalThis);
+  assert.ok(ctxWithoutGlobalThis.MM_BIG_NUMBERS);
+});
+
+test('otherPlays defers to takeAwayTen and multiplyWorlds on overlapping items', () => {
+  const taItem = { music: 'takeAwayBeats', prompt: 'היו 10 תפוחים בארון. נמכרו 4 תפוחים לחנות. כמה תפוחים נשארו?', answer: 6 };
+  assert.equal(B.specForItem(taItem), null);
+
+  const mwItem = { music: 'repeatedBars', prompt: 'חשבו במאונך: 23 × 2', answer: 46, standard: 'כפל וחילוק במספר חד' };
+  assert.equal(B.specForItem(mwItem), null);
+});
+
+test('play falls back to globalThis getSharedAudioContext and playVoice', () => {
+  const s = spec('thousandAccents', 'מה הספרה במקום העשרות במספר 3164?', 6);
+  const calls = [];
+  const fakeCtx = { currentTime: 2, state: 'running' };
+  const origGetShared = globalThis.getSharedAudioContext;
+  const origPlayVoice = globalThis.playVoice;
+  try {
+    globalThis.getSharedAudioContext = () => fakeCtx;
+    globalThis.playVoice = (ac, voice, hz, when, extra, opts) => calls.push({ ac, voice, hz, when, opts });
+    const res = B.play(s);
+    assert.ok(res.notes > 0);
+    assert.ok(calls.length > 0);
+    assert.equal(calls[0].ac, fakeCtx);
+    assert.ok(calls[0].opts.dur > 0);
+    assert.ok(calls[0].opts.gain > 0);
+  } finally {
+    if (origGetShared) globalThis.getSharedAudioContext = origGetShared;
+    else delete globalThis.getSharedAudioContext;
+    if (origPlayVoice) globalThis.playVoice = origPlayVoice;
+    else delete globalThis.playVoice;
+  }
+});
+
+test('html unrevealed ends cleanly without extra string and handles null answer', () => {
+  const dummySpec = {
+    kind: 'number',
+    value: 12,
+    answer: '12',
+    world: { he: 'הרכב אורף', why: 'כלי הנגינה' }
+  };
+  const unrev = B.html(dummySpec);
+  assert.ok(unrev.endsWith('<button type="button" class="snd-play">▶ שמעו</button></div>'));
+
+  const nullSpec = {
+    kind: 'number',
+    value: null,
+    answer: null,
+    world: { he: 'הרכב אורף', why: 'כלי הנגינה' }
+  };
+  const revNull = B.html(nullSpec, { revealed: true });
+  assert.ok(revNull.includes('<span class="snd-answer"></span>'));
+});
+
 
 
