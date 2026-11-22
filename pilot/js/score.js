@@ -800,6 +800,265 @@
     };
   }
 
+  // ---------------------------------------------------------------- MM-AUTO-767 aggregated class report & retention
+  function reportDateKey(v) {
+    if (!v) return '';
+    if (v instanceof Date) {
+      if (isNaN(v.getTime())) return '';
+      return v.toISOString().slice(0, 10);
+    }
+    if (typeof v === 'number') {
+      if (!Number.isFinite(v) || v <= 0) return '';
+      try {
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+      } catch (e) { return ''; }
+    }
+    if (typeof v === 'string') {
+      const s = v.trim();
+      if (!s) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      try {
+        const d = new Date(s);
+        return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+      } catch (e) { return ''; }
+    }
+    return '';
+  }
+
+  function getRowDateKey(r) {
+    if (!r) return '';
+    const val = r.reportAt != null ? r.reportAt : (r.at != null ? r.at : ((r.post && r.post.at != null) ? r.post.at : ((r.pre && r.pre.at != null) ? r.pre.at : ((r.later && r.later.at != null) ? r.later.at : (r.completedAt || r.startedAt)))));
+    return reportDateKey(val);
+  }
+
+  function collectReportClasses(rows) {
+    if (!Array.isArray(rows)) return [];
+    const set = [];
+    rows.forEach(function (r) {
+      if (!r) return;
+      const k = r.klass || r.class || r.grade;
+      if (k && set.indexOf(k) === -1) set.push(k);
+    });
+    return set.sort();
+  }
+
+  function filterAggregatedRows(rows, filters) {
+    if (!Array.isArray(rows)) return [];
+    const opts = filters || {};
+    const klass = opts.klass || opts.reportClass || opts.class || '';
+    const from = opts.from || opts.reportFrom || '';
+    const to = opts.to || opts.reportTo || '';
+
+    return rows.filter(function (r) {
+      if (!r) return false;
+      if (klass && klass !== 'all' && klass !== 'הכל') {
+        const rClass = r.klass || r.class || r.grade;
+        if (rClass !== klass) return false;
+      }
+      if (from || to) {
+        const dKey = getRowDateKey(r);
+        if (!dKey) return false;
+        if (from && dKey < from) return false;
+        if (to && dKey > to) return false;
+      }
+      return true;
+    });
+  }
+
+  const REPORT_BUCKET_DEFS = [
+    { key: 'drop', label: 'ירידה', min: -Infinity, max: -0.0001 },
+    { key: 'none', label: '0–24 נק׳', min: 0, max: 24.9999 },
+    { key: 'good', label: '25–49 נק׳', min: 25, max: 49.9999 },
+    { key: 'high', label: '50–74 נק׳', min: 50, max: 74.9999 },
+    { key: 'top', label: '75–100 נק׳', min: 75, max: Infinity }
+  ];
+
+  function getBucketKey(gain) {
+    if (gain < 0) return 'drop';
+    if (gain < 25) return 'none';
+    if (gain < 50) return 'good';
+    if (gain < 75) return 'high';
+    return 'top';
+  }
+
+  function buildAggregatedPilotReport(rows, filters) {
+    const rawRows = Array.isArray(rows) ? rows : [];
+    const classes = collectReportClasses(rawRows);
+    const filtered = filterAggregatedRows(rawRows, filters);
+
+    const musicRows = [];
+    const controlRows = [];
+    filtered.forEach(function (r) {
+      if (isControlRow(r)) controlRows.push(r);
+      else musicRows.push(r);
+    });
+
+    const musicStats = computeGroupStats(musicRows, 'קבוצת ניסוי');
+    const controlStats = computeGroupStats(controlRows, 'קבוצת ביקורת');
+
+    const stages = [
+      {
+        key: 'pre',
+        label: 'לפני היחידה',
+        music: musicStats.preMean != null ? musicStats.preMean : null,
+        control: controlStats.preMean != null ? controlStats.preMean : null,
+        diff: (musicStats.preMean != null && controlStats.preMean != null) ? Math.round((musicStats.preMean - controlStats.preMean) * 10) / 10 : null
+      },
+      {
+        key: 'post',
+        label: 'מיד אחרי',
+        music: musicStats.postMean != null ? musicStats.postMean : null,
+        control: controlStats.postMean != null ? controlStats.postMean : null,
+        diff: (musicStats.postMean != null && controlStats.postMean != null) ? Math.round((musicStats.postMean - controlStats.postMean) * 10) / 10 : null
+      },
+      {
+        key: 'later',
+        label: 'שבוע אחרי (שימור)',
+        music: musicStats.laterMean != null ? musicStats.laterMean : null,
+        control: controlStats.laterMean != null ? controlStats.laterMean : null,
+        diff: (musicStats.laterMean != null && controlStats.laterMean != null) ? Math.round((musicStats.laterMean - controlStats.laterMean) * 10) / 10 : null
+      }
+    ];
+
+    function calcRetention(stats) {
+      const laterN = stats.laterN || 0;
+      let rate = null;
+      let drop = null;
+      if (stats.postMean && stats.postMean > 0 && stats.laterMean !== null) {
+        rate = Math.round((stats.laterMean / stats.postMean) * 100) / 100;
+        drop = Math.round((stats.postMean - stats.laterMean) * 10) / 10;
+      }
+      return {
+        laterN: laterN,
+        rate: rate,
+        drop: drop
+      };
+    }
+
+    const retention = {
+      music: calcRetention(musicStats),
+      control: calcRetention(controlStats)
+    };
+
+    const buckets = REPORT_BUCKET_DEFS.map(function (b) {
+      return { key: b.key, label: b.label, music: 0, control: 0 };
+    });
+    const bucketMap = {};
+    buckets.forEach(function (b) { bucketMap[b.key] = b; });
+
+    let musicPairCount = 0;
+    musicRows.forEach(function (r) {
+      if (r && r.pre && pctScore(r.pre) !== null && r.post && pctScore(r.post) !== null) {
+        musicPairCount++;
+        const g = pctScore(r.post) - pctScore(r.pre);
+        const bKey = getBucketKey(g);
+        if (bucketMap[bKey]) bucketMap[bKey].music++;
+      }
+    });
+
+    let controlPairCount = 0;
+    controlRows.forEach(function (r) {
+      if (r && r.pre && pctScore(r.pre) !== null && r.post && pctScore(r.post) !== null) {
+        controlPairCount++;
+        const g = pctScore(r.post) - pctScore(r.pre);
+        const bKey = getBucketKey(g);
+        if (bucketMap[bKey]) bucketMap[bKey].control++;
+      }
+    });
+
+    const distSpec = {
+      title: 'התפלגות שיפור (הפרש נקודות אחוז)',
+      categories: buckets.map(function (b) { return b.label; }),
+      series: [
+        {
+          key: 'music',
+          name: 'קבוצת ניסוי',
+          color: '#1B1446',
+          values: buckets.map(function (b) { return b.music; })
+        },
+        {
+          key: 'control',
+          name: 'קבוצת ביקורת',
+          color: '#6B6396',
+          values: buckets.map(function (b) { return b.control; })
+        }
+      ],
+      distribution: true
+    };
+
+    const chartSpec = {
+      title: 'השוואת ממוצעי הישגים: קבוצת ניסוי מול קבוצת ביקורת',
+      categories: ['לפני', 'אחרי', 'מעקב שבוע'],
+      series: [
+        {
+          key: 'music',
+          name: 'קבוצת ניסוי',
+          color: '#1B1446',
+          values: [
+            musicStats.preMean != null ? musicStats.preMean : 0,
+            musicStats.postMean != null ? musicStats.postMean : 0,
+            musicStats.laterMean != null ? musicStats.laterMean : 0
+          ]
+        },
+        {
+          key: 'control',
+          name: 'קבוצת ביקורת',
+          color: '#6B6396',
+          values: [
+            controlStats.preMean != null ? controlStats.preMean : 0,
+            controlStats.postMean != null ? controlStats.postMean : 0,
+            controlStats.laterMean != null ? controlStats.laterMean : 0
+          ]
+        }
+      ],
+      max: 100,
+      comparative: true
+    };
+
+    const distribution = {
+      musicTotal: musicPairCount,
+      controlTotal: controlPairCount,
+      buckets: buckets,
+      spec: distSpec
+    };
+
+    return {
+      rowCount: filtered.length,
+      classes: classes,
+      groups: {
+        music: {
+          name: 'קבוצת ניסוי',
+          n: musicStats.n,
+          children: musicStats.children,
+          preMean: musicStats.preMean,
+          postMean: musicStats.postMean,
+          laterMean: musicStats.laterMean,
+          gainMean: musicStats.gainMean
+        },
+        control: {
+          name: 'קבוצת ביקורת',
+          n: controlStats.n,
+          children: controlStats.children,
+          preMean: controlStats.preMean,
+          postMean: controlStats.postMean,
+          laterMean: controlStats.laterMean,
+          gainMean: controlStats.gainMean
+        }
+      },
+      stages: stages,
+      retention: retention,
+      distribution: distribution,
+      distributionSpec: distSpec,
+      chartSpec: chartSpec,
+      filters: {
+        klass: (filters && filters.klass) || 'all',
+        from: (filters && filters.from) || '',
+        to: (filters && filters.to) || ''
+      }
+    };
+  }
+
   return {
     KINDS: Object.keys(KINDS),
     PLACE: PLACE,
@@ -812,6 +1071,10 @@
     calculatePooledStd: calculatePooledStd,
     classifyEffectSize: classifyEffectSize,
     computeNetImprovement: computeNetImprovement,
-    isControlRow: isControlRow
+    isControlRow: isControlRow,
+    buildAggregatedPilotReport: buildAggregatedPilotReport,
+    filterAggregatedRows: filterAggregatedRows,
+    collectReportClasses: collectReportClasses,
+    reportDateKey: reportDateKey
   };
 });

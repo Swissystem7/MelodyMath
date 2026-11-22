@@ -62,6 +62,9 @@
   }
 
   function renderBarChartHtml(spec) {
+    if (spec && (spec.distribution || spec.type === 'distribution')) {
+      return renderDistributionChartHtml(spec);
+    }
     if (spec && (spec.comparative || (Array.isArray(spec.series) && Array.isArray(spec.categories)))) {
       return renderComparativeBarChartHtml(spec);
     }
@@ -137,6 +140,65 @@
       + '</div>';
   }
 
+  function normalizeDistribution(raw) {
+    const src = raw && typeof raw === 'object' ? raw : {};
+    const title = String(src.title || 'התפלגות שיפור');
+    const categories = (Array.isArray(src.categories) ? src.categories : []).map(String);
+    const series = (Array.isArray(src.series) ? src.series : []).map(function (s, idx) {
+      const sObj = s && typeof s === 'object' ? s : {};
+      const rawKey = String(sObj.key || ('series-' + idx));
+      const cleanKey = rawKey.replace(/[^a-zA-Z0-9_-]/g, '') || ('series-' + idx);
+      return {
+        key: cleanKey,
+        name: String(sObj.name || sObj.label || ('סדרה ' + (idx + 1))),
+        color: sObj.color ? String(sObj.color) : null,
+        values: (Array.isArray(sObj.values) ? sObj.values : []).map(function (v) {
+          const num = Number(v);
+          return (Number.isFinite(num) && num > 0) ? Math.round(num) : 0;
+        })
+      };
+    });
+    let allVals = [];
+    series.forEach(function (s) { allVals = allVals.concat(s.values); });
+    const highest = allVals.length ? Math.max.apply(null, allVals) : 0;
+    const requestedMax = Math.round(Number(src.max)) || 0;
+    const max = Math.max(highest, requestedMax, 1);
+    return { title: title, categories: categories, series: series, max: max };
+  }
+
+  function renderDistributionChartHtml(spec) {
+    const D = normalizeDistribution(spec);
+    const legendItems = D.series.map(function (s) {
+      const colorStyle = s.color ? ' style="background-color:' + escapeHtml(s.color) + '"' : '';
+      return '<span class="distribution-legend-item"><span class="distribution-swatch distribution-swatch--' + escapeHtml(s.key) + '"' + colorStyle + ' aria-hidden="true"></span>'
+        + '<span class="distribution-legend-label">' + escapeHtml(s.name) + '</span></span>';
+    }).join('');
+    const legend = '<div class="distribution-legend" aria-label="מקרא סדרות">' + legendItems + '</div>';
+
+    const groups = D.categories.map(function (cat, catIdx) {
+      const barsHtml = D.series.map(function (s) {
+        const val = s.values[catIdx] != null ? s.values[catIdx] : 0;
+        const pct = D.max > 0 ? Math.min(100, Math.round((val / D.max) * 100)) : 0;
+        const colorStyle = s.color ? 'background-color:' + escapeHtml(s.color) + ';' : '';
+        return '<div class="distribution-col distribution-col--' + escapeHtml(s.key) + '" data-series="' + escapeHtml(s.key) + '">'
+          + '<span class="distribution-val">' + val + '</span>'
+          + '<div class="distribution-bar distribution-bar--' + escapeHtml(s.key) + '" style="height:' + pct + '%;' + colorStyle + '" aria-hidden="true"></div>'
+          + '<span class="sr-only">' + escapeHtml(s.name) + ': ' + val + ' תלמידים</span>'
+          + '</div>';
+      }).join('');
+
+      return '<div class="distribution-group" data-bucket="' + escapeHtml(cat) + '">'
+        + '<div class="distribution-group-bars">' + barsHtml + '</div>'
+        + '<span class="distribution-group-label">' + escapeHtml(cat) + '</span>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="distribution-chart" role="img" aria-label="' + escapeHtml(D.title) + '">'
+      + legend
+      + '<div class="distribution-track">' + groups + '</div>'
+      + '</div>';
+  }
+
   // A pie of `parts` equal wedges (כיתה ד׳): each slice colours a run of
   // wedges, and the thin borders let the child count parts of the whole. The
   // legend names the slices only, so a "what part" question is still read
@@ -208,6 +270,8 @@
     renderPieChartHtml: renderPieChartHtml,
     normalizeTable: normalizeTable,
     renderTableHtml: renderTableHtml,
+    normalizeDistribution: normalizeDistribution,
+    renderDistributionChartHtml: renderDistributionChartHtml,
     escapeHtml: escapeHtml,
   };
 });
