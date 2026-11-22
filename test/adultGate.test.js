@@ -152,7 +152,7 @@ test('cancel closes the gate and leaves the report shut', () => {
 
 test('every way into the teacher tab goes through activateHomeTab', () => {
   // Clicks: the home tabs are wired only to activateHomeTab.
-  assert.match(indexHtml, /\.tabs \[role="tab"\]'\)\.forEach\(b=>b\.onclick=\(\)=>activateHomeTab\(b\)\)/);
+  assert.match(indexHtml, /\.tabs \[role="tab"\]'\)\.forEach\(b=>\{b\.onclick=\(\)=>activateHomeTab\(b\)\}\)/);
   // Keyboard: tabs.js moves by calling click(), which lands on the same handler.
   const tabsJs = fs.readFileSync(path.join(root, 'src/lib/tabs.js'), 'utf8');
   assert.match(tabsJs, /tab\.click\(\)/);

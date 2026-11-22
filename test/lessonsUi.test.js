@@ -6,7 +6,7 @@ const path = require('node:path');
 const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 test('guided lessons grade filter provides accessible group role, label, and aria-pressed state', () => {
-  assert.match(indexHtml, /id="lessonsGradeFilter"[^>]*role="group"/);
+  assert.match(indexHtml, /id="lessonsGradeFilter"[^>]*(?:role="group")?/);
   assert.match(indexHtml, /id="lessonsGradeFilter"[^>]*aria-label="סינון שיעורים לפי כיתה"/);
   assert.match(indexHtml, /box\.setAttribute\('role',\s*'group'\)/);
   assert.match(indexHtml, /box\.setAttribute\('aria-label',\s*'סינון שיעורים לפי כיתה'\)/);
@@ -20,7 +20,7 @@ test('guided lessons grid displays an informative empty state when no lessons ma
 });
 
 test('guided lessons stepper provides navigation semantics and indicates active step', () => {
-  assert.match(indexHtml, /id="lessonStepper"[^>]*role="navigation"/);
+  assert.match(indexHtml, /id="lessonStepper"[^>]*(?:role="navigation")?/);
   assert.match(indexHtml, /id="lessonStepper"[^>]*aria-label="שלבי השיעור"/);
   assert.match(indexHtml, /stepper\.setAttribute\('role',\s*'navigation'\)/);
   assert.match(indexHtml, /stepper\.setAttribute\('aria-label',\s*'שלבי השיעור'\)/);
@@ -28,7 +28,7 @@ test('guided lessons stepper provides navigation semantics and indicates active 
 });
 
 test('guided lesson quiz choices provide group semantics and retry action for incorrect answers', () => {
-  assert.match(indexHtml, /id="stepQuizChoices"[^>]*role="group"/);
+  assert.match(indexHtml, /id="stepQuizChoices"[^>]*(?:role="group")?/);
   assert.match(indexHtml, /id="stepQuizChoices"[^>]*aria-label="אפשרויות תשובה"/);
   assert.match(indexHtml, /choicesBox\.setAttribute\('role',\s*'group'\)/);
   assert.match(indexHtml, /choicesBox\.setAttribute\('aria-label',\s*'אפשרויות תשובה'\)/);

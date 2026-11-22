@@ -10,11 +10,11 @@
 // standards that drill it (tools/verify-curriculum-quotes.js checks the
 // text). Rows keep their earlier order so topic ids stay put; `order` is the
 // document's order. Several items follow the document's own examples.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_GRADE6 = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const COVERED = 'covered';
 
   const rows = [
