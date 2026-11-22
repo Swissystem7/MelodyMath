@@ -1,15 +1,13 @@
 // MelodyMath — reading a pictogram, a bar chart, and a simple data table
 // (כיתה א׳–ג׳, יחידת נתונים). Every widget here is read-only: the child
 // reads the picture and types the answer in the normal answer box.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
-    });
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
   function normalizePictogram(raw) {
@@ -21,9 +19,7 @@
     const icon = rawIcon || '●';
     // A row that is not an object (null from a hand-edited spec, a bare
     // number) has no label or count to read; skip it instead of throwing.
-    const rows = (Array.isArray(src.rows) ? src.rows : []).filter(isRow).map(function (r) {
-      return { label: String(r.label == null ? '' : r.label), count: Math.max(0, Math.round(Number(r.count)) || 0) };
-    });
+    const rows = (Array.isArray(src.rows) ? src.rows : []).filter(isRow).map((r) => ({ label: String(r.label == null ? '' : r.label), count: Math.max(0, Math.round(Number(r.count)) || 0) }));
     return { key: key, icon: icon, rows: rows };
   }
 
@@ -34,7 +30,7 @@
   function renderPictogramHtml(spec) {
     const P = normalizePictogram(spec);
     const icon = escapeHtml(P.icon);
-    const rows = P.rows.map(function (r) {
+    const rows = P.rows.map((r) => {
       const symbols = Math.ceil(r.count / P.key);
       const icons = new Array(symbols).fill(icon).join(' ');
       return '<tr><th scope="row">' + escapeHtml(r.label) + '</th>'
@@ -48,15 +44,13 @@
 
   function normalizeBars(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
-    const bars = (Array.isArray(src.bars) ? src.bars : []).filter(isRow).map(function (b) {
-      return { label: String(b.label == null ? '' : b.label), value: Math.max(0, Math.round(Number(b.value)) || 0) };
-    });
+    const bars = (Array.isArray(src.bars) ? src.bars : []).filter(isRow).map((b) => ({ label: String(b.label == null ? '' : b.label), value: Math.max(0, Math.round(Number(b.value)) || 0) }));
     // The tallest bar fills the track; an explicit max only raises the scale.
     // A max below the tallest bar would draw that bar past the top of the track.
-    const tallest = Math.max.apply(null, bars.map(function (b) { return b.value; }).concat([1]));
+    const tallest = Math.max.apply(null, bars.map((b) => b.value).concat([1]));
     const max = Math.max(tallest, Math.round(Number(src.max)) || 1);
     // An axis that starts above zero (a misleading-graph item): never above the shortest bar.
-    const lowest = Math.min.apply(null, bars.map(function (b) { return b.value; }).concat([max]));
+    const lowest = Math.min.apply(null, bars.map((b) => b.value).concat([max]));
     const min = Math.max(0, Math.min(Math.round(Number(src.min)) || 0, lowest, max - 1));
     return { bars: bars, max: max, min: min };
   }
@@ -69,7 +63,7 @@
       return renderComparativeBarChartHtml(spec);
     }
     const B = normalizeBars(spec);
-    const bars = B.bars.map(function (b) {
+    const bars = B.bars.map((b) => {
       const pct = Math.round(((b.value - B.min) / (B.max - B.min)) * 100);
       return '<div class="barchart-col">'
         + '<div class="barchart-bar" style="height:' + pct + '%" aria-hidden="true"></div>'
@@ -77,10 +71,10 @@
         + '<span class="barchart-label">' + escapeHtml(b.label) + '</span>'
         + '</div>';
     }).join('');
-    const axis = B.min ? 'הציר מתחיל ב־' + B.min : '';
-    return '<div class="barchart" role="img" aria-label="דיאגרמת עמודות' + (axis ? ', ' + axis : '') + '">'
+    const axis = B.min ? `הציר מתחיל ב־${B.min}` : '';
+    return '<div class="barchart" role="img" aria-label="דיאגרמת עמודות' + (axis ? `, ${axis}` : '') + '">'
       + '<div class="barchart-track">' + bars + '</div>'
-      + (axis ? '<span class="barchart-axis-min">' + axis + '</span>' : '')
+      + (axis ? `<span class="barchart-axis-min">${axis}</span>` : '')
       + '</div>';
   }
 
@@ -88,20 +82,20 @@
     const src = raw && typeof raw === 'object' ? raw : {};
     const title = String(src.title || 'דיאגרמת עמודות השוואתית');
     const categories = (Array.isArray(src.categories) ? src.categories : []).map(String);
-    const series = (Array.isArray(src.series) ? src.series : []).map(function (s, idx) {
+    const series = (Array.isArray(src.series) ? src.series : []).map((s, idx) => {
       const sObj = s && typeof s === 'object' ? s : {};
       return {
-        key: String(sObj.key || ('series-' + idx)),
-        name: String(sObj.name || sObj.label || ('סדרה ' + (idx + 1))),
+        key: String(sObj.key || (`series-${idx}`)),
+        name: String(sObj.name || sObj.label || (`סדרה ${idx + 1}`)),
         color: sObj.color ? String(sObj.color) : null,
-        values: (Array.isArray(sObj.values) ? sObj.values : []).map(function (v) {
+        values: (Array.isArray(sObj.values) ? sObj.values : []).map((v) => {
           const num = Number(v);
           return Number.isFinite(num) ? Math.max(0, Math.round(num * 10) / 10) : 0;
         })
       };
     });
     let allVals = [];
-    series.forEach(function (s) { allVals = allVals.concat(s.values); });
+    series.forEach((s) => { allVals = allVals.concat(s.values); });
     const highest = allVals.length ? Math.max.apply(null, allVals) : 0;
     const max = Math.max(highest, Math.round(Number(src.max)) || (highest > 100 ? Math.ceil(highest / 10) * 10 : 100));
     return { title: title, categories: categories, series: series, max: max };
@@ -109,18 +103,18 @@
 
   function renderComparativeBarChartHtml(spec) {
     const C = normalizeComparativeBars(spec);
-    const legendItems = C.series.map(function (s) {
-      const colorStyle = s.color ? ' style="background-color:' + escapeHtml(s.color) + '"' : '';
+    const legendItems = C.series.map((s) => {
+      const colorStyle = s.color ? ` style="background-color:${escapeHtml(s.color)}"` : '';
       return '<span class="barchart-legend-item"><span class="barchart-swatch barchart-swatch--' + escapeHtml(s.key) + '"' + colorStyle + ' aria-hidden="true"></span>'
         + '<span class="barchart-legend-label">' + escapeHtml(s.name) + '</span></span>';
     }).join('');
-    const legend = '<div class="barchart-legend" aria-label="מקרא סדרות">' + legendItems + '</div>';
+    const legend = `<div class="barchart-legend" aria-label="מקרא סדרות">${legendItems}</div>`;
 
-    const groups = C.categories.map(function (cat, catIdx) {
-      const barsHtml = C.series.map(function (s) {
+    const groups = C.categories.map((cat, catIdx) => {
+      const barsHtml = C.series.map((s) => {
         const val = s.values[catIdx] != null ? s.values[catIdx] : 0;
         const pct = C.max > 0 ? Math.min(100, Math.round((val / C.max) * 100)) : 0;
-        const colorStyle = s.color ? 'background-color:' + escapeHtml(s.color) + ';' : '';
+        const colorStyle = s.color ? `background-color:${escapeHtml(s.color)};` : '';
         return '<div class="barchart-col barchart-col--' + escapeHtml(s.key) + '" data-series="' + escapeHtml(s.key) + '">'
           + '<span class="barchart-val">' + val + (C.max === 100 ? '%' : '') + '</span>'
           + '<div class="barchart-bar barchart-bar--' + escapeHtml(s.key) + '" style="height:' + pct + '%;' + colorStyle + '" aria-hidden="true"></div>'
@@ -148,33 +142,29 @@
 
   function normalizePie(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
-    const slices = (Array.isArray(src.slices) ? src.slices : []).filter(isRow).map(function (s) {
-      return { label: String(s.label == null ? '' : s.label), parts: Math.max(0, Math.round(Number(s.parts)) || 0) };
-    }).filter(function (s) { return s.parts > 0; });
-    const used = slices.reduce(function (n, s) { return n + s.parts; }, 0);
+    const slices = (Array.isArray(src.slices) ? src.slices : []).filter(isRow).map((s) => ({ label: String(s.label == null ? '' : s.label), parts: Math.max(0, Math.round(Number(s.parts)) || 0) })).filter((s) => s.parts > 0);
+    const used = slices.reduce((n, s) => n + s.parts, 0);
     const parts = Math.min(24, Math.max(used, 1, Math.round(Number(src.parts)) || 1));
     return { parts: parts, slices: slices };
   }
 
   function renderPieChartHtml(spec) {
     const P = normalizePie(spec);
-    const pt = function (k) {
+    const pt = (k) => {
       const a = 2 * Math.PI * k / P.parts - Math.PI / 2;
-      return (50 + 45 * Math.cos(a)).toFixed(2) + ' ' + (50 + 45 * Math.sin(a)).toFixed(2);
+      return `${(50 + 45 * Math.cos(a)).toFixed(2)} ${(50 + 45 * Math.sin(a)).toFixed(2)}`;
     };
     const fill = [];
-    P.slices.forEach(function (s, i) { for (let j = 0; j < s.parts; j++) fill.push(PIE_COLORS[i % PIE_COLORS.length]); });
+    P.slices.forEach((s, i) => { for (let j = 0; j < s.parts; j++) fill.push(PIE_COLORS[i % PIE_COLORS.length]); });
     let wedges = '';
     for (let k = 0; k < P.parts; k++) {
       const color = fill[k] || '#ffffff';
       wedges += P.parts === 1
-        ? '<circle cx="50" cy="50" r="45" fill="' + color + '" stroke="#333"/>'
-        : '<path d="M50 50 L' + pt(k) + ' A45 45 0 0 1 ' + pt(k + 1) + ' Z" fill="' + color + '" stroke="#333" stroke-width="0.8"/>';
+        ? `<circle cx="50" cy="50" r="45" fill="${color}" stroke="#333"/>`
+        : `<path d="M50 50 L${pt(k)} A45 45 0 0 1 ${pt(k + 1)} Z" fill="${color}" stroke="#333" stroke-width="0.8"/>`;
     }
-    const legend = P.slices.map(function (s, i) {
-      return '<li><span aria-hidden="true" style="display:inline-block;width:1em;height:1em;background:'
-        + PIE_COLORS[i % PIE_COLORS.length] + '"></span> ' + escapeHtml(s.label) + '</li>';
-    }).join('');
+    const legend = P.slices.map((s, i) => '<li><span aria-hidden="true" style="display:inline-block;width:1em;height:1em;background:'
+        + PIE_COLORS[i % PIE_COLORS.length] + '"></span> ' + escapeHtml(s.label) + '</li>').join('');
     return '<div class="piechart" role="img" aria-label="דיאגרמת עוגה מחולקת ל־' + P.parts + ' חלקים שווים">'
       + '<svg viewBox="0 0 100 100" width="160" height="160" aria-hidden="true">' + wedges + '</svg>'
       + '<ul class="piechart-legend" style="list-style:none;padding:0">' + legend + '</ul>'
@@ -184,18 +174,14 @@
   function normalizeTable(raw) {
     const src = raw && typeof raw === 'object' ? raw : {};
     const headers = (Array.isArray(src.headers) ? src.headers : []).map(String);
-    const rows = (Array.isArray(src.rows) ? src.rows : []).map(function (r) {
-      return (Array.isArray(r) ? r : []).map(String);
-    });
+    const rows = (Array.isArray(src.rows) ? src.rows : []).map((r) => (Array.isArray(r) ? r : []).map(String));
     return { headers: headers, rows: rows };
   }
 
   function renderTableHtml(spec) {
     const T = normalizeTable(spec);
-    const head = T.headers.map(function (h) { return '<th scope="col">' + escapeHtml(h) + '</th>'; }).join('');
-    const body = T.rows.map(function (r) {
-      return '<tr>' + r.map(function (c) { return '<td>' + escapeHtml(c) + '</td>'; }).join('') + '</tr>';
-    }).join('');
+    const head = T.headers.map((h) => `<th scope="col">${escapeHtml(h)}</th>`).join('');
+    const body = T.rows.map((r) => `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('');
     return '<table class="data-table"><caption class="sr-only">טבלת נתונים</caption>'
       + '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>';
   }
@@ -205,13 +191,13 @@
     const title = String(src.title || 'גרף התפלגות שיפור');
     let bins = [];
     if (Array.isArray(src.bins)) {
-      bins = src.bins.map(function (b, idx) {
+      bins = src.bins.map((b, idx) => {
         const bObj = b && typeof b === 'object' ? b : { label: String(b), count: 0 };
         const mCount = bObj.musicCount != null ? Number(bObj.musicCount) : (bObj.interventionCount != null ? Number(bObj.interventionCount) : Number(bObj.count || 0));
         const cCount = bObj.controlCount != null ? Number(bObj.controlCount) : 0;
         const total = bObj.count != null ? Number(bObj.count) : (mCount + cCount);
         return {
-          label: String(bObj.label || ('קטגוריה ' + (idx + 1))),
+          label: String(bObj.label || (`קטגוריה ${idx + 1}`)),
           count: Math.max(0, Math.round(total) || 0),
           musicCount: Math.max(0, Math.round(mCount) || 0),
           controlCount: Math.max(0, Math.round(cCount) || 0),
@@ -220,13 +206,9 @@
       });
     } else if (Array.isArray(src.categories)) {
       const categories = src.categories.map(String);
-      const mSeries = (Array.isArray(src.series) ? src.series : []).find(function (s) {
-        return s && (s.key === 'music' || s.key === 'intervention');
-      });
-      const cSeries = (Array.isArray(src.series) ? src.series : []).find(function (s) {
-        return s && s.key === 'control';
-      });
-      bins = categories.map(function (cat, idx) {
+      const mSeries = (Array.isArray(src.series) ? src.series : []).find((s) => s && (s.key === 'music' || s.key === 'intervention'));
+      const cSeries = (Array.isArray(src.series) ? src.series : []).find((s) => s && s.key === 'control');
+      bins = categories.map((cat, idx) => {
         const mV = mSeries && Array.isArray(mSeries.values) ? Math.max(0, Math.round(Number(mSeries.values[idx])) || 0) : 0;
         const cV = cSeries && Array.isArray(cSeries.values) ? Math.max(0, Math.round(Number(cSeries.values[idx])) || 0) : 0;
         return {
@@ -239,10 +221,10 @@
       });
     }
 
-    const hasGroups = bins.some(function (b) { return b.controlCount > 0; }) || (Array.isArray(src.series) && src.series.length > 1);
+    const hasGroups = bins.some((b) => b.controlCount > 0) || (Array.isArray(src.series) && src.series.length > 1);
 
     let maxVal = 1;
-    bins.forEach(function (b) {
+    bins.forEach((b) => {
       if (hasGroups) {
         if (b.musicCount > maxVal) maxVal = b.musicCount;
         if (b.controlCount > maxVal) maxVal = b.controlCount;
@@ -257,7 +239,7 @@
       bins: bins,
       max: maxVal,
       hasGroups: hasGroups,
-      totalCount: bins.reduce(function (sum, b) { return sum + b.count; }, 0)
+      totalCount: bins.reduce((sum, b) => sum + b.count, 0)
     };
   }
 
@@ -272,7 +254,7 @@
         + '</div>';
     }
 
-    const binsHtml = D.bins.map(function (b) {
+    const binsHtml = D.bins.map((b) => {
       let barsMarkup = '';
       if (D.hasGroups) {
         const mPct = D.max > 0 ? Math.round((b.musicCount / D.max) * 100) : 0;

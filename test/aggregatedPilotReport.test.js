@@ -325,8 +325,8 @@ test('app.js aggregatedReportCard renders full dashboard card with filter contro
     }
     function dataVizApi() { return MMDataViz; }
     function checkRows() { return ${JSON.stringify(rows)}; }
-    ${appSource.match(/const aggregatedReportFilters = \{[\s\S]*?\n  \};/)[0]}
-    ${appSource.match(/function aggregatedReportCard\([\s\S]*?\n  \}/)[0]}
+    ${appSource.match(/const aggregatedReportFilters = \{[\s\S]*?\n {2}\};/)[0]}
+    ${appSource.match(/function aggregatedReportCard\([\s\S]*?\n {2}\}/)[0]}
     aggregatedReportCard();
   `;
 
