@@ -62,6 +62,9 @@
   }
 
   function renderBarChartHtml(spec) {
+    if (spec && (spec.distribution || spec.type === 'distribution')) {
+      return renderDistributionChartHtml(spec);
+    }
     if (spec && (spec.comparative || (Array.isArray(spec.series) && Array.isArray(spec.categories)))) {
       return renderComparativeBarChartHtml(spec);
     }
@@ -197,6 +200,115 @@
       + '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>';
   }
 
+  function normalizeDistribution(raw) {
+    const src = raw && typeof raw === 'object' ? raw : {};
+    const title = String(src.title || 'גרף התפלגות שיפור');
+    let bins = [];
+    if (Array.isArray(src.bins)) {
+      bins = src.bins.map(function (b, idx) {
+        const bObj = b && typeof b === 'object' ? b : { label: String(b), count: 0 };
+        const mCount = bObj.musicCount != null ? Number(bObj.musicCount) : (bObj.interventionCount != null ? Number(bObj.interventionCount) : Number(bObj.count || 0));
+        const cCount = bObj.controlCount != null ? Number(bObj.controlCount) : 0;
+        const total = bObj.count != null ? Number(bObj.count) : (mCount + cCount);
+        return {
+          label: String(bObj.label || ('קטגוריה ' + (idx + 1))),
+          count: Math.max(0, Math.round(total) || 0),
+          musicCount: Math.max(0, Math.round(mCount) || 0),
+          controlCount: Math.max(0, Math.round(cCount) || 0),
+          pct: Number.isFinite(Number(bObj.pct)) ? Number(bObj.pct) : null
+        };
+      });
+    } else if (Array.isArray(src.categories)) {
+      const categories = src.categories.map(String);
+      const mSeries = (Array.isArray(src.series) ? src.series : []).find(function (s) {
+        return s && (s.key === 'music' || s.key === 'intervention');
+      });
+      const cSeries = (Array.isArray(src.series) ? src.series : []).find(function (s) {
+        return s && s.key === 'control';
+      });
+      bins = categories.map(function (cat, idx) {
+        const mV = mSeries && Array.isArray(mSeries.values) ? Math.max(0, Math.round(Number(mSeries.values[idx])) || 0) : 0;
+        const cV = cSeries && Array.isArray(cSeries.values) ? Math.max(0, Math.round(Number(cSeries.values[idx])) || 0) : 0;
+        return {
+          label: cat,
+          count: mV + cV,
+          musicCount: mV,
+          controlCount: cV,
+          pct: null
+        };
+      });
+    }
+
+    const hasGroups = bins.some(function (b) { return b.controlCount > 0; }) || (Array.isArray(src.series) && src.series.length > 1);
+
+    let maxVal = 1;
+    bins.forEach(function (b) {
+      if (hasGroups) {
+        if (b.musicCount > maxVal) maxVal = b.musicCount;
+        if (b.controlCount > maxVal) maxVal = b.controlCount;
+      } else {
+        if (b.count > maxVal) maxVal = b.count;
+      }
+    });
+    if (Number(src.max) > maxVal) maxVal = Number(src.max);
+
+    return {
+      title: title,
+      bins: bins,
+      max: maxVal,
+      hasGroups: hasGroups,
+      totalCount: bins.reduce(function (sum, b) { return sum + b.count; }, 0)
+    };
+  }
+
+  function renderDistributionChartHtml(spec) {
+    const D = normalizeDistribution(spec);
+
+    let legendHtml = '';
+    if (D.hasGroups) {
+      legendHtml = '<div class="dist-chart-legend" aria-label="מקרא קבוצות">'
+        + '<span class="dist-legend-item"><span class="dist-swatch dist-swatch--music" aria-hidden="true"></span> קבוצת ניסוי (מוזיקה)</span>'
+        + '<span class="dist-legend-item"><span class="dist-swatch dist-swatch--control" aria-hidden="true"></span> קבוצת ביקורת</span>'
+        + '</div>';
+    }
+
+    const binsHtml = D.bins.map(function (b) {
+      let barsMarkup = '';
+      if (D.hasGroups) {
+        const mPct = D.max > 0 ? Math.round((b.musicCount / D.max) * 100) : 0;
+        const cPct = D.max > 0 ? Math.round((b.controlCount / D.max) * 100) : 0;
+        barsMarkup = '<div class="dist-bars-grouped">'
+          + '<div class="dist-bar-col dist-bar-col--music">'
+          + '<span class="dist-bar-val">' + b.musicCount + '</span>'
+          + '<div class="dist-bar dist-bar--music" style="height:' + mPct + '%" aria-hidden="true"></div>'
+          + '<span class="sr-only">ניסוי: ' + b.musicCount + '</span>'
+          + '</div>'
+          + '<div class="dist-bar-col dist-bar-col--control">'
+          + '<span class="dist-bar-val">' + b.controlCount + '</span>'
+          + '<div class="dist-bar dist-bar--control" style="height:' + cPct + '%" aria-hidden="true"></div>'
+          + '<span class="sr-only">ביקורת: ' + b.controlCount + '</span>'
+          + '</div>'
+          + '</div>';
+      } else {
+        const pct = D.max > 0 ? Math.round((b.count / D.max) * 100) : 0;
+        barsMarkup = '<span class="dist-bar-val">' + b.count + '</span>'
+          + '<div class="dist-bar" style="height:' + pct + '%" aria-hidden="true"></div>'
+          + '<span class="sr-only">' + b.count + '</span>';
+      }
+
+      return '<div class="dist-bin" data-bin="' + escapeHtml(b.label) + '" data-testid="dist-bin">'
+        + '<div class="dist-bin-track">' + barsMarkup + '</div>'
+        + '<span class="dist-bin-label">' + escapeHtml(b.label) + '</span>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="distribution-chart" role="img" aria-label="' + escapeHtml(D.title) + '" data-testid="distribution-chart">'
+      + '<h4 class="dist-chart-title">' + escapeHtml(D.title) + '</h4>'
+      + legendHtml
+      + '<div class="dist-chart-track">' + binsHtml + '</div>'
+      + '</div>';
+  }
+
   return {
     normalizePictogram: normalizePictogram,
     renderPictogramHtml: renderPictogramHtml,
@@ -204,6 +316,8 @@
     renderBarChartHtml: renderBarChartHtml,
     normalizeComparativeBars: normalizeComparativeBars,
     renderComparativeBarChartHtml: renderComparativeBarChartHtml,
+    normalizeDistribution: normalizeDistribution,
+    renderDistributionChartHtml: renderDistributionChartHtml,
     normalizePie: normalizePie,
     renderPieChartHtml: renderPieChartHtml,
     normalizeTable: normalizeTable,

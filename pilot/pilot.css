@@ -528,3 +528,203 @@ span.mm-key-dot.mm-note--removed { font-size: 0; }
 .mm-table--comparison th:first-child {
   text-align: start;
 }
+
+/* MM-AUTO-767: Aggregated pilot report, distribution chart & printable view */
+.mm-aggregated-report {
+  border-color: var(--mm-ink);
+  background: var(--mm-white);
+  margin-top: 16px;
+}
+.mm-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--mm-cream-2);
+  border: 2px solid var(--mm-ink);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 12px 0 16px;
+}
+.mm-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mm-ink);
+}
+.mm-filter-field input,
+.mm-filter-field select {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 6px 10px;
+  border: 2px solid var(--mm-ink);
+  border-radius: 8px;
+  background: var(--mm-white);
+}
+.mm-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+/* Improvement distribution chart */
+.distribution-chart {
+  margin: 18px 0;
+  background: var(--mm-cream-2);
+  border: 2px solid var(--mm-ink);
+  border-radius: 12px;
+  padding: 16px;
+}
+.dist-chart-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--mm-ink);
+}
+.dist-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.dist-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dist-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--mm-ink);
+}
+.dist-swatch--music {
+  background: var(--mm-ink);
+}
+.dist-swatch--control {
+  background: var(--mm-violet);
+}
+.dist-chart-track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 190px;
+  padding: 10px 6px 4px;
+  border-bottom: 2px solid var(--mm-ink);
+  gap: 10px;
+}
+.dist-bin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  height: 100%;
+}
+.dist-bin-track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: calc(100% - 24px);
+}
+.dist-bars-grouped {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+.dist-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  flex: 1;
+  max-width: 28px;
+}
+.dist-bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  border: 2px solid var(--mm-ink);
+  border-bottom: none;
+  background: var(--mm-ink);
+  transition: height 0.3s ease;
+}
+.dist-bar--music {
+  background: var(--mm-ink);
+}
+.dist-bar--control {
+  background: var(--mm-violet);
+}
+.dist-bar-val {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mm-ink);
+  margin-bottom: 2px;
+}
+.dist-bin-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mm-ink);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Print styles for clean export/printing of teacher report */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .mm-topbar,
+  .mm-topbar__actions,
+  .mm-icon-btn,
+  .mm-report-filters,
+  .mm-report-actions,
+  .mm-details,
+  button,
+  .mm-btn {
+    display: none !important;
+  }
+  .mm-card,
+  .mm-aggregated-report {
+    border: 1px solid #777 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin: 10px 0 !important;
+  }
+  .distribution-chart {
+    border: 1px solid #777 !important;
+    background: #fff !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .dist-chart-track {
+    border-bottom: 2px solid #000 !important;
+  }
+  .mm-table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  .mm-table th,
+  .mm-table td {
+    border: 1px solid #888 !important;
+    padding: 6px !important;
+  }
+}
