@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="טנגו ובנדונאון — Buenos Aires Tango Bandoneón">
+  <title>טנגו (Tango)</title>
+  <desc>טנגו מבואנוס איירס ובנדונאון: פתיחת שורות ומערכים מלבניים לבדיקת התחלקות ומחלקים</desc>
+  <rect width="64" height="64" rx="14" fill="#881337"/>
+  <!-- Left wooden end-block -->
+  <polygon points="12,20 18,17 18,47 12,44" fill="#4c0519" stroke="#ffd85d" stroke-width="1.2"/>
+  <!-- Left pearl buttons -->
+  <circle cx="15" cy="24" r="1.2" fill="#ffffff"/>
+  <circle cx="15" cy="28" r="1.2" fill="#ffffff"/>
+  <circle cx="15" cy="32" r="1.2" fill="#ffffff"/>
+  <circle cx="15" cy="36" r="1.2" fill="#ffffff"/>
+  <circle cx="15" cy="40" r="1.2" fill="#ffffff"/>
+
+  <!-- Center pleated bellows folds (concertina folds) -->
+  <path d="M18 17 L22 14 L26 18 L30 14 L34 18 L38 14 L42 18 L46 15 L46 45 L42 48 L38 44 L34 48 L30 44 L26 48 L22 44 L18 47 Z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.2"/>
+  <!-- Bellows fold lines -->
+  <line x1="22" y1="14" x2="22" y2="44" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="26" y1="18" x2="26" y2="48" stroke="#cbd5e1" stroke-width="1.2"/>
+  <line x1="30" y1="14" x2="30" y2="44" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="34" y1="18" x2="34" y2="48" stroke="#cbd5e1" stroke-width="1.2"/>
+  <line x1="38" y1="14" x2="38" y2="44" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="42" y1="18" x2="42" y2="48" stroke="#cbd5e1" stroke-width="1.2"/>
+
+  <!-- Right wooden end-block -->
+  <polygon points="46,15 52,18 52,48 46,45" fill="#4c0519" stroke="#ffd85d" stroke-width="1.2"/>
+  <!-- Right pearl buttons -->
+  <circle cx="49" cy="22" r="1.2" fill="#ffffff"/>
+  <circle cx="49" cy="26" r="1.2" fill="#ffffff"/>
+  <circle cx="49" cy="30" r="1.2" fill="#ffffff"/>
+  <circle cx="49" cy="34" r="1.2" fill="#ffffff"/>
+  <circle cx="49" cy="38" r="1.2" fill="#ffffff"/>
+
+  <!-- Corner metal braces -->
+  <polygon points="12,20 15,18.5 15,22 12,23" fill="#ffd85d"/>
+  <polygon points="52,18 49,16.5 49,20 52,21" fill="#ffd85d"/>
+</svg>

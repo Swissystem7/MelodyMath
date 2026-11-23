@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="דרבוקה — Darbuka Goblet Drum">
+  <title>דרבוקה (Darbuka)</title>
+  <desc>תוף גביע מזרחי: מכות דום וטק המייצגות שברים, משקלים ומחזורי איקאע</desc>
+  <rect width="64" height="64" rx="14" fill="#0f766e"/>
+  <!-- Stretched drum head at top (ellipse) -->
+  <ellipse cx="32" cy="17" rx="18" ry="6" fill="#fef3c7" stroke="#ffd85d" stroke-width="1.8"/>
+  <!-- Center circle indicating low "Dum" strike zone -->
+  <ellipse cx="32" cy="17" rx="8" ry="2.8" fill="#d97706" opacity="0.65"/>
+  <circle cx="32" cy="17" r="2.5" fill="#ffd85d"/>
+  <!-- Rim circle indicating sharp "Tek" strike zone -->
+  <circle cx="45" cy="17" r="1.8" fill="#ffffff"/>
+  <!-- Goblet Body curving down into narrow neck, then flaring at base -->
+  <path d="M14 17 C15 28, 23 33, 27 38 L27 50 L20 54 L44 54 L37 50 L37 38 C41 33, 49 28, 50 17 Z" fill="#ffffff" stroke="#134e4a" stroke-width="1.5"/>
+  <!-- Decorative engraved geometric bands -->
+  <path d="M21 26 Q32 30 43 26" fill="none" stroke="#0f766e" stroke-width="2"/>
+  <path d="M23 31 Q32 35 41 31" fill="none" stroke="#d97757" stroke-width="2"/>
+  <rect x="27" y="42" width="10" height="3" fill="#0f766e"/>
+  <!-- Base flare rim -->
+  <ellipse cx="32" cy="54" rx="12" ry="2.5" fill="#134e4a"/>
+</svg>

@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MelodyMath — פלייר פיילוט למורה | רשת בתי הספר ברנקו וייס</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 10mm;
+  }
+  * { box-sizing: border-box; }
+  :root {
+    --purple: #6946e8;
+    --purple-dark: #4e32b5;
+    --purple-light: #f3f0fd;
+    --terracotta: #d97757;
+    --ink: #1f1e1d;
+    --muted: #5a5955;
+    --line: #dedbd2;
+    --card: #ffffff;
+    --bg-tint: #faf9f5;
+    --gold: #d97706;
+  }
+  body {
+    font-family: "Assistant", "Heebo", "Rubik", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+    font-size: 10pt;
+    line-height: 1.45;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print {
+    background: #2a2825;
+    color: #fff;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11pt;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .no-print button {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 10.5pt;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .no-print button:hover { background: var(--purple-dark); }
+
+  .flyer-container {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 8mm 10mm;
+  }
+
+  /* Header */
+  .header-card {
+    border: 2px solid var(--purple);
+    border-radius: 10px;
+    background: var(--purple-light);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .brand-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--purple);
+    flex-shrink: 0;
+  }
+  .title-group h1 {
+    font-size: 19pt;
+    margin: 0;
+    color: var(--purple-dark);
+    line-height: 1.15;
+    font-weight: 800;
+  }
+  .title-group .sub {
+    font-size: 10.5pt;
+    margin: 2px 0 0;
+    color: #3b3a36;
+    font-weight: 600;
+  }
+  .badge-tag {
+    background: var(--purple);
+    color: #fff;
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* Highlights Bar */
+  .highlights-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .highlight-item {
+    border: 1px solid var(--line);
+    background: var(--bg-tint);
+    border-radius: 6px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .highlight-item .label {
+    font-size: 8pt;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .highlight-item .val {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 1px;
+  }
+
+  /* Section Layout */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    background: #fff;
+  }
+  .box-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--purple-dark);
+    margin: 0 0 6px;
+    padding-bottom: 3px;
+    border-bottom: 1.5px solid var(--purple-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  p { margin: 0 0 5px; }
+
+  /* Concept Bullets */
+  .concept-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .concept-list li {
+    position: relative;
+    padding-inline-start: 16px;
+    margin-bottom: 5px;
+    font-size: 9.5pt;
+  }
+  .concept-list li::before {
+    content: "◀";
+    position: absolute;
+    right: 0;
+    color: var(--terracotta);
+    font-size: 7.5pt;
+    top: 2px;
+  }
+
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin: 4px 0 6px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 3.5px 6px;
+    text-align: right;
+    vertical-align: top;
+  }
+  th {
+    background: #f4f2eb;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  tr:nth-child(even) td { background: #faf9f6; }
+
+  /* QR & Start box */
+  .start-box {
+    border: 2px dashed var(--purple);
+    background: #faf8ff;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .qr-frame {
+    width: 68px;
+    height: 68px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  .qr-frame svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .start-steps ol {
+    margin: 0;
+    padding-inline-start: 18px;
+    font-size: 9pt;
+  }
+  .start-steps li { margin-bottom: 2px; }
+  .url-tag {
+    font-family: Consolas, monospace;
+    font-size: 8.5pt;
+    direction: ltr;
+    unicode-bidi: embed;
+    color: var(--purple-dark);
+    font-weight: 600;
+  }
+
+  /* Boundary Notice */
+  .boundary-card {
+    background: #fffbf0;
+    border: 1px solid #ebd494;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 8.5pt;
+    color: #4d3d17;
+    margin-top: 8px;
+  }
+  .boundary-card b {
+    color: var(--gold);
+    display: inline;
+  }
+
+  /* Footer */
+  .flyer-footer {
+    border-top: 1px solid var(--line);
+    margin-top: 8px;
+    padding-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8pt;
+    color: var(--muted);
+  }
+
+  @media print {
+    .no-print { display: none; }
+    body { background: #fff; font-size: 9.5pt; }
+    .flyer-container { padding: 0; max-width: 100%; }
+    .box, table, .header-card, .start-box { break-inside: avoid; }
+    a { text-decoration: none; color: inherit; }
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <span>מדריך ופלייר להדפסה למורי פיילוט ברנקו וייס (A4)</span>
+  <button onclick="window.print()" type="button" aria-label="הדפסת פלייר">
+    🖨️ הדפסת פלייר למורה
+  </button>
+</div>
+
+<main class="flyer-container">
+
+  <!-- Header -->
+  <header class="header-card">
+    <div class="brand-area">
+      <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" aria-label="MelodyMath Logo" role="img" viewBox="0 0 192 192">
+        <rect width="192" height="192" fill="#6946e8" rx="40"/>
+        <circle cx="70" cy="138" r="18" fill="#ffd85d"/>
+        <circle cx="122" cy="128" r="18" fill="#ffd85d"/>
+        <rect width="10" height="90" x="84" y="48" fill="#fff"/>
+        <rect width="10" height="90" x="136" y="38" fill="#fff"/>
+        <path fill="#fff" d="M94 48 C120 36, 136 28, 146 38 L146 58 C132 48, 116 54, 94 64 Z"/>
+      </svg>
+      <div class="title-group">
+        <h1>MelodyMath בכיתה</h1>
+        <div class="sub">דף מידע למורה · פיילוט רשת בתי הספר ברנקו וייס</div>
+      </div>
+    </div>
+    <div class="badge-tag">פיילוט תשפ״ז · 4 שבועות</div>
+  </header>
+
+  <!-- Key Attributes -->
+  <section class="highlights-bar" aria-label="מאפייני הפיילוט">
+    <div class="highlight-item">
+      <div class="label">קהל יעד עיקרי</div>
+      <div class="val">כיתות א׳–ג׳ (שילוב וכיתה)</div>
+    </div>
+    <div class="highlight-item">
+      <div class="label">משך מפגש מומלץ</div>
+      <div class="val">15–20 דק׳ · 1–2 פעמים בשבוע</div>
+    </div>
+    <div class="highlight-item">
+      <div class="label">דרישות טכניות</div>
+      <div class="val">טאבלט/מחשב בדפדפן (עובד אופליין)</div>
+    </div>
+    <div class="highlight-item">
+      <div class="label">אבטחה ופרטיות</div>
+      <div class="val">ללא הרשמה · 100% שמירה מקומית</div>
+    </div>
+  </section>
+
+  <!-- Core Math Concept & 3 Ways to Use -->
+  <div class="grid-2">
+    <section class="box">
+      <h2 class="box-title">🎵 המוזיקה היא החשבון — לא קישוט ולא אווטאר</h2>
+      <p>ב־MelodyMath הקצב והצליל אינם פרס חיצוני, אלא <b>ייצוג ישיר של המבנה המתמטי</b>:</p>
+      <ul class="concept-list">
+        <li><b>תיבה ופעמות:</b> תיבה של 4 פעמות היא קבוצה של 4; 3 תיבות הן 3 × 4.</li>
+        <li><b>שברים כמשך צליל:</b> תיבה שלמה, חצי תיבה ורבע תיבה נשמעים כמשכי זמן אמיתיים.</li>
+        <li><b>השוואה כפלית ויחס:</b> טמפו כפול או אוקטבה מייצגים יחס של פי 2.</li>
+        <li><b>עולמות מוזיקליים:</b> ואלס (3/4), גיג (6/8), הורה, דבקה, גמלאן וטבלה נותנים הקשר חי.</li>
+      </ul>
+    </section>
+
+    <section class="box">
+      <h2 class="box-title">🏫 שלוש דרכים לשילוב בשיעור</h2>
+      <ul class="concept-list">
+        <li><b>מליאה מול מסך משותף:</b> פותחים תרגיל, הכיתה מוחאת את הפעמות, ותלמיד/ה מקיש/ה את התשובה במשטח התוף (הקשה מייצרת ספירה חזותית).</li>
+        <li><b>תחנת תרגול בסבב:</b> 2–4 טאבלטים בפינת הכיתה. קבוצה קטנה מתרגלת 8–10 דקות עצמאית או באוזניות בזמן ששאר הכיתה בעבודה שקטה.</li>
+        <li><b>הוראה מותאמת וקבוצות שילוב:</b> המורה מקצה יחידה מדויקת לפי מוקד הקושי, ועוקבת אחר ההתקדמות בלוח המורה לאורך 4 השבועות.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- Lesson Structure & Teacher Board -->
+  <div class="grid-2">
+    <section class="box">
+      <h2 class="box-title">⏱️ מהלך שיעור מוצע (15–20 דקות)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">זמן</th>
+            <th style="width:28%">שלב</th>
+            <th>מה עושים</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2–3 דק׳</td>
+            <td><b>בדיקה לפני</b></td>
+            <td>2–3 שאלות קצרות <i>ללא מוזיקה וללא רמזים</i>. לא מתקנים בשלב זה — זהו קו בסיס.</td>
+          </tr>
+          <tr>
+            <td>3 דק׳</td>
+            <td><b>שיעור קצר</b></td>
+            <td>הדגמה קצרה על המסך: סופרים ומוחאים את התיבות יחד.</td>
+          </tr>
+          <tr>
+            <td>8–10 דק׳</td>
+            <td><b>תרגילים פעילים</b></td>
+            <td>עבודה ביחידה שהוקצתה: <b>חושבים</b> (שאלה מכוונת) ← <b>שומעים ורואים</b> ← <b>למה</b> (הסבר).</td>
+          </tr>
+          <tr>
+            <td>2–3 דק׳</td>
+            <td><b>בדיקה אחרי</b></td>
+            <td>אותן שאלות ללא מוזיקה. התלמיד/ה והמורה רואים שיפור נקודתי.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:8.5pt; color:var(--muted); margin-top:3px;">
+        * כפתור <b>🔇 מצב שקט</b> מתאים לכיתה שקטה או לתלמידים עם רגישות לצליל — כל המידע המתמטי מופיע במלואו באיור ובטקסט.
+      </p>
+    </section>
+
+    <section class="box">
+      <h2 class="box-title">📊 לוח המורה ומעקב התקדמות</h2>
+      <ul class="concept-list">
+        <li><b>כיסוי תוכנית הלימודים:</b> 31 נושאי כיתות א׳–ג׳ בתוכנית משרד החינוך ב־11 יחידות לימוד מובנות.</li>
+        <li><b>דוח פערים פדגוגי:</b> תוצאות „לפני” מול „אחרי” מסווגות ל־<i>שולט/ת</i> (70%+), <i>פער</i> (עם המלצה להמשך) ו־<i>טרם נבדק</i>.</li>
+        <li><b>אפס איסוף מידע אישי:</b> אין שמות משפחה ואין תעודות זהות. המידע נשמר אך ורק בזיכרון המקומי של המכשיר.</li>
+        <li><b>ייצוא גיבוי ואיפוס:</b> אפשרות לייצוא הדוח ואיפוס מלא של נתוני ההדגמה בסיום הפיילוט בלחיצה אחת.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- Quick Start & QR Code -->
+  <section class="start-box">
+    <div class="qr-frame" aria-label="QR Code to MelodyMath Pilot">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" fill="#21183b" shape-rendering="crispEdges">
+        <rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="14" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="17" y="2" width="1" height="1"/><rect x="19" y="2" width="1" height="1"/><rect x="24" y="2" width="1" height="1"/><rect x="25" y="2" width="1" height="1"/><rect x="26" y="2" width="1" height="1"/><rect x="27" y="2" width="1" height="1"/><rect x="28" y="2" width="1" height="1"/><rect x="29" y="2" width="1" height="1"/><rect x="30" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="12" y="3" width="1" height="1"/><rect x="14" y="3" width="1" height="1"/><rect x="16" y="3" width="1" height="1"/><rect x="18" y="3" width="1" height="1"/><rect x="22" y="3" width="1" height="1"/><rect x="24" y="3" width="1" height="1"/><rect x="30" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="13" y="4" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="17" y="4" width="1" height="1"/><rect x="20" y="4" width="1" height="1"/><rect x="24" y="4" width="1" height="1"/><rect x="26" y="4" width="1" height="1"/><rect x="27" y="4" width="1" height="1"/><rect x="28" y="4" width="1" height="1"/><rect x="30" y="4" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="17" y="5" width="1" height="1"/><rect x="19" y="5" width="1" height="1"/><rect x="21" y="5" width="1" height="1"/><rect x="22" y="5" width="1" height="1"/><rect x="24" y="5" width="1" height="1"/><rect x="26" y="5" width="1" height="1"/><rect x="27" y="5" width="1" height="1"/><rect x="28" y="5" width="1" height="1"/><rect x="30" y="5" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/><rect x="13" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="18" y="6" width="1" height="1"/><rect x="19" y="6" width="1" height="1"/><rect x="20" y="6" width="1" height="1"/><rect x="21" y="6" width="1" height="1"/><rect x="22" y="6" width="1" height="1"/><rect x="24" y="6" width="1" height="1"/><rect x="26" y="6" width="1" height="1"/><rect x="27" y="6" width="1" height="1"/><rect x="28" y="6" width="1" height="1"/><rect x="30" y="6" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="14" y="7" width="1" height="1"/><rect x="20" y="7" width="1" height="1"/><rect x="22" y="7" width="1" height="1"/><rect x="24" y="7" width="1" height="1"/><rect x="30" y="7" width="1" height="1"/><rect x="2" y="8" width="1" height="1"/><rect x="3" y="8" width="1" height="1"/><rect x="4" y="8" width="1" height="1"/><rect x="5" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="8" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="12" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="16" y="8" width="1" height="1"/><rect x="18" y="8" width="1" height="1"/><rect x="20" y="8" width="1" height="1"/><rect x="22" y="8" width="1" height="1"/><rect x="24" y="8" width="1" height="1"/><rect x="25" y="8" width="1" height="1"/><rect x="26" y="8" width="1" height="1"/><rect x="27" y="8" width="1" height="1"/><rect x="28" y="8" width="1" height="1"/><rect x="29" y="8" width="1" height="1"/><rect x="30" y="8" width="1" height="1"/><rect x="10" y="9" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="20" y="9" width="1" height="1"/><rect x="21" y="9" width="1" height="1"/><rect x="22" y="9" width="1" height="1"/><rect x="2" y="10" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="10" y="10" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="15" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="19" y="10" width="1" height="1"/><rect x="23" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="27" y="10" width="1" height="1"/><rect x="28" y="10" width="1" height="1"/><rect x="29" y="10" width="1" height="1"/><rect x="4" y="11" width="1" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="14" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="21" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="25" y="11" width="1" height="1"/><rect x="26" y="11" width="1" height="1"/><rect x="28" y="11" width="1" height="1"/><rect x="29" y="11" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="8" y="12" width="1" height="1"/><rect x="9" y="12" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="11" y="12" width="1" height="1"/><rect x="16" y="12" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="23" y="12" width="1" height="1"/><rect x="25" y="12" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="6" y="13" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="14" y="13" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/><rect x="18" y="13" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="26" y="13" width="1" height="1"/><rect x="27" y="13" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="7" y="14" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="10" y="14" width="1" height="1"/><rect x="13" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="24" y="14" width="1" height="1"/><rect x="30" y="14" width="1" height="1"/><rect x="4" y="15" width="1" height="1"/><rect x="13" y="15" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="21" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="24" y="15" width="1" height="1"/><rect x="25" y="15" width="1" height="1"/><rect x="26" y="15" width="1" height="1"/><rect x="29" y="15" width="1" height="1"/><rect x="30" y="15" width="1" height="1"/><rect x="4" y="16" width="1" height="1"/><rect x="8" y="16" width="1" height="1"/><rect x="10" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="13" y="16" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="19" y="16" width="1" height="1"/><rect x="20" y="16" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="23" y="16" width="1" height="1"/><rect x="24" y="16" width="1" height="1"/><rect x="25" y="16" width="1" height="1"/><rect x="26" y="16" width="1" height="1"/><rect x="27" y="16" width="1" height="1"/><rect x="28" y="16" width="1" height="1"/><rect x="3" y="17" width="1" height="1"/><rect x="4" y="17" width="1" height="1"/><rect x="7" y="17" width="1" height="1"/><rect x="11" y="17" width="1" height="1"/><rect x="12" y="17" width="1" height="1"/><rect x="14" y="17" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/><rect x="20" y="17" width="1" height="1"/><rect x="21" y="17" width="1" height="1"/><rect x="23" y="17" width="1" height="1"/><rect x="24" y="17" width="1" height="1"/><rect x="28" y="17" width="1" height="1"/><rect x="30" y="17" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="5" y="18" width="1" height="1"/><rect x="7" y="18" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/><rect x="11" y="18" width="1" height="1"/><rect x="12" y="18" width="1" height="1"/><rect x="14" y="18" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="19" y="18" width="1" height="1"/><rect x="20" y="18" width="1" height="1"/><rect x="22" y="18" width="1" height="1"/><rect x="27" y="18" width="1" height="1"/><rect x="28" y="18" width="1" height="1"/><rect x="2" y="19" width="1" height="1"/><rect x="3" y="19" width="1" height="1"/><rect x="4" y="19" width="1" height="1"/><rect x="5" y="19" width="1" height="1"/><rect x="6" y="19" width="1" height="1"/><rect x="7" y="19" width="1" height="1"/><rect x="12" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/><rect x="18" y="19" width="1" height="1"/><rect x="19" y="19" width="1" height="1"/><rect x="20" y="19" width="1" height="1"/><rect x="21" y="19" width="1" height="1"/><rect x="23" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="25" y="19" width="1" height="1"/><rect x="26" y="19" width="1" height="1"/><rect x="28" y="19" width="1" height="1"/><rect x="29" y="19" width="1" height="1"/><rect x="30" y="19" width="1" height="1"/><rect x="2" y="20" width="1" height="1"/><rect x="3" y="20" width="1" height="1"/><rect x="4" y="20" width="1" height="1"/><rect x="5" y="20" width="1" height="1"/><rect x="8" y="20" width="1" height="1"/><rect x="11" y="20" width="1" height="1"/><rect x="12" y="20" width="1" height="1"/><rect x="17" y="20" width="1" height="1"/><rect x="21" y="20" width="1" height="1"/><rect x="23" y="20" width="1" height="1"/><rect x="24" y="20" width="1" height="1"/><rect x="27" y="20" width="1" height="1"/><rect x="30" y="20" width="1" height="1"/><rect x="2" y="21" width="1" height="1"/><rect x="4" y="21" width="1" height="1"/><rect x="5" y="21" width="1" height="1"/><rect x="13" y="21" width="1" height="1"/><rect x="16" y="21" width="1" height="1"/><rect x="18" y="21" width="1" height="1"/><rect x="20" y="21" width="1" height="1"/><rect x="22" y="21" width="1" height="1"/><rect x="23" y="21" width="1" height="1"/><rect x="24" y="21" width="1" height="1"/><rect x="25" y="21" width="1" height="1"/><rect x="26" y="21" width="1" height="1"/><rect x="2" y="22" width="1" height="1"/><rect x="5" y="22" width="1" height="1"/><rect x="6" y="22" width="1" height="1"/><rect x="7" y="22" width="1" height="1"/><rect x="8" y="22" width="1" height="1"/><rect x="9" y="22" width="1" height="1"/><rect x="10" y="22" width="1" height="1"/><rect x="11" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="13" y="22" width="1" height="1"/><rect x="14" y="22" width="1" height="1"/><rect x="17" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="21" y="22" width="1" height="1"/><rect x="22" y="22" width="1" height="1"/><rect x="23" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="25" y="22" width="1" height="1"/><rect x="26" y="22" width="1" height="1"/><rect x="28" y="22" width="1" height="1"/><rect x="29" y="22" width="1" height="1"/><rect x="30" y="22" width="1" height="1"/><rect x="10" y="23" width="1" height="1"/><rect x="11" y="23" width="1" height="1"/><rect x="12" y="23" width="1" height="1"/><rect x="15" y="23" width="1" height="1"/><rect x="16" y="23" width="1" height="1"/><rect x="17" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="22" y="23" width="1" height="1"/><rect x="26" y="23" width="1" height="1"/><rect x="27" y="23" width="1" height="1"/><rect x="2" y="24" width="1" height="1"/><rect x="3" y="24" width="1" height="1"/><rect x="4" y="24" width="1" height="1"/><rect x="5" y="24" width="1" height="1"/><rect x="6" y="24" width="1" height="1"/><rect x="7" y="24" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="11" y="24" width="1" height="1"/><rect x="12" y="24" width="1" height="1"/><rect x="14" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="24" width="1" height="1"/><rect x="17" y="24" width="1" height="1"/><rect x="18" y="24" width="1" height="1"/><rect x="20" y="24" width="1" height="1"/><rect x="21" y="24" width="1" height="1"/><rect x="22" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/><rect x="26" y="24" width="1" height="1"/><rect x="27" y="24" width="1" height="1"/><rect x="28" y="24" width="1" height="1"/><rect x="2" y="25" width="1" height="1"/><rect x="8" y="25" width="1" height="1"/><rect x="11" y="25" width="1" height="1"/><rect x="13" y="25" width="1" height="1"/><rect x="15" y="25" width="1" height="1"/><rect x="18" y="25" width="1" height="1"/><rect x="21" y="25" width="1" height="1"/><rect x="22" y="25" width="1" height="1"/><rect x="26" y="25" width="1" height="1"/><rect x="29" y="25" width="1" height="1"/><rect x="2" y="26" width="1" height="1"/><rect x="4" y="26" width="1" height="1"/><rect x="5" y="26" width="1" height="1"/><rect x="6" y="26" width="1" height="1"/><rect x="8" y="26" width="1" height="1"/><rect x="12" y="26" width="1" height="1"/><rect x="13" y="26" width="1" height="1"/><rect x="15" y="26" width="1" height="1"/><rect x="18" y="26" width="1" height="1"/><rect x="21" y="26" width="1" height="1"/><rect x="22" y="26" width="1" height="1"/><rect x="23" y="26" width="1" height="1"/><rect x="24" y="26" width="1" height="1"/><rect x="25" y="26" width="1" height="1"/><rect x="26" y="26" width="1" height="1"/><rect x="27" y="26" width="1" height="1"/><rect x="29" y="26" width="1" height="1"/><rect x="2" y="27" width="1" height="1"/><rect x="4" y="27" width="1" height="1"/><rect x="5" y="27" width="1" height="1"/><rect x="6" y="27" width="1" height="1"/><rect x="8" y="27" width="1" height="1"/><rect x="11" y="27" width="1" height="1"/><rect x="18" y="27" width="1" height="1"/><rect x="19" y="27" width="1" height="1"/><rect x="20" y="27" width="1" height="1"/><rect x="21" y="27" width="1" height="1"/><rect x="23" y="27" width="1" height="1"/><rect x="25" y="27" width="1" height="1"/><rect x="27" y="27" width="1" height="1"/><rect x="28" y="27" width="1" height="1"/><rect x="30" y="27" width="1" height="1"/><rect x="2" y="28" width="1" height="1"/><rect x="4" y="28" width="1" height="1"/><rect x="5" y="28" width="1" height="1"/><rect x="6" y="28" width="1" height="1"/><rect x="8" y="28" width="1" height="1"/><rect x="11" y="28" width="1" height="1"/><rect x="12" y="28" width="1" height="1"/><rect x="14" y="28" width="1" height="1"/><rect x="17" y="28" width="1" height="1"/><rect x="18" y="28" width="1" height="1"/><rect x="19" y="28" width="1" height="1"/><rect x="21" y="28" width="1" height="1"/><rect x="24" y="28" width="1" height="1"/><rect x="25" y="28" width="1" height="1"/><rect x="26" y="28" width="1" height="1"/><rect x="27" y="28" width="1" height="1"/><rect x="28" y="28" width="1" height="1"/><rect x="29" y="28" width="1" height="1"/><rect x="2" y="29" width="1" height="1"/><rect x="8" y="29" width="1" height="1"/><rect x="11" y="29" width="1" height="1"/><rect x="13" y="29" width="1" height="1"/><rect x="14" y="29" width="1" height="1"/><rect x="15" y="29" width="1" height="1"/><rect x="16" y="29" width="1" height="1"/><rect x="17" y="29" width="1" height="1"/><rect x="23" y="29" width="1" height="1"/><rect x="24" y="29" width="1" height="1"/><rect x="25" y="29" width="1" height="1"/><rect x="27" y="29" width="1" height="1"/><rect x="28" y="29" width="1" height="1"/><rect x="30" y="29" width="1" height="1"/><rect x="2" y="30" width="1" height="1"/><rect x="3" y="30" width="1" height="1"/><rect x="4" y="30" width="1" height="1"/><rect x="5" y="30" width="1" height="1"/><rect x="6" y="30" width="1" height="1"/><rect x="7" y="30" width="1" height="1"/><rect x="8" y="30" width="1" height="1"/><rect x="10" y="30" width="1" height="1"/><rect x="12" y="30" width="1" height="1"/><rect x="13" y="30" width="1" height="1"/><rect x="19" y="30" width="1" height="1"/><rect x="20" y="30" width="1" height="1"/><rect x="21" y="30" width="1" height="1"/><rect x="23" y="30" width="1" height="1"/><rect x="26" y="30" width="1" height="1"/><rect x="27" y="30" width="1" height="1"/><rect x="28" y="30" width="1" height="1"/>
+      </svg>
+    </div>
+    <div class="start-steps">
+      <h2 style="font-size:10.5pt; margin:0 0 4px; color:var(--purple-dark); font-weight:700;">🚀 התחלת עבודה ב־3 צעדים</h2>
+      <ol>
+        <li>סרקו את הקוד או היכנסו בדפדפן: <span class="url-tag">https://swissystem7.github.io/MelodyMath/pilot/index.html</span></li>
+        <li>היכנסו עם חשבון הדגמת המורה שנמסר לבית הספר (פעם ראשונה בלבד; לאחר מכן עובד גם ללא רשת).</li>
+        <li>לחצו פעם אחת על המסך להפעלת שמע, בחרו תלמיד/ה ויחידה רצויה, ולחצו על <b>הקצאה</b>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Ethical & Honesty Notice -->
+  <div class="boundary-card">
+    <b>חשוב לדעת ושקיפות פדגוגית:</b> MelodyMath משמש כעזר הוראה חווייתי ומשלים וטרם נבדק במחקר שדה קליני מבוקר. מבדקי 3 השאלות (לפני/אחרי) נועדו לספק למורה אינדיקציה פדגוגית מהירה להתקדמות ופערים, ואינם מהווים אבחון דידקטי או ציון רשמי.
+  </div>
+
+  <!-- Footer -->
+  <footer class="flyer-footer">
+    <div>פיילוט MelodyMath · רשת בתי הספר ברנקו וייס · תשפ״ז (2026–2027)</div>
+    <div>פיתוח חינוכי פתוח · Swissystem7 · ללא מטרת רווח בפיילוט</div>
+  </footer>
+
+</main>
+
+</body>
+</html>

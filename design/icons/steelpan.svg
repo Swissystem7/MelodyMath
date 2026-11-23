@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="סטילפאן — Trinidad Steelpan Drum">
+  <title>סטילפאן (Steelpan)</title>
+  <desc>תוף פלדה מטרינידד: פאות ומחלקים הבאים בזוגות ומצלצלים בהרמוניה</desc>
+  <rect width="64" height="64" rx="14" fill="#1d4ed8"/>
+  <!-- Circular outer drum rim -->
+  <circle cx="32" cy="32" r="22" fill="#3b82f6" stroke="#ffffff" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="19" fill="#1e40af"/>
+  <!-- Inner tuned grooved note facets (petals) -->
+  <!-- Center circle note -->
+  <circle cx="32" cy="32" r="5" fill="#fef08a" stroke="#ffffff" stroke-width="1.2"/>
+  <!-- Surrounding radial note sectors -->
+  <ellipse cx="32" cy="18" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2"/>
+  <ellipse cx="43" cy="24" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2" transform="rotate(45 43 24)"/>
+  <ellipse cx="46" cy="35" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2" transform="rotate(90 46 35)"/>
+  <ellipse cx="41" cy="44" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2" transform="rotate(135 41 44)"/>
+  <ellipse cx="32" cy="46" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2"/>
+  <ellipse cx="23" cy="44" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2" transform="rotate(-135 23 44)"/>
+  <ellipse cx="18" cy="35" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2" transform="rotate(-90 18 35)"/>
+  <ellipse cx="21" cy="24" rx="4.5" ry="3" fill="#e2e8f0" stroke="#ffffff" stroke-width="1.2" transform="rotate(-45 21 24)"/>
+  <!-- Rubber mallet tip striking note -->
+  <circle cx="32" cy="18" r="2" fill="#ef4444"/>
+  <line x1="32" y1="18" x2="40" y2="8" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+</svg>

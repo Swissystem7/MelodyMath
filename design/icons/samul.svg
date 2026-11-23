@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="סאמולנורי — Korean Samul Nori">
+  <title>סאמולנורי (Samul Nori)</title>
+  <desc>הרכב הקשה קוריאני מסורתי: ארבעה כלי הקשה לגורמים ראשוניים שונים</desc>
+  <rect width="64" height="64" rx="14" fill="#334155"/>
+  <!-- Janggu (hourglass drum) -->
+  <!-- Left Bell -->
+  <path d="M12 24 L22 30 L22 42 L12 48 Z" fill="#b91c1c" stroke="#0f172a" stroke-width="1.2"/>
+  <ellipse cx="12" cy="36" rx="3" ry="12" fill="#fef08a" stroke="#0f172a" stroke-width="1.2"/>
+  <!-- Narrow central waist -->
+  <rect x="22" y="34" width="6" height="4" fill="#7f1d1d"/>
+  <!-- Right Bell -->
+  <path d="M28 30 L38 24 L38 48 L28 42 Z" fill="#1d4ed8" stroke="#0f172a" stroke-width="1.2"/>
+  <ellipse cx="38" cy="36" rx="3" ry="12" fill="#fef08a" stroke="#0f172a" stroke-width="1.2"/>
+  <!-- Zig-zag tuning cords -->
+  <line x1="14" y1="26" x2="36" y2="46" stroke="#f8fafc" stroke-width="1"/>
+  <line x1="14" y1="46" x2="36" y2="26" stroke="#f8fafc" stroke-width="1"/>
+  <circle cx="25" cy="36" r="2.5" fill="#ffd85d"/>
+
+  <!-- Kkwaenggwari (small high bronze hand gong) on right -->
+  <circle cx="50" cy="26" r="9" fill="#eab308" stroke="#78350f" stroke-width="1.5"/>
+  <circle cx="50" cy="26" r="4" fill="#fef08a"/>
+  <!-- Holding cord -->
+  <path d="M50 17 L50 12" stroke="#ffffff" stroke-width="1.5"/>
+</svg>

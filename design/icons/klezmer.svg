@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="כליזמר — Klezmer Music &amp; Clarinet">
+  <title>כליזמר (Klezmer)</title>
+  <desc>מוזיקה יהודית מסורתית לשמחות: קלרינט וכינור בקצב פריילעך המייצגים דילוגים וזוגות</desc>
+  <rect width="64" height="64" rx="14" fill="#1e1b4b"/>
+  <!-- Decorative star motif in soft glow -->
+  <path d="M32 10 L35 18 L44 18 L37 23 L40 31 L32 26 L24 31 L27 23 L20 18 L29 18 Z" fill="#ffd85d" opacity="0.15"/>
+  <!-- Clarinet running diagonally -->
+  <!-- Clarinet Mouthpiece -->
+  <path d="M12 48 L15 51 L18 48 L15 45 Z" fill="#ffffff"/>
+  <!-- Clarinet Barrel & Body -->
+  <path d="M16 46 L40 22 L45 27 L21 51 Z" fill="#0f172a" stroke="#ffffff" stroke-width="1.2"/>
+  <!-- Bell at the end -->
+  <path d="M40 22 L49 13 C52 14, 54 18, 51 21 L45 27 Z" fill="#d97706" stroke="#ffd85d" stroke-width="1.5"/>
+  <!-- Silver Keys and Rings -->
+  <circle cx="23" cy="39" r="1.8" fill="#ffd85d"/>
+  <circle cx="28" cy="34" r="1.8" fill="#ffd85d"/>
+  <circle cx="33" cy="29" r="1.8" fill="#ffd85d"/>
+  <circle cx="38" cy="24" r="1.8" fill="#ffd85d"/>
+  <line x1="22" y1="41" x2="25" y2="38" stroke="#ffffff" stroke-width="1.2"/>
+  <line x1="32" y1="31" x2="35" y2="28" stroke="#ffffff" stroke-width="1.2"/>
+  <!-- Musical celebration notes floating -->
+  <path d="M14 18 C14 16, 17 14, 20 15 L20 23 C18.5 22, 16 23, 16 25 C16 26.5, 17.5 28, 19.5 28 C21.5 28, 22.5 26.5, 22.5 24 L22.5 13 L27 12 L27 15 L22.5 16" fill="#ffd85d"/>
+</svg>
