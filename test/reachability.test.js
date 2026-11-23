@@ -21,7 +21,8 @@ const INTENTIONALLY_UNUSED = {
   'clockMath.js': 'pure clock arithmetic, 12/24h conversion and quarter-hour fraction helper awaiting UI integration',
   'fractionArithmetic.js': 'pure fraction simplify/add and beats-in-a-bar helper awaiting UI integration',
   'geometryMath.js': 'pure geometry classification and note duration helper awaiting UI integration',
-  'measurementConversion.js': 'pure measurement conversion and rectangle/square helper awaiting UI integration',
+  'measurementConversion.js': 'pure metric conversion (including inverse centimeter/meter and millimeter/centimeter helpers) and rectangle/square helper awaiting UI integration',
+  'measurementStrings.js': 'Node-only Hebrew labels and hints required by the CommonJS conversion helper; no page loads either module directly',
   'numberLineMath.js': 'pure number-line jump helper awaiting UI integration',
   'patternMath.js': 'pure pattern-cycle and next-element helper awaiting UI integration',
   'moneyMath.js': 'pure Israeli-currency bills/coins/change helper awaiting UI integration',
@@ -54,6 +55,21 @@ test('the intentionally-unused list names real files that really are unused, eac
     assert.ok(!loaded.has(f), f + ' is loaded by a page; drop it from the list');
     assert.ok(INTENTIONALLY_UNUSED[f].length > 20, f + ' needs a reason');
   });
+});
+
+test('measurement conversion keeps its Hebrew labels with the conversion logic', () => {
+  const helper = fs.readFileSync(path.join(libDir, 'measurementConversion.js'), 'utf8');
+  assert.match(helper, /MEASUREMENT_UNIT_LABELS/);
+  assert.match(helper, /MEASUREMENT_HINTS/);
+  assert.match(helper, /require\(["']\.\/measurementStrings["']\)/);
+  for (const type of [
+    'metersToCentimeters', 'centimetersToMeters',
+    'centimetersToMillimeters', 'millimetersToCentimeters',
+    'metersToMillimeters', 'millimetersToMeters',
+    'kilometersToMeters', 'metersToKilometers',
+  ]) {
+    assert.ok(helper.includes(type), type + ' missing from the conversion table');
+  }
 });
 
 test('index.html draws every widget the question banks use', () => {
