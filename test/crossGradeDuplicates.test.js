@@ -1,22 +1,21 @@
-'use strict';
 // A prompt belongs to one grade. A child who moves up a grade must not meet
 // the same question again, unless a decision keeps it (#1096).
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const banks = require('../src/lib/banks');
 
 const all = banks.allItems();
 const byPrompt = new Map();
-all.forEach((it) => byPrompt.set(it.prompt, (byPrompt.get(it.prompt) || []).concat(it)));
+for (const it of all) byPrompt.set(it.prompt, (byPrompt.get(it.prompt) || []).concat(it));
 const repeats = [...byPrompt.values()].filter((its) => its.length > 1);
 
 const dir = path.join(__dirname, '../src/lib/music');
 const mods = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => {
-  try { return require(path.join(dir, f)); } catch (e) { return null; }
+  try { return require(path.join(dir, f)); } catch { return null; }
 }).filter((m) => m && typeof m.specForItem === 'function');
-const sounds = (it) => mods.some((m) => { try { return !!m.specForItem(it); } catch (e) { return false; } });
+const sounds = (it) => mods.some((m) => { try { return !!m.specForItem(it); } catch { return false; } });
 
 test('a prompt repeats only where a decision keeps it', () => {
   // #751 keeps the twelve grade ב׳ cube counts in grade ד׳ too (test/musicWays.test.js).
@@ -38,7 +37,7 @@ test('23.11.2026: the five replaced items keep their ids, are worked out here, a
   assert.equal(corner.answer, 'כן', 'the corner of a square is a right angle');
   const sixty = by('א-geometry-307');
   assert.match(sixty.prompt, /60 מעלות/);
-  assert.equal(sixty.answer, 60 === 90 ? 'כן' : 'לא');
+  assert.equal(sixty.answer, 'לא', 'only 90 degrees is a right angle');
   // grade ה׳: denominators that need a common one
   const add = by('ה-fractions-437');
   assert.equal(add.prompt, '1/2 + 1/5 = ?');
