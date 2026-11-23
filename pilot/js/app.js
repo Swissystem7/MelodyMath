@@ -1177,8 +1177,12 @@
         const p = store.progress(s.id, unit.id);
         if (p.pre) {
           const ctrl = isControlRow(p);
+          const dateVal = (p.post && p.post.at) || (p.pre && p.pre.at) || p.completedAt || p.startedAt || null;
           rows.push({
             student: s.displayName,
+            grade: s.grade || (unit && unit.grades) || '',
+            date: dateVal,
+            timestamp: dateVal,
             unit: unit.id,
             pre: p.pre,
             post: p.post || null,
@@ -1337,6 +1341,101 @@
       + '<h3>לוח השוואת ניסוי מול ביקורת (קבוצת מוזיקה מול ביקורת)</h3>'
       + '<p class="mm-sub">השוואה מדעית מבוקרת: תלמידים שתרגלו עם מוזיקה מול קבוצת ביקורת שתרגלה את אותם תרגילים ובדיקות בלי צלילים. כולל ממוצעי לפני, אחרי ומעקב שבוע, שיפור נטו ומדד Cohen d.</p>'
       + contentHtml
+      + '</div>';
+  }
+
+  // MM-AUTO-767: Aggregated classroom pilot report and processed weekly retention metrics (no PII)
+  const aggregatedReportFilters = {
+    grade: '',
+    dateFrom: '',
+    dateTo: ''
+  };
+
+  function aggregatedReportCard() {
+    const rawRows = checkRows();
+    const S = (typeof G !== 'undefined' && G.MMPilotScore) || (typeof MMPilotScore !== 'undefined' ? MMPilotScore : null);
+    if (!S || typeof S.computeAggregatedReport !== 'function') return '';
+
+    const report = S.computeAggregatedReport(rawRows, aggregatedReportFilters);
+    const dv = dataVizApi();
+
+    const sign = function (v) { return (v > 0 ? '+' : '') + v; };
+
+    // Filter controls
+    const allGrades = ['א', 'ב', 'ג'];
+    const gradeOptions = ['<option value="">כל הכיתות</option>'].concat(allGrades.map(function (g) {
+      const sel = aggregatedReportFilters.grade === g ? ' selected' : '';
+      return '<option value="' + esc(g) + '"' + sel + '>כיתה ' + esc(g) + '׳</option>';
+    })).join('');
+
+    const filtersHtml = '<div class="mm-report-filters" data-testid="aggregated-report-filters">'
+      + '<label class="mm-filter-field">כיתה: '
+      + '<select data-testid="report-filter-grade" id="mm-rep-grade">' + gradeOptions + '</select>'
+      + '</label>'
+      + '<label class="mm-filter-field">מתאריך: '
+      + '<input type="date" data-testid="report-filter-date-from" id="mm-rep-date-from" value="' + esc(aggregatedReportFilters.dateFrom || '') + '">'
+      + '</label>'
+      + '<label class="mm-filter-field">עד תאריך: '
+      + '<input type="date" data-testid="report-filter-date-to" id="mm-rep-date-to" value="' + esc(aggregatedReportFilters.dateTo || '') + '">'
+      + '</label>'
+      + '<button type="button" class="mm-btn mm-btn--small" data-act="filter-report" data-testid="report-filter-apply">סינון</button>'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="reset-report-filter" data-testid="report-filter-reset">איפוס סינון</button>'
+      + '</div>';
+
+    const actionsHtml = '<div class="mm-report-actions">'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="print-aggregated-report" data-testid="print-aggregated-report">🖨️ הדפסת דוח מסכם נקי</button>'
+      + '<button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="export-clean-report" data-testid="export-clean-report">📥 ייצוא דוח נקי (CSV ללא PII)</button>'
+      + '</div>';
+
+    let bodyHtml = '';
+    if (!report.hasData) {
+      bodyHtml = '<p class="mm-sub" data-testid="aggregated-report-empty">אין נתוני בדיקות תואמים לסינון שנבחר.</p>';
+    } else {
+      const comp = report.comparison;
+      const m = comp.music;
+      const c = comp.control;
+      const ret = report.retention;
+
+      const netGainDisplay = comp.netGain != null ? sign(comp.netGain) + ' נקודות' : '—';
+      const cohenDDisplay = comp.cohenD != null ? 'd = ' + comp.cohenD + (comp.effectClassification ? ' (' + comp.effectClassification + ')' : '') : '—';
+      const mRetDisplay = ret.music.retentionRate != null ? ret.music.retentionRate + '%' : '—';
+      const cRetDisplay = ret.control.retentionRate != null ? ret.control.retentionRate + '%' : '—';
+      const netRetDisplay = ret.netRetentionRate != null ? sign(ret.netRetentionRate) + '%' : '—';
+
+      const metricsHtml = '<div class="mm-comparison-metrics" data-testid="aggregated-metrics">'
+        + '<div class="mm-metric-box mm-metric-box--highlight" data-testid="metric-net-gain"><span class="mm-metric-box__num ltr">' + esc(netGainDisplay) + '</span><span class="mm-metric-box__label">שיפור נטו (ניסוי מול ביקורת)</span></div>'
+        + '<div class="mm-metric-box" data-testid="metric-cohen-d"><span class="mm-metric-box__num ltr">' + esc(cohenDDisplay) + '</span><span class="mm-metric-box__label">גודל אפקט Cohen d</span></div>'
+        + '<div class="mm-metric-box" data-testid="metric-music-retention"><span class="mm-metric-box__num ltr">' + esc(mRetDisplay) + '</span><span class="mm-metric-box__label">שימור שבועי ניסוי (מוזיקה)</span></div>'
+        + '<div class="mm-metric-box" data-testid="metric-control-retention"><span class="mm-metric-box__num ltr">' + esc(cRetDisplay) + '</span><span class="mm-metric-box__label">שימור שבועי ביקורת</span></div>'
+        + '<div class="mm-metric-box" data-testid="metric-net-retention"><span class="mm-metric-box__num ltr">' + esc(netRetDisplay) + '</span><span class="mm-metric-box__label">הפרש שימור נטו</span></div>'
+        + '</div>';
+
+      const tableHtml = '<div class="mm-table-wrap"><table class="mm-table mm-table--comparison" data-testid="aggregated-summary-table"><thead><tr>'
+        + '<th scope="col">מדד</th><th scope="col">קבוצת ניסוי (מוזיקה)</th><th scope="col">קבוצת ביקורת</th><th scope="col">הפרש נטו</th></tr></thead><tbody>'
+        + '<tr><th scope="row">מספר זוגות נבדקים</th><td>' + m.n + '</td><td>' + c.n + '</td><td>' + (m.n - c.n) + '</td></tr>'
+        + '<tr><th scope="row">הצלחה לפני היחידה</th><td><span class="ltr">' + (m.preMean != null ? m.preMean + '%' : '—') + '</span></td><td><span class="ltr">' + (c.preMean != null ? c.preMean + '%' : '—') + '</span></td><td><span class="ltr">' + (m.preMean != null && c.preMean != null ? sign(Math.round((m.preMean - c.preMean) * 10) / 10) + '%' : '—') + '</span></td></tr>'
+        + '<tr><th scope="row">הצלחה מיד אחרי היחידה</th><td><span class="ltr">' + (m.postMean != null ? m.postMean + '%' : '—') + '</span></td><td><span class="ltr">' + (c.postMean != null ? c.postMean + '%' : '—') + '</span></td><td><span class="ltr">' + (m.postMean != null && c.postMean != null ? sign(Math.round((m.postMean - c.postMean) * 10) / 10) + '%' : '—') + '</span></td></tr>'
+        + '<tr><th scope="row">שיפור ממוצע (לפני מול אחרי)</th><td><strong class="ltr">' + (m.gainMean != null ? sign(m.gainMean) + '%' : '—') + '</strong></td><td><strong class="ltr">' + (c.gainMean != null ? sign(c.gainMean) + '%' : '—') + '</strong></td><td><strong class="ltr">' + esc(netGainDisplay) + '</strong></td></tr>'
+        + '<tr><th scope="row">הצלחה שבוע אחרי (מעקב)</th><td><span class="ltr">' + (m.laterMean != null ? m.laterMean + '%' + (m.laterN ? ' (' + m.laterN + ' זוגות)' : '') : 'עוד לא') + '</span></td><td><span class="ltr">' + (c.laterMean != null ? c.laterMean + '%' + (c.laterN ? ' (' + c.laterN + ' זוגות)' : '') : 'עוד לא') + '</span></td><td><span class="ltr">' + (m.laterMean != null && c.laterMean != null ? sign(Math.round((m.laterMean - c.laterMean) * 10) / 10) + '%' : '—') + '</span></td></tr>'
+        + '<tr><th scope="row"><strong>מדד שימור שבועי (מעקב מול אחרי)</strong></th><td><strong class="ltr">' + esc(mRetDisplay) + '</strong></td><td><strong class="ltr">' + esc(cRetDisplay) + '</strong></td><td><strong class="ltr">' + esc(netRetDisplay) + '</strong></td></tr>'
+        + '</tbody></table></div>';
+
+      const retentionNoteHtml = '<p class="mm-sub" data-testid="aggregated-retention-text">' + esc(ret.summaryText) + '</p>';
+
+      let distChartHtml = '';
+      if (dv && typeof dv.renderDistributionChartHtml === 'function') {
+        distChartHtml = dv.renderDistributionChartHtml(report.distribution);
+      }
+
+      bodyHtml = metricsHtml + tableHtml + retentionNoteHtml + (distChartHtml ? '<div class="mm-distribution-chart-wrap" data-testid="aggregated-distribution-wrap">' + distChartHtml + '</div>' : '');
+    }
+
+    return '<div class="mm-card mm-aggregated-report" data-testid="aggregated-pilot-report">'
+      + '<h3>דוח השוואה כיתתי ומדדי שימור שבועיים מעובדים למורה</h3>'
+      + '<p class="mm-sub">דוח מסכם מעובד ונקי ממידע מזהה (ללא PII). השוואה בין קבוצת ניסוי (מוזיקה) לקבוצת ביקורת לפני היחידה, מיד אחריה וכעבור שבוע, עם גרף התפלגות שיפור ואפשרויות סינון, הדפסה וייצוא נקי.</p>'
+      + filtersHtml
+      + actionsHtml
+      + bodyHtml
       + '</div>';
   }
 
@@ -1541,7 +1640,7 @@
       + coverageCard()
       + '<section class="mm-view" aria-labelledby="report-title" data-testid="report"><h2 id="report-title" style="margin:6px 0 0">דוח לפי נושא ופערים</h2>'
       + '<p class="mm-sub">פער = פחות מ־' + Math.round(U.GAP_THRESHOLD * 100) + '% מהתרגילים בנושא נפתרו בניסיון הראשון. «לפני/אחרי» = בדיקה קצרה בלי מוזיקה, לפני היחידה ואחריה (2–3 שאלות: סימן, לא ציון). הנתונים מהמכשיר הזה בלבד.</p>'
-      + classGainCard() + comparisonDashboardCard() + teacherReport() + '</section>'
+      + classGainCard() + comparisonDashboardCard() + aggregatedReportCard() + teacherReport() + '</section>'
       + '<div class="mm-card"><h3>נתוני ההדגמה</h3><p class="mm-sub">מוחק את המשימות, ההתקדמות והכניסה מהדפדפן הזה בלבד.</p>'
       + '<div class="mm-row-actions"><button type="button" class="mm-btn mm-btn--white mm-btn--small" data-act="reset" data-testid="reset">'
       + (state.confirmReset ? 'לחצו שוב לאישור המחיקה' : 'איפוס נתוני ההדגמה') + '</button></div></div>'
@@ -1877,6 +1976,47 @@
     go('login');
   }
 
+  function handleActionPrintAggregatedReport() {
+    if (typeof G.print === 'function') {
+      try { G.print(); } catch (e) {}
+    }
+  }
+
+  function handleActionExportCleanReport() {
+    const rawRows = checkRows();
+    const S = (typeof G !== 'undefined' && G.MMPilotScore) || (typeof MMPilotScore !== 'undefined' ? MMPilotScore : null);
+    if (!S || typeof S.exportCleanReportCsv !== 'function') return;
+    const csv = S.exportCleanReportCsv(rawRows, aggregatedReportFilters);
+    try {
+      const blob = new G.Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const a = G.document.createElement('a');
+      a.href = G.URL.createObjectURL(blob);
+      a.download = 'melodymath-aggregated-pilot-report-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.setAttribute('data-testid', 'export-clean-link');
+      G.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { G.URL.revokeObjectURL(a.href); }, 1000);
+    } catch (e) {}
+  }
+
+  function handleActionFilterReport() {
+    const gradeEl = root.querySelector('#mm-rep-grade') || root.querySelector('[data-testid="report-filter-grade"]');
+    const fromEl = root.querySelector('#mm-rep-date-from') || root.querySelector('[data-testid="report-filter-date-from"]');
+    const toEl = root.querySelector('#mm-rep-date-to') || root.querySelector('[data-testid="report-filter-date-to"]');
+    if (gradeEl) aggregatedReportFilters.grade = gradeEl.value;
+    if (fromEl) aggregatedReportFilters.dateFrom = fromEl.value;
+    if (toEl) aggregatedReportFilters.dateTo = toEl.value;
+    render();
+  }
+
+  function handleActionResetReportFilter() {
+    aggregatedReportFilters.grade = '';
+    aggregatedReportFilters.dateFrom = '';
+    aggregatedReportFilters.dateTo = '';
+    render();
+  }
+
   function rootClickHandler(e) {
     const btn = e.target.closest('[data-act]');
     if (!btn || btn.disabled) return;
@@ -1904,6 +2044,10 @@
     if (act === 'session-again') return handleActionSessionAgain();
     if (act === 'export-checks') return exportChecks();
     if (act === 'reset') return handleActionReset();
+    if (act === 'print-aggregated-report') return handleActionPrintAggregatedReport();
+    if (act === 'export-clean-report') return handleActionExportCleanReport();
+    if (act === 'filter-report') return handleActionFilterReport();
+    if (act === 'reset-report-filter') return handleActionResetReportFilter();
   }
   root.addEventListener('click', rootClickHandler);
   });
@@ -1986,8 +2130,12 @@
   if (typeof globalThis !== 'undefined') {
     globalThis.MMPilotApp = Object.assign(globalThis.MMPilotApp || {}, {
       comparisonDashboardCard: comparisonDashboardCard,
+      aggregatedReportCard: aggregatedReportCard,
+      exportCleanReport: handleActionExportCleanReport,
+      printAggregatedReport: handleActionPrintAggregatedReport,
       checkRows: checkRows,
-      isControlRow: isControlRow
+      isControlRow: isControlRow,
+      aggregatedReportFilters: aggregatedReportFilters
     });
   }
 })();
