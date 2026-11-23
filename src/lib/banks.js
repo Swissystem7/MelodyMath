@@ -711,8 +711,9 @@
     GEOA('א', 'איזו משתי הצורות היא בעלת יותר צלעות: מלבן או מחומש?', 'מחומש', 'חמש צלעות לעומת ארבע', 3),
     GEOA('א', 'צורה עם 6 צלעות שוות — איך קוראים לה?', 'משושה', 'שש צלעות', 3),
     GEOA('א', 'פינת דף מרובע — האם הזווית שם ישרה? (כן/לא)', 'כן', 'פינת ריבוע היא תמיד זווית ישרה', 1, ST.RIGHT_ANGLE),
-    GEOA('א', 'זווית ישרה שווה לכמה מעלות?', 90, 'תשעים מעלות בדיוק', 2, ST.RIGHT_ANGLE),
-    GEOA('א', 'האם זווית של 90 מעלות היא זווית ישרה? (כן/לא)', 'כן', '90 מעלות בדיוק היא זווית ישרה', 2, ST.RIGHT_ANGLE),
+    // 23.11.2026 (#1096): these two were word for word the grade ב׳ items. Same ids, another question.
+    GEOA('א', 'פינת שולחן ריבועי — האם הזווית שם ישרה? (כן/לא)', 'כן', 'פינה ישרה נראית כמו פינת דף', 2, ST.RIGHT_ANGLE),
+    GEOA('א', 'האם זווית של 60 מעלות היא זווית ישרה? (כן/לא)', 'לא', 'רק 90 מעלות היא זווית ישרה', 2, ST.RIGHT_ANGLE),
     GEOA('א', 'האם זווית של 45 מעלות היא זווית ישרה? (כן/לא)', 'לא', 'רק 90 מעלות היא זווית ישרה', 3, ST.RIGHT_ANGLE)
   );
 
@@ -928,9 +929,11 @@
     G56('ה', 'fractions', 'כמה שמיניות יש ב־3/4?', 6, '3/4 = 6/8', 2, ST.FRAC_EQUIV, 'bars'),
     G56('ה', 'fractions', 'מה גדול יותר, 2/3 או 3/5? כתבו את השבר הגדול.', '2/3', 'מכנה משותף 15: 10/15 מול 9/15', 3, ST.FRAC_EQUIV),
     G56('ה', 'fractions', '1/4 + 2/4 = ?', '3/4', 'אותו מכנה — מחברים מונים', 1, ST.FRAC_ADD),
-    G56('ה', 'fractions', '1/2 + 1/4 = ?', '3/4', '1/2 = 2/4', 1, ST.FRAC_ADD, 'bars'),
+    // 23.11.2026 (#1096): 1/2 + 1/4 and 3/4 − 1/8 are grade ד׳ items (one denominator is a multiple of
+    // the other). Grade ה׳ takes denominators that need a common one. Same ids.
+    G56('ה', 'fractions', '1/2 + 1/5 = ?', '7/10', 'מכנה משותף 10: 5/10 + 2/10', 1, ST.FRAC_ADD, 'lcm'),
     G56('ה', 'fractions', '1/2 + 1/3 = ?', '5/6', 'מכנה משותף 6: 3/6 + 2/6', 2, ST.FRAC_ADD, 'lcm'),
-    G56('ה', 'fractions', '3/4 − 1/8 = ?', '5/8', '3/4 = 6/8', 2, ST.FRAC_ADD, 'bars'),
+    G56('ה', 'fractions', '3/4 − 1/3 = ?', '5/12', 'מכנה משותף 12: 9/12 − 4/12', 2, ST.FRAC_ADD, 'lcm'),
     G56('ה', 'fractions', '2/3 + 1/4 = ?', '11/12', 'מכנה משותף 12: 8/12 + 3/12', 3, ST.FRAC_ADD, 'lcm'),
     G56('ה', 'fractions', 'תיבה של 4/4 מכילה רבע, שמינית ושמינית. כמה חסר עד תיבה מלאה? (כשבר)', '1/2', '1/4 + 1/8 + 1/8 = 1/2', 3, ST.FRAC_ADD, 'bars'),
     G56('ה', 'fractions', 'כמה זה 1/3 מ־12?', 4, 'מחלקים ל־3 חלקים שווים', 1, ST.FRAC_OF),
@@ -1963,7 +1966,15 @@
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
-      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart, band: e.band }));
+      // 23.11.2026 (#1096): the even-prime question stays in grade ה׳ only.
+      // Grade ו׳ asks the largest prime below 20. The grade file keeps its
+      // record; the shipped item keeps its id, standard, level and music way.
+      const dup = f.grade === 'ו' && x[0] === 'division'
+        && x[1] === 'מהו המספר הראשוני הזוגי היחיד?';
+      const prompt = dup ? 'מהו המספר הראשוני הגדול ביותר שקטן מ־20?' : x[1];
+      const answer = dup ? 19 : x[2];
+      const hint = dup ? 'יורדים מ־20: איזה מספר מתחלק רק ב־1 ובעצמו?' : x[3];
+      RAW.push(I(f.grade, x[0], prompt, answer, hint, { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart, band: e.band }));
     });
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
