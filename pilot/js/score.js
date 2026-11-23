@@ -800,6 +800,321 @@
     };
   }
 
+  // ---------------------------------------------------------------- MM-AUTO-767: Aggregated pilot report without PII
+  function filterReportRows(rows, filters) {
+    if (!Array.isArray(rows)) return [];
+    if (!filters || typeof filters !== 'object') return rows.slice();
+
+    const targetGrade = filters.grade ? String(filters.grade).trim() : '';
+    let fromTs = null;
+    let toTs = null;
+
+    if (filters.dateFrom) {
+      const parsedFrom = new Date(filters.dateFrom).getTime();
+      if (!Number.isNaN(parsedFrom)) fromTs = parsedFrom;
+    }
+    if (filters.dateTo) {
+      const parsedTo = new Date(filters.dateTo);
+      if (!Number.isNaN(parsedTo.getTime())) {
+        if (typeof filters.dateTo === 'string' && filters.dateTo.length <= 10) {
+          parsedTo.setHours(23, 59, 59, 999);
+        }
+        toTs = parsedTo.getTime();
+      }
+    }
+
+    return rows.filter(function (r) {
+      if (!r) return false;
+
+      // Grade filtering
+      if (targetGrade && targetGrade !== 'all' && targetGrade !== 'הכל') {
+        const rGrade = String(r.grade || (r.unit && r.unit.grades) || '').trim();
+        if (rGrade && !rGrade.includes(targetGrade) && targetGrade !== rGrade) {
+          return false;
+        }
+      }
+
+      // Date filtering
+      if (fromTs !== null || toTs !== null) {
+        const rowDate = r.timestamp || r.date || (r.post && r.post.at) || (r.pre && r.pre.at) || null;
+        if (rowDate) {
+          const rowTs = new Date(rowDate).getTime();
+          if (!Number.isNaN(rowTs)) {
+            if (fromTs !== null && rowTs < fromTs) return false;
+            if (toTs !== null && rowTs > toTs) return false;
+          }
+        }
+      }
+
+      // Unit filtering
+      if (filters.unit && r.unit !== filters.unit) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  function stripPII(rows) {
+    if (!Array.isArray(rows)) return [];
+    return rows.map(function (r) {
+      if (!r || typeof r !== 'object') return null;
+      const clean = {
+        group: r.group || (isControlRow(r) ? 'control' : 'intervention'),
+        controlMode: isControlRow(r),
+        unit: r.unit || '',
+        grade: r.grade || '',
+        date: r.date || r.timestamp || null,
+        timestamp: r.timestamp || r.date || null
+      };
+
+      if (r.pre && typeof r.pre === 'object') {
+        clean.pre = { score: r.pre.score, total: r.pre.total, at: r.pre.at || null };
+      } else {
+        clean.pre = null;
+      }
+
+      if (r.post && typeof r.post === 'object') {
+        clean.post = { score: r.post.score, total: r.post.total, at: r.post.at || null };
+      } else {
+        clean.post = null;
+      }
+
+      if (r.later && typeof r.later === 'object') {
+        clean.later = { score: r.later.score, total: r.later.total, at: r.later.at || null };
+      } else {
+        clean.later = null;
+      }
+
+      return clean;
+    }).filter(Boolean);
+  }
+
+  function computeWeeklyRetention(musicStatsOrRows, controlStatsOrRows) {
+    let mStats = musicStatsOrRows;
+    let cStats = controlStatsOrRows;
+
+    if (Array.isArray(musicStatsOrRows)) {
+      mStats = computeGroupStats(musicStatsOrRows, 'מוזיקה');
+    }
+    if (Array.isArray(controlStatsOrRows)) {
+      cStats = computeGroupStats(controlStatsOrRows, 'ביקורת');
+    }
+
+    const mPost = mStats && mStats.postMean != null ? mStats.postMean : null;
+    const mLater = mStats && mStats.laterMean != null ? mStats.laterMean : null;
+    const cPost = cStats && cStats.postMean != null ? cStats.postMean : null;
+    const cLater = cStats && cStats.laterMean != null ? cStats.laterMean : null;
+
+    let musicRetentionRate = null;
+    let musicRetentionDrop = null;
+    if (mPost !== null && mPost > 0 && mLater !== null) {
+      musicRetentionRate = Math.round((mLater / mPost) * 100);
+      musicRetentionDrop = Math.round((mPost - mLater) * 10) / 10;
+    }
+
+    let controlRetentionRate = null;
+    let controlRetentionDrop = null;
+    if (cPost !== null && cPost > 0 && cLater !== null) {
+      controlRetentionRate = Math.round((cLater / cPost) * 100);
+      controlRetentionDrop = Math.round((cPost - cLater) * 10) / 10;
+    }
+
+    let netRetentionRate = null;
+    if (musicRetentionRate !== null && controlRetentionRate !== null) {
+      netRetentionRate = musicRetentionRate - controlRetentionRate;
+    }
+
+    let summaryText = '';
+    if (musicRetentionRate !== null && controlRetentionRate !== null) {
+      const netSign = netRetentionRate > 0 ? '+' : '';
+      summaryText = 'שימור שבועי: ' + musicRetentionRate + '% בקבוצת הניסוי לעומת ' + controlRetentionRate + '% בקבוצת הביקורת (הפרש נטו ' + netSign + netRetentionRate + '%).';
+    } else if (musicRetentionRate !== null) {
+      summaryText = 'שימור שבועי בקבוצת הניסוי: ' + musicRetentionRate + '% מהישגי הלמידה נשמרו כעבור שבוע.';
+    } else if (controlRetentionRate !== null) {
+      summaryText = 'שימור שבועי בקבוצת הביקורת: ' + controlRetentionRate + '% כעבור שבוע.';
+    } else {
+      summaryText = 'עדיין לא הושלמו בדיקות מעקב שבועיות מספיקות לחישוב שימור.';
+    }
+
+    return {
+      music: {
+        postMean: mPost,
+        laterMean: mLater,
+        retentionRate: musicRetentionRate,
+        retentionDrop: musicRetentionDrop,
+        n: mStats ? mStats.laterN : 0
+      },
+      control: {
+        postMean: cPost,
+        laterMean: cLater,
+        retentionRate: controlRetentionRate,
+        retentionDrop: controlRetentionDrop,
+        n: cStats ? cStats.laterN : 0
+      },
+      netRetentionRate: netRetentionRate,
+      hasBoth: musicRetentionRate !== null && controlRetentionRate !== null,
+      summaryText: summaryText
+    };
+  }
+
+  function computeGainDistribution(musicRowsOrAll, controlRows) {
+    let musicRows = [];
+    let ctrlRows = [];
+
+    if (Array.isArray(musicRowsOrAll) && Array.isArray(controlRows)) {
+      musicRows = musicRowsOrAll;
+      ctrlRows = controlRows;
+    } else if (Array.isArray(musicRowsOrAll)) {
+      musicRowsOrAll.forEach(function (r) {
+        if (isControlRow(r)) ctrlRows.push(r);
+        else musicRows.push(r);
+      });
+    }
+
+    const calcGains = function (rows) {
+      return (rows || []).filter(function (r) {
+        return r && r.pre && pctScore(r.pre) !== null && r.post && pctScore(r.post) !== null;
+      }).map(function (r) {
+        return pctScore(r.post) - pctScore(r.pre);
+      });
+    };
+
+    const mGains = calcGains(musicRows);
+    const cGains = calcGains(ctrlRows);
+
+    const binDefs = [
+      { key: 'decline', label: 'ירידה (<0%)', match: function (g) { return g < 0; } },
+      { key: 'same', label: 'ללא שינוי (0%)', match: function (g) { return g === 0; } },
+      { key: 'mild', label: 'שיפור מתון (1-25%)', match: function (g) { return g > 0 && g <= 25; } },
+      { key: 'moderate', label: 'שיפור בינוני (26-50%)', match: function (g) { return g > 25 && g <= 50; } },
+      { key: 'high', label: 'שיפור ניכר (>50%)', match: function (g) { return g > 50; } }
+    ];
+
+    const bins = binDefs.map(function (def) {
+      const mCount = mGains.filter(def.match).length;
+      const cCount = cGains.filter(def.match).length;
+      return {
+        key: def.key,
+        label: def.label,
+        musicCount: mCount,
+        controlCount: cCount,
+        count: mCount + cCount
+      };
+    });
+
+    const categories = bins.map(function (b) { return b.label; });
+    const series = [
+      { key: 'music', name: 'קבוצת ניסוי (מוזיקה)', values: bins.map(function (b) { return b.musicCount; }) },
+      { key: 'control', name: 'קבוצת ביקורת', values: bins.map(function (b) { return b.controlCount; }) }
+    ];
+
+    return {
+      title: 'התפלגות שיפור הישגים: ניסוי מול ביקורת',
+      categories: categories,
+      series: series,
+      bins: bins,
+      totalGains: mGains.length + cGains.length,
+      distribution: true
+    };
+  }
+
+  function computeAggregatedReport(rawRows, filters) {
+    const filtered = filterReportRows(rawRows, filters);
+    const cleanRows = stripPII(filtered);
+
+    let musicRows = [];
+    let ctrlRows = [];
+    cleanRows.forEach(function (r) {
+      if (isControlRow(r)) ctrlRows.push(r);
+      else musicRows.push(r);
+    });
+
+    const comparison = compareGroups(musicRows, ctrlRows);
+    const retention = computeWeeklyRetention(comparison.music, comparison.control);
+    const distribution = computeGainDistribution(musicRows, ctrlRows);
+
+    return {
+      noPII: true,
+      hasData: cleanRows.length > 0,
+      totalCount: cleanRows.length,
+      musicCount: musicRows.length,
+      controlCount: ctrlRows.length,
+      comparison: comparison,
+      retention: retention,
+      distribution: distribution,
+      filtersApplied: filters || {}
+    };
+  }
+
+  function exportCleanReportCsv(reportOrRows, filters) {
+    let report = reportOrRows;
+    if (Array.isArray(reportOrRows)) {
+      report = computeAggregatedReport(reportOrRows, filters);
+    }
+    if (!report || typeof report !== 'object') return '';
+
+    const comp = report.comparison || { music: {}, control: {} };
+    const m = comp.music || {};
+    const c = comp.control || {};
+    const ret = report.retention || { music: {}, control: {} };
+    const dist = report.distribution || { bins: [] };
+
+    const f = report.filtersApplied || {};
+    const filterDesc = [
+      'כיתה: ' + (f.grade || 'כל הכיתות'),
+      'מתאריך: ' + (f.dateFrom || 'הכל'),
+      'עד תאריך: ' + (f.dateTo || 'הכל')
+    ].join(' | ');
+
+    const lines = [];
+    lines.push('\uFEFFדוח השוואה כיתתי ומדדי שימור שבועיים - MelodyMath (ללא פרטים מזהים)');
+    lines.push('סינון: ' + filterDesc);
+    lines.push('');
+    lines.push('--- מדדי הישגים ושימור שבועי לפי קבוצה ---');
+    lines.push('קבוצה,מספר זוגות נבדקים,ממוצע לפני (%),ממוצע מיד אחרי (%),שיפור ממוצע (נקודות),ממוצע מעקב שבוע (%),אחוז שימור שבועי (%)');
+    lines.push([
+      'קבוצת ניסוי (מוזיקה)',
+      m.n || 0,
+      m.preMean != null ? m.preMean + '%' : '—',
+      m.postMean != null ? m.postMean + '%' : '—',
+      m.gainMean != null ? (m.gainMean > 0 ? '+' : '') + m.gainMean : '—',
+      m.laterMean != null ? m.laterMean + '%' : '—',
+      ret.music && ret.music.retentionRate != null ? ret.music.retentionRate + '%' : '—'
+    ].join(','));
+    lines.push([
+      'קבוצת ביקורת',
+      c.n || 0,
+      c.preMean != null ? c.preMean + '%' : '—',
+      c.postMean != null ? c.postMean + '%' : '—',
+      c.gainMean != null ? (c.gainMean > 0 ? '+' : '') + c.gainMean : '—',
+      c.laterMean != null ? c.laterMean + '%' : '—',
+      ret.control && ret.control.retentionRate != null ? ret.control.retentionRate + '%' : '—'
+    ].join(','));
+    lines.push('');
+    lines.push('--- מדדי השוואה ואפקט ---');
+    lines.push('הפרש שיפור נטו (נקודות),Cohen d,סיווג גודל אפקט,הפרש שימור נטו (%)');
+    lines.push([
+      comp.netGain != null ? (comp.netGain > 0 ? '+' : '') + comp.netGain : '—',
+      comp.cohenD != null ? comp.cohenD : '—',
+      comp.effectClassification || '—',
+      ret.netRetentionRate != null ? (ret.netRetentionRate > 0 ? '+' : '') + ret.netRetentionRate + '%' : '—'
+    ].join(','));
+    lines.push('');
+    lines.push('--- התפלגות שיפור (מספר תלמידים בכל טווח) ---');
+    lines.push('טווח שיפור,קבוצת ניסוי,קבוצת ביקורת,סה"כ');
+    (dist.bins || []).forEach(function (b) {
+      lines.push([
+        '"' + b.label + '"',
+        b.musicCount != null ? b.musicCount : 0,
+        b.controlCount != null ? b.controlCount : 0,
+        b.count != null ? b.count : 0
+      ].join(','));
+    });
+
+    return lines.join('\r\n');
+  }
+
   return {
     KINDS: Object.keys(KINDS),
     PLACE: PLACE,
@@ -812,6 +1127,12 @@
     calculatePooledStd: calculatePooledStd,
     classifyEffectSize: classifyEffectSize,
     computeNetImprovement: computeNetImprovement,
-    isControlRow: isControlRow
+    isControlRow: isControlRow,
+    filterReportRows: filterReportRows,
+    stripPII: stripPII,
+    computeWeeklyRetention: computeWeeklyRetention,
+    computeGainDistribution: computeGainDistribution,
+    computeAggregatedReport: computeAggregatedReport,
+    exportCleanReportCsv: exportCleanReportCsv
   };
 });
