@@ -10,7 +10,7 @@
    one missing URL must not stop the service worker from installing.
    A navigation that cannot reach the network uses the cached page, then
    ./index.html. Scope is this file's directory (/MelodyMath/ on GitHub Pages). */
-const CACHE = 'melodymath-offline-v103';
+const CACHE = 'melodymath-offline-v104';
 const ASSETS = [
   './',
   './index.html',

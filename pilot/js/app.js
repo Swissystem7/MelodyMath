@@ -17,6 +17,8 @@
   const G = globalThis;
   const SEED = G.MM_PILOT_SEED || { accounts: [] };
   const BASE = G.MMPilotUnit;
+  // Above music(): that call reads this list while the file is still loading.
+  const MUSIC_NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
   const M = music();
   const R = research();
   const CURRICULUM = BASE.CURRICULUM || {};      // older unit.js (MM-600) had no curriculum ids
@@ -108,8 +110,6 @@
       isMuted: function () { return muted; }
     };
   }
-
-  const MUSIC_NEEDED = ['chips', 'plan', 'barFill', 'caption', 'hint', 'describe', 'play', 'stop', 'setMuted', 'isMuted'];
 
   function inspectLiveMusic(live) {
     if (!live) return { ok: false, missing: ['MMPilotMusic'] };
@@ -1884,7 +1884,6 @@
     enterExercise();
   }
 
-  root.addEventListener('click', function (e) {
   function handleActionSignOut() { signOutClean(); store.signOut(); state.account = null; state.flash = ''; state.whyOpen = false; go('login'); }
   function handleActionOpenUnit(btn) { openUnit(btn.getAttribute('data-unit') || UNITS[0].id); }
   function handleActionSkipUnit(btn) {
@@ -2050,7 +2049,6 @@
     if (act === 'reset-report-filter') return handleActionResetReportFilter();
   }
   root.addEventListener('click', rootClickHandler);
-  });
 
   root.addEventListener('submit', function (e) {
     e.preventDefault();
