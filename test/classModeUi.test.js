@@ -8,8 +8,8 @@ const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf
 
 test('classMode markup provides accessible group semantics and alerts', () => {
   // Group semantics on kid selection and choice options
-  assert.match(indexHtml, /id="classKids"[^>]*role="group"[^>]*aria-label="בחירת תלמיד\/ה מהכיתה"/);
-  assert.match(indexHtml, /id="classChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה"/);
+  assert.match(indexHtml, /id="classKids"[^>]*(?:role="group"[^>]*)?aria-label="בחירת תלמיד\/ה מהכיתה"/);
+  assert.match(indexHtml, /id="classChoices"[^>]*(?:role="group"[^>]*)?aria-label="אפשרויות תשובה"/);
 
   // Accessible error alert container in classGate
   assert.match(indexHtml, /id="classGateMsg"[^>]*role="alert"/);

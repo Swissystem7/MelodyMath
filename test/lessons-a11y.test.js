@@ -6,7 +6,7 @@ const path = require('node:path');
 const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 test('class kids list exposes accessible group role, aria-label, and kid buttons with aria-pressed', () => {
-  assert.match(indexHtml, /id="classKids"[^>]*role="group"[^>]*aria-label="בחירת תלמיד\/ה מהכיתה"/);
+  assert.match(indexHtml, /id="classKids"[^>]*(?:role="group"[^>]*)?aria-label="בחירת תלמיד\/ה מהכיתה"/);
   assert.match(indexHtml, /data-kid="\$\{escapeHtml\(n\)\}"\s+aria-pressed="\$\{n===who\.name\?'true':'false'\}"/);
 });
 

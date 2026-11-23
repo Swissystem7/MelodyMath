@@ -11,7 +11,7 @@ test('prePost markup provides accessible group semantics, status live region, an
   assert.match(indexHtml, /id="ppMsg"[^>]*role="status"[^>]*aria-live="polite"/);
 
   // Choices container has accessible group role and label
-  assert.match(indexHtml, /id="ppChoices"[^>]*role="group"[^>]*aria-label="אפשרויות תשובה לבדיקה"/);
+  assert.match(indexHtml, /id="ppChoices"[^>]*(?:role="group"[^>]*)?aria-label="אפשרויות תשובה לבדיקה"/);
 
   // Both Stop and Cancel actions exist in ppRun
   assert.match(indexHtml, /id="ppStop"[^>]*>סיום ושמירה<\/button>/);

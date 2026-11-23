@@ -3,11 +3,11 @@
 // An item without {grade, strand, standard} does not ship.
 // Banks are split by grade. Multiplication 3/6/7/8/9 is tagged table=3..9
 // so mastery.js can keep it closed until 2/4/5/10 are actually mastered.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root, api);
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const GRADES = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
 
   const STRAND = {
@@ -172,7 +172,7 @@
     ['percent', SKILL_HE.percent],
   ];
   const RM_ORDER = {};
-  RM_SKILLS.forEach(function (s, i) { RM_ORDER[s[0]] = i; });
+  RM_SKILLS.forEach((s, i) => { RM_ORDER[s[0]] = i; });
 
   const LEVEL_HE = { 1: 'בסיס', 2: 'ביניים', 3: 'אתגר' };
 
@@ -1652,7 +1652,7 @@
   // ---------- כיתה א׳ · ישר מספרים — מיקום מקורב (#466) ----------
   // No mark on the line: the child estimates, and within 4 counts. Appended
   // last because ids are RAW indices and existing ids must not move.
-  [17, 23, 37, 48, 62, 71, 86, 94].forEach(function (n) {
+  [17, 23, 37, 48, 62, 71, 86, 94].forEach((n) => {
     const lo = Math.floor(n / 10) * 10;
     RAW.push(I('א', 'number_line', 'איפה בערך ' + n + ' על הישר 0–100? (סמנו קרוב)', n, 'בין ' + lo + ' ל-' + (lo + 10), {
       standard: ST.NUMBER_LINE_APPROX, level: 2, widget: 'numberLine', line: { min: 0, max: 100 }, tolerance: 4,
@@ -1679,7 +1679,7 @@
   const POLL = { parts: 4, slices: [{ label: 'בעד', parts: 3 }, { label: 'נגד', parts: 1 }] };
   const ROUTE = { parts: 4, slices: [{ label: 'ברגל', parts: 2 }, { label: 'באופניים', parts: 1 }, { label: 'ברכב', parts: 1 }] };
   const BAND = { parts: 8, slices: [{ label: 'תופים', parts: 3 }, { label: 'חליל', parts: 1 }, { label: 'פסנתר', parts: 4 }] };
-  const V = function (a, b, op) { return { widget: 'vertical', vert: { a: a, b: b, op: op } }; };
+  const V = (a, b, op) => ({ widget: 'vertical', vert: { a: a, b: b, op: op } });
   RAW.push(
     G4('place_value', 'במספר 472,315, מהי ספרת מאות האלפים?', 4, 'הספרה השישית מימין', 1, ST.NUM_MILLION),
     G4('place_value', 'במספר 472,315, מהי ספרת עשרות האלפים?', 7, 'הספרה החמישית מימין', 1, ST.NUM_MILLION),
@@ -1955,11 +1955,11 @@
     : [G.MM_GRADE6, G.MM_GRADE1, G.MM_GRADE4, G.MM_GRADE5, G.MM_GRADE3, G.MM_GRADE2];
   // Research behind the music ways of the grade files (#591): id → [label, URL].
   const MUSIC_SOURCES = {};
-  GRADE_FILES.forEach(function (f) {
+  GRADE_FILES.forEach((f) => {
     if (!f || !Array.isArray(f.items)) return;
-    Object.keys(f.ST).forEach(function (k) { ST[k] = f.ST[k][0]; });
-    Object.keys(f.sources || {}).forEach(function (k) { MUSIC_SOURCES[k] = f.sources[k]; });
-    f.items.forEach(function (x) {
+    Object.keys(f.ST).forEach((k) => { ST[k] = f.ST[k][0]; });
+    Object.keys(f.sources || {}).forEach((k) => { MUSIC_SOURCES[k] = f.sources[k]; });
+    f.items.forEach((x) => {
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
@@ -1971,13 +1971,13 @@
     // older builders (G56, MV) included. A way is [tag, note, source, evidence],
     // then optional flags; `also` lists more sources cited next to the first.
     const link = {};
-    Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
+    Object.keys(f.music || {}).forEach((k) => { link[ST[k]] = f.music[k]; });
     // A prompt that already plays sound or reads music notation is a music
     // activity: counted beats (hear), the playing widgets of grades א׳-ג׳
     // (g1: beats, chart100, pattern, countOn; g2; g3: meter, remainder, pair, grid, chant)
     // and the 4/4 bar of the fraction items (bar44).
-    const cap = function (k) { return k.charAt(0).toUpperCase() + k.slice(1); };
-    RAW.forEach(function (raw) {
+    const cap = (k) => k.charAt(0).toUpperCase() + k.slice(1);
+    RAW.forEach((raw) => {
       if (raw.grade !== f.grade || raw.music) return;
       if (raw.g1 && raw.g1.kind) raw.music = 'g1' + cap(raw.g1.kind);
       else if (raw.g2 && raw.g2.kind) raw.music = 'g2' + cap(raw.g2.kind);
@@ -1987,7 +1987,7 @@
     });
     // Dosage rules (#591, 23.10 15:54): the item is solved with a primary way;
     // optional ways (extra practice, weak evidence marked) ride along.
-    RAW.forEach(function (raw) {
+    RAW.forEach((raw) => {
       const ways = raw.grade === f.grade && !raw.music && link[raw.standard];
       if (!ways) return;
       const m = shownWay(raw, ways);
@@ -2112,7 +2112,7 @@
     ? require('./exercises/explorerBank')
     : (typeof globalThis !== 'undefined' ? globalThis.MM_EXPLORER_BANK : null);
   if (EXPLORER && typeof EXPLORER.bankSpecs === 'function') {
-    EXPLORER.bankSpecs().forEach(function (s) {
+    EXPLORER.bankSpecs().forEach((s) => {
       const raw = I(s.grade, s.skill, s.prompt, s.answer, s.hint, {
         standard: ST[s.standard], level: s.level, table: s.table, widget: s.widget, line: s.line,
       });
@@ -2165,11 +2165,11 @@
   }
 
   function musicForLate() {
-    GRADE_FILES.forEach(function (f) {
+    GRADE_FILES.forEach((f) => {
       if (!f || !Array.isArray(f.items)) return;
       const link = {};
-      Object.keys(f.music || {}).forEach(function (k) { link[ST[k]] = f.music[k]; });
-      RAW.forEach(function (raw) {
+      Object.keys(f.music || {}).forEach((k) => { link[ST[k]] = f.music[k]; });
+      RAW.forEach((raw) => {
         applyLateWays(raw, f, link);
       });
     });
@@ -2404,7 +2404,7 @@
     smith2014: ['Smith, King & Hoyte 2014 — Learning angles through movement (J. Math. Behav.)', 'https://doi.org/10.1016/j.jmathb.2014.09.001'],
     moore2012: ['Moore & Linder 2012 — Using dance to deepen student understanding of geometry (J. Dance Educ.)', 'https://doi.org/10.1080/15290824.2012.701175'],
   };
-  Object.keys(EVIDENCE_SOURCES).forEach(function (k) { MUSIC_SOURCES[k] = EVIDENCE_SOURCES[k]; });
+  Object.keys(EVIDENCE_SOURCES).forEach((k) => { MUSIC_SOURCES[k] = EVIDENCE_SOURCES[k]; });
 
   // Mechanism → its Hebrew name, the studies behind it (none for M8-M14), the
   // one-line finding, and the way and activity tags that use it.
@@ -2453,8 +2453,8 @@
       tags: ['vertexBells', 'shapeRhythm', 'sideMelody', 'instrumentShape', 'drumHead', 'circleTerms', 'staffLines', 'stagePlan', 'circleFifths'] },
   };
   const MECH_OF = {};
-  Object.keys(MUSIC_MECHANISMS).forEach(function (m) {
-    MUSIC_MECHANISMS[m].tags.forEach(function (t) { MECH_OF[t] = m; });
+  Object.keys(MUSIC_MECHANISMS).forEach((m) => {
+    MUSIC_MECHANISMS[m].tags.forEach((t) => { MECH_OF[t] = m; });
   });
   // Mechanism id of a way or activity tag (M1-M14), or null when unmapped.
   function mechanismOf(tag) { return MECH_OF[tag] || null; }
@@ -2466,7 +2466,7 @@
   // it is primary; the primary ways of a standard share one mechanism.
   const MUSIC_DOSAGE = { primary: ['M1', 'M2', 'M3', 'M6'], optionalOnly: ['M4', 'M5', 'M7'] };
   function isOptionalWay(w) { return !!(w && w[4] && w[4].optional); }
-  function primaryWays(ways) { return (ways || []).filter(function (w) { return !isOptionalWay(w); }); }
+  function primaryWays(ways) { return (ways || []).filter((w) => !isOptionalWay(w)); }
   function isDBoxVolumeItem(raw) {
     if (raw.grade !== 'ד') return false;
     if (raw.standard !== ST.MASS_VOL) return false;
@@ -2480,7 +2480,7 @@
     const primary = primaryWays(ways);
     if (!primary.length) return null;
     if (isDBoxVolumeItem(raw)) {
-      const vol = (ways || []).find(function (w) { return w[0] === 'cubeLayerGroups'; });
+      const vol = (ways || []).find((w) => w[0] === 'cubeLayerGroups');
       if (vol) return vol;
     }
     return primary[Math.min(clampLevel(raw.level), primary.length) - 1];
@@ -2504,13 +2504,11 @@
   function extraFor(raw, ways, shown) {
     const cube = /תיבה|קובי/.test(raw.prompt || '');
     const mass = isDBoxMassItem(raw, cube);
-    return (ways || []).filter(function (w) {
+    return (ways || []).filter((w) => {
       if (!isOptionalWay(w)) return false;
       if (w[0] === shown[0]) return false;
       return isCubeFilteredWay(cube, mass, w);
-    }).map(function (w) {
-      return { music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' };
-    });
+    }).map((w) => ({ music: w[0], note: w[1], src: w[2], ev: w[3], evidence: w[4].evidence || 'strong' }));
   }
 
   // Rules 1-3 on the items: a music activity of a weak (M4) or unsupported
@@ -2520,9 +2518,9 @@
   // other item does. A standard without ways in
   // its grade carries the ways of the nearest earlier grade (rule 4).
   const WAYS_OF = {};
-  GRADE_FILES.forEach(function (f) {
+  GRADE_FILES.forEach((f) => {
     if (!f) return;
-    Object.keys(f.music || {}).forEach(function (k) { WAYS_OF[f.grade + '|' + ST[k]] = f.music[k]; });
+    Object.keys(f.music || {}).forEach((k) => { WAYS_OF[f.grade + '|' + ST[k]] = f.music[k]; });
   });
   // All ways (primary and optional) of a standard in a grade, carried from
   // the nearest earlier grade when the grade itself lists none.
@@ -2533,7 +2531,7 @@
     }
     return [];
   }
-  RAW.forEach(function (raw) {
+  RAW.forEach((raw) => {
     const m = raw.music && !raw.musicNote ? mechanismOf(raw.music) : null;
     if (!m || MUSIC_DOSAGE.primary.indexOf(m) >= 0) return;
     const ways = waysCarried(raw.grade, raw.standard);
@@ -2542,9 +2540,7 @@
     const w = primary[Math.min(clampLevel(raw.level), primary.length) - 1];
     raw.musicStory = raw.music;
     raw.music = w[0]; raw.musicNote = w[1]; raw.musicSrc = w[2]; raw.musicEv = w[3];
-    const extra = ways.filter(isOptionalWay).map(function (x) {
-      return { music: x[0], note: x[1], src: x[2], ev: x[3], evidence: x[4].evidence || 'strong' };
-    });
+    const extra = ways.filter(isOptionalWay).map((x) => ({ music: x[0], note: x[1], src: x[2], ev: x[3], evidence: x[4].evidence || 'strong' }));
     if (extra.length) raw.musicExtra = extra;
   });
 
@@ -2570,13 +2566,13 @@
     mean: [MATH_IN_MUSIC_SRC, 'A'], meanBpm: [MATH_IN_MUSIC_SRC, 'A'], tempo: [MATH_IN_MUSIC_SRC, 'A'],
     ratioHz: ['interplay2024', 'R'], circleFifths: ['interplay2024', 'A'],
   };
-  RAW.forEach(function (raw) {
+  RAW.forEach((raw) => {
     const s = raw.music && !raw.musicSrc && ACTIVITY_SOURCES[raw.music];
     if (s) { raw.musicSrc = s[0]; raw.musicEv = s[1]; }
   });
 
   const SHIPPED = [];
-  RAW.forEach(function (raw, i) {
+  RAW.forEach((raw, i) => {
     if (!isShippable(raw)) return;
     const it = {
       id: raw.grade + '-' + raw.skill + '-' + i,
@@ -2634,11 +2630,11 @@
   }
 
   function itemsForGrade(grade) {
-    return SHIPPED.filter(function (it) { return it.grade === grade; });
+    return SHIPPED.filter((it) => it.grade === grade);
   }
 
   function rowsOf(skill, grade) {
-    return SHIPPED.filter(function (it) {
+    return SHIPPED.filter((it) => {
       if (it.skill !== skill) return false;
       if (grade && it.grade !== grade) return false;
       return true;
@@ -2647,7 +2643,7 @@
 
   function itemsAtLevel(skill, level, grade) {
     const want = clampLevel(level);
-    return rowsOf(skill, grade).filter(function (it) { return it.level === want; });
+    return rowsOf(skill, grade).filter((it) => it.level === want);
   }
 
   // Own keys only: a stored grade such as "constructor" must not resolve to
@@ -2666,13 +2662,13 @@
   function diagnosticPair(skill, grade) {
     const rows = rowsOf(skill, grade);
     const pair = [];
-    const base = rows.find(function (it) { return it.level === 1; });
-    const mid = rows.find(function (it) { return it.level === 2; });
+    const base = rows.find((it) => it.level === 1);
+    const mid = rows.find((it) => it.level === 2);
     if (base) pair.push(base);
     if (mid) pair.push(mid);
     // A skill missing one of the two levels still contributes two questions,
     // so the diagnostic keeps its length.
-    rows.forEach(function (it) {
+    rows.forEach((it) => {
       if (pair.length < 2 && pair.indexOf(it) === -1) pair.push(it);
     });
     return pair;
@@ -2680,9 +2676,7 @@
 
   function diagnosticItems(grade) {
     const g = isGrade(grade) ? grade : 'א';
-    return skillsForGrade(g).flatMap(function (skill) {
-      return diagnosticPair(skill, g);
-    });
+    return skillsForGrade(g).flatMap((skill) => diagnosticPair(skill, g));
   }
 
   // #678: the diagnostic is never one long pre-test. It runs in rounds of at
@@ -2702,9 +2696,7 @@
   function classItems(grade) {
     const g = isGrade(grade) ? grade : 'א';
     const skills = g === 'א' ? ['counting', 'addition', 'subtraction', 'number_line'] : skillsForGrade(g);
-    return SHIPPED.filter(function (it) {
-      return it.grade === g && skills.indexOf(it.skill) !== -1 && !it.typed;
-    });
+    return SHIPPED.filter((it) => it.grade === g && skills.indexOf(it.skill) !== -1 && !it.typed);
   }
 
   // Beat-mode pack «מעבר עשרת» (#465): the two-instrument vertical sums
@@ -2713,12 +2705,12 @@
     return g.op === '+' ? g.a % 10 + g.b % 10 >= 10 : g.a % 10 < g.b % 10;
   }
   function regroupItems() {
-    return SHIPPED.filter(function (it) { return it.g2 && it.g2.kind === 'duo' && !it.typed && regroups(it.g2); });
+    return SHIPPED.filter((it) => it.g2 && it.g2.kind === 'duo' && !it.typed && regroups(it.g2));
   }
 
   function practiceItems(skills, grade) {
     const want = Array.isArray(skills) && skills.length ? skills : null;
-    return SHIPPED.filter(function (it) {
+    return SHIPPED.filter((it) => {
       if (grade && it.grade !== grade) return false;
       if (want && want.indexOf(it.skill) === -1) return false;
       return true;
@@ -2728,7 +2720,7 @@
   // Pass a skill to borrow only that skill's core facts: a grade-ג division
   // stage must not fill up with multiplication questions.
   function coreFactItems(skill) {
-    return SHIPPED.filter(function (it) {
+    return SHIPPED.filter((it) => {
       if (skill != null && it.skill !== skill) return false;
       return (it.skill === 'multiplication' || it.skill === 'division')
         && (it.table === 2 || it.table === 4 || it.table === 5 || it.table === 10);
@@ -2736,9 +2728,7 @@
   }
 
   function skillGrade(k) {
-    const grades = GRADES.filter(function (g) {
-      return (GRADE_SKILLS[g] || []).indexOf(k) !== -1;
-    });
+    const grades = GRADES.filter((g) => (GRADE_SKILLS[g] || []).indexOf(k) !== -1);
     if (!grades.length) return '';
     if (grades.length === 1) return grades[0] + '׳';
     return grades[0] + '׳–' + grades[grades.length - 1] + '׳';
@@ -2750,11 +2740,11 @@
 
   function coverage() {
     const out = {};
-    RM_SKILLS.forEach(function (pair) {
+    RM_SKILLS.forEach((pair) => {
       const skill = pair[0];
       const rows = rowsOf(skill);
       const byLevel = { 1: 0, 2: 0, 3: 0 };
-      rows.forEach(function (it) { byLevel[it.level] += 1; });
+      rows.forEach((it) => { byLevel[it.level] += 1; });
       out[skill] = { total: rows.length, byLevel: byLevel, grade: skillGrade(skill) };
     });
     return out;
@@ -2762,12 +2752,12 @@
 
   function coverageByGrade() {
     const out = {};
-    GRADES.forEach(function (g) {
+    GRADES.forEach((g) => {
       out[g] = {};
-      skillsForGrade(g).forEach(function (skill) {
+      skillsForGrade(g).forEach((skill) => {
         const rows = rowsOf(skill, g);
         const byLevel = { 1: 0, 2: 0, 3: 0 };
-        rows.forEach(function (it) { byLevel[it.level] += 1; });
+        rows.forEach((it) => { byLevel[it.level] += 1; });
         out[g][skill] = { total: rows.length, byLevel: byLevel, he: skillHe(skill) };
       });
     });
@@ -2775,16 +2765,14 @@
   }
 
   const SKILL_GRADE = {};
-  RM_SKILLS.forEach(function (pair) {
+  RM_SKILLS.forEach((pair) => {
     SKILL_GRADE[pair[0]] = skillGrade(pair[0]);
   });
 
   // Compact dump kept so older callers that read RM_BANK[skill] still see prompts.
   const RM_BANK = {};
-  RM_SKILLS.forEach(function (pair) {
-    RM_BANK[pair[0]] = rowsOf(pair[0]).map(function (it) {
-      return [it.prompt, it.answer, it.hint, it.hear, it.level];
-    });
+  RM_SKILLS.forEach((pair) => {
+    RM_BANK[pair[0]] = rowsOf(pair[0]).map((it) => [it.prompt, it.answer, it.hint, it.hear, it.level]);
   });
 
   const TIME_STANDARDS = [ST.CLOCK, ST.HALF_HOUR, ST.MINUTES, ST.CALENDAR, ST.TIME_MIN_SEC];
@@ -2810,7 +2798,7 @@
 
   function isDataWorldItem(it) {
     const dw = (typeof globalThis !== 'undefined' && globalThis.MM_DATA_WORLDS)
-      || (typeof require === 'function' ? (function () { try { return require('./music/dataWorlds'); } catch (_e) { return null; } })() : null);
+      || (typeof require === 'function' ? (() => { try { return require('./music/dataWorlds'); } catch (_e) { return null; } })() : null);
     return Boolean(dw && typeof dw.isDataWorldItem === 'function' && dw.isDataWorldItem(it));
   }
 
@@ -2824,15 +2812,11 @@
   }
 
   function dataAndTimeItems(grade) {
-    return SHIPPED.filter(function (it) {
-      return isShippable(it) && (!grade || it.grade === grade) && isDataOrTimeItem(it);
-    });
+    return SHIPPED.filter((it) => isShippable(it) && (!grade || it.grade === grade) && isDataOrTimeItem(it));
   }
 
   function gapItems(grade) {
-    return SHIPPED.filter(function (it) {
-      return isShippable(it) && (!grade || it.grade === grade) && !!(it.research && it.research.includes('gap'));
-    });
+    return SHIPPED.filter((it) => isShippable(it) && (!grade || it.grade === grade) && !!(it.research && it.research.includes('gap')));
   }
 
   function matchErrorItem(it, p, id) {
@@ -2857,14 +2841,10 @@
     const p = err.prompt ? err.prompt : '';
     const id = err.id ? err.id : '';
     const sk = err.skill ? err.skill : '';
-    const match = SHIPPED.find(function (it) {
-      return matchErrorItem(it, p, id);
-    });
+    const match = SHIPPED.find((it) => matchErrorItem(it, p, id));
     addErrorMatch(match, grade, add);
     if (sk) {
-      basePool.filter(function (it) {
-        return isMatchingSkill(it, sk);
-      }).forEach(add);
+      basePool.filter((it) => isMatchingSkill(it, sk)).forEach(add);
     }
   }
 
@@ -2895,7 +2875,7 @@
       pool.push(it);
     }
     if (errors.length) {
-      errors.slice().sort(function (a, b) { return (b.count || 0) - (a.count || 0); }).forEach(function (err) {
+      errors.slice().sort((a, b) => (b.count || 0) - (a.count || 0)).forEach((err) => {
         handleSingleError(err, grade, basePool, add);
       });
     }
@@ -2914,7 +2894,7 @@
     }
     if (item.vert && item.vert.op === '×') {
       const vertMod = (typeof globalThis !== 'undefined' && globalThis.normalizeVertical)
-        || (typeof require === 'function' ? (function () { try { return require('./vertical'); } catch (e) { return null; } })() : null);
+        || (typeof require === 'function' ? (() => { try { return require('./vertical'); } catch (e) { return null; } })() : null);
       const explainFn = (vertMod && typeof vertMod.explainError === 'function')
         ? vertMod.explainError
         : (vertMod && vertMod.normalizeVertical && typeof vertMod.normalizeVertical.explainError === 'function')
@@ -2934,8 +2914,14 @@
     return item.hint ? ('ולמה: ' + item.hint) : 'ולמה: לפי חוק הפילוג כופלים כל חלק בנפרד ומחברים את המכפלות החלקיות.';
   }
 
+  function explainOrderOfOperationsError(item, givenAnswer) {
+    if (!item) return 'ולמה: יש לבדוק את סדר פעולות החשבון.';
+    const g = Number(String(givenAnswer == null ? '' : givenAnswer).replace(/,/g, '').trim());
+    return 'ולמה: התוצאה' + (!isNaN(g) && g !== 0 ? ' (' + g + ')' : '') + ' התקבלה מביצוע משמאל לימין תוך התעלמות מסוגריים ומקדימות כפל וחילוק. בסדר פעולות יש לחשב תחילה את הביטוי שבתוך הסוגריים, אחר כך כפל וחילוק, ורק אז חיבור וחיסור משמאל לימין.';
+  }
+
   function distributiveItems(grade) {
-    return SHIPPED.filter(function (it) {
+    return SHIPPED.filter((it) => {
       if (grade && it.grade !== grade) return false;
       return it.kind === 'distributive' || it.kind === 'distributive_shofar' || it.kind === 'shofar'
         || (it.vert && it.vert.op === '×')
@@ -2990,5 +2976,6 @@
     coverageByGrade: coverageByGrade,
     distributiveItems: distributiveItems,
     explainDistributiveError: explainDistributiveError,
+    explainOrderOfOperationsError: explainOrderOfOperationsError,
   };
 });

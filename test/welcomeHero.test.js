@@ -26,7 +26,19 @@ test('quick start flow offers 2 simple steps: grade and instrument before launch
 
 test('familyJamCard is placed on the home screen under practice', () => {
   assert.ok(indexHtml.includes('id="familyJamCard"'));
-  const remSection = indexHtml.slice(indexHtml.indexOf('id="remediation"'), indexHtml.indexOf('</section>'));
+  const remStart = indexHtml.indexOf('id="remediation"');
+  const remOpen = indexHtml.lastIndexOf('<', remStart);
+  let depth = 0, remEnd = remOpen;
+  const remTag = /<\/?(section)\b/gi;
+  remTag.lastIndex = remOpen;
+  let m = remTag.exec(indexHtml);
+  while (m) {
+    if (m[0][1] === '/') depth -= 1;
+    else depth += 1;
+    if (m.index >= remOpen && depth === 0) { remEnd = remTag.lastIndex; break; }
+    m = remTag.exec(indexHtml);
+  }
+  const remSection = indexHtml.slice(remStart, remEnd);
   assert.ok(remSection.includes('id="familyJamCard"'));
   assert.ok(remSection.indexOf('id="familyJamCard"') > remSection.indexOf('id="rmStart"'));
 });

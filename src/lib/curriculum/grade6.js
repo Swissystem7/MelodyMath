@@ -10,11 +10,11 @@
 // standards that drill it (tools/verify-curriculum-quotes.js checks the
 // text). Rows keep their earlier order so topic ids stay put; `order` is the
 // document's order. Several items follow the document's own examples.
-(function (root, factory) {
+((root, factory) => {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.MM_GRADE6 = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : this, () => {
   const COVERED = 'covered';
 
   const rows = [
@@ -109,8 +109,8 @@
     ['division', 'מספר מתחלק ב־3 אבל לא ב־6. האם הוא יכול להיות זוגי? (כן/לא)', 'לא', 'מספר זוגי שמתחלק ב־3 מתחלק גם ב־6', 3, 'G6_NAT_PROPS'],
     ['division', 'מהספרות 9, 8, 5, 2, 0, כל ספרה פעם אחת: מהו המספר הגדול ביותר שמתחלק ב־5?' + NC, 98520, 'ספרת היחידות 0 או 5, והגדולות משמאל', 3, 'G6_NAT_PROPS'],
     ['division', 'מהספרות 9, 8, 5, 2, 0, כל ספרה פעם אחת: מהו המספר הקטן ביותר שמתחלק ב־5? (לא מתחילים ב־0)' + NC, 20895, 'נסו לסיים ב־5 ולהתחיל ב־20', 3, 'G6_NAT_PROPS'],
-    ['multiplication', '120 − 8 × (20 − 15) = ?', 80, 'קודם הסוגריים, אחר כך הכפל', 1, 'G6_NAT_OPS'],
-    ['multiplication', '(45 + 15) : 6 × 2 = ?', 20, '60 : 6 = 10, ואז כפול 2', 2, 'G6_NAT_OPS'],
+    ['multiplication', '120 − 8 × (20 − 15) = ?', 80, 'קודם הסוגריים, אחר כך הכפל', 1, 'G6_NAT_OPS', { widget: 'orderOfOperations' }],
+    ['multiplication', '(45 + 15) : 6 × 2 = ?', 20, '60 : 6 = 10, ואז כפול 2', 2, 'G6_NAT_OPS', { widget: 'orderOfOperations' }],
     ['multiplication', '24 × 36 = 864. כמה זה 12 × 36?', 432, 'גורם אחד קטן פי 2, ולכן המכפלה קטנה פי 2', 2, 'G6_NAT_OPS'],
     ['division', '4,312 : 7 = 616. כמה זה 43,120 : 7?' + NC, 6160, 'המחולק גדל פי 10, ולכן גם המנה', 2, 'G6_NAT_OPS'],
     ['division', '4,312 : 7 = 616. כמה זה 4,312 : 14?', 308, 'המחלק גדל פי 2, ולכן המנה קטנה פי 2', 3, 'G6_NAT_OPS'],
@@ -235,13 +235,11 @@
   // own. Nothing here claims more than its label.
   const sources = {
     azaryahu2020: ['Azaryahu et al. 2020 — MusiMath and Academic Music', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7378943/'],
-    vanDenHeuvel2003: ['Van den Heuvel-Panhuizen 2003 — The didactical use of models in Realistic Mathematics Education: an example from a longitudinal trajectory on percentage (Educ. Stud. Math. 54, 9-35)', 'https://doi.org/10.1023/B:EDUC.0000005212.03219.dc'],
-    interplay2024: ['Interplay between music and mathematics (Humanit. Soc. Sci. Commun., 2024)', 'https://www.nature.com/articles/s41599-024-03631-z'],
+    vanDenHeuvel2003: ['Van den Heuvel-Panhuizen 2003 — The didactic use of models in Realistic Mathematics Education: an example from a longitudinal trajectory on percentage (Educ. Stud. Math. 54, 9-35)', 'https://doi.org/10.1023/B:EDUC.0000005212.03219.dc'],
     kcConnections: ['Kennedy Center — Connections: Math and Music', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/media-and-interactives/media/music/connections/connections/math--music/'],
     kcMath: ['Kennedy Center — math collection', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/collections/collections/math/'],
     kcPractice: ['Kennedy Center — Arts Integration in Practice: Math', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/articles-and-how-tos/articles/collections/arts-integration-resources/arts-integration-in-practice-math/'],
     kcLessons: ['Kennedy Center — lessons and activities', 'https://www.kennedy-center.org/education/resources-for-educators/classroom-resources/lessons-and-activities/'],
-    wnetMathInMusic: ['WNET/THIRTEEN — Get the Math: Math in Music', 'https://www.thirteen.org/get-the-math/teachers/teachers-math-in-music-activities/76/'],
     makingMusicCount: ['Making Music Count', 'https://makingmusiccount.org/'],
     palmPipes: ['Exploratorium — Palm Pipes', 'https://www.exploratorium.edu/snacks/palm-pipes'],
     whitehead: ['Exploratorium — instrument builder Peter Whitehead', 'https://annex.exploratorium.edu/music/movies/peterWhitehead_Low.html'],
