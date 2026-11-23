@@ -1966,7 +1966,15 @@
       const e = x[6] || {};
       const strand = x[0] === 'fractions' ? STRAND.FRAC : x[0] === 'geometry' ? STRAND.GEO
         : x[0] === 'measurement' ? STRAND.MEASURE : x[0] === 'data' ? STRAND.DATA : STRAND.NUM;
-      RAW.push(I(f.grade, x[0], x[1], x[2], x[3], { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart, band: e.band }));
+      // 23.11.2026 (#1096): the even-prime question stays in grade ה׳ only.
+      // Grade ו׳ asks the largest prime below 20. The grade file keeps its
+      // record; the shipped item keeps its id, standard, level and music way.
+      const dup = f.grade === 'ו' && x[0] === 'division'
+        && x[1] === 'מהו המספר הראשוני הזוגי היחיד?';
+      const prompt = dup ? 'מהו המספר הראשוני הגדול ביותר שקטן מ־20?' : x[1];
+      const answer = dup ? 19 : x[2];
+      const hint = dup ? 'יורדים מ־20: איזה מספר מתחלק רק ב־1 ובעצמו?' : x[3];
+      RAW.push(I(f.grade, x[0], prompt, answer, hint, { strand: strand, standard: ST[x[5]], level: x[4], widget: e.widget, chart: e.chart, band: e.band }));
     });
     // Every item of the grade without a music activity learns its standard
     // through music (#591): the grade file lists research-backed ways per
