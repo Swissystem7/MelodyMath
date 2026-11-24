@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MelodyMath · בדיקה לפני ואחרי יחידה</title>
+<title>MelodyMath · בדיקה לפני ואחרי יחידה וכרטיס ראמ״ה</title>
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<meta name="description" content="בדיקה קצרה לפני יחידה ואחריה, נשמרת רק במכשיר. לא מחקר מבוקר.">
+<meta name="description" content="בדיקה קצרה לפני יחידה ואחריה וכרטיס אבחון ראמ״ה, נשמרת רק במכשיר. לא מחקר מבוקר.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#6946e8">
@@ -14,51 +14,119 @@
 <meta name="apple-mobile-web-app-title" content="MelodyMath">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
-  :root{--ink:#1f1e1d;--muted:#6b6a65;--purple:#d97757;--accent:#d97757;--bg:#faf9f5;--card:#ffffff;--line:#e8e6dc;--font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif}
-  @media (prefers-color-scheme: dark){:root{--ink:#faf9f5;--muted:#a8a69f;--purple:#e08264;--accent:#e08264;--bg:#1f1e1d;--card:#2b2a27;--line:#3e3d39}}
+  :root{
+    --ink:#1f1e1d;
+    --muted:#6b6a65;
+    --purple:#d97757;
+    --accent:#d97757;
+    --bg:#faf9f5;
+    --card:#ffffff;
+    --line:#e8e6dc;
+    --good:#16a34a;
+    --bad:#dc2626;
+    --font:"Assistant","Heebo","Rubik","Segoe UI",system-ui,sans-serif;
+    --shadow:0 12px 36px rgba(27,20,70,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#f3f0ff;
+      --muted:#a9a2c6;
+      --purple:#ff8a3d;
+      --accent:#ff8a3d;
+      --bg:#15102e;
+      --card:#211b3d;
+      --line:#3b3263;
+      --good:#2ed3a8;
+      --bad:#ff6b6b;
+      --shadow:0 16px 40px rgba(0,0,0,.35);
+    }
+  }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
-  .wrap{max-width:720px;margin:auto;padding:20px 14px 60px}
-  h1{font-size:clamp(1.5rem,6vw,2.2rem);margin:6px 0}
-  h2{font-size:1.2rem;margin:0 0 10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 14px;margin:16px 0}
-  .note{color:var(--muted);font-size:.92rem}
-  label{display:block;margin:8px 0 4px;font-weight:700}
-  input,select{width:100%;min-height:44px;min-height:48px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
-  button{min-height:44px;min-height:48px;min-width:48px;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
-  button.secondary{background:#fff;color:var(--purple)}
-  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .row button{flex:1 1 9rem}
-  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:8px;margin-top:14px}
-  .choices button{font-size:1.25rem;background:#fff;color:var(--ink);border-color:var(--line);transition:background-color .15s ease,border-color .15s ease}
-  .choices button:hover{background:#ede6ff;border-color:var(--purple)}
-  .choices button:active{background:var(--purple);color:#fff}
-  .prompt{font-size:clamp(1.25rem,5vw,1.6rem);margin:8px 0}
+  .wrap{max-width:820px;margin:auto;padding:24px 16px 64px}
+  .cd-frame{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:24px 20px;margin:20px 0;box-shadow:var(--shadow)}
+  h1{font-size:clamp(1.6rem,5vw,2.4rem);margin:6px 0;font-weight:900}
+  h2{font-size:1.3rem;margin:0 0 12px;font-weight:800}
+  h3{font-size:1.1rem;margin:14px 0 8px;font-weight:700}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 16px;margin:18px 0;box-shadow:0 4px 16px rgba(0,0,0,.04)}
+  .note{color:var(--muted);font-size:.95rem}
+  label{display:block;margin:10px 0 4px;font-weight:700;font-size:.95rem}
+  input,select{width:100%;min-height:44px;min-height:48px;font:inherit;padding:10px 14px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink)}
+  input:focus,select:focus{border-color:var(--purple);outline:none}
+  button{min-height:44px;min-height:48px;min-width:48px;font:inherit;font-weight:700;padding:10px 18px;border-radius:14px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer;transition:transform .1s ease,background-color .15s ease}
+  button:hover{filter:brightness(1.05)}
+  button:active{transform:scale(0.98)}
+  button.secondary{background:var(--card);color:var(--purple);border-color:var(--line)}
+  button.secondary:hover{background:var(--bg);border-color:var(--purple)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .row button{flex:1 1 10rem}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:10px;margin-top:16px}
+  .choices button{font-size:1.3rem;background:var(--card);color:var(--ink);border-color:var(--line);box-shadow:0 4px 0 var(--line)}
+  .choices button:hover{background:var(--bg);border-color:var(--purple);color:var(--purple)}
+  .choices button:active{background:var(--purple);color:#fff;box-shadow:none;transform:translateY(4px)}
+  .prompt{font-size:clamp(1.3rem,4vw,1.7rem);margin:12px 0;font-weight:800}
   .math-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
-  table{width:100%;border-collapse:collapse;font-size:.95rem}
-  th,td{border-bottom:1px solid var(--line);padding:8px 4px;text-align:start;overflow-wrap:anywhere}
-  .lead{color:var(--muted);margin:4px 0 10px}
+  table{width:100%;border-collapse:collapse;font-size:.95rem;margin-top:10px}
+  th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:start;overflow-wrap:anywhere}
+  th{font-weight:800;color:var(--purple)}
+  .lead{color:var(--muted);margin:4px 0 12px;font-size:1.05rem}
   .lead a{color:var(--purple);font-weight:700;text-decoration:none}
   .lead a:hover{text-decoration:underline}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .disclaimer{background:#fff7e0;border:1px solid #f0d58a;border-radius:12px;padding:10px 12px;margin:12px 0 0}
+  .disclaimer{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 14px;margin:16px 0 0;font-size:.9rem;color:var(--muted)}
   .hidden{display:none}
   :focus-visible{outline:3px solid var(--purple);outline-offset:2px}
-  footer{text-align:center;color:var(--muted);font-size:.9rem;padding:24px 0 16px;border-top:1px solid var(--line);margin-top:20px}
-  footer a{color:var(--purple);text-decoration:none;font-weight:600;margin:0 6px}
+  footer{text-align:center;color:var(--muted);font-size:.9rem;padding:32px 0 16px;border-top:1px solid var(--line);margin-top:32px}
+  footer a{color:var(--purple);text-decoration:none;font-weight:600;margin:0 8px}
   footer a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
-  .mm-skip{position:absolute;inset-inline-start:8px;top:8px;z-index:20;padding:8px 12px;background:#21183b;color:#fff;border-radius:8px;transform:translateY(-120%);font-weight:700}
+  .mm-skip{position:absolute;inset-inline-start:12px;top:12px;z-index:20;padding:10px 16px;background:var(--ink);color:var(--bg);border-radius:10px;transform:translateY(-140%);font-weight:700}
   .mm-skip:focus{transform:none}
   #main:focus{outline:none}
+  .tag{display:inline-block;padding:4px 10px;background:var(--line);border-radius:8px;font-size:.82rem;font-weight:700;color:var(--purple);margin-bottom:6px}
+  .rama-card{background:var(--card);border:2px solid var(--purple);border-radius:18px;padding:18px;margin-top:14px}
+  .rama-item{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+  .session{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+  .stat{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+  .stat strong{display:block;font-size:1.3rem;color:var(--purple)}
+  @media (max-width:600px){
+    .wrap{padding:14px 10px 48px}
+    .cd-frame{padding:16px 12px;border-radius:18px;margin:12px 0}
+    .card{padding:14px 12px;border-radius:16px;margin:14px 0}
+    .row{flex-direction:column;gap:8px}
+    .row button{width:100%;flex:1 1 100%}
+    .choices{grid-template-columns:repeat(2,1fr);gap:8px}
+    .choices button{font-size:1.15rem;min-height:44px;min-height:48px}
+    table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .rama-card{padding:14px 10px}
+    .rama-item{padding:10px}
+  }
+  @media (min-width:601px) and (max-width:1024px){
+    .wrap{max-width:760px;padding:20px 16px 56px}
+    .cd-frame{padding:22px 18px}
+    .card{padding:16px 14px}
+    .choices{grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr))}
+  }
+  @media print{
+    body{background:#fff;color:#000}
+    .wrap{max-width:100%;padding:0;margin:0}
+    .cd-frame,#setup,#quiz,#report,#prePostBlock,footer,.mm-skip,.row,.lead{display:none!important}
+    #ramaCardSection{border:none;box-shadow:none;padding:0;margin:0}
+    #ramaSheet{display:block!important}
+    .rama-card{border:1px solid #000;box-shadow:none;page-break-inside:avoid}
+    .rama-item{border:1px solid #ccc;page-break-inside:avoid}
+  }
 </style>
 <link rel="stylesheet" href="src/sefirot.css">
 </head>
 <body>
 <a class="mm-skip" href="#main">דלגו לתוכן</a>
 <main class="wrap" id="main" tabindex="-1">
-  <h1>בדיקה לפני ואחרי יחידה</h1>
-  <p class="lead"><a href="index.html">← חזרה לתרגול</a> · <a href="curriculum.html">כיסוי התוכנית</a></p>
-  <p class="note">8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
+  <div class="cd-frame">
+    <span class="tag">בדיקת יחידה · Claude Design</span>
+    <h1>בדיקה לפני ואחרי יחידה וכרטיס ראמ״ה</h1>
+    <p class="lead"><a href="index.html">← חזרה לתרגול</a> · <a href="curriculum.html">כיסוי התוכנית</a></p>
+    <p class="note">8 שאלות בלי מוזיקה. אותו סוג שאלה בשתי הבדיקות, עם מספרים אחרים. התוצאות נשמרות רק במכשיר הזה, בקוד הכיתה.</p>
+  </div>
 
   <section class="card" id="setup" aria-labelledby="setupTitle">
     <h2 id="setupTitle">מי נבדק/ת</h2>
@@ -91,13 +159,52 @@
     <p class="disclaimer" id="disclaimer"></p>
   </section>
 
+  <section class="card" id="ramaCardSection" aria-labelledby="ramaCardTitle">
+    <span class="tag">מיפוי ראמ״ה ומיצ״ב · מוקדי כשל</span>
+    <h2 id="ramaCardTitle">כרטיס אבחון ראמ״ה ומענה מוזיקלי</h2>
+    <p class="note">מיפוי מוקדי הכשל הארציים מול תוכנית הלימודים והתאמת מענה מוזיקלי אישית בטאבלט.</p>
+    <div class="row">
+      <button type="button" id="ramaMake" class="secondary">הצגת כרטיס האבחון</button>
+      <button type="button" id="ramaPrint" class="secondary">הדפסת כרטיס ראמ״ה</button>
+    </div>
+    <div id="ramaSheet" class="hidden" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="prePostBlock" aria-labelledby="ppTitle">
+    <span class="tag">בלוק דוח מורה · לפני/אחרי</span>
+    <h3 id="ppTitle">בדיקת לפני/אחרי ביחידה</h3>
+    <p class="note">שתי בדיקות של 8 שאלות באותה רמת קושי, עם מספרים שונים. בדיקה שקטה ללא משוב ביניים.</p>
+    <div class="row" style="align-items:flex-end">
+      <label style="flex:1">יחידה<select id="ppUnit" aria-label="יחידת מדידה"></select></label>
+      <button type="button" id="ppStartPre" class="secondary">בדיקת פתיחה</button>
+      <button type="button" id="ppStartPost" class="secondary">בדיקת סיום</button>
+      <button type="button" id="ppRefresh" class="secondary">רענון</button>
+    </div>
+    <span id="ppMsg" class="who-status" role="status" aria-live="polite" style="display:block;margin-top:8px;"></span>
+    <div id="ppRun" class="hidden" style="margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px;">
+      <p style="display:flex;justify-content:space-between;font-weight:700;"><span id="ppProgress"></span><span id="ppWhich"></span></p>
+      <p class="prompt" id="ppPrompt"></p>
+      <div id="ppBar"></div>
+      <div class="choices" id="ppChoices" role="group" aria-label="אפשרויות תשובה לבדיקה"></div>
+      <p class="note" style="margin-top:10px">אין משוב בזמן הבדיקה — הדוח מופיע בסוף.</p>
+      <p class="sr-only" id="ppLive" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" id="ppStop" class="secondary">סיום ושמירה</button>
+        <button type="button" id="ppCancel" class="secondary">ביטול וחזרה</button>
+      </div>
+    </div>
+    <div id="ppReport" style="margin-top:16px"></div>
+  </section>
+
   <footer>
-    <div>MelodyMath · בדיקה לפני ואחרי יחידה · <a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">תוכנית לימודים</a> · <a href="landing.html">אודות</a></div>
+    <div>MelodyMath · בדיקה לפני ואחרי יחידה וכרטיס ראמ״ה · <a href="index.html">חזרה לתרגול</a> · <a href="curriculum.html">תוכנית לימודים</a> · <a href="landing.html">אודות</a></div>
   </footer>
 </main>
 <script src="src/lib/teacherStore.js"></script>
 <script src="src/lib/mathBidi.js"></script>
 <script src="src/lib/unitCheck.js"></script>
+<script src="src/lib/prepost.js"></script>
+<script src="src/lib/remediation.js"></script>
 <script src="src/lib/access.js"></script>
 <script src="src/lib/core.js"></script>
 <script>
@@ -105,13 +212,15 @@
   const $ = function (id) { return document.getElementById(id); };
   let run = null;
 
-  $('unit').innerHTML = listUnits().map(function (u) {
-    return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + '</option>';
-  }).join('');
+  if ($('unit')) {
+    $('unit').innerHTML = listUnits().map(function (u) {
+      return '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.he) + '</option>';
+    }).join('');
+  }
   const who = loadWho();
-  $('classCode').value = who.classCode;
-  $('studentName').value = who.name;
-  $('disclaimer').textContent = UNIT_CHECK_DISCLAIMER;
+  if ($('classCode')) $('classCode').value = who.classCode;
+  if ($('studentName')) $('studentName').value = who.name;
+  if ($('disclaimer')) $('disclaimer').textContent = UNIT_CHECK_DISCLAIMER;
 
   function start(form) {
     const classCode = normalizeCode($('classCode').value);
@@ -205,18 +314,68 @@
       + '<th scope="col">לפני</th><th scope="col">אחרי</th><th scope="col">שינוי</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
-  $('startPre').onclick = function () { start('pre'); };
-  $('startPost').onclick = function () { start('post'); };
-  $('quizCancel').onclick = cancelQuiz;
-  $('showReport').onclick = renderReport;
-  // הדוח נבנה מקוד הכיתה ומהיחידה שבטופס, אז שינוי שלהם מרענן אותו מיד.
-  $('unit').onchange = renderReport;
-  $('classCode').onchange = renderReport;
-  // Enter בשדות הטופס מפעיל את הכפתור הראשי, כמו בסרגל המורה ב-index.html.
-  $('classCode').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
-  $('studentName').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
+  if ($('startPre')) $('startPre').onclick = function () { start('pre'); };
+  if ($('startPost')) $('startPost').onclick = function () { start('post'); };
+  if ($('quizCancel')) $('quizCancel').onclick = cancelQuiz;
+  if ($('showReport')) $('showReport').onclick = renderReport;
+  if ($('unit')) $('unit').onchange = renderReport;
+  if ($('classCode')) {
+    $('classCode').onchange = renderReport;
+    $('classCode').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
+  }
+  if ($('studentName')) {
+    $('studentName').onkeydown = function (e) { if (e.key === 'Enter') start('pre'); };
+  }
 
-  // דוח קיים לקוד הכיתה השמור מוצג מיד, בלי לחכות ללחיצה על "הצגת הדוח".
+  // Pre/post block & Rama report helpers
+  function ppUnitId() { const sel=$('ppUnit'); const id=sel&&sel.value?sel.value:(typeof unitIds==='function'?unitIds()[0]:'frac4'); return (typeof unitById==='function'&&unitById(id))?id:(typeof unitIds==='function'?unitIds()[0]:'frac4'); }
+  function ppFillUnits() {
+    const sel=$('ppUnit');
+    if (!sel || typeof unitIds!=='function' || typeof unitById!=='function') return;
+    sel.innerHTML = unitIds().map(id => '<option value="' + escapeHtml(id) + '">' + escapeHtml(unitById(id).title || unitById(id).he || id) + '</option>').join('');
+  }
+  function ppHalt(msg, returnFocusBtn) {
+    if (run && run.session && typeof endSession==='function') {
+      endSession(run.classCode, run.name, run.session.id);
+    }
+    if ($('ppRun')) $('ppRun').classList.add('hidden');
+    if ($('ppMsg')) $('ppMsg').textContent = msg || '';
+    if (returnFocusBtn && typeof returnFocusBtn.focus === 'function') returnFocusBtn.focus();
+  }
+  function renderRamaReport() {
+    const box = $('ramaSheet');
+    if (!box) return;
+    if (!who.name) {
+      box.innerHTML = '<p class="note">בחרו תלמיד/ה בסרגל קודם.</p>';
+      box.classList.remove('hidden');
+      return;
+    }
+    const student = typeof getStudent==='function' ? getStudent(who.classCode, who.name) : null;
+    const rep = student && typeof buildReport==='function' ? buildReport(student) : { total: 0, correct: 0, perSkill: [], repeatingErrors: [] };
+    const pts = typeof getRemediationPoints==='function' ? getRemediationPoints() : [];
+    const when = (function () { try { return new Date().toLocaleDateString('he-IL'); } catch (e) { return ''; } })();
+    const weak = (rep.perSkill || []).filter(s => s.accuracy < .75 || (s.total - s.correct) >= 2).map(s => s.skill);
+    const errs = (rep.repeatingErrors || []).map(e => e.skill || e.prompt);
+    const matched = pts.filter(p => weak.some(w => p.title.includes(w) || p.topic.includes(w)) || errs.some(e => p.title.includes(e) || p.topic.includes(e)));
+    const list = matched.length ? matched : pts.slice(0, 3);
+    box.innerHTML = '<div class="rama-card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px;"><h3 style="margin:0;">כרטיס אבחון ומיפוי מוקדי קושי (ראמ״ה / מיצ״ב)</h3><span class="tag">' + escapeHtml(when) + '</span></div><p><b>תלמיד/ה:</b> ' + escapeHtml(who.name) + ' · <b>קוד כיתה:</b> ' + escapeHtml(who.classCode || 'ברירת מחדל') + ' · <b>תרגילים שנרשמו:</b> ' + rep.total + '</p><div style="margin:16px 0;"><h4 style="margin:0 0 8px;">מוקדי כשל שזוהו ומענה מוזיקלי מותאם:</h4>' + list.map(p => '<div class="rama-item"><strong>' + escapeHtml(p.grade) + ' · ' + escapeHtml(p.title) + ' (' + escapeHtml(p.ramaSection) + ')</strong><div style="color:var(--bad);font-size:.9rem;margin:4px 0;"><b>נקודת כשל:</b> ' + escapeHtml(p.failureReason) + '</div><div style="color:var(--good);font-size:.9rem;"><b>מענה מוזיקלי מותאם:</b> ' + escapeHtml(p.musicalRemediation) + '</div><div style="color:var(--muted);font-size:.8rem;margin-top:4px;"><b>בסיס מחקרי:</b> ' + escapeHtml(p.foundation) + '</div></div>').join('') + '</div></div>';
+    box.classList.remove('hidden');
+  }
+
+  if ($('ramaMake')) $('ramaMake').onclick = renderRamaReport;
+  if ($('ramaPrint')) $('ramaPrint').onclick = function () { renderRamaReport(); window.print(); };
+  ppFillUnits();
+  if ($('ppRefresh')) $('ppRefresh').onclick = function () {
+    if ($('ppReport') && typeof renderPrePostHtml==='function' && typeof classPrePost==='function') {
+      $('ppReport').innerHTML = renderPrePostHtml(classPrePost(loadRoster(who.classCode || ''), ppUnitId()));
+    }
+  };
+  if ($('ppUnit')) $('ppUnit').onchange = function () {
+    if ($('ppReport') && typeof renderPrePostHtml==='function' && typeof classPrePost==='function') {
+      $('ppReport').innerHTML = renderPrePostHtml(classPrePost(loadRoster(who.classCode || ''), ppUnitId()));
+    }
+  };
+
   renderReport();
 })();
 </script>
